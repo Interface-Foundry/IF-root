@@ -88,8 +88,8 @@ function createStores(stores) {
                         }
                         n.addressString = store.address_1 + ' ' + store.address_2 + ' ' + store.city + ' ' + store.postal_code + ' ' + store.country_code
                         n.tel = store.phone_number;
-
                         n.hasloc = true;
+                        n.tel = store.phone;
                         n.linkback = 'http://www.urbanoutfitters.com';
                         n.linkbackname = 'urbanoutfitters.com'
                         n.loc.coordinates[0] = parseFloat(store.longitude);

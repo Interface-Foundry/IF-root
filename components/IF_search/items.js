@@ -1,12 +1,13 @@
 var express = require('express');
 var app = express.Router();
-var db = require('../IF_schemas/db');
+var db = require('db');
 var elasticsearch = require('elasticsearch');
 var config = require('config');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var deepcopy = require('deepcopy');
 var kip = require('kip');
+var _ =require('lodash');
 
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
@@ -281,7 +282,7 @@ function textSearch(q, page) {
                     'local.email': q.text
                 }, {
                     'facebook.email': q.text
-                },{
+                }, {
                     'name': q.text
                 }]
             }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
@@ -392,10 +393,62 @@ app.post(trendingItemsUrl, function(req, res, next) {
         q.text = str;
         return search(q, 0)
             .then(function(res) {
+
+                // function distance(lat1, lon1, lat2, lon2, unit) {
+                //     var radlat1 = Math.PI * lat1 / 180
+                //     var radlat2 = Math.PI * lat2 / 180
+                //     var radlon1 = Math.PI * lon1 / 180
+                //     var radlon2 = Math.PI * lon2 / 180
+                //     var theta = lon1 - lon2
+                //     var radtheta = Math.PI * theta / 180
+                //     var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+                //     dist = Math.acos(dist)
+                //     dist = dist * 180 / Math.PI
+                //     dist = dist * 60 * 1.1515
+                //     if (unit == "K") {
+                //         dist = dist * 1.609344
+                //     }
+                //     if (unit == "N") {
+                //         dist = dist * 0.8684
+                //     }
+                //     return dist
+                // }
+
+                // function compare(a, b) {
+                //     if (a.distance < b.distance)
+                //         return -1;
+                //     if (a.distance > b.distance)
+                //         return 1;
+                //     return 0;
+                // }
+
+                // var previous_name;
+                // var duplicates = []
+                // res.sort({
+                //     'name': 1
+                // }).forEach(function(current) {
+                //     if (current.name === previous_name) {
+                //         var rating = {
+                //             _id: current._id,
+                //             name: current.name,
+                //             distance: distance(q.loc.lat, q.loc.lon, current.loc.coordinates[1], current.loc.coordinates[0])
+                //         }
+                //         duplicates.push(rating)
+                //     }
+                //     previous_name = current.name;
+                // });
+
+                // var duplicates2 = _.groupBy(duplicates,name)
+
+                // console.log('duplicates2: ',duplicates2)
+
+                // console.log('Closest item: ', duplicates2.sort(compare)[0].distance, 'Duplicates', duplicates);
+
                 return {
                     category: 'Trending in "' + str + '"',
                     results: res
                 }
+                
             })
     });
 

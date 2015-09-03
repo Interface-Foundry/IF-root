@@ -1,5 +1,4 @@
-// TODO: Colors and more pages
-
+//NY stores
 // 3074,3818,3037,1260,3946,303,3036
 var request = require('request');
 var cheerio = require('cheerio');

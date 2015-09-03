@@ -1,12 +1,13 @@
 var http = require('http');
 var cheerio = require('cheerio');
-// var db = require('db');
+var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
-// var uniquer = require('../../uniquer');
+var uniquer = require('../../uniquer');
 var request = require('request');
 var urlapi = require('url');
-var _ = require('underscore');
+var _ = require('lodash');
+var tagParser = require('../tagParser')
 
 var Stores = []
 var url = 'http://www.urbanoutfitters.com/urban/catalog/productdetail.jsp?id=33749656&category=W-ADIDAS';
@@ -22,6 +23,7 @@ async.waterfall([
     //     })
     // },
     function(callback) {
+        console.log(1)
         scrapeItem(url).then(function(item) {
             callback(null, item)
         }).catch(function(err) {
@@ -29,6 +31,7 @@ async.waterfall([
         })
     },
     function(item, callback) {
+           console.log(2)
         cloneItems(item).then(function(items) {
             console.log('Items: ', items[0].physicalStores[0])
             callback(null, items)
@@ -37,32 +40,35 @@ async.waterfall([
         })
     },
     function(items, callback) {
-        saveStores(items).then(function(item) {
-            callback(null, item)
+           console.log(3)
+        saveItems(items).then(function(items) {
+            callback(null, items)
         }).catch(function(err) {
             callback(err)
         })
     }
+
+    // ,
+    // function(items, callback) {
+    //     saveStores(items).then(function(item) {
+    //         callback(null, item)
+    //     }).catch(function(err) {
+    //         callback(err)
+    //     })
+    // },
     // function(item, inventory, callback) {
     //     updateInventory(inventory, item).then(function(item) {
     //         callback(null, item)
     //     }).catch(function(err) {
     //         callback(err)
     //     })
-    // },
-
-    // function(item, callback) {
-    //     saveItems(item).then(function(items) {
-    //         callback(null, items)
-    //     }).catch(function(err) {
-    //         callback(err)
-    //     })
     // }
+
 ], function(err, items) {
     if (err) {
         console.log(err)
     }
-    //console.log('finished scraping item!!', items)
+    console.log('finished scraping item!!', items)
 });
 
 
@@ -284,26 +290,25 @@ function cloneItems(newItems) {
                         finalItems.push(newItem); //add final item by color (will contain all sizes and skuIDs per size)
                     }
                 }
-
                 iterateCheck++;
-
                 //ON FINAL Z LOOP END
                 if (Object.keys(colorItemObjs).length == iterateCheck) { //fake async
                     finalOutput(finalItems);
                 }
-
             }
 
             function finalOutput(finalItems) {
                 finalItems.forEach(function(item) {
                     item.physicalStores.forEach(function(store) {
-                            store.storeId = store.link.indexOf('/id=')[1]
+                            store.storeId = store.link.split('?id=')[1]
+                            // console.log('***',store.storeId)
                         })
                         //Remove duplicates
                     item.physicalStores = _.uniq(item.physicalStores, 'storeId');
                     item.physicalStores = _.uniq(item.physicalStores, 'storeName');
                 })
-                return resolve(finalItems)
+                // console.log('store: ', finalItems[0].physicalStores[0])
+                resolve(finalItems)
             }
 
 
@@ -312,62 +317,108 @@ function cloneItems(newItems) {
     });
 }
 
-
-function saveItems(newItem) {
+function saveItems(items) {
     return new Promise(function(resolve, reject) {
         var savedItems = []
-        async.eachSeries(Stores, function(store, callback) {
-            var i = new db.Landmark();
-            i.source_zara_item = newItem;
-            i.world = false;
-            i.hasloc = true;
-            // console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
-            i.loc.coordinates[0] = parseFloat(store.lng);
-            i.loc.coordinates[1] = parseFloat(store.lat);
-            uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
-                i.id = output;
-                i.save(function(e, item) {
-                    if (e) {
-                        console.error(e);
-                        return callback();
+        async.eachSeries(items, function(item, callback1) {
+            console.log('*1')
+            async.eachSeries(item.physicalStores, function(store, callback2) {
+                     console.log('*2')
+                    //Create new item for each store in inventory list.
+                    var i = new db.Landmark();
+                    i.world = false;
+                    i.source_generic_item = item;
+                    delete i.source_generic_item.physicalStores
+                    i.price = parseFloat(item.price);
+                    i.itemImageURL = item.images;
+                    i.name = item.name;
+                    //TODO: owner;
+                    // i.owner = owner;
+                    i.linkback = item.src;
+                    i.linkbackname = 'urbanoutfitters.com'
+                    var tags = i.name.split(' ').map(function(word) {
+                        return word.toString().toLowerCase()
+                    })
+                    tags.forEach(function(tag) {
+                        i.itemTags.text.push(tag)
+                    })
+                    i.itemTags.text.push('Urban Outfitters')
+                    i.itemTags.text.push(item.color)
+                    i.itemTags.text = tagParser.parse(i.itemTags.text)
+                    if (tagParser.colorize(item.color)) {
+                        i.itemTags.colors.push(tagParser.colorize(item.color))
                     }
-                    savedItems.push(item)
-                    callback()
+                    i.source_generic_item.storeId = store.storeId;
+                    i.hasloc = true;
+                    i.loc.type = 'Point'
+
+                    uniquer.uniqueId(i.name, 'Landmark').then(function(output) {
+                              console.log('*3')
+                            i.id = output;
+                            db.Landmarks.findOne({
+                                'source_generic_store.storeId': storeId,
+                                'linkbackname': 'urbanoutfitters.com'
+                            }, function(err, s) {
+                                if (err) {
+                                    console.log(err)
+                                    count++
+                                    return callback2()
+                                }
+
+                                if (!s) {
+                                    //The parent store doesn't exist in db, skip this item for now.
+                                    // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
+                                    console.log('missing id: ', store.storeId)
+                                    count++
+                                    return callback2()
+                                }
+                                //Check if the store with storeId exists in db
+                                else if (s) {
+                                    // console.log('Found store!')
+                                    i.tel = s.tel;
+                                    i.loc.coordinates[0] = parseFloat(s.loc.coordinates[0]);
+                                    i.loc.coordinates[1] = parseFloat(s.loc.coordinates[1]);
+                                    i.parent.mongoId = s._id;
+                                    if (s.name) {
+                                        i.parent.name = s.name;
+                                    } else {
+                                        i.parent.name = s.id
+                                    }
+
+                                    i.parent.id = s.id;
+                                }
+                                //Save item
+                                i.save(function(e, item) {
+                                    if (e) {
+                                        console.error(e);
+                                    }
+                                    savedItems.push(item)
+                                        console.log('Saved: ', item.source_generic_item)
+                                    count++
+                                    callback2();
+                                })
+                            })
+                        }) //end of uniquer
+
+                },
+                function(err) {
+                    if (err) console.log(err)
+
+                    callback1()
+
                 })
-            })
+
+
         }, function(err) {
             if (err) {
                 // console.log('Error in saveItems: ',err)
-                reject(err)
+                return reject(err)
             }
+
             resolve(savedItems)
         })
     })
 }
-
-
-function updateInventory(inventory, newItem) {
-    return new Promise(function(resolve, reject) {
-        console.log('')
-        if (inventory.stocks && inventory.stocks.length > 0) {
-            inventory.stocks.forEach(function(stock) {
-                newItem.physicalStores.forEach(function(store) {
-                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
-                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
-                        // console.log('MATCH')
-                        store.inventory = stock.sizeStocks;
-                    }
-                })
-            })
-            resolve(newItem)
-        } else {
-            console.log('no inventory? ', inventory)
-            resolve(newItem)
-        }
-    })
-}
-
-
 
 
 function saveStores(items) {
@@ -380,7 +431,7 @@ function saveStores(items) {
             db.Landmarks
                 .findOne({
                     'source_generic_store.storeId': store.storeId,
-                    'linkbackname': 'nordstrom.com'
+                    'linkbackname': 'urbanoutfitters.com'
                 })
                 .exec(function(e, s) {
                     if (e) {
@@ -398,7 +449,7 @@ function saveStores(items) {
                         console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
                         n.loc.coordinates[0] = parseFloat(store.lng);
                         n.loc.coordinates[1] = parseFloat(store.lat);
-                        uniquer.uniqueId('zara_' + store.storeAddress, 'Landmark').then(function(output) {
+                        uniquer.uniqueId('urban outfitters ' + store.storeAddress, 'Landmark').then(function(output) {
                             n.id = output;
                             n.save(function(e, newStore) {
                                 if (e) {
@@ -429,6 +480,35 @@ function saveStores(items) {
         })
     })
 }
+
+
+
+
+
+function updateInventory(inventory, newItem) {
+    return new Promise(function(resolve, reject) {
+        console.log('')
+        if (inventory.stocks && inventory.stocks.length > 0) {
+            inventory.stocks.forEach(function(stock) {
+                newItem.physicalStores.forEach(function(store) {
+                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
+                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
+                        // console.log('MATCH')
+                        store.inventory = stock.sizeStocks;
+                    }
+                })
+            })
+            resolve(newItem)
+        } else {
+            console.log('no inventory? ', inventory)
+            resolve(newItem)
+        }
+    })
+}
+
+
+
+
 
 
 

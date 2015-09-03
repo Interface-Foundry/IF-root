@@ -428,8 +428,8 @@ function saveStores(item, inventory) {
         var notFound = true;
 
         async.eachSeries(inventory["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
-           // var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
-            var url = 'http://shop.nordstrom.com/st/'+ item.StoreNumber +'/directions';
+            // var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
+            var url = 'http://shop.nordstrom.com/st/' + item.StoreNumber + '/directions';
             var options = {
                 url: url,
                 headers: {
@@ -460,48 +460,45 @@ function saveStores(item, inventory) {
                 $('div').each(function(i, elem) {
                     if (elem.attribs && elem.attribs.class) {
 
-                        if (elem.attribs.class == 'leftColumn'){ //get store name
-                            storeObj.name = elem.children[0].children[0].data.replace(/[\n\t\r]/g,""); //the replace here is removing preceding and trailer \r \n \t stuff
+                        if (elem.attribs.class == 'leftColumn') { //get store name
+                            storeObj.name = elem.children[0].children[0].data.replace(/[\n\t\r]/g, ""); //the replace here is removing preceding and trailer \r \n \t stuff
                         }
 
-                        if (elem.attribs.class == 'storeAddress'){ //get street address and phone number
-                            for (var i in elem.children){
-                                if (elem.children[i].data){
-                                    var cleanData = elem.children[i].data.replace(/\./g, "").replace(/[\n\t\r]/g,""); //remove periods from phone num
+                        if (elem.attribs.class == 'storeAddress') { //get street address and phone number
+                            for (var i in elem.children) {
+                                if (elem.children[i].data) {
+                                    var cleanData = elem.children[i].data.replace(/\./g, "").replace(/[\n\t\r]/g, ""); //remove periods from phone num
 
-                                    if (/^[(]{0,1}[0-9]{3}[)]{0,1}[-\s\.]{0,1}[0-9]{3}[-\s\.]{0,1}[0-9]{4}$/.test(cleanData)){ //is it a phone #?
+                                    if (/^[(]{0,1}[0-9]{3}[)]{0,1}[-\s\.]{0,1}[0-9]{3}[-\s\.]{0,1}[0-9]{4}$/.test(cleanData)) { //is it a phone #?
                                         storeObj.PhoneNumber = cleanData;
-                                    }   
-                                    else if (!storeObj.StreetAddress){ //if no street data , create data key
+                                    } else if (!storeObj.StreetAddress) { //if no street data , create data key
                                         storeObj.StreetAddress = elem.children[i].data;
-                                    } 
-                                    else {  //street data already started, continue adding
+                                    } else { //street data already started, continue adding
                                         storeObj.StreetAddress = storeObj.StreetAddress + ' ' + elem.children[i].data;
-                                        storeObj.StreetAddress = storeObj.StreetAddress.replace(/[\n\t\r]/g,"");
+                                        storeObj.StreetAddress = storeObj.StreetAddress.replace(/[\n\t\r]/g, "");
                                     }
-                                    
+
                                 }
-                            }                       
+                            }
                         }
 
-                        if (elem.attribs.class == 'date'){ //get store hours
-                            for (var i in elem.children){
-                                if (elem.children[i].data){
-                                    if (!storeObj.Hours){ //if no street data , create data key
+                        if (elem.attribs.class == 'date') { //get store hours
+                            for (var i in elem.children) {
+                                if (elem.children[i].data) {
+                                    if (!storeObj.Hours) { //if no street data , create data key
                                         storeObj.Hours = elem.children[i].data;
-                                    } 
-                                    else {  //street data already started, continue adding
+                                    } else { //street data already started, continue adding
                                         storeObj.Hours = storeObj.Hours + ' ' + elem.children[i].data;
-                                        storeObj.Hours = storeObj.Hours.replace(/[\n\t\r]/g,"");
+                                        storeObj.Hours = storeObj.Hours.replace(/[\n\t\r]/g, "");
                                     }
-                                    
+
                                 }
-                            }                       
+                            }
                         }
 
-                        if (elem.attribs.class == 'errorMessage hidden'){ //get lat lng inside here
-                            storeObj.Lat = elem.next.attribs['lat-value'];       
-                            storeObj.Lng = elem.next.attribs['lon-value'];                   
+                        if (elem.attribs.class == 'errorMessage hidden') { //get lat lng inside here
+                            storeObj.Lat = elem.next.attribs['lat-value'];
+                            storeObj.Lng = elem.next.attribs['lon-value'];
                         }
                     }
                 });
@@ -625,11 +622,11 @@ function saveItems(newItem, Stores) {
                         // })
                     item.itemTags.text.push('nordstrom')
                     item.itemTags.text.push(cat)
-                    //Get rid of blank tags
+                        //Get rid of blank tags
                     var i = item.itemTags.text.length
                     while (i--) {
-                        if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ' ) {
-                            item.itemTags.text.splice(i,1)
+                        if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ') {
+                            item.itemTags.text.splice(i, 1)
                         }
                     }
                     item.parent.mongoId = store._id;
@@ -745,8 +742,11 @@ function updateInventory(item, stores, coords) {
                 }
             }]
         }, function(err, res) {
-            if (err) reject(err)
-            console.log('Removed: ', res.result.n)
+            if (err) return reject(err)
+            if (res) {
+                console.log('Removed: ', res.result.n)
+            }
+
             resolve(item)
         })
     })
