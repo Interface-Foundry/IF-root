@@ -237,9 +237,11 @@ function mongoToEs(schema, doc) {
     }, {})
 }
 
-GO();
-// alternatively, if you want to blow away the current index and recreate
-// the entire elasticsaerch index, comment out GO() and call CreateIndexes();
+if (process.argv[2] === 'rebuild') {
+    createIndexes();
+} else {
+    GO();
+}
 
 /*
 also, here's what you'll want in your crontab if you use crontabs

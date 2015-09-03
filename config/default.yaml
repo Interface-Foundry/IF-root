@@ -15,3 +15,5 @@ redis:
 neighborhoodServer:
   url: http://localhost:9998
 geoipURL: http://www.freegeoip.net/json/
+app:
+  port: 2997

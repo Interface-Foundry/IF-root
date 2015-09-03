@@ -1,6 +1,6 @@
 var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
-var config = global.config || require('config');
+var config = require('config');
 var logger = require('../IF_logging/if_logger');
 
 if (mongoose.connection.readyState == 0) {

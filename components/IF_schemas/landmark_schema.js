@@ -354,7 +354,14 @@ var landmarkSchema = new Schema({
     flags: {
         humanProcessed: Boolean,
         humanProcessedTime: Date,
-        mustUpdateElasticsearch: Boolean
+        mustUpdateElasticsearch: {
+            type: Boolean,
+            default: true
+        },
+        mustProcessImages: {
+            type: Boolean,
+            default: true
+        }
     }
 
 
