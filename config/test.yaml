@@ -1,5 +1,4 @@
 env: test
-isProduction: false
 mongodb:
   url: mongodb://localhost/foundry
   options:
