@@ -28,7 +28,7 @@ var es = new elasticsearch.Client({
     log: ESLogger
 });
 
-console.log('using elasticsearch', global.config.elasticsearch.url);
+console.log('using elasticsearch', config.elasticsearch.url);
 
 var pageSize = 20;
 var defaultRadius = 2;
@@ -460,7 +460,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
             type: 'Point',
             coordinates: [parseFloat(req.body.loc.lat), parseFloat(req.body.loc.lon)]
         };
-        var url = global.config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
+        var url = config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
         return Promise.settle([search(q, 0), request(url)])
             .then(function(results) {
                 if (results[0].isFulfilled() && results[1].isFulfilled()) {

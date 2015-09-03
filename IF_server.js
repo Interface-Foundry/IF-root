@@ -19,10 +19,9 @@ var async = require('async');
 var moment = require('moment');
 var http = require('http');
 var connectBusboy = require('connect-busboy');
-var mmm = require('mmmagic'),
-    Magic = mmm.Magic;
 
-global.config = require('./config'); // pulls in config/index.js
+var config = require('./config'); // pulls in config/index.js
+console.log('config');
 
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var submitContestEntry = require('./components/IF_contests/IF_contests.js');
@@ -107,7 +106,7 @@ app.get('/api/healthcheck', function(req, res) {
 });
 
 // proxy. in production, we sit behind a proxy but still want secure session cookies
-if (global.config.isProduction) {
+if (config.isProduction) {
     app.set('trust proxy', 1); // trust first proxy
 }
 
@@ -237,7 +236,7 @@ function puts(error, stdout, stderr) {
 
 }
 
-console.log('using greegeoip server', global.config.geoipURL);
+console.log('using greegeoip server', config.geoipURL);
 
 
 //---------------------------------------//
@@ -550,7 +549,7 @@ app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes')
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
 // devops
-if (!global.config.isProduction) {
+if (!config.isProduction) {
     app.use('/devops', require('./components/IF_superuser/devops'));
 }
 
@@ -3691,7 +3690,7 @@ app.use(function error_handler(err, req, res, next) {
     if (res.headerSent) {
         return;
     } // prevent buggy things from multiple errors and next(err) calls
-    if (global.config.isProduction) {
+    if (config.isProduction) {
         res.send({
             err: {
                 niceMessage: err.niceMessage
@@ -3781,8 +3780,8 @@ app.use(function error_handler(err, req, res, next) {
 if (module.parent) {
     module.exports = app;
 } else {
-    server.listen(2997, function () {
-        console.log("Illya casting magic on 9090 ~ ~ ♡");
+    server.listen(config.app.port, function () {
+        console.log("Illya casting magic on " + config.app.port + " ~ ~ ♡");
         logger.log('started server');
     });
 }

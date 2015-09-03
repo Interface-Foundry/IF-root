@@ -6,7 +6,7 @@ var config = require('config');
 var traceback = require('traceback');
 var os = require('os');
 var hostname = os.hostname();
-var filename = require.main.filename.split('/').pop();
+var filename = require.main ? require.main.filename.split('/').pop() : 'debug';
 console.log('logging data to elasticsearch "logstash-node/' + filename + '"');
 
 var getStackInfo = function() {

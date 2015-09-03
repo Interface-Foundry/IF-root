@@ -3,7 +3,8 @@
 var express = require('express'),
     router = express.Router(),
     request = require('request'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    config = require('config');
 
 var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
@@ -20,7 +21,7 @@ router.use(function(req, res, next) {
 		req.geoloc.lng = req.query.lng;
 	}
 
-    if (global.config.env === 'development' || global.config.env === 'test') {
+    if (config.env === 'development' || config.env === 'test') {
         console.log('In development mode, defaulting to NYC (hardcoded)')
         req.geoloc.cityName = 'New York City';
 		req.geoloc.src = 'ip-based';
@@ -41,8 +42,8 @@ router.use(function(req, res, next) {
         ip = req.connection.remoteAddress;
     }
 
-    if (global.config.env === 'development') {
-        ip = global.config.ip; // use local real ip address in dev
+    if (config.env === 'development') {
+        ip = config.ip; // use local real ip address in dev
     }
 
     //Because the request library also uses 'res' we'll rename the response here
@@ -50,16 +51,16 @@ router.use(function(req, res, next) {
 
     //IF not in dev mode 
 
-    if (global.config.env !== 'development') {
+    if (config.env !== 'development') {
         //query the local freegeoip server we are running 
-        request(global.config.geoipURL + ip, function(err, res, body) {
+        request(config.geoipURL + ip, function(err, res, body) {
             if (err) console.log(err);
 
             try {
                 var data = JSON.parse(body);
             } catch (e) {
                 console.error("Could not parse response from geoip server");
-                console.error("server: " + global.config.geoipURL + ip);
+                console.error("server: " + config.geoipURL + ip);
                 console.error(e);
                 console.error(body);
                 response.sendStatus(200);

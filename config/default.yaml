@@ -1,0 +1,19 @@
+env: development
+isProduction: false
+mongodb:
+  url: mongodb://pikachu.kipapp.co:27017/foundry
+  options:
+    server:
+      poolSize: 5
+      socketOptions:
+        keepAlive: 1
+elasticsearch:
+  url: http://pikachu.kipapp.co:9200
+redis:
+  port: 6379
+  url: localhost
+neighborhoodServer:
+  url: http://pikachu.kipapp.co:9998
+geoipURL: http://www.freegeoip.net/json/
+app:
+  port: 2997
