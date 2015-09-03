@@ -61,7 +61,7 @@ var nbabygirls = 'http://www.zara.com/us/en/new-in/baby-girl-c286504.html'
 var nbabyboys = 'http://www.zara.com/us/en/new-in/baby-boy-c286505.html'
 var nmini = 'http://www.zara.com/us/en/new-in/mini-c286506.html'
 
-var catalogs = [mjackets, mcoats, mblazers, msuits, mtrousers, mjeans, mshorts, mshirts, mtshirts, mpoloshirts, msweatshirts, mknitwear, mshoes, mbags, maccessories, msoftwear, touterwear, tdresses, tjumpsuits, tcoordsets, ttops, ttrousers, tjeans, tskirts, ttshirts,
+var catalogs = [ mjeans, mjackets, mcoats, mblazers, msuits, mtrousers,mshorts, mshirts, mtshirts, mpoloshirts, msweatshirts, mknitwear, mshoes, mbags, maccessories, msoftwear, touterwear, tdresses, tjumpsuits, tcoordsets, ttops, ttrousers, tjeans, tskirts, ttshirts,
     tsweatshirts, tshoes, tbags, wjackets, wblazers, wleather, wsuede, wdresses, wjumpsuits, wcoordsets, wtops, wtrousers, wjeans, wskirts, wknitwear, wtshirts, wstudio, wshoes, wbags, waccessories, wcoats, nmens, nwomens, ntrf, ngirls, nboys, nmini, nbabygirls, nbabyboys
 ]
 

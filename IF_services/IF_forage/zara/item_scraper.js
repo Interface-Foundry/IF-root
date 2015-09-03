@@ -215,8 +215,8 @@ function scrapeDetails(url) {
                     newItem.price = $('span').attr('price').replace(/[^\d.-]/g, '');
                 }
 
-                if ($('div.colors div.imgCont')) {
-                    newItem.color = $('div.colors div.imgCont')[0].attribs.title
+                if ($('div.colors div.imgCont')['0']) {
+                    newItem.color = $('div.colors div.imgCont')['0'].attribs.title
                 }
 
                 //iterate on images found in HTML
