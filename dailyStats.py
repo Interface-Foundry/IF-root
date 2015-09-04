@@ -1,8 +1,9 @@
 import pymongo
+from everyconfig import everyconfig
 
-url = 'mongodb://pikachu.kipapp.co:27017'
+config = everyconfig('./config')
 #url = 'mongodb://flareon.internal.kipapp.co:27017'
-client = pymongo.MongoClient(url)
+client = pymongo.MongoClient(config['mongodb']['url'])
 db = client['foundry']
 
 
@@ -18,5 +19,3 @@ print 'Shops:', shopCount
 
 userCount = db['users'].count({})
 print 'Users:', userCount
-
-
