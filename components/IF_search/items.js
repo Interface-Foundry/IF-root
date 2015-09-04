@@ -7,7 +7,7 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 var deepcopy = require('deepcopy');
 var kip = require('kip');
-var _ =require('lodash');
+var _ = require('lodash');
 
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
@@ -355,6 +355,8 @@ function filterSearch(q, page) {
 
     console.log(query);
 
+//checkhere
+
     return db.Landmarks
         .find(query)
         .limit(pageSize)
@@ -394,7 +396,6 @@ app.post(trendingItemsUrl, function(req, res, next) {
         return search(q, 0)
             .then(function(res) {
 
-                console.log('\n\n\n\n\n\n\n\n****Is this happening?')
 
                 function distance(lat1, lon1, lat2, lon2, unit) {
                     var radlat1 = Math.PI * lat1 / 180
@@ -425,11 +426,12 @@ app.post(trendingItemsUrl, function(req, res, next) {
                 }
 
                 var previous_name;
-                var duplicates = []
+                var duplicates = [];
 
-                res.sort({
-                    'name': 1
-                }).forEach(function(current) {
+                var copy = deepcopy(res)
+
+                copy.forEach(function(current) {
+                    console.log('current: ', current.id)
                     if (current.name === previous_name) {
                         var rating = {
                             _id: current._id,
@@ -441,20 +443,22 @@ app.post(trendingItemsUrl, function(req, res, next) {
                     previous_name = current.name;
                 });
 
-                var duplicates2 = _.groupBy(duplicates,name)
+
+                console.log('\n\n\n\n\n\n\n\n****', copy)
+
+                var duplicates2 = _.groupBy(duplicates, name)
 
                 // duplicates2.sort(compare)[0].distance
-
-                console.log('Duplicates2: ',duplicates2)
-
                 console.log('Duplicates', duplicates);
+
+                console.log('Duplicates2: ', duplicates2)
 
                 return {
                     category: 'Trending in "' + str + '"',
                     results: res
                 }
 
-                
+
             })
     });
 

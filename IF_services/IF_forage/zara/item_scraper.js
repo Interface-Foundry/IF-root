@@ -269,6 +269,8 @@ function scrapeDetails(url) {
 //in order to match them as parent worlds to each item/store pair in the inventory list.
 function loadStores() {
     return new Promise(function(resolve, reject) {
+
+        
         db.Landmarks.find({
             'source_generic_store': {
                 $exists: true
@@ -287,6 +289,8 @@ function loadStores() {
                 resolve(stores)
             }
         })
+
+
     })
 }
 
