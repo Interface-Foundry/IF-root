@@ -157,7 +157,10 @@ var landmarkSchema = new Schema({
         viewers: [String],
         admins: [String]
     },
-    updated_time: Date, // TO DO
+    updated_time: {
+        type: Date,
+        default: Date.now
+    }, // TO DO
     // source_fb: { //source of data bubble (is facebook event api)
     //  is_source: Boolean,
     //  id: String,
@@ -437,6 +440,10 @@ Landmark.priceToPriceRange = function(p) {
     } else {
         return 4;
     }
+};
+
+Landmark.priceStringToNumber = function(s) {
+    return accounting.unformat(s);
 };
 
 Landmark.generateIdFromName = function(name) {

@@ -1,0 +1,121 @@
+http://www.dsw.com/Womens-Shoes-New-Arrivals/_/N-271o?activeCategory=102442
+http://www.dsw.com/shoe/bcbgeneration+preize+suede+sandal?prodId=dsw12prod6580032&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002
+http://www.dsw.com/shoe/bcbgeneration+preize+suede+sandal?prodId=dsw12prod6580032&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002
+{ url: 'http://www.dsw.com/shoe/bcbgeneration+preize+suede+sandal?prodId=dsw12prod6580032&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002',
+  productId: 'dsw12prod6580032',
+  categoryId: '102444',
+  sizes: 
+   [ { text: 6, id: '1000022' },
+     { text: 6.5, id: '1000013' },
+     { text: 7, id: '1000001' },
+     { text: 7.5, id: '1000000' },
+     { text: 8, id: '1000029' },
+     { text: 8.5, id: '1000023' },
+     { text: 9, id: '1000025' },
+     { text: 9.5, id: '1000019' },
+     { text: 10, id: '1000012' },
+     { text: 11, id: '1000016' } ],
+  images: 
+   [ 'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_645_ss_01?scl=23.80952380952381&qlt=70&fmt=jpeg&wid=63&hei=62&op_sharpen=1',
+     'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_05?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1',
+     'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_02?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1',
+     'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_04?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1',
+     'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_03?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1',
+     'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_07?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1',
+     'http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_06?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1' ],
+  name: 'BCBGeneration Preize Suede Sandal',
+  price: '$69.95',
+  description: 'Item # dsw12prod6580032\nUPC # 888878270578\n The Preize from BCBGeneration is a strappy t-strap sandal that is perfect for the upcoming season. Dress up your skinny jeans or your favorite dress for a look that screams sophistication!       Suede upper      Quarter strap with an adjustable buckle     T-strap styling     1½" platform, 3¾" covered heel     Synthetic sole     Imported     View more BGBGeneration',
+  relatedItemURLs: [],
+  colors: 
+   [ { id: 'colors_feed_00000000186730',
+       swatch: 'https://a248.e.akamai.net/f/248/9086/10h/origin-d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_645_ss_sw?$slswatches$',
+       name: 'Dark Magenta' },
+     { id: 'colors_feed_00000000186661',
+       swatch: 'https://a248.e.akamai.net/f/248/9086/10h/origin-d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_sw?$slswatches$',
+       name: 'Grey' },
+     { id: 'colors_feed_00000000189126',
+       swatch: 'https://a248.e.akamai.net/f/248/9086/10h/origin-d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_460_ss_sw?$slswatches$',
+       name: 'Teal' } ] }
+{
+  "url": "http://www.dsw.com/shoe/bcbgeneration+preize+suede+sandal?prodId=dsw12prod6580032&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002",
+  "productId": "dsw12prod6580032",
+  "categoryId": "102444",
+  "sizes": [
+    {
+      "text": 6,
+      "id": "1000022"
+    },
+    {
+      "text": 6.5,
+      "id": "1000013"
+    },
+    {
+      "text": 7,
+      "id": "1000001"
+    },
+    {
+      "text": 7.5,
+      "id": "1000000"
+    },
+    {
+      "text": 8,
+      "id": "1000029"
+    },
+    {
+      "text": 8.5,
+      "id": "1000023"
+    },
+    {
+      "text": 9,
+      "id": "1000025"
+    },
+    {
+      "text": 9.5,
+      "id": "1000019"
+    },
+    {
+      "text": 10,
+      "id": "1000012"
+    },
+    {
+      "text": 11,
+      "id": "1000016"
+    }
+  ],
+  "images": [
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_645_ss_01?scl=23.80952380952381&qlt=70&fmt=jpeg&wid=63&hei=62&op_sharpen=1",
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_05?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1",
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_02?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1",
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_04?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1",
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_03?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1",
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_07?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1",
+    "http://s7d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_06?scl=25.862068965517242&qlt=70&fmt=jpeg&wid=58&hei=62&op_sharpen=1"
+  ],
+  "name": "BCBGeneration Preize Suede Sandal",
+  "price": "$69.95",
+  "description": "Item # dsw12prod6580032\nUPC # 888878270578\n The Preize from BCBGeneration is a strappy t-strap sandal that is perfect for the upcoming season. Dress up your skinny jeans or your favorite dress for a look that screams sophistication!       Suede upper      Quarter strap with an adjustable buckle     T-strap styling     1½\" platform, 3¾\" covered heel     Synthetic sole     Imported     View more BGBGeneration",
+  "relatedItemURLs": [],
+  "colors": [
+    {
+      "id": "colors_feed_00000000186730",
+      "swatch": "https://a248.e.akamai.net/f/248/9086/10h/origin-d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_645_ss_sw?$slswatches$",
+      "name": "Dark Magenta"
+    },
+    {
+      "id": "colors_feed_00000000186661",
+      "swatch": "https://a248.e.akamai.net/f/248/9086/10h/origin-d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_060_ss_sw?$slswatches$",
+      "name": "Grey"
+    },
+    {
+      "id": "colors_feed_00000000189126",
+      "swatch": "https://a248.e.akamai.net/f/248/9086/10h/origin-d2.scene7.com/is/image/DSWShoes/dsw12prod6580032_460_ss_sw?$slswatches$",
+      "name": "Teal"
+    }
+  ],
+  "foundItems": {
+    "colors_feed_00000000186730": {},
+    "colors_feed_00000000186661": {},
+    "colors_feed_00000000189126": {}
+  }
+}
