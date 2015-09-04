@@ -1,5 +1,25 @@
 var quickflow = module.exports = require('quickflow')()
 
+function setup(data, done) {
+    require('colors');
+    require('vvv');
+    var db = require('db');
+    db.Landmarks.find({
+        world: true,
+        'source_generic_store.source': 'dsw'
+    }).select('id name').exec(function(e, l) {
+        if (e) { console.error(e); return}
+        global.stores = l.map(function(s) {
+            return {
+                mongoId: s._id.toString(),
+                id: s.id,
+                name: s.name
+            };
+        });
+        done();
+    })
+}
+
 function getCatalogURLs(data, done) {
 var urls = ['http://www.dsw.com/Womens-Shoes-New-Arrivals/_/N-271o?activeCategory=102442'];
 
@@ -58,18 +78,14 @@ kipScrapeTools.load(data, function($) {
   }).toArray().filter(function(a) {
     return !!a;
   })
+
+    var colors = $('#colors img').map(function() {
+        return {id: $(this).attr('id'), swatch: $(this).attr('src'), name: $(this).attr('alt')};
+    }).toArray();
   
   var images = $('#productImageSpinset .tile_container img').map(function() {
     return $(this).attr('src');
   }).toArray();
-  
-  var colorText = $('#ColorLabel').text().replace(/[\w\d]/g, ' ').trim().split(' ');
-  
-  var colorImageText = $('#colors img').map(function() {
-    return $(this).attr('alt');
-  }).toArray();
-  
-  var tags = colorText.concat(colorImageText);
   
   var relatedItemURLs = $('#productRecommendationZone .productName a').map(function() {
     return $(this).attr('href');
@@ -84,23 +100,19 @@ kipScrapeTools.load(data, function($) {
     name: $('.title').text().trim(),
     price: $('.priceSelected').text().trim(),
     description: $('#productDesc').text().trim(),
-    tags: tags,
-    relatedItemURLs: relatedItemURLs
+    relatedItemURLs: relatedItemURLs,
+    colors: colors
   })
   
 })
 }
 
-function extras(data, done) {
-require('colors');
-require('vvv');
-}
-
 function findStores(data, done) {
 var request = require('request');
+var cheerio = require('cheerio');
+var Promise = require('bluebird');
 
-var body = 'sizes=1000016&widths=M&zipCode=10002&city=&state=&categoryName=&categoryId=&lineItem.product.id=206963&color=dsw12color39200221&size=1000016&width=M&lineItem.id=&lineItem.commerceItemId=';
-var url = 'http://www.dsw.com/dsw_shoes/product/206963/find';
+var url = 'http://www.dsw.com/dsw_shoes/product/$id/find'.replace('$id', data.productId);
 var headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -113,28 +125,81 @@ var headers = {
     'Accept': '*/*',
     'Accept-Language': 'en-US,en;q=0.8'
 }
-var form = {
-    zipCode: '10002',
-    'lineItem.product.id': '206963',
-    color: 'dsw12color39200221',
-    size: '1000016',
-    width: 'M'
+
+function checkAvailability(color, size, zipcode) {
+  // return a promise
+  var form = {
+      sizes: size,
+      widths: 'M',
+      zipCode: zipcode,
+      'lineItem.product.id': data.productId,
+      color: color,
+      size: size,
+      width: 'M'
+  };
+
+    return new Promise(function(resolve, reject) {
+        request.post({
+            url: url,
+            headers: headers,
+            form: form
+        }, function(e, r, b) {
+            var $ = cheerio.load(b);
+
+            var stores = $('#searchResultsTable tr').map(function() {
+                var row = $(this);
+                var store = {};
+                store.id = row.find('input[name="lineItem.storeId"]').val()
+                if (!store.id) { return store }
+                var r = new RegExp(store.id + '$');
+                store.landmark = global.stores.filter(function(s) {
+                    return !!s.id.match(r);
+                })[0];
+                return store;
+            }).toArray();
+            resolve(stores);
+        })
+    })
 }
 
-request.post({
-    url: url,
-    headers: headers,
-    form: form
-}, function(e, r, b) {
-    //console.log(b);
+    var zipcodes = ['10002'];
+
+var promises = [];
+var items = [];
+data.colors.map(function(color) {
+  data.sizes.map(function(size) {
+    zipcodes.map(function(zipcode) {
+      promises.push(checkAvailability(color, size.id, zipcode).then(function(stores) {
+        stores.map(function(store) {
+            if (!store.id || !store.landmark) return;
+            items.push({
+                color: color,
+                size: size,
+                zipcode: zipcode,
+                store: store
+            });
+        })
+      }))
+    })
+  })
 })
 
+    Promise.settle(promises).then(function() {
+        console.log(JSON.stringify(data, null, 2));
+        // turn this steaming pile of shit into real items.
+        // the unique identify for each item is a composite key: productId + colorId + storeId\
+        var itemHashmap = {};
+        items.map(function(i) {
+            var key =
+        })
+        done(data);
+    })
 }
 
+quickflow.connect(setup, getCatalogURLs)
 quickflow.connect(getCatalogURLs, getItemURLs)
 quickflow.connect(getItemURLs, log)
 quickflow.connect(getItemURLs, scrapeItem)
 quickflow.connect(scrapeItem, log)
-quickflow.connect(extras)
-quickflow.connect(findStores)
+quickflow.connect(scrapeItem, findStores)
 if (!module.parent) quickflow.run()
