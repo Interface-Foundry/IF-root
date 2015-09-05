@@ -30,8 +30,8 @@ function getUser() {
       })
     } else {
       _.merge(u, ruffleconUser);
-      debugger;
-      u.update(function(e) {
+      u.save(function(e) {
+        console.log("updated user");
         kip.ohshit(e);
         ruffleconUser = u;
         getLandmark();
@@ -76,7 +76,7 @@ function getLandmark() {
       })
     } else {
       _.merge(l, ruffleconLandmark);
-      l.update(function(e) {
+      l.save(function(e) {
         kip.ohshit(e);
         ruffleconLandmark = l;
         console.log(l);
@@ -133,7 +133,7 @@ function getHat() {
       })
     } else {
       _.merge(hat, ruffleconHat)
-      hat.update(function(e) {
+      hat.save(function(e) {
         kip.ohshit(e);
         ruffleconHat = hat;
         console.log(ruffleconHat);
