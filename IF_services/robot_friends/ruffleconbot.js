@@ -10,7 +10,7 @@ function getUser() {
   console.log('getting user');
   ruffleconUser = {
     profileID: 'rufflecon',
-    name: 'Rufflecon',
+    name: 'RuffleCon',
     location: 'Stamford, CT',
     avatar: 'https://s3.amazonaws.com/if.kip.apparel.images/rufflecon/rufflecon_avatar.png',
     admin: false,
@@ -44,7 +44,7 @@ var ruffleconLandmark;
 function getLandmark() {
   console.log('getting landmark')
   ruffleconLandmark = {
-    name: 'Ruffle Con',
+    name: 'RuffleCon',
     id: 'rufflecon',
     world: true,
     owner: {
@@ -92,7 +92,7 @@ function getHat() {
   console.log('getting hat');
   ruffleconHat = {
     id: 'ruffleconhat',
-    name: 'Rufflecon Prize Hat',
+    name: 'RuffleCon Prize Hat',
     world: false,
     parent: {
       mongoId: ruffleconLandmark._id.toString(),
@@ -107,13 +107,13 @@ function getHat() {
     valid: true,
     // avatar: 'https://s3.amazonaws.com/if.kip.apparel.images/rufflecon/rufflecon_avatar.png',
     loc: ruffleconLandmark.loc.toObject(),
-    description: 'The Rufflecon contest hat!  A beautiful red hat, both soft and firm, with smooth yet well defined velvet curves.',
+    description: 'The RuffleCon contest hat!  A beautiful red hat, both soft and firm, with smooth yet well defined velvet curves.  From Japanese brand, Victorian Maiden',
     price: 0,
     priceRange: 1,
     itemTags: {
       colors: ['Red'],
       categories: ['Hats'],
-      text: ['hat', 'velvet']
+      text: ['hat', 'velvet', 'Victorian Maiden']
     },
     itemImageURL: ['https://s3.amazonaws.com/if.kip.apparel.images/rufflecon/hat.png'],
     linkback: 'https://instagram.com/kipstyles.co',
