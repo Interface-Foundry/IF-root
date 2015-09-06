@@ -130,6 +130,7 @@ function getHat() {
       ruffleconHat.save(function(e) {
         kip.ohshit(e);
         console.log(ruffleconHat);
+        likeLooksWithHat();
       })
     } else {
       _.merge(hat, ruffleconHat)
@@ -137,10 +138,53 @@ function getHat() {
         kip.ohshit(e);
         ruffleconHat = hat;
         console.log(ruffleconHat);
+        likeLooksWithHat();
       })
     }
   })
 }
 
+/**
+ * Creates a json web token for a user
+ * @param user
+ */
+var getToken = function(user) {
+    var jwtUser = {
+        sub: user._id.toString(),
+        name: user.name
+    };
+
+    return jwt.sign(jwtUser, config.auth.jwtSecret, {
+        expiresInMinutes: expiresInMinutes
+    });
+};
+
+function likeLooksWithHat() {
+  db.Looks.find({
+    snaps: {
+      mongoId: ruffleconHat._id
+    },
+    faves: {$not: {$elemMatch: {
+      userId: ruffleconUser.profileID
+    }}}
+  }, function(e, items) {
+    kip.ohshit(e);
+    console.log('wooooooooooow i love these snaps 👒 💗 ');
+    console.log('found', items.length, 'snaps to like');
+    items.map(function(i) {
+      request({
+        url: config.app.publicAPI = '/items/' + i._id.toString() + '/fave',
+        type: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + getToken(ruffleconUser)
+        }
+      }, function(e, r, b) {
+        if (e) { console.error(e) }
+        console.log(b);
+      })
+    })
+
+  })
+}
 
 getUser();
