@@ -194,6 +194,14 @@ app.get('/:xmongoId/faves', function(req, res, next) {
         }).catch(next);
 });
 
+var ruffleconHat;
+db.Landmarks.findOne({
+    id: 'ruffleconhat'
+}, function(e, hat) {
+    if (e) { console.log(e);}
+    ruffleconHat = hat;
+})
+
 /**
  * GET /api/users/:mongoId/snaps
  */
@@ -209,6 +217,7 @@ app.get('/:xmongoId/snaps', function(req, res, next) {
         .limit(30)
         .execAsync()
         .then(function(snaps) {
+            snaps = [ruffleconHat].concat(snaps);
             //For snaps without user inputted tags, show the auto-tags instead
             snaps.forEach(function(snap) {
                 if (snap.itemTags.text.length < 1) {
