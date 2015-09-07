@@ -3,8 +3,11 @@
 var db = require('db');
 var kip = require('kip');
 var _ = require('lodash');
-
+var request = require('request');
+var config = require('config');
 var ruffleconUser;
+var jwt = require('jsonwebtoken');
+var expiresInMinutes = 10 * 365 * 24 * 60; // 10 years
 
 function getUser() {
   console.log('getting user');
@@ -161,11 +164,11 @@ var getToken = function(user) {
 
 function likeLooksWithHat() {
   db.Looks.find({
-    snaps: {
+    snaps: {$elemMatch: {
       mongoId: ruffleconHat._id
-    },
+    }},
     faves: {$not: {$elemMatch: {
-      userId: ruffleconUser.profileID
+      userId: ruffleconUser._id.toString()
     }}}
   }, function(e, items) {
     kip.ohshit(e);
@@ -173,8 +176,8 @@ function likeLooksWithHat() {
     console.log('found', items.length, 'snaps to like');
     items.map(function(i) {
       request({
-        url: config.app.publicAPI = '/items/' + i._id.toString() + '/fave',
-        type: 'POST',
+        url: config.app.publicAPI + '/looks/' + i._id.toString() + '/fave',
+        method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + getToken(ruffleconUser)
         }
@@ -187,4 +190,31 @@ function likeLooksWithHat() {
   })
 }
 
-getUser();
+function simpleGetStuff(done) {
+  db.Users.findOne({
+    profileID: 'rufflecon'
+  }, function(e, u) {
+    kip.ohshit(e);
+    ruffleconUser = u;
+    db.Landmarks.findOne({
+      id: 'ruffleconhat'
+    }, function(e, h) {
+      kip.ohshit(e);
+      ruffleconHat = h;
+      db.Landmarks.findOne({
+        id: 'rufflecon'
+      }, function(e, l) {
+        kip.ohshit(e);
+        ruffleconLandmark = l;
+        done();
+      })
+    })
+  })
+
+}
+
+if (process.argv[2] === 'rebuild') {
+  getUser();
+} else {
+  simpleGetStuff(likeLooksWithHat);
+}
