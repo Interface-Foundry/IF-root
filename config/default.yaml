@@ -17,3 +17,15 @@ neighborhoodServer:
 geoipURL: http://www.freegeoip.net/json/
 app:
   port: 2997
+facebookAuth:
+  clientID: 1401271990193674
+  clientSecret: 8d7c6cb160c60bd656d8a944d8f1f2bd
+  callbackURL: https://kipapp.co/auth/facebook/callback,
+twitterAuth:
+  consumerKey: 79AqE2SPIW219Bx35So7KfTD1
+  consumerSecret: N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R,
+  callbackURL: https://kipapp.co/auth/twitter/callback
+meetupAuth:
+  consumerKey: vgmujlff2vflhtutplkaf15h
+  consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
+  callbackURL: https://kipapp.co/auth/meetup/callback
