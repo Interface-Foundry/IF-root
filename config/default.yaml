@@ -17,6 +17,9 @@ neighborhoodServer:
 geoipURL: http://www.freegeoip.net/json/
 app:
   port: 2997
+  publicAPI: http://pikachu.kipapp.co/api
+auth:
+  jwtSecret: SlytherinOrGTFO
 facebookAuth:
   clientID: 1401271990193674
   clientSecret: 8d7c6cb160c60bd656d8a944d8f1f2bd

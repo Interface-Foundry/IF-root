@@ -15,3 +15,5 @@ redis:
 geoipURL: http://localhost:8080/json/
 neighborhoodServer:
   url: http://localhost:9998
+app:
+  publicAPI: https://kipapp.co/styles/api

@@ -12,3 +12,5 @@ redis:
 geoipURL: http://localhost:8080/json/
 neighborhoodServer:
   url: http://localhost:9998
+app:
+  publicAPI: http://pikachu.kipapp.co/api
