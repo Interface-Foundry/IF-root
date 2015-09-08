@@ -7,7 +7,6 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 var deepcopy = require('deepcopy');
 var kip = require('kip');
-var _ = require('lodash');
 
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
@@ -308,6 +307,7 @@ function textSearch(q, page) {
             })
 
         }, kip.err);
+
 }
 
 /**
@@ -355,8 +355,6 @@ function filterSearch(q, page) {
 
     console.log(query);
 
-//checkhere
-
     return db.Landmarks
         .find(query)
         .limit(pageSize)
@@ -395,70 +393,11 @@ app.post(trendingItemsUrl, function(req, res, next) {
         q.text = str;
         return search(q, 0)
             .then(function(res) {
-
-
-                function distance(lat1, lon1, lat2, lon2, unit) {
-                    var radlat1 = Math.PI * lat1 / 180
-                    var radlat2 = Math.PI * lat2 / 180
-                    var radlon1 = Math.PI * lon1 / 180
-                    var radlon2 = Math.PI * lon2 / 180
-                    var theta = lon1 - lon2
-                    var radtheta = Math.PI * theta / 180
-                    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-                    dist = Math.acos(dist)
-                    dist = dist * 180 / Math.PI
-                    dist = dist * 60 * 1.1515
-                    if (unit == "K") {
-                        dist = dist * 1.609344
-                    }
-                    if (unit == "N") {
-                        dist = dist * 0.8684
-                    }
-                    return dist
-                }
-
-                function compare(a, b) {
-                    if (a.distance < b.distance)
-                        return -1;
-                    if (a.distance > b.distance)
-                        return 1;
-                    return 0;
-                }
-
-                var previous_name;
-                var duplicates = [];
-
-                var copy = deepcopy(res)
-
-                copy.forEach(function(current) {
-                    console.log('current: ', current.id)
-                    if (current.name === previous_name) {
-                        var rating = {
-                            _id: current._id,
-                            name: current.name,
-                            distance: distance(q.loc.lat, q.loc.lon, current.loc.coordinates[1], current.loc.coordinates[0])
-                        }
-                        duplicates.push(rating)
-                    }
-                    previous_name = current.name;
-                });
-
-
-                console.log('\n\n\n\n\n\n\n\n****', copy)
-
-                var duplicates2 = _.groupBy(duplicates, name)
-
-                // duplicates2.sort(compare)[0].distance
-                console.log('Duplicates', duplicates);
-
-                console.log('Duplicates2: ', duplicates2)
-
+                var newRes = (eliminateDuplicates(res, q, pageSize) !== null) ? (eliminateDuplicates(res, q)) : res
                 return {
                     category: 'Trending in "' + str + '"',
-                    results: res
+                    results: newRes
                 }
-
-
             })
     });
 
@@ -569,6 +508,110 @@ app.post(trendingItemsUrl, function(req, res, next) {
 
 
 })
+
+//****TEMPORARY FIX: This function will identify duplicate items in response, find the closest item (distance) within those duplicates
+//and return one of that item for each duplicated item.
+function eliminateDuplicates(res, q, pageSize) {
+    // console.log('eliminating duplicates')
+    function distance(lat1, lon1, lat2, lon2, unit) {
+        var radlat1 = Math.PI * lat1 / 180
+        var radlat2 = Math.PI * lat2 / 180
+        var radlon1 = Math.PI * lon1 / 180
+        var radlon2 = Math.PI * lon2 / 180
+        var theta = lon1 - lon2
+        var radtheta = Math.PI * theta / 180
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist)
+        dist = dist * 180 / Math.PI
+        dist = dist * 60 * 1.1515
+        if (unit == "K") {
+            dist = dist * 1.609344
+        }
+        if (unit == "N") {
+            dist = dist * 0.8684
+        }
+        return dist
+    }
+
+    function compare(a, b) {
+        if (a.distance < b.distance)
+            return -1;
+        if (a.distance > b.distance)
+            return 1;
+        return 0;
+    }
+    var previous_name;
+    var duplicates = {};
+    var unique = {};
+    var dupeNames = [];
+    for (var i in res) {
+        if (typeof(unique[res[i].name]) !== "undefined") {
+            dupeNames.push(res[i].name);
+        }
+        unique[res[i].name] = 0;
+    }
+    dupeNames = dupeNames.sort().filter(function(name, pos, dupeNames) {
+        return !pos || name != dupeNames[pos - 1];
+    })
+    var modifiedRes = []
+    var unmodifiedRes = []
+    res.forEach(function(current) {
+        // console.log('current: ', current.name)
+        if (current.name !== undefined && current.name === previous_name) {
+            var obj = {}
+            current.distance = distance(q.loc.lat, q.loc.lon, current.loc.coordinates[1], current.loc.coordinates[0])
+            obj.id = current.id
+            obj.name = current.name;
+            obj.distance = current.distance;
+            modifiedRes.push(obj)
+        } else if (current.name !== undefined) {
+            unmodifiedRes.push(current)
+        }
+        previous_name = current.name;
+    });
+
+    modifiedRes = modifiedRes.sort(function(a, b) {
+        return a.name.localeCompare(b.name)
+    }).sort(function(a, b) {
+        return parseFloat(a.distance) - parseFloat(b.distance);
+    })
+
+    var closestDupeItems = {}
+    dupeNames.forEach(function(name) {
+        modifiedRes.forEach(function(item) {
+            if (item.name === name) {
+                if (!closestDupeItems[name]) {
+                    closestDupeItems[name] = item
+                }
+            }
+        })
+    })
+    var resIds = res.map(function(obj) {
+        return res.id
+    }).join()
+    var result = []
+    var unique = {};
+    var string = ''
+    for (var i = 0; i < res.length; i++) {
+        for (var key in closestDupeItems) {
+            string = string.concat(key)
+            var item = res[i]
+            if (item.name && item.name.trim() === key.trim() && item.id.trim() == closestDupeItems[key].id.trim()) {
+                result.push(item)
+            }
+        }
+    }
+
+    var trueUniqueIds = []
+    unmodifiedRes.forEach(function(item) {
+        if (string.indexOf(item.name) == -1) {
+            trueUniqueIds.push(item)
+        }
+    })
+    result = trueUniqueIds.concat(result)
+    return result
+
+}
 
 
 module.exports = app;
