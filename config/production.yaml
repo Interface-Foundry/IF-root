@@ -2,6 +2,7 @@ env: production
 isProduction: true
 mongodb:
   url: mongodb://flareon.internal.kipapp.co/foundry,jankeon.internal.kipapp.co/foundry,vaporeon.internal.kipapp.co/foundry
+  backuphost: flareon.internal.kipapp.co
   options:
     replset:
       rs_name: foundry
