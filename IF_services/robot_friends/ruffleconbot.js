@@ -216,5 +216,12 @@ function simpleGetStuff(done) {
 if (process.argv[2] === 'rebuild') {
   getUser();
 } else {
-  simpleGetStuff(likeLooksWithHat);
+  simpleGetStuff(function() {
+    likeLooksWithHat();
+
+    // like the stuff every two minutes
+    setInterval(function() {
+      likeLooksWithHat()
+    }, 1000*60*2)
+  })
 }
