@@ -1,5 +1,6 @@
 $(function() {
     function submit() {
+        $('form *').attr('disabled', true);
         $.ajax({
             url: 'reset',
             type: 'POST',
@@ -10,7 +11,16 @@ $(function() {
                 email: $('#email').val(),
                 password: $('#password').val(),
                 token: location.hash.split('/')[2]
-            })
+            }),
+            success: function() {
+                $('p').remove();
+                $('form').parent().append('<p class="green">success</p>');
+            },
+            error: function(xhr, errorType, error) {
+                $('p').remove();
+                $('form *').removeAttr('disabled');
+                $('form').parent().append('<p class="red">' + xhr.response + '</p>');
+            }
         })
         return false;
     }
