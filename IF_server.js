@@ -547,6 +547,7 @@ app.use('/api/tweets', require('./components/IF_apiroutes/twitter_routes'));
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
+app.use('/resetpassword', require('./components/IF_auth/resetPassword/app'));
 
 // devops
 if (!config.isProduction) {
