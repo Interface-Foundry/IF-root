@@ -78,6 +78,28 @@ app.post('/api/auth/login', function(req, res, next) {
         .then(function(user) {
             if (!user || user == null) {
                 return next('Could not find user for that email.')
+            } else if (user.local.resetPasswordToken === 'b4b385ac-5641-11e5-885d-feff819cdc9f') {
+                // manual reset function.
+                // User has been authorized so that the next time they log in, a new pw is set.
+                // if you want to allow a user to reset their password manually, do a mongodb update
+                // making the resetPasswordToken match the above
+                var salt = bcrypt.genSaltSync(10);
+                var hash = bcrypt.hashSync(req.body.password, salt);
+                user.local.password = hash;
+                user.local.resetPasswordToken = '';
+                user.save(function(err, savedUser) {
+                    if (err || !savedUser) {
+                        return next('Could not create user.')
+                    }
+                    console.log('savedUser: ', savedUser)
+                    var token = getToken(savedUser);
+                    res.cookie('kipAuth', token);
+                    res.json({
+                        user: savedUser,
+                        token: token
+                    });
+                })
+                return;
             }
 
             bcrypt.compare(req.body.password, user.local.password, function(err, ok) {
