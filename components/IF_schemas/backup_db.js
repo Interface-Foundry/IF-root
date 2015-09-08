@@ -7,11 +7,11 @@ var fs = require('fs');
 // looks like "backup_production_2015-09-07_2"
 // where the _2 is an incrementing counter depending on the number of backups already taken today.
 var filename_base = 'backup_' + config.env + '_' + moment().format('YYYY-MM-DD');
-var filename = filename_base + '.tar.gz';
+var filename = filename_base;
 var inc = 0;
 
-while (fs.existsSync(filename)) {
-    filename = filename_base + '_' + (++inc) + '.tar.gz';
+while (fs.existsSync(filename) || fs.existsSync(filename + '.tar.gz')) {
+    filename = filename_base + '_' + (++inc);
 }
 
 // host should just be the hostname, no database part.
