@@ -43,6 +43,7 @@
     "mongodb-wrapper": "0.4.x",
     "mongojs": "*",
     "mongoose": "~4.x",
+    "mongoose-hook-ensure-indexes": "^0.1.4",
     "mongoose-text-search": "~0.0.2",
     "monguurl": "~0.1.0",
     "morgan": "~1.0.0",

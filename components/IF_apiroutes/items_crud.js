@@ -65,35 +65,27 @@ router.post('/:id/delete', function(req, res, next) {
  * req.itemId
  */
 router.use('/:id*', function(req, res, next) {
-    db.Landmarks.findById(req.params.id, function(err, item) {
-        if (err) {
-            return next(err);
-        } else if (!item) {
-            return next('Could not find item ＼(º □ º 〃)/');
-        }
+    console.log('finding item', req.params.id);
+    db.Landmarks
+        .findById(req.params.id)
+        .populate('parents', 'name id addressString tel description loc')
+        .exec(function(err, item) {
+            console.log('yay', item);
+            if (err) {
+                return next(err);
+            } else if (!item) {
+                return next('Could not find item ＼(º □ º 〃)/');
+            }
 
-        req.item = item;
-        req.itemId = item._id.toString();
-        return next();
-
+            req.item = item;
+            req.itemId = item._id.toString();
+            return next();
     });
 });
 
 //Get item given an item ID
 router.get('/:id', function(req, res, next) {
-    var result = {
-        item: req.item
-    };
-    db.Landmarks.findById(req.item.parent.mongoId, function(err, place) {
-        if (err) {
-            err.niceMessage = 'Error finding store.';
-            return next(err);
-        } else if (!place) {
-            return next("Error finding place");
-        }
-        result.parent = place;
-        res.send(result);
-    });
+    res.send(req.item);
 });
 
 //Update an item
