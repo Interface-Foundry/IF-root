@@ -16,15 +16,20 @@ var landmarkSchema = new Schema({
         lowercase: true
     },
     world: Boolean,
+    parent: {
+        mongoId: String,
+        id: String,
+        name: String
+    },
     parents: [{
         type: ObjectId,
         ref: 'Landmark',
         index: true
     }],
     owner: {
-        type: ObjectId,
-        ref: 'User',
-        index: true
+        mongoId: String,
+        profileID: String,
+        name: String
     },
     valid: Boolean, //are all req. items inputted
     status: String, //'draft' 'archived' 'public'

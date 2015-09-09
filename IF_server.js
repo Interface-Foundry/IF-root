@@ -49,6 +49,7 @@ var readChunk = require('read-chunk');
 var fileTypeProcess = require('file-type');
 var _ = require('lodash');
 var sanitize = require('mongo-sanitize');
+var semver = require('semver');
 // var multer  = require('multer');
 
 
@@ -155,9 +156,14 @@ app.use(bodyParser.json({
 
 var redisClient = require('./redis.js');
 
+app.use('/', function(req, res, next) {
+    req.version = semver(req.headers.version || '0.0.0') || '0.0.0';
+    next();
+})
 app.use('/', require('./components/IF_auth/new_auth'));
 
 app.use(flash()); // use connect-flash for flash messages stored in session
+
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy(
