@@ -49,6 +49,7 @@ var readChunk = require('read-chunk');
 var fileTypeProcess = require('file-type');
 var _ = require('lodash');
 var sanitize = require('mongo-sanitize');
+var semver = require('semver');
 // var multer  = require('multer');
 
 
@@ -155,9 +156,14 @@ app.use(bodyParser.json({
 
 var redisClient = require('./redis.js');
 
+app.use('/', function(req, res, next) {
+    req.version = semver(req.headers.version || '0.0.0') || '0.0.0';
+    next();
+})
 app.use('/', require('./components/IF_auth/new_auth'));
 
 app.use(flash()); // use connect-flash for flash messages stored in session
+
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy(
@@ -339,7 +345,6 @@ app.post('/email/request_confirm/:token', function(req, res) {
 //====================================//
 
 app.post('/forgot', function(req, res, next) {
-
     async.waterfall([
         function(done) {
             crypto.randomBytes(20, function(err, buf) {
@@ -363,7 +368,7 @@ app.post('/forgot', function(req, res, next) {
                     }
                 });
             } else {
-                return done('Please use a real email address');
+                return next('Please use a real email address');
             }
         },
         function(token, user, done) {
@@ -374,18 +379,17 @@ app.post('/forgot', function(req, res, next) {
                     subject: 'Kip Password Reset',
                     text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
                         'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-                        'https://' + req.headers.host + '/reset/' + token + '\n\n' +
+                        'https://kipapp.co/styles/resetpassword/#/' + user.local.email + '/' + token + '\n\n' +
                         'If you did not request this, please ignore this email and your password will remain unchanged.\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
-                    req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
+                    res.send(200);
                     done(err, 'done');
                 });
             }
         }
     ], function(err) {
         if (err) return next(err);
-        res.redirect('/#/forgot');
     });
 });
 
@@ -393,78 +397,6 @@ function validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
-
-app.post('/resetConfirm/:token', function(req, res) {
-    User.findOne({
-        'local.resetPasswordToken': req.params.token,
-        'local.resetPasswordExpires': {
-            $gt: Date.now()
-        }
-    }, function(err, user) {
-        if (!user) {
-            //req.flash('error', 'Password reset token is invalid or has expired.');
-            // return res.redirect('/#/forgot');
-            res.send(403);
-        } else {
-            res.send('yeah its fine');
-        }
-    });
-});
-
-app.post('/reset/:token', function(req, res) {
-    async.waterfall([
-        function(done) {
-            User.findOne({
-                'local.resetPasswordToken': req.params.token,
-                'local.resetPasswordExpires': {
-                    $gt: Date.now()
-                }
-            }, function(err, user) {
-                if (!user) {
-                    req.flash('error', 'Password reset token is invalid or has expired.');
-                    //return res.redirect('/#/forgot');
-                    res.send(403);
-                } else {
-                    if (req.body.password.length >= 6) {
-                        user.local.password = user.generateHash(req.body.password);
-                        user.local.resetPasswordToken = undefined;
-                        user.local.resetPasswordExpires = undefined;
-
-                        user.save(function(err) {
-                            req.logIn(user, function(err) {
-                                done(err, user);
-                            });
-                        });
-                    } else {
-                        return done('Password needs to be at least 6 characters');
-                    }
-                }
-            });
-        },
-        function(user, done) {
-
-            var mailOptions = {
-                to: user.local.email,
-                from: 'Kip <noreply@kipapp.co>',
-                subject: 'Your Kip Password was reset',
-                text: 'Hello,\n\n' +
-                    'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed. If this is an error, please contact: hello@interfacefoundry.com\n'
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
-                req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
-                done(err, 'done');
-            });
-        }
-    ], function(err) {
-        if (err) {
-            res.send({
-                err: err
-            });
-        } else {
-            res.send('password changed successfully');
-        }
-    });
-});
 
 //====================================//
 //========  END MAIL RESET  ==========//
@@ -547,6 +479,7 @@ app.use('/api/tweets', require('./components/IF_apiroutes/twitter_routes'));
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
+app.use('/resetpassword', require('./components/IF_auth/resetPassword/app'));
 
 // devops
 if (!config.isProduction) {

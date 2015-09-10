@@ -1,3 +1,5 @@
 env: development
+mongodb:
+  url: localhost/foundry
 app:
   publicAPI: http://localhost:2997/api

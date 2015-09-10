@@ -5,10 +5,8 @@ var express = require('express'),
     db = require('db'),
     landmark = db.Landmark,
     _ = require('lodash'),
-    shapefile = require('shapefile'),
     request = require('request'),
-    redisClient = require('../../redis.js'),
-    mock_places = require('../../test/KipAPI/mock_places');
+    semver = require('semver');
 
 // delete is sooooo idempotent.
 
@@ -65,7 +63,17 @@ router.post('/:id/delete', function(req, res, next) {
  * req.itemId
  */
 router.use('/:id*', function(req, res, next) {
-    db.Landmarks.findById(req.params.id, function(err, item) {
+    console.log('finding item', req.params.id);
+    var query = db.Landmarks
+        .findById(req.params.id);
+
+    // Version 0.0.4 (9/10/15) changes "parent" to "parents"
+    if (semver.gte(req.version, '0.0.4')) {
+        query = query.populate('parents', 'name id addressString tel description loc')
+    }
+
+    query.exec(function(err, item) {
+        console.log('yay', item);
         if (err) {
             return next(err);
         } else if (!item) {
@@ -75,25 +83,35 @@ router.use('/:id*', function(req, res, next) {
         req.item = item;
         req.itemId = item._id.toString();
         return next();
-
     });
 });
 
 //Get item given an item ID
 router.get('/:id', function(req, res, next) {
-    var result = {
-        item: req.item
-    };
-    db.Landmarks.findById(req.item.parent.mongoId, function(err, place) {
-        if (err) {
-            err.niceMessage = 'Error finding store.';
-            return next(err);
-        } else if (!place) {
-            return next("Error finding place");
+    // Version 0.0.4 (9/10/15) changes "parent" to "parents"
+    if (semver.gte(req.version, '0.0.4')) {
+        // just use the first coordinates for now TODO
+        if (req.item.loc.type === 'MultiPoint') {
+            req.item.loc.coordinates = req.item.loc.coordinates[0];
         }
-        result.parent = place;
-        res.send(result);
-    });
+        res.send({item: req.item});
+    } else {
+        // which parent to choose? TODO
+        db.Landmarks.findOne({
+            _id: req.item.parent.mongoId
+        }, function(e, parent) {
+            if (e) { return next(e) }
+
+            // just use the first coordinates for now TODO
+            if (req.item.loc.type === 'MultiPoint') {
+                req.item.loc.coordinates = req.item.loc.coordinates[0];
+            }
+            res.send({
+                item: req.item,
+                parent: parent
+            })
+        })
+    }
 });
 
 //Update an item

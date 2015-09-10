@@ -84,8 +84,8 @@ router.post('/', function(req, res, next) {
             }
         })
     } else {
-        if (req.body.parent.mongoId) {
-            db.Landmarks.findById(req.body.parent.mongoId, function(err, parent) {
+        if (req.body.parent._id) {
+            db.Landmarks.findById(req.body.parent._id, function(err, parent) {
                 if (err) {
                     err.niceMessage = 'Error checking for existing place.';
                     return next(err);
@@ -109,9 +109,7 @@ function createItem(req, res, newPlace) {
     var newItem = new db.Landmark();
     newItem = _.extend(newItem, req.body);
     if (newPlace) {
-        newItem.parent.mongoId = newPlace._id;
-        newItem.parent.name = newPlace.name;
-        newItem.parent.id = newPlace.id;
+        newItem.parent = newPlace._id;
     }
     newItem.loc.coordinates[0] = newPlace.loc.coordinates[0];
     newItem.loc.coordinates[1] = newPlace.loc.coordinates[1];
