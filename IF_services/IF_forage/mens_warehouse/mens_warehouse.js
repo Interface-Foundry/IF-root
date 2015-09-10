@@ -1,15 +1,19 @@
 var http = require('http');
 var cheerio = require('cheerio');
-var db = require('db');
+// var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
-var uniquer = require('../../uniquer');
+// var uniquer = require('../../uniquer');
 var request = require('request');
+var UglifyJS = require("uglifyjs");
+var _ = require('underscore');
 
 
 var Stores = []
-    // var url = 'http://www.menswearhouse.com/mens-clothes/mens-outerwear/modern-fit-trim-outerwear/pronto-blue-modern-fit-moto-jacket-cognac-726F726G03';
-var url = 'http://www.menswearhouse.com/mens-suits/slim-fit-extra-trim-suits/awearness-by-kenneth-cole-blue-sharkskin-slim-fit-suit-30KP30KR56';
+var url = 'http://www.menswearhouse.com/mens-shoes/mens-dress-shoes/joseph-abboud-bixby-brown-cap-toe-lace-up-dress-shoes-403U03';
+//http://www.menswearhouse.com/mens-shoes/mens-dress-shoes/joseph-abboud-bixby-brown-cap-toe-lace-up-dress-shoes-403U03
+//http://www.menswearhouse.com/mens-clothes/mens-outerwear/modern-fit-trim-outerwear/pronto-blue-modern-fit-moto-jacket-cognac-726F726G03
+
 async.waterfall([
     // function(callback) {
     //     checkIfScraped(url).then(callback(null,url)).catch(function(err) {
@@ -92,10 +96,10 @@ function checkIfScraped(url) {
 function getItem(url) {
     return new Promise(function(resolve, reject) {
         //construct newItem object
-        var newItem = {
-            src: url,
-            images: []
-        };
+        // var newItem = {
+        //     src: url, 
+        //     images: []
+        // };
 
         var newItems = [];
 
@@ -105,115 +109,182 @@ function getItem(url) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
 
                 $ = cheerio.load(body); //load HTML
 
+                var itemCountLoop = 0; //used to compare num items to current loop
                 var itemCount = 0;
 
-                //NEW ITEM CREATED (BY COLOR)
-                var itemCollect = {
-                    imgURLs: [],
-                    sizeIds: []
-                };
-
-                $('div img').each(function(i, elem) {
-                    if (elem.attribs.src.indexOf('images.menswearhouse.com/is/image/TMW/') > -1 && elem.attribs.itemprop == 'image') {
-                        itemCollect.imgURLs.push(elem.attribs.src)
+                //initial count of num of items to collect
+                $('div').each(function(i, elem) {
+                    if (elem.attribs && elem.attribs.id && elem.attribs.id.indexOf('current_') > -1){
+                        itemCountLoop++;
                     }
-                })
-
-                $('h3.final-price').each(function(i, elem) {
-                    itemCollect.price = elem.children[0].data
-                })
-
-                $('p.help-links a.flat-btn').each(function(i, elem) {
-                    if (elem.attribs && elem.attribs.href && elem.attribs.href.indexOf('catalogId') > -1 && elem.attribs.href.indexOf('storeId') > -1) {
-                        itemCollect.catalogId = elem.attribs.href.split('?')[1].split('=')[1].split('&')[0]
-                        itemCollect.storeId = elem.attribs.href.split('storeId=')[1]
-                    }
-                })
+                });
 
                 //iterate on images found in HTML
                 $('div').each(function(i, elem) {
-                    if (elem.attribs) {
+                    if (elem.attribs){
+                        if(elem.attribs.id){
+                            if (elem.attribs.id.indexOf('current_') > -1){
 
-                        if (elem.attribs.id) {
-
-                            if (elem.attribs.id.indexOf('current_') > -1) {
-                                var el = eval("(" + elem.children[0].data + ")")
-                                itemCollect.itemPartNumbersMap = el.cmProdInfo.itemPartNumbersMap;
-                                itemCollect.name = el.cmProdInfo.shortDesc;
+                                //console.log('current_ ',elem.children[0].data);
+                                if (elem.children[0].data.length > 5){
+                                    //NEW ITEM CREATED (BY COLOR)
+                                    var itemCollect = {
+                                        sizeIds: [],
+                                        images: [],
+                                        physicalStores: []
+                                    };
+                                    newItems.push(itemCollect);
+                                    newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
+                                }
                             }
+                            else if (elem.attribs.id.indexOf('detail_') > -1){
 
-                            if (elem.attribs.id.indexOf('detail_') > -1) {
-                                var el = eval("(" + elem.children[0].data + ")")
-                                itemCollect.parentProductId = el.ProdDetail.parentProductId;
-                                readItemPartNumbers(itemCollect);
+                                if (elem.children[0].data.length > 5){ //prevent false positive data
+
+                                    if (elem.children[0].data.length < 70){ //filter data glitch
+                                        var detailObj = elem.children[0].next.next.data.replace('",','{ ProdDetail:{'); //fixing glitchy data incoming from mens warehouse
+                                    }
+                                    else {
+                                        var detailObj = elem.children[0].data; //no data glitch, proceed
+                                    }
+                                    
+                                    newItems[itemCount].parentProductId = eval("(" + detailObj + ")").ProdDetail.parentProductId; //get parent product ID
+                                    newItems[itemCount].src = eval("(" + detailObj + ")").ProdDetail.SocialURL; //get parent product ID
+
+                                    ////////// EXTRACT TAGS //////////
+                                    var details = eval("(" + detailObj  + ")").ProdDetail.details.split("|"); //from details
+                                    if (eval("(" + detailObj  + ")").ProdDetail.longDesc){
+                                        var longDesc = eval("(" + detailObj  + ")").ProdDetail.longDesc.split(" "); //from longDescription
+                                    }
+                                    else {
+                                        var longDesc = ['']; //no longDesc
+                                    }
+                                    var tagMerge = details.concat(longDesc);
+                                    tagMerge = details.concat(longDesc).join(" ");
+
+                                    newItems[itemCount].tags = getNoneStopWords(tagMerge); //add tags to newItem
+                                    newItems[itemCount].tags = eliminateDuplicates(newItems[itemCount].tags);
+
+                                    //remove STOP words from: 
+                                    // http://stackoverflow.com/questions/6686718/javascript-code-to-filter-out-common-words-in-a-string
+                                    function getNoneStopWords(sentence) {
+                                        var common = getStopWords();
+                                        var wordArr = sentence.match(/\w+/g),
+                                            commonObj = {},
+                                            uncommonArr = [],
+                                            word, i;
+                                        for (i = 0; i < common.length; i++) {
+                                            commonObj[ common[i].trim() ] = true;
+                                        }
+                                        for (i = 0; i < wordArr.length; i++) {
+                                            word = wordArr[i].trim().toLowerCase();
+                                            if (!commonObj[word]) {
+                                                uncommonArr.push(word);
+                                            }
+                                        }
+                                        return uncommonArr;
+                                    }
+                                    function getStopWords() {
+                                        return ["free","stand","features","adds","full","extra","featuring","up","upper","details","detail","down","featuring","featuring","look","interior","exterior","multiple","single","a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your", "ain't", "aren't", "can't", "could've", "couldn't", "didn't", "doesn't", "don't", "hasn't", "he'd", "he'll", "he's", "how'd", "how'll", "how's", "i'd", "i'll", "i'm", "i've", "isn't", "it's", "might've", "mightn't", "must've", "mustn't", "shan't", "she'd", "she'll", "she's", "should've", "shouldn't", "that'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "wasn't", "we'd", "we'll", "we're", "weren't", "what'd", "what's", "when'd", "when'll", "when's", "where'd", "where'll", "where's", "who'd", "who'll", "who's", "why'd", "why'll", "why's", "won't", "would've", "wouldn't", "you'd", "you'll", "you're", "you've"];
+                                    }
+                                    //http://stackoverflow.com/questions/9751413/removing-duplicate-element-in-an-array
+                                    function eliminateDuplicates(arr) {
+                                        var i,len=arr.length,out=[],obj={};
+                                         for (i=0;i<len;i++) {
+                                            obj[arr[i]]=0;
+                                         }
+                                         for (i in obj) {
+                                            out.push(i);
+                                         }
+                                         return out;
+                                    }
+                                    ///////////////////////////////////////
+
+                                    var imageURL = eval("(" + detailObj  + ")").ProdDetail.ProdFullImage;
+                                    newItems[itemCount].images.push('http://images.menswearhouse.com/is/image/TMW/'+imageURL+'?$40Zoom$'); //get parent product ID
+
+                                    //GET IMAGES
+                                   //http://images.menswearhouse.com/is/image/TMW/MW40_726F_03_PRONTO_BLUE_COGNAC_SET?$40Zoom$
+                                   //MW40_726F_03_PRONTO_BLUE_COGNAC_SET
+
+
+                                   readItemPartNumbers(); //parse item parts
+
+                                }
+
                             }
-
-                            if (elem.attribs.id.indexOf('swatches_') > -1) {
+                            else if (elem.attribs.id.indexOf('swatches_') > -1){
 
                                 //console.log('swatches_ ',elem.children[0].data);
 
                             }
+                            else if (elem.attribs.id.indexOf('sizes_') > -1){
 
-                            if (elem.attribs.id.indexOf('sizes_') > -1) {
-                                if (elem.children[0].data.length > 5) { //prevent false positive data
-                                    itemCollect.sizeMap = eval("(" + elem.children[0].data + ")").sizeMap; //lol idk but it works
-                                    readProductSizes(itemCollect);
+                                //console.log('sizes_ ',elem.children[0].data);
+
+                                if (elem.children[0].data.length > 5){ //prevent false positive data
+                                   newItems[itemCount].sizeMap = eval("(" + elem.children[0].data + ")").sizeMap; //blah blah JS container or smthing
+                                   readProductSizes();
                                 }
+
+                            }
+                            else if (elem.attribs.id.indexOf('pdpprices_') > -1){
+
+
+                                if (elem.children[0].data.length > 5){
+                                    newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regListPrice; //get item price
+                                    if (!newItems[itemCount].price){ //get this price if the other one doesn't exist (backup)
+                                        newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regOfferPrice;
+                                    }
+                                }
+
+                                //console.log('pdpprices_ ',elem.children[0].data);
+                                itemCount++; //SHOULD GO LAST IN LOOP, used to select index in newItems array
+                                
+                                //ALL ITEMS ARE COLLECTED, NOW MOVE ON TO INVENTORY
+                                if (itemCount == itemCountLoop){
+                                    if (newItems[0]) {
+                                        //console.log(newItems);
+                                        resolve(newItems);
+                                    } else {
+                                        console.log('missing params', newItems[0]);
+                                        reject('missing params');
+                                    }                                    
+                                }
+
                             }
 
-                            if (elem.attribs.id.indexOf('pdpprices_') > -1) {
-                                itemCount++; //SHOULD GO LAST IN LOOP
-                            }
                         }
-
-                        // delete itemCollect.itemPartNumbersMap
-
-                        resolve(itemCollect)
-                            console.log('Final item: ',itemCollect)
-
-
                     }
                 });
 
-                function jsonEscape(str) {
-                    return str.replace(/\n/g, " ").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t");
-                }
-
-                function readItemPartNumbers(itemCollect) {
-                    // console.log('^^^', itemCollect)
-                    var dataString = itemCollect.itemPartNumbersMap;
+                function readItemPartNumbers(productId) {
+                    var dataString = newItems[itemCount].itemPartNumbersMap;    
                     var pairs = dataString.split("|");
                     var partNumbers = [];
                     for (var j in pairs) {
                         var nvp = pairs[j].split(" ");
+
+                        //MISSING ONE ITEM IN PartNumberMap !!!
                         if (nvp.length == 2 && nvp[0] && nvp[1]) {
-                            itemCollect.sizeIds.push({ //add item + part numbers to itemCollect
+                            newItems[itemCount].sizeIds.push({ //add item + part numbers to itemCollect
                                 itemNumber: nvp[0],
                                 partNumber: nvp[1]
                             });
                         }
                     }
-
-                    // itemCollect.name = eval("(" + itemCollect.itemPartNumbersMap + ")").cmProdInfo.shortDesc;
+                    newItems[itemCount].name = eval("(" + newItems[itemCount].itemPartNumbersMap + ")").cmProdInfo.shortDesc; //get the short description from itempartnummap
                 }
 
 
-                function readProductSizes(itemCollect) {
-                    // if (!data || !data.sizeMap || !data.sizeMap.xSizes) {
-                    //     this.hasSizes = false;
-                    //     return
-                    // }
-                    // console.log(itemCollect.sizeIds);
+                function readProductSizes(productId) {
                     var sizeMap = {};
-
-                    var sizes = itemCollect.sizeMap.xSizes.split("|");
-
+                    var sizes = newItems[itemCount].sizeMap.xSizes.split("|");
                     for (var i in sizes) {
                         var s = sizes[i].split("_");
                         if (s && s[0] && s[1] && s[2]) {
@@ -226,90 +297,16 @@ function getItem(url) {
                             }
                         }
                     }
-
-                    itemCollect.sizeMap = sizeMap;
-
-                    // console.log('sizeMap ', sizeMap);
-
+                    //match sizeMap to sizeIds
+                    for (var i in newItems[itemCount].sizeIds){
+                        var itemNumber = newItems[itemCount].sizeIds[i].itemNumber;
+                        if (sizeMap[''+newItems[itemCount].sizeIds[i].itemNumber+''] && sizeMap[''+newItems[itemCount].sizeIds[i].itemNumber+''].size){
+                            var sizeName = sizeMap[''+newItems[itemCount].sizeIds[i].itemNumber+''].size;
+                            newItems[itemCount].sizeIds[i].sizeName = sizeName;
+                        }
+                    }
                 }
 
-
-                // readItemCatentryId: function(productId) {
-                //     var container = document.getElementById("swatches_" + productId);
-                //     if (!container) {
-                //         return
-                //     }
-                //     var data = eval("(" + container.innerHTML + ")");
-                //     if (!data || !data.colorMap) {
-                //         return
-                //     }
-                //     this.currentItemCatentryId = data.colorMap.buyableCatEntryId;
-                //     this.currentItemId = this.currentItemCatentryId;
-                //     if (this.currentItemCatentryId && this.currentItemCatentryId.indexOf("_") > -1) {
-                //         var catPairs = this.currentItemCatentryId.split("_");
-                //         this.currentItemId = catPairs[0];
-                //         this.currentItemCatentryId = catPairs[0];
-                //         console.log("currentItemCatentryId set to :" + this.currentItemCatentryId + ">> currentItemAvailablity :" + catPairs[1]);
-                //         var add_cart_id = "#add-to-cart_" + this.currentProductId;
-                //         console.log("Current Selected Product Swatch Id: " + this.currentProductId);
-                //         if (catPairs[1] == "INSTORE") {
-                //             jQuery(add_cart_id).text("Out Of Stock");
-                //             jQuery(add_cart_id).removeClass("blue-btn");
-                //             jQuery(add_cart_id).addClass("oos-btn")
-                //         } else {
-                //             if (catPairs[1] == "ONLINE") {
-                //                 this.getElementById("puis-feature").hide();
-                //                 this.getElementById("puis-selected-item-web-only").show();
-                //                 var colorTxt = "Color: " + this.currentItemColor;
-                //                 return
-                //             } else {
-                //                 jQuery(add_cart_id).text("Add to Cart");
-                //                 jQuery(add_cart_id).removeClass("oos-btn");
-                //                 jQuery(add_cart_id).addClass("blue-btn")
-                //             }
-                //         }
-                //         this.getElementById("puis-feature").show();
-                //         this.getElementById("puis-selected-item-web-only").hide()
-                //     }
-                // },
-
-                //////////Construct item name from Brand Name + Product Name /////////////
-                // var brandName = '';
-                // //get brand name
-                // $("section[id='brand-title']").map(function(i, section) {
-                //     for (var i = 0; i < section.children.length; i++) { 
-                //         if (section.children[i].name == 'h2'){
-                //            brandName = section.children[i].children[0].children[0].data;               
-                //         }
-                //     }
-                // });
-                // //get product name
-                // $("section[id='product-title']").map(function(i, section) {
-                //     for (var i = 0; i < section.children.length; i++) { 
-                //         if (section.children[i].name == 'h1'){
-                //            newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
-                //         }
-                //     }
-                // });
-                // //////////////////////////////////////////////////////////////////////////
-
-                // //get item price
-                // $('td').each(function(i, elem) {
-                //     if (elem.attribs.class.indexOf('item-price') > -1){
-                //        newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
-                //     }
-                // });
-
-                // //get the styleId to query nordstrom server with from the product URL. lastindexof gets item from end of URL. 
-                // //split('?') kills anything after productID in URL
-                // newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
-
-                // if (newItem.styleId) {
-                //     resolve(newItem);
-                // } else {
-                //     console.log('missing params', newItem);
-                //     reject('missing params');
-                // }
             } else {
                 if (error) {
                     console.log('error: ', error)
@@ -322,18 +319,16 @@ function getItem(url) {
 }
 
 
-function getInventory(newItem) {
+function getInventory(newItems) {
     return new Promise(function(resolve, reject) {
 
-        var Stores = [];
-
-        // 38.8006756,-95.2369805
         //catalogId 
         //storeId
         //distance
         //latlong
         //partNumber
         //726F726G03
+        //http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F30003
 
         /* 
         catalogId=12004
@@ -344,234 +339,70 @@ function getInventory(newItem) {
         &partNumber=TMW726F30003
         */
 
-        // http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F10003
-        // http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F30003
-        // http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F50003
-        //<input type="hidden" value="700478997" id="currProductId" name="currProductId">
+// http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F10003
+// http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F30003
+// http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=25&latlong=40.74071,-73.99418&partNumber=TMW726F50003
 
-        var url = 'http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=' + newItem.catalogId + '&langId=-1&storeId=' + newItem.storeId + '&distance=6000&latlong=38.8006756,-95.2369805&partNumber=' + newItem.sizeIds[0].partNumber
 
-        var options = {
-            url: url,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
-            }
-        };
+//<input type="hidden" value="700478997" id="currProductId" name="currProductId">
+        
+        var lat = 40.74071;
+        var lng = -73.99418;
+        var radius = 200; //i think this is max? idk
 
-        request(options, function(error, response, body) {
-            if ((!error) && (response.statusCode == 200)) {
-                body = eval("(" + body + ")").result
-                console.log('!!!!!!', body.length)
-                async.eachSeries(body, function iterator(store, callback) {
+        async.eachSeries(newItems, function iterator(item, callback) {
 
-                    var storeObj = {
-                        name: store.address.storeName,
-                        stlocId: store.stlocId,
-                        Address: store.address1 + store.address2 + store.city + store.country + store.state,
-                        City: store.city,
-                        State: store.state,
-                        ZipCode: store.zipcode,
-                        PhoneNumber: store.phone,
-                        Hours: store.hours,
-                        Description: store.desc,
-                        Lat: store.latlong.split(',')[0],
-                        Lng: store.latlong.split(',')[1]
+            async.eachSeries(item.sizeIds, function iterator(item2, callback2) {
+
+                var url = 'http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance='+radius+'&latlong='+lat+','+lng+'&partNumber='+item2.partNumber+''; //note: you can get a list of all stores by lat lng by removing the partNumber val
+                var options = { 
+                    url: url,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                     }
+                };
+                request(options, function(error, response, body) {
+                    if ((!error) && (response.statusCode == 200)) {
 
-                    Stores.push(storeObj);
+                        item2.physicalStores = eval("(" + body + ")").result; //put store results in each item object
 
-                    setTimeout(function() {
-                        callback()
-                    }, 800); //slowly collecting stores that carry item cause there's a rate limiter on the API
-
-
-                }, function(err, res) {
-                    resolve(Stores)
-                    console.log('stores in zip code ' + Stores.length);
+                        for (var x in eval("(" + body + ")").result){
+                            item.physicalStores.push(eval("(" + body + ")").result[x]);
+                        }
+                        
+                    } else {
+                        if (error) {
+                            console.log('getinventory error ')
+                            reject(error)
+                        } else {
+                            console.log('bad response')
+                            reject('Bad response from inventory request')
+                        }
+                    }
                 });
 
-            } else {
-                if (error) {
-                    console.log('getinventory error ')
-                    reject(error)
-                } else {
-                    console.log('bad response')
-                    reject('Bad response from inventory request')
-                }
-            }
-        })
+                setTimeout(function() { callback2() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+            },function(err,res){
+
+                item.physicalStores = _.uniq(item.physicalStores, 'stlocId'); //remove duplicate physical stores
+
+                setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+            });
+
+        },function(err,res){
+
+            //DONE GETTING ALL SIZES FOR ALL ITEMS AND COLORS
+            console.log('/////////////////// FINAL ITEMS ///////////////////');
+            //******* DATA NOTES *********
+            //******* physicalStores = list of stores that carry this item
+            //******* parentProductId = unique Id parent for all item colors and sizes. use this to check if the item was scraped 
+            console.log(newItems); // the items (sorted by color, item created per color)
+
+        });
+
 
     });
 }
-
-function saveStores(stores) {
-    return new Promise(function(resolve, reject) {
-        var Stores = [];
-        var count = 0
-        async.each(stores, function(store, callback) {
-
-            db.Landmarks
-                .findOne({
-                    'source_generic_store.storeId': store.stlocId,
-                    'linkbackname': 'menswearhouse.com'
-                })
-                .exec(function(e, s) {
-                    if (e) {
-                        //error
-                        console.log('Error in saveStores(): ', e)
-                        item.physicalStores[count].mongoId = 'null'
-                        count++;
-                        callback()
-                    }
-                    if (!s) {
-                        var n = new db.Landmark();
-                        n.name = 'Mens Wearhouse ' + store.name;
-                        n.source_generic_store = store;
-                        n.world = true;
-                        n.addressString = store.Address;
-                        n.tel = store.PhoneNumber;
-                        n.linkback = 'http://www.menswearhouse.com';
-                        n.linkbackname = 'menswearhouse.com'
-                        n.hasloc = true;
-                        n.loc.coordinates[0] = parseFloat(store.Lng);
-                        n.loc.coordinates[1] = parseFloat(store.Lat);
-                        uniquer.uniqueId('menswearhouse ' + store.Address, 'Landmark').then(function(output) {
-                            n.id = output;
-                            n.save(function(e, newStore) {
-                                if (e) {
-                                    // console.error(e);
-                                    return callback()
-                                }
-                                Stores.push(newStore)
-                                callback()
-                            })
-                        })
-                    } else if (s) {
-                        Stores.push(newStore)
-                        callback()
-                    }
-                })
-        }, function(err) {
-            if (err) {
-                return reject(err)
-            }
-
-            resolve(Stores)
-        })
-    })
-}
-
-
-
-function saveItem(stores, item) {
-    return new Promise(function(resolve, reject) {
-        var parents = [];
-
-        // i.parent.mongoId = s._id;
-        // if (s.name) {
-        //     i.parent.name = s.name;
-        // } else {
-        //     i.parent.name = s.id
-        // }
-        // i.parent.id = s.id;
-
-        stores.forEach(function(store) {
-            var obj = {}
-            obj.mongoId = store._id;
-            obj.name = store.name;
-            obj.id = store.id
-            parents.push(obj)
-        })
-
-        //Check if this item/store exists
-        db.Landmarks.findOne({
-            'source_generic_item.productId': item.productId,
-            'source_generic_item.storeId': store.storeId
-        }, function(err, match) {
-            if (err) {
-                console.log(err)
-                return callback1()
-            }
-            if (!match) {
-
-                //Create new item for each store in inventory list.
-                var i = new db.Landmark();
-                i.world = false;
-                i.source_generic_item = item;
-                delete i.source_generic_item.physicalStores;
-                i.price = parseFloat(item.price);
-                i.itemImageURL = item.images;
-                i.name = item.name;
-                //TODO: owner;
-                // i.owner = owner;
-                i.linkback = item.src;
-                i.linkbackname = 'menswearhouse.com';
-                var tags = i.name.split(' ').map(function(word) {
-                    return word.toString().toLowerCase()
-                })
-                tags.forEach(function(tag) {
-                    i.itemTags.text.push(tag)
-                })
-                i.itemTags.text.push('Urban Outfitters')
-                i.itemTags.text.push(item.color)
-                i.itemTags.text = tagParser.parse(i.itemTags.text)
-                if (tagParser.colorize(item.color)) {
-                    i.itemTags.colors.push(tagParser.colorize(item.color))
-                }
-                i.itemTags.text.push(cat)
-                i.source_generic_item.storeId = store.storeId;
-                i.hasloc = true;
-                i.loc.type = 'Point'
-                uniquer.uniqueId(i.name, 'Landmark').then(function(output) {
-                        // console.log('*3')
-                        i.id = output;
-                        db.Landmarks.findOne({
-                            'source_generic_store.storeId': store.storeId,
-                            'linkbackname': 'urbanoutfitters.com'
-                        }, function(err, s) {
-                            if (err) {
-                                console.log(err)
-                                return callback2()
-                            }
-                            if (!s) {
-                                //The parent store doesn't exist in db, skip this item for now.
-                                // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
-                                console.log('missing id: ', store.storeId)
-                                return callback2()
-                            }
-                            //Check if the store with storeId exists in db
-                            else if (s) {
-                                // console.log('Found store!')
-                                i.tel = s.tel;
-                                i.loc.coordinates[0] = parseFloat(s.loc.coordinates[0]);
-                                i.loc.coordinates[1] = parseFloat(s.loc.coordinates[1]);
-                                i.parent.mongoId = s._id;
-                                if (s.name) {
-                                    i.parent.name = s.name;
-                                } else {
-                                    i.parent.name = s.id
-                                }
-                                i.parent.id = s.id;
-                            }
-                            //Save item
-                            i.save(function(e, item) {
-                                if (e) {
-                                    console.error(e);
-                                }
-                                savedItems.push(item)
-                                console.log('Saved: ', item.id)
-                                return callback2();
-                            })
-                        })
-                    }) //end of uniquer
-            }
-      
-
-      
-
-    })
-}
-
 
 
 function updateInventory(inventory, newItem) {
@@ -596,6 +427,63 @@ function updateInventory(inventory, newItem) {
 }
 
 
+
+function saveStores(item) {
+    return new Promise(function(resolve, reject) {
+        var storeIds = []
+        var count = 0
+        async.each(Stores, function(store, callback) {
+            db.Landmarks
+                .findOne({
+                    'source_zara_store.storeId': store.storeId
+                })
+                .exec(function(e, s) {
+                    if (e) {
+                        //error
+                        console.log('Error in saveStores(): ', e)
+                        item.physicalStores[count].mongoId = 'null'
+                        count++;
+                        callback()
+                    }
+                    if (!s) {
+                        var n = new db.Landmark();
+                        n.source_zara_store = store;
+                        n.world = true;
+                        n.hasloc = true;
+                        console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
+                        n.loc.coordinates[0] = parseFloat(store.lng);
+                        n.loc.coordinates[1] = parseFloat(store.lat);
+                        uniquer.uniqueId('zara_' + store.storeAddress, 'Landmark').then(function(output) {
+                            n.id = output;
+                            n.save(function(e, newStore) {
+                                if (e) {
+                                    // console.error(e);
+                                    return callback()
+                                }
+                                item.physicalStores[count].mongoId = newStore._id
+                                count++;
+                                callback()
+                            })
+                        })
+                    } else if (s) {
+                        item.physicalStores[count].mongoId = s._id
+                        count++;
+                        callback()
+                    }
+                })
+        }, function(err) {
+            if (err) {
+                // console.log('Error in saveStores()',err)
+                return reject(err)
+            }
+            item.physicalStores = item.physicalStores.filter(function(val, i) {
+                    return val !== 'null'
+                })
+                // console.log('-_- Updated item: ', item)
+            resolve(item)
+        })
+    })
+}
 
 function saveItems(newItem) {
     return new Promise(function(resolve, reject) {
