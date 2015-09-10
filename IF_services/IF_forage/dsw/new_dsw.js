@@ -75,7 +75,7 @@ function getItemURLs(catalogUrl, done) {
 
     console.log(catalogUrl)
 
-    kipScrapeTools.load(catalogUrl, function ($) {
+    kipScrapeTools.load('http://www.dsw.com' + catalogUrl, function ($) {
         $('.productContainer .productImage>a').map(function () {
             return $(this).attr('href');
         }).toArray().filter(function (u) {
@@ -154,20 +154,33 @@ function scrapeItem(itemUrl, done) {
             // unravel this mess into a whole bunch of kip items.
             item.colors.map(function(color) {
                 stores.map(function(store) {
-                    var kipId = ['dsw_', item.name.toLowerCase().replace(/[^\w^\d]/g, ''), item.productId, color.id, store.id].join('_');
+                    var kipId = ['dsw_', item.name.toLowerCase().replace(/[^\w^\d]/g, ''), item.productId, color.id].join('_');
                     if (newItems[kipId]) {
-                        if (newItems[kipId].source_generic_item.sizesInStock.indexOf(store.size) < 0) {
-                            newItems[kipId].source_generic_item.sizesInStock.push(store.size)
+                        // take care of the store's inventory, which is kept per-store, though currently not
+                        // used per-store in querying
+                        if (newItems[kipId].source_generic_item[store.landmark.id]) {
+                            if (newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.indexOf(store.size) < 0) {
+                                newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.push(store.size)
+                            }
+
+                            if (newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.indexOf(store.color) < 0) {
+                                newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.push(store.color)
+                            }
+                        } else {
+                            newItems[kipId].source_generic_item[store.landmark.id] = {}
+                            newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
+                            newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
                         }
 
-                        if (newItems[kipId].source_generic_item.colorsInStock.indexOf(store.color) < 0) {
-                            newItems[kipId].source_generic_item.colorsInStock.push(store.color)
-                        }
+                        newItems[kipId].parents.push(store.landmark._id);
+                        newItems[kipId].loc.coordinates.push(store.landmark.loc.coordinates);
+
                     } else {
                         newItems[kipId] = {
                             id: kipId,
                             name: item.name,
                             world: false,
+                            parents: [store.landmark._id],
                             parent: {
                                 mongoId: store.landmark.mongoId,
                                 name: store.landmark.name,
@@ -176,7 +189,10 @@ function scrapeItem(itemUrl, done) {
                             owner: dswUser,
                             valid: true,
                             status: 'scraped',
-                            loc: store.landmark.loc,
+                            loc: {
+                                type: 'MultiPoint',
+                                coordinates: [store.landmark.loc.coordinates]
+                            },
                             description: item.description,
                             source_generic_item: _.cloneDeep(item),
                             price: db.Landmark.priceStringToNumber(item.price),
@@ -190,8 +206,10 @@ function scrapeItem(itemUrl, done) {
                             linkbackname: 'dsw.com',
                             updated_time: new Date()
                         };
-                        newItems[kipId].source_generic_item.sizesInStock = [store.size]
-                        newItems[kipId].source_generic_item.colorsInStock = [store.color]
+                        newItems[kipId].source_generic_item.stores = {}
+                        newItems[kipId].source_generic_item.stores[store.landmark.id] = {}
+                        newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
+                        newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
                     }
 
                     log.vv(newItems);
@@ -199,7 +217,6 @@ function scrapeItem(itemUrl, done) {
 
                     Object.keys(newItems).map(function(k) {
                         upsert(newItems[k], function() {
-                            // whoop
                         })
                     })
                 })

@@ -412,27 +412,29 @@ app.post(trendingItemsUrl, function(req, res, next) {
         var url = config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
         return Promise.settle([search(q, 0), request(url)])
             .then(function(results) {
-                if (results[0].isFulfilled() && results[1].isFulfilled()) {
-                    var area = JSON.parse(results[1].value()[0].body)
-                    var items = results[0].value()
-                    data = {
-                        category: 'Trending in ' + area.area,
-                        results: items
-                    }
-                    resolve(data)
-                } else if (results[0].isFulfilled() && results[1].isRejected()) {
-                     var items = results[0].value()
-                    data = {
-                        category: 'Trending near you',
-                        results: items
-                    }
-                      resolve(data)
-                } else if (results[0].isRejected()){
-                    console.log('EGGEGEGEGEGEGE')
-                    // console.log(results[0].reason())
-                } else {
-                       console.log('AHAHAHAHAEGGEGEGEGEGEGE')
+
+                if (!results[0].isFulfilled()) {
+                    console.log(results[0].reason());
+                    return reject();
                 }
+
+                if (!results[1].isFulfilled()) {
+                    console.log(results[1].reason());
+                    return reject();
+                }
+
+                try {
+                    var area = JSON.parse(results[1].value()[0].body)
+                } catch (e) {
+                    return reject();
+                }
+
+                var items = results[0].value()
+                data = {
+                    category: 'Trending in ' + area.area,
+                    results: items
+                }
+                resolve(data)
             })
     })
 
@@ -467,13 +469,19 @@ app.post(trendingItemsUrl, function(req, res, next) {
         })
         .then(function(res) {
             return {
-                category: 'Trending near you',
+                category: 'Trending around me',
                 results: res
             }
         });
 
-    Promise.settle(_.flatten([textCategories, nearYou]))
+    Promise.settle(_.flatten([textCategories, neighborhoods, nearYou]))
         .then(function(results) {
+            // only show "nearYou" if "neighborhoods" failed
+            if (results[1].isFulfilled() && results[1].results && results[1].results.length > 0) {
+                if (results[2].isFulfilled() && results[2].results) {
+                    delete results[2].results;
+                }
+            }
             res.send({
                 query: req.body,
                 links: links,
