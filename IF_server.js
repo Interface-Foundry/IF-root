@@ -1,16 +1,16 @@
 /*
-   ▄█   ▄█▄  ▄█     ▄███████▄ 
-  ███ ▄███▀ ███    ███    ███ 
-  ███▐██▀   ███▌   ███    ███ 
- ▄█████▀    ███▌   ███    ███ 
-▀▀█████▄    ███▌ ▀█████████▀  
-  ███▐██▄   ███    ███        
-  ███ ▀███▄ ███    ███        
-  ███   ▀█▀ █▀    ▄████▀      
-  ▀                           
+   ▄█   ▄█▄  ▄█     ▄███████▄
+  ███ ▄███▀ ███    ███    ███
+  ███▐██▀   ███▌   ███    ███
+ ▄█████▀    ███▌   ███    ███
+▀▀█████▄    ███▌ ▀█████████▀
+  ███▐██▄   ███    ███
+  ███ ▀███▄ ███    ███
+  ███   ▀█▀ █▀    ▄████▀
+  ▀
 
-  v0.9 Illya 
-  interfacefoundry.com ♥ ♥ ♥  
+  v0.9 Illya
+  interfacefoundry.com ♥ ♥ ♥
 */
 
 var fs = require('fs');
@@ -21,7 +21,7 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 
 var config = require('./config'); // pulls in config/index.js
-console.log('config');
+console.log(config);
 
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var submitContestEntry = require('./components/IF_contests/IF_contests.js');
@@ -129,7 +129,7 @@ app.use(express.static(__dirname + '/app/dist', {
 //     fileSize: 10000000
 //   },
 
-//   onFileSizeLimit: function (file) {   
+//   onFileSizeLimit: function (file) {
 //     console.log('Failed: ', file.originalname)
 //     fs.unlink('./' + file.path) // delete the partially written file
 //   }
@@ -152,7 +152,7 @@ app.use(bodyParser.json({
 //---- Redis -----//
 //-------------------------------------//
 // var redis = require('redis');
-// var client = redis.createClient(); //creates a new client 
+// var client = redis.createClient(); //creates a new client
 
 var redisClient = require('./redis.js');
 
@@ -441,7 +441,7 @@ var fn = function(req, res) {
 /* Routes */
 
 
-// route to test if the user is logged in or not 
+// route to test if the user is logged in or not
 app.get('/api/user/loggedin', function(req, res) {
     if (req.user) {
         res.send(req.user);
@@ -581,7 +581,7 @@ app.get('/api/bubblesearch/:type', function(req, res, next) {
 
 /* Logging Analytics */
 
-//Creates new analytics object 
+//Creates new analytics object
 app.post('/api/analytics/:action', function(req, res) {
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
     redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
@@ -968,7 +968,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
 
 ///////////////////////////
-///////TILE MAP APIs///////  
+///////TILE MAP APIs///////
 ///////////////////////////
 
 //upload map to temp folder locally until map built
@@ -1071,7 +1071,7 @@ app.post('/api/temp_map_upload', isLoggedIn, function(req, res) {
     }
 });
 
-//map send to tile server to build 
+//map send to tile server to build
 app.post('/api/build_map', isLoggedIn, function(req, res) {
 
     if (fs.existsSync(__dirname + '/app/dist/' + req.body.mapIMG)) {
@@ -1145,7 +1145,7 @@ function worldMapTileUpdate(req, res, data, mapBuild) {
                     var max = tileRes.zooms.slice(-1)[0];
 
                     if (lm.style.maps.localMapArray) {
-                        for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+                        for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set
 
                             if (lm.style.maps.localMapArray[i].map_marker_viewID) {
                                 if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
@@ -1201,7 +1201,7 @@ app.post('/api/update_map', isLoggedIn, function(req, res) {
 
                 if (lm.style.maps.localMapArray) {
 
-                    for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+                    for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set
                         if (lm.style.maps.localMapArray[i].map_marker_viewID) {
                             if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //finding right item in array
 
@@ -1262,7 +1262,7 @@ app.post('/api/delete_map', isLoggedIn, function(req, res) {
             } else if (req.user._id == lm.permissions.ownerID) {
 
                 if (lm.style.maps.localMapArray) {
-                    for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+                    for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set
                         if (lm.style.maps.localMapArray[i].map_marker_viewID) {
                             if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //found right item in array
                                 //**********//
@@ -1275,7 +1275,7 @@ app.post('/api/delete_map', isLoggedIn, function(req, res) {
                             }
                         }
                     }
-                    //this function can be used across 
+                    //this function can be used across
                     function saveMap() {
                         lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
                         lm.save(function(err, landmark) {
@@ -1334,7 +1334,7 @@ app.post('/api/anon_user/create', function(req, res) {
 //check user ID
 // CHECK IF USER EXISTS
 // THEN IF YES: GEN NEW SESSION ID AND RETURN
-// IF NOT, GEN NEW USER AND SEND BACK SESSION ID AND USER ID 
+// IF NOT, GEN NEW USER AND SEND BACK SESSION ID AND USER ID
 
 
 app.post('/api/anon_user/update', function(req, res) {
@@ -1542,7 +1542,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 
                 if (req.body.addr) {
                     us.addr = req.body.addr;
-                    //us.addrP = req.body.addrP;         
+                    //us.addrP = req.body.addrP;
                 }
 
                 if (req.body.addr2) {
@@ -1682,7 +1682,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 
                             us.org.push(orgObj);
                             callback();
-                            
+
                           }, function(err){
                               if( err ) {
                                 console.log(err);
@@ -1716,7 +1716,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 
                             us.email.push(emailObj);
                             callback();
-                            
+
                           }, function(err){
                               if( err ) {
                                 console.log(err);
@@ -1749,7 +1749,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 
                             us.tel.push(telObj);
                             callback();
-                            
+
                           }, function(err){
                               if( err ) {
                                 console.log(err);
@@ -1779,7 +1779,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 
                             us.contact.push(contactObj);
                             callback();
-                            
+
                           }, function(err){
                               if( err ) {
                                 console.log(err);
@@ -1806,7 +1806,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                           res.send(200, 'there was an error saving user info');
                         }
                         else {
-                          res.send(200, 'user updated'); 
+                          res.send(200, 'user updated');
                         }
 
                       });
@@ -1935,7 +1935,7 @@ app.get('/api/:collection', function(req, res) {
                     parentID:req.query.parentID,
                     world:false //only landmarks
                 };
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));     
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
                 break;
               //return live landmarks inside parent world
               case 'now':
@@ -1958,18 +1958,18 @@ app.get('/api/:collection', function(req, res) {
 
                   if (data){
                       var stringArr = [];
-                      async.forEach(data, function (obj, done){ 
+                      async.forEach(data, function (obj, done){
                           stringArr.push({_id: obj._id});
-                          done(); 
+                          done();
                       }, function(err) {
                           //console.log(stringArr);
                           res.send(JSON.stringify(stringArr));
-                      }); 
-                      
+                      });
+
                   }
                   else {
                       console.log('no results');
-                      res.send({err:'no results'});            
+                      res.send({err:'no results'});
                   }
                 });
 
@@ -1989,26 +1989,26 @@ app.get('/api/:collection', function(req, res) {
                     parentID:req.query.parentID,
                     world:false,
                     'time.start': {$gt: currentTime}
-                };   
+                };
 
                 landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
 
                   if (data){
                       var stringArr = [];
-                      async.forEach(data, function (obj, done){ 
+                      async.forEach(data, function (obj, done){
                          stringArr.push({_id: obj._id});
-                         done(); 
+                         done();
                       }, function(err) {
                          //console.log(stringArr);
                          //console.log(JSON.stringify(stringArr));
                          res.send(JSON.stringify( stringArr ));
                       });
-                      
+
                   } else {
                       console.log('no results');
                       res.send({err:'no results'});
                   }
-                });    
+                });
 
                 break;
               default:
@@ -2016,8 +2016,8 @@ app.get('/api/:collection', function(req, res) {
                 var qw = {
                     parentID:req.query.parentID,
                     world:false
-                };   
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));   
+                };
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
 
                 break;
             }*/
@@ -2511,7 +2511,7 @@ app.get('/api/worlds/:id', function(req, res) {
 });
 
 
-// Save 
+// Save
 app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     // da eff is up in this shit.  how the eff do you get such legacy code with a one year old startup?
@@ -2590,7 +2590,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             sticker.href = req.body.href;
         }
         if (req.body.stats) {
-            sticker.stats.alive = true; //should it start true? 
+            sticker.stats.alive = true; //should it start true?
             if (req.body.stats.age) {
                 sticker.stats.age = req.body.stats.age;
             }
@@ -2862,7 +2862,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             if (req.body.widgets.category) {lm.widgets.category = req.body.widgets.category;}*/
                         }
 
-                        //if user checks box to activate time 
+                        //if user checks box to activate time
 
                         //ADDING / UPDATING CLOUD MAP INFO
                         if (req.body.style) {
@@ -2916,7 +2916,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                                     } else {
                                         lm.tags.push(newTag); //else add to array
                                     }
-                                    if (count == req.body.tags.length - 1) { //stop on final loop     
+                                    if (count == req.body.tags.length - 1) { //stop on final loop
                                         checktoRemove(); //on loop end check to remove anything
                                     }
                                     count++;
@@ -2947,7 +2947,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             saveLandmark(); //nm, just save everything else
                         }
 
-                        //remove tags 
+                        //remove tags
                         function removeTags() {
                             var count = 0;
                             for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
@@ -3100,7 +3100,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         lm.avatar = "img/tidepools/default.jpg";
                     }
 
-                    //if user checks box to activate time 
+                    //if user checks box to activate time
                     if (req.body.hasTime == true) {
                         lm.time.start = req.body.time.start || null;
                         lm.time.end = req.body.time.end || null;
@@ -3154,7 +3154,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                                 } else {
                                     lm.tags.push(newTag); //else add to array
                                 }
-                                if (count == req.body.tags.length - 1) { //stop on final loop     
+                                if (count == req.body.tags.length - 1) { //stop on final loop
                                     checktoRemove(); //on loop end check to remove anything
                                 }
                                 count++;
@@ -3185,7 +3185,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         saveLandmark(); //nm, just save everything else
                     }
 
-                    //remove tags 
+                    //remove tags
                     function removeTags() {
                         var count = 0;
                         for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
@@ -3649,7 +3649,7 @@ app.use(function error_handler(err, req, res, next) {
 //3 Hour checkup on size of image directories, emails if over 10gb
 //from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
 // async.whilst(
-//     function () { return true }, 
+//     function () { return true },
 //     function (callback) {
 
 //         var spawn = require('child_process').spawn,
@@ -3670,7 +3670,7 @@ app.use(function error_handler(err, req, res, next) {
 //               };
 //               mailerTransport.sendMail(mailOptions, function(err) {
 //                 console.log('warning size message sent');
-//               });  
+//               });
 //           }
 
 //         });
@@ -3689,7 +3689,7 @@ app.use(function error_handler(err, req, res, next) {
 //   landmarkSchema.find({}, {'id':1}, function (err, docs) {
 //     if (err) {
 //       console.log("Error Occured: ", err);
-//     } else { 
+//     } else {
 
 //       var xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 //       for (var i in docs) {
@@ -3709,7 +3709,7 @@ app.use(function error_handler(err, req, res, next) {
 
 // app.get('/sitemap.xml', function(req, res) {
 //     res.header('Content-Type', 'text/xml');
-//     res.send(generate_xml_sitemap());     
+//     res.send(generate_xml_sitemap());
 // })
 
 if (module.parent) {
