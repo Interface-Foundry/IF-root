@@ -480,7 +480,9 @@ app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes')
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 app.use('/resetpassword', require('./components/IF_auth/resetPassword/app'));
-
+if (!config.isProduction) {
+    app.use('/test', require('./test/testApp/app'));
+}
 // devops
 if (!config.isProduction) {
     app.use('/devops', require('./components/IF_superuser/devops'));

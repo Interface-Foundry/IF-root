@@ -1,0 +1,30 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css"/>
+    <link href="normalize.css" rel="stylesheet" type="text/css"/>
+    <link href="skeleton.css" rel="stylesheet" type="text/css"/>
+    <link href="test.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+    <div class="row headerBar">
+        <span>Kip Styles</span>
+    </div>
+<div class="container">
+    <label>Trending</label>
+    <input type="text" id="lon" value="-73.990638">
+    <input type="text" id="lat" value="40.7352793">
+    <select id="server">
+        <option value="https://kipapp.co/styles/" selected="selected">kipapp.co</option>
+        <option value="http://pikachu.kipapp.co/">pikachu.kipapp.co</option>
+        <option value="http://localhost:2997/">localhost</option>
+    </select>
+    <button id="trending-go">Get Trending</button>
+    <pre id="trending"></pre>
+</div>
+<script src="zepto.min.js"></script>
+<script src="test.js"></script>
+</body>
+</html>
