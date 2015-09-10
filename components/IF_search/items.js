@@ -428,7 +428,10 @@ app.post(trendingItemsUrl, function(req, res, next) {
                     }
                       resolve(data)
                 } else if (results[0].isRejected()){
-                    console.log(results[0].reason())
+                    console.log('EGGEGEGEGEGEGE')
+                    // console.log(results[0].reason())
+                } else {
+                       console.log('AHAHAHAHAEGGEGEGEGEGEGE')
                 }
             })
     })
@@ -469,7 +472,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
             }
         });
 
-    Promise.settle(_.flatten([textCategories, neighborhoods, nearYou]))
+    Promise.settle(_.flatten([textCategories, nearYou]))
         .then(function(results) {
             res.send({
                 query: req.body,

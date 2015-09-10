@@ -24,19 +24,15 @@ router.post('/', function(req, res, next) {
     if (!req.user) {
         return next('You must log in first');
     }
-
-
     //If no place was found for this item, create a new place.
     if (req.body.place_id) {
-
-
         //If this is a user created place
         if (req.body.place_id == 'custom_location') {
-
             var newPlace = new db.Landmark();
             newPlace.name = req.body.parent.name;
             newPlace.world = true;
             newPlace.hasloc = true;
+            //Might implement these properties in the future
             // newPlace.addressString = '';
             // newPlace.tel = '';
             newPlace.linkback = 'custom';
@@ -49,14 +45,12 @@ router.post('/', function(req, res, next) {
                         return next('Error saving new place')
                     }
                     // console.log('Created new custom place: ', newStore)
-                    return createItem(req, res, newStore)
+                    createItem(req, res, newStore)
                 })
             })
 
 
         } else {
-
-
             //First check if it really doesn't exist in the db yet
             db.Landmarks.findOne({
                 'source_google.place_id': req.body.place_id
@@ -93,6 +87,7 @@ router.post('/', function(req, res, next) {
 
         //If place was found
     } else {
+          // console.log(3)
         if (req.body.parent._id) {
             db.Landmarks.findById(req.body.parent._id, function(err, parent) {
                 if (err) {
@@ -121,7 +116,9 @@ function createItem(req, res, newPlace) {
     if (newPlace) {
         newItem.parents.push(newPlace)
     }
-
+    if (newItem.parent.name) {
+        newItem.parent = null
+    }
     newItem.world = false;
     newItem.owner.mongoId = req.user._id;
     newItem.owner.profileID = req.user.profileID;
@@ -152,7 +149,7 @@ function createItem(req, res, newPlace) {
                     return next(err);
                 }
                 //Finally send the item
-                console.log('Saved new item!', item)
+                // console.log('Saved new item!', item)
                 res.send(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
