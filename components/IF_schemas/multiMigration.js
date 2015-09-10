@@ -1,6 +1,5 @@
 // run this directly in mongo with
 // mongo <host>/foundry --eval "`cat multiMigration.js`"
-db.landmarks.dropIndexes();
 db.landmarks.find({world: false}).forEach(function(w) {
     w.parents = [w.parent.mongoId];
     w.loc = {type: 'MultiPoint', coordinates: [w.loc.coordinates]};
