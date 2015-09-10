@@ -402,7 +402,7 @@ landmarkSchema.index({
 });
 
 
-var Landmark = module.exports = mongoose.model('Landmark', landmarkSchema);
+var Landmark = module.exports = mongoose.model('Landmark', landmarkSchema, 'landmarks');
 
 /**
  * Returns the number of dollar signs indicating the expensiveness of a price.
