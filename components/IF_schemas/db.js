@@ -1,5 +1,6 @@
 var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
+var ensureIndexes = require('mongoose-hook-ensure-indexes')
 var config = require('config');
 var logger = require('../IF_logging/if_logger');
 
@@ -61,6 +62,7 @@ schemas.map(function (schema) {
     var model = require('./' + schema.filename);
     module.exports[schema.single] = model;
     module.exports[schema.plural] = model;
+    model.schema.plugin(ensureIndexes, {mongoose: mongoose});
 });
 
 
