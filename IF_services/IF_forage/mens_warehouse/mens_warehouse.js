@@ -149,13 +149,9 @@ function getItem(url) {
                             }
 
                             if (elem.attribs.id.indexOf('detail_') > -1) {
-
                                 var el = eval("(" + elem.children[0].data + ")")
-
                                 itemCollect.parentProductId = el.ProdDetail.parentProductId;
-                                // console.log('!!!!', itemCollect);
                                 readItemPartNumbers(itemCollect);
-
                             }
 
                             if (elem.attribs.id.indexOf('swatches_') > -1) {
