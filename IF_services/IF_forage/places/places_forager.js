@@ -418,6 +418,7 @@ function addGoogleDetails(newPlace) {
                     addy = addy + ' ' + el.long_name;
                 })
                 newPlace.source_google.address = addy.trim()
+                newPlace.addressString = addy.trim()
             }
 
             //INPUT
@@ -472,6 +473,7 @@ function addGoogleDetails(newPlace) {
                 newPlace.source_google.international_phone_number = "";
             } else {
                 newPlace.source_google.international_phone_number = body.result.international_phone_number;
+                newPlace.tel = body.result.international_phone_number;
             }
             //OPENING HOURS
             if (typeof body.result.opening_hours == 'undefined') {

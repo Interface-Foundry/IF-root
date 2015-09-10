@@ -92,25 +92,18 @@ module.exports = function scrapeItem(url) {
                 },
                 function(item, inventory, callback) {
                     // console.log(6)
-                    processItems(inventory, item).then(function(savedItems) {
-                        callback(null, savedItems)
+                    processItems(inventory, item).then(function(item) {
+                        callback(null, item)
                     }).catch(function(err) {
                         callback(err)
                     })
                 }
             ],
-            function(err, items) {
+            function(err, item) {
                 if (err) {
                     console.log(err)
                     reject(err)
                 }
-
-                if (multiColors.length > 0) {
-
-                }
-                // if (items) {
-                //     console.log('Saved ',items, ' items.')
-                // }
 
                 resolve()
             });
@@ -270,7 +263,7 @@ function scrapeDetails(url) {
 function loadStores() {
     return new Promise(function(resolve, reject) {
 
-        
+
         db.Landmarks.find({
             'source_generic_store': {
                 $exists: true
@@ -391,107 +384,91 @@ function processItems(inventory, itemData) {
         //If item has not been scraped, create a new item in db for each store in inventory list
         //OR if item has been scraped but there are newly stocked items in new stores, modify variables to account for those new items
         if (!exists || newlyStocked) {
-            var savedItems = []
-            var count = 0;
 
             //If newlyStocked it means there were items existing in db but they were newly stocked at other stores.
             if (newlyStocked) {
                 var storeIds = itemData.map(function(item) {
                     return item.source_generic_item.storeId
                 })
-
                 inventory = inventory.filter(function(store, i) {
                     return storeIds.join().indexOf(store.physicalStoreId) == -1
                 })
-
                 //Overwrite itemData variable 
                 itemData = itemData[0].source_generic_item;
             }
 
-            async.eachSeries(inventory, function(store, callback) {
-                        //Create new item for each store in inventory list.
-                        var i = new db.Landmark();
-                        i.world = false;
-                        i.source_generic_item = itemData
-                        i.price = parseFloat(itemData.price);
-                        i.itemImageURL = itemData.images;
-                        i.name = itemData.name;
-                        i.owner = owner;
-                        i.linkback = itemData.src;
-                        i.linkbackname = 'zara.com'
-                        var tags = i.name.split(' ').map(function(word) {
-                            return word.toString().toLowerCase()
-                        })
-                        tags.forEach(function(tag) {
-                            i.itemTags.text.push(tag)
-                        })
-                        i.itemTags.text.push('zara')
-                        i.itemTags.text.push(itemData.type)
-                        i.itemTags.text.push(itemData.color)
-                        i.itemTags.text = tagParser.parse(i.itemTags.text)
-                        if (tagParser.colorize(itemData.color)) {
-                            i.itemTags.colors.push(tagParser.colorize(itemData.color))
-                        }
-                        i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
-                        if (store.sizeStocks) {
-                            i.source_generic_item.inventory = store.sizeStocks;
-                        } else {
-                            i.source_generic_item.inventory = store
-                        }
-                        i.hasloc = true;
-                        i.loc.type = 'Point'
-                        uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
-                                i.id = output;
+            //Create new item for each store in inventory list.
+            var i = new db.Landmark();
+            i.world = false;
+            i.source_generic_item = itemData
+            i.price = parseFloat(itemData.price);
+            i.itemImageURL = itemData.images;
+            i.name = itemData.name;
+            i.owner = owner;
+            i.linkback = itemData.src;
+            i.linkbackname = 'zara.com'
+            var tags = i.name.split(' ').map(function(word) {
+                return word.toString().toLowerCase()
+            })
+            tags.forEach(function(tag) {
+                i.itemTags.text.push(tag)
+            })
+            i.itemTags.text.push('zara')
+            i.itemTags.text.push(itemData.type)
+            i.itemTags.text.push(itemData.color)
+            i.itemTags.text = tagParser.parse(i.itemTags.text)
+            if (tagParser.colorize(itemData.color)) {
+                i.itemTags.colors.push(tagParser.colorize(itemData.color))
+            }
+            i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
+            if (store.sizeStocks) {
+                i.source_generic_item.inventory = store.sizeStocks;
+            } else {
+                i.source_generic_item.inventory = store
+            }
+            i.hasloc = true;
+            i.loc.type = 'Point'
+            uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
+                    i.id = output;
+                    async.eachSeries(inventory, function(store, callback) {
                                 db.Landmarks.findOne({
                                     'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
                                     if (err) {
                                         console.log(err)
-                                        count++
                                         return callback()
                                     }
                                     if (!s) {
                                         //The parent store doesn't exist in db, skip this item for now.
                                         // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
-                                        console.log('missing id: ', store.physicalStoreId)
-                                        count++
+                                        console.log('Cannot find store in db: ', store.physicalStoreId)
+
                                         return callback()
                                     }
                                     //Check if the store with storeId exists in db
                                     else if (s) {
-                                        // console.log('Found store!')
-                                        i.tel = s.tel;
-                                        i.loc.coordinates[0] = parseFloat(s.loc.coordinates[0]);
-                                        i.loc.coordinates[1] = parseFloat(s.loc.coordinates[1]);
-                                        i.parent.mongoId = s._id;
-                                        if (s.name) {
-                                            i.parent.name = s.name;
-                                        } else {
-                                            i.parent.name = s.id
-                                        }
-
-                                        i.parent.id = s.id;
+                                        i.loc.coordinates.push([parseFloat(s.loc.coordinates[1]),parseFloat(s.loc.coordinates[0])])
                                     }
-                                    //Save item
-                                    i.save(function(e, item) {
-                                        if (e) {
-                                            console.error(e);
-                                        }
-                                        savedItems.push(item)
-                                        // console.log('Saved ', item.itemTags)
-                                        count++
-                                        callback();
-                                    })
+
                                 })
-                            }) //end of uniquer
-                    },
-                    function(e) {
-                        if (e) {
-                            console.log('If item not exists async each error: ', e)
-                        }
-                        console.log('Saved ', savedItems.length, ' items.')
-                        resolve(savedItems)
-                    }) //end of async.eachSeries
+
+                            },
+                            function(e) {
+                                if (e) {
+                                    console.log('If item not exists async each error: ', e)
+                                }
+                                //Save item
+                                i.save(function(e, item) {
+                                    if (e) {
+                                        console.error(e);
+                                    }
+                                    callback();
+                                })
+                                resolve(item)
+                            }) //end of async.eachSeries
+
+                }) //end of uniquer
+
         } //end of if not exists
     })
 }

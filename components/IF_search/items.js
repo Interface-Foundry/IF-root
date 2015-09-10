@@ -327,7 +327,7 @@ function filterSearch(q, page) {
         loc: {
             $near: {
                 $geometry: {
-                    type: "Point",
+                    type: "MultiPoint",
                     coordinates: [q.loc.lon, q.loc.lat]
                 },
                 $maxDistance: radius,
@@ -420,8 +420,15 @@ app.post(trendingItemsUrl, function(req, res, next) {
                         results: items
                     }
                     resolve(data)
-                } else {
-                    console.log(results[1].reason())
+                } else if (results[0].isFulfilled() && results[1].isRejected()) {
+                     var items = results[0].value()
+                    data = {
+                        category: 'Trending near you',
+                        results: items
+                    }
+                      resolve(data)
+                } else if (results[0].isRejected()){
+                    console.log(results[0].reason())
                 }
             })
     })

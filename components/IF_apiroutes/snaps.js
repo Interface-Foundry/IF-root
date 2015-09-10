@@ -17,7 +17,6 @@ var express = require('express'),
         nonPrintable: "",
         trim: true
     }),
-    forumStyle = require('../../IF_services/IF_forage/places/forum_theme.json'),
     googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 //Create a new snap
@@ -26,63 +25,73 @@ router.post('/', function(req, res, next) {
         return next('You must log in first');
     }
 
+
     //If no place was found for this item, create a new place.
     if (req.body.place_id) {
-        //First check if it really doesn't exist in the db yet
-        db.Landmarks.findOne({
-            'source_google.place_id': req.body.place_id
-        }, function(err, place) {
-            if (err) {
-                err.niceMessage = 'Error checking for existing place.';
-                return next(err);
-            }
-            if (place) {
-                console.log('Place already exists..')
-                return createItem(req, res, place)
-            } else {
-                var newPlace = new db.Landmark();
-                newPlace.world = true;
-                newPlace.newStatus = true;
-                newPlace.parentID = '';
-                newPlace.hasloc = true;
-                newPlace.valid = true;
-                newPlace.views = 0;
-                newPlace.hasTime = false;
-                newPlace.resources = {
-                    hashtag: ''
-                };
-                newPlace.permissions = {
-                    ownerID: '553e5480a4bdda8c18c1edbc',
-                    hidden: false
-                };
-                newPlace.time.created = new Date()
-                newPlace.world_id = '';
-                newPlace.widgets = forumStyle.widgets;
-                newPlace.source_google.place_id = req.body.place_id;
 
-                newPlace.loc.type = 'Point';
-                newPlace.tags = [];
-                newPlace.tags.push('clothing');
-                newPlace.category = {
-                    name: 'place',
-                    avatar: '',
-                    hiddenPresent: false
+
+        //If this is a user created place
+        if (req.body.place_id == 'custom_location') {
+
+            var newPlace = new db.Landmark();
+            newPlace.name = req.body.parent.name;
+            newPlace.world = true;
+            newPlace.hasloc = true;
+            // newPlace.addressString = '';
+            // newPlace.tel = '';
+            newPlace.linkback = 'custom';
+            newPlace.linkbackname = 'custom';
+            newPlace.loc.coordinates.push(req.body.parent.coordinates)
+            uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
+                newPlace.id = output;
+                newPlace.save(function(e, newStore) {
+                    if (e) {
+                        return next('Error saving new place')
+                    }
+                    // console.log('Created new custom place: ', newStore)
+                    return createItem(req, res, newStore)
+                })
+            })
+
+
+        } else {
+
+
+            //First check if it really doesn't exist in the db yet
+            db.Landmarks.findOne({
+                'source_google.place_id': req.body.place_id
+            }, function(err, place) {
+                if (err) {
+                    err.niceMessage = 'Error checking for existing place.';
+                    return next(err);
                 }
-
-                addGoogleDetails(newPlace, req.body.place_id).then(function(newPlace) {
-                    uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
-                        newPlace.id = output;
-                        newPlace.save(function(err, saved) {
-                            if (err) {
-                                return next('Error saving new place')
-                            }
-                            saveStyle(newPlace)
-                            createItem(req, res, newPlace)
+                if (place) {
+                    console.log('Place already exists..')
+                    return createItem(req, res, place)
+                } else {
+                    var newPlace = new db.Landmark();
+                    newPlace.world = true;
+                    newPlace.hasloc = true;
+                    newPlace.source_google.place_id = req.body.place_id;
+                    addGoogleDetails(newPlace, req.body.place_id).then(function(newPlace) {
+                        uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
+                            newPlace.id = output;
+                            newPlace.save(function(err, saved) {
+                                if (err) {
+                                    return next('Error saving new place')
+                                }
+                                createItem(req, res, newPlace)
+                            })
                         })
                     })
-                })
-            }
-        })
+                }
+            })
+
+
+        }
+
+
+        //If place was found
     } else {
         if (req.body.parent._id) {
             db.Landmarks.findById(req.body.parent._id, function(err, parent) {
@@ -91,7 +100,7 @@ router.post('/', function(req, res, next) {
                     return next(err);
                 }
                 if (parent && parent.source_google.place_id) {
-                    createItem(req, res, parent)
+                    return createItem(req, res, parent)
                 } else {
                     err.niceMessage = 'That store does not exist.';
                     return next(err);
@@ -108,11 +117,11 @@ router.post('/', function(req, res, next) {
 function createItem(req, res, newPlace) {
     var newItem = new db.Landmark();
     newItem = _.extend(newItem, req.body);
+    newItem.loc.coordinates.push(newPlace.loc.coordinates[0])
     if (newPlace) {
-        newItem.parent = newPlace._id;
+        newItem.parents.push(newPlace)
     }
-    newItem.loc.coordinates[0] = newPlace.loc.coordinates[0];
-    newItem.loc.coordinates[1] = newPlace.loc.coordinates[1];
+
     newItem.world = false;
     newItem.owner.mongoId = req.user._id;
     newItem.owner.profileID = req.user.profileID;
@@ -120,7 +129,7 @@ function createItem(req, res, newPlace) {
     //Create a unique id field
     uniquer.uniqueId(newItem.owner.profileID, 'Landmarks').then(function(unique) {
         newItem.id = unique;
-        //Upload each image in snap to Amazon S3
+        // //Upload each image in snap to Amazon S3
         async.eachSeries(newItem.base64, function(buffer, callback) {
             upload.uploadPicture(newItem.owner.profileID, buffer).then(function(imgURL) {
                 newItem.itemImageURL.push(imgURL)
@@ -142,7 +151,8 @@ function createItem(req, res, newPlace) {
                     err.niceMessage = 'Could not save item';
                     return next(err);
                 }
-                console.log('ITEM SAVE OMDG:', item)
+                //Finally send the item
+                console.log('Saved new item!', item)
                 res.send(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
@@ -164,18 +174,17 @@ function createItem(req, res, newPlace) {
                 });
                 // Increment users snapCount
                 req.user.update({
-                    $inc: {
-                        snapCount: 1
-                    }
-                }, function(err) {
-                    if (err) {
-                        err.niceMessage = 'Could not increment users snapCount';
-                        console.log(err)
-                    }
-                })
-
-                // add kips to the user
-               req.user.update({
+                        $inc: {
+                            snapCount: 1
+                        }
+                    }, function(err) {
+                        if (err) {
+                            err.niceMessage = 'Could not increment users snapCount';
+                            console.log(err)
+                        }
+                    })
+                    // add kips to the user
+                req.user.update({
                     _id: req.user._id
                 }, {
                     $inc: {
@@ -190,6 +199,7 @@ function createItem(req, res, newPlace) {
                 });
                 //Save Activity
                 a.saveAsync().then(function() {}).catch(next);
+
             });
         })
     }).catch(function(err) {
@@ -221,6 +231,7 @@ function addGoogleDetails(newPlace, place_id) {
                     addy = addy + ' ' + el.long_name;
                 })
                 newPlace.source_google.address = addy.trim()
+                newPlace.addressString = addy.trim()
             }
             //INPUT
             var components = body.result.address_components
@@ -257,6 +268,7 @@ function addGoogleDetails(newPlace, place_id) {
                 newPlace.source_google.international_phone_number = "";
             } else {
                 newPlace.source_google.international_phone_number = body.result.international_phone_number;
+                newPlace.tel = body.result.international_phone_number;
             }
             //OPENING HOURS
             if (typeof body.result.opening_hours == 'undefined') {
@@ -296,31 +308,5 @@ function addGoogleDetails(newPlace, place_id) {
     return deferred.promise;
 }
 
-//loading style from JSON, saving
-function saveStyle(place) {
-    var deferred = q.defer();
-    var st = new db.Style()
-    st.name = forumStyle.name;
-    st.bodyBG_color = forumStyle.bodyBG_color;
-    st.titleBG_color = forumStyle.titleBG_color;
-    st.navBG_color = forumStyle.navBG_color;
-    st.landmarkTitle_color = forumStyle.landmarkTitle_color;
-    st.categoryTitle_color = forumStyle.categoryTitle_color;
-    st.widgets.twitter = forumStyle.widgets.twitter;
-    st.widgets.instagram = forumStyle.widgets.instagram;
-    st.widgets.upcoming = forumStyle.widgets.upcoming;
-    st.widgets.category = forumStyle.widgets.category;
-    st.widgets.messages = forumStyle.widgets.messages;
-    st.widgets.streetview = forumStyle.widgets.streetview;
-    st.widgets.nearby = forumStyle.widgets.nearby;
-    st.save(function(err, style) {
-        if (err) console.log(err);
-        place.style.styleID = style._id;
-        place.style.maps.cloudMapID = cloudMapID;
-        place.style.maps.cloudMapName = cloudMapName;
-        deferred.resolve();
-    })
-    return deferred.promise;
-}
 
 module.exports = router;
