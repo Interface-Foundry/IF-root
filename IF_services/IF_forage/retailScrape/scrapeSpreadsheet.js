@@ -59,8 +59,9 @@ scrapers.scrapeItemDetail(data.url, data.row).then(function(fields) {
           name: data.row.store.name,
           id: data.row.store.name
         },
+        parents: [data.row.store._id],
         owner: data.row.store.owner,
-        loc: data.row.store.loc,
+        loc: {type: 'MultiPoint', coordinates: [data.row.store.loc.coordinates]},
         description: fields.ItemDescription,
         source_generic_item: {
           url: data.url,
