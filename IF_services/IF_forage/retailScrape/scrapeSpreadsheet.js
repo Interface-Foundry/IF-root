@@ -1,4 +1,5 @@
 var quickflow = module.exports = require('quickflow')()
+var job = require('job');
 
 function startingPoint(data, done) {
 // Gets the rows from the spreadsheet
@@ -17,7 +18,8 @@ var scrapers = require('./scrapers');
 
 scrapers.scrapeSiteCatalog(data).then(function(urls) {
   urls.map(function(u) {
-    done({
+    console.log('found url', u);
+    scrape({
       row: data,
       url: u
     })
@@ -25,7 +27,8 @@ scrapers.scrapeSiteCatalog(data).then(function(urls) {
 })
 }
 
-function scrapeItem(data, done) {
+
+var scrape = job('generic-retail-spreadsheet', function(data, done) {
 var scrapers = require('./scrapers');
 var db = require('db');
 var accounting = require('accounting');
@@ -85,11 +88,11 @@ scrapers.scrapeItemDetail(data.url, data.row).then(function(fields) {
       if (e) { throw new Error(e) }
       
       data.item = item.toObject();
-      done(data);
+      done(null, data);
     });
   })
 })
-}
+})
 
 function log(data, done) {
 // you don't even have to call done() if you don't want to
@@ -150,8 +153,5 @@ db.Landmarks.findOne({id: data.StoreId}, function(e, s) {
 }
 
 quickflow.connect(startingPoint, getStoreFromRow)
-quickflow.connect(getItemUrls, scrapeItem)
-quickflow.connect(scrapeItem, log)
-quickflow.connect(scrapeItem, processImages)
 quickflow.connect(getStoreFromRow, getItemUrls)
 if (!module.parent) quickflow.run()
