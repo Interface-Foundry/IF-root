@@ -396,7 +396,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
                 var newRes = (eliminateDuplicates(res, q, pageSize) !== null) ? (eliminateDuplicates(res, q)) : res
                 return {
                     category: 'Trending in "' + str + '"',
-                    results: newRes
+                    results: res
                 }
             })
     });
@@ -474,7 +474,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
             }
         });
 
-    Promise.settle(_.flatten([textCategories, neighborhoods, nearYou]))
+    Promise.settle(_.flatten([textCategories, neighborhoods,nearYou]))
         .then(function(results) {
             // only show "nearYou" if "neighborhoods" failed
             if (results[1].isFulfilled() && results[1].results && results[1].results.length > 0) {

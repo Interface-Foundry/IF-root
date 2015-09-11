@@ -403,6 +403,8 @@ function getInventory(newItem, zipcode) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
                 body = JSON.parse(body); //o.m.g. request, just do the double parse and don't ask 
+
+                console.log('NORDSTROM INVENTORY: ', body)
                 resolve(body)
             } else {
                 if (error) {
@@ -543,9 +545,7 @@ function saveStores(item, inventory) {
                                     newStore.world = true;
                                     newStore.name = storeObj.name;
                                     newStore.hasloc = true;
-                                    newStore.loc.type = 'Point';
-                                    newStore.loc.coordinates[0] = storeObj.Lng;
-                                    newStore.loc.coordinates[1] = storeObj.Lat;
+                                    newStore.loc.coordinates.push([storeObj.Lng, storeObj.Lat])
                                     delete newStore.source_generic_store.Lng;
                                     delete newStore.source_generic_store.Lat
                                     newStore.save(function(e, s) {
@@ -585,86 +585,91 @@ function saveStores(item, inventory) {
 
 function saveItems(newItem, Stores) {
     return new Promise(function(resolve, reject) {
-        var savedItems = []
+        var storeIds = Stores.map(function(store) {
+            return store._id
+        })
 
-        //For each store create an item in db if it does not already exist
-        async.eachSeries(Stores, function iterator(store, callback) {
-            //Check if there is an item with parent field that is equal to store id in db
-            db.Landmarks.findOne({
-                $and: [{
-                    'source_generic_item.styleId': newItem.styleId
-                }, {
-                    'parent.mongoId': store._id
-                }]
-            }, function(err, i) {
-                if (err) console.log(err)
+        var storeLocs = [];
 
-                //Create new item in db if it does not already exist
-                if (!i) {
-                    var item = new db.Landmarks();
-                    item.source_generic_item = newItem;
-                    item.price = parseFloat(newItem.price);
-                    item.owner = owner;
-                    item.name = item.source_generic_item.name
-                    item.source_generic_item.storeId = store.source_generic_store.storeId;
-                    item.linkback = item.source_generic_item.src;
-                    item.linkbackname = 'nordstrom.com';
-                    item.itemImageURL = item.source_generic_item.images;
-                    var tags = item.name.split(' ').map(function(word) {
-                        word = word.replace(/\W/g, '')
-                        return word.toString().toLowerCase()
-                    })
-                    tags.forEach(function(tag) {
-                            item.itemTags.text.push(tag)
-                        })
-                        // item.source_generic_item.colors.forEach(function(color) {
-                        //     item.itemTags.colors.push(color)
-                        // })
-                    item.itemTags.text.push('nordstrom')
-                    item.itemTags.text.push(cat)
-                        //Get rid of blank tags
-                    var i = item.itemTags.text.length
-                    while (i--) {
-                        if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ') {
-                            item.itemTags.text.splice(i, 1)
-                        }
-                    }
-                    item.parent.mongoId = store._id;
-                    item.parent.name = store.name;
-                    item.parent.id = store.id;
-                    item.name = newItem.name;
-                    item.world = false;
-                    item.loc.type = 'Point';
-                    item.loc.coordinates[0] = store.loc.coordinates[0];
-                    item.loc.coordinates[1] = store.loc.coordinates[1];
-                    uniquer.uniqueId('nordstrom ' + newItem.name, 'Landmark').then(function(output) {
-                        item.id = output;
-                        //Save item
-                        item.save(function(e, i) {
-                            if (e) {
-                                console.error(e);
-                            }
-                            console.log('Saved item!', i.id)
-                            savedItems.push(i)
-                                // console.log('Saved item', i.name)
-                            return callback();
-                        })
-                    })
-                }
+        Stores.forEach(function(store) {
+            storeLocs.push(store.loc.coordinates[0])
+        })
 
-                //If item exists in db 
-                else if (i) {
-                    console.log('Item already exists.', i._id)
-                    callback()
-                }
-            })
-        }, function(err) {
+        //Check if there is an item with parent field that is equal to store id in db
+        db.Landmarks.findOne({
+            'source_generic_item.styleId': newItem.styleId
+        }, function(err, i) {
             if (err) console.log(err)
 
-            console.log('Saved ', savedItems.length)
+            //Create new item in db if it does not already exist
+            if (!i) {
+                var item = new db.Landmarks();
+                item.source_generic_item = newItem;
+                item.source_generic_item.inventory = storeIds;
+                item.parents = storeIds;
+                item.price = parseFloat(newItem.price);
+                item.owner = owner;
+                item.name = item.source_generic_item.name
+                item.linkback = item.source_generic_item.src;
+                item.linkbackname = 'nordstrom.com';
+                item.itemImageURL = item.source_generic_item.images;
+                var tags = item.name.split(' ').map(function(word) {
+                    word = word.replace(/\W/g, '')
+                    return word.toString().toLowerCase()
+                })
+                tags.forEach(function(tag) {
+                    item.itemTags.text.push(tag)
+                })
+                item.itemTags.text.push('nordstrom')
+                item.itemTags.text.push(cat)
+                    //Get rid of blank tags
+                var i = item.itemTags.text.length
+                while (i--) {
+                    if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ') {
+                        item.itemTags.text.splice(i, 1)
+                    }
+                }
+                item.parent.mongoId = store._id;
+                item.parent.name = store.name;
+                item.parent.id = store.id;
+                item.name = newItem.name;
+                item.world = false;
+                item.loc.type = 'Point';
+                item.loc.coordinates = storeLocs
+                uniquer.uniqueId('nordstrom ' + newItem.name, 'Landmark').then(function(output) {
+                    item.id = output;
+                    //Save item
+                    item.save(function(e, i) {
+                        if (e) {
+                            console.error(e);
+                        }
+                        console.log('Saved item!', i.id)
+                        savedItems.push(i)
+                            // console.log('Saved item', i.name)
+                        return callback();
+                    })
+                })
+            }
 
-            resolve(savedItems)
-        });
+            //If item exists in db 
+            else if (i) {
+                 console.log('Updating item inventory', i.id)
+                db.Landmarks.findOne({
+                    '_id': i._id
+                }).update({
+                    $set: {
+                        'source_generic_item.inventory': storeIds
+                    }
+                }, function(e, result) {
+                    if (e) {
+                        console.log('Inventory update error: ', e)
+                    }
+                    console.log('Updated inventory for store.')
+                    return resolve('Finished updating inventory.')
+                })
+            }
+        })
+
     })
 }
 

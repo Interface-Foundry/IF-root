@@ -6,7 +6,8 @@ var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
-var tagParser = require('../tagParser')
+var tagParser = require('../tagParser');
+var _ = require('lodash')
 
 //Global var to hold fake user object
 owner = {}
@@ -41,7 +42,6 @@ module.exports = function scrapeItem(url) {
 
         async.waterfall([
                 function(callback) {
-                    // console.log(1)
                     loadFakeUser().then(function(items) {
                         callback(null)
                     }).catch(function(err) {
@@ -49,12 +49,11 @@ module.exports = function scrapeItem(url) {
                     })
                 },
                 function(callback) {
-                    // console.log(2)
                     checkIfScraped(url).then(function(items) {
                         if (items && items.length > 0) {
                             exists = true;
-                            existingItems = items; //proxy var for later processing
-                            callback(null, items)
+                            existingItem = items[0]; //proxy var for later processing
+                            callback(null, existingItem)
                         } else {
                             callback(null, null)
                         }
@@ -62,8 +61,7 @@ module.exports = function scrapeItem(url) {
                         callback(err)
                     })
                 },
-                function(existingItems, callback) {
-                    // console.log(3)
+                function(existingItem, callback) {
                     if (!exists) {
                         scrapeDetails(url).then(function(item) {
                             callback(null, item)
@@ -71,11 +69,10 @@ module.exports = function scrapeItem(url) {
                             callback(err)
                         })
                     } else if (exists) {
-                        callback(null, existingItems)
+                        callback(null, existingItem)
                     }
                 },
                 function(item, callback) {
-                    // console.log(4)
                     loadStores().then(function(stores) {
                         callback(null, item, stores)
                     }).catch(function(err) {
@@ -83,7 +80,6 @@ module.exports = function scrapeItem(url) {
                     })
                 },
                 function(item, stores, callback) {
-                    // console.log(5)
                     getInventory(item, stores).then(function(inventory) {
                         callback(null, item, inventory)
                     }).catch(function(err) {
@@ -102,7 +98,7 @@ module.exports = function scrapeItem(url) {
             function(err, item) {
                 if (err) {
                     console.log(err)
-                    reject(err)
+                    return reject(err)
                 }
 
                 resolve()
@@ -154,18 +150,17 @@ function checkIfScraped(url) {
             .find({
                 'source_generic_item.src': url.toString().trim()
             })
+            .populate('parents')
             .exec(function(e, items) {
                 if (items) {
-                    existing = true
+                    // console.log('Item exists.',items.length)
                     return resolve(items)
                 }
                 if (!items) {
-                    existing = false
                     return resolve()
                 }
                 if (e) {
                     //if some mongo error happened here just pretend it doesn't exist and go ahead with the process
-                    existing = false
                     return resolve()
                 }
             })
@@ -291,7 +286,7 @@ function loadStores() {
 function getInventory(itemData, stores) {
 
     //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
-    var Item = !exists ? itemData : itemData[0].source_generic_item
+    var Item = !exists ? itemData : itemData.source_generic_item
         //Map-out storeIds out of array to use in URL query below.
         // var storeIds = stores.map(function(obj) {
         //     return obj.source_generic_store.storeId
@@ -336,77 +331,72 @@ function getInventory(itemData, stores) {
 function processItems(inventory, itemData) {
 
     return new Promise(function(resolve, reject) {
-        // Bool to check if item was scraped but newly stocked at other stores
-        var newlyStocked = false;
 
         if (!inventory && inventory.length < 1) {
             return reject('No inventory found for this item. Aborting.')
         }
-        //If this item has already been scraped, just update inventory of items in db.
+        //If this item has already been scraped, update inventory,parents, and location fields of item.
         if (exists) {
-            async.eachSeries(inventory, function(store, callback) {
-                async.eachSeries(itemData, function(item, callback2) {
-                    if (item.source_generic_item.storeId == store.physicalStoreId) {
-                        //Use sizeStocks property in inventory item if it exists, top-level if not. 
-                        var query = store.sizeStocks ? store.sizeStocks : store;
-                        //Update items inventory info
-                        item.update({
-                            $set: {
-                                'source_generic_item.inventory': query
-                            }
-                        }, function(e, result) {
-                            if (e) {
-                                console.log('Inventory update error: ', e)
-                                count++
-                                return callback()
-                            }
-                            console.log('Updated inventory for store: ', store.physicalStoreId)
-                            count++
-                            callback()
-                        })
-                    } else {
-                        //If no matches were found and you checked all the stores in inventory list, 
-                        //then it means this could be an item that was scraped but was newly stocked at other stores. 
-                        if (inventory[inventory.length - 1].physicalStoreId == store.physicalStoreId) {
-                            newlyStocked = true;
-                        }
-                        callback2()
-                    }
-                }, function(err) {
-                    callback()
-                })
-            }, function(err) {
-                // console.log('Finished updating inventory.')
-                resolve('Finished updating inventory.')
+
+            // console.log('itemData.parents',itemData)
+
+            var inventoryStoreIds = inventory.map(function(store) {
+                return store.physicalStoreId.toString().trim()
             })
+            var inventoryString = inventoryStoreIds.join()
+            if (!itemData.parents) {
+                console.log('This item has no parents!', itemData._id)
+                return reject('This item has no parents!')
+            }
+            var dbStoreIds = itemData.parents.map(function(store) {
+                return store.source_generic_store.storeId
+            })
+
+            var updatedParents = itemData.parents.filter(function(store){
+                return inventoryString.indexOf(store.source_generic_store.storeId) > -1
+            })
+
+            var updatedParentMongoIds = updatedParents.map(function(store){
+                return store._id
+            })
+
+            var updatedLocs = [];
+
+            updatedParents.forEach(function(store){
+                 updatedLocs.push(store.loc.coordinates[0])
+            })
+
+            db.Landmarks.findOne({
+                '_id': itemData._id
+            }).update({
+                $set: {
+                    'source_generic_item.inventory': inventory,
+                    'parents': updatedParentMongoIds,
+                    'loc.coordinates': updatedLocs
+                }
+            }, function(e, result) {
+                if (e) {
+                    console.log('Inventory update error: ', e)
+                }
+                console.log('Updated inventory for item.')
+                return resolve('Finished updating inventory.')
+            })
+
         } //end of if item exists
 
-        //If item has not been scraped, create a new item in db for each store in inventory list
-        //OR if item has been scraped but there are newly stocked items in new stores, modify variables to account for those new items
-        if (!exists || newlyStocked) {
-
-            //If newlyStocked it means there were items existing in db but they were newly stocked at other stores.
-            if (newlyStocked) {
-                var storeIds = itemData.map(function(item) {
-                    return item.source_generic_item.storeId
-                })
-                inventory = inventory.filter(function(store, i) {
-                    return storeIds.join().indexOf(store.physicalStoreId) == -1
-                })
-                //Overwrite itemData variable 
-                itemData = itemData[0].source_generic_item;
-            }
-
+        //If item has not been scraped, create a new item 
+        if (!exists) {
             //Create new item for each store in inventory list.
             var i = new db.Landmark();
             i.world = false;
-            i.source_generic_item = itemData
+            i.source_generic_item = itemData;
+            i.hasloc = true;
             i.price = parseFloat(itemData.price);
             i.itemImageURL = itemData.images;
             i.name = itemData.name;
             i.owner = owner;
             i.linkback = itemData.src;
-            i.linkbackname = 'zara.com'
+            i.linkbackname = 'zara.com';
             var tags = i.name.split(' ').map(function(word) {
                 return word.toString().toLowerCase()
             })
@@ -420,17 +410,12 @@ function processItems(inventory, itemData) {
             if (tagParser.colorize(itemData.color)) {
                 i.itemTags.colors.push(tagParser.colorize(itemData.color))
             }
-            i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
-            if (store.sizeStocks) {
-                i.source_generic_item.inventory = store.sizeStocks;
-            } else {
-                i.source_generic_item.inventory = store
-            }
-            i.hasloc = true;
-            i.loc.type = 'Point'
+            i.source_generic_item.inventory = inventory
             uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
                     i.id = output;
+                    //Update location property for item with location of each store found in inventory.
                     async.eachSeries(inventory, function(store, callback) {
+
                                 db.Landmarks.findOne({
                                     'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
@@ -439,36 +424,36 @@ function processItems(inventory, itemData) {
                                         return callback()
                                     }
                                     if (!s) {
-                                        //The parent store doesn't exist in db, skip this item for now.
-                                        // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
+                                        //The parent store doesn't exist in db, skip this store for now.
                                         console.log('Cannot find store in db: ', store.physicalStoreId)
-
                                         return callback()
+                                    } else if (s) {
+                                        // console.log('Found store coords: ',s.loc)
+                                        i.parents.push(s._id)
+                                        i.loc.coordinates.push(s.loc.coordinates[0])
+                                        callback()
                                     }
-                                    //Check if the store with storeId exists in db
-                                    else if (s) {
-                                        i.loc.coordinates.push([parseFloat(s.loc.coordinates[1]),parseFloat(s.loc.coordinates[0])])
-                                    }
-
                                 })
-
                             },
                             function(e) {
                                 if (e) {
-                                    console.log('If item not exists async each error: ', e)
+                                    console.log(e)
+                                }
+
+                                if (i.loc.coordinates.length < 1) {
+                                    console.log('Need to scrape more stores for this item:', i.id)
+                                    return reject('Need to scrape more stores for this item')
                                 }
                                 //Save item
                                 i.save(function(e, item) {
                                     if (e) {
                                         console.error(e);
                                     }
-                                    callback();
+                                    console.log('Saved! ', item.id)
+                                    resolve(item)
                                 })
-                                resolve(item)
                             }) //end of async.eachSeries
-
                 }) //end of uniquer
-
         } //end of if not exists
     })
 }

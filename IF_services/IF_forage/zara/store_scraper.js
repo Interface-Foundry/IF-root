@@ -68,7 +68,7 @@ async.whilst(
                                     notFoundCount++
                                 }
 
-                                if (notFoundCount >= 50) {
+                                if (notFoundCount >= 75) {
                                     notFoundCount = 0;
                                     return cb('Done with state.')
                                 }
@@ -275,13 +275,13 @@ function saveStores(stores) {
                         n.tel = store.storePhone1
                         n.linkback = 'http://www.zara.com';
                         n.linkbackname = 'zara.com'
-                        n.loc.coordinates[0] = parseFloat(store.lng);
-                        n.loc.coordinates[1] = parseFloat(store.lat);
+                        n.loc.coordinates.push([parseFloat(store.lng),parseFloat(store.lat)]) 
                         n.name = 'Zara ' + store.storeAddress
                         uniquer.uniqueId('zara ' + store.storeAddress, 'Landmark').then(function(output) {
                             n.id = output;
                             n.save(function(e, newStore) {
                                 if (e) {
+                                    console.log('ERROR MOFO',e)
                                     return callback()
                                 }
 
