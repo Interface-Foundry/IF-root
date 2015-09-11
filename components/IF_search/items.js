@@ -11,6 +11,7 @@ var kip = require('kip');
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
 
+
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
     var defaultLogger = function() {};
@@ -297,10 +298,14 @@ function textSearch(q, page) {
                 var i = arry[1];
 
                 if (u.isFulfilled() && i.isFulfilled()) {
-                    var results = u.value().concat(i.value())
+                    var results = u.value().concat(i.value().map(function(i) {
+                        return db.Landmark.itemLocationHack(i, q.loc);
+                    }));
                     return results
                 } else if (i.isFulfilled() && !u.isFulfilled()) {
-                    return i.value()
+                    return i.value().map(function(i) {
+                        return db.Landmark.itemLocationHack(i, q.loc);
+                    });
                 } else if (u.isFulfilled() && !i.isFulfilled()) {
                     return u.value()
                 }
@@ -358,7 +363,12 @@ function filterSearch(q, page) {
     return db.Landmarks
         .find(query)
         .limit(pageSize)
-        .exec();
+        .exec()
+        .then(function(items) {
+            return items.map(function(item) {
+                return db.Landmark.itemLocationHack(item, q.loc);
+            });
+        });
 }
 
 
