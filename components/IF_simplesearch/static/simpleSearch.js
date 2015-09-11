@@ -2,7 +2,7 @@ $(function() {
     function search() {
         //$('form *').attr('disabled', true);
         $.ajax({
-            url: 'search',
+            url: 'https://kipapp.co/styles/api/items/search',
             type: 'POST',
             headers: {
                 'Content-Type': 'application/json'
