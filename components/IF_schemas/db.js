@@ -37,6 +37,7 @@ var schemas = [
     {filename: 'contest_schema', single: 'Contest', plural: 'Contests'},
     {filename: 'contestEntry_schema', single: 'ContestEntry', plural: 'ContestEntries'},
     {filename: 'instagram_schema', single: 'Instagram', plural: 'Instagrams'},
+    {filename: 'job_schema', single: 'Job', plural: 'Jobs'},
     {filename: 'landmark_schema', single: 'Landmark', plural: 'Landmarks'},
     {filename: 'look_schema', single: 'Look', plural: 'Looks'},
     {filename: 'project_schema', single: 'Project', plural: 'Projects'},
