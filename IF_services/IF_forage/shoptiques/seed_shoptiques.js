@@ -56,6 +56,12 @@ var seed = function() {
     }
     scrapeCatalogPage(url).then(function() {
         offset += 90;
+
+        // only scrape the first two pages
+        if (offset > 180) {
+            offset = 0;
+            neighborhoodIndex++;
+        }
         seed();
     }).catch(function(e) {
         neighborhoodIndex++;
