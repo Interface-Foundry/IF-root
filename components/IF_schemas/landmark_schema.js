@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 //textSearch = require('mongoose-text-search');
 var monguurl = require('monguurl');
 var accounting = require('accounting');
+var geolib = require('geolib');
 
 //schema construction
 var Schema = mongoose.Schema,
@@ -436,4 +437,51 @@ Landmark.generateIdFromName = function(name) {
     if (!name) { name = 'item' + (Math.random()*1000000000|0).toString(32) }
     name = name.toLowerCase().replace(/[^\w^\d]/g, '');
     return name + '_' + (Math.random()*1000000000000000|0).toString(32);
+}
+
+/**
+ * With multiple parents there are mutliple locations
+ * but we only want to return one to the front end for some versions of the app
+ * @param item
+ * @param loc
+ * @returns {*}
+ */
+Landmark.itemLocationHack = function(item, loc) {
+    if (item.loc.type === 'MultiPoint') {
+        item.loc.type = 'Point';
+        if (!loc) {
+            // Randomize the coordinates
+            // >_>
+            // <_<
+            // T_T
+            item.loc.coordinates = item.loc.coordinates[Math.random()*item.loc.coordinates|0];
+            item.otherLocations = [];
+            return item;
+        }
+
+        var sortedPoints =
+            item.loc.coordinates
+                .map(function(c) {
+                    return {
+                        distance: geolib.getDistance({
+                            latitude: loc.lat,
+                            longitude: loc.lon
+                        }, {
+                            latitude: c[1],
+                            longitude: c[0]
+                        }),
+                        lon: c[0],
+                        lat: c[1]
+                    }
+                }).sort(function(a, b) {
+                    return a.distance < b.distance;
+                }).map(function(c) {
+                    return [c.lon, c.lat]
+                });
+        item.loc.coordinates = sortedPoints[0];
+        item.otherLocations = sortedPoints.slice(1);
+    } else {
+        item.otherLocations = [];
+    }
+    return item;
 }

@@ -81,12 +81,16 @@ var scrapeShoptiques = job('scrape-shoptiques-item', function (data, done) {
                             id: i.id + '.' + i.colorId,
                             price: i.price,
                             priceRange: db.Landmark.priceToPriceRange(i.price),
+                            parents: [store._id],
                             parent: {
                                 mongoId: store._id.toString(),
                                 name: store.name,
                                 id: store.id
                             },
-                            loc: store.get('loc'),
+                            loc: {
+                                type: 'MultiPoint',
+                                coordinates: [store.get('loc.coordinates')]
+                            },
                             description: i.description,
                             itemTags: {
                                 text: i.categories.concat([i.colorName]),

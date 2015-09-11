@@ -17,5 +17,10 @@ shopCount = db['landmarks'].count({
 })
 print 'Shops:', shopCount
 
-userCount = db['users'].count({})
+userCount = db['users'].count({
+    '$or': [
+        {'facebook.email': {'$exists': True}},
+        {'local.email': {'$exists': True}}
+    ]
+})
 print 'Users:', userCount

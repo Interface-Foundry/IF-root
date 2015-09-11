@@ -1,7 +1,7 @@
 var db = require('../../../components/IF_schemas/db');
 var job = require('job');
-var cheerio = require('cheerio');
 var request = require('request');
+var cheerio = require('cheerio');
 var Promise = require('bluebird');
 
 /**
@@ -25,27 +25,22 @@ var scrapeShoptiques = job('scrape-shoptiques-item');
 var scrapeCatalogPage = function(url) {
     return new Promise(function(resolve, reject) {
         console.log('processing catalog page', url);
-        request.get(url, function (e, r, b) {
+        request(url, function (e, r, b) {
             if (e) {
+                console.log(e);
                 return reject(e);
             }
-            var $ = cheerio.load(b);
-            var promises = $('div.products div.productImageHolder a.img').toArray().map(function (a) {
-                var itemUrl = 'http://www.shoptiques.com' + $(a).attr('href');
 
-                return new Promise(function(resolve, reject) {
-                    scrapeShoptiques({
-                        url: itemUrl
-                    });
-                    resolve();
+            var $ = cheerio.load(b);
+
+            $('div.products div.productImageHolder a.img').toArray().map(function (a) {
+                var itemUrl = 'http://www.shoptiques.com' + $(a).attr('href');
+                console.log('found url', itemUrl);
+                scrapeShoptiques({
+                    url: itemUrl
                 });
             });
-
-            if (promises.length === 0) {
-                return reject();
-            }
-
-            Promise.all(promises).then(resolve).catch(reject);
+            resolve();
         });
     });
 };
@@ -54,9 +49,19 @@ var offset = 0;
 var urlFormat = 'http://www.shoptiques.com/neighborhoods/$n?max=90&offset=X';
 var neighborhoodIndex = 0;
 var seed = function() {
-    url = urlFormat.replace('X', offset).replace('$n', neighborhoods[neighborhoodIndex]);
+    var url = urlFormat.replace('X', offset).replace('$n', neighborhoods[neighborhoodIndex]);
+    if (!url) {
+        console.log('done seeding shoptiques');
+        process.exit(0);
+    }
     scrapeCatalogPage(url).then(function() {
         offset += 90;
+
+        // only scrape the first two pages
+        if (offset > 180) {
+            offset = 0;
+            neighborhoodIndex++;
+        }
         seed();
     }).catch(function(e) {
         neighborhoodIndex++;

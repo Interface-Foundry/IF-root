@@ -80,7 +80,7 @@ router.use('/:id*', function(req, res, next) {
             return next('Could not find item ＼(º □ º 〃)/');
         }
 
-        req.item = item;
+        req.item = db.Landmark.itemLocationHack(item);
         req.itemId = item._id.toString();
         return next();
     });
@@ -90,10 +90,6 @@ router.use('/:id*', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
     // Version 0.0.4 (9/10/15) changes "parent" to "parents"
     if (semver.gte(req.version, '0.0.4')) {
-        // just use the first coordinates for now TODO
-        if (req.item.loc.type === 'MultiPoint') {
-            req.item.loc.coordinates = req.item.loc.coordinates[0];
-        }
         res.send({item: req.item});
     } else {
         // which parent to choose? TODO
@@ -102,10 +98,6 @@ router.get('/:id', function(req, res, next) {
         }, function(e, parent) {
             if (e) { return next(e) }
 
-            // just use the first coordinates for now TODO
-            if (req.item.loc.type === 'MultiPoint') {
-                req.item.loc.coordinates = req.item.loc.coordinates[0];
-            }
             res.send({
                 item: req.item,
                 parent: parent
