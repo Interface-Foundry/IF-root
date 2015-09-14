@@ -32,7 +32,10 @@ function processItem() {
     // we can't do image tagging if there's no image
     if (!l.itemImageURL[0]) {
       console.log('no image url for landmark', l._id.toString());
-      return setTimeout(processItem, 1000);
+      l.flags.justVisualProcessed = true;
+      l.save(function() {
+        return setTimeout(processItem, 1000);
+      })
     }
 
     var url = urlTemplate.replace('$URL', l.itemImageURL[0])
