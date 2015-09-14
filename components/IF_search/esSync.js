@@ -191,8 +191,7 @@ function GO() {
     db.Landmarks
         .find({
             'world': false,
-            'flags.mustUpdateElasticsearch': {$ne: false},
-            'flags.justVisualProcessed': true
+            'flags.mustUpdateElasticsearch': {$ne: false}
         })
         .populate('source_justvisual.images')
         .limit(20)
@@ -202,8 +201,10 @@ function GO() {
                 return;
             }
             if (landmarks.length === 0) {
-                console.log('finished updating elasticsearch');
-                process.exit(0);
+                if (process.argv[2] === 'rebuild') { console.log('finished'); process.exit(0) }
+                console.log('finished updating elasticsearch, will check again in 10 minutes (current time', new Date(), ')');
+                setTimeout(GO, 1000*60*60*10)
+                return;
             }
 
             var bulkBody = landmarks.reduce(function(body, l) {
