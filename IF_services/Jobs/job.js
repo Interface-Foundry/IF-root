@@ -122,12 +122,17 @@ JobRunner.prototype.run = function() {
                     // try to run the job processing function they provided
                     me.opts.fn.call(null, doc.inputData, function (err, outputData) {
                         log.v('finished processing job', me.opts.name);
-                        doc.flags.failed = false;
-                        doc.flags.succeeded = true;
+                          if (err) {
+                          doc.flags.failed = true;
+                          doc.flags.succeeded = false;
+                        } else {
+                          doc.flags.failed = false;
+                          doc.flags.succeeded = true;
+                        }
                         doc.flags.complete = true;
                         doc.flags.inProgress = false;
                         doc.timestamps.finished = new Date();
-                        doc.outputData = outputData;
+                        doc.outputData = err ? {err: err} : outputData;
                         log.vv(doc);
                         doc.save(function(e) {
                             if (e) {

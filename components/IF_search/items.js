@@ -102,6 +102,15 @@ app.post(searchItemsUrl, function(req, res, next) {
         .then(function(results) {
             responseBody.results = results;
             res.send(responseBody);
+            (new db.Analytics({
+              anonId: req.anonId,
+              userId: req.userId,
+              action: 'search',
+              data: {
+                query: req.body,
+                resultCount: results.length
+              }
+            })).save();
         }, next)
 });
 
@@ -502,39 +511,21 @@ app.post(trendingItemsUrl, function(req, res, next) {
                     return full;
                 }, [])
             });
+            (new db.Analytics({
+              anonId: req.anonId,
+              userId: req.userId,
+              action: 'trending',
+              data: {
+                query: req.body,
+                resultCount: results.reduce(function(count, r) {
+                  if (r && r._settledValue && r._settledValue.results) {
+                    count = count + r._settledValue.reseults.length;
+                  }
+                  return count;
+                }, 0)
+              }
+            })).save();
         }, next);
-
-
-    return;
-
-    request.post('http://localhost:2997/api/items/search', {
-        body: {
-            "text": "summer",
-            "radius": 0.5,
-            "loc": {
-                "lat": 40.7352793,
-                "lon": -73.990638
-            }
-        },
-        json: true
-    }, function(e, r, body) {
-
-        res.send({
-            query: req.body,
-            links: links,
-            results: [{
-                category: 'Trending in Summer',
-                results: body.results
-            }, {
-                category: 'Trending near you',
-                results: body.results
-            }]
-        });
-    });
-
-
-
-
 })
 
 //****TEMPORARY FIX: This function will identify duplicate items in response, find the closest item (distance) within those duplicates
