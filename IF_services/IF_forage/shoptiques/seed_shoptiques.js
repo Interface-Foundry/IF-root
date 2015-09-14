@@ -55,13 +55,7 @@ var seed = function() {
         process.exit(0);
     }
     scrapeCatalogPage(url).then(function() {
-        offset += 90;
-
-        // only scrape the first two pages
-        if (offset > 180) {
-            offset = 0;
-            neighborhoodIndex++;
-        }
+        neighborhoodIndex++;
         seed();
     }).catch(function(e) {
         neighborhoodIndex++;
