@@ -2,29 +2,6 @@ body {
     font-family: Raleway, arial, sans-serif;
 }
 
-@font-face {
-  font-family: 'Kip';
-  src: url('kip/kip.eot');
-  src: local('Kip'), local('Kip'),
-    url("kip/kip.woff") format("woff"),
-    url("kip/kip.otf") format("opentype"),
-    url("kip/kip.svg") format("svg");
-}
-
-.kipFont { 
-    font-family: "Kip" sans-serif;
-    font-size: 18px;
-}
-
-.kipFont span{
-    margin-top: -2px;
-    font-size: 16px;
-}
-
-.energized {
-    color: rgba(244, 89, 29, 1.0);
-}
-
 .u-hidden {
     display: none;
 }
@@ -79,17 +56,4 @@ div.headerBar {
     display: flex;
     align-items: center;
     padding-left: 10px;
-}
-
-div.footerBar {
-    background-color: rgba(85, 66, 226, 1.0);   
-    color: white;
-    width: 100%;
-    font-size: 20px;
-    vertical-align: middle;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    position: absolute;;
 }

@@ -1,4 +1,16 @@
-<html lang="en">
+<!doctype html>
+<html lang="en" ng-app="simpleSearchApp">
+<!-- 
+   _  __                ____   
+  |"|/ /       ___    U|  _"\ u
+  | ' /       |_"_|   \| |_) |/
+U/| . \\u      | |     |  __/  
+  |_|\_\     U/| |\u   |_|     
+,-,>> \\,-.-,_|___|_,-.||>>_   
+ \.)   (_/ \_)-' '-(_/(__)__) 
+
+not alphabet.
+-->
 <head>
     <meta charset="utf-8"/>
     <title>Kip</title>
@@ -8,32 +20,93 @@
     <link href="skeleton.css" rel="stylesheet" type="text/css"/>
     <link href="simpleSearch.css" rel="stylesheet" type="text/css"/>
 </head>
-<body>
+<body ng-controller="SimpleSearchCtrl">
 
 <div class="container">
     
     <div class="row">
-      <br><br><br><br>
-        <h1 class="u-full-width u-textAlignCenter">Kip Logo<h1>
-        <h6 class="u-full-width u-textAlignCenter">Search for things in IRL stores around you</h6>
+
+      <br><br>
+
+      <div class="u-full-width u-textAlignCenter">
+         <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px;" width="90">
+      </div>
     </div>
     <div class="row">
         <div class="four columns u-centered">
+
             <form class="u-full-width">
-                <input id="query" name="query" type="text"
-                       placeholder="What are you looking for?"
-                       class="u-full-width"/>
-                <input
-                  type="submit" value="Search" class="u-full-width color-Positive"/></form>
+                <input 
+                  type="text" auto-focus ng-model="query" placeholder="What are you looking for?" class="u-full-width"/>
+                <input type="submit" value="Search" ng-click="searchQuery()" class="u-full-width color-Positive"/>
             </form>
+            <h6 class="u-full-width u-textAlignCenter">Search for things in IRL stores around you</h6>
+
+            Try <a ng-click="">blue hat</a> or <a ng-click="">purple striped shirt</a>
         </div>
     </div>
 
+    <div ng-show="userCity"><p>Items near {{userCity}}</p></div>
+    <div ng-show="items" ng-repeat="item in items">
+
+<!--       SHOW TWO BUTTONS: Directions and view online link (3 buttons if TEL # "tel"  to call)
+
+          TEXT BUTTON: share, click to see highlighted text field of link. and buttons to sites
+          
+
+          USE SPECIAL SITE TO EXPORT AS WEB APP
+
+          BUILD OUT URL LINKS TO CIOPY PASTE!!!! OF SERACH!~
+ -->      
+      
+      <img ng-src="{{item.itemImageURL[0]}}" width="800" style="max-width:100%;">
+
+      <h5>{{item.name}}  ${{item.price}}</h5>
+      <p>{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
+
+      <p ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
+
+      <p ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
+      <p ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
+
+      <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
+    
+
+      <h1 class="kipFont energized"> <span>{{item.faves.length}}</span></h1> 
+<!-- 
+      <div ng-show="item.source_shoptiques_item.id">
+        shoptiques
+      </div>
+      <div ng-show="item.source_instagram_post.id">
+        instagram
+      </div>
+      <div ng-show="item.source_google.id">
+        google
+      </div>
+      <div ng-show="item.source_generic">
+        generic
+      </div>
+
+ -->
+
+  <!--       <div ng-repeat="image in item.itemImageURL" >
+          <img width="50" src="{{image}}">
+        </div> -->
+
+      <div ng-show="item.linkback">
+          <p>Item from <a href="{{item.linkback}}" target="_blank">{{item.linkbackname}}</a></p>
+      </div>
+
+    </div>
+
+    <div class="footerBar" ng-style="{top: windowHeight + 'px'}" ng-click="getLocation()">USE GPS</div>
+
     <div class="row">
-      <br><br><br><br>
-      <h6 class="u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>
+      
+      <h6 ng-show="items" class="u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>
     </div>
 </div>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <script src="zepto.min.js"></script>
 <script src="simpleSearch.js"></script>
 </body>
