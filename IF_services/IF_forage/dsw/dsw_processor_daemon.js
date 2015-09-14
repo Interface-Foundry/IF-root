@@ -295,6 +295,10 @@ function findStores(item, done) {
             });
         })
         callback();
+      }).catch(function(e) {
+        console.error('error in checkAvailability', item);
+        console.error(e);
+        callback();
       })
     }, function() {
           log.v('found', stores.length, 'stores for product', item.productId);
