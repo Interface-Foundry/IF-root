@@ -1,3 +1,10 @@
+var urlify = require('urlify').create({
+    spaces: "",
+    nonPrintable: "",
+    trim: true
+});
+
+
 module.exports = {
     parse: function(array, common) {
         var common = ['the', 'it', 'is', 'a', 'an', 'and', 'by', 'to', 'he', 'she', 'they', 'we', 'i', 'are', 'to', 'for', 'of', 'with']
@@ -5,7 +12,7 @@ module.exports = {
         var uniqueArray = eliminateDuplicates(array);
         var commonString = common.join();
         for (var i = 0; i < uniqueArray.length; i++) {
-            var tag = uniqueArray[i].trim().toLowerCase();
+            var tag = urlify(uniqueArray[i]).toLowerCase();
             if (commonString.indexOf(tag) == -1) {
                 //Process tag
                 if (tag == 'man') {
