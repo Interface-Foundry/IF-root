@@ -23,7 +23,7 @@ var _ = require('lodash');
 var scrapeShoptiques = job('scrape-shoptiques-item', function (data, done) {
     var url = data.url;
     if (typeof url === 'undefined') {
-        return done();
+        return done('could not process undefined url');
     }
     console.log('URL:', url);
 
