@@ -266,7 +266,7 @@ function textSearch(q, page) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^3", "id^2", "parentName^2", "tags^2", "categories", "description"],
+                            fields: ["name^4", "id^3", "parentName^3", "tags^3", "categories^2", "description^2", "miscText"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }

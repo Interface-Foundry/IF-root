@@ -85,11 +85,26 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
                 _.get(this, 'meta.humanTags.itemStyle'),
                 _.get(this, 'meta.humanTags.itemEvent'),
                 _.get(this, 'meta.humanTags.itemDetail'),
-                _.get(this, 'meta.humanTags.itemFabric')
+                _.get(this, 'meta.humanTags.itemFabric'),
+                _.get(this, 'source_justvisual.keywords')
             ]).filter(function(a) {
-                return typeof a !== 'undefined';
+                return typeof a !== 'undefined' && a !== '';
             })
         }
+    },
+    miscText: {
+      source: function() {
+        return _.flattenDeep([
+          (_.get(this, 'source_justvisual.images') || []).map(function(i) {
+            return [
+              _.get(i, 'description'),
+              _.get(i, 'title')
+            ];
+          })
+        ]).filter(function(a) {
+            return typeof a !== 'undefined' && a !== '';
+        })
+      }
     },
     // override some defaults from kipSchemaBase
     location: {
@@ -176,8 +191,10 @@ function GO() {
     db.Landmarks
         .find({
             'world': false,
-            'flags.mustUpdateElasticsearch': {$ne: false}
+            'flags.mustUpdateElasticsearch': {$ne: false},
+            'flags.justVisualProcessed': true
         })
+        .populate('source_justvisual.images')
         .limit(20)
         .exec(function(e, landmarks) {
             if (e) {
