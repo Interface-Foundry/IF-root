@@ -3,6 +3,9 @@ require('vvv');
 var kipScrapeTools = require('../kipScrapeTools');
 var db = require('db');
 var _ = require('lodash');
+var job = require('job');
+var scrapeShoe;
+var _async = require('async');
 
 /**
  * First get all the stores and the dsw user, so we can reference them later on without additional db calls.
@@ -28,64 +31,16 @@ db.Landmarks.find({
     db.Users.findOne({profileID: 'dsw'}, function(e, u) {
         if (e) { console.error(e); return }
         dswUser = u;
-        getCatalogURLs()
+        startJob()
     });
 })
 
-function getCatalogURLs() {
-  // got this from
-  /*
-  loading the dsw women's shoes page TODO men's shoes
-  var x = $('#leftNavZone a[data-omniture-info]')
-  s = x.map(function() { return $(this).attr('href')}).toArray()
-  */
-    var urls = ['/Womens-Shoes-New-Arrivals/_/N-271o?activeCategory=102442',
-  '/Womens-Shoes-Top-Rated/_/N-27cq?activeCategory=102442',
-  '/Womens-Shoes-Marie-Claire-Shoes-First/_/N-lzwy?activeCategory=102442',
-  '/Womens-Shoes-The-Trend-Spot/_/N-27cx?activeCategory=102442',
-  '/Womens-Shoes-Luxury/_/N-27d1?activeCategory=102442',
-  '/Womens-Shoes-Boots-Under-50/_/N-lzwg?activeCategory=102442',
-  '/Womens-Shoes-Boots-Under-100/_/N-lzwx?activeCategory=102442',
-  '/Womens-Shoes-Boots/_/N-273d?activeCategory=102442',
-  '/Womens-Shoes-Sandals/_/N-272u?activeCategory=102442',
-  '/Womens-Shoes-Pumps-and-Heels/_/N-2735?activeCategory=102442',
-  '/Womens-Shoes-Evening-and-Wedding/_/N-27dn?activeCategory=102442',
-  '/Womens-Shoes-Flats/_/N-273c?activeCategory=102442',
-  '/Womens-Shoes-Clogs-and-Mules/_/N-lzvn?activeCategory=102442',
-  '/Womens-Shoes-Loafers-and-Slip-Ons/_/N-27dm?activeCategory=102442',
-  '/Womens-Shoes-Oxfords-and-Lace-Ups/_/N-27dl?activeCategory=102442',
-  '/Womens-Shoes-Comfort/_/N-273n?activeCategory=102442',
-  '/Womens-Shoes-Wide-Width/_/N-27dw?activeCategory=102442',
-  '/Womens-Shoes-Sneakers/_/N-273o?activeCategory=102442',
-  '/Womens-Shoes-Athletic/_/N-273p?activeCategory=102442',
-  '/Womens-Shoes-Work-and-Safety/_/N-273t?activeCategory=102442',
-  '/Womens-Shoes-Slippers/_/N-273u?activeCategory=102442',
-  '/Womens-Shoes-Handbags/_/N-lzs1?activeCategory=102442',
-  '/Womens-Shoes-Accessories/_/N-lzs2?activeCategory=102442',
-  '/Womens-Shoes-Womens-Clearance/_/N-272m?activeCategory=102442'];
-
-    urls.map(getItemURLs);
-}
-
-function getItemURLs(catalogUrl, done) {
-
-    if (!catalogUrl) {
-        return
-    }
-
-    console.log(catalogUrl)
-
-    kipScrapeTools.load('http://www.dsw.com' + catalogUrl, function ($) {
-        $('.productContainer .productImage>a').map(function () {
-            return $(this).attr('href');
-        }).toArray().filter(function (u) {
-            return u.indexOf('javascript') !== 0;
-        }).map(function (u) {
-            return 'http://www.dsw.com' + u;
-        }).map(scrapeItem)
-    })
-}
-function scrapeItem(itemUrl, done) {
+function startJob() {
+var scrapeShoe = job('scrape-dsw', function (item, done) {
+  if (!item || !item.url) {
+    return done('could not find item url');
+  }
+  var itemUrl = item.url;
 // looks like http://www.dsw.com/shoe/crown+vintage+natasha+bootie?prodId=333140&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002
     var urlParts = itemUrl.split(/[/?&=]/);
     var productId = urlParts[6];
@@ -211,19 +166,26 @@ function scrapeItem(itemUrl, done) {
                         newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
                         newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
                     }
-
-                    log.vv(newItems);
-                    debugger;
-
-                    Object.keys(newItems).map(function(k) {
-                        upsert(newItems[k], function() {
-                        })
-                    })
                 })
             })
+
+            log.vv(newItems);
+            debugger;
+
+            if (Object.keys(newItems).length === 0) {
+              return done('no stores found for item', item)
+            }
+
+            Object.keys(newItems).map(function(k) {
+                upsert(newItems[k], function() {
+                })
+            })
+            debugger;
+            done();
         })
 
     })
+})
 }
 
 function findStores(item, done) {
@@ -265,6 +227,7 @@ function findStores(item, done) {
                 headers: headers,
                 form: form
             }, function (e, r, b) {
+              log.vvv(b);
                 var $ = cheerio.load(b);
 
                 var stores = $('#searchResultsTable tr').map(function () {
@@ -293,32 +256,49 @@ function findStores(item, done) {
         })
     }
 
-    var zipcodes = ['10002'];
+    // want to find the minimum set of zipcodes that spans the major regions of interest
+    // looks like the radius is about 100 miles
+    var zipcodes = [
+      '10002', // gets new york
+      '92805', // anaheim worked better than hollywood area for some reason
+      '60612', // chicago
+      '20001', // dc
+      '77006', // houston
+      '19123', // philly
+    ];
 
     var promises = [];
+    var queue = [];
     var stores = [];
     item.colors.map(function (color) {
         item.sizes.map(function (size) {
             zipcodes.map(function (zipcode) {
-                promises.push(checkAvailability(color.id, size.id, zipcode).then(function (s) {
-                    s.map(function (store) {
-                        if (!store.id || !store.landmark) return;
-                        stores.push({
-                            color: color,
-                            size: size,
-                            zipcode: zipcode,
-                            landmark: store.landmark,
-                            id: store.id
-                        });
-                    })
-                }))
+              queue.push({
+                zipcode: zipcode,
+                size: size,
+                color: color
+              });
             })
         })
     })
 
-    Promise.settle(promises).then(function () {
-        log.v('found', stores.length, 'stores for product', item.productId);
-        done(stores);
+    _async.eachSeries(queue, function(item, callback) {
+      checkAvailability(item.color.id, item.size.id, item.zipcode).then(function(s) {
+        s.map(function (store) {
+            if (!store.id || !store.landmark) return;
+            stores.push({
+                color: color,
+                size: size,
+                zipcode: zipcode,
+                landmark: store.landmark,
+                id: store.id
+            });
+        })
+        callback();
+      })
+    }, function() {
+          log.v('found', stores.length, 'stores for product', item.productId);
+          done(stores);
     })
 }
 
