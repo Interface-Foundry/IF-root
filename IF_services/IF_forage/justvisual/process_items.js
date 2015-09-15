@@ -60,7 +60,7 @@ function processItem() {
       l.flags.justVisualProcessed = true;
       l.flags.mustUpdateElasticsearch = true;
 
-      var promises = b.images.map(function(i) {
+      var promises = (b.images || []).map(function(i) {
         return saveJustVisual(i);
       })
 
