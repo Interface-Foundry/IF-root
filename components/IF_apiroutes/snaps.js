@@ -33,6 +33,7 @@ router.post('/', function(req, res, next) {
             newPlace.name = req.body.parent.name;
             newPlace.world = true;
             newPlace.hasloc = true;
+            newPlace.loc.type = 'Point';
             //Might implement these properties in the future
             // newPlace.addressString = '';
             // newPlace.tel = '';
@@ -54,6 +55,8 @@ router.post('/', function(req, res, next) {
 
         } else {
                 console.log(2)
+var copybody = req.body
+//console.log('req.body: -->', copybody)
             //First check if it really doesn't exist in the db yet
             db.Landmarks.findOne({
                 'source_google.place_id': req.body.place_id
@@ -70,11 +73,13 @@ router.post('/', function(req, res, next) {
                     var newPlace = new db.Landmark();
                     newPlace.world = true;
                     newPlace.hasloc = true;
+newPlace.loc.type = 'Point'
                     newPlace.source_google.place_id = req.body.place_id;
                     addGoogleDetails(newPlace, req.body.place_id).then(function(newPlace) {
                         uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
                             newPlace.id = output;
-                            newPlace.save(function(err, saved) {
+console.log('!!!!!!!!!!!',newPlace)                           
+ newPlace.save(function(err, saved) {
                                 if (err) {
                                     return next('Error saving new place')
                                 }
@@ -92,7 +97,7 @@ router.post('/', function(req, res, next) {
         //If place was found
     } else {
           console.log(3)
-          console.log('req.body:', req.body)
+         // console.log('req.body:', req.body)
         if (req.body.parent.mongoId) {
             console.log(4)
             db.Landmarks.findById(req.body.parent.mongoId, function(err, parent) {
@@ -137,6 +142,7 @@ function createItem(req, res, newPlace, next) {
     //Create a unique id field
     uniquer.uniqueId(newItem.owner.profileID, 'Landmarks').then(function(unique) {
         newItem.id = unique;
+        console.log('base64: ',req.body.base64)
         // //Upload each image in snap to Amazon S3
         async.eachSeries(req.body.base64, function(buffer, callback) {
             upload.uploadPicture(newItem.owner.profileID, buffer).then(function(imgURL) {
