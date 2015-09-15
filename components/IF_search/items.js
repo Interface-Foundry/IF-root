@@ -519,7 +519,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
                 query: req.body,
                 resultCount: results.reduce(function(count, r) {
                   if (r && r._settledValue && r._settledValue.results) {
-                    count = count + r._settledValue.reseults.length;
+                    count = count + r._settledValue.results.length;
                   }
                   return count;
                 }, 0)

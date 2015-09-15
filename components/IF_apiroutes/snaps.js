@@ -91,6 +91,7 @@ router.post('/', function(req, res, next) {
         //If place was found
     } else {
           console.log(3)
+          console.log('req.body:', req.body)
         if (req.body.parent._id) {
             console.log(4)
             db.Landmarks.findById(req.body.parent._id, function(err, parent) {
