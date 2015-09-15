@@ -72,6 +72,18 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
         type: 'string',
         source: 'owner.name'
     },
+    name: {
+      source: function () {
+        // the name property will be both the mongo document name
+        // and the name found by cloudsight if any
+        return [
+          this.name,
+          _.get(this, 'source_cloudsight.name') || ''
+        ].filter(function(v) {
+          return v !== '';
+        });
+      }
+    },
     categories: {
         type: 'string',
         index: 'not_analyzed',
@@ -86,7 +98,8 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
                 _.get(this, 'meta.humanTags.itemEvent'),
                 _.get(this, 'meta.humanTags.itemDetail'),
                 _.get(this, 'meta.humanTags.itemFabric'),
-                _.get(this, 'source_justvisual.keywords')
+                _.get(this, 'source_justvisual.keywords'),
+                _.get(this, 'source_cloudsight.categories')
             ]).filter(function(a) {
                 return typeof a !== 'undefined' && a !== '';
             })
@@ -191,7 +204,8 @@ function GO() {
     db.Landmarks
         .find({
             'world': false,
-            'flags.mustUpdateElasticsearch': {$ne: false}
+            'flags.mustUpdateElasticsearch': {$ne: false},
+            'flags.cloudsightProcessed': true
         })
         .populate('source_justvisual.images')
         .limit(20)

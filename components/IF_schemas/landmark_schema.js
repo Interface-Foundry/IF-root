@@ -274,6 +274,10 @@ var landmarkSchema = new Schema({
         }], // list of _ids for images
         keywords: [String] // list of keywords from search
     },
+    source_cloudsight: {
+      name: String,
+      categories: [String] // warning /!\ often not present /!\
+    },
 
     widgets: {
         twitter: Boolean,
@@ -362,7 +366,8 @@ var landmarkSchema = new Schema({
             type: Boolean,
             default: true
         },
-        justVisualProcessed: Boolean
+        justVisualProcessed: Boolean,
+        cloudsightProcessed: Boolean
     }
 
 
