@@ -400,6 +400,7 @@ function saveStores(item, inventory) {
                                 if (!store) {
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
+                                    newStore.linkbackname = 'nordstrom.com'
                                     newStore.addressString = storeObj.StreetAddress;
                                     newStore.id = output;
                                     newStore.tel = storeObj.PhoneNumber;

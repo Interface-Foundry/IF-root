@@ -5,7 +5,6 @@ var Promise = require('bluebird');
 var async = require('async');
 // var uniquer = require('../../uniquer');
 var request = require('request');
-var UglifyJS = require("uglifyjs");
 var _ = require('underscore');
 
 
@@ -109,6 +108,7 @@ function getItem(url) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
+
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
 
@@ -116,6 +116,8 @@ function getItem(url) {
 
                 var itemCountLoop = 0; //used to compare num items to current loop
                 var itemCount = 0;
+
+
 
                 //initial count of num of items to collect
                 $('div').each(function(i, elem) {
@@ -396,7 +398,7 @@ function getInventory(newItems) {
             //******* DATA NOTES *********
             //******* physicalStores = list of stores that carry this item
             //******* parentProductId = unique Id parent for all item colors and sizes. use this to check if the item was scraped 
-            console.log(newItems); // the items (sorted by color, item created per color)
+            console.log(JSON.stringify(newItems)); // the items (sorted by color, item created per color)
 
         });
 

@@ -26,6 +26,7 @@ router.post('/', function(req, res, next) {
     }
     //If no place was found for this item, create a new place.
     if (req.body.place_id) {
+        console.log(1)
         //If this is a user created place
         if (req.body.place_id == 'custom_location') {
             var newPlace = new db.Landmark();
@@ -37,6 +38,7 @@ router.post('/', function(req, res, next) {
             // newPlace.tel = '';
             newPlace.linkback = 'custom';
             newPlace.linkbackname = 'custom';
+            console.log('req.body.parent.coordinates: ', req.body.parent.coordinates )
             newPlace.loc.coordinates.push(req.body.parent.coordinates)
             uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
                 newPlace.id = output;
@@ -51,6 +53,7 @@ router.post('/', function(req, res, next) {
 
 
         } else {
+                console.log(2)
             //First check if it really doesn't exist in the db yet
             db.Landmarks.findOne({
                 'source_google.place_id': req.body.place_id
@@ -87,8 +90,9 @@ router.post('/', function(req, res, next) {
 
         //If place was found
     } else {
-          // console.log(3)
+          console.log(3)
         if (req.body.parent._id) {
+            console.log(4)
             db.Landmarks.findById(req.body.parent._id, function(err, parent) {
                 if (err) {
                     err.niceMessage = 'Error checking for existing place.';
@@ -102,6 +106,7 @@ router.post('/', function(req, res, next) {
                 }
             })
         } else {
+                  console.log(5)
             err.niceMessage = 'You must choose a store.';
             return next(err);
         }
