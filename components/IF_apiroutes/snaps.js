@@ -40,7 +40,7 @@ router.post('/', function(req, res, next) {
             newPlace.linkback = 'custom';
             newPlace.linkbackname = 'custom';
             console.log('req.body.parent.coordinates: ', req.body.parent.coordinates )
-            newPlace.loc.coordinates.push(req.body.parent.coordinates)
+            newPlace.loc.coordinates = req.body.parent.coordinates
             uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
                 newPlace.id = output;
                 newPlace.save(function(e, newStore) {
