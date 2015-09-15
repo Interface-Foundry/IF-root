@@ -53,14 +53,14 @@ function processItem() {
 
 
       l.source_justvisual = l.source_justvisual || {};
-      l.source_justvisual.images = b.images.map(function(i) {
+      l.source_justvisual.images = (b.images || []).map(function(i) {
         return i.id;
       });
       l.source_justvisual.keywords = b.keywords;
       l.flags.justVisualProcessed = true;
       l.flags.mustUpdateElasticsearch = true;
 
-      var promises = b.images.map(function(i) {
+      var promises = (b.images || []).map(function(i) {
         return saveJustVisual(i);
       })
 
