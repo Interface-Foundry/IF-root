@@ -82,13 +82,13 @@ module.exports = function(url, category, zipcode) {
                                     },
                                     function(item, stores, callback) {
                                         getLatLong(zipcode).then(function(coords) {
-                                            callback(null, item, stores, coords)
+                                            callback(null, item, coords)
                                         }).catch(function(err) {
                                             callback(err)
                                         })
                                     },
-                                    function(item, stores, coords, callback) {
-                                        updateInventory(item, stores, coords).then(function() {
+                                    function(item, coords, callback) {
+                                        updateInventory(item, coords).then(function() {
                                             callback(null)
                                         }).catch(function(err) {
                                             callback(err)
@@ -407,7 +407,8 @@ function saveStores(item, inventory) {
                                     newStore.world = true;
                                     newStore.name = storeObj.name;
                                     newStore.hasloc = true;
-                                    newStore.loc.coordinates.push([parseFloat(storeObj.Lng), parseFloat(storeObj.Lat)])
+                                    newStore.loc.type = 'Point'
+                                    newStore.loc.coordinates = [parseFloat(storeObj.Lng), parseFloat(storeObj.Lat)]
                                     delete newStore.source_generic_store.Lng;
                                     delete newStore.source_generic_store.Lat
                                     newStore.save(function(e, s) {
@@ -449,10 +450,12 @@ function saveItem(newItem, Stores) {
         var storeIds = Stores.map(function(store) {
             return store._id
         })
-        newStores = storeIds;
+        newStores = storeIds.map(function(id){
+            return id.toString();
+        });
         var storeLocs = [];
         Stores.forEach(function(store) {
-            storeLocs.push(store.loc.coordinates[0])
+            storeLocs.push(store.loc.coordinates)
         })
             //Check if item already exists
         db.Landmarks.findOne({
@@ -500,7 +503,9 @@ function saveItem(newItem, Stores) {
             else if (i) {
                 console.log('Item exists: ',i.id)
                 if (i.parents) {
-                    oldStores = i.parents
+                    oldStores = i.parents.map(function(id){
+                        return id.toString()
+                    })
                 }
 
                 db.Landmarks.findOne({
@@ -597,7 +602,7 @@ function getLatLong(zipcode) {
     })
 }
 
-function updateInventory(item, stores, coords) {
+function updateInventory(item, coords) {
     return new Promise(function(resolve, reject) {
         var d = _.difference(oldStores, newStores);
         if (d.length < 1) {
@@ -619,7 +624,7 @@ function updateInventory(item, stores, coords) {
                 return callback()
             } else if (stores) {
                 stores.forEach(function(store) {
-                    if (distance(store.loc.coordinates[0][1], store.loc.coordinates[0][1], parseFloat(coords[1]), parseFloat(coords[0]), 'K') < 163) {
+                    if (distance(store.loc.coordinates[1], store.loc.coordinates[0], parseFloat(coords[1]), parseFloat(coords[0]), 'K') < 163) {
                         storesToRemove.push(store)
                     }
                 })
@@ -630,7 +635,7 @@ function updateInventory(item, stores, coords) {
                     })
                     var locs = []
                     storesToRemove.forEach(function(store) {
-                        locs.push(store.loc.coordinates[0])
+                        locs.push(store.loc.coordinates)
                     })
 
                     db.Landmarks.update({

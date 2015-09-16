@@ -430,7 +430,7 @@ function processItems(inventory, itemData) {
                                     } else if (s) {
                                         // console.log('Found store coords: ',s.loc)
                                         i.parents.push(s._id)
-                                        i.loc.coordinates.push(s.loc.coordinates[0])
+                                        i.loc.coordinates.push(s.loc.coordinates)
                                         callback()
                                     }
                                 })
