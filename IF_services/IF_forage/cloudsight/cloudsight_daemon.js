@@ -51,10 +51,10 @@ function processItem() {
         if (e) {
           console.error('error saving landmark');
           console.error(e);
-          return setTimeout(processItem, 1000);
+          process.exit(1);
         }
         console.log('updated landmark', l._id.toString());
-        return setTimeout(processItem, 1000);
+        process.exit(0);
       })
     })
   })

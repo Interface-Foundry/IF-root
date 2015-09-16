@@ -10,6 +10,7 @@ var ftpPassword = 'elJLjq4qGX';
 var urlTemplate = 'http://style.vsapi01.com/api-search/by-url/?apikey=$KEY&url=$URL'
   .replace('$KEY', APIKey);
 
+
 /**
  * this function processes items until there are no more items to process
  * then it enters the coldwait function, which polls the db every so often
@@ -72,10 +73,10 @@ function processItem() {
           if (e) {
             console.error('error saving landmark');
             console.error(e);
-            return setTimeout(processItem, 1000);
+            process.exit(1);
           }
           console.log('updated landmark', l._id.toString());
-          return setTimeout(processItem, 1000);
+          process.exit(0);
         })
       })
     })
@@ -98,7 +99,7 @@ function coldwait() {
       process.exit(1);
     }
     if (l) {
-      process.nextTick(function() {
+      setImmediate(function() {
         processItem();
       })
     } else {
