@@ -8,6 +8,7 @@ var uniquer = require('../../uniquer');
 var request = require('request');
 var _ = require('lodash');
 var tagParser = require('../tagParser');
+var fs = require('fs');
 
 module.exports = function(url, category, zipcode) {
     //Global variable declarations
@@ -468,6 +469,11 @@ function saveStores(items, stores) {
                 delete item.physicalStores
                 delete item.itemPartNumbersMap;
             })
+
+            fs.appendFile('items.js', JSON.stringify(items), function(err) {
+                if (err) throw err;
+            });
+
             resolve([items, Stores])
         })
     })
@@ -480,7 +486,7 @@ function saveItems(Items, Stores) {
         var storeIds = Stores.map(function(store) {
             return store._id
         })
-        newStores = storeIds.map(function(id){
+        newStores = storeIds.map(function(id) {
             return id.toString()
         });
         var storeLocs = [];
@@ -496,6 +502,7 @@ function saveItems(Items, Stores) {
             //Check if item already exists
             db.Landmarks.findOne({
                 'source_generic_item.parentProductId': item.parentProductId,
+                'name': item.name,
                 'linkbackname': 'menswearhouse.com'
             }, function(err, i) {
                 if (err) {
@@ -548,7 +555,7 @@ function saveItems(Items, Stores) {
                 else if (i) {
                     console.log('Item exists: ', i.id)
                     if (i.parents) {
-                        oldStores = i.parents.map(function(id){
+                        oldStores = i.parents.map(function(id) {
                             return id.toString()
                         })
                     }
@@ -684,7 +691,7 @@ function updateInventory(item, coords) {
                     }
                 })
                 console.log('Found ', storesToRemove.length, ' inventory records to remove.')
-         
+
                 if (storesToRemove.length > 0) {
                     var ids = storesToRemove.map(function(store) {
                         return store._id
