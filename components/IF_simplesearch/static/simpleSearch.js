@@ -1,6 +1,6 @@
 var simpleSearchApp = angular.module('simpleSearchApp',[]);
 
-simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location) {
+simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * * 
@@ -10,8 +10,11 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
 
     var userLat;
     var userLng;
+    $scope.showGPS = true;
+    $scope.locationMsg = 'Use precise location';
+    $scope.itemHighlight = "form-grey";
+    $scope.locationHighlight = "form-grey";
 
-    $scope.windowHeight = $(window).height();
 
     $http.get('https://kipapp.co/api/geolocation').
         then(function(res) {
@@ -34,9 +37,64 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     function showPosition(position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
+
+        //get neighborhood name via lat lng from google
+        $http.get('http://maps.googleapis.com/maps/api/geocode/json?latlng='+userLat+','+userLng+'&sensor=true').
+            then(function(res) {
+                for (var i = 0; i < res.data.results.length; i++) {   
+                    if (res.data.results[i].geometry.location_type == 'APPROXIMATE'){ 
+                        res.data.results[i].formatted_address = res.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
+                        $scope.userCity = res.data.results[i].formatted_address;
+                        break;                               
+                    }
+                }
+                $scope.locationMsg = 'Update Location';
+            }, function(res) {
+                //if IP broken get HTML5 geoloc
+                //$scope.getLocation();
+            });
     }
 
+    //why isn't this working to update ng-class :\ can't unselect input box right now
+    document.onclick= function(e) {
+        $scope.itemHighlight = "form-grey"; 
+        $scope.locationHighlight = "form-grey"; 
+    };
 
+    $scope.toggleHighlight = function($event){
+         
+        if ($event.currentTarget.id == 'search_item'){
+            if ($scope.itemHighlight === "form-grey"){
+                $scope.itemHighlight = "form-highlight";
+                $scope.locationHighlight = "form-grey";
+            }
+            $event.stopPropagation();
+
+        }
+        else if ($event.currentTarget.id == 'search_location'){
+            if ($scope.locationHighlight === "form-grey"){
+                $scope.locationHighlight = "form-highlight";
+                $scope.itemHighlight = "form-grey";
+            }
+            $event.stopPropagation();
+        }
+        else {
+            $scope.itemHighlight = "form-grey";
+            $scope.locationHighlight = "form-grey"; 
+        }
+
+    }
+
+    $scope.randomSearch = function(query){
+        var tempRandomTrends = ['70s','vintage','fur','orange','health goth'];
+        $scope.query = tempRandomTrends[Math.floor(Math.random()*tempRandomTrends.length)];
+        $scope.searchQuery();
+    }
+
+    $scope.searchThis = function(query){
+        $scope.query = query;
+        $scope.searchQuery();
+    }
 
     $scope.searchQuery = function(){
 
@@ -48,7 +106,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
         $http.post('https://kipapp.co/styles/api/items/search', {
             text: $scope.query,
             loc: {lat: userLat, lon: userLng},
-            radius: 2,
+            radius: 5,
         }).
             then(function(response) {
 
@@ -82,12 +140,29 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
                     }
                 }
 
+                //if not mobile, move query bar to top of page
+                // if (window.innerWidth > 992){
+                    $scope.showQueryBar = true;
+                // }
+
+                //console.log($document[0].body.scrollHeight);
+
+                $scope.windowHeight = $document[0].body.scrollHeight;
+
+
+
+
         }, function(response) {
 
         });
 
     };
 
+
+    angular.element(document).ready(function () {
+        $scope.windowHeight = window.innerHeight;
+        //console.log($scope.windowHeight);
+    });
 
 
 
@@ -134,6 +209,41 @@ simpleSearchApp.directive('autoFocus', function($timeout) {
         }
     };
 });
+
+simpleSearchApp.directive('afterResults', function($document) {
+    return {
+        restrict: "E",
+        replace: true,
+        scope: {
+            windowHeight:'='
+        },
+        link: function(scope, element, attrs) {
+            console.log(scope.$parent.windowHeight);
+            if (scope.$parent.$last){
+                // console.log(scope.windowHeight);
+                // console.log($document[0].body.scrollHeight);
+                // console.log($document[0].body.clientHeight);
+
+                scope.windowHeight = $document[0].body.clientHeight;
+                console.log(scope.windowHeight);
+            }
+        }
+    };
+});
+
+simpleSearchApp.directive('selectOnClick', ['$window', function ($window) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            element.on('click', function () {
+                if (!$window.getSelection().toString()) {
+                    // Required for mobile Safari
+                    this.setSelectionRange(0, this.value.length)
+                }
+            });
+        }
+    };
+}]);
 
 // app.directive('hires', function() {
 //   return {

@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" ng-app="simpleSearchApp">
 <!-- 
    _  __                ____   
@@ -9,13 +9,14 @@ U/| . \\u      | |     |  __/
 ,-,>> \\,-.-,_|___|_,-.||>>_   
  \.)   (_/ \_)-' '-(_/(__)__) 
 
-not alphabet.
+~ by Interface Foundry PBC ~
 -->
 <head>
     <meta charset="utf-8"/>
     <title>Kip</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css"/>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <link href="normalize.css" rel="stylesheet" type="text/css"/>
     <link href="skeleton.css" rel="stylesheet" type="text/css"/>
     <link href="simpleSearch.css" rel="stylesheet" type="text/css"/>
@@ -23,31 +24,107 @@ not alphabet.
 <body ng-controller="SimpleSearchCtrl">
 
 <div class="container">
-    
+
+  <div ng-hide="showQueryBar">
+<!--     
     <div class="row">
-
-      <br><br>
-
-      <div class="u-full-width u-textAlignCenter">
-         <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px;" width="90">
+      <div class="col-md-4"></div>
+      <div class="col-md-4">     
+        <div class="u-full-width u-textAlignCenter">
+          <br>
+          <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px;" width="90">
+        </div>
       </div>
+      <div class="col-md-4"></div>
     </div>
+ -->
     <div class="row">
-        <div class="four columns u-centered">
+        <br>
+        <div class="col-md-4">     
+            <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px; margin-top:171px;" width="90">
+<!--             <h1>Search for clothes in IRL stores around you</h1>
+ -->
+        </div>
+<!--         <div class="col-md-8">
+            <hgroup>
+              <h1>Search for clothes in IRL stores around you</h1>
+              <h2>Kip finds dresses, bags, hats, suits, shirts, accessories, and more</h2>
+            </hgroup>
+        </div> -->
+   
+    </div>
 
-            <form class="u-full-width">
-                <input 
-                  type="text" auto-focus ng-model="query" placeholder="What are you looking for?" class="u-full-width"/>
-                <input type="submit" value="Search" ng-click="searchQuery()" class="u-full-width color-Positive"/>
-            </form>
-            <h6 class="u-full-width u-textAlignCenter">Search for things in IRL stores around you</h6>
+    <div class="row">
+        <div class="col-md-12">     
+            <h1 class="kip-headline">Search for clothes in IRL stores around you</h1>
+        </div>
+    </div>    
 
-            Try <a ng-click="">blue hat</a> or <a ng-click="">purple striped shirt</a>
+    <div class="kip-headinput" style="padding-bottom:5px;">
+
+        <div class="row">
+          <form ng-submit="searchQuery()">
+            <div class="col-xs-6 col-md-6"> 
+                  <label id="search_item" class="kip-search_pseudo-input pseudo-input" ng-class="itemHighlight" ng-click="toggleHighlight($event)">
+                    <span class="pseudo-input_text">Find</span>
+                    <span class="pseudo-input_field-holder">
+                      <input auto-focus ng-model="query" 
+                        type="text" maxlength="2048" placeholder="blue dress, office, fall" tabindex="1" 
+                        class="kip-search-bar main-search_field pseudo-input_field">
+                    </span>
+                  </label>
+
+            </div>
+          </form>
+
+          <form ng-submit="searchQuery()">
+            <div class="col-xs-6 col-md-6"> 
+                  <label id="search_location" ng-class="locationHighlight" class="kip-search_pseudo-input pseudo-input" ng-click="toggleHighlight($event)">
+                    <span class="pseudo-input_text">Near</span>
+                    <span class="pseudo-input_field-holder">
+                      <input type="text" ng-cloak maxlength="2048" value="{{userCity}}" tabindex="1" 
+                      class="kip-search-bar main-search_field pseudo-input_field" select-on-click>
+                    </span>
+                  </label>
+                  <input class="kip-search-button" value="Kip Search" type="submit"> 
+            </div>
+          </form>
         </div>
     </div>
 
-    <div ng-show="userCity"><p>Items near {{userCity}}</p></div>
-    <div ng-show="items" ng-repeat="item in items">
+    <div class="row">
+        <div class="col-md-12">    
+        <br><br> 
+            <h2 class="kip-subheadline">Trending: <a >70s</a> <a>fall</a> <a>blue dress</a> </h2>
+        </div>
+    </div>
+
+  </div>
+
+
+<!--     <div class="row">
+      <div ng-cloak class="footerBar col-md-12" style="position:absolute;" ng-show="showGPS" ng-style="{top: windowHeight - 44 + 'px'}" ng-click="getLocation()">
+        <div ng-cloak class="kip-location u-full-width u-textAlignCenter" ng-show="userCity">{{userCity}} - <a style="cursor:pointer;" ng-click="getLocation()">{{locationMsg}}</a></div>
+      </div>
+    </div>
+ -->
+
+  <div ng-show="showQueryBar" ng-cloak>
+    <div class="row">
+      <form class="u-full-width" ng-submit="searchQuery()">
+        <br>
+        <div class="col-md-8">     
+            <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px;" width="90">
+            <input type="text" auto-focus ng-model="query" placeholder="What are you looking for?" style="border-radius:0px;" class="u-full-width kip-search-bar" />
+        </div>
+        <div class="col-md-4">
+            <div ng-click="searchQuery()" style="border-radius:0px;" class="button kip-search-button"><span class="glyphicon glyphicon-search"></span></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+    <div class="card" ng-show="items" ng-repeat="item in items" after-results ng-cloak>
 
 <!--       SHOW TWO BUTTONS: Directions and view online link (3 buttons if TEL # "tel"  to call)
 
@@ -58,21 +135,36 @@ not alphabet.
 
           BUILD OUT URL LINKS TO CIOPY PASTE!!!! OF SERACH!~
  -->      
+      <img class="card-img-top" ng-src="{{item.itemImageURL[0]}}" alt="{{item.name}}">
       
-      <img ng-src="{{item.itemImageURL[0]}}" width="800" style="max-width:100%;">
+<!--       <img ng-src="{{item.itemImageURL[0]}}" width="800" style="max-width:100%;">
+ -->
 
-      <h5>{{item.name}}  ${{item.price}}</h5>
-      <p>{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
+      <div class="card-block">
+        <h4 class="card-title">{{item.name}} ${{item.price}}</h4>
+        <p class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
 
-      <p ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
+        <p class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
 
-      <p ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
-      <p ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
+        <p class="card-text" ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
+        <p class="card-text" ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
 
-      <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
+        <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
+        
+        <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
+        <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+        
+        <a href="#" class="btn btn-primary">Button</a>
+
+        <div ng-show="item.linkback">
+            <p>Item from <a href="{{item.linkback}}" target="_blank">{{item.linkbackname}}</a></p>
+        </div>
+
+      </div>
+
+
     
 
-      <h1 class="kipFont energized"> <span>{{item.faves.length}}</span></h1> 
 <!-- 
       <div ng-show="item.source_shoptiques_item.id">
         shoptiques
@@ -93,21 +185,37 @@ not alphabet.
           <img width="50" src="{{image}}">
         </div> -->
 
-      <div ng-show="item.linkback">
-          <p>Item from <a href="{{item.linkback}}" target="_blank">{{item.linkbackname}}</a></p>
+
+
+    </div>
+
+
+</div>
+    <div class="row">
+
+      <div ng-cloak class="footerBar col-md-12" style="position:absolute;" ng-show="showGPS" ng-style="{top: windowHeight - 44 + 'px'}" ng-click="getLocation()">
+        <div ng-cloak class="kip-location u-full-width u-textAlignCenter">Over 1,000,000 items on sale</div>
+        <!-- <div ng-cloak class="kip-location u-full-width u-textAlignCenter" ng-show="userCity"><a style="cursor:pointer;" ng-click="getLocation()">{{locationMsg}}</a></div> -->
+
       </div>
 
     </div>
 
-    <div class="footerBar" ng-style="{top: windowHeight + 'px'}" ng-click="getLocation()">USE GPS</div>
-
     <div class="row">
-      
-      <h6 ng-show="items" class="u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>
+      <h6 ng-cloak ng-show="items" class=" u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>
     </div>
-</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
 <script src="zepto.min.js"></script>
-<script src="simpleSearch.js"></script>
+<!-- <script src="ui-bootstrap-tpls-0.13.4.min.js"></script>
+ --><script src="simpleSearch.js"></script>
 </body>
 </html>
+
+
+
+

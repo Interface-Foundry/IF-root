@@ -1,5 +1,24 @@
 body {
-    font-family: Raleway, arial, sans-serif;
+    font-family: 'Open Sans', arial, sans-serif;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth:always;
+}
+
+.header {
+  margin: 0;
 }
 
 @font-face {
@@ -11,18 +30,96 @@ body {
     url("kip/kip.svg") format("svg");
 }
 
+.form-grey{
+    border:1px solid #d9d9d9 !important;
+}
+
+.form-highlight{
+    border:1px solid #4d90fe !important;
+}
+
 .kipFont { 
     font-family: "Kip" sans-serif;
     font-size: 18px;
 }
+
+.kip-search-bar {
+    width: 100%;
+    float:left;
+    line-height: 26px !important;
+    height: 26px !important;
+    font: 16px arial,sans-serif !important;
+    border-radius: 0px !important; 
+    border: none !important;
+    color:#000;
+}
+
+.kip-headline{
+    font-size: 22px;
+    margin-top: 10px;
+    /*float:right;*/
+}
+
+.kip-subheadline{
+    font-size: 14px;
+    letter-spacing: 0.9px;
+    cursor: pointer;
+    float: right;
+}
+
+.kip-search-button{
+    color: #fff !important;
+    background-color: #5649D8 !important;
+    height: 36px !important;
+    line-height: 27px !important;
+    width: 113.75px !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+    border-radius: 2px !important;
+    font-family: arial,sans-serif !important;
+    font-weight: bold !important;
+    border: none !important;
+    text-transform: none !important;
+    letter-spacing: 0.9px !important;
+    float:right;
+    margin-left: 12px;
+}
+
+.kip-search-button:hover{
+
+    border: 1px solid #AEA9A9 !important;
+    color:  #AEA9A9 !important;
+}
+
+.kip-location{
+    font-size: 14px;
+}
+
+
 
 .kipFont span{
     margin-top: -2px;
     font-size: 16px;
 }
 
-.energized {
+.search-container {
+    margin-left:auto;
+    margin-right:auto;
+    width:150px;
+}
+
+.search-button {
+    background-color: #f2f2f2;
+    color:#757575;
+    border:none;
+}
+
+.kip-energized {
     color: rgba(244, 89, 29, 1.0);
+}
+
+.kip-positive {
+    color: #5649D8;
 }
 
 .u-hidden {
@@ -82,8 +179,9 @@ div.headerBar {
 }
 
 div.footerBar {
-    background-color: rgba(85, 66, 226, 1.0);   
-    color: white;
+    background-color: #f2f2f2;
+    border-top: 1px solid #e4e4e4;   
+    color:#333;
     width: 100%;
     font-size: 20px;
     vertical-align: middle;
@@ -91,5 +189,140 @@ div.footerBar {
     display: flex;
     align-items: center;
     padding-left: 10px;
-    position: absolute;;
+    position: absolute;
+    left:0;
+    right:0;
+
 }
+
+.arrange--6{
+    margin-left:-3px;
+    margin-right: -3px;
+}
+
+.arrange {
+    display: table;
+    min-width: 100%;
+    table-layout: auto;
+}
+
+.arrange--6>.arrange_unit {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.arrange--middle>.arrange_unit {
+    vertical-align: middle;
+}
+
+.main-search_search-field-arrange{
+    width: 50%;
+}
+
+.arrange_unit{
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing: border-box;
+    box-sizing:border-box;
+    display: table-cell;
+    vertical-align: top;    
+}
+
+
+/* special */
+
+.kip-headinput{
+    height: 38px;
+}
+
+.main-search_suggestions-field{
+    position: relative;
+}
+
+.main-search_pseudo-input{
+    margin: 0;
+    border:1px solid #000;
+}
+
+.pseudo-input{
+    cursor: text;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width:100%;
+    margin:0 0 18px;
+    padding:5px;
+    border: 1px solid #d9d9d9;
+    font-size: 14px;
+    line-height: 1.7em;
+    height: 38px;
+    width: 85%;
+    float: left;
+}
+
+#search_location{
+    margin-left: -87px;
+}
+
+.hover-input{
+    border: 1px solid #b9b9b9;
+    border-top-color: #a0a0a0;
+}
+
+.main-search_pseudo-input, .yform .main-search_pseudo-input{
+    margin: 0;
+    border: 1px solid #000;
+}
+
+.pseudo-input_text{
+    float: left;
+    margin-right: 5px;
+    margin-left: 3px;
+    font-weight: black !important;
+    color:#333;
+    cursor: default;
+    -webkit-user-select:none;
+    -khtml-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+    font-size: 16px;
+    font-family: arial, sans-serif;
+    margin-top: 0.5px;
+}
+
+.pseudo-input_field-holder{
+    display: block;
+    overflow: hidden;
+}
+
+.pseudo-input textarea, .yform .pseudo-input textarea:focus, .yform .pseudo-input.focused textarea, .yform .pseudo-input input, .yform .pseudo-input input:focus, .yform .pseudo-input.focused input{
+    margin: 0;
+    border:0;
+    outline: 0;
+    -webkit-box-shadow:none;
+    box-shadow: none;
+    background: none;
+    padding: 2px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.pseudo-input_field{
+    width: 100%;
+    vertical-align: baseline !important;
+    padding: 0 !important;
+}
+
+/* end special */
+
+
+
+
+
+
+
+
+
