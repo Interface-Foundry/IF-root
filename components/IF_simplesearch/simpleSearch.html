@@ -40,13 +40,45 @@ U/| . \\u      | |     |  __/
       <div class="col-md-4"></div>
     </div>
  -->
+      <div class="flex-Container">
+          
+        <div class="flexBody Top">
+            <div class="flexBody Top-Icon"></div>
+            <div class="Top-Tag">Search for clothes in IRL stores around you</div>
+        </div>
+          
+        <div class="flexBody Mid-Container">
+            <form ng-submit="searchQuery()" class="flexBody Mid Input">
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-model="query" class="Find-Input" placeholder="blue dress, office, fall"></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input class="Find-Input" placeholder=""></input></div>
+                <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
+            </form>
+            <div class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
+        </div>
+        <div class="flexBody Mid Tag">
+            <div class="Mid Tag Text">
+                <div>Trending: <a >70s</a> <a>fall</a> <a>blue dress</a></div>
+            </div>
+        </div>
+        <div class="flexBody Foot">Over 1,000,000 items on sale</div>
+      </div>
+      
+      
+    
+    
+    
+    
+    
+<!--
+    
     <div class="row">
         <br>
         <div class="col-md-4">     
             <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px; margin-top:171px;" width="90">
+-->
 <!--             <h1>Search for clothes in IRL stores around you</h1>
  -->
-        </div>
+<!--        </div>-->
 <!--         <div class="col-md-8">
             <hgroup>
               <h1>Search for clothes in IRL stores around you</h1>
@@ -54,8 +86,9 @@ U/| . \\u      | |     |  __/
             </hgroup>
         </div> -->
    
-    </div>
+<!--    </div>-->
 
+<!--
     <div class="row">
         <div class="col-md-12">     
             <h1 class="kip-headline">Search for clothes in IRL stores around you</h1>
@@ -64,9 +97,9 @@ U/| . \\u      | |     |  __/
 
     <div class="kip-headinput" style="padding-bottom:5px;">
 
-        <div class="row">
+        <div class="row-fluid">
           <form ng-submit="searchQuery()">
-            <div class="col-xs-6 col-md-6"> 
+            <div class="col-md-6 span4"> 
                   <label id="search_item" class="kip-search_pseudo-input pseudo-input" ng-class="itemHighlight" ng-click="toggleHighlight($event)">
                     <span class="pseudo-input_text">Find</span>
                     <span class="pseudo-input_field-holder">
@@ -80,7 +113,7 @@ U/| . \\u      | |     |  __/
           </form>
 
           <form ng-submit="searchQuery()">
-            <div class="col-xs-6 col-md-6"> 
+            <div class="col-md-6 span4"> 
                   <label id="search_location" ng-class="locationHighlight" class="kip-search_pseudo-input pseudo-input" ng-click="toggleHighlight($event)">
                     <span class="pseudo-input_text">Near</span>
                     <span class="pseudo-input_field-holder">
@@ -103,6 +136,7 @@ U/| . \\u      | |     |  __/
 
   </div>
 
+-->
 
 <!--     <div class="row">
       <div ng-cloak class="footerBar col-md-12" style="position:absolute;" ng-show="showGPS" ng-style="{top: windowHeight - 44 + 'px'}" ng-click="getLocation()">
@@ -170,13 +204,15 @@ U/| . \\u      | |     |  __/
 </div>
     <div class="row">
 
+<!--
       <div ng-cloak class="footerBar col-md-12" style="position:absolute;" ng-show="showGPS" ng-style="{top: windowHeight - 44 + 'px'}" ng-click="getLocation()">
         <div ng-cloak class="kip-location u-full-width u-textAlignCenter">Over 1,000,000 items on sale</div>
-        <!-- <div ng-cloak class="kip-location u-full-width u-textAlignCenter" ng-show="userCity"><a style="cursor:pointer;" ng-click="getLocation()">{{locationMsg}}</a></div> -->
+         <div ng-cloak class="kip-location u-full-width u-textAlignCenter" ng-show="userCity"><a style="cursor:pointer;" ng-click="getLocation()">{{locationMsg}}</a></div> 
 
       </div>
 
     </div>
+-->
 
     <div class="row">
       <h6 ng-cloak ng-show="items" class=" u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>

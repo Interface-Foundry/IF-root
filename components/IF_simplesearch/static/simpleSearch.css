@@ -342,10 +342,182 @@ div.footerBar {
 /* end special */
 
 
+/*Flexbox CSS*/
 
+.flex-Container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20%;
+/*    outline: 1px solid black;*/
+}
 
+.flexBody.Top {
+/*    outline: 2px solid red;   */
+    margin-left: -20px;
+}
 
+.flexBody.Top-Icon {
+    background-image: url("http://kipstyles.co/assets/images/kip_logo_purp.svg");
+    background-size: contain;
+    height: 90px;
+    width: 90px;
+}
 
+.Top-Tag {
+    font-size: 22px;   
+    
+}
 
+.flexBody.Mid-Container {
+/*    outline: 2px solid green;   */
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+}
 
+.Mid.Input {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
 
+.Mid.Button {
+    color: #fff;
+    border-radius: 2px;
+    background-color: #5649D8;
+    height: 36px;
+    width: 113.75px;
+    text-align: center;
+    font-weight: bold;
+    font-family: arial, sans-serif;
+    letter-spacing: 0.9px;
+    line-height: 27px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    top: -10px;
+    margin-top: -6px;
+}
+
+.Mid.Button:hover {
+    border: 1px solid #AEA9A9;
+    color: #AEA9A9;
+    cursor: pointer;
+}
+
+.Mobile.Button {
+    width: 20%;
+    color: #fff;
+    border-radius: 2px;
+    background-color: #5649D8;
+    position: relative;
+    top: -7px;
+    visibility:  hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.Mobile-Icon {
+    font-size: 40px;  
+    visibility: hidden;
+}
+
+.Find-ZTop {
+    z-index: 10;   
+    position: relative;
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+    padding-left: 10px;
+}
+
+.Find-Input {
+    padding-left: 50px;  
+    z-index: 9;
+    position: relative;
+    height: 36px;
+    width: 96%;
+    top: -31px;
+    border: 1px solid #d9d9d9;
+}
+
+.Mid-Input.Length {
+    width: 44%;   
+    margin-bottom: -30px;
+}
+
+.Length.Button {
+    width: 12%;   
+}
+
+.Mid.Tag {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-right: -10px;
+}
+
+.Mid.Tag.Text {
+    margin-top: 10px;
+    font-size: 14px;
+    letter-spacing: 0.9px;
+    cursor: pointer;  
+}
+
+.flexBody.Foot {
+    background-color: #f2f2f2;   
+    border-top: 1px solid #e4e4e4;
+    font-size: 20px;
+    position: fixed;
+    bottom: 0;
+    left:0;
+    color: #333;
+    text-align: center;
+    width: 100%;
+}
+
+body {
+    height: 100%;   
+}
+
+@media(max-width: 400px) {
+    .flex-Container {
+        margin-top: 20%;   
+    }
+    
+    .Top-Tag {
+        font-size: 16px;   
+    }
+    
+    .Mobile-Icon {
+        visibility: visible;
+    }
+    
+    .Mobile.Button {
+        visibility: visible;
+    }
+    
+    .flexBody.Top {
+        margin-left: 0px;   
+    }
+    
+    .Mid.Tag {
+        margin-right: 0px;
+    }
+    
+    .Mid.Input {
+        flex-wrap:wrap;
+        width: 80%;
+    }
+    .Mid-Input.Length {
+        width: 100%;   
+        margin-bottom: -39px;
+    }
+    
+    .Length.Button {
+        display: none;   
+    }
+}
