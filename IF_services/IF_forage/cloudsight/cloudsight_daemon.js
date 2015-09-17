@@ -1,7 +1,6 @@
 var db = require('db');
 var request = require('request');
 require('vvv');
-var saveJustVisual = require('./saveJustVisual');
 var Promise = require('bluebird');
 var CloudsightAPI = require('./cloudsightAPI');
 var cloudsight = new CloudsightAPI({
@@ -51,10 +50,10 @@ function processItem() {
         if (e) {
           console.error('error saving landmark');
           console.error(e);
-          process.exit(1);
+          return setTimeout(processItem, 1000);
         }
         console.log('updated landmark', l._id.toString());
-        process.exit(0);
+        return setTimeout(processItem, 1000);
       })
     })
   })
