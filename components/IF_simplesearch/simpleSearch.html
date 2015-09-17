@@ -50,10 +50,10 @@ U/| . \\u      | |     |  __/
         <div class="flexBody Mid-Container">
             <form ng-submit="searchQuery()" class="flexBody Mid Input">
                 <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-model="query" class="Find-Input" placeholder="blue dress, office, fall"></input></div>
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input class="Find-Input" placeholder=""></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input class="Find-Input" value="{{userCity}}" placeholder=""></input></div>
                 <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
-            <div class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
+            <div ng-click="searchQuery()" class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
         </div>
         <div class="flexBody Mid Tag">
             <div class="Mid Tag Text">
@@ -94,6 +94,8 @@ U/| . \\u      | |     |  __/
             <h1 class="kip-headline">Search for clothes in IRL stores around you</h1>
         </div>
     </div>    
+-->
+<!--
 
     <div class="kip-headinput" style="padding-bottom:5px;">
 
@@ -126,17 +128,19 @@ U/| . \\u      | |     |  __/
           </form>
         </div>
     </div>
+-->
 
+<!--
     <div class="row">
         <div class="col-md-12">    
         <br><br> 
             <h2 class="kip-subheadline">Trending: <a >70s</a> <a>fall</a> <a>blue dress</a> </h2>
         </div>
     </div>
+-->
 
   </div>
 
--->
 
 <!--     <div class="row">
       <div ng-cloak class="footerBar col-md-12" style="position:absolute;" ng-show="showGPS" ng-style="{top: windowHeight - 44 + 'px'}" ng-click="getLocation()">
@@ -146,6 +150,23 @@ U/| . \\u      | |     |  __/
  -->
 
   <div ng-show="showQueryBar" ng-cloak>
+    <div class="flex-Container Query">
+
+        <div class="flexBody Mid-Container">
+            <div class="flexBody Top-Icon Query"></div>
+            <form ng-submit="searchQuery()" class="flexBody Mid Input">
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-model="query" class="Find-Input" placeholder="blue dress, office, fall"></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input class="Find-Input" value="{{userCity}}" placeholder=""></input></div>
+                <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
+            </form>
+            <div ng-click="searchQuery()" class="Mid-Input Mobile Button Query"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
+        </div>
+        
+    </div>
+      
+      
+<!--
+      
     <div class="row">
       <form class="u-full-width" ng-submit="searchQuery()">
         <br>
@@ -158,6 +179,7 @@ U/| . \\u      | |     |  __/
         </div>
       </form>
     </div>
+-->
   </div>
 
     <div class="kip-card row" ng-show="items" ng-repeat="item in items" after-results ng-cloak>

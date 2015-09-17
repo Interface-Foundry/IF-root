@@ -351,6 +351,10 @@ div.footerBar {
 /*    outline: 1px solid black;*/
 }
 
+.flex-Container.Query {
+    margin-top: 0;      
+}
+
 .flexBody.Top {
 /*    outline: 2px solid red;   */
     margin-left: -20px;
@@ -359,8 +363,13 @@ div.footerBar {
 .flexBody.Top-Icon {
     background-image: url("http://kipstyles.co/assets/images/kip_logo_purp.svg");
     background-size: contain;
+    background-repeat: no-repeat;
     height: 90px;
     width: 90px;
+}
+
+.Top-Icon.Query {
+    margin-top: -20px;   
 }
 
 .Top-Tag {
@@ -484,8 +493,15 @@ body {
 }
 
 @media(max-width: 400px) {
+    .Top-Icon.Query {
+        margin-top: 0;   
+    }
+    
     .flex-Container {
         margin-top: 20%;   
+    }
+    
+    .flex-Container.Query {
     }
     
     .Top-Tag {
@@ -498,6 +514,10 @@ body {
     
     .Mobile.Button {
         visibility: visible;
+    }
+    
+    .Mobile.Button.Query {
+        margin-bottom:8px;   
     }
     
     .flexBody.Top {
