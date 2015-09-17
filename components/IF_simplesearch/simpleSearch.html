@@ -16,7 +16,9 @@ U/| . \\u      | |     |  __/
     <title>Kip</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css"/>
+
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
     <link href="normalize.css" rel="stylesheet" type="text/css"/>
     <link href="skeleton.css" rel="stylesheet" type="text/css"/>
     <link href="simpleSearch.css" rel="stylesheet" type="text/css"/>
@@ -118,13 +120,39 @@ U/| . \\u      | |     |  __/
             <input type="text" auto-focus ng-model="query" placeholder="What are you looking for?" style="border-radius:0px;" class="u-full-width kip-search-bar" />
         </div>
         <div class="col-md-4">
-            <div ng-click="searchQuery()" style="border-radius:0px;" class="button kip-search-button"><span class="glyphicon glyphicon-search"></span></div>
+            <div ng-click="searchQuery()" style="border-radius:0px;" class="button kip-search-button">Kip Search<span class="glyphicon glyphicon-search"></span></div>
         </div>
       </form>
     </div>
   </div>
 
-    <div class="card" ng-show="items" ng-repeat="item in items" after-results ng-cloak>
+    <div class="kip-card row" ng-show="items" ng-repeat="item in items" after-results ng-cloak>
+
+        <div class="col-md-4">     
+            <img class="kip-image-left" ng-src="{{item.itemImageURL[0]}}" alt="{{item.name}}">
+        </div>
+
+        <div class="col-md-8">
+            <h3 class="card-title"><a href="{{item.linkback}}">{{item.name}}</a> ${{item.price}}</h3>
+            <p>{{item.linkback}}</p>
+            <p class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
+
+            <p class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
+
+            <p class="card-text" ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
+            <p class="card-text" ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
+
+            <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
+            
+            <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
+            <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+            
+            <a href="#" class="btn btn-primary">Button</a>
+
+            <div ng-show="item.linkback">
+                <p>Item from <a href="{{item.linkback}}" style="color:#1a0dab;" target="_blank">{{item.linkbackname}}</a></p>
+            </div>    
+        </div>
 
 <!--       SHOW TWO BUTTONS: Directions and view online link (3 buttons if TEL # "tel"  to call)
 
@@ -135,57 +163,6 @@ U/| . \\u      | |     |  __/
 
           BUILD OUT URL LINKS TO CIOPY PASTE!!!! OF SERACH!~
  -->      
-      <img class="card-img-top" ng-src="{{item.itemImageURL[0]}}" alt="{{item.name}}">
-      
-<!--       <img ng-src="{{item.itemImageURL[0]}}" width="800" style="max-width:100%;">
- -->
-
-      <div class="card-block">
-        <h4 class="card-title">{{item.name}} ${{item.price}}</h4>
-        <p class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
-
-        <p class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
-
-        <p class="card-text" ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
-        <p class="card-text" ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
-
-        <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
-        
-        <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
-        <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
-        
-        <a href="#" class="btn btn-primary">Button</a>
-
-        <div ng-show="item.linkback">
-            <p>Item from <a href="{{item.linkback}}" target="_blank">{{item.linkbackname}}</a></p>
-        </div>
-
-      </div>
-
-
-    
-
-<!-- 
-      <div ng-show="item.source_shoptiques_item.id">
-        shoptiques
-      </div>
-      <div ng-show="item.source_instagram_post.id">
-        instagram
-      </div>
-      <div ng-show="item.source_google.id">
-        google
-      </div>
-      <div ng-show="item.source_generic">
-        generic
-      </div>
-
- -->
-
-  <!--       <div ng-repeat="image in item.itemImageURL" >
-          <img width="50" src="{{image}}">
-        </div> -->
-
-
 
     </div>
 
