@@ -13,7 +13,7 @@ U/| . \\u      | |     |  __/
 -->
 <head>
     <meta charset="utf-8"/>
-    <title>Kip</title>
+    <title>Kip - Search for things in IRL stores around you</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css"/>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
@@ -58,7 +58,7 @@ U/| . \\u      | |     |  __/
                 <div>Trending: <a >70s</a> <a>fall</a> <a>blue dress</a></div>
             </div>
         </div>
-        <div class="flexBody Foot">Over 1,000,000 items on sale</div>
+        <div class="flexBody Foot ">Over 1,000,000 items on sale</div>
 
       </div>
       
@@ -155,8 +155,8 @@ U/| . \\u      | |     |  __/
         <div class="flexBody Mid-Container">
             <div class="flexBody Top-Icon Query"></div>
             <form ng-submit="searchQuery()" class="flexBody Mid Input">
-                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-model="query" class="Find-Input" placeholder="blue dress, office, fall"></input></div>
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input class="Find-Input" value="{{userCity}}" placeholder=""></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>
                 <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
             <div ng-click="searchQuery()" class="Mid-Input Mobile Button Query"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
@@ -187,20 +187,31 @@ U/| . \\u      | |     |  __/
                 <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
             </div>
 
-            <div class="col-md-8">
-                <h3 class="card-title"><a href="{{item.linkback}}">{{item.name}}</a> ${{item.price}}</h3>
-                <p>{{item.linkback}}</p>
-                <p class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
 
-                <p class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
+        <div class="col-md-8" >
+            <h3 class="card-title" style="margin-bottom:0rem !important;"><a href="{{item.linkback}}">{{item.name}}</a> ${{item.price}}</h3>
+           <!--  <p style="margin-bottom:1rem !important;">{{item.linkbackname}}</p> -->
+            <p style="margin-bottom:1rem !important;"class="card-text">{{item.parent.name}} </p>
 
-                <p class="card-text" ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
-                <p class="card-text" ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
+<!--               – {{item.distanceMI}} miles <span style="font-size:12px;">({{item.distanceKM}}km)</span></p>
+ -->
+            <p style="margin-bottom:1rem !important;" class="card-text" ng-show="item.addressString">{{item.addressString}}</p>
 
-                <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
+            <p style="margin-bottom:1rem !important;" class="card-text" ng-show="item.tel">{{item.tel}}</p>
+            <p  style="margin-bottom:1rem !important;" class="card-text" ng-show="item.addressString">{{item.addressString}}</p>
 
-                <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
-                <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+            <div style="position:inline-block;"><a style="margin-bottom:1rem !important;" class="btn btn-primary" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to store</a>
+              <a style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important;" ng-href="{{item.linkback}}">Get online</a></p>
+<!--             
+            <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
+            <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+             -->
+
+<!--             <div ng-show="item.linkback">
+                <p>Item from <a href="{{item.linkback}}" style="color:#1a0dab;" target="_blank">{{item.linkbackname}}</a></p>
+            </div>    --> 
+        </div>
+
 
                 <a href="#" class="btn btn-primary">Button</a>
 
@@ -234,7 +245,7 @@ U/| . \\u      | |     |  __/
 -->
 
     <div class="row">
-      <h6 ng-cloak ng-show="items" class=" u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>
+      <h6 ng-cloak ng-show="items" class=" u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location with Kip Styles on iOS and Android</h6>
     </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
