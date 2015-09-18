@@ -16,7 +16,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     $scope.locationHighlight = "form-grey";
 
 
-    $http.get('https://kipapp.co/api/geolocation').
+    $http.get('https://kipapp.co/styles/api/geolocation').
         then(function(res) {
             userLat = res.lat; 
             userLng = res.lng;
@@ -247,6 +247,20 @@ simpleSearchApp.directive('selectOnClick', ['$window', function ($window) {
         }
     };
 }]);
+
+simpleSearchApp.directive('ngEnter', function() {
+        return function(scope, element, attrs) {
+            element.bind("keydown keypress", function(event) {
+                if(event.which === 13) {
+                    scope.$apply(function(){
+                        scope.$eval(attrs.ngEnter, {'event': event});
+                    });
+
+                    event.preventDefault();
+                }
+            });
+        };
+    });
 
 // app.directive('hires', function() {
 //   return {

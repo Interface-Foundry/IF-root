@@ -43,14 +43,14 @@ U/| . \\u      | |     |  __/
       <div class="flex-Container">
           
         <div class="flexBody Top">
-            <div class="flexBody Top-Icon"></div>
+            <a href="/"><div class="flexBody Top-Icon"></div></a>
             <div class="Top-Tag">Search for clothes in IRL stores around you</div>
         </div>
           
         <div class="flexBody Mid-Container">
-            <form ng-submit="searchQuery()" class="flexBody Mid Input">
-                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-model="query" class="Find-Input" placeholder="blue dress, office, fall"></input></div>
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input class="Find-Input" value="{{userCity}}" placeholder=""></input></div>
+            <form class="flexBody Mid Input">
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-enter="searchQuery()" ng-model="userCity" class="Find-Input" maxlength="2046" placeholder="address, city, landmark" select-on-click></input></div>
                 <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
             <div ng-click="searchQuery()" class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
@@ -61,6 +61,7 @@ U/| . \\u      | |     |  __/
             </div>
         </div>
         <div class="flexBody Foot">Over 1,000,000 items on sale</div>
+
       </div>
       
       
@@ -95,9 +96,9 @@ U/| . \\u      | |     |  __/
         </div>
     </div>    
 -->
-<!--
 
-    <div class="kip-headinput" style="padding-bottom:5px;">
+
+<!--     <div class="kip-headinput" style="padding-bottom:5px;">
 
         <div class="row-fluid">
           <form ng-submit="searchQuery()">
@@ -127,8 +128,8 @@ U/| . \\u      | |     |  __/
             </div>
           </form>
         </div>
-    </div>
--->
+    </div> -->
+
 
 <!--
     <div class="row">

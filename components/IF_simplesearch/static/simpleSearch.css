@@ -289,11 +289,6 @@ div.footerBar {
     margin-left: -87px;
 }
 
-.hover-input{
-    border: 1px solid #b9b9b9;
-    border-top-color: #a0a0a0;
-}
-
 .main-search_pseudo-input, .yform .main-search_pseudo-input{
     margin: 0;
     border: 1px solid #000;
@@ -442,6 +437,7 @@ div.footerBar {
     font-size: 16px;
     color: #333;
     padding-left: 10px;
+    pointer-events:none;
 }
 
 .Find-Input {
@@ -452,6 +448,16 @@ div.footerBar {
     width: 96%;
     top: -31px;
     border: 1px solid #d9d9d9;
+}
+
+.Find-Input:hover{
+    border: 1px solid #b9b9b9;
+    border-top-color: #a0a0a0;
+}
+
+.Find-Input:focus {
+    border:1px solid #4d90fe !important;
+    outline: none !important;
 }
 
 .Mid-Input.Length {
