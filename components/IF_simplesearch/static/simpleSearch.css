@@ -492,10 +492,31 @@ div.footerBar {
     color: #333;
     text-align: center;
     width: 100%;
+    background-repeat: no-repeat;
 }
 
-body {
-    height: 100%;   
+.imageWrapper {
+    height: 241px;
+    width: 241px;
+    overflow: hidden;
+}
+
+.holderPlace {
+    position: absolute;   
+    z-index: 2;
+    min-height: 241px;
+    max-width: 100%;
+}
+
+.holderPlace:first-child {
+    pointer-events:none;   
+}
+
+.holderPlace.Sub {
+    position: relative;
+    z-index: 1;
+    height: 241px;
+    max-width: 100%;
 }
 
 @media(max-width: 400px) {

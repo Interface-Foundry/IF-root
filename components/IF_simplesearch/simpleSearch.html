@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" ng-app="simpleSearchApp">
 <!-- 
    _  __                ____   
@@ -16,9 +16,7 @@ U/| . \\u      | |     |  __/
     <title>Kip</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css"/>
-
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-
     <link href="normalize.css" rel="stylesheet" type="text/css"/>
     <link href="skeleton.css" rel="stylesheet" type="text/css"/>
     <link href="simpleSearch.css" rel="stylesheet" type="text/css"/>
@@ -41,17 +39,17 @@ U/| . \\u      | |     |  __/
     </div>
  -->
       <div class="flex-Container">
-          
+
         <div class="flexBody Top">
             <a href="/"><div class="flexBody Top-Icon"></div></a>
             <div class="Top-Tag">Search for clothes in IRL stores around you</div>
         </div>
-          
+
         <div class="flexBody Mid-Container">
             <form class="flexBody Mid Input">
                 <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
                 <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-enter="searchQuery()" ng-model="userCity" class="Find-Input" maxlength="2046" placeholder="address, city, landmark" select-on-click></input></div>
-                <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
+                <div class="Mid-Input Length Button"><div ng-click="searchQuery(); holderRun()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
             <div ng-click="searchQuery()" class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
         </div>
@@ -66,7 +64,7 @@ U/| . \\u      | |     |  __/
       
       
     
-    
+    </div>
     
     
     
@@ -140,7 +138,7 @@ U/| . \\u      | |     |  __/
     </div>
 -->
 
-  </div>
+
 
 
 <!--     <div class="row">
@@ -151,6 +149,7 @@ U/| . \\u      | |     |  __/
  -->
 
   <div ng-show="showQueryBar" ng-cloak>
+      
     <div class="flex-Container Query">
 
         <div class="flexBody Mid-Container">
@@ -164,8 +163,6 @@ U/| . \\u      | |     |  __/
         </div>
         
     </div>
-      
-      
 <!--
       
     <div class="row">
@@ -182,50 +179,49 @@ U/| . \\u      | |     |  __/
     </div>
 -->
   </div>
+    <div class="resultsContainer">
+        <div class="kip-card row" ng-show="items" ng-repeat="item in items">
 
-    <div class="kip-card row" ng-show="items" ng-repeat="item in items" after-results ng-cloak>
+            <div class="col-md-4 imageWrapper">     
+                <img class="holderPlace" data-original="{{item.itemImageURL[0]}}">
+                <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
+            </div>
 
-        <div class="col-md-4">     
-            <img class="kip-image-left" ng-src="{{item.itemImageURL[0]}}" alt="{{item.name}}">
+            <div class="col-md-8">
+                <h3 class="card-title"><a href="{{item.linkback}}">{{item.name}}</a> ${{item.price}}</h3>
+                <p>{{item.linkback}}</p>
+                <p class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
+
+                <p class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
+
+                <p class="card-text" ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
+                <p class="card-text" ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
+
+                <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
+
+                <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
+                <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+
+                <a href="#" class="btn btn-primary">Button</a>
+
+                <div ng-show="item.linkback">
+                    <p>Item from <a href="{{item.linkback}}" style="color:#1a0dab;" target="_blank">{{item.linkbackname}}</a></p>
+                </div>    
+    <!--       SHOW TWO BUTTONS: Directions and view online link (3 buttons if TEL # "tel"  to call)
+
+              TEXT BUTTON: share, click to see highlighted text field of link. and buttons to sites
+
+
+              USE SPECIAL SITE TO EXPORT AS WEB APP
+
+              BUILD OUT URL LINKS TO CIOPY PASTE!!!! OF SERACH!~
+     -->      
+            </div>
+
         </div>
-
-        <div class="col-md-8">
-            <h3 class="card-title"><a href="{{item.linkback}}">{{item.name}}</a> ${{item.price}}</h3>
-            <p>{{item.linkback}}</p>
-            <p class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles ({{item.distanceKM}}km)</p>
-
-            <p class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
-
-            <p class="card-text" ng-show="item.parent.addressString || item.tel">{{item.parent.tel || item.tel}}</p>
-            <p class="card-text" ng-show="item.parent.addressString || item.addressString">{{item.parent.addressString || item.addressString}}</p>
-
-            <a ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Directions to {{item.parent.name}}</a>
-            
-            <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
-            <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
-            
-            <a href="#" class="btn btn-primary">Button</a>
-
-            <div ng-show="item.linkback">
-                <p>Item from <a href="{{item.linkback}}" style="color:#1a0dab;" target="_blank">{{item.linkbackname}}</a></p>
-            </div>    
-        </div>
-
-<!--       SHOW TWO BUTTONS: Directions and view online link (3 buttons if TEL # "tel"  to call)
-
-          TEXT BUTTON: share, click to see highlighted text field of link. and buttons to sites
-          
-
-          USE SPECIAL SITE TO EXPORT AS WEB APP
-
-          BUILD OUT URL LINKS TO CIOPY PASTE!!!! OF SERACH!~
- -->      
-
     </div>
-
-
 </div>
-    <div class="row">
+<!--    <div class="row">-->
 
 <!--
       <div ng-cloak class="footerBar col-md-12" style="position:absolute;" ng-show="showGPS" ng-style="{top: windowHeight - 44 + 'px'}" ng-click="getLocation()">
@@ -241,14 +237,18 @@ U/| . \\u      | |     |  __/
       <h6 ng-cloak ng-show="items" class=" u-full-width u-textAlignCenter" >Have something to sell? <br> Add your own items to search, by location (link to Kip in iOS/android) WIP/!\</h6>
     </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
 <script src="zepto.min.js"></script>
+<script type="text/javascript" src="angular-holderjs/src/holder.js"></script>
+<script type="text/javascript" src="holder.js"></script>
+<script type="text/javascript" src="jquery.lazyload.js"></script>
+<script type="text/javascript" src="ng-infinite-scroll.min.js"></script>
+<script type="text/javascript" src="lib/ui-scroll.min.js"></script>
 <!-- <script src="ui-bootstrap-tpls-0.13.4.min.js"></script>
  --><script src="simpleSearch.js"></script>
+        
 </body>
 </html>
 
