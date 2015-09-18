@@ -108,7 +108,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
         //Tap images to see more?
         //* * * * * * * * * * * * * 
         //https://kipapp.co/styles/api/items/search
-        $http.post('http://pikachu.kipapp.co/api/items/search', {
+        $http.post('https://kipapp.co/styles/api/items/search', {
             text: $scope.query,
             loc: {lat: userLat, lon: userLng},
             radius: 5,
