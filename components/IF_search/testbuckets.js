@@ -1,6 +1,7 @@
 var searchterms = require('./searchterms');
 require('colors');
 var fs = require('fs');
+var _ = require('lodash');
 
 var testQueries = [
   'black light jacket',
@@ -27,14 +28,24 @@ var google_trends = fs.readFileSync('./google_trends.txt', 'utf8').split('\n');
 testQueries = testQueries.concat(google_trends);
 
 
+var uncategorizedWords = [];
 testQueries.map(function(q) {
   console.log(q.blue);
   var result = searchterms.parse(q);
   Object.keys(result).map(function(k) {
     var str = ['  '];
-    str.push(k === 'uncategorized' ? k.red : k);
+    if (k === 'uncategorized') {
+      str.push(k.red);
+      uncategorizedWords = uncategorizedWords.concat(result[k]);
+    } else {
+      str.push(k);
+    }
     str.push(': ');
     str.push(result[k].join(', '));
     console.log(str.join(''));
   })
 })
+uncategorizedWords = _.unique(uncategorizedWords);
+
+console.log(("Found " + uncategorizedWords.length + " uncategorized words").red);
+console.log(uncategorizedWords.join(', '));

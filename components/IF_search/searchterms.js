@@ -46,13 +46,13 @@ buckets.push({
 })
 module.exports.buckets = buckets;
 
-
+var tokenizer = new natural.WordTokenizer();
 /**
  * Takes a list of words, remomves the stop words, returns array
  */
 var tokenize = function(text) {
   var tokens = [];
-  text.split(/\s+/).map(function(token) {
+  tokenizer.tokenize(text).map(function(token) {
     if (stopwords.indexOf(token) === -1) {
       tokens.push(natural.PorterStemmer.stem(token.toLowerCase()));
     }
