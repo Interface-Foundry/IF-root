@@ -26,10 +26,10 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
 
         }, function(res) {
             //if IP broken get HTML5 geoloc
-            $scope.getLocation();
+            $scope.getGPSLocation();
         });
 
-    $scope.getLocation = function() {
+    $scope.getGPSLocation = function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition);
         } else {
@@ -108,7 +108,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
         //Tap images to see more?
         //* * * * * * * * * * * * * 
         //https://kipapp.co/styles/api/items/search
-        $http.post('https://kipapp.co/styles/api/items/search', {
+        $http.post('http://pikachu.kipapp.co/api/items/search', {
             text: $scope.query,
             loc: {lat: userLat, lon: userLng},
             radius: 5,

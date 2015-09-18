@@ -76,14 +76,14 @@ body {
     font: 18px arial,sans-serif !important;
 }
 
-/*.kip-card a{
-    color: #1a0dab;
+/*.card-title{
+    color: #1a0dab !important;
 }
 
-.kip-card a:visited{
-    color:#609;
-}
-*/
+.card-title:visited{
+    color:#609 !important;
+}*/
+
 .kip-image-left{
     max-width: 100%;
     max-height: 100%;
@@ -118,6 +118,16 @@ body {
     font-size: 14px;
 }
 
+
+.item-description{
+    line-height: 1.4;
+    word-wrap:break-word;
+    color:#545454;
+    font-family: arial,sans-serif;
+    font-size: small;
+    text-align: left;
+    list-style: none;
+}
 
 
 .kipFont span{
@@ -316,7 +326,7 @@ div.footerBar {
     overflow: hidden;
 }
 
-.pseudo-input textarea, .yform .pseudo-input textarea:focus, .yform .pseudo-input.focused textarea, .yform .pseudo-input input, .yform .pseudo-input input:focus, .yform .pseudo-input.focused input{
+.pseudo-input textarea{
     margin: 0;
     border:0;
     outline: 0;
