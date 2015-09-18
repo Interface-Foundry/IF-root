@@ -1,26 +1,50 @@
 var stopwords = require('./stopwords');
-var tsv = require('tsv');
 var fs = require('fs');
+var natural = require('natural');
+
+
+var rgbtxt = fs.readFileSync('./rgb.txt', 'utf8').split('\n').slice(1);
+var colormap = module.exports.colormap = {};
+var colors = module.exports.colors = rgbtxt.map(function(line) {
+  line = line.split('\t');
+  if (line[0] && line[1]) {
+    colormap[line[0]] = line[1];
+    return line[0];
+  }
+})
+
+
+/**
+ * Get the words from teh spreadsheet
+ *    ________________
+ * ,./ cool story bro \
+ *   \________________/
+ */
 var tsvfile = fs.readFileSync('./List of Tags in Kip Search - terms.tsv',  'utf8');
-var buckets = [];
 tsvfile = tsvfile.split('\r\n');
-buckets = tsvfile[1].split('\t').slice(1).map(function(val) {
+var buckets = tsvfile[1].split('\t').slice(1).map(function(val) {
   return {
-    name: val
+    name: val,
+    boost:0, //default
+    words: []
   }
 });
-
-
-console.log(buckets);
-process.exit(0);
-tsvfile[0].split('\t').map(function(val) {
-
+tsvfile[0].split('\t').slice(1).map(function(val, i) {
+  buckets[i].boost = val;
 })
-tsvfile.split('\n').map(function(line) {
-  line.split()
+tsvfile.slice(2).map(function(row) {
+  row.split('\t').slice(1).map(function(val, i) {
+    if (val && val !== '') {
+      buckets[i].words.push(natural.PorterStemmer.stem(val.toLowerCase()));
+    }
+  })
 })
-
-
+buckets.push({
+  name: 'colors',
+  boost: 5,
+  words: colors
+})
+module.exports.buckets = buckets;
 
 
 /**
@@ -30,7 +54,7 @@ var tokenize = function(text) {
   var tokens = [];
   text.split(/\s+/).map(function(token) {
     if (stopwords.indexOf(token) === -1) {
-      tokens.push(token);
+      tokens.push(natural.PorterStemmer.stem(token.toLowerCase()));
     }
   })
   return tokens;
@@ -41,17 +65,27 @@ var tokenize = function(text) {
  * Takes a list of words, remomves the stop words, and splits the remaining
  * words into fashion buckets.
  */
-var split = function(terms) {
+var split = module.exports.parse = function(terms) {
   var tokens = tokenize(terms);
 
   var bucketTerms = tokens.reduce(function (bucketTerms, t) {
+    var categorized = false;
     buckets.map(function(bucket) {
       if (bucket.words.indexOf(t) >= 0) {
         bucketTerms[bucket.name] = bucketTerms[bucket.name] || [];
-        bucketTerms.push(t);
+        bucketTerms[bucket.name].push(t);
+        categorized = true;
       }
     })
-  }, {});
+    if (!categorized) {
+      bucketTerms.uncategorized.push(t);
+    }
+    return bucketTerms;
+  }, {'uncategorized': []});
+
+  if (bucketTerms.uncategorized.length === 0) {
+    delete bucketTerms.uncategorized;
+  }
 
   return bucketTerms;
 
@@ -62,6 +96,7 @@ var split = function(terms) {
  */
 var getElasticsearchQuery = function (bucketTerms) {
   var matches = Object.keys(bucketTerms).map(function(bucketName) {
+    if (bucketName === 'uncategorized') return; // uncategorized handled differently
     var bucket = buckets[bucketName];
     var terms = bucketTerms[bucketName];
     return {
