@@ -18,9 +18,11 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
 
     $http.get('https://kipapp.co/styles/api/geolocation').
         then(function(res) {
-            userLat = res.lat; 
-            userLng = res.lng;
-            $scope.userCity = res.cityName;
+
+            console.log(res);
+            userLat = res.data.lat; 
+            userLng = res.data.lng;
+            $scope.userCity = res.data.cityName;
 
         }, function(res) {
             //if IP broken get HTML5 geoloc
