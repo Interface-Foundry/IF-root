@@ -53,7 +53,7 @@ var defaultRadius = 2;
     "loc": {"lat": 40.7352793, "lon": -73.990638}
  }
  */
-var searchItemsUrl = '/api/items/search';
+var searchItemsUrl = '/api/items/search_old';
 app.post(searchItemsUrl, function(req, res, next) {
 
     // page is 0-indexed
