@@ -352,10 +352,11 @@ div.footerBar {
 
 .flexBody.Top {
 /*    outline: 2px solid red;   */
-    margin-left: -20px;
+    
 }
 
 .flexBody.Top-Icon {
+    margin-left: -20px;
     background-image: url("http://kipstyles.co/assets/images/kip_logo_purp.svg");
     background-size: contain;
     background-repeat: no-repeat;
@@ -369,7 +370,6 @@ div.footerBar {
 
 .Top-Tag {
     font-size: 22px;   
-    
 }
 
 .flexBody.Mid-Container {
@@ -377,6 +377,7 @@ div.footerBar {
     display: flex;
     flex-direction: row;
     margin-top: 20px;
+    
 }
 
 .Mid.Input {
@@ -419,10 +420,11 @@ div.footerBar {
     position: relative;
     top: -7px;
     visibility:  hidden;
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    
 }
 
 .Mobile-Icon {
@@ -472,7 +474,7 @@ div.footerBar {
 .Mid.Tag {
     display: flex;
     flex-direction: row-reverse;
-    margin-right: -10px;
+    
 }
 
 .Mid.Tag.Text {
@@ -542,6 +544,7 @@ div.footerBar {
     
     .Mobile.Button {
         visibility: visible;
+        display: flex;
     }
     
     .Mobile.Button.Query {
