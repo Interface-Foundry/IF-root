@@ -13,8 +13,8 @@ var fs = require('fs');
 module.exports = function(url, category, zipcode) {
     //Global variable declarations
     owner = {};
-    toUpdate = [];
-    updatedInventory = [];
+    oldStores = [];
+    newStores = [];
     return new Promise(function(resolve, reject) {
         async.waterfall([
                 function(callback) {
@@ -346,9 +346,6 @@ function getInventory(newItems, coords) {
     return new Promise(function(resolve, reject) {
         var storesToSave = []
         async.eachSeries(newItems, function iterator(item, callback) {
-            if (item.physicalStores == undefined) {
-                return callback()
-            }
             async.eachSeries(item.sizeIds, function iterator(sizeItem, callback2) {
                 var radius = 200; //TODO: Test if this is max radius
                 var url = 'http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=' + radius + '&latlong=' + parseFloat(coords[1]) + ',' + parseFloat(coords[0]) + '&partNumber=' + sizeItem.partNumber + ''; //note: you can get a list of all stores by lat lng by removing the partNumber val
@@ -362,10 +359,6 @@ function getInventory(newItems, coords) {
                 request(options, function(error, response, body) {
                     if ((!error) && (response.statusCode == 200)) {
                         sizeItem.physicalStores = eval("(" + body + ")").result; //put store results in each item object
-                        if (sizeItem.physicalStores == undefined) {
-                            return callback2()
-                        }
-                        //OMG
                         storesToSave.push(eval("(" + body + ")").result)
                         for (var x in eval("(" + body + ")").result) {
                             item.physicalStores.push(eval("(" + body + ")").result[x]);
@@ -459,28 +452,24 @@ function saveStores(items, stores) {
             }
             //Now delete extraneous info from physicalStores and sizeIds properties
             items.forEach(function(item) {
-                    if (item.sizeIds && item.sizeIds.length > 0) {
-                        item.sizeIds.forEach(function(part) {
-                            part.availableStores = []
-                            if (part.physicalStores !== null && part.physicalStores !== undefined) {
-                                part.physicalStores.forEach(function(store) {
-                                    Stores.forEach(function(dbStore) {
-                                        if (store.stlocId && store.stlocId == dbStore.source_generic_store.stlocId) {
-                                            store.mongoId = dbStore._id
-                                        }
-                                    })
-                                    if (store.mongoId) {
-                                        part.availableStores.push(store.mongoId)
+                    item.sizeIds.forEach(function(part) {
+                        part.availableStores = []
+                        if (part.physicalStores !== null && part.physicalStores !== undefined) {
+                            part.physicalStores.forEach(function(store) {
+                                Stores.forEach(function(dbStore) {
+                                    if (store.stlocId == dbStore.source_generic_store.stlocId) {
+                                        store.mongoId = dbStore._id
                                     }
                                 })
-                                delete part.physicalStores;
-                            }
-                        })
-                        item.inventory = item.sizeIds
-                        delete item.sizeIds
-                        delete item.physicalStores
-                        delete item.itemPartNumbersMap;
-                    }
+                                part.availableStores.push(store.mongoId)
+                            })
+                            delete part.physicalStores;
+                        }
+                    })
+                    item.inventory = item.sizeIds
+                    delete item.sizeIds
+                    delete item.physicalStores
+                    delete item.itemPartNumbersMap;
                 })
                 // fs.appendFile('items.js', JSON.stringify(items), function(err) {
                 //     if (err) throw err;
@@ -494,13 +483,12 @@ function saveStores(items, stores) {
 
 function saveItems(items, Stores) {
     return new Promise(function(resolve, reject) {
-        var Items = []
+        //Variable to hold existing Items to update inventory later
+        var Items = [];
         var storeIds = Stores.map(function(store) {
-            return store._id.toString()
+            return store._id
         })
-        updatedInventory = storeIds
-
-        storeIds.map(function(id) {
+        newStores = storeIds.map(function(id) {
             return id.toString()
         });
         var storeLocs = [];
@@ -560,16 +548,21 @@ function saveItems(items, Stores) {
                                 console.error(e);
                                 return callback()
                             }
+
                             console.log('Saved item!', i.id)
-                            Items.push(i)
                             callback()
                         })
                     })
                 }
                 //If item exists in db, add new inventory values to the item (removed stocks will be updated in a later function)
                 else if (i) {
+                    Items.push(i);
                     console.log('Item exists: ', i.id)
-                    toUpdate.push(i)
+                    if (i.parents) {
+                        oldStores = i.parents.map(function(id) {
+                            return id.toString()
+                        })
+                    }
                     db.Landmarks.findOne({
                         '_id': i._id
                     }).update({
@@ -589,8 +582,7 @@ function saveItems(items, Stores) {
                             console.log('Inventory update error: ', e)
                             return callback()
                         }
-                        Items.push(i)
-                            // console.log('Updated inventory.', i)
+                        // console.log('Updated inventory.', i)
                         callback()
                     })
                 }
@@ -673,57 +665,57 @@ function getLatLong(zipcode) {
     })
 }
 
-function updateInventory(Items, coords) {
+function updateInventory(items, coords) {
     return new Promise(function(resolve, reject) {
-        var toUpdateIds = toUpdate.map(function(item) {
-            return item._id
-        })
-
+        // console.log('old stores: ',oldStores, 'new stores: ', newStores)
+        var d = _.difference(oldStores, newStores);
         // console.log('difference: ',d)
         if (d.length < 1 || d == null) {
             console.log('No inventory to update')
             return resolve('No stores to remove.')
         }
         var storesToRemove = []
-        async.eachSeries(toUpateIds, function iterator(item, callback) {
-            var d = _.difference(i.parents, updatedInventory);
             //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
-            db.Landmarks.find({
-                '_id': {
-                    $in: d
-                }
-            }, function(err, stores) {
-                if (err) {
-                    console.log('682', err)
-                    return callback()
-                }
-                if (!stores) {
-                    console.log('Stores not found!')
-                    return callback()
-                } else if (stores) {
-                    stores.forEach(function(store) {
-                        if (distance(store.loc.coordinates[1], store.loc.coordinates[0], parseFloat(coords[1]), parseFloat(coords[0]), 'K') < 325) {
-                            storesToRemove.push(store)
-                        }
-                    })
-                    console.log('Found ', storesToRemove.length, ' inventory records to remove.')
-                    if (storesToRemove.length > 0) {
-                        var ids = storesToRemove.map(function(store) {
-                            return store._id
-                        })
-                        var locs = []
-                        storesToRemove.forEach(function(store) {
-                            locs.push(store.loc.coordinates)
-                        })
-                        var inv = []
-                        storesToRemove.forEach(function(store) {
-                            inv.concat(store.source_generic_store.inventory)
-                        })
-                        inv = _.flatten(inv)
-                        inv = _.uniq(inv, 'partNumber')
+        db.Landmarks.find({
+            '_id': {
+                $in: d
+            }
+        }, function(err, stores) {
+            if (err) {
+                console.log('682', err)
+                return callback()
+            }
+            if (!stores) {
+                console.log('Stores not found!')
+                return callback()
+            } else if (stores) {
+                stores.forEach(function(store) {
+                    if (distance(store.loc.coordinates[1], store.loc.coordinates[0], parseFloat(coords[1]), parseFloat(coords[0]), 'K') < 325) {
+                        storesToRemove.push(store)
+                    }
+                })
+                console.log('Found ', storesToRemove.length, ' inventory records to remove.')
 
+                if (storesToRemove.length > 0) {
+                    var ids = storesToRemove.map(function(store) {
+                        return store._id
+                    })
+                    var locs = []
+                    storesToRemove.forEach(function(store) {
+                        locs.push(store.loc.coordinates)
+                    })
+                    var inv = []
+                    storesToRemove.forEach(function(store) {
+                        inv.concat(store.source_generic_store.inventory)
+                    })
+                    inv = _.flatten(inv)
+                    inv = _.uniq(inv, 'partNumber')
+                    console.log('Updating ',items.length)
+                    async.eachSeries(items, function iterator(item, callback) {
                         db.Landmarks.update({
-                            'source_generic_item.styleId': item.styleId
+                            'source_generic_item.parentProductId': item.parentProductId,
+                            'name': item.name,
+                            'linkbackname': 'menswearhouse.com'
                         }, {
                             $pullAll: {
                                 'parents': storesToRemove,
@@ -731,29 +723,26 @@ function updateInventory(Items, coords) {
                                 'loc.coordinates': locs
                             }
                         }, function(err, res) {
-                            if (err) console.log('644', err)
+                            if (err) console.log('726', err)
                             if (res) {
-                                console.log('Updated inventory.', res)
-                                resolve()
+                                console.log('Updated operation for ', item.id, '\nResult: ', res.nModified)
+                                callback()
                             }
                         })
+                    }, function(err) {
+                        if (err) {
+                            console.log(err)
+                        }
+                        return resolve()
+                    })
 
-                    } // end of if
-                    else {
-                        // console.log('Inventory is up-to-date.')
-                        resolve()
-                    }
+                } // end of if
+                else {
+                    // console.log('Inventory is up-to-date.')
+                    resolve()
                 }
-            })
-
-
-        }, function(err) {
-
+            }
         })
-
-
-
-
     })
 }
 
