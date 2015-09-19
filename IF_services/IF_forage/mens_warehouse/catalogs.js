@@ -54,7 +54,7 @@ var luggage = {
     category: 'luggage',
     url: 'http://www.menswearhouse.com/mens-clothes/luggage'
 }
-var catalogs = [shirts, suits, shoes, blazers, pants, jeans, dressshirts, casualshirts, ties, sweaters, outerwear, accessories, formalwear, luggage]
+var catalogs = [shoes, blazers, pants, jeans, dressshirts, casualshirts, ties, sweaters, outerwear, accessories, formalwear, luggage,shirts, suits]
 
 
 

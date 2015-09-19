@@ -110,11 +110,8 @@ function loadFakeUser() {
 
 function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
-
         var newItems = []; //multiple colors for item == multiple items
-
         var latestColor;
-
         var options = {
             url: 'http://www.urbanoutfitters.com/api/v1/product/' + getParameterByName('id', url) + '',
             headers: {
@@ -123,9 +120,7 @@ function scrapeItem(url) {
         };
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
-
                 body = JSON.parse(body);
-
                 for (var i = 0; i < body.product.skusInfo.length; i++) { //get all the skuIDs
                     newItems[i] = { //make new item object in array of items
                         name: body.product.skusInfo[i].description + ' ' + body.product.skusInfo[i].color,

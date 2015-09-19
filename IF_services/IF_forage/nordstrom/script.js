@@ -14,6 +14,9 @@ db.Landmarks.find({
                 'linkbackname': 'nordstrom.com'
             }, {
                 'linkbackname': 'zara.com'
+            },
+            {
+                'linkbackname': 'urbanoutfitters.com'
             }]
         }
     }]
@@ -34,3 +37,7 @@ db.Landmarks.find({
             console.log('Finished!')
         })
 })
+
+
+//mongo command to update stores with 'MultiPoint'
+// db.landmarks.find({$and: [{'source_generic_store': {$exists: true}}, {'loc.type': 'MultiPoint'}, {linkbackname: {$in: ['nordstrom.com', 'zara.com', 'urbanoutfitters.com']}}]}).forEach(function(s) {s.loc.type = 'Point';s.loc.coordinates = s.loc.coordinates[0];print('Updated store: ',s);db.landmarks.save(s);})

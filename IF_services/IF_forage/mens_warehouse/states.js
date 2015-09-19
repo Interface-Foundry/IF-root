@@ -1,12 +1,10 @@
 module.exports = [
-    "NY"
-    ,
-    "NJ"
-    // ,
-    // "CA",
-    // "CT",
-    // "PA",
-    // "FL",
+    "NY",
+    "NJ",
+    "FL",
+    "CA",
+    "CT",
+    "PA"
     // "OH",
     // "AR",
     // "ME",
