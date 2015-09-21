@@ -30,6 +30,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
         types: ['geocode']
     }).bind("geocode:result", function(event, result) {
         $scope.userCity = result.formatted_address;
+        $scope.newQuery = true;
     });
     
     //* * * * * * * * *
@@ -218,6 +219,13 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
                         resultsContainer = resultsContainer[0].clientHeight;
                         httpBool = false;
                     }, 500);
+                
+                    $('#locInputTop').geocomplete({
+                        details: 'form',
+                        types: ['geocode']
+                    }).bind("geocode:result", function(event, result) {
+                        $scope.userCity = result.formatted_address;
+                    });
                     
                     var posChecker = $interval(function() {
                         $document.on('scroll', function(e) {
