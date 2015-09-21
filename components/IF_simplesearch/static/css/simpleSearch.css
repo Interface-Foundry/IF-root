@@ -393,7 +393,7 @@ div.footerBar {
 
 .loading-gif {
    background:
-     url('img/ajax-loader.gif')
+     url('../img/ajax-loader.gif')
      no-repeat
      right center;
 }
@@ -404,7 +404,7 @@ div.footerBar {
 
 .flexBody.Top-Icon {
     margin-left: -20px;
-    background-image: url("http://kipstyles.co/assets/images/kip_logo_purp.svg");
+    background-image: url("../img/kip_logo_purp.svg");
     background-size: contain;
     background-repeat: no-repeat;
     height: 90px;
