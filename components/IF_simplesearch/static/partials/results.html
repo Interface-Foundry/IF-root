@@ -1,0 +1,129 @@
+
+
+<div class="container">
+
+  <div ng-hide="showQueryBar">
+<!--     
+    <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-4">     
+        <div class="u-full-width u-textAlignCenter">
+          <br>
+          <img src="http://kipstyles.co/assets/images/kip_logo_purp.svg" style="margin-left:-10px;" width="90">
+        </div>
+      </div>
+      <div class="col-md-4"></div>
+    </div>
+ -->
+      <div class="flex-Container">
+
+        <div class="flexBody Top">
+            <a href="/"><div class="flexBody Top-Icon"></div></a>
+            <h1 class="Top-Tag">Search for clothes in IRL stores around you <i style="padding-left:5px; font-size:13px; opacity:0.6;">  <span class="beta">BETA</span></i></h1>
+        </div>
+          
+        <div class="flexBody Mid-Container">
+            <form class="flexBody Mid Input">
+                
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near </span><span><i tooltip data-placement="top" data-toggle="tooltip" title="Locate Me" ng-hide="loadingLoc || hideGPSIcon" style="cursor:pointer; z-index:12; float:right; padding-right:23px; padding-top:4px; opacity:0.4; cursor:pointer;" ng-click="getGPSLocation()" class="glyphicon glyphicon-screenshot"></i></span>
+                  
+                  <input id="locInput" ng-enter="searchQuery()" ng-model="userCity" 
+                    class="Find-Input" ng-class="loadingLoc ? 'loading-gif' : 'noloading-gif'" maxlength="2046" placeholder="address, city, landmark" select-on-click>
+                  </input>
+                </div>
+                <div class="Mid-Input Length Button"><div ng-click="searchQuery(); holderRun()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
+            </form>
+            <div ng-click="searchQuery()" class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
+        </div>
+        <div class="flexBody Mid Tag">
+            <div class="Mid Tag Text">
+                <div>Trending: <a >#70s</a> <a>#fall</a> <a>#blue dress</a></div>
+            </div>
+        </div>
+        <div class="flexBody Foot ">
+          <h2>Over 1,000,000 items on sale</h2>
+          <h6 style="margin-bottom:0px;" class="u-full-width u-textAlignCenter">Have something to sell? <a href="http://kipstyles.co/blog/adding-snaps-using-style-snap-to-kip/">Add your own items</a> to Kip Search with our <a href="https://itunes.apple.com/us/app/kip-styles/id1024791354?mt=8">iPhone</a> or <a href="https://play.google.com/store/apps/details?id=com.kip">Android</a> app</h6>
+
+<!--           <a><div style="cursor:pointer;" ng-click="getGPSLocation()">Locate Me</div></a>
+ -->
+        </div>
+
+      </div>
+      
+    </div>
+    
+
+  <div ng-show="showQueryBar" id="topQueryBar" ng-cloak>  
+    <div class="flex-Container Query">
+        <div class="flexBody Mid-Container">
+            <div ng-click="forceReload()" class="flexBody Top-Icon Query"></div>
+            <form ng-submit="searchQuery()" class="flexBody Mid Input">
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-change="newQuery = true" ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input id="locInputTop" ng-change="newQuery = true" ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>
+                <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
+            </form>
+            <div ng-click="searchQuery()" class="Mid-Input Mobile Button Query"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
+        </div> 
+    </div>
+  </div>
+
+    <div class="resultsContainer" ng-cloak>
+      
+        <div class="scrollTop" ng-click="scrollTop()" ng-show="items.length > 0"><i style="padding:5px; color:#ccc; visibility:visible; font-size:21px; padding-left:11px; padding-top:15px; cursor:pointer;" class="Mobile-Icon glyphicon glyphicon-chevron-up"></i></div>
+
+        <div ng-show="noResults">Sorry, we couldn't find anything for you :(</div>
+
+        <div class="kip-card row" ng-show="items" ng-repeat="item in items">
+
+            <div class="col-md-4 imageWrapper">     
+                <img class="holderPlace" data-original="{{item.itemImageURL[0]}}">
+                <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
+            </div>
+
+
+        <div class="col-md-8" >
+
+            <span class="item-description" style="float:right;" am-time-ago="item.updated_time" ></span>
+
+            <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}"><span ng-show="item.price" style="color:#251998;">${{item.price}} - </span> {{item.name}}</a></h3>
+            
+
+            <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{item.parent.name}} – {{item.distanceMI}} miles <span style="font-size:12px;">({{item.distanceKM}}km)</span></p>
+           
+<!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
+ -->
+            <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{item.parent.tel}}</p>
+            <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressText">{{item.parent.addressText}}</p>
+
+            <div style="position:inline-block;"><a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Map to {{item.parent.name}}</a>
+              <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{item.linkback}}">Get online {{item.linkbackname}}</a></p>
+<!--             
+            <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
+            <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+             -->
+
+<!--             <div ng-show="item.linkback">
+                <p>Item from <a href="{{item.linkback}}" style="color:#1a0dab;" target="_blank">{{item.linkbackname}}</a></p>
+            </div>    --> 
+            </div>
+
+<!--                 <div ng-show="item.linkback">
+                    <p>Item from <a href="{{item.linkback}}" style="color:#1a0dab;" target="_blank">{{item.linkbackname}}</a></p>
+                </div>   -->  
+    <!--       SHOW TWO BUTTONS: Directions and view online link (3 buttons if TEL # "tel"  to call)
+
+              TEXT BUTTON: share, click to see highlighted text field of link. and buttons to sites
+
+              USE SPECIAL SITE TO EXPORT AS WEB APP
+
+              BUILD OUT URL LINKS TO CIOPY PASTE!!!! OF SERACH!~
+     -->      
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
