@@ -28,7 +28,10 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     $('#locInput').geocomplete({
         details: 'form',
         types: ['geocode']
+    }).bind("geocode:result", function(event, result) {
+        $scope.userCity = result.formatted_address;
     });
+    
     //* * * * * * * * *
     // LOAD FUNCTIONS
 
