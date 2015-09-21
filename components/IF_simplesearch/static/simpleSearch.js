@@ -21,8 +21,14 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     $scope.searchIndex = 0;
     $scope.items = [];
     $scope.newQuery = true;
+    $scope.forceReload = function() {
+        window.location.reload();   
+    }
 
-
+    $('#locInput').geocomplete({
+        details: 'form',
+        types: ['geocode']
+    });
     //* * * * * * * * *
     // LOAD FUNCTIONS
 
