@@ -21,6 +21,24 @@ U/| . \\u      | |     |  __/
     <link href="normalize.css" rel="stylesheet" type="text/css"/>
     <link href="skeleton.css" rel="stylesheet" type="text/css"/>
     <link href="simpleSearch.css" rel="stylesheet" type="text/css"/>
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicon/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/favicon/mstile-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
 </head>
 <body ng-controller="SimpleSearchCtrl">
 
@@ -43,7 +61,7 @@ U/| . \\u      | |     |  __/
 
         <div class="flexBody Top">
             <a href="/"><div class="flexBody Top-Icon"></div></a>
-            <h1 class="Top-Tag">Search for clothes in IRL stores around you <i style="padding-left:5px; font-size:13px; opacity:0.6;">  BETA</i></h1>
+            <h1 class="Top-Tag">Search for clothes in IRL stores around you <i style="padding-left:5px; font-size:13px; opacity:0.6;">  <span class="beta">BETA</span></i></h1>
         </div>
 
         <div class="flexBody Mid-Container">
@@ -65,8 +83,8 @@ U/| . \\u      | |     |  __/
             </div>
         </div>
         <div class="flexBody Foot ">
-          <h2 style="margin-bottom:0px;">Over 1,000,000 items on sale</h2>
-          <h6 style="margin-bottom:0px;" class="u-full-width u-textAlignCenter" >Have something to sell? Add your own items to Kip Search with our <a href="https://itunes.apple.com/us/app/kip-styles/id1024791354?mt=8">iPhone</a> or <a href="https://play.google.com/store/apps/details?id=com.kip">Android</a> app</h6>
+          <h2>Over 1,000,000 items on sale</h2>
+          <h6 style="margin-bottom:0px;" class="u-full-width u-textAlignCenter">Have something to sell? <a href="http://kipstyles.co/blog/adding-snaps-using-style-snap-to-kip/">Add your own items</a> to Kip Search with our <a href="https://itunes.apple.com/us/app/kip-styles/id1024791354?mt=8">iPhone</a> or <a href="https://play.google.com/store/apps/details?id=com.kip">Android</a> app</h6>
 
 <!--           <a><div style="cursor:pointer;" ng-click="getGPSLocation()">Locate Me</div></a>
  -->
@@ -116,10 +134,10 @@ U/| . \\u      | |     |  __/
            
             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
 
-            <p style="margin-bottom:1rem !important;" class="card-text" ng-show="item.tel">{{item.tel}}</p>
-            <p style="margin-bottom:1rem !important;" class="card-text" ng-show="item.addressString">{{item.addressString}}</p>
-
-
+            <p style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{item.parent.tel}}</p>
+            <p style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressText">{{item.parent.addressText}}</p>
+{{item.parent.tel}}
+{{item.parent.addressText}}
 
             <div style="position:inline-block;"><a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Map to {{item.parent.name}}</a>
               <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{item.linkback}}">Get online {{item.linkbackname}}</a></p>

@@ -172,6 +172,10 @@ form {
     margin-bottom: 0;
 }
 
+.beta {
+    letter-spacing: 0.4px;
+}
+
 .u-centered {
     margin-left: auto;
     margin-right: auto;
@@ -373,12 +377,18 @@ div.footerBar {
 
 .flexBody h2 {
     font-size:15px;
-    font-weight: 400;
+    font-weight: 300;
     margin-bottom: 0px;
+    color:#251998;
+    margin-bottom:0px;
+    font-family: arial, sans-serif;
+    letter-spacing: 0.3px;
+
 }
 
 .flexBody a {
     color:#251998;
+    font-weight: 300;
 }
 
 .loading-gif {
@@ -444,7 +454,6 @@ div.footerBar {
 }
 
 .Mid.Button:hover {
-    border: 1px solid #AEA9A9;
     cursor: pointer;
     background-color: #251998;
 }
@@ -516,7 +525,6 @@ div.footerBar {
 .Mid.Tag {
     display: flex;
     flex-direction: row;
-    
 }
 
 .Mid.Tag.Text {
@@ -524,7 +532,13 @@ div.footerBar {
     font-size: 12px;
     letter-spacing: 0.9px;
     cursor: pointer;  
+   
 }
+
+.Mid.Tag a{
+   font-weight: 500 !important;  
+}
+
 
 .flexBody.Foot {
     background-color: #f2f2f2;   

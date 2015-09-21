@@ -1,4 +1,4 @@
-var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment']);
+var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute']);
 
 simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window) {
 
@@ -149,7 +149,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
 
         //http://pikachu.kipapp.co/api/items/search?page
         function searchItems(){
-            $http.post('https://kipapp.co/styles/api/items/search?page='+$scope.searchIndex, {
+            $http.post('http://pikachu.kipapp.co/api/items/search?page='+$scope.searchIndex, {
                 text: $scope.query,
                 loc: {lat: userLat, lon: userLng},
                 radius: 5,
