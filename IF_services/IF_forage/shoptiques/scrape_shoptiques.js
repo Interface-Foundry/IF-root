@@ -57,7 +57,8 @@ var scrapeShoptiques = job('scrape-shoptiques-item', function (data, done) {
                                 name: boutique.name,
                                 id: boutique.name.replace(/[^\w]+/g, '').toLowerCase() + boutique.id,
                                 world: true,
-                                valid: true
+                                valid: true,
+                                addressText: boutique.addressText + ', ' + boutique.state
                             });
                             if (addr) {
                                 store.loc = {
