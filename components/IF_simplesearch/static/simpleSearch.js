@@ -68,7 +68,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         userLng = position.coords.longitude;
 
         //get neighborhood name via lat lng from google
-        $http.get('http://maps.googleapis.com/maps/api/geocode/json?latlng='+userLat+','+userLng+'&sensor=true').
+        $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+userLat+','+userLng+'&sensor=true').
             then(function(res) {
                 for (var i = 0; i < res.data.results.length; i++) {   
                     if (res.data.results[i].geometry.location_type == 'APPROXIMATE'){ 
@@ -263,10 +263,11 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         $scope.searchItems();
     }
     else {
-        console.log('WHAT');
         //get location from IP
         $http.get('https://kipapp.co/styles/api/geolocation').
         then(function(res) {
+
+            console.log(res);
             userLat = res.data.lat; 
             userLng = res.data.lng;
             $scope.userCity = res.data.cityName;
