@@ -82,8 +82,8 @@ U/| . \\u      | |     |  __/
         <div class="flexBody Mid-Container">
             <div class="flexBody Top-Icon Query"></div>
             <form ng-submit="searchQuery()" class="flexBody Mid Input">
-                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-change="newQuery = true" ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-change="newQuery = true" ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>
                 <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
             <div ng-click="searchQuery()" class="Mid-Input Mobile Button Query"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>

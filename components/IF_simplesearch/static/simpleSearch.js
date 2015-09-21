@@ -20,6 +20,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     $scope.locationHighlight = "form-grey";
     $scope.searchIndex = 0;
     $scope.items = [];
+    $scope.newQuery = true;
 
 
     //* * * * * * * * *
@@ -105,7 +106,12 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
 
     $scope.searchQuery = function(){
         httpBool = true;
-
+        
+        if ($scope.newQuery) {
+            $scope.items = [];
+            $scope.newQuery = false;
+        }
+        
         //* * * * * * * * * * * * * 
         //Tap images to see more?
         //* * * * * * * * * * * * * 
@@ -149,6 +155,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
 
         //http://pikachu.kipapp.co/api/items/search?page
         function searchItems(){
+            
             $http.post('https://kipapp.co/styles/api/items/search?page='+$scope.searchIndex, {
                 text: $scope.query,
                 loc: {lat: userLat, lon: userLng},
@@ -159,9 +166,9 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
                     //* * * * * * * * * * * * * 
                     //if no results, re-query with US size radius
                     //* * * * * * * * * * * * * 
-
+                
                     $scope.items = $scope.items.concat(response.data.results);
-
+                        
                     if ($scope.items.length < 1){
                          $scope.noResults = true;
                          console.log('no results');
