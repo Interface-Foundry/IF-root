@@ -148,7 +148,9 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 }, function(res) {
                 //if IP broken get HTML5 geoloc
                 //$scope.getGPSLocation();
-            });      
+            });    
+
+
 
         }
         else {
@@ -260,26 +262,30 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         userLng = $routeParams.lng;
         $scope.searchItems();
     }
+    else {
+        console.log('WHAT');
+        //get location from IP
+        $http.get('https://kipapp.co/styles/api/geolocation').
+        then(function(res) {
+            userLat = res.data.lat; 
+            userLng = res.data.lng;
+            $scope.userCity = res.data.cityName;
+            historyCity = $scope.userCity; //save historycity to compare string if user mods location
 
-    //get location from IP
-    $http.get('https://kipapp.co/styles/api/geolocation').
-    then(function(res) {
-        userLat = res.data.lat; 
-        userLng = res.data.lng;
-        $scope.userCity = res.data.cityName;
-        historyCity = $scope.userCity; //save historycity to compare string if user mods location
+        }, function(res) {
+            //if IP broken get HTML5 geoloc
+            $scope.getGPSLocation();
+        }); 
 
-    }, function(res) {
-        //if IP broken get HTML5 geoloc
-        $scope.getGPSLocation();
-    }); 
-
-    //check if mobile or tablet. warning: there is no perfect way to do this, so need to keep testing on this. 
-    //via: http://jstricks.com/detect-mobile-devices-javascript-jquery/
-    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-        $scope.getGPSLocation(); //get GPS loc cause mobile device
-        $scope.hideGPSIcon = true;
+        //check if mobile or tablet. warning: there is no perfect way to do this, so need to keep testing on this. 
+        //via: http://jstricks.com/detect-mobile-devices-javascript-jquery/
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+            $scope.getGPSLocation(); //get GPS loc cause mobile device
+            $scope.hideGPSIcon = true;
+        }       
     }
+
+
 
     angular.element(document).ready(function () {
         $scope.windowHeight = $window.height + 'px'; //position 
