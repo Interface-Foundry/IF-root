@@ -365,9 +365,25 @@ div.footerBar {
     
 }
 
+.flexBody h1{
+    font-size:22px;
+    font-weight: 400;
+    margin-bottom: 0px;
+}
+
+.flexBody h2 {
+    font-size:15px;
+    font-weight: 400;
+    margin-bottom: 0px;
+}
+
+.flexBody a {
+    color:#251998;
+}
+
 .loading-gif {
    background:
-     url('http://www.hsi.com.hk/HSI-Net/pages/images/en/share/ajax-loader.gif')
+     url('img/ajax-loader.gif')
      no-repeat
      right center;
 }
@@ -429,8 +445,8 @@ div.footerBar {
 
 .Mid.Button:hover {
     border: 1px solid #AEA9A9;
-    color: #AEA9A9;
     cursor: pointer;
+    background-color: #251998;
 }
 
 .Mobile.Button {
@@ -451,6 +467,11 @@ div.footerBar {
 .Mobile-Icon {
     font-size: 40px;  
     visibility: hidden;
+}
+
+.popover {
+  position: absolute;
+  z-index: 100;
 }
 
 .Find-ZTop {
@@ -494,13 +515,13 @@ div.footerBar {
 
 .Mid.Tag {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     
 }
 
 .Mid.Tag.Text {
     margin-top: 10px;
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 0.9px;
     cursor: pointer;  
 }
@@ -530,6 +551,7 @@ div.footerBar {
     z-index: 2;
     min-height: 241px;
     max-width: 100%;
+    background-color: #cccccc;
 }
 
 .holderPlace:first-child {

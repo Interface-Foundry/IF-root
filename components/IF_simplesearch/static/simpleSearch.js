@@ -1,6 +1,6 @@
 var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment']);
 
-simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment) {
+simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * * 
@@ -64,6 +64,8 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
         $scope.locationHighlight = "form-grey"; 
     };
 
+
+
     $scope.toggleHighlight = function($event){
          
         if ($event.currentTarget.id == 'search_item'){
@@ -104,16 +106,10 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     $scope.searchQuery = function(){
         httpBool = true;
 
-
         //* * * * * * * * * * * * * 
-        //CHANGE CSS SO SEARCH BAR ON TOP OF PAGE NOW
-
         //Tap images to see more?
         //* * * * * * * * * * * * * 
-        //https://kipapp.co/styles/api/items/search
-// <<<<<<< HEAD
-//         $http.post('http://pikachu.kipapp.co/api/items/search', {
-// =======
+
         //check if location was modified by user
         if ($scope.userCity !== historyCity){
 
@@ -151,7 +147,7 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
         }
 
 
-
+        //http://pikachu.kipapp.co/api/items/search?page
         function searchItems(){
             $http.post('https://kipapp.co/styles/api/items/search?page='+$scope.searchIndex, {
                 text: $scope.query,
@@ -244,14 +240,13 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     //via: http://jstricks.com/detect-mobile-devices-javascript-jquery/
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
         $scope.getGPSLocation(); //get GPS loc cause mobile device
+        $scope.hideGPSIcon = true;
     }
 
     angular.element(document).ready(function () {
-        $scope.windowHeight = window.innerHeight; //position 
-        //console.log($scope.windowHeight);
+        $scope.windowHeight = $window.height + 'px'; //position 
+        $scope.windowWidth = window.width + 'px';
     });
-
-
 
 });
 
@@ -346,6 +341,20 @@ simpleSearchApp.directive('ngEnter', function() {
         };
     });
 
+simpleSearchApp.directive('tooltip', function(){
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs){
+            $(element).hover(function(){
+                // on mouseenter
+                $(element).tooltip('show');
+            }, function(){
+                // on mouseleave
+                $(element).tooltip('hide');
+            });
+        }
+    };
+});
 // simpleSearchApp.directive('stringToTimestamp', function() {
 //         return {
 //             require: 'ngModel',
