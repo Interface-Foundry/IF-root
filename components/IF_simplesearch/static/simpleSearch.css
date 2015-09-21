@@ -393,7 +393,7 @@ div.footerBar {
 
 .loading-gif {
    background:
-     url('ajax-loader.gif')
+     url('../img/ajax-loader.gif')
      no-repeat
      right center;
 }
