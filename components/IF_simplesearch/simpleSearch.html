@@ -63,13 +63,17 @@ U/| . \\u      | |     |  __/
             <a href="/"><div class="flexBody Top-Icon"></div></a>
             <h1 class="Top-Tag">Search for clothes in IRL stores around you <i style="padding-left:5px; font-size:13px; opacity:0.6;">  <span class="beta">BETA</span></i></h1>
         </div>
-
+          
         <div class="flexBody Mid-Container">
             <form class="flexBody Mid Input">
+                
+             
+                
+                
                 <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
                 <div class="Mid-Input Length"><span class="Find-ZTop">Near </span><span><i tooltip data-placement="top" data-toggle="tooltip" title="Locate Me" ng-hide="loadingLoc || hideGPSIcon" style="cursor:pointer; z-index:12; float:right; padding-right:23px; padding-top:4px; opacity:0.4; cursor:pointer;" ng-click="getGPSLocation()" class="glyphicon glyphicon-screenshot"></i></span>
                   
-                  <input ng-enter="searchQuery()" ng-model="userCity" 
+                  <input id="locInput" ng-enter="searchQuery()" ng-model="userCity" 
                     class="Find-Input" ng-class="loadingLoc ? 'loading-gif' : 'noloading-gif'" maxlength="2046" placeholder="address, city, landmark" select-on-click>
                   </input>
                 </div>
@@ -98,10 +102,10 @@ U/| . \\u      | |     |  __/
   <div ng-show="showQueryBar" ng-cloak>  
     <div class="flex-Container Query">
         <div class="flexBody Mid-Container">
-            <div class="flexBody Top-Icon Query"></div>
+            <div ng-click="forceReload()" class="flexBody Top-Icon Query"></div>
             <form ng-submit="searchQuery()" class="flexBody Mid Input">
-                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-change="newQuery = true" ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input ng-change="newQuery = true" ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>
                 <div class="Mid-Input Length Button"><div ng-click="searchQuery()" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
             <div ng-click="searchQuery()" class="Mid-Input Mobile Button Query"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
@@ -111,7 +115,7 @@ U/| . \\u      | |     |  __/
 
     <div class="resultsContainer" ng-cloak>
       
-        <div ng-show="items" ng-style="{top: windowHeight, left: windowWidth}" style="background:white; border:1px solid #ccc; width:47px; height:60px; position:fixed;"><i style="padding:5px; color:#ccc; visibility:visible; font-size:24px; padding-left:12px; padding-top:15px; cursor:pointer;" class="Mobile-Icon glyphicon glyphicon-chevron-up"></i></div>
+        <div ng-show="items.length > 0" ng-style="{'bottom': 0, 'right': 0, 'margin-right': '10px', 'margin-bottom': '10px'}" style="background:white; border:1px solid #ccc; width:47px; height:60px; position:fixed;"><i style="padding:5px; color:#ccc; visibility:visible; font-size:24px; padding-left:12px; padding-top:15px; cursor:pointer;" class="Mobile-Icon glyphicon glyphicon-chevron-up"></i></div>
 
         <div ng-show="noResults">Sorry, we couldn't find anything for you :(</div>
 
@@ -185,6 +189,8 @@ U/| . \\u      | |     |  __/
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
+<script src="lib/jquery.geocomplete.js"></script>
 <script src="moment.min.js"></script>
 <script src="angular-moment.min.js"></script>
 <script src="zepto.min.js"></script>

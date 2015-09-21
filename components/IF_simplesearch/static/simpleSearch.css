@@ -409,6 +409,7 @@ div.footerBar {
     background-repeat: no-repeat;
     height: 90px;
     width: 90px;
+    cursor: pointer;
 }
 
 .Top-Icon.Query {
