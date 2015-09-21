@@ -1,4 +1,4 @@
-var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute']);
+var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment']);
 
 simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window) {
 
