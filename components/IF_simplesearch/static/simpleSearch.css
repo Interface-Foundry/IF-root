@@ -580,7 +580,7 @@ div.footerBar {
     max-width: 100%;
 }
 
-@media(max-width: 400px) {
+@media(max-width: 650px) {
     .Top-Icon.Query {
         margin-top: 0;   
     }
