@@ -40,10 +40,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.showGPS = true;
     $scope.searchIndex = 0;
     $scope.items = [];
-    $scope.newQuery = true;
-    $scope.forceReload = function() {
-        window.location.reload();   
-    }
+    $scope.newQuery = null;
 
     $('#locInput').geocomplete({
         details: 'form',
@@ -52,6 +49,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         $scope.userCity = result.formatted_address;
         $scope.newQuery = true;
     });
+    
     
     //* * * * * * * * *
     // LOAD FUNCTIONS
@@ -117,11 +115,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.searchQuery = function(){
         httpBool = true;
         
-        if ($scope.newQuery) {
-            $scope.items = [];
-            $scope.newQuery = false;
-        }
-        
         //* * * * * * * * * * * * * 
         //Tap images to see more?
         //* * * * * * * * * * * * * 
@@ -171,7 +164,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
-
+        if ($scope.newQuery) {
+//            $scope.items = [];
+            
+            $scope.newQuery = false;
+        }
+        
         $http.post('http://pikachu.kipapp.co/api/items/search?page='+$scope.searchIndex, {
             text: $scope.query,
             loc: {lat: userLat, lon: userLng},
@@ -231,12 +229,15 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                     types: ['geocode']
                 }).bind("geocode:result", function(event, result) {
                     $scope.userCity = result.formatted_address;
+                    $scope.newQuery = true;
                 });
                 
                 var posChecker = $interval(function() {
                     $document.on('scroll', function(e) {
                         if (!httpBool) {
-                            if ((resultsContainer - e.target.activeElement.scrollTop) < 3000) {
+                            if ((resultsContainer - e.target.scrollingElement.scrollTop) < 3000) {
+                                $scope.query = decodeURI($routeParams.query);
+                                $scope.userCity = decodeURI($routeParams.cityName);
                                 $scope.searchQuery();
                             }
                         }
