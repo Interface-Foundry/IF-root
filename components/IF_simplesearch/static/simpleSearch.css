@@ -541,6 +541,23 @@ div.footerBar {
 }
 
 
+.scrollTop{
+    bottom: 0; 
+    right: 0;
+    margin-right: 14px; 
+    margin-bottom: 16px;
+    background:white; 
+    border:1px solid #ccc; 
+    width:42px; height:55px; 
+    position:fixed;
+}
+
+.scrollTop:hover{
+    background:#ddd; 
+    border:1px solid #ccc;
+}
+
+
 .flexBody.Foot {
     background-color: #f2f2f2;   
     border-top: 1px solid #e4e4e4;

@@ -99,7 +99,7 @@ U/| . \\u      | |     |  __/
     </div>
     
 
-  <div ng-show="showQueryBar" ng-cloak>  
+  <div ng-show="showQueryBar" id="topQueryBar" ng-cloak>  
     <div class="flex-Container Query">
         <div class="flexBody Mid-Container">
             <div ng-click="forceReload()" class="flexBody Top-Icon Query"></div>
@@ -115,7 +115,7 @@ U/| . \\u      | |     |  __/
 
     <div class="resultsContainer" ng-cloak>
       
-        <div ng-show="items.length > 0" ng-style="{'bottom': 0, 'right': 0, 'margin-right': '10px', 'margin-bottom': '10px'}" style="background:white; border:1px solid #ccc; width:47px; height:60px; position:fixed;"><i style="padding:5px; color:#ccc; visibility:visible; font-size:24px; padding-left:12px; padding-top:15px; cursor:pointer;" class="Mobile-Icon glyphicon glyphicon-chevron-up"></i></div>
+        <div class="scrollTop" ng-click="scrollTop()" ng-show="items.length > 0"><i style="padding:5px; color:#ccc; visibility:visible; font-size:21px; padding-left:11px; padding-top:15px; cursor:pointer;" class="Mobile-Icon glyphicon glyphicon-chevron-up"></i></div>
 
         <div ng-show="noResults">Sorry, we couldn't find anything for you :(</div>
 

@@ -1,6 +1,6 @@
 var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment']);
 
-simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window) {
+simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window,$anchorScroll) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * * 
@@ -76,6 +76,10 @@ simpleSearchApp.controller('SimpleSearchCtrl', function ($scope, $http, $locatio
     };
 
 
+    $scope.scrollTop = function(){
+        $location.hash('topQueryBar');
+        $anchorScroll();
+    }
 
     $scope.toggleHighlight = function($event){
          
