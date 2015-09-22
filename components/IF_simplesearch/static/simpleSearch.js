@@ -1,13 +1,31 @@
 var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute','ngTouch'])
+.factory('location', [
+    '$location',
+    '$route',
+    '$rootScope',
+    function ($location, $route, $rootScope) {
+        $location.skipReload = function () {
+            var lastRoute = $route.current;
+            var un = $rootScope.$on('$locationChangeSuccess', function () {
+                $route.current = lastRoute;
+                un();
+            });
+            return $location;
+        };
+        return $location;
+    }
+])
 .config(function ($routeProvider, $locationProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'partials/home.html',
-        controller: 'HomeCtrl'
+        controller: 'HomeCtrl',
+        reloadOnSearch: false
       })
       .when('/q/:query/:lat/:lng/:cityName', {
         templateUrl: 'partials/results.html',
-        controller: 'HomeCtrl'
+        controller: 'HomeCtrl',
+        reloadOnSearch: false
       })
       .otherwise({
         redirectTo: '/'
@@ -23,7 +41,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
 
 
 
-simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams) {
+simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * * 
@@ -261,7 +279,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             radius: 5,
         }).
             then(function(response) {
-                
+                location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
                 //* * * * * * * * * * * * * 
                 //if no results, re-query with US size radius
                 //* * * * * * * * * * * * * 
