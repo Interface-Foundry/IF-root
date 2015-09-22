@@ -2,6 +2,22 @@ var stopwords = require('./stopwords');
 var fs = require('fs');
 var natural = require('natural');
 
+
+/**
+ * Takes a list of words, remomves the stop words, returns array
+ */
+var tokenizer = new natural.WordTokenizer();
+var tokenize = module.exports.tokenize = function(text) {
+  var tokens = [];
+  tokenizer.tokenize(text).map(function(token) {
+    if (stopwords.indexOf(token) === -1) {
+      tokens.push(natural.PorterStemmer.stem(token.toLowerCase()));
+    }
+  })
+  return tokens;
+}
+
+
 /**
  * Get the list of colors and color values
  */
@@ -25,32 +41,64 @@ var colors = module.exports.colors = rgbtxt.map(function(line) {
  *  words: ['jacket', 'skiboots', etc]
  * }]
  */
-var tsvfile = fs.readFileSync('./List of Tags in Kip Search - terms.tsv',  'utf8');
-tsvfile = tsvfile.split('\r\n');
-var buckets = tsvfile[1].split('\t').slice(1).map(function(val) {
+var tsvfile = fs.readFileSync('./List of Tags in Kip Search - category terms.tsv',  'utf8').split('\r\n');
+var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row) {
+  row = row.split('\t').filter(function(val) {
+    return val !== '';
+  });
   return {
-    name: val,
-    boost:0, //default
-    words: []
+    name: row[0].toLowerCase(),
+    boost: row[1], //default, should often be overridden by our combos
+    words: tokenize(row.slice(2).join(' '))
   }
 });
-tsvfile[0].split('\t').slice(1).map(function(val, i) {
-  buckets[i].boost = val;
+
+// some custom logic for combining "major item" and "minor item" buckets
+var itembucket = buckets.reduce(function(bucket, b) {
+  if (b.name.indexOf('item') >= 0) {
+    bucket.words = bucket.words.concat(b.words);
+  }
+  return bucket;
+}, {name: 'item', boost: 50, words: []})
+buckets = buckets.filter(function(b) {
+  return b.name.indexOf('item') < 0;
 })
-tsvfile.slice(2).map(function(row) {
-  row.split('\t').slice(1).map(function(val, i) {
-    if (val && val !== '') {
-      buckets[i].words.push(natural.PorterStemmer.stem(val.toLowerCase()));
-    }
-  })
-})
+buckets.push(itembucket);
+
+// also add the colors
 buckets.push({
   name: 'colors',
-  boost: 5,
-  words: colors
+  boost: 30,
+  words: tokenize(colors.join(' '))
 })
-module.exports.buckets = buckets;
 
+// make a bucket hash instead of array.
+bucketHash = buckets.reduce(function(h, b) {
+  h[b.name] = b;
+  return h;
+}, {})
+
+// make sure there are no genders in the brand bucket
+bucketHash.brand.words = bucketHash.brand.words.filter(function (word) {
+  return bucketHash.gender.words.indexOf(word) < 0;
+})
+
+// make sure there are no items in the pop culture bucket
+bucketHash['pop culture'].words = bucketHash['pop culture'].words.filter(function (word) {
+  return bucketHash.item.words.indexOf(word) < 0;
+})
+
+// colors are actually the worst
+bucketHash.colors.words = bucketHash.colors.words.filter(function(word) {
+  var ok = true;
+  buckets.map(function(b) {
+    if (b.name == 'colors') { return; }
+    if (b.words.indexOf(word) >= 0) {
+      ok = false;
+    }
+  })
+  return ok;
+})
 
 /**
  * Get the combos from the spreadsheet
@@ -73,7 +121,7 @@ var combos = module.exports.combos = {};
 var twoTermCombosFirstValue = comboTsv[3][0];
 var twoTermCombosSecondValue = comboTsv[4][0];
 for (var i = 1; i < comboTsv[3].length; i++) {
-  var key = comboTsv[3][i] + '__' + comboTsv[4][i];
+  var key = [comboTsv[3][i], comboTsv[4][i]].sort().join('|')
   combos[key] = [{
       name: comboTsv[3][i],
       boost: twoTermCombosFirstValue
@@ -88,7 +136,7 @@ var threeTermCombosFirstValue = comboTsv[7][0];
 var threeTermCombosSecondValue = comboTsv[8][0];
 var threeTermCombosThirdValue = comboTsv[9][0];
 for (var i = 1; i < comboTsv[8].length; i++) {
-  var key = comboTsv[7][i] + '__' + comboTsv[8][i] + '__' + comboTsv[9][i];
+  var key = [comboTsv[7][i], comboTsv[8][i], comboTsv[9][i]].sort().join('|');
   combos[key] = [{
       name: comboTsv[7][i],
       boost: threeTermCombosFirstValue
@@ -101,20 +149,6 @@ for (var i = 1; i < comboTsv[8].length; i++) {
     }];
 }
 
-
-/**
- * Takes a list of words, remomves the stop words, returns array
- */
-var tokenizer = new natural.WordTokenizer();
-var tokenize = module.exports.tokenize = function(text) {
-  var tokens = [];
-  tokenizer.tokenize(text).map(function(token) {
-    if (stopwords.indexOf(token) === -1) {
-      tokens.push(natural.PorterStemmer.stem(token.toLowerCase()));
-    }
-  })
-  return tokens;
-}
 
 /**
  * Takes a list of words, remomves the stop words, and splits the remaining
@@ -159,8 +193,8 @@ var parse = module.exports.parse = function(terms) {
 
   // check to see if we need to apply custom weights for a SECRET COMBO
   // up up down down left right left right b a
-  if (combos[combo.join('__')]) {
-    combos[combo.join('__')].map(function(bucket) {
+  if (combos[combo.sort().join('|')]) {
+    combos[combo.sort().join('|')].map(function(bucket) {
       bucketTerms[bucket.name].boost = bucket.boost;
     })
   }
