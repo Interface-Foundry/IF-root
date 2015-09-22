@@ -21,7 +21,7 @@ var tokenize = module.exports.tokenize = function(text) {
 /**
  * Get the list of colors and color values
  */
-var rgbtxt = fs.readFileSync('./rgb.txt', 'utf8').split('\n').slice(1);
+var rgbtxt = fs.readFileSync(__dirname + '/rgb.txt', 'utf8').split('\n').slice(1);
 var colormap = module.exports.colormap = {};
 var colors = module.exports.colors = rgbtxt.map(function(line) {
   line = line.split('\t');
@@ -41,7 +41,7 @@ var colors = module.exports.colors = rgbtxt.map(function(line) {
  *  words: ['jacket', 'skiboots', etc]
  * }]
  */
-var tsvfile = fs.readFileSync('./List of Tags in Kip Search - category terms.tsv',  'utf8').split('\r\n');
+var tsvfile = fs.readFileSync(__dirname + '/List of Tags in Kip Search - category terms.tsv',  'utf8').split('\r\n');
 var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row) {
   row = row.split('\t').filter(function(val) {
     return val !== '';
@@ -106,7 +106,7 @@ bucketHash.colors.words = bucketHash.colors.words.filter(function(word) {
  *  'gender__item': [{name: 'item': boost: 71}, {name: 'gender', boost: 29}]
  * }
  */
-var comboTsv = fs.readFileSync('./List of Tags in Kip Search - custom weights.tsv', 'utf8')
+var comboTsv = fs.readFileSync(__dirname + '/List of Tags in Kip Search - custom weights.tsv', 'utf8')
   .split('\r\n')
   .map(function(row) {
     return row

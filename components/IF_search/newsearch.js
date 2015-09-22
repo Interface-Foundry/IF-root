@@ -36,7 +36,7 @@ if (!module.parent) {
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-var searchItemsUrl = '/search';
+var searchItemsUrl = '/api/items/search';
 app.post(searchItemsUrl, function(req, res, next) {
 
     // page is 0-indexed
@@ -298,7 +298,7 @@ function textSearch(q, page) {
               }
           }
       };
-      kip.prettyPrint(fuzzyQuery)
+      //kip.prettyPrint(fuzzyQuery)
 
       return es.search(fuzzyQuery)
           .then(function(results) {
@@ -356,4 +356,6 @@ if (!module.parent) {
     }
     console.log("kip style search listening on 8080")
   })
+} else {
+  module.exports = app;
 }

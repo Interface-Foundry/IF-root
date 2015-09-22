@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css"/>
+    <link href="normalize.css" rel="stylesheet" type="text/css"/>
+    <link href="skeleton.css" rel="stylesheet" type="text/css"/>
+    <link href="test.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+    <div class="row headerBar">
+        <span>Kip Styles</span>
+    </div>
+<div class="container">
+  <div class="row">
+    <div class="six columns">
+      <label>Search</label>
+      <input type="text" class="u-full-width" id="q" value="white dress">
+    </div>
+    <div class="two columns">
+      <label>Lon</label>
+      <input type="text" class="u-max-full-width" id="lon" value="-73.990638">
+    </div>
+    <div class="two columns">
+      <label>Lat</label>
+      <input type="text" class="u-max-full-width" id="lat" value="40.7352793">
+    </div>
+    <div class="two columns">
+      <label>&nbsp;</label>
+      <button id="search-go">Search</button>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <div class="six columns">
+      <select id="server">
+          <option value="https://kipapp.co/styles/" selected="selected">kipapp.co</option>
+          <option value="http://pikachu.kipapp.co/">pikachu.kipapp.co</option>
+          <option value="http://localhost:8081/">localhost</option>
+      </select>
+      <br />
+      <div class="results r1"></div>
+    </div>
+    <div class="six columns">
+      <select id="server2">
+          <option value="https://kipapp.co/styles/">kipapp.co</option>
+          <option value="http://pikachu.kipapp.co/" selected="selected">pikachu.kipapp.co</option>
+          <option value="http://localhost:8081/">localhost</option>
+      </select>
+      <br />
+      <div class="results r2"></div>
+    </div>
+  </div>
+</div>
+<script src="zepto.min.js"></script>
+<script src="test.js"></script>
+</body>
+</html>
