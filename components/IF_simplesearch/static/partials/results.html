@@ -19,7 +19,7 @@
 
     <div class="resultsContainer" ng-cloak>
       
-        <div class="scrollTop" ng-click="scrollTop()" ng-show="items.length > 0"><i style="padding:5px; color:#ccc; visibility:visible; font-size:21px; padding-left:11px; padding-top:15px; cursor:pointer;" class="Mobile-Icon glyphicon glyphicon-chevron-up"></i></div>
+        <div class="scrollTop" ng-click="scrollTop()" ng-show="items.length > 0"><i style="padding:5px; color:#ccc; visibility:visible; font-size:21px; padding-left:11px; padding-top:15px; cursor:pointer;" class="glyphicon glyphicon-chevron-up"></i></div>
 
         <div ng-show="noResults">Sorry, we couldn't find anything for you :(</div>
 
@@ -27,7 +27,7 @@
             
         <div class="collapsedContent">
             
-            <div class="col-md-4 imageWrapper" ng-click="expandContent($index)">     
+            <div class="col-md-4 imageWrapper" ng-click="expandContent($index, $event)">     
                 <img class="holderPlace" data-original="{{item.itemImageURL[0]}}">
                 <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
             </div>
@@ -58,7 +58,8 @@
             
         </div>
         
-        <div class="expandTopWrapper ">
+        <div class="expandTopWrapper">
+                <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
                 <div class="expandedImageWrapper">
                     <div class="expandedLargeImage largeImage{{$index}}" ng-style="{'background-image': 'url({{item.itemImageURL[0]}})'}"></div>
                     <div class="imageSelectors Wrapper">
@@ -68,8 +69,6 @@
             
             <div class="detailsContentWrapper">
                 <div class="detailsContent">{{item.description}}</div>
-                
-                
             </div>
             
         </div>

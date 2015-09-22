@@ -41,17 +41,31 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.searchIndex = 0;
     $scope.items = [];
     $scope.newQuery = null;
-    $scope.expandedIndex;
+    $scope.expandedIndex = null;
+    $scope.isExpanded = false;
     
-    $scope.expandContent = function(index) {
+    $scope.expandContent = function(index, event) {
+        console.log('ng',event);
         if ($scope.expandedIndex === index) {
             $scope.expandedIndex = null;
             $('.row'+index).removeClass('expand');
+            $scope.isExpanded = false;
+        }else if ($scope.expandedIndex !== null) {
+            $('.row'+$scope.expandedIndex).removeClass('expand');
+            $('.row'+index).addClass('expand');
+            $scope.expandedIndex = index;
         } else {
             $('.row'+index).addClass('expand');
             $scope.expandedIndex = index;
         }
     }
+    
+    $(window).on('click', function(event) {
+        if (event.target.className === "collapsedContent"){
+            $('.row'+$scope.expandedIndex).removeClass('expand');
+            $scope.expandedIndex = null;
+        }
+    })
     
     $scope.enlargeImage = function(parIndex, imgIndex) {
         console.log(parIndex, imgIndex);

@@ -556,6 +556,7 @@ div.footerBar {
     border:1px solid #ccc; 
     width:42px; height:55px; 
     position:fixed;
+    z-index: 100;
 }
 
 .scrollTop:hover{
@@ -676,23 +677,23 @@ div.footerBar {
     margin-left: 12%;
     display: flex;
     flex-direction: column;
-    
 }
 
 .expandedLargeImage {
-    
     height: 300px;
     width: 300px;
     background-color: white;
     background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     display: flex;
-    flex-direction: wrap;
+    flex-direction: row;
 }
 
 .imageSelectors.Wrapper {
     display: flex;
     flex-direction: row;    
-    width: 100%;
+    width: auto;
 }
 
 .imageSelectors {
@@ -700,6 +701,7 @@ div.footerBar {
     width: 50px;
     background-color: white;
     background-size: contain;
+    background-repeat: no-repeat;
     display: inline-block;
  
 }
@@ -720,13 +722,28 @@ div.footerBar {
 }
 
 .detailsContentWrapper {
-    display: flex;
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap:wrap;
+    width: 66%;
 }
 
 .detailsContent {
     color: white;
     padding-left: 20%;
     padding-right: 20%;
+    flex-grow: 1;
+}
+
+.closeExpand {
+    color: white;  
+    height: 30px;
+    width: 30px;
+    font-size: 30px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
 }
 
 @media(max-width: 650px) {
