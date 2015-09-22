@@ -96,7 +96,7 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
     },
     tags: {
         source: function() {
-            return _.flattenDeep([
+            return _.uniq(searchterms.tokenize(_.flattenDeep([
                 _.get(this, 'itemTags.text'),
                 _.get(this, 'meta.humanTags.itemType'),
                 _.get(this, 'meta.humanTags.itemStyle'),
@@ -108,7 +108,7 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
                 _.get(this, 'meta.classifierTags')
             ]).filter(function(a) {
                 return typeof a !== 'undefined' && a !== '';
-            })
+            }).join(' ')))
         }
     },
     miscText: {
@@ -207,6 +207,7 @@ function GO() {
             var bulkBody = landmarks.reduce(function(body, l) {
                 body.push({index: {_index: 'kip', _type: 'items', _id: l._id.toString()}})
                 var doc = mongoToEs(esItemSchema, l);
+                // console.log(JSON.stringify(doc, null, 2));
                 // maybe do custom things here
                 body.push(doc);
                 return body;
@@ -271,6 +272,7 @@ function mongoToEs(schema, doc) {
       }, []);
       esDoc.fullText = _.flatten(fullText).join(' ');
     }
+    return esDoc;
 }
 
 if (process.argv[2] === 'rebuild') {
