@@ -41,6 +41,24 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.searchIndex = 0;
     $scope.items = [];
     $scope.newQuery = null;
+    $scope.expandedIndex;
+    
+    $scope.expandContent = function(index) {
+        if ($scope.expandedIndex === index) {
+            $scope.expandedIndex = null;
+            $('.row'+index).removeClass('expand');
+        } else {
+            $('.row'+index).addClass('expand');
+            $scope.expandedIndex = index;
+        }
+    }
+    
+    $scope.enlargeImage = function(parIndex, imgIndex) {
+        console.log(parIndex, imgIndex);
+        $('.largeImage'+parIndex).css({
+            'background-image': "url("+imgIndex+")"
+        });
+    }
 
     $('#locInput').geocomplete({
         details: 'form',
