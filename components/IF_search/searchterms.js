@@ -47,7 +47,7 @@ var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row) {
     return val !== '';
   });
   return {
-    name: row[0].toLowerCase(),
+    name: row[0].toLowerCase().replace(/ /g, ''),
     boost: row[1], //default, should often be overridden by our combos
     words: tokenize(row.slice(2).join(' '))
   }
@@ -84,7 +84,7 @@ bucketHash.brand.words = bucketHash.brand.words.filter(function (word) {
 })
 
 // make sure there are no items in the pop culture bucket
-bucketHash['pop culture'].words = bucketHash['pop culture'].words.filter(function (word) {
+bucketHash.popculture.words = bucketHash.popculture.words.filter(function (word) {
   return bucketHash.item.words.indexOf(word) < 0;
 })
 
@@ -121,12 +121,12 @@ var combos = module.exports.combos = {};
 var twoTermCombosFirstValue = comboTsv[3][0];
 var twoTermCombosSecondValue = comboTsv[4][0];
 for (var i = 1; i < comboTsv[3].length; i++) {
-  var key = [comboTsv[3][i], comboTsv[4][i]].sort().join('|')
+  var key = [comboTsv[3][i], comboTsv[4][i]].sort().join('|').replace(/ /g, '');
   combos[key] = [{
-      name: comboTsv[3][i],
+      name: comboTsv[3][i].replace(/ /g, ''),
       boost: twoTermCombosFirstValue
     }, {
-      name: comboTsv[4][i],
+      name: comboTsv[4][i].replace(/ /g, ''),
       boost: twoTermCombosSecondValue
     }];
 }
@@ -136,15 +136,15 @@ var threeTermCombosFirstValue = comboTsv[7][0];
 var threeTermCombosSecondValue = comboTsv[8][0];
 var threeTermCombosThirdValue = comboTsv[9][0];
 for (var i = 1; i < comboTsv[8].length; i++) {
-  var key = [comboTsv[7][i], comboTsv[8][i], comboTsv[9][i]].sort().join('|');
+  var key = [comboTsv[7][i], comboTsv[8][i], comboTsv[9][i]].sort().join('|').replace(/ /g, '');
   combos[key] = [{
-      name: comboTsv[7][i],
+      name: comboTsv[7][i].replace(/ /g, ''),
       boost: threeTermCombosFirstValue
     }, {
-      name: comboTsv[8][i],
+      name: comboTsv[8][i].replace(/ /g, ''),
       boost: threeTermCombosSecondValue
     }, {
-      name: comboTsv[9][i],
+      name: comboTsv[9][i].replace(/ /g, ''),
       boost: threeTermCombosThirdValue
     }];
 }
@@ -209,17 +209,16 @@ var parse = module.exports.parse = function(terms) {
 var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (text) {
 
   var bucketTerms = parse(text);
+  console.log(bucketTerms);
 
   var matches = Object.keys(bucketTerms).map(function(bucketName) {
     if (bucketName === 'uncategorized') return; // uncategorized handled differently
-    var bucket = buckets[bucketName];
-    var terms = bucketTerms[bucketName];
+    var terms = bucketTerms[bucketName].words;
     return {
-      match: {
-        content: {
+      multi_match: {
           query: terms.join(' '),
-          boost: bucket.boost
-        }
+          fields: ['tags^10', 'fullText'],
+          boost: bucketTerms[bucketName].boost
       }
     }
   });

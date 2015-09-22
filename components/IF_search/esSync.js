@@ -2,6 +2,8 @@ var db = require('db');
 var elasticsearch = require('elasticsearch');
 var config = require('config');
 var kip = require('kip');
+var searchterms = require('./searchterms');
+console.log(JSON.stringify(config, null, 2));
 
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
@@ -50,6 +52,9 @@ var esKipSchemaBase = {
     },
     popularity: {
         type: "double"
+    },
+    fullText: {
+        type: "string"
     }
 }
 
@@ -99,7 +104,8 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
                 _.get(this, 'meta.humanTags.itemDetail'),
                 _.get(this, 'meta.humanTags.itemFabric'),
                 _.get(this, 'source_justvisual.keywords'),
-                _.get(this, 'source_cloudsight.categories')
+                _.get(this, 'source_cloudsight.categories'),
+                _.get(this, 'meta.classifierTags')
             ]).filter(function(a) {
                 return typeof a !== 'undefined' && a !== '';
             })
@@ -134,37 +140,12 @@ types.push({
     properties: esItemSchema
 });
 
-var esLookSchema = _.merge({}, esKipSchemaBase, {
-    ownerName: {
-        type: 'string',
-            source: 'owner.name'
-    }
-})
-
-var esStoreSchema = _.merge({}, esKipSchemaBase, {
-    geolocation: {
-        type: "geo_point",
-        source: 'loc.coordinates'
-    },
-    ownerName: {
-        type: 'string',
-        source: 'owner.name'
-    }
-})
-
-var esUserSchema = _.merge({}, esKipSchemaBase, {
-    id: {
-        type: "string",
-        source: 'profileID'
-    }
-})
-
 
 function createIndexes() {
     es.indices.delete({
         index: 'kip'
     }, function (e) {
-        var body ={ mappings: {
+        var body = { mappings: {
             items:
             {
                 properties: schemaToMapping(esItemSchema)
@@ -199,13 +180,14 @@ function schemaToMapping(schema) {
     }, {})
 }
 
-
+/**
+ * Ingest a document
+ */
 function GO() {
     db.Landmarks
         .find({
             'world': false,
             'flags.mustUpdateElasticsearch': {$ne: false},
-            'flags.cloudsightProcessed': true,
             'hidden': {$ne: true}
         })
         .populate('source_justvisual.images')
@@ -224,7 +206,9 @@ function GO() {
 
             var bulkBody = landmarks.reduce(function(body, l) {
                 body.push({index: {_index: 'kip', _type: 'items', _id: l._id.toString()}})
-                body.push(mongoToEs(esItemSchema, l))
+                var doc = mongoToEs(esItemSchema, l);
+                // maybe do custom things here
+                body.push(doc);
                 return body;
             }, [])
 
@@ -241,7 +225,7 @@ function GO() {
                 }, {'flags.mustUpdateElasticsearch': false}, {multi: true}, function(e, r) {
                     if (e) { console.error(e) }
 
-                    process.nextTick(function() {
+                    setImmediate(function() {
                         GO();
                     })
                 })
@@ -251,7 +235,11 @@ function GO() {
 }
 
 function mongoToEs(schema, doc) {
-    return Object.keys(schema).reduce(function(esDoc, k) {
+    var hasFullText = false;
+    var esDoc = Object.keys(schema).reduce(function(esDoc, k) {
+        if (k === 'fullText') {
+          hasFullText = true;
+        }
         var prop = schema[k];
         if (prop.type === 'object' && typeof prop.properties !== 'undefined') {
             esDoc[k] = mongoToEs(prop.properties, doc);
@@ -267,7 +255,22 @@ function mongoToEs(schema, doc) {
             console.error('source of unknown type');
         }
         return esDoc;
-    }, {})
+    }, {});
+
+    // build a custom full text field with our custom tokenizer
+    if (hasFullText) {
+      var fullText = Object.keys(schema).reduce(function(fullText, k) {
+        if (schema[k].type === 'string') {
+          if (esDoc[k] instanceof Array) {
+            fullText.push(searchterms.tokenize(_.flatten(esDoc[k]).join(' ')));
+          } else if (typeof esDoc[k] === 'string') {
+            fullText.push(searchterms.tokenize(esDoc[k]))
+          }
+        }
+        return fullText; // array of token arrays
+      }, []);
+      esDoc.fullText = _.flatten(fullText).join(' ');
+    }
 }
 
 if (process.argv[2] === 'rebuild') {

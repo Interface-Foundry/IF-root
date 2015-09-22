@@ -1,18 +1,152 @@
 var db = require('db');
+var elasticsearch = require('elasticsearch');
+var config = require('config');
 var express = require('express');
+var Promise = require('bluebird');
 var app = express();
 var kip = require('kip');
 var geolib = require('geolib');
 var searchterms = require('./searchterms');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var pageSize = 20;
+var defaultRadius = 2;
+
+// logs elasticsearch stuff, flesh out later once we know what's useful
+var ESLogger = function(config) {
+    var defaultLogger = function() {};
+
+    this.error = defaultLogger;
+    this.warning = defaultLogger;
+    this.info = defaultLogger;
+    this.debug = defaultLogger;
+    this.trace = defaultLogger;
+    this.close = defaultLogger;
+};
+var es = new elasticsearch.Client({
+    host: config.elasticsearch.url,
+    log: ESLogger
+});
 
 
 // parse user if we're running this on it's own server
 if (!module.parent) {
-  app.use(require('../IF_auth/new_auth.js'));
+  //app.use(require('../IF_auth/new_auth.js'));
 }
+app.use(cookieParser());
+app.use(bodyParser.json());
+
+var searchItemsUrl = '/search';
+app.post(searchItemsUrl, function(req, res, next) {
+
+    // page is 0-indexed
+    var page = parseInt(req.query.page) || 0;
+
+    var responseBody = {
+        links: {
+            self: req.originalUrl,
+            next: searchItemsUrl + '?page=' + (page + 1),
+            prev: page == 0 ? null : searchItemsUrl + '?page=' + (page - 1),
+            first: searchItemsUrl,
+            last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
+        },
+        query: req.body,
+        results: []
+    };
 
 
-app.get('/search', function(req, res, next) {
+    search(req.body, page)
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 5;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, page);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 50;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, page);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 500;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, page);
+            } else {
+                return res;
+            }
+        })
+        .then(function(results) {
+            // first un-mongoose the results
+            results = results.map(function(r) {
+              return r.toObject();
+            })
+
+            // Add the parents here.  fetch them from the db in one query
+            // The goal is to make item.parents a list of landmarks ordered by
+            // distance to the search location.  And make item.parent the
+            // closest one.
+
+            // only make one db call to fetch all the parents in this result set
+            var allParents = results.reduce(function (all, r) {
+              return all.concat(r.parents || []);
+            }, [])
+
+            db.Landmarks.find({
+              _id: {$in: allParents}
+            }, function(e, parents) {
+              if (e) { return next(e); }
+              debugger;
+
+              results.map(function(r) {
+                var strparents = r.parents.map(function(_id) { return _id.toString()});
+                r.parents = parents.filter(function(p) {
+                  return strparents.indexOf(p._id.toString()) >= 0;
+                }).sort(function(a, b) {
+                  // sort by location
+                  var a_dist = geolib.getDistance({
+                    longitude: a.loc.coordinates[0],
+                    latitude: a.loc.coordinates[1]
+                  }, {
+                    longitude: req.body.loc.lon,
+                    latitude: req.body.loc.lat
+                  });
+                  var b_dist = geolib.getDistance({
+                    longitude: b.loc.coordinates[0],
+                    latitude: b.loc.coordinates[1]
+                  }, {
+                    longitude: req.body.loc.lon,
+                    latitude: req.body.loc.lat
+                  });
+                  return a_dist < b_dist;
+                });
+                r.parent = r.parents[0];
+              })
+
+              responseBody.results = results;
+              res.send(responseBody);
+            })
+
+            // (new db.Analytics({
+            //   anonId: req.anonId,
+            //   userId: req.userId,
+            //   action: 'search',
+            //   data: {
+            //     query: req.body,
+            //     resultCount: results.length
+            //   }
+            // })).save();
+        }, next)
+});
+
+function search(q, page) {
     //
     // Normalize query
     //
@@ -102,7 +236,7 @@ app.get('/search', function(req, res, next) {
     } else {
         return filterSearch(q, page);
     }
-})
+}
 
 /**
  * Search implementation for a query that has text
