@@ -748,26 +748,41 @@ div.footerBar {
 
 @media(max-width: 650px) {
     
+    .container-fluid {
+        overflow-x: hidden;
+    }
+    
     .card-title > a {
         font-size: 14px;
     }
     .resultsContainer {
-        overflow-x: hidden;   
+        
     }
     
     .flex-Container {
-        margin-left: 1%;
+        margin-left: 5%;
         margin-right: 0;
     }
     .contentRow {
         height: 325px;
+        
     }
     .collapsedContent {
         padding-left: 0;   
+        
     }
+    
+    .imageWrapper {
+        padding-left: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
     .descripWrapper {
         padding-left: 0;
         padding-right: 0;
+        margin-right: 10%;
     }
     .Top-Icon.Query {
         margin-top: 0;   
@@ -816,6 +831,44 @@ div.footerBar {
     
     .Length.Button {
         display: none;   
+    }
+    
+    .expandMobileWrapper {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        z-index: 200;
+        background-color: black;
+    }
+    
+    .mobileImageWrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .expandedMobileImage {
+        height: 280px;
+        width: 280px;
+        margin-top: 15%;
+        background-size: contain;
+        background-repeat:no-repeat;
+        
+    }
+    
+    .imageSelectors.Wrapper {
+        position: relative;
+        bottom: 0;
+        width: 280px;
+    }
+    
+    .expandedDescripWrapper {
+        background-color: black;
+        color: white;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 10px;
     }
 }
 

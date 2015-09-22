@@ -43,11 +43,35 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.newQuery = null;
     $scope.expandedIndex = null;
     $scope.isExpanded = false;
+    $scope.outerWidth = $(window)[0].outerWidth;
+    $scope.mobileScreen = false;
+    $scope.mobileScreenIndex;
+
+    if ($scope.outerWidth < 651) {
+        $scope.mobileScreen = true;
+    }
+    
+    $scope.closeMobileWrapper = function(index) {
+        if ($scope.mobileScreen) {
+            var el = $('.expandMobileWrapper.mWrapper'+index);   
+            el.css({
+                'width': ''+$scope.outerWidth+'px',
+                'height': '0'
+            });
+            $scope.mobileScreenIndex = null;
+        }
+    }
     
     $scope.expandContent = function(index, event) {
         console.log(event);
-        if (event.view.window.outerHeight < 651) {
-            
+        if ($scope.mobileScreen) {
+            $scope.mobileScreenIndex = index;
+            var el = $('.expandMobileWrapper.mWrapper'+index);
+            console.log('mobview', el);
+            el.css({
+                'width': ''+$scope.outerWidth+'px',
+                'height': '100%'
+            });
         } else {
             if ($scope.expandedIndex === index) {
                 $scope.expandedIndex = null;
@@ -73,9 +97,35 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     
     $scope.enlargeImage = function(parIndex, imgIndex) {
         console.log(parIndex, imgIndex);
-        $('.largeImage'+parIndex).css({
-            'background-image': "url("+imgIndex+")"
-        });
+        if ($scope.mobileScreen) {
+            $('.mobileImg'+parIndex).css({
+                'background-image': "url("+imgIndex+")"
+            });       
+        } else {
+            $('.largeImage'+parIndex).css({
+                'background-image': "url("+imgIndex+")"
+            });
+        }
+    }
+    
+    $scope.swipeImage = function(direction, parIndex, item, imgIndex) {
+        var newIndex;
+        if (direction == "left") {    
+            if (imgIndex < item.itemImageURL.length - 1) {
+                newIndex = imgIndex++;
+            } else {
+                newIndex = 0;
+            }
+        } else if (direction == "right") {
+            if (imgIndex !== 0) {
+                newIndex = imgIndex--;
+            } else {
+                newIndex = item.itemImageURL.length - 1;
+            }   
+        }
+        $('.mobileImg'+parIndex).css({
+            'background-image': "url("+item.itemImageURL[newIndex]+")"
+        });    
     }
 
     $('#locInput').geocomplete({

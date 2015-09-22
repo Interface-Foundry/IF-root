@@ -72,5 +72,26 @@
             </div>
             
         </div>
+        
+        <div ng-if="mobileScreen" class="expandMobileWrapper mWrapper{{$index}}">
+            <div ng-show="mobileScreenIndex == $index" class="mobileContentWrapper">
+                <div ng-click="closeMobileWrapper($index)" class="closeExpand glyphicon glyphicon-remove"></div>
+                
+                <div class="mobileImageWrapper">
+                    
+                    
+                    <div class="expandedMobileImage mobileImg{{$index}}" ng-style="{'background-image': 'url({{item.itemImageURL[0]}})'}"
+                         ng-swipe-left="swipeImage(left, $parent.$index, item, $index)" ng-swipe-right="swipeImage(right, $parent.$index, item, $index)">
+                        
+
+                    </div>
+                    <div class="imageSelectors Wrapper">
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{item.itemImageURL[$index]}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                    </div>
+                    <div class="expandedDescripWrapper">{{item.description}}</div>
+            </div>
+        </div>
 </div>
 
+</div>
+</div>
