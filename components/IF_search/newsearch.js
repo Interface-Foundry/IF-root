@@ -114,11 +114,6 @@ function textSearch(q, page) {
 
       console.log('text search', q);
 
-      //split up the search terms into their categories.
-      var buckets = searchterms.split(q.text);
-
-
-
       // elasticsearch impl
       // update fuzziness of query based on search term length
       var fuzziness = 0;
@@ -163,17 +158,7 @@ function textSearch(q, page) {
           body: {
               query: {
                   filtered: {
-                      query: {
-                          multi_match: {
-                              query: q.text,
-                              fuzziness: fuzziness,
-                              prefix_length: 1,
-                              type: "best_fields",
-                              fields: ["name^4", "id^3", "parentName^3", "tags^3", "categories^2", "description^2", "miscText"],
-                              tie_breaker: 0.2,
-                              minimum_should_match: "30%"
-                          }
-                      },
+                      query: searchterms.getElasticsearchQuery(q.text),
                       filter: filter
                   }
               }

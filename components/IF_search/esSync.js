@@ -205,7 +205,8 @@ function GO() {
         .find({
             'world': false,
             'flags.mustUpdateElasticsearch': {$ne: false},
-            'flags.cloudsightProcessed': true
+            'flags.cloudsightProcessed': true,
+            'hidden': {$ne: true}
         })
         .populate('source_justvisual.images')
         .limit(20)
