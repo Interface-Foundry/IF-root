@@ -747,6 +747,28 @@ div.footerBar {
 }
 
 @media(max-width: 650px) {
+    
+    .card-title > a {
+        font-size: 14px;
+    }
+    .resultsContainer {
+        overflow-x: hidden;   
+    }
+    
+    .flex-Container {
+        margin-left: 1%;
+        margin-right: 0;
+    }
+    .contentRow {
+        height: 325px;
+    }
+    .collapsedContent {
+        padding-left: 0;   
+    }
+    .descripWrapper {
+        padding-left: 0;
+        padding-right: 0;
+    }
     .Top-Icon.Query {
         margin-top: 0;   
     }

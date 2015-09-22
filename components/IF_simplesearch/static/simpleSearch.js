@@ -45,18 +45,22 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.isExpanded = false;
     
     $scope.expandContent = function(index, event) {
-        console.log('ng',event);
-        if ($scope.expandedIndex === index) {
-            $scope.expandedIndex = null;
-            $('.row'+index).removeClass('expand');
-            $scope.isExpanded = false;
-        }else if ($scope.expandedIndex !== null) {
-            $('.row'+$scope.expandedIndex).removeClass('expand');
-            $('.row'+index).addClass('expand');
-            $scope.expandedIndex = index;
+        console.log(event);
+        if (event.view.window.outerHeight < 651) {
+            
         } else {
-            $('.row'+index).addClass('expand');
-            $scope.expandedIndex = index;
+            if ($scope.expandedIndex === index) {
+                $scope.expandedIndex = null;
+                $('.row'+index).removeClass('expand');
+                $scope.isExpanded = false;
+            }else if ($scope.expandedIndex !== null) {
+                $('.row'+$scope.expandedIndex).removeClass('expand');
+                $('.row'+index).addClass('expand');
+                $scope.expandedIndex = index;
+            } else {
+                $('.row'+index).addClass('expand');
+                $scope.expandedIndex = index;
+            }
         }
     }
     
