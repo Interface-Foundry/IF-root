@@ -1,4 +1,4 @@
-var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute'])
+var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute','ngTouch'])
 .config(function ($routeProvider, $locationProvider) {
     $routeProvider
       .when('/', {
