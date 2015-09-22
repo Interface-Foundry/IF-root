@@ -1,8 +1,6 @@
 
 <div class="container" >
-
   <div ng-hide="showQueryBar" >
-
       <div class="flex-Container">
 
         <div class="flexBody Top">
@@ -13,10 +11,10 @@
         <div class="flexBody Mid-Container">
             <form class="flexBody Mid Input">
                 
-                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery(); doBlur($event)" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus></input></div>
                 <div class="Mid-Input Length"><span class="Find-ZTop">Near </span><span><i tooltip data-placement="top" data-toggle="tooltip" title="Locate Me" ng-hide="loadingLoc || hideGPSIcon" style="cursor:pointer; z-index:12; float:right; padding-right:23px; padding-top:4px; opacity:0.4; cursor:pointer;" ng-click="getGPSLocation()" class="glyphicon glyphicon-screenshot"></i></span>
                   
-                  <input id="locInput" ng-enter="searchQuery()" ng-model="userCity" 
+                  <input id="locInput" ng-enter="searchQuery(); doBlur($event)" ng-model="userCity" 
                     class="Find-Input" ng-class="loadingLoc ? 'loading-gif' : 'noloading-gif'" maxlength="2046" placeholder="address, city, landmark" select-on-click>
                   </input>
                 </div>
@@ -26,7 +24,7 @@
         </div>
         <div class="flexBody Mid Tag">
             <div class="Mid Tag Text">
-                <div>Trending: <a >#70s</a> <a>#fall</a> <a>#blue dress</a></div>
+                <div>Trending: <a ng-click="searchThis('70s')">#70s</a> <a ng-click="searchThis('fall')">#fall</a> <a ng-click="searchThis('blue dress')">#blue dress</a></div>
             </div>
         </div>
         <div class="flexBody Foot ">
@@ -36,9 +34,6 @@
         </div>
 
       </div>
-      
     </div>
-    
-
 </div>
 

@@ -80,7 +80,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                         break;                               
                     }
                 }
-                $scope.locationMsg = 'Update Location';
             }, function(res) {
                 //if IP broken get HTML5 geoloc
                 //$scope.getLocation();
@@ -167,8 +166,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         var encodeCity = encodeURI($scope.userCity);
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
         if ($scope.newQuery) {
-//            $scope.items = [];
-            
             $scope.newQuery = false;
         }
         
@@ -191,11 +188,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 }
 
                 console.log('data', response.data);
+
                 if ($scope.items && $scope.items.length){
                     $scope.noResults = false;
                     for (var i = 0; i < $scope.items.length; i++) {    
                         //filter out usernames
-                        if ($scope.items[i].loc){ 
+                        if ($scope.items[i].loc && !$scope.items[i].profileID){ 
 
                             //make link for directions URL
                             $scope.items[i].directionsURL = $scope.items[i].loc.coordinates[1] + ',' + $scope.items[i].loc.coordinates[0];
@@ -210,12 +208,16 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                             miles = miles * 0.000621371192; //meters to miles
                             $scope.items[i].distanceMI = roundFloat(miles,1); //distance in miles                           
                         }
+                        else {
+                            if (i > -1) { //remove users from results
+                                $scope.items.splice(i,1);
+                            }
+                        }
 
                     }
                 }
 
                 $scope.showQueryBar = true;
-
                 $scope.windowHeight = $document[0].body.scrollHeight;
             
                 $timeout(function() {
@@ -267,11 +269,23 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         $http.get('https://kipapp.co/styles/api/geolocation').
         then(function(res) {
 
-            console.log(res);
             userLat = res.data.lat; 
             userLng = res.data.lng;
-            $scope.userCity = res.data.cityName;
-            historyCity = $scope.userCity; //save historycity to compare string if user mods location
+
+            //get neighborhood name via lat lng from google
+            $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+res.data.lat+','+res.data.lng+'&sensor=true').
+            then(function(res2) {
+                for (var i = 0; i < res2.data.results.length; i++) {   
+                    if (res2.data.results[i].geometry.location_type == 'APPROXIMATE'){ 
+                        res2.data.results[i].formatted_address = res2.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
+                        $scope.userCity = res2.data.results[i].formatted_address;
+                        historyCity = $scope.userCity;
+                        $scope.loadingLoc = false;
+                        break;                               
+                    }
+                }
+            }, function() {
+            });
 
         }, function(res) {
             //if IP broken get HTML5 geoloc
