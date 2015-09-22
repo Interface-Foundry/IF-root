@@ -78,7 +78,7 @@ for (var i = 1; i < comboTsv[3].length; i++) {
       name: comboTsv[3][i],
       boost: twoTermCombosFirstValue
     }, {
-      name: combotTsv[4][i]],
+      name: comboTsv[4][i],
       boost: twoTermCombosSecondValue
     }];
 }
@@ -86,17 +86,17 @@ for (var i = 1; i < comboTsv[3].length; i++) {
 // three-term combos
 var threeTermCombosFirstValue = comboTsv[7][0];
 var threeTermCombosSecondValue = comboTsv[8][0];
-var threeTermCombosSecondValue = comboTsv[9][0];
+var threeTermCombosThirdValue = comboTsv[9][0];
 for (var i = 1; i < comboTsv[8].length; i++) {
   var key = comboTsv[7][i] + '__' + comboTsv[8][i] + '__' + comboTsv[9][i];
   combos[key] = [{
       name: comboTsv[7][i],
       boost: threeTermCombosFirstValue
     }, {
-      name: combotTsv[8][i]],
+      name: comboTsv[8][i],
       boost: threeTermCombosSecondValue
     }, {
-      name: combotTsv[9][i]],
+      name: comboTsv[9][i],
       boost: threeTermCombosThirdValue
     }];
 }
@@ -151,9 +151,9 @@ var parse = module.exports.parse = function(terms) {
       combo.push('uncategorized');
     }
     return bucketTerms;
-  }, {'uncategorized': {words: [], boost: 0}}});
+  }, {'uncategorized': {words: [], boost: 0}});
 
-  if (bucketTerms.uncategorized.length === 0) {
+  if (bucketTerms.uncategorized.words.length === 0) {
     delete bucketTerms.uncategorized;
   }
 

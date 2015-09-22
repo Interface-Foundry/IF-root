@@ -27,6 +27,8 @@ var testQueries = [
 var google_trends = fs.readFileSync('./google_trends.txt', 'utf8').split('\n');
 testQueries = testQueries.concat(google_trends);
 
+console.log(searchterms.buckets);
+console.log(searchterms.combos);
 
 var uncategorizedWords = [];
 testQueries.map(function(q) {
@@ -36,12 +38,14 @@ testQueries.map(function(q) {
     var str = ['  '];
     if (k === 'uncategorized') {
       str.push(k.red);
-      uncategorizedWords = uncategorizedWords.concat(result[k]);
+      uncategorizedWords = uncategorizedWords.concat(result[k].words);
     } else {
       str.push(k);
     }
-    str.push(': ');
-    str.push(result[k].join(', '));
+    str.push(' (');
+    str.push(('' + result[k].boost).green);
+    str.push('): ');
+    str.push(result[k].words.join(', '));
     console.log(str.join(''));
   })
 })
