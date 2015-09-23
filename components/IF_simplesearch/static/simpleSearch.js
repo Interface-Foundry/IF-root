@@ -238,6 +238,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.searchQuery = function(type){
         if (type === 'button') {
             $scope.items = [];
+            $scope.searchIndex = 0;
         }
 
         httpBool = true;
