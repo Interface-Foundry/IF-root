@@ -17,7 +17,7 @@ $(function() {
             }),
             success: function (xhr) {
                 var html = xhr.results.reduce(function (html, r) {
-                  return html += (r.name + '<br/><img src="' + r.itemImageURL[0] + '"><br/>');
+                  return html += (r.name + " (" + r._id + ')<br/><img src="' + r.itemImageURL[0] + '"><br/>');
                 }, '')
                 $(".r1").html(html);
             },
@@ -41,7 +41,7 @@ $(function() {
             }),
             success: function (xhr) {
                 var html = xhr.results.reduce(function (html, r) {
-                  return html += (r.name + '<br/><img src="' + r.itemImageURL[0] + '"><br/>');
+                  return html += (r.name + " (" + r._id + ')<br/><img src="' + r.itemImageURL[0] + '"><br/>');
                 }, '')
                 $(".r2").html(html);
             },

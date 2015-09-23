@@ -212,7 +212,7 @@ var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (tex
   console.log(bucketTerms);
 
   var matches = Object.keys(bucketTerms).map(function(bucketName) {
-    if (bucketName === 'uncategorized') return; // uncategorized handled differently
+    //if (bucketName === 'uncategorized') return; // uncategorized handled differently
     var terms = bucketTerms[bucketName].words;
     return {
       multi_match: {
