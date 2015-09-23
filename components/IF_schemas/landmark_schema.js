@@ -373,7 +373,8 @@ var landmarkSchema = new Schema({
         },
         justVisualProcessed: Boolean,
         cloudsightProcessed: Boolean,
-        classifierFirstPassDone: Boolean
+        classifierFirstPassDone: Boolean,
+        needsGooglePlace: Boolean
     }
 
 
