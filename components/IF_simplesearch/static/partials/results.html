@@ -27,7 +27,7 @@
             
         <div class="collapsedContent">
             <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
-            <div class="col-md-4 imageWrapper content{{$index}}" ng-click="expandContent($index, $event)">{{items.length}}
+            <div class="col-md-4 imageWrapper content{{$index}}" ng-click="expandContent($index, $event)">
                 <img class="holderPlace" data-original="{{item.itemImageURL[0]}}">
                 <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
             </div>
