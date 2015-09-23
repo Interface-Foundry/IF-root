@@ -27,12 +27,12 @@
             
         <div class="collapsedContent">
             <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
-            <div class="col-md-4 imageWrapper content{{$index}}" ng-click="expandContent($index, $event)">
+            <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}" ng-click="expandContent($index, $event)">
                 <img class="holderPlace" data-original="{{item.itemImageURL[0]}}">
                 <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
             </div>
 
-            <div class="col-md-8 descripWrapper">
+            <div class="col-md-8 descripWrapper" ng-hide="expandedIndex == $index">
                 <span class="item-description" style="float:right;" am-time-ago="item.updated_time" ></span>
                 <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}"><span ng-show="item.price" style="color:#251998;">${{item.price}} - </span> {{item.name}}</a></h3>
 
@@ -67,7 +67,23 @@
                 </div>
             
             <div class="detailsContentWrapper">
+                
+                <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{item.price}} - </span> {{item.name}}</div>
                 <div class="detailsContent">{{item.description}}</div>
+                <span class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
+                <span class="detailsFromCollapsed Distance"> {{item.distanceMI}} miles</span>
+                
+                <div class="parentWrapper">
+                    <div class="detailsFromCollapsed Parent">{{item.parent.name}}</div>
+                    <p class="detailsFromCollapsed Tel">{{item.parent.tel}}</p>
+                    <p class="detailsFromCollapsed Store">{{item.parent.addressText}}</p>
+                </div>
+
+                <div style="position:inline-block;"><a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
+                    Map to {{item.parent.name}}</a>
+                    <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{item.linkback}}">
+                        Buy online</a></p>
+                
             </div>
             
         </div>

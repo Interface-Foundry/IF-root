@@ -636,7 +636,7 @@ div.footerBar {
         height: 300px;
     }
     100% {
-        height: 650px;
+        height: 850px;
     }
 }
 
@@ -656,7 +656,7 @@ div.footerBar {
 .expandTopWrapper {
     position: relative;
     background-color: black;
-    height: 400px;
+    height: 550px;
     display: flex;
     align-items: center;
 }
@@ -680,8 +680,8 @@ div.footerBar {
 }
 
 .expandedLargeImage {
-    height: 300px;
-    width: 300px;
+    height: 450px;
+    width: 450px;
     background-color: white;
     background-size: contain;
     background-repeat: no-repeat;
@@ -697,8 +697,8 @@ div.footerBar {
 }
 
 .imageSelectors {
-    height: 50px;
-    width: 50px;
+    height: 75px;
+    width: 75px;
     background-color: white;
     background-size: contain;
     background-repeat: no-repeat;
@@ -723,16 +723,38 @@ div.footerBar {
 
 .detailsContentWrapper {
     display: flex !important;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap:wrap;
     width: 66%;
+    align-items: center;
 }
 
 .detailsContent {
     color: white;
-    padding-left: 20%;
-    padding-right: 20%;
+    font-size: 18px;
     flex-grow: 1;
+    width: 50%;
+    text-align: center;
+    padding-bottom: 50px;
+}
+
+.detailsFromCollapsed {
+    color: white;
+    font-size: 36px;
+}
+
+.detailsFromCollapsed.Time {
+    position: absolute;
+    font-size: 18px;
+    top: 50px;
+    right: 20px;
+}
+
+.detailsFromCollapsed.Distance {
+    position: absolute;
+    font-size: 18px;
+    top: 80px;
+    right: 20px;
 }
 
 .closeExpand {
@@ -746,7 +768,20 @@ div.footerBar {
     cursor: pointer;
 }
 
+.detailsFromCollapsed.Parent,
+.detailsFromCollapsed.Tel,
+.detailsFromCollapsed.Store {
+    margin-top: 50px;
+    font-size: 18px;   
+    display: inline;
+}
+
 @media(max-width: 650px) {
+    
+    img {
+        max-width: 100%;
+        height: auto;
+    }
     
     .container-fluid {
         overflow-x: hidden;
@@ -764,25 +799,30 @@ div.footerBar {
         margin-right: 0;
     }
     .contentRow {
-        height: 325px;
+        height: 250px;
         
     }
     .collapsedContent {
         padding-left: 0;   
-        
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .imageWrapper {
         padding-left: 0;
         display: flex;
         flex-direction: column;
+        align-items: center;
         width: 100%;
     }
     
     .descripWrapper {
-        padding-left: 0;
+        padding-left: 10px;
         padding-right: 0;
         margin-right: 10%;
+        display:inline-block;
+        width: 100%;
     }
     .Top-Icon.Query {
         margin-top: 0;   

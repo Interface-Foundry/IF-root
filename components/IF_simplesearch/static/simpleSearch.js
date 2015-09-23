@@ -117,11 +117,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 $('.row'+index).addClass('expand');
                 $scope.expandedIndex = index;
             }
+            var old = $location.hash();
+            $location.hash('anchor'+index);
+            $anchorScroll();
+            $location.hash(old);
         }
-        var old = $location.hash();
-        $location.hash('anchor'+index);
-        $anchorScroll();
-        $location.hash(old);
+        
     }
     
     $(window).on('click', function(event) {
