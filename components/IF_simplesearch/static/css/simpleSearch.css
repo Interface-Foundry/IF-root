@@ -76,6 +76,10 @@ body {
     font: 18px arial,sans-serif !important;
 }
 
+.card-title > a {
+    cursor:pointer;   
+}
+
 /*.card-title{
     color: #1a0dab !important;
 }
@@ -583,6 +587,7 @@ div.footerBar {
     height: 241px;
     width: 241px;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .holderPlace {
@@ -800,6 +805,7 @@ div.footerBar {
     
     .card-title > a {
         font-size: 14px;
+        
     }
     
     .mobileButtonWrapper {
