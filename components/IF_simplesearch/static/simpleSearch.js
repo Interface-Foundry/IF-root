@@ -42,17 +42,17 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
 simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $anchorScroll, $rootScope) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
-    // * * * * * * * * ** * * * * * * * * * 
+    // * * * * * * * * ** * * * * * * * * *
     //ON LOAD PAGE, first get IP loc. banner pop up, get more accurate results? use GPS?
     //popup little menu after search with miles adjuster & button to get GPS results
-    //* * * * * * * * * * * * * * * * * * * 
+    //* * * * * * * * * * * * * * * * * * *
 
     var userLat;
     var userLng;
     var historyCity;
     var resultsContainer;
     var httpBool = false;
-   
+
     $scope.showGPS = true;
     $scope.searchIndex = 0;
     $scope.items = [];
@@ -62,20 +62,20 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.outerWidth = $(window)[0].outerWidth;
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
-    
+
  $rootScope.$on('$locationChangeState', function(event) {
-        event.preventDefault(); 
+        event.preventDefault();
  });
-    
+
     $scope.returnHome = function() {
-        $location.path('/partials/home.html');   
+        $location.path('/partials/home.html');
         $scope.items = [];
     }
 
     if ($scope.outerWidth < 651) {
         $scope.mobileScreen = true;
     }
-    
+
     $scope.sayHello = function() {
         if (!httpBool) {
                 $scope.query = decodeURI($routeParams.query);
@@ -83,10 +83,10 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 $scope.searchQuery();
         }
     }
-    
+
     $scope.closeMobileWrapper = function(index) {
         if ($scope.mobileScreen) {
-            var el = $('.expandMobileWrapper.mWrapper'+index);   
+            var el = $('.expandMobileWrapper.mWrapper'+index);
             el.css({
                 'width': ''+$scope.outerWidth+'px',
                 'height': '0'
@@ -94,7 +94,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             $scope.mobileScreenIndex = null;
         }
     }
-    
+
     $scope.expandContent = function(index, event) {
         if ($scope.mobileScreen) {
 //            $scope.mobileScreenIndex = index;
@@ -124,30 +124,30 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         }
         
     }
-    
+
     $(window).on('click', function(event) {
         if (event.target.className === "collapsedContent"){
             $('.row'+$scope.expandedIndex).removeClass('expand');
             $scope.expandedIndex = null;
         }
     })
-    
+
     $scope.enlargeImage = function(parIndex, imgIndex) {
         console.log(parIndex, imgIndex);
         if ($scope.mobileScreen) {
             $('.mobileImg'+parIndex).css({
                 'background-image': "url("+imgIndex+")"
-            });       
+            });
         } else {
             $('.largeImage'+parIndex).css({
                 'background-image': "url("+imgIndex+")"
             });
         }
     }
-    
+
     $scope.swipeImage = function(direction, parIndex, item, imgIndex) {
         var newIndex;
-        if (direction == "left") {    
+        if (direction == "left") {
             if (imgIndex < item.itemImageURL.length - 1) {
                 newIndex = imgIndex++;
             } else {
@@ -158,11 +158,11 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 newIndex = imgIndex--;
             } else {
                 newIndex = item.itemImageURL.length - 1;
-            }   
+            }
         }
         $('.mobileImg'+parIndex).css({
             'background-image': "url("+item.itemImageURL[newIndex]+")"
-        });    
+        });
     }
 
     $('#locInput').geocomplete({
@@ -172,8 +172,8 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         $scope.userCity = result.formatted_address;
         $scope.newQuery = true;
     });
-    
-    
+
+
     //* * * * * * * * *
     // LOAD FUNCTIONS
 
@@ -187,20 +187,21 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         }
     }
     function showPosition(position) {
+      console.log(position);
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
 
         //get neighborhood name via lat lng from google
         $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+userLat+','+userLng+'&sensor=true').
             then(function(res) {
-                for (var i = 0; i < res.data.results.length; i++) {   
-                    if (res.data.results[i].geometry.location_type == 'APPROXIMATE'){ 
+                for (var i = 0; i < res.data.results.length; i++) {
+                    if (res.data.results[i].geometry.location_type == 'APPROXIMATE'){
                         res.data.results[i].formatted_address = res.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
                         $scope.userCity = res.data.results[i].formatted_address;
                         historyCity = $scope.userCity;
                         $scope.loadingLoc = false;
 
-                        break;                               
+                        break;
                     }
                 }
             }, function(res) {
@@ -211,8 +212,8 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
     //why isn't this working to update ng-class :\ can't unselect input box right now
     document.onclick = function(e) {
-        $scope.itemHighlight = "form-grey"; 
-        $scope.locationHighlight = "form-grey"; 
+        $scope.itemHighlight = "form-grey";
+        $scope.locationHighlight = "form-grey";
     };
 
 
@@ -238,12 +239,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         if (type === 'button') {
             $scope.items = [];
         }
-        
+
         httpBool = true;
-        
-        //* * * * * * * * * * * * * 
+
+        //* * * * * * * * * * * * *
         //Tap images to see more?
-        //* * * * * * * * * * * * * 
+        //* * * * * * * * * * * * *
 
         //check if location was modified by user
         if ($scope.userCity !== historyCity){
@@ -254,7 +255,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             $http.get('https://maps.googleapis.com/maps/api/geocode/json?address='+encodeCity+'&key=AIzaSyCABdI8Lpm5XLQZh-O4SpmShqMEKqKteUg').
                 then(function(res) {
 
-                    if (res.data.results[0] && res.data.results[0].geometry){     
+                    if (res.data.results[0] && res.data.results[0].geometry){
                         userLat = res.data.results[0].geometry.location.lat;
                         userLng = res.data.results[0].geometry.location.lng;
                     }
@@ -264,7 +265,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                     $scope.searchItems();
 
 
-                // userLat = res.data.lat; 
+                // userLat = res.data.lat;
                 // userLng = res.data.lng;
 
                 // historyLat = userLat;
@@ -274,7 +275,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 }, function(res) {
                 //if IP broken get HTML5 geoloc
                 //$scope.getGPSLocation();
-            });    
+            });
 
 
 
@@ -287,18 +288,18 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
     //https://kipapp.co/styles/api/items/search?page=
     //http://pikachu.kipapp.co/api/items/search?page
-    
 
-    
+
+
     $scope.searchItems = function(){
-        
+
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
         if ($scope.newQuery) {
             $scope.newQuery = false;
         }
-        
+
         $http.post('https://kipapp.co/styles/api/items/search?page='+$scope.searchIndex, {
             text: $scope.query,
             loc: {lat: userLat, lon: userLng},
@@ -307,12 +308,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             then(function(response) {
 //                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
                 location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
-                //* * * * * * * * * * * * * 
+                //* * * * * * * * * * * * *
                 //if no results, re-query with US size radius
-                //* * * * * * * * * * * * * 
-            
+                //* * * * * * * * * * * * *
+
                 $scope.items = $scope.items.concat(response.data.results);
-                    
+
                 if ($scope.items.length < 1){
                      $scope.noResults = true;
                      console.log('no results');
@@ -322,9 +323,9 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
                 if ($scope.items && $scope.items.length){
                     $scope.noResults = false;
-                    for (var i = 0; i < $scope.items.length; i++) {    
+                    for (var i = 0; i < $scope.items.length; i++) {
                         //filter out usernames
-                        if ($scope.items[i].loc && !$scope.items[i].profileID){ 
+                        if ($scope.items[i].loc && !$scope.items[i].profileID){
 
                             //make link for directions URL
                             $scope.items[i].directionsURL = $scope.items[i].loc.coordinates[1] + ',' + $scope.items[i].loc.coordinates[0];
@@ -337,7 +338,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                             //convert from km to miles
                             var miles = distance * 1000; //km to m
                             miles = miles * 0.000621371192; //meters to miles
-                            $scope.items[i].distanceMI = roundFloat(miles,1); //distance in miles                           
+                            $scope.items[i].distanceMI = roundFloat(miles,1); //distance in miles
                         }
                         else {
                             if (i > -1) { //remove users from results
@@ -350,7 +351,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
                 $scope.showQueryBar = true;
                 $scope.windowHeight = $document[0].body.scrollHeight;
-            
+
                 $timeout(function() {
                     $("img.holderPlace").lazyload();
                     $scope.searchIndex++;
@@ -358,7 +359,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                     resultsContainer = resultsContainer[0].clientHeight;
                     httpBool = false;
                 }, 500);
-            
+
                 $('#locInputTop').geocomplete({
                     details: 'form',
                     types: ['geocode']
@@ -376,7 +377,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     //     RUN KIP
 
     //this is a search from URL
-    if ($routeParams.query) { 
+    if ($routeParams.query) {
         $scope.query = decodeURI($routeParams.query);
         $scope.userCity = decodeURI($routeParams.cityName);
         userLat = $routeParams.lat;
@@ -387,20 +388,23 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         //get location from IP
         $http.get('https://kipapp.co/styles/api/geolocation').
         then(function(res) {
-
-            userLat = res.data.lat; 
+            if (res.data.lat === 38) {
+              $('#locInput').geocomplete("find", "NYC");
+              return;
+            }
+            userLat = res.data.lat;
             userLng = res.data.lng;
 
             //get neighborhood name via lat lng from google
             $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+res.data.lat+','+res.data.lng+'&sensor=true').
             then(function(res2) {
-                for (var i = 0; i < res2.data.results.length; i++) {   
-                    if (res2.data.results[i].geometry.location_type == 'APPROXIMATE'){ 
+                for (var i = 0; i < res2.data.results.length; i++) {
+                    if (res2.data.results[i].geometry.location_type == 'APPROXIMATE'){
                         res2.data.results[i].formatted_address = res2.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
                         $scope.userCity = res2.data.results[i].formatted_address;
                         historyCity = $scope.userCity;
                         $scope.loadingLoc = false;
-                        break;                               
+                        break;
                     }
                 }
             }, function() {
@@ -409,20 +413,20 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         }, function(res) {
             //if IP broken get HTML5 geoloc
             $scope.getGPSLocation();
-        }); 
+        });
 
-        //check if mobile or tablet. warning: there is no perfect way to do this, so need to keep testing on this. 
+        //check if mobile or tablet. warning: there is no perfect way to do this, so need to keep testing on this.
         //via: http://jstricks.com/detect-mobile-devices-javascript-jquery/
         if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
             $scope.getGPSLocation(); //get GPS loc cause mobile device
             $scope.hideGPSIcon = true;
-        }       
+        }
     }
 
 
 
     angular.element(document).ready(function () {
-        $scope.windowHeight = $window.height + 'px'; //position 
+        $scope.windowHeight = $window.height + 'px'; //position
         $scope.windowWidth = window.width + 'px';
     });
 
@@ -439,7 +443,7 @@ function calcDistance(lat2,lon2,lat1,lon1){
    var dLon = lon2 - lon1;
    var a = Math.sin(dLat / 2) * Math.sin(dLat /2) + Math.sin(dLon / 2) * Math.sin(dLon /2) * Math.cos(lat1) * Math.cos(lat2);
    var c = 2 * Math.asin(Math.sqrt(a));
-   return R * c;  
+   return R * c;
 }
 
 function roundFloat(value, exp) {
@@ -575,4 +579,3 @@ simpleSearchApp.service('searchQuery', function() {
 //     }
 //   };
 // });
-
