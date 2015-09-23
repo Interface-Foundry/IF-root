@@ -1,4 +1,4 @@
-var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute','ngTouch'])
+var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute'])
 .factory('location', [
     '$location',
     '$route',
@@ -19,13 +19,11 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
     $routeProvider
       .when('/', {
         templateUrl: 'partials/home.html',
-        controller: 'HomeCtrl',
-        reloadOnSearch: false
+        controller: 'HomeCtrl'
       })
       .when('/q/:query/:lat/:lng/:cityName', {
         templateUrl: 'partials/results.html',
-        controller: 'HomeCtrl',
-        reloadOnSearch: false
+        controller: 'HomeCtrl'
       })
       .otherwise({
         redirectTo: '/'
@@ -83,13 +81,13 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.expandContent = function(index, event) {
         console.log(event);
         if ($scope.mobileScreen) {
-            $scope.mobileScreenIndex = index;
-            var el = $('.expandMobileWrapper.mWrapper'+index);
-            console.log('mobview', el);
-            el.css({
-                'width': ''+$scope.outerWidth+'px',
-                'height': '100%'
-            });
+//            $scope.mobileScreenIndex = index;
+//            var el = $('.expandMobileWrapper.mWrapper'+index);
+//            console.log('mobview', el);
+//            el.css({
+//                'width': ''+$scope.outerWidth+'px',
+//                'height': '100%'
+//            });
         } else {
             if ($scope.expandedIndex === index) {
                 $scope.expandedIndex = null;
