@@ -726,7 +726,7 @@ div.footerBar {
     flex-direction: column;
     flex-wrap:wrap;
     width: 66%;
-    align-items: center;
+    padding-left: 40px;
 }
 
 .detailsContent {
@@ -734,7 +734,7 @@ div.footerBar {
     font-size: 18px;
     flex-grow: 1;
     width: 50%;
-    text-align: center;
+    text-align: justify;
     padding-bottom: 50px;
 }
 
@@ -768,6 +768,17 @@ div.footerBar {
     cursor: pointer;
 }
 
+.expandedButtonsWrapper {
+    display: flex;   
+}
+
+.expandedButtons {
+    display: inline;
+    color: grey;
+    border-radius: 2px;
+    margin-right: 3px;
+}
+
 .detailsFromCollapsed.Parent,
 .detailsFromCollapsed.Tel,
 .detailsFromCollapsed.Store {
@@ -790,8 +801,24 @@ div.footerBar {
     .card-title > a {
         font-size: 14px;
     }
-    .resultsContainer {
-        
+    
+    .mobileButtonWrapper {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    
+    .btn-default {
+        width: 45%;
+        overflow: hidden;
+        flex-grow: 1;
+        margin-left: 4%;
+    }
+    
+    .bigMobile {
+        width: 100%;
     }
     
     .flex-Container {
@@ -799,7 +826,7 @@ div.footerBar {
         margin-right: 0;
     }
     .contentRow {
-        height: 250px;
+        height: 385px;
         
     }
     .collapsedContent {
@@ -807,6 +834,7 @@ div.footerBar {
         display: flex;
         flex-direction: column;
         align-items: center;
+        height: 385px;
     }
     
     .imageWrapper {
@@ -823,6 +851,7 @@ div.footerBar {
         margin-right: 10%;
         display:inline-block;
         width: 100%;
+        margin-bottom: 20px;
     }
     .Top-Icon.Query {
         margin-top: 0;   
