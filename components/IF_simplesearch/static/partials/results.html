@@ -23,7 +23,7 @@
 
         <div ng-show="noResults">Sorry, we couldn't find anything for you :(</div>
 
-        <div class="kip-card contentRow row{{$index}}" ng-show="items" ng-repeat="item in items track by $index">
+        <div id="anchor{{$index}}" class="kip-card contentRow row{{$index}}" ng-show="items" ng-repeat="item in items track by $index">
             
         <div class="collapsedContent">
             <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>

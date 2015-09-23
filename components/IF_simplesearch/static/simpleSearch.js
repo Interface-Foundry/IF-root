@@ -6,10 +6,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
     function ($location, $route, $rootScope) {
         $location.skipReload = function () {
             var lastRoute = $route.current;
-            console.log('call',$route.current);
             var un = $rootScope.$on('$locationChangeSuccess', function () {
-                
-                console.log('on',$route.current, $location);
                 $route.current = lastRoute;
                 un();
             });
@@ -42,7 +39,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
 
 
 
-simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location) {
+simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $anchorScroll, $rootScope) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * * 
@@ -65,6 +62,10 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.outerWidth = $(window)[0].outerWidth;
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
+    
+ $rootScope.$on('$locationChangeState', function(event) {
+        event.preventDefault(); 
+ });
     
     $scope.returnHome = function() {
         $location.path('/partials/home.html');   
@@ -95,7 +96,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     }
     
     $scope.expandContent = function(index, event) {
-        console.log(event);
         if ($scope.mobileScreen) {
 //            $scope.mobileScreenIndex = index;
 //            var el = $('.expandMobileWrapper.mWrapper'+index);
@@ -118,6 +118,10 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 $scope.expandedIndex = index;
             }
         }
+        var old = $location.hash();
+        $location.hash('anchor'+index);
+        $anchorScroll();
+        $location.hash(old);
     }
     
     $(window).on('click', function(event) {
