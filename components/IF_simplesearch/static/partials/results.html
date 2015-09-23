@@ -6,7 +6,7 @@
       
     <div class="flex-Container Query">
         <div class="flexBody Mid-Container">
-            <a href="/" class="flexBody Top-Icon Query"></a>
+            <a ng-click="returnHome()" class="flexBody Top-Icon Query"></a>
             <form ng-submit="searchQuery()" class="flexBody Mid Input">
                 <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-change="newQuery = true" ng-enter="searchQuery()" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall"></input></div>
                 <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input id="locInputTop" ng-change="newQuery = true" ng-enter="searchQuery()" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark"  select-on-click></input></div>

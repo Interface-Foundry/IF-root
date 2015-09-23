@@ -6,7 +6,10 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
     function ($location, $route, $rootScope) {
         $location.skipReload = function () {
             var lastRoute = $route.current;
+            console.log('call',$route.current);
             var un = $rootScope.$on('$locationChangeSuccess', function () {
+                
+                console.log('on',$route.current, $location);
                 $route.current = lastRoute;
                 un();
             });
@@ -62,6 +65,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.outerWidth = $(window)[0].outerWidth;
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
+    
+    $scope.returnHome = function() {
+
+        $location.path('/partials/home.html');   
+        $scope.items = [];
+    }
 
     if ($scope.outerWidth < 651) {
         $scope.mobileScreen = true;
@@ -262,8 +271,11 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
     //https://kipapp.co/styles/api/items/search?page=
     //http://pikachu.kipapp.co/api/items/search?page
-    $scope.searchItems = function(){
+    
 
+    
+    $scope.searchItems = function(){
+        httpBool = true;
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
@@ -277,6 +289,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             radius: 5,
         }).
             then(function(response) {
+//                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
                 location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
                 //* * * * * * * * * * * * * 
                 //if no results, re-query with US size radius
