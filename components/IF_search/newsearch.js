@@ -346,6 +346,63 @@ function textSearch(q, page) {
           }, kip.err);
 
   }
+  
+/**
+ * Search implementation for a query that does not have text
+ * Just use mongodb
+ * @param q query (must contain at least loc" property)
+ * @param page
+ */
+function filterSearch(q, page) {
+    console.log('filter search', q);
+
+    var radius = q.radius || defaultRadius; // miles
+    radius = 1609.344 * radius; // meters
+
+    var query = {
+        world: false,
+        loc: {
+            $near: {
+                $geometry: {
+                    type: "MultiPoint",
+                    coordinates: [q.loc.lon, q.loc.lat]
+                },
+                $maxDistance: radius,
+                $minDistance: 0
+            }
+        }
+    };
+
+    if (q.priceRange) {
+        query.price = q.priceRange;
+    }
+
+    if (q.categories && q.categories.length > 0) {
+        query['itemTags.categories'] = {
+            $in: q.categories
+        };
+
+    }
+
+    if (q.color) {
+        query['itemTags.color'] = {
+            $in: q.color
+        };
+    }
+
+    console.log(query);
+
+    return db.Landmarks
+        .find(query)
+        .limit(pageSize)
+        .exec()
+        .then(function(items) {
+            return items.map(function(item) {
+                return db.Landmark.itemLocationHack(item, q.loc);
+            });
+        });
+}
+
 
 
   /**
