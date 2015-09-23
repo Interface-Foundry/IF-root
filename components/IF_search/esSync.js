@@ -191,7 +191,7 @@ function GO() {
             'hidden': {$ne: true}
         })
         .populate('source_justvisual.images')
-        .limit(20)
+        .limit(50)
         .exec(function(e, landmarks) {
             if (e) {
                 console.error(e);

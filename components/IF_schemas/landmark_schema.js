@@ -33,6 +33,10 @@ var landmarkSchema = new Schema({
         name: String
     },
     valid: Boolean, //are all req. items inputted
+    hidden: {
+      type: Boolean,
+      index: true
+    },
     status: String, //'draft' 'archived' 'public'
     avatar: String,
     hasLoc: Boolean,
