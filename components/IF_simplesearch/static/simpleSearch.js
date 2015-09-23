@@ -1,4 +1,4 @@
-var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute'])
+var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute', 'angular-inview'])
 .factory('location', [
     '$location',
     '$route',
@@ -67,13 +67,20 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.mobileScreenIndex;
     
     $scope.returnHome = function() {
-
         $location.path('/partials/home.html');   
         $scope.items = [];
     }
 
     if ($scope.outerWidth < 651) {
         $scope.mobileScreen = true;
+    }
+    
+    $scope.sayHello = function() {
+        if (!httpBool) {
+                $scope.query = decodeURI($routeParams.query);
+                $scope.userCity = decodeURI($routeParams.cityName);
+                $scope.searchQuery();
+        }
     }
     
     $scope.closeMobileWrapper = function(index) {
@@ -279,7 +286,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
     
     $scope.searchItems = function(){
-        httpBool = true;
+        
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
@@ -354,18 +361,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                     $scope.userCity = result.formatted_address;
                     $scope.newQuery = true;
                 });
-                
-                var posChecker = $interval(function() {
-                    $document.on('scroll', function(e) {
-                        if (!httpBool) {
-                            if ((resultsContainer - e.target.scrollingElement.scrollTop) < 3000) {
-                                $scope.query = decodeURI($routeParams.query);
-                                $scope.userCity = decodeURI($routeParams.cityName);
-                                $scope.searchQuery();
-                            }
-                        }
-                    }) 
-                }, 250);
 
         }, function(response) {
 
