@@ -1,0 +1,376 @@
+Weight (higher is better)	10	5	10	5	5	5	7	5	100	5
+Description	demographic	category	specific item	type	style	feelings	materials	events	boosted words	brand
+	womens	Top	cardigan	a-line	sleek	cute	Aba	date	rufflecon	Jérémie Pauzié
+	mens	Dress	shirt	backless	formal	nice	Acrilan fabric	prom		Heavy Eco
+	kids	Outerwear	sweater	baggy	casual	airy	Acrylic	football		A.P.C.
+	children	pants	tshirt	best	relaxed	sexy	Aertex	graduation		Reem Acra
+	unisex	shoes	t-shirt	boot-cut	distressed	reserved	Airdura	wedding		Akris
+		skirts	sleeveless	brief	vintage	modest	Airguard	party		Reem Alasadi
+		bags	long-sleeve	button-down	worn	awesome	Alençon lace	mixer		Alexander McQueen
+		accessories	longsleeve	button-through			Alpaca	social		Alfred Dunhill Ltd.
+		activewear	vest	casual			Androsia	banquet		Charlie Allen
+		jewelry	jersey	clingy			Angora	funeral		Ally Capellino
+		underwear	dress-shirt	close-fitting			Antique satin			Alter és Kiss
+		tights & leggings	dressshirt	comfortable			Argentan lace			Andrés Sardá
+			button-down	conservative			Argentella lace			Andrew Marc
+			buttondown	cool			Argyle			Anna Valentine
+			polo	designer			Armenian needlelace			Anne Fontaine
+			polo-shirt	double-breasted			Baize			Aquascutum
+			tank	down to			Ballistic nylon			Armani
+			tanktop	dressy			Bamboo			Audience by PETROU\MAN
+			tank-top	drip-dry			Ban-Lon			Dominique Aurientis
+			blouse	décolleté			Barathea			Agnès b.
+			henley	easy-care			Barkcloth			Badgley Mischka
+			crop	flame-retardant			Batik			Balenciaga
+			croptop	formal			Batiste			Bally Shoe
+			crop-top	full			Battenberg lace			Balmain
+			tube	full-length			Bedford cord			Neil Barrett
+			tubetop	heavy			Beetling			Belle & Bunty
+			tube-top	homespun			Benaras			Bellville Sassoon
+			jeantop	hooded			Bengaline silk			Berluti
+			jean-top	ill-fitting			Beta cloth			Beulah London
+			halter	informal			Bingata			Dirk Bikkembergs
+			haltertop	itchy			Bird's-Eye Weave			Bill Blass Group
+			turtle	jackie-o			Bizarre silk			Ozwald Boateng
+			turtleneck	knee-length			Bobbinet			BodyMap
+			turtle-neck	light			Boiled wool			Boglioli
+				lined			Bombazine			Bonia
+			dress	long			Bouclé			Bontoni
+			sundress	loose			Braid			Borsalino
+			wedding	loose-fitting			Brilliantine			Hugo Boss
+			maxi	low			Broadcloth			Bottega Veneta
+			gown	low-cut			Brocade			BP Studio
+			bubble	machine-washable			Broderie Anglaise			Veronique Branquinho
+			tiered	made-to-measure			Buckram			Malan Breton
+			corset	modest			Bunting			Brioni
+			tea	monogrammed			Burano lace			Thom Browne
+			teadress	off-the-peg			Buratto lace			Brunello Cucinelli
+			wrap	off-the-rack			Burlap			Bulgari
+			wrapdress	one-piece			Burnout			Burberry
+			blouson	open-necked			Bògòlanfini			Jon Buscemi
+			halter	oversized			C change			Nigel Cabourn
+			babydoll	padded			Calendering			Cacharel
+			bodycon	peaked			Calico			Camilla and Marc
+				permanent-press			Cambric			Caraceni
+			jacket	pleated			Camel's hair			Jane Carr
+			coat	plunging			Camlet			Carrera y Carrera
+			blazer	plus-size			Canvas			Cartier
+			hoodie	preshrunk			Capilene			Dean and Dan Caten
+			suit	prim			Carbon fiber			Roberto Cavalli
+			windbreaker	prissy			Carrickmacross lace			Céline
+			parka	raglan			Casement			Cerruti
+			leather-jacket	rainproof			Cashmere			Cerruti 1881
+			leatherjacket	ready-to-wear			Cavalry twill			Hussein Chalayan
+			harrington	revealing			Cedar bark			Chanel
+			harrington-jacket	reversible			Challis			Charvet Place Vendôme
+			harringtonjacket	rolled-up			Chambray			List of Charvet customers
+			poncho	roomy			Chantilly lace			Childrensalon
+			robe	ruched			Char cloth			Chloé
+			shawl	sartorial			Charmeuse			Christian Dior S.A.
+			tuxedo	scanty			Charvet			Clements Ribeiro
+			overcoat	seamed			Cheesecloth			Colcci
+			over-coat	seamless			Chenille			Comme des Garçons
+			sport-coat	sensible			Chiengora			Common Projects
+			sportcoat	single-breasted			Chiffon			Jasper Conran
+			waistcoat	skimpy			Chino			Corneliani
+			waist-coat	skinny			Chintz			Costello Tagliapietra
+			duffle	skintight			Chiné			Crolla
+			dufflecoat	sleeveless			Cloqué			CuteCircuit
+			duffle-coat	slimming			Cloth of gold			Cutler and Gross
+			peacoat	sloppy			Coir			Cyma Watches
+			pea	smart			Conductive			Wendy Dagworthy
+			britishwarm	snug			Coolmax			DAKS
+			british-warm	sporty			Cordura			Damani Dada
+			ulster	starched			Corduroy			Damiani
+			ulster-coat	straight			Cotton			DAS Collection
+			winterjacket	strapless			Cotton duck			Ann Demeulemeester
+			winter-jacket	strappy			Coutil			Dior Homme
+			puffer	stretch			Crape			Dolce & Gabbana
+			puffer-jacket	stretchy			Cretonne			Duvelleroy
+			cagoule	tailor-made			Crimplene			Benoît-Pierre Emery
+			chesterfield	tailored			Crinoline			Ermanno Scervino
+			cover-coat	thermal			Crochet			Escada
+			covercoat	threadbare			Crêpe			Etro
+			duffle-coat	tight			Crêpe de Chine			Extè
+			bomber	tight-fitting			Crêpe-back satin			Façonnable
+			bomber-jacket	two-piece			Damask			Fendi
+			bomberjacket	unfashionable			Darlexx			Gianfranco Ferré
+			trench	unlined			Dazzle			FFACE
+			trenchcoat	v-necked			Decatising			Fiorucci
+			trench-coat	voluminous			Delaine wool			Tom Ford
+			rain	washable			Denim			Franck Sorbier
+			raincoat	waterproof			Devoré			Frey Wille
+			guardjacket	wearable			Dimity			Frost French
+			guard-jacket	weatherproof			Dobby			Holly Fulton
+			mess	wraparound			Doeskin			Diane von Fürstenberg
+			mess-jacket	zip-up			Donegal tweed			Katie Gallagher
+			messjacket	zippered			Dornix			John Galliano
+			opera				Dotted Swiss			Jean Paul Gaultier
+			operacoat				Double cloth			Frida Giannini
+			opera-coat				Double knitting			Dege & Skinner
+			shrug				Double weave			Gieves & Hawkes
+							Dowlas			Giusto Manetti Battiloro
+			shorts				Drill			Givenchy
+			pants				Drugget			Ana González
+			pant				Duck			Goyard
+			jeans				Dupioni silk			Gravati
+			jean				Dyeing			Great Greenland Furhouse
+			trousers				Dyneema			Gucci
+			trouser				E-textiles			H.J. Cave & Sons
+			chaps				Egyptian cotton			Hackett London
+			cargo				Eolienne			Kevan Hall
+			capri				Faile			Halston
+			palazzo				Faux fur			Hamilton Jewelers
+			palazzos				Felt			Tim Hamilton
+			chinos				Fiber			Hansengross
+			chino				Filet/Lacis lace			Hardy Amies
+			khaki				Finishing			Haus Alkire
+			khakis				Fishnet			Helmut Lang
+			overalls				Flannel			Alexandre Herchcovitch
+			yoga-pants				Flannelette			Hermès
+			yogapants				Fleece			Carolina Herrera
+			lowrise				Foulard			Hield
+			lowrise-pants				Fulling			Georges Hobeika
+			lowrisepants				Fustian			House of Flora
+			sweatpants				Gabardine			Vivienne Hu
+			sweat-pants				Gannex			Huntsman, Savile Row Tailor
+			parachute				Gauze			Iceberg
+			phat				Gazar			IRFE
+			pedal-pushers				Georgette			Isabel Marant
+			pedalpushers				Ghalamkar			Isaia
+			dresspants				Gingham			Jil Sander
+			dress-pants				Gore-Tex			Jimmy Choo Ltd
+			bellbottoms				Grenadine			John Varvatos
+			bell-bottoms				Grenfell Cloth			Joseph
+			cycling				Grosgrain			Karen Kane
+			highwater				Habutai			Donna Karan
+			high-water				Haircloth			Mary Katrantzou
+			bermuda				Halas lace			Rabih Kayrouz
+			windpants				Harris Tweed			Kenzo
+			wind-pants				Heather knit			Khaadi
+							Heatsetting			Kiton
+			shoe				Hemp			Michael Kors
+			shoes				Herringbone			Xander Kostroma
+			sneaker				Himroo			Kristall Smolensk
+			sneakers				History of clothing and textiles			L.K.Bennett
+			boot				History of silk			La Martina
+			boots				History of textiles			Lachasse
+			slipper				Hodden			Christian Lacroix
+			slippers				Holland cloth			Karl Lagerfeld
+			sandal				Hollie Point lace			Lagos
+			sandals				Hopsack			Derek Lam
+			spat				Houndstooth			Lanvin
+			spats				Houndstooth check			Lardini
+			croc				Indian cotton			Guy Laroche
+			crocs				Indienne			Larusmiani
+			dress-shoes				Intarsia			Monique Lhuillier
+			boot				Interlock			Carol Lim
+			boots				Irish linen			Phillip Lim
+			flip-flops				Jaconet			J.Lindeberg
+			flip-flop				Jacquard			Linnanen
+			sandal				Jacquard knit			Dan Liu
+			heels				Jamdani			LOEWE
+			high-heels				Jersey			Loro Piana
+			highheels				Jute			Christian Louboutin
+							Kemp			Louis Vuitton
+			skirt				Kenmare Lace			Luxottica
+			miniskirt				Kente cloth			Draft:LËO-STAR République
+			mini-skirt				Kerseymere			Mad Carpentier
+			a-line				Kevlar			Madeleine Vramant
+			aline				Khaki			Tomas Maier
+			aline-skirt				Khaki drill			Mainbocher
+			ballerina				Khādī			Maison Margiela
+			ballerina-skirt				Kincob			Malo
+			denimskirt				Knit			Arefeh Mansouri
+			denim-skirt				Knitting			Marchesa
+			jobskirt				Lace			Martin Margiela
+			job-skirt				Lambswool			Marimekko
+			job				Lampas			Marina Rinaldi
+			microskirt				Lamé			Mario Hernández
+			micro-skirt				Lantana			Marni
+			pencil-skirt				Lawn			Mataano
+			pencilskirt				Lawn cloth			Maui Jim
+			praire				Leather			Max Mara
+			praire-skirt				Leatherette			Maxfield Parrish
+			praireskirt				Limerick lace			Stella McCartney
+			rah-rah				Linen			Lorenzo Merlino
+			rahrah				Linsey-woolsey			Michael Michalsky
+			tutu				Loden			Carlos Miele
+			wrap-skirt				Longcloth			Missoni
+			wrapskirt				Loop knit			Miu Miu
+			leatherskirt				Lumalive			Issey Miyake
+			leather-skirt				Lycra knit			Modern Creation Munich
+							Machine knitting			Moschino
+			Bags				Mackinaw			Mulberry
+			backpack				Madapolam			Net-a-Porter
+			handbag				Madras			Nina Ricci
+			hand-bag				Malimo			Norton & Sons
+			handbags				Manufacturing			Obrey
+			chanel				Marquisette			Marvin Oduber
+			duffel				Matelassé			Charlotte Olympia
+			satchel				Melton			Oroton
+			tote				Mercerization			Oscar and Jesus
+			messenger				Merino			Rick Owens
+			saddle				Mesh			Oxxford Clothes
+			clutch				Microfiber			Cesare Paciotti
+			wristlet				Microfibre			Paule Ka
+							Milliskin			Perry Ellis
+			Accessories				Mockado			Petrodvorets Watch Factory
+			sunglasses				Mohair			PETROU\MAN
+			watch				Moire			Nicolas Petrou
+			wristwatch				Moleskin			Pineda Covalín
+			scarf				Monk's cloth			Philipp Plein
+			sash				Moquette			Poltrona Frau
+			headband				Mouflon			Pomellato
+			glasses				Mousseline			Henry Poole & Co
+			cufflink				Muslin			Prada
+			tie				Nainsook			Pringle of Scotland
+			necktie				Nankeen			Project D
+			bow				Nap			Emilio Pucci
+			bowtie				Natural fiber			Gareth Pugh
+			belt				Needlerun Net			Qeelin
+			bandana				Neoprene			Randi Rahm
+			suspenders				Ninon			Raja Fashions
+			wallet				Nomex			Raketa
+							Nylon			Ralph & Russo
+			Activewear				Oilskin			Ralph Lauren Corporation
+			swim				Olefin			Rayne
+			swimwear				Organdy			Regent
+			swim-wear				Organza			John Richmond
+			swimsuit				Osnaburg			Carla Rigg
+			swim-suit				Ottoman			RM
+			swim-briefs				Oxford			Roberto Coin
+			swimbriefs				Paduasoy			Rochas
+			wet				Paisley			Rodarte
+			wetsuit				Pandy			Narciso Rodriguez
+			wet-suit				Panné velvet			Roland Mouret
+			surfer				Pashmina			Stéphane Rolland
+			surf				Peau de Soie			Sergio Rossi
+			trunks				Percale			Christian Roth
+			bikini				Pin stripes			Ralph Rucci
+			boardshorts				Piqué			Rudsak
+			board				Piña			Rue du Mail
+			drysuit				Plissé			Sonia Rykiel
+			dry				Plush			S.E.H Kelly
+			one-piece				Point de France lace			Elie Saab
+			onepiece				Point de Gaze lace			Safilo
+			rashguard				Point de Venise lace			Salvatore Ferragamo S.p.A.
+			rash				Polar fleece			Sant Blanc
+			yoga				Polyester			Ferdinando Sarmi
+			sports				Pongee			Sass & bide
+							Poplin			Satya Paul
+			Jewelry				Preservation			Elsa Schiaparelli
+			earrings				Punto in Aria lace			Sealup
+			earring				Qiviut			Sermoneta Gloves
+			necklace				Quilting			Shanghai Tang
+			ring				Rakematiz			Shiatzy Chen
+			brooch				Ramie			Shreve & Co.
+			brooches				Raschel knit			Raf Simons
+			bracelet				Raw silk			John Smedley
+			bracelets				Rayadillo			Paul Smith
+			amethyst				Rayon			Smythson
+			emerald				Rep			Yotam Solomon
+			jade				Reticella lace			SONGZIO
+			jasper				Rib knit			Luciano Soprani
+			ruby				Rib weave			Garo Sparo
+			sapphire				Ribbon lace			St. John
+			diamond				Rinzu			Star in the Hood
+			gold				Ripstop			Stirling Cooper
+							Ripstop nylon			Strathberry of Scotland
+			Underwear				Rogan printing			Jill Stuart
+			underwear				Roller printing			Stylenite
+			underpants				Russell cord			Anna Sui
+			boxers				Rōketsuzome			Vivienne Tam
+			briefs				Saga Nishiki			TechnoMarine
+			boxer				Sailcloth			The Chelsea Cobbler
+			brief				Samite			Threeasfour
+			panties				Sanforization			Tibi
+			slip				Sateen			Tiffany & Co.
+			hoisery				Satin			Tori Richard
+			bra				Saye			Trands
+			bras				Scarlet			Pauline Trigère
+							Scrim			Trussardi
+			Tights & Leggings				Sea silk			Tumbler and Tipsy
+			tights				Seersucker			Turnbull & Asser
+			leggings				Sequin			Kay Unger
+			legging				Serge			Valentino SpA
+							Shantung			Kris Van Assche
+							Sharkskin			Walter van Beirendonck
+							Shot silk			Dries van Noten
+							Shrinkage			Alexandre Vauthier
+							Shweshwe			Bouchra Jarrar
+							Silk			Versace
+							Silk Noil			Viktor & Rolf
+							Silnylon			Alexander Wang
+							Sisal			Vera Wang
+							Smartwool			Warmenhoven & Venderbos
+							Songket			WarPaint International
+							Spandex			Vivienne Westwood
+							Spider silk			Matthew Williamson
+							Stockinette			Women's Home Industries
+							Stub-tex			Wooyoungmi
+							Stuff			Workers for Freedom
+							Suede			Jason Wu
+							Surah			Wunderkind
+							Swatches and strike-offs			Yohji Yamamoto
+							SympaTex			Yeohlee
+							Synthetic fabric			Yuvna Kim
+							Taffeta			Yves Saint Laurent
+							Tais			Zeena Zaki
+							Tambour lace			Giuseppe Zanotti
+							Tammana			Ermenegildo Zegna
+							Tapestry			
+							Tartan			
+							Tartan (Plaid)			
+							Tattersall			
+							Technical textiles			
+							Template:Samia begum			
+							Teneriffe lace			
+							Tenterhook			
+							Terminology			
+							Terry velour			
+							Terrycloth			
+							Textile			
+							Textile manufacturing			
+							Textile printing			
+							Ticking			
+							Toile			
+							Tricot knit			
+							Tucuyo			
+							Tulle			
+							Tulle netting			
+							Tussar silk			
+							Tweed			
+							Twill			
+							Ultrasuede			
+							Vegetable flannel			
+							Velour			
+							Velours du Kasaï			
+							Velvet			
+							Velveteen			
+							Venetian Lace			
+							Venetian Wool			
+							Ventile			
+							Vintage			
+							Vinyl coated polyester			
+							Viyella			
+							Voile			
+							Wadmal			
+							Warp printing			
+							Waxed cotton			
+							Weaving			
+							Whipcord			
+							Wigan			
+							Windstopper			
+							Woodblock printing			
+							Wool			
+							Worcester			
+							Worsted wool			
+							Yarn			
+							Youghal lace			
+							Zephyr			
+							Zibeline			
+							Zorbeez			
+							terrycotton			
+							terrysilk			
+							terrywool			

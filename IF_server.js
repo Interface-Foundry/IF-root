@@ -455,7 +455,7 @@ app.use(require('cors')());
 
 
 //--- SEARCH BABY ----//
-app.use(require('./components/IF_search/items'));
+app.use(require('./components/IF_search/newsearch'));
 //--- SNAP ROUTE ----//
 app.use('/api/snaps', require('./components/IF_apiroutes/snaps'));
 //--- ITEM ROUTER ----//

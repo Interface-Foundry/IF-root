@@ -50,6 +50,7 @@
     "mongoose-text-search": "~0.0.2",
     "monguurl": "~0.1.0",
     "morgan": "~1.0.0",
+    "natural": "^0.2.1",
     "ngeohash": "^0.6.0",
     "node-vibrant": "pbrandt1/node-vibrant",
     "nodemailer": "^1.4.0",

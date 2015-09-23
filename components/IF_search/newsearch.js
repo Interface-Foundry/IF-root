@@ -1,17 +1,17 @@
-var express = require('express');
-var app = express.Router();
 var db = require('db');
 var elasticsearch = require('elasticsearch');
 var config = require('config');
+var express = require('express');
 var Promise = require('bluebird');
-var _ = require('lodash');
-var deepcopy = require('deepcopy');
+var app = express();
 var kip = require('kip');
 var geolib = require('geolib');
-
-// set up the fake data for the /trending api
-var request = Promise.promisify(require('request'));
-
+var searchterms = require('./searchterms');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var _ = require('lodash');
+var pageSize = 20;
+var defaultRadius = 2;
 
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
@@ -29,31 +29,15 @@ var es = new elasticsearch.Client({
     log: ESLogger
 });
 
-console.log('using elasticsearch', config.elasticsearch.url);
 
-var pageSize = 20;
-var defaultRadius = 2;
+// parse user if we're running this on it's own server
+if (!module.parent) {
+  //app.use(require('../IF_auth/new_auth.js'));
+}
+app.use(cookieParser());
+app.use(bodyParser.json());
 
-/**
- * Item Search
- * post body: {
-    "text": "something tag la",
-    "colors": ['FF00FF', 'FF00FF'],
-    "categories": ['shoes'],
-    "priceRange": 1, // or 2, 3, or 4
-    "radius": .5, // miles
-    "loc": {"lat": 34, "lon": -77}
-  }
-
- example:
- {
-    "text": "dress",
-    "priceRange": 2,
-    "radius": 0.5,
-    "loc": {"lat": 40.7352793, "lon": -73.990638}
- }
- */
-var searchItemsUrl = '/api/items/search_old';
+var searchItemsUrl = '/api/items/search';
 app.post(searchItemsUrl, function(req, res, next) {
 
     // page is 0-indexed
@@ -151,24 +135,18 @@ app.post(searchItemsUrl, function(req, res, next) {
               res.send(responseBody);
             })
 
-            (new db.Analytics({
-              anonId: req.anonId,
-              userId: req.userId,
-              action: 'search',
-              data: {
-                query: req.body,
-                resultCount: results.length
-              }
-            })).save();
+            // (new db.Analytics({
+            //   anonId: req.anonId,
+            //   userId: req.userId,
+            //   action: 'search',
+            //   data: {
+            //     query: req.body,
+            //     resultCount: results.length
+            //   }
+            // })).save();
         }, next)
 });
 
-/**
- * Takes any query, normalizes it, and performs a search
- * @param q
- * @param page
- * @returns {*}
- */
 function search(q, page) {
     //
     // Normalize query
@@ -183,6 +161,7 @@ function search(q, page) {
     }
 
     // categories should be an array
+    // these are the buttons they click
     if (q.categories && !(q.categories instanceof Array)) {
         return Promise.reject({
             niceMessage: 'Could not complete search',
@@ -191,12 +170,16 @@ function search(q, page) {
     }
 
     // color should be an array
+    // these are converted to the appropriave hsl colors
     if (q.color && !(q.color instanceof Array)) {
         return Promise.reject({
             niceMessage: 'Could not complete search',
             devMessage: 'q.color must be an array, was ' + q.color
         });
     }
+
+    // also add any colors from the text fields to the color array
+    // TODO
 
     // priceRange should be a number 1-4
     if (q.priceRange && [1, 2, 3, 4].indexOf(q.priceRange) < 0) {
@@ -263,116 +246,107 @@ function search(q, page) {
  * @param page
  */
 function textSearch(q, page) {
-    console.log('text search', q);
 
-    // elasticsearch impl
-    // update fuzziness of query based on search term length
-    var fuzziness = 0;
-    if (q.text.length >= 4) {
-        fuzziness = 1;
-    } else if (q.text.length >= 6) {
-        fuzziness = 2;
-    }
+      console.log('text search', q);
 
-    // here's some reading on filtered queries
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
-    var filter = {
-        bool: {
-            must: [{
-                geo_distance: {
-                    distance: (q.radius || defaultRadius) + "mi",
-                    "geolocation": {
-                        lat: q.loc.lat,
-                        lon: q.loc.lon
-                    }
-                }
-            }]
-        }
-    };
+      // elasticsearch impl
+      // update fuzziness of query based on search term length
+      var fuzziness = 0;
+      if (q.text.length >= 4) {
+          fuzziness = 1;
+      } else if (q.text.length >= 6) {
+          fuzziness = 2;
+      }
 
-    // if the price is specified, add a price filter
-    if (q.priceRange) {
-        filter.bool.must.push({
-            term: {
-                priceRange: q.priceRange
-            }
-        });
-    }
+      // here's some reading on filtered queries
+      // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
+      var filter = {
+          bool: {
+              must: [{
+                  geo_distance: {
+                      distance: (q.radius || defaultRadius) + "mi",
+                      "geolocation": {
+                          lat: q.loc.lat,
+                          lon: q.loc.lon
+                      }
+                  }
+              }]
+          }
+      };
 
-    // put it all together in a filtered fuzzy query
-    var fuzzyQuery = {
-        size: pageSize,
-        from: page * pageSize,
-        index: "kip",
-        type: "items",
-        fields: [],
-        body: {
-            query: {
-                filtered: {
-                    query: {
-                        multi_match: {
-                            query: q.text,
-                            fuzziness: fuzziness,
-                            prefix_length: 1,
-                            type: "best_fields",
-                            fields: ["name^4", "id^3", "parentName^3", "tags^3", "categories^2", "description^2", "miscText"],
-                            tie_breaker: 0.2,
-                            minimum_should_match: "30%"
-                        }
-                    },
-                    filter: filter
-                }
-            }
-        }
-    };
-    kip.prettyPrint(fuzzyQuery)
+      // if the price is specified, add a price filter
+      if (q.priceRange) {
+          filter.bool.must.push({
+              term: {
+                  priceRange: q.priceRange
+              }
+          });
+      }
 
-    return es.search(fuzzyQuery)
-        .then(function(results) {
-            var ids = results.hits.hits.map(function(r) {
-                return r._id;
-            });
+      // put it all together in a filtered fuzzy query
+      var fuzzyQuery = {
+          size: pageSize,
+          from: page * pageSize,
+          index: "kip",
+          type: "items",
+          fields: [],
+          body: {
+              query: {
+                  filtered: {
+                      query: searchterms.getElasticsearchQuery(q.text),
+                      filter: filter
+                  }
+              }
+          }
+      };
+      //kip.prettyPrint(fuzzyQuery)
 
-            var users = db.Users.find({
-                $or: [{
-                    'profileID': q.text
-                }, {
-                    'local.email': q.text
-                }, {
-                    'facebook.email': q.text
-                }, {
-                    'name': q.text
-                }]
-            }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
+      return es.search(fuzzyQuery)
+          .then(function(results) {
+              var ids = results.hits.hits.map(function(r) {
+                  return r._id;
+              });
 
-            var items = db.Landmarks.find({
-                _id: {
-                    $in: ids
-                }
-            }).exec();
+              var users = db.Users.find({
+                  $or: [{
+                      'profileID': q.text
+                  }, {
+                      'local.email': q.text
+                  }, {
+                      'facebook.email': q.text
+                  }, {
+                      'name': q.text
+                  }]
+              }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
 
-            return Promise.settle([users, items]).then(function(arry) {
-                var u = arry[0];
-                var i = arry[1];
+              var items = db.Landmarks.find({
+                  _id: {
+                      $in: ids
+                  }
+              }).exec();
 
-                if (u.isFulfilled() && i.isFulfilled()) {
-                    var results = u.value().concat(i.value().map(function(i) {
-                        return db.Landmark.itemLocationHack(i, q.loc);
-                    }));
-                    return results
-                } else if (i.isFulfilled() && !u.isFulfilled()) {
-                    return i.value().map(function(i) {
-                        return db.Landmark.itemLocationHack(i, q.loc);
-                    });
-                } else if (u.isFulfilled() && !i.isFulfilled()) {
-                    return u.value()
-                }
-            })
+              return Promise.settle([users, items]).then(function(arry) {
+                  var u = arry[0];
+                  var i = arry[1];
 
-        }, kip.err);
+                  if (u.isFulfilled() && i.isFulfilled()) {
+                      var results = u.value().concat(i.value().map(function(i) {
+                          return db.Landmark.itemLocationHack(i, q.loc);
+                      }));
+                      return results
+                  } else if (i.isFulfilled() && !u.isFulfilled()) {
+                      return i.value().map(function(i) {
+                          return db.Landmark.itemLocationHack(i, q.loc);
+                      });
+                  } else if (u.isFulfilled() && !i.isFulfilled()) {
+                      return u.value()
+                  }
+              })
 
-}
+          }, kip.err);
 
+  }
+  
 /**
  * Search implementation for a query that does not have text
  * Just use mongodb
@@ -430,152 +404,153 @@ function filterSearch(q, page) {
 }
 
 
-/**
- * Trending Items
- * POST /api/items/trending
- * body: {
- *   lat: Number,
- *   lon: Number,
- *   category: String (optional)
- * }
- */
-var trendingItemsUrl = '/api/items/trending';
-app.post(trendingItemsUrl, function(req, res, next) {
-    // page is 0-indexed
-    var page = parseInt(req.query.page) || 0;
 
-    // make some links which allow easy page traversal on the client
-    var links = {
-        self: req.originalUrl,
-        next: trendingItemsUrl + '?page=' + (page + 1),
-        prev: page == 0 ? null : trendingItemsUrl + '?page=' + (page - 1),
-        first: trendingItemsUrl,
-        last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
-    };
+  /**
+   * Trending Items
+   * POST /api/items/trending
+   * body: {
+   *   lat: Number,
+   *   lon: Number,
+   *   category: String (optional)
+   * }
+   */
+  var trendingItemsUrl = '/api/items/trending';
+  app.post(trendingItemsUrl, function(req, res, next) {
+      // page is 0-indexed
+      var page = parseInt(req.query.page) || 0;
 
-    req.body.radius = 2;
+      // make some links which allow easy page traversal on the client
+      var links = {
+          self: req.originalUrl,
+          next: trendingItemsUrl + '?page=' + (page + 1),
+          prev: page == 0 ? null : trendingItemsUrl + '?page=' + (page - 1),
+          first: trendingItemsUrl,
+          last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
+      };
 
-    // TODO curate text categories based on user's preferences
-    var textCategories = ['Fall', 'School'].map(function(str) {
-        var q = _.cloneDeep(req.body);
-        q.text = str;
-        return search(q, 0)
-            .then(function(res) {
-                var newRes = (eliminateDuplicates(res, q, pageSize) !== null) ? (eliminateDuplicates(res, q)) : res
-                return {
-                    category: 'Trending in "' + str + '"',
-                    results: res
-                }
-            })
-    });
+      req.body.radius = 2;
 
-    var neighborhoods = new Promise(function(resolve, reject) {
-        var q = {
-            loc: req.body.loc
-        };
-        var loc = {
-            type: 'Point',
-            coordinates: [parseFloat(req.body.loc.lat), parseFloat(req.body.loc.lon)]
-        };
-        var url = config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
-        return Promise.settle([search(q, 0), request(url)])
-            .then(function(results) {
-
-                if (!results[0].isFulfilled()) {
-                    console.log(results[0].reason());
-                    return reject();
-                }
-
-                if (!results[1].isFulfilled()) {
-                    console.log(results[1].reason());
-                    return reject();
-                }
-
-                try {
-                    var area = JSON.parse(results[1].value()[0].body)
-                } catch (e) {
-                    return reject();
-                }
-
-                var items = results[0].value()
-                data = {
-                    category: 'Trending in ' + area.area,
-                    results: items
-                }
-                resolve(data)
-            })
-    })
-
-
-    var nearYou = search(req.body, 0)
-        .then(function(res) {
-            if (res.length < 20) {
-                req.body.radius = 5;
-                console.log('searching radius', req.body.radius);
-                return search(req.body, 0);
-            } else {
-                return res;
-            }
-        })
-        .then(function(res) {
-            if (res.length < 20) {
-                req.body.radius = 50;
-                console.log('searching radius', req.body.radius);
-                return search(req.body, 0);
-            } else {
-                return res;
-            }
-        })
-        .then(function(res) {
-            if (res.length < 20) {
-                req.body.radius = 500;
-                console.log('searching radius', req.body.radius);
-                return search(req.body, 0);
-            } else {
-                return res;
-            }
-        })
-        .then(function(res) {
-            return {
-                category: 'Trending around me',
-                results: res
-            }
-        });
-
-    Promise.settle(_.flatten([textCategories, neighborhoods,nearYou]))
-        .then(function(results) {
-            // only show "nearYou" if "neighborhoods" failed
-            if (results[1].isFulfilled() && results[1].results && results[1].results.length > 0) {
-                if (results[2].isFulfilled() && results[2].results) {
-                    delete results[2].results;
-                }
-            }
-            res.send({
-                query: req.body,
-                links: links,
-                results: results.reduce(function(full, r) {
-                    if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0 && r._settledValue.category.length < 50) {
-                        full.push(r._settledValue)
-                    }
-                    return full;
-                }, [])
-            });
-            (new db.Analytics({
-              anonId: req.anonId,
-              userId: req.userId,
-              action: 'trending',
-              data: {
-                query: req.body,
-                resultCount: results.reduce(function(count, r) {
-                  if (r && r._settledValue && r._settledValue.results) {
-                    count = count + r._settledValue.results.length;
+      // TODO curate text categories based on user's preferences
+      var textCategories = ['Fall', 'School'].map(function(str) {
+          var q = _.cloneDeep(req.body);
+          q.text = str;
+          return search(q, 0)
+              .then(function(res) {
+                  var newRes = (eliminateDuplicates(res, q, pageSize) !== null) ? (eliminateDuplicates(res, q)) : res
+                  return {
+                      category: 'Trending in "' + str + '"',
+                      results: res
                   }
-                  return count;
-                }, 0)
+              })
+      });
+
+      var neighborhoods = new Promise(function(resolve, reject) {
+          var q = {
+              loc: req.body.loc
+          };
+          var loc = {
+              type: 'Point',
+              coordinates: [parseFloat(req.body.loc.lat), parseFloat(req.body.loc.lon)]
+          };
+          var url = config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
+          return Promise.settle([search(q, 0), request(url)])
+              .then(function(results) {
+
+                  if (!results[0].isFulfilled()) {
+                      console.log(results[0].reason());
+                      return reject();
+                  }
+
+                  if (!results[1].isFulfilled()) {
+                      console.log(results[1].reason());
+                      return reject();
+                  }
+
+                  try {
+                      var area = JSON.parse(results[1].value()[0].body)
+                  } catch (e) {
+                      return reject();
+                  }
+
+                  var items = results[0].value()
+                  data = {
+                      category: 'Trending in ' + area.area,
+                      results: items
+                  }
+                  resolve(data)
+              })
+      })
+
+
+      var nearYou = search(req.body, 0)
+          .then(function(res) {
+              if (res.length < 20) {
+                  req.body.radius = 5;
+                  console.log('searching radius', req.body.radius);
+                  return search(req.body, 0);
+              } else {
+                  return res;
               }
-            })).save();
-        }, next);
-})
+          })
+          .then(function(res) {
+              if (res.length < 20) {
+                  req.body.radius = 50;
+                  console.log('searching radius', req.body.radius);
+                  return search(req.body, 0);
+              } else {
+                  return res;
+              }
+          })
+          .then(function(res) {
+              if (res.length < 20) {
+                  req.body.radius = 500;
+                  console.log('searching radius', req.body.radius);
+                  return search(req.body, 0);
+              } else {
+                  return res;
+              }
+          })
+          .then(function(res) {
+              return {
+                  category: 'Trending around me',
+                  results: res
+              }
+          });
+
+      Promise.settle(_.flatten([textCategories, neighborhoods,nearYou]))
+          .then(function(results) {
+              // only show "nearYou" if "neighborhoods" failed
+              if (results[1].isFulfilled() && results[1].results && results[1].results.length > 0) {
+                  if (results[2].isFulfilled() && results[2].results) {
+                      delete results[2].results;
+                  }
+              }
+              res.send({
+                  query: req.body,
+                  links: links,
+                  results: results.reduce(function(full, r) {
+                      if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0 && r._settledValue.category.length < 50) {
+                          full.push(r._settledValue)
+                      }
+                      return full;
+                  }, [])
+              });
+              (new db.Analytics({
+                anonId: req.anonId,
+                userId: req.userId,
+                action: 'trending',
+                data: {
+                  query: req.body,
+                  resultCount: results.reduce(function(count, r) {
+                    if (r && r._settledValue && r._settledValue.results) {
+                      count = count + r._settledValue.results.length;
+                    }
+                    return count;
+                  }, 0)
+                }
+              })).save();
+          }, next);
+  })
 
 //****TEMPORARY FIX: This function will identify duplicate items in response, find the closest item (distance) within those duplicates
 //and return one of that item for each duplicated item.
@@ -682,4 +657,16 @@ function eliminateDuplicates(res, q, pageSize) {
 }
 
 
-module.exports = app;
+
+
+if (!module.parent) {
+  app.listen(8080, function(e) {
+    if(e) {
+      console.log(e);
+      process.exit(1);
+    }
+    console.log("kip style search listening on 8080")
+  })
+} else {
+  module.exports = app;
+}
