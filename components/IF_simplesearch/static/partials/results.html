@@ -23,30 +23,30 @@
 
         <div ng-show="noResults">Sorry, we couldn't find anything for you :(</div>
 
-        <div id="anchor{{$index}}" class="kip-card contentRow row{{$index}}" ng-show="items" ng-repeat="item in items track by $index">
+        <div id="anchor{{::$index}}" class="kip-card contentRow row{{$index}}" ng-show="items" ng-repeat="item in items track by $index">
             
         <div class="collapsedContent">
             <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
             <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}" ng-click="expandContent($index, $event)">
-                <img class="holderPlace" data-original="{{item.itemImageURL[0]}}">
-                <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{item.name}}" title="{{item.name}}">
+                <img class="holderPlace" data-original="{{::item.itemImageURL[0]}}">
+                <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
             </div>
 
             <div class="col-md-8 descripWrapper">
-                <span class="item-description" style="float:right;" am-time-ago="item.updated_time" ></span>
-                <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{item.price}} - </span> {{item.name}}</a></h3>
+                <span class="item-description updated-time" am-time-ago="item.updated_time" ></span>
+                <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price}} - </span> {{::item.name}}</a></h3>
 
-                <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{item.parent.name}} <span style="float:right;">{{item.distanceMI}} miles</span> <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
+                <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{::item.parent.name}} - {{::item.distanceMI}} miles <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
 
     <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
      -->
-                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{item.parent.tel | limitTo:20:1}}</p>
-                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressString">{{item.parent.addressString}}</p>
+                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressString">{{::item.parent.addressString}}</p>
+                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{::item.parent.tel | limitTo:20:1}}</p>
 
                 <div class="mobileButtonWrapper">
                     <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default bigMobile" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
-                    Map to {{item.parent.name}}</a>
-                    <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{item.linkback}}">Buy online</a>
+                    Map to {{::item.parent.name}}</a>
+                    <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}">Buy online</a>
                     <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" href="tel: {{item.parent.tel}}">Call</a>
                 <!--             
                 <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1> 
@@ -61,30 +61,32 @@
         <div ng-show="expandedIndex !== null" class="expandTopWrapper">
                 <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
                 <div class="expandedImageWrapper">
-                    <div class="expandedLargeImage largeImage{{$index}}" ng-style="{'background-image': 'url({{item.itemImageURL[0]}})'}"></div>
+                    <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>
                     <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{item.itemImageURL[$index]}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index]}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
                     </div>
                 </div>
             
             <div class="detailsContentWrapper">
                 
-                <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{item.price}} - </span> {{item.name}}</div>
-                <div class="detailsContent">{{item.description}}</div>
+                <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{::item.price}} - </span> {{::item.name}}</div>
+                <div class="detailsContent">{{::item.description}}</div>
                 <span class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
-                <span class="detailsFromCollapsed Distance"> {{item.distanceMI}} miles</span>
+                <span class="detailsFromCollapsed Distance"> {{::item.distanceMI}} miles</span>
                 
                 <div class="parentWrapper">
-                    <div ng-hide="{{!item.parent.name}}" class="detailsFromCollapsed Parent">{{item.parent.name}} </div>
-                    <p ng-hide="{{!item.parent.addressString}}" class="detailsFromCollapsed Store">| {{item.parent.addressString}}</p>
-                    <p ng-hide="{{!item.parent.tel}}" class="detailsFromCollapsed Tel">| {{item.parent.tel | limitTo:20:1}}</p>
+                    <div ng-hide="{{!item.parent.name}}" class="detailsFromCollapsed Parent">{{::item.parent.name}} </div>
+                    <p ng-hide="{{!item.parent.addressString}}" class="detailsFromCollapsed Store">| {{::item.parent.addressString}}</p>
+                    <p ng-hide="{{!item.parent.tel}}" class="detailsFromCollapsed Tel">| {{::item.parent.tel | limitTo:20:1}}</p>
                 </div>
 
                 <div class="expandedButtonsWrapper">
-                    <a class="btn btn-default expandedButtons" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Map to {{item.parent.name}}</a>
-                    <a ng-hide="{{!item.linkback}}" class="btn btn-default expandedButtons" ng-href="{{item.linkback}}">Buy online</a></p>
-                    <span ng-show="mobileScreen"><a ng-hide="{{!item.parent.tel}}" class="btn btn-default expandedButtons" href="tel: {{item.parent.tel}}">Call</a></span>
+                    <a class="btn btn-default expandedButtons" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Map to {{::item.parent.name}}</a>
+                    <a ng-hide="{{!item.linkback}}" class="btn btn-default expandedButtons" ng-href="{{::item.linkback}}">Buy online</a></p>
+                    <span ng-show="mobileScreen"><a ng-hide="{{!item.parent.tel}}" class="btn btn-default expandedButtons" href="tel: {{::item.parent.tel}}">Call</a></span>
                 </div>
+
+                <p style="color:#fff;">{{::item.linkbackname}}</p>
             
         </div>
         

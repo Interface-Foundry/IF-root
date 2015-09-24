@@ -792,6 +792,10 @@ div.footerBar {
     display: inline;
 }
 
+.updated-time{
+    float: right;
+}
+
 @media(max-width: 650px) {
     
     img {
@@ -804,10 +808,14 @@ div.footerBar {
     }
     
     .card-title > a {
-        font-size: 14px;
+/*        font-size: 16px;*/
         
     }
-    
+
+    .updated-time{
+        float: none;
+    }
+
     .mobileButtonWrapper {
         display: flex;
         flex-direction: row;
