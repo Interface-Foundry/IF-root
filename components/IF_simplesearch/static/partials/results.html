@@ -72,7 +72,6 @@
         </div>
 
         <div ng-if="expandedIndex !== null" class="expandTopWrapper">
-
                 <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
                 <div class="expandedImageWrapper">
                     <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>
@@ -102,8 +101,9 @@
                 </div>
 
                 <p ng-show="item.linkbackname" style="color:#ccc;">From {{::item.linkbackname}}</p>
+                
 
-        </div>
+            </div>
 
 <!--
         <div ng-if="mobileScreen" class="expandMobileWrapper mWrapper{{$index}}">
@@ -126,5 +126,5 @@
         </div>
 -->
 
-</div>
+        </div>
 </div>
