@@ -61,6 +61,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.expandedIndex = null;
     $scope.isExpanded = false;
     $scope.outerWidth = $(window)[0].outerWidth;
+    $scope.mobileFooterPos;
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
 

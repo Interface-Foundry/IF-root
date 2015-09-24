@@ -961,6 +961,8 @@ div.footerBar {
 
     .flex-Container {
         margin-top: 20%;
+        background-color: white;
+        outline: 40px solid white;
     }
 
     .flex-Container.Query {
@@ -977,6 +979,7 @@ div.footerBar {
     .Mobile.Button {
         visibility: visible;
         display: flex;
+        z-index: 2;
     }
 
     .Mobile.Button.Query {
@@ -985,6 +988,7 @@ div.footerBar {
 
     .flexBody.Top {
         margin-left: 0px;
+        z-index: 2;
     }
 
     .Mid.Tag {
@@ -994,6 +998,9 @@ div.footerBar {
     .Mid.Input {
         flex-wrap:wrap;
         width: 80%;
+        background-color: white;
+        z-index: 1;
+        outline: 70px solid white;
     }
     .Mid-Input.Length {
         width: 100%;
@@ -1040,5 +1047,10 @@ div.footerBar {
         padding-left: 10px;
         padding-right: 10px;
         padding-top: 10px;
+    }
+    
+    .flexBody.Foot {
+        z-index: -1;
+        top: 50px;
     }
 }
