@@ -1,5 +1,5 @@
 var db = require('db');
-var searchterms = require('./searchterms');
+var searchterms = require('../searchterms');
 var _ = require('lodash');
 var get = _.get;
 var kip = require('kip');

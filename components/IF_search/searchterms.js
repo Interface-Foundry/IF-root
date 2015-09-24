@@ -217,7 +217,7 @@ var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (tex
     return {
       multi_match: {
           query: terms.join(' '),
-          fields: ['tags^10', 'fullText'],
+          fields: ['tags^10', 'name^4', 'fullText'],
           boost: bucketTerms[bucketName].boost
       }
     }

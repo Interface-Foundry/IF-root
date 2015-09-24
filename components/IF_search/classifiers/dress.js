@@ -6,7 +6,7 @@ require('vvv');
 var _ = require('lodash');
 
 // make the trainnig and test sockets
-var trainingSet = require('./trainingSet').map(function(item) {
+var trainingSet = require('../trainingSet').map(function(item) {
   return {
     _id: item._id,
     text: [item.description, item.price].join(' '),
