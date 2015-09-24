@@ -24,12 +24,13 @@
 
         <div class="scrollTop" ng-click="scrollTop()" ng-show="items.length > 0"><i style="padding:5px; color:#ccc; visibility:visible; font-size:21px; padding-left:11px; padding-top:15px; cursor:pointer;" class="glyphicon glyphicon-chevron-up"></i></div>
 
-        <div ng-show="noResults" class="flexBody Top" ng-cloak>
+        <div ng-show="noResults" class="flexBody Top noitem" ng-cloak>
             
             <center>
                 <img src="img/404kip.png">
                 <br>
-                <h1 class="Top-Tag">Sorry! We couldn't find your item. We're working on it now, thanks!</h1>
+                <h1 class="Top-Tag"><span style="font-size:50px;">Sorry!</span> <br>
+                    We couldn't find your item. We're working on it now, thanks!</h1>
             </center>
         </div>
 

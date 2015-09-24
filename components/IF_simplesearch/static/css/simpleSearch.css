@@ -101,6 +101,10 @@ body {
   vertical-align: middle;
 }
 
+.noitem {
+    margin-top:32px;
+    position: relative;
+}
 
 .form-grey{
     border:1px solid #d9d9d9 !important;
@@ -879,6 +883,11 @@ div.footerBar {
     margin-left: -25px;
     z-index: 11;
     cursor: pointer;
+    opacity:0.4;
+}
+
+.clearField:hover{
+    opacity: 0.8;
 }
 
 @media(max-width: 650px) {
