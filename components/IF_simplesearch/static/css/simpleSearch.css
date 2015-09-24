@@ -785,6 +785,8 @@ div.footerBar {
 .soloImg {
     margin-left: 1px;
     margin-right: 1px;
+    background-color: gray;
+    background-position: center;
 }
 
 .soloImg:hover {
