@@ -299,7 +299,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.searchItems = function(){
         var encodeQuery = null;
         var encodeCity = null;
-        console.log($scope.query);
+        
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
         
