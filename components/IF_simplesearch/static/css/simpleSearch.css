@@ -890,6 +890,13 @@ div.footerBar {
     opacity: 0.8;
 }
 
+.scrollActivate {
+    width: 241px;
+    height: 241px;
+    position: absolute;
+    z-index: 11;
+}
+
 @media(max-width: 650px) {
 
     img {

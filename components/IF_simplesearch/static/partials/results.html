@@ -38,7 +38,8 @@
 
         <div class="collapsedContent">
             <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
-            <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}" ng-click="expandContent($index, $event)">
+            <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
+                <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>
                 <img class="holderPlace" data-original="{{::item.itemImageURL[0]}}">
                 <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
             </div>

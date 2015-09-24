@@ -1,4 +1,4 @@
-var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute', 'angular-inview'])
+var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute', 'angular-inview', 'smoothScroll'])
 
 .factory('location', [
     '$location',
@@ -40,7 +40,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
 
 
 
-simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $rootScope) {
+simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
@@ -121,10 +121,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 $('.row'+index).addClass('expand');
                 $scope.expandedIndex = index;
             }
-            var old = $location.hash();
-            $location.hash('anchor'+index);
-            $anchorScroll();
-            $location.hash(old);
+            
         }
         
     }
