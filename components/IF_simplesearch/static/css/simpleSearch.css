@@ -22,14 +22,85 @@ body {
   margin: 0;
 }
 
-@font-face {
+/*@font-face {
   font-family: 'Kip';
   src: url('kip/kip.eot');
   src: local('Kip'), local('Kip'),
     url("kip/kip.woff") format("woff"),
     url("kip/kip.otf") format("opentype"),
     url("kip/kip.svg") format("svg");
+}*/
+
+@font-face {
+	font-family: 'kiplevels';
+	src:url('/kip/fonts/kiplevels.eot?-y4ype7');
+	src:url('/kip/fonts/kiplevels.eot?#iefix-y4ype7') format('embedded-opentype'),
+		url('/kip/fonts/kiplevels.ttf?-y4ype7') format('truetype'),
+		url('/kip/fonts/kiplevels.woff?-y4ype7') format('woff'),
+		url('/kip/fonts/kiplevels.svg?-y4ype7#kiplevels') format('svg');
+	font-weight: normal;
+	font-style: normal;
 }
+
+[class^="kiplevels-"], [class*=" kiplevels-"] {
+	font-family: 'kiplevels';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.kiplevels-comment-outline:before {
+	content: "\e62f";
+}
+.kiplevels-hate-outline:before {
+	content: "\e63a";
+}
+.kiplevels-hate-solid:before {
+	content: "\e63b";
+}
+.kiplevels-navbar-search:before {
+	content: "\e649";
+}
+.kiplevels-phone-outline:before {
+	content: "\e64e";
+}
+.kiplevels-phone-solid:before {
+	content: "\e64f";
+}
+.kiplevels-search:before {
+	content: "\e654";
+}
+.kiplevels-share-outline:before {
+	content: "\e655";
+}
+.kiplevels-share-solid:before {
+	content: "\e656";
+}
+.kiplevels-userloc-outline:before {
+	content: "\e663";
+}
+.kiplevels-userloc-solid:before {
+	content: "\e664";
+}
+.kiplevels-map-outline:before {
+	content: "\e666";
+}
+
+.callIcon,
+.mapIcon {
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 0;
+  vertical-align: middle;
+}
+
 
 .form-grey{
     border:1px solid #d9d9d9 !important;
@@ -39,7 +110,7 @@ body {
     border:1px solid #4d90fe !important;
 }
 
-.kipFont { 
+.kipFont {
     font-family: "Kip" sans-serif;
     font-size: 18px;
 }
@@ -50,7 +121,7 @@ body {
     line-height: 26px !important;
     height: 26px !important;
     font: 16px arial,sans-serif !important;
-    border-radius: 0px !important; 
+    border-radius: 0px !important;
     border: none !important;
     color:#000;
 }
@@ -68,7 +139,7 @@ body {
     float: right;
 }
 
-.kip-card { 
+.kip-card {
     padding-bottom: 30px;
 }
 
@@ -77,7 +148,7 @@ body {
 }
 
 .card-title > a {
-    cursor:pointer;   
+    cursor:pointer;
 }
 
 /*.card-title{
@@ -200,7 +271,7 @@ form {
 }
 
 input.color-Positive {
-    background-color: rgba(85, 66, 226, 1.0);   
+    background-color: rgba(85, 66, 226, 1.0);
     color: white;
     font-size: 14px;
     font-family: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
@@ -208,7 +279,7 @@ input.color-Positive {
 }
 
 div.headerBar {
-    background-color: rgba(85, 66, 226, 1.0);   
+    background-color: rgba(85, 66, 226, 1.0);
     color: white;
     width: 100%;
     font-size: 20px;
@@ -221,7 +292,7 @@ div.headerBar {
 
 div.footerBar {
     background-color: #f2f2f2;
-    border-top: 1px solid #e4e4e4;   
+    border-top: 1px solid #e4e4e4;
     color:#333;
     width: 100%;
     font-size: 20px;
@@ -265,7 +336,7 @@ div.footerBar {
     -moz-box-sizing: border-box;
     box-sizing:border-box;
     display: table-cell;
-    vertical-align: top;    
+    vertical-align: top;
 }
 
 
@@ -367,12 +438,12 @@ div.footerBar {
 }
 
 .flex-Container.Query {
-    margin-top: 0;      
+    margin-top: 0;
 }
 
 .flexBody.Top {
 /*    outline: 2px solid red;   */
-    
+
 }
 
 .flexBody h1{
@@ -419,15 +490,15 @@ div.footerBar {
 }
 
 #topQueryBar {
-    background-color: white;   
+    background-color: white;
 }
 
 .Top-Icon.Query {
-    margin-top: -20px;   
+    margin-top: -20px;
 }
 
 .Top-Tag {
-    font-size: 22px;   
+    font-size: 22px;
 }
 
 .flexBody.Mid-Container {
@@ -435,7 +506,7 @@ div.footerBar {
     display: flex;
     flex-direction: row;
     margin-top: 20px;
-    
+
 }
 
 .Mid.Input {
@@ -481,11 +552,11 @@ div.footerBar {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    
+
 }
 
 .Mobile-Icon {
-    font-size: 40px;  
+    font-size: 40px;
     visibility: hidden;
 }
 
@@ -495,7 +566,7 @@ div.footerBar {
 }
 
 .Find-ZTop {
-    z-index: 10;   
+    z-index: 10;
     position: relative;
     font-weight: bold;
     font-size: 16px;
@@ -505,7 +576,7 @@ div.footerBar {
 }
 
 .Find-Input {
-    padding-left: 50px;  
+    padding-left: 50px;
     z-index: 9;
     position: relative;
     height: 36px;
@@ -525,12 +596,12 @@ div.footerBar {
 }
 
 .Mid-Input.Length {
-    width: 44%;   
+    width: 44%;
     margin-bottom: -30px;
 }
 
 .Length.Button {
-    width: 12%;   
+    width: 12%;
 }
 
 .Mid.Tag {
@@ -542,35 +613,35 @@ div.footerBar {
     margin-top: 10px;
     font-size: 12px;
     letter-spacing: 0.9px;
-    cursor: pointer;  
-   
+    cursor: pointer;
+
 }
 
 .Mid.Tag a{
-   font-weight: 500 !important;  
+   font-weight: 500 !important;
 }
 
 
 .scrollTop{
-    bottom: 0; 
+    bottom: 0;
     right: 0;
-    margin-right: 14px; 
+    margin-right: 14px;
     margin-bottom: 16px;
-    background:white; 
-    border:1px solid #ccc; 
-    width:42px; height:55px; 
+    background:white;
+    border:1px solid #ccc;
+    width:42px; height:55px;
     position:fixed;
     z-index: 100;
 }
 
 .scrollTop:hover{
-    background:#ddd; 
+    background:#ddd;
     border:1px solid #ccc;
 }
 
 
 .flexBody.Foot {
-    background-color: #f2f2f2;   
+    background-color: #f2f2f2;
     border-top: 1px solid #e4e4e4;
     font-size: 14px;
     position: fixed;
@@ -591,7 +662,7 @@ div.footerBar {
 }
 
 .holderPlace {
-    position: absolute;   
+    position: absolute;
     z-index: 2;
     min-height: 241px;
     max-width: 100%;
@@ -599,7 +670,7 @@ div.footerBar {
 }
 
 .holderPlace:first-child {
-    pointer-events:none;   
+    pointer-events:none;
 }
 
 .holderPlace.Sub {
@@ -622,7 +693,7 @@ div.footerBar {
 }
 
 .contentRow {
-    display: block;   
+    display: block;
     width: 100%;
     height: 241px;
 /*    margin-bottom: -350px;*/
@@ -646,11 +717,11 @@ div.footerBar {
 }
 
 .block {
-    display: block;   
+    display: block;
 }
 
 .centerContent {
-    text-align: center;   
+    text-align: center;
 }
 
 .centerCollapse {
@@ -675,7 +746,7 @@ div.footerBar {
     background-color: black;
     display: flex;
     align-items: center;
-    
+
 }
 
 .expandedImageWrapper {
@@ -697,7 +768,7 @@ div.footerBar {
 
 .imageSelectors.Wrapper {
     display: flex;
-    flex-direction: row;    
+    flex-direction: row;
     width: auto;
 }
 
@@ -708,7 +779,7 @@ div.footerBar {
     background-size: contain;
     background-repeat: no-repeat;
     display: inline-block;
- 
+
 }
 
 .soloImg {
@@ -723,7 +794,7 @@ div.footerBar {
 
 .descripWrapper,
 .imageWrapper {
-    background-color: white;   
+    background-color: white;
 }
 
 .detailsContentWrapper {
@@ -763,7 +834,7 @@ div.footerBar {
 }
 
 .closeExpand {
-    color: white;  
+    color: white;
     height: 30px;
     width: 30px;
     font-size: 30px;
@@ -773,8 +844,12 @@ div.footerBar {
     cursor: pointer;
 }
 
+.closeExpand:hover {
+    color: #ccc;
+}
+
 .expandedButtonsWrapper {
-    display: flex;   
+    display: flex;
 }
 
 .expandedButtons {
@@ -788,7 +863,7 @@ div.footerBar {
 .detailsFromCollapsed.Tel,
 .detailsFromCollapsed.Store {
     margin-top: 50px;
-    font-size: 18px;   
+    font-size: 18px;
     display: inline;
 }
 
@@ -797,19 +872,19 @@ div.footerBar {
 }
 
 @media(max-width: 650px) {
-    
+
     img {
         max-width: 100%;
         height: auto;
     }
-    
+
     .container-fluid {
         overflow-x: hidden;
     }
-    
+
     .card-title > a {
 /*        font-size: 16px;*/
-        
+
     }
 
     .updated-time{
@@ -822,35 +897,40 @@ div.footerBar {
         flex-wrap: wrap;
         align-items: center;
     }
-    
-    
+
+
     .btn-default {
         width: 45%;
         overflow: hidden;
         flex-grow: 1;
         margin-left: 4%;
     }
-    
+
     .bigMobile {
         width: 100%;
     }
-    
+
     .flex-Container {
         margin-left: 5%;
         margin-right: 0;
     }
+
+    .flex-Container.Query {
+        margin-bottom: -40px;
+    }
     .contentRow {
         height: 385px;
-        
+
     }
     .collapsedContent {
-        padding-left: 0;   
+        padding-left: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         height: 385px;
+        margin-top: 40px;
     }
-    
+
     .imageWrapper {
         padding-left: 0;
         display: flex;
@@ -858,64 +938,64 @@ div.footerBar {
         align-items: center;
         width: 100%;
     }
-    
+
     .descripWrapper {
         padding-left: 10px;
         padding-right: 0;
         margin-right: 10%;
         display:inline-block;
         width: 100%;
-        margin-bottom: 20px;
+        margin-bottom: -20px;
     }
     .Top-Icon.Query {
-        margin-top: 0;   
+        margin-top: 0;
     }
-    
+
     .flex-Container {
-        margin-top: 20%;   
+        margin-top: 20%;
     }
-    
+
     .flex-Container.Query {
     }
-    
+
     .Top-Tag {
-        font-size: 16px;   
+        font-size: 16px;
     }
-    
+
     .Mobile-Icon {
         visibility: visible;
     }
-    
+
     .Mobile.Button {
         visibility: visible;
         display: flex;
     }
-    
+
     .Mobile.Button.Query {
-        margin-bottom:8px;   
+        margin-bottom:8px;
     }
-    
+
     .flexBody.Top {
-        margin-left: 0px;   
+        margin-left: 0px;
     }
-    
+
     .Mid.Tag {
         margin-right: 0px;
     }
-    
+
     .Mid.Input {
         flex-wrap:wrap;
         width: 80%;
     }
     .Mid-Input.Length {
-        width: 100%;   
+        width: 100%;
         margin-bottom: -39px;
     }
-    
+
     .Length.Button {
-        display: none;   
+        display: none;
     }
-    
+
     .expandMobileWrapper {
         position: fixed;
         left: 0;
@@ -923,29 +1003,29 @@ div.footerBar {
         z-index: 200;
         background-color: black;
     }
-    
+
     .mobileImageWrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
         width: 100%;
     }
-    
+
     .expandedMobileImage {
         height: 280px;
         width: 280px;
         margin-top: 15%;
         background-size: contain;
         background-repeat:no-repeat;
-        
+
     }
-    
+
     .imageSelectors.Wrapper {
         position: relative;
         bottom: 0;
         width: 280px;
     }
-    
+
     .expandedDescripWrapper {
         background-color: black;
         color: white;
@@ -954,5 +1034,3 @@ div.footerBar {
         padding-top: 10px;
     }
 }
-
-

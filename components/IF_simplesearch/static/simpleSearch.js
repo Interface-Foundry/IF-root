@@ -1,4 +1,5 @@
 var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute', 'angular-inview'])
+
 .factory('location', [
     '$location',
     '$route',
@@ -39,7 +40,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
 
 
 
-simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $rootScope) {
+simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $rootScope, kipConstants) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
@@ -559,7 +560,7 @@ simpleSearchApp.service('searchQuery', function() {
     getSearch: getSearch
   };
 
-});
+})
 // simpleSearchApp.directive('stringToTimestamp', function() {
 //         return {
 //             require: 'ngModel',
@@ -582,3 +583,80 @@ simpleSearchApp.service('searchQuery', function() {
 //     }
 //   };
 // });
+.constant('kipConstants', {
+    categories: [
+        {
+            name: 'Outerwear', 
+            icon : 'kip-category-outerwear-outline', 
+            active : 'kip-category-outerwear-solid', 
+            id : 'outerwear'
+        },
+        {
+            name: 'Dresses', 
+            icon : 'kip-category-dresses-outline', 
+            active : 'kip-category-dresses-solid', 
+            id : 'dresses'
+        },
+        {
+            name: 'Tops',
+            icon : 'kip-category-tops-outline',
+            active : 'kip-category-tops-solid',
+            id : 'tops'
+        },
+        {
+            name: 'Skirts',
+            icon : 'kip-category-skirts-outline',
+            active : 'kip-category-skirts-solid',
+            id : 'skirts'
+        },
+        {
+            name: 'Pants',
+            icon : 'kip-category-pants-outline',
+            active : 'kip-category-pants-solid',
+            id : 'pants'
+        },
+        {
+            name: 'Underwear',
+            icon : 'kip-category-underwear-outline',
+            active : 'kip-category-underwear-solid',
+            id : 'underwear'
+        },
+        {
+            name: 'Activewear', 
+            icon : 'kip-category-activewear-outline', 
+            active : 'kip-category-activewear-solid', 
+            id : 'activewear'
+        },
+        {
+            name: 'Tights & Leggings',
+            icon : 'kip-category-leggings-outline',
+            active : 'kip-category-leggings-solid',
+            id : 'tightsleggings'
+        },
+        {
+            name: 'Shoes',
+            icon : 'kip-category-shoes-outline',
+            active : 'kip-category-shoes-solid',
+            id : 'shoes'
+        },
+        {
+            name: 'Bags',
+            icon : 'kip-category-bags-outline',
+            active : 'kip-category-bags-solid',
+            id : 'bags'
+        },
+        {
+            name: 'Accessories',
+            icon : 'kip-category-accessories-outlinesvg',
+            active : 'kip-category-accessories-solid',
+            id : 'accessories'
+        },
+        
+        {
+            name: 'Jewelry',
+            icon : 'kip-category-jewerly-outline',
+            active : 'kip-category-jewerly-solid',
+            id : 'jewelry'
+        },
+    ]
+})
