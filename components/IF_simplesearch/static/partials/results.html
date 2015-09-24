@@ -44,7 +44,7 @@
     <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
      -->
                 <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressString">{{::item.parent.addressString}}</p>
-                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{::item.parent.tel | limitTo:20:1}}</p>
+                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{::item.parent.tel}}</p>
 
                 <div class="mobileButtonWrapper" id="anchor{{::$index}}">
                     <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default bigMobile" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
@@ -83,7 +83,7 @@
                 <div class="parentWrapper">
                     <p ng-hide="{{!item.parent.addressString}}" class="detailsFromCollapsed Store"> {{::item.parent.addressString}}</p>
                     <br>
-                    <p ng-hide="{{!item.parent.tel}}" class="detailsFromCollapsed Tel"> {{::item.parent.tel | limitTo:20:1}}</p>
+                    <p ng-hide="{{!item.parent.tel}}" class="detailsFromCollapsed Tel"> {{::item.parent.tel}}</p>
                 </div>
                 <br>
                 <div class="expandedButtonsWrapper">
@@ -92,7 +92,7 @@
                     <span ng-show="mobileScreen"><a ng-hide="{{!item.parent.tel}}" class="btn btn-default expandedButtons" href="tel: {{::item.parent.tel}}">Call</a></span>
                 </div>
 
-                <p style="color:#ccc;">From {{::item.linkbackname}}</p>
+                <p ng-show="item.linkbackname" style="color:#ccc;">From {{::item.linkbackname}}</p>
 
         </div>
 
