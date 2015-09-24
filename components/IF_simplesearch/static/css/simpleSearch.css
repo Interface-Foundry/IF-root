@@ -871,6 +871,14 @@ div.footerBar {
     float: right;
 }
 
+.clearField {
+    position: absolute;
+    margin-top: -20px;
+    margin-left: -25px;
+    z-index: 11;
+    cursor: pointer;
+}
+
 @media(max-width: 650px) {
 
     img {

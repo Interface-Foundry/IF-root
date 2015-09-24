@@ -64,13 +64,17 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
 
- $rootScope.$on('$locationChangeState', function(event) {
+    $rootScope.$on('$locationChangeState', function(event) {
         event.preventDefault();
- });
+    });
 
     $scope.returnHome = function() {
         $location.path('/partials/home.html');
         $scope.items = [];
+    }
+    
+    $scope.emptyQuery = function() {
+        $scope.query = '';   
     }
 
     if ($scope.outerWidth < 651) {
