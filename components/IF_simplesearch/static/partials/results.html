@@ -58,7 +58,7 @@
             
         </div>
         
-        <div ng-show="expandedIndex !== null" class="expandTopWrapper">
+        <div ng-if="expandedIndex !== null" class="expandTopWrapper">
                 <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
                 <div class="expandedImageWrapper">
                     <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>

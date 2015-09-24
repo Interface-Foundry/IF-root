@@ -78,8 +78,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
     $scope.sayHello = function() {
         if (!httpBool) {
-                $scope.query = decodeURI($routeParams.query);
-                $scope.userCity = decodeURI($routeParams.cityName);
                 $scope.searchQuery();
         }
     }
@@ -293,9 +291,12 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
 
 
     $scope.searchItems = function(){
-
+        var encodeQuery = null;
+        var encodeCity = null;
+        console.log($scope.query);
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
+        
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
         if ($scope.newQuery) {
             $scope.newQuery = false;
@@ -307,6 +308,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             radius: 5,
         }).
             then(function(response) {
+            
 //                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
                 location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
                 //* * * * * * * * * * * * *
