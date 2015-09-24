@@ -39,7 +39,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
 
 
 
-simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $anchorScroll, $rootScope) {
+simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $anchorScroll, $routeParams, location, $rootScope) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
