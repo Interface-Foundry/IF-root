@@ -7,6 +7,8 @@ var job = require('job');
 var scrapeShoe;
 var _async = require('async');
 
+console.log('running dsw daemon');
+
 /**
  * First get all the stores and the dsw user, so we can reference them later on without additional db calls.
  */
@@ -15,12 +17,13 @@ var dswUser;
 db.Landmarks.find({
     world: true,
     'source_generic_store.source': 'dsw'
-}).select('id name loc').exec(function (e, l) {
+}).select('id name loc').exec(function(e, l) {
     if (e) {
         console.error(e);
         return
     }
-    dswStores = l.map(function (s) {
+    console.log('cacheing dsw stores');
+    dswStores = l.map(function(s) {
         return {
             mongoId: s._id.toString(),
             id: s.id,
@@ -28,164 +31,173 @@ db.Landmarks.find({
             loc: s.loc.toObject()
         };
     });
-    db.Users.findOne({profileID: 'dsw'}, function(e, u) {
-        if (e) { console.error(e); return }
+    db.Users.findOne({
+        profileID: 'dsw'
+    }, function(e, u) {
+        if (e) {
+            console.error(e);
+            return
+        }
+        console.log('cacheing dsw user');
         dswUser = u;
         startJob()
     });
 })
 
 function startJob() {
-var scrapeShoe = job('scrape-dsw', function (item, done) {
-  if (!item || !item.url) {
-    return done('could not find item url');
-  }
-  var itemUrl = item.url;
-// looks like http://www.dsw.com/shoe/crown+vintage+natasha+bootie?prodId=333140&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002
-    var urlParts = itemUrl.split(/[/?&=]/);
-    var productId = urlParts[6];
-    var categoryId = urlParts[8];
-
-    console.log('scraping', itemUrl);
-
-    kipScrapeTools.load(itemUrl, function ($) {
-        log.vv('loaded', itemUrl);
-        var sizes = $('select.sizes option').map(function () {
-            return {
-                text: parseFloat($(this).html()),
-                id: $(this).attr('value')
-            }
-        }).toArray().filter(function (a) {
-            return !!a.id;
-        })
-
-        var widths = $('select.widths option').map(function () {
-            return parseFloat($(this).html())
-        }).toArray().filter(function (a) {
-            return !!a;
-        })
-
-        var colors = $('#colors img').map(function () {
-            return {
-                id: $(this).attr('id').replace('colors_', ''),
-                swatch: $(this).attr('src'),
-                name: $(this).attr('alt')
-            };
-        }).toArray();
-
-        var images = $('#productImageSpinset .tile_container img').map(function () {
-            return $(this).attr('src');
-        }).toArray();
-
-        var relatedItemURLs = $('#productRecommendationZone .productName a').map(function () {
-            return $(this).attr('href');
-        }).toArray();
-
-        var tags = $('.breadcrumb a.breadcrumbText').map(function() {
-            return $(this).text()
-        }).toArray();
-
-        var item = {
-            source: 'dsw',
-            url: itemUrl,
-            productId: productId,
-            categoryId: categoryId,
-            sizes: sizes, // all sizes in all locations
-            sizesInStock: [], // only sizes at this location
-            images: images,
-            name: $('.title').text().trim(),
-            price: $('.priceSelected').text().trim(),
-            description: $('#productDesc').text().trim(),
-            relatedItemURLs: relatedItemURLs,
-            colors: colors,
-            colorsInStock: [],
-            tags: tags
+    console.log('starting job');
+    var scrapeShoe = job('scrape-dsw', function(item, done) {
+        if (!item || !item.url) {
+            return done('could not find item url');
         }
+        var itemUrl = item.url;
+        // looks like http://www.dsw.com/shoe/crown+vintage+natasha+bootie?prodId=333140&activeCategory=102444&category=dsw12cat880002&activeCats=cat10006,dsw12cat880002
+        var urlParts = itemUrl.split(/[/?&=]/);
+        var productId = urlParts[6];
+        var categoryId = urlParts[8];
 
-        log.v(JSON.stringify(item, null, 2))
+        console.log('scraping', itemUrl);
 
-        findStores(item, function (stores) {
-            var newItems = {};
-            // unravel this mess into a whole bunch of kip items.
-            item.colors.map(function(color) {
-                stores.map(function(store) {
-                    var kipId = ['dsw_', item.name.toLowerCase().replace(/[^\w^\d]/g, ''), item.productId, color.id].join('_');
-                    if (newItems[kipId]) {
-                        // take care of the store's inventory, which is kept per-store, though currently not
-                        // used per-store in querying
-                        if (newItems[kipId].source_generic_item[store.landmark.id]) {
-                            if (newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.indexOf(store.size) < 0) {
-                                newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.push(store.size)
+        kipScrapeTools.load(itemUrl, function($) {
+            log.vv('loaded', itemUrl);
+            var sizes = $('select.sizes option').map(function() {
+                return {
+                    text: parseFloat($(this).html()),
+                    id: $(this).attr('value')
+                }
+            }).toArray().filter(function(a) {
+                return !!a.id;
+            })
+
+            var widths = $('select.widths option').map(function() {
+                return parseFloat($(this).html())
+            }).toArray().filter(function(a) {
+                return !!a;
+            })
+
+            var colors = $('#colors img').map(function() {
+                return {
+                    id: $(this).attr('id').replace('colors_', ''),
+                    swatch: $(this).attr('src'),
+                    name: $(this).attr('alt')
+                };
+            }).toArray();
+
+            var images = $('#productImageSpinset .tile_container img').map(function() {
+                return $(this).attr('src');
+            }).toArray();
+
+            var relatedItemURLs = $('#productRecommendationZone .productName a').map(function() {
+                return $(this).attr('href');
+            }).toArray();
+
+            var tags = $('.breadcrumb a.breadcrumbText').map(function() {
+                return $(this).text()
+            }).toArray();
+            debugger;
+
+            var item = {
+                source: 'dsw',
+                url: itemUrl,
+                productId: productId,
+                categoryId: categoryId,
+                sizes: sizes, // all sizes in all locations
+                sizesInStock: [], // only sizes at this location
+                images: images,
+                name: $('.title').text().trim(),
+                price: $('.priceSelected').text().trim(),
+                description: $('#productDesc').text().trim(),
+                relatedItemURLs: relatedItemURLs,
+                colors: colors,
+                colorsInStock: [],
+                tags: tags
+            }
+
+            log.v(JSON.stringify(item, null, 2))
+
+            findStores(item, function(stores) {
+                var newItems = {};
+                // unravel this mess into a whole bunch of kip items.
+                item.colors.map(function(color) {
+                    stores.map(function(store) {
+                        var kipId = ['dsw_', item.name.toLowerCase().replace(/[^\w^\d]/g, ''), item.productId, color.id].join('_');
+                        if (newItems[kipId]) {
+                            // take care of the store's inventory, which is kept per-store, though currently not
+                            // used per-store in querying
+                            if (newItems[kipId].source_generic_item[store.landmark.id]) {
+                                if (newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.indexOf(store.size) < 0) {
+                                    newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.push(store.size)
+                                }
+
+                                if (newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.indexOf(store.color) < 0) {
+                                    newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.push(store.color)
+                                }
+                            } else {
+                                newItems[kipId].source_generic_item[store.landmark.id] = {}
+                                newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
+                                newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
                             }
 
-                            if (newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.indexOf(store.color) < 0) {
-                                newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.push(store.color)
-                            }
+                            newItems[kipId].parents.push(store.landmark._id);
+                            newItems[kipId].loc.coordinates.push(store.landmark.loc.coordinates);
+
                         } else {
-                            newItems[kipId].source_generic_item[store.landmark.id] = {}
+                            newItems[kipId] = {
+                                id: kipId,
+                                name: item.name,
+                                world: false,
+                                parents: [store.landmark._id],
+                                parent: {
+                                    mongoId: store.landmark.mongoId,
+                                    name: store.landmark.name,
+                                    id: store.landmark.id
+                                },
+                                owner: dswUser,
+                                valid: true,
+                                status: 'scraped',
+                                loc: {
+                                    type: 'MultiPoint',
+                                    coordinates: [store.landmark.loc.coordinates]
+                                },
+                                description: item.description,
+                                source_generic_item: _.cloneDeep(item),
+                                price: db.Landmark.priceStringToNumber(item.price),
+                                priceRange: db.Landmark.priceToPriceRange(item.price),
+                                itemTags: {
+                                    colors: colors.map(function(c) {
+                                        return c.name
+                                    }),
+                                    text: ['shoes'].concat(item.tags),
+                                    categories: ['Shoes']
+                                },
+                                linkback: item.url,
+                                linkbackname: 'dsw.com',
+                                updated_time: new Date()
+                            };
+                            newItems[kipId].source_generic_item.stores = {}
+                            newItems[kipId].source_generic_item.stores[store.landmark.id] = {}
                             newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
                             newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
                         }
-
-                        newItems[kipId].parents.push(store.landmark._id);
-                        newItems[kipId].loc.coordinates.push(store.landmark.loc.coordinates);
-
-                    } else {
-                        newItems[kipId] = {
-                            id: kipId,
-                            name: item.name,
-                            world: false,
-                            parents: [store.landmark._id],
-                            parent: {
-                                mongoId: store.landmark.mongoId,
-                                name: store.landmark.name,
-                                id: store.landmark.id
-                            },
-                            owner: dswUser,
-                            valid: true,
-                            status: 'scraped',
-                            loc: {
-                                type: 'MultiPoint',
-                                coordinates: [store.landmark.loc.coordinates]
-                            },
-                            description: item.description,
-                            source_generic_item: _.cloneDeep(item),
-                            price: db.Landmark.priceStringToNumber(item.price),
-                            priceRange: db.Landmark.priceToPriceRange(item.price),
-                            itemTags: {
-                                colors: colors.map(function(c) { return c.name }),
-                                text: ['shoes'].concat(item.tags),
-                                categories: ['Shoes']
-                            },
-                            linkback: item.url,
-                            linkbackname: 'dsw.com',
-                            updated_time: new Date()
-                        };
-                        newItems[kipId].source_generic_item.stores = {}
-                        newItems[kipId].source_generic_item.stores[store.landmark.id] = {}
-                        newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
-                        newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
-                    }
+                    })
                 })
+
+                log.vv(newItems);
+                debugger;
+
+                if (Object.keys(newItems).length === 0) {
+                    return done('no stores found for item', item)
+                }
+
+                Object.keys(newItems).map(function(k) {
+                    upsert(newItems[k], function() {})
+                })
+                debugger;
+                done();
             })
 
-            log.vv(newItems);
-            debugger;
-
-            if (Object.keys(newItems).length === 0) {
-              return done('no stores found for item', item)
-            }
-
-            Object.keys(newItems).map(function(k) {
-                upsert(newItems[k], function() {
-                })
-            })
-            debugger;
-            done();
         })
-
     })
-})
 }
 
 function findStores(item, done) {
@@ -221,16 +233,16 @@ function findStores(item, done) {
             width: 'M'
         };
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             request.post({
                 url: url,
                 headers: headers,
                 form: form
-            }, function (e, r, b) {
-              log.vvv(b);
+            }, function(e, r, b) {
+                log.vvv(b);
                 var $ = cheerio.load(b);
 
-                var stores = $('#searchResultsTable tr').map(function () {
+                var stores = $('#searchResultsTable tr').map(function() {
                     var row = $(this);
                     var store = {};
                     store.id = row.find('input[name="lineItem.storeId"]').val()
@@ -238,7 +250,7 @@ function findStores(item, done) {
                         return store
                     }
                     var r = new RegExp(store.id + '$');
-                    store.landmark = dswStores.filter(function (s) {
+                    store.landmark = dswStores.filter(function(s) {
                         return !!s.id.match(r);
                     })[0];
                     return store;
@@ -259,50 +271,50 @@ function findStores(item, done) {
     // want to find the minimum set of zipcodes that spans the major regions of interest
     // looks like the radius is about 100 miles
     var zipcodes = [
-      '10002', // gets new york
-      '92805', // anaheim worked better than hollywood area for some reason
-      '60612', // chicago
-      '20001', // dc
-      '77006', // houston
-      '19123', // philly
+        '10002', // gets new york
+        '92805', // anaheim worked better than hollywood area for some reason
+        '60612', // chicago
+        '20001', // dc
+        '77006', // houston
+        '19123', // philly
     ];
 
     var promises = [];
     var queue = [];
     var stores = [];
-    item.colors.map(function (color) {
-        item.sizes.map(function (size) {
-            zipcodes.map(function (zipcode) {
-              queue.push({
-                zipcode: zipcode,
-                size: size,
-                color: color
-              });
+    item.colors.map(function(color) {
+        item.sizes.map(function(size) {
+            zipcodes.map(function(zipcode) {
+                queue.push({
+                    zipcode: zipcode,
+                    size: size,
+                    color: color
+                });
             })
         })
     })
 
     _async.eachSeries(queue, function(item, callback) {
-      checkAvailability(item.color.id, item.size.id, item.zipcode).then(function(s) {
-        s.map(function (store) {
-            if (!store.id || !store.landmark) return;
-            stores.push({
-                color: color,
-                size: size,
-                zipcode: zipcode,
-                landmark: store.landmark,
-                id: store.id
-            });
+        checkAvailability(item.color.id, item.size.id, item.zipcode).then(function(s) {
+            s.map(function(store) {
+                if (!store.id || !store.landmark) return;
+                stores.push({
+                    color: item.color,
+                    size: item.size,
+                    zipcode: item.zipcode,
+                    landmark: store.landmark,
+                    id: store.id
+                });
+            })
+            callback();
+        }).catch(function(e) {
+            console.error('error in checkAvailability', item);
+            console.error(e);
+            callback();
         })
-        callback();
-      }).catch(function(e) {
-        console.error('error in checkAvailability', item);
-        console.error(e);
-        callback();
-      })
     }, function() {
-          log.v('found', stores.length, 'stores for product', item.productId);
-          done(stores);
+        log.v('found', stores.length, 'stores for product', item.productId);
+        done(stores);
     })
 }
 
@@ -315,17 +327,23 @@ function upsert(item, callback) {
     db.Landmarks.findOne({
         id: item.id
     }, function(e, i) {
-        if (e) { console.log(e); return; }
+        if (e) {
+            console.log(e);
+            return;
+        }
         if (i) {
             _.merge(i, item);
             i.markModified('source_generic_item')
             return i.update(function(e) {
-                if (e) { console.error(e); return; }
+                if (e) {
+                    console.error(e);
+                    return;
+                }
                 console.log('saved item', i.id);
             })
         } else {
             i = new db.Landmark(item);
-            i.save(function (e) {
+            i.save(function(e) {
                 if (e) {
                     console.error(e);
                     return;
