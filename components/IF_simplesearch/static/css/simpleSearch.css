@@ -957,6 +957,7 @@ div.footerBar {
     }
     .Top-Icon.Query {
         margin-top: 0;
+        z-index: 3;
     }
 
     .flex-Container {
