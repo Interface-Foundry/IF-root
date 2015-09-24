@@ -124,18 +124,19 @@ function startJob() {
                         if (newItems[kipId]) {
                             // take care of the store's inventory, which is kept per-store, though currently not
                             // used per-store in querying
-                            if (newItems[kipId].source_generic_item[store.landmark.id]) {
-                                if (newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.indexOf(store.size) < 0) {
-                                    newItems[kipId].source_generic_item[store.landmark.id].sizesInStock.push(store.size)
+                            if (newItems[kipId].source_generic_item.stores[store.landmark.id]) {
+                                var thisStore = newItems[kipId].source_generic_item.stores[store.landmark.id];
+                                if (thisStore.sizesInStock.indexOf(store.size) < 0) {
+                                    thisStore.sizesInStock.push(store.size)
                                 }
 
-                                if (newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.indexOf(store.color) < 0) {
-                                    newItems[kipId].source_generic_item[store.landmark.id].colorsInStock.push(store.color)
+                                if (thisStore.colorsInStock.indexOf(store.color) < 0) {
+                                    thisStore.colorsInStock.push(store.color)
                                 }
                             } else {
-                                newItems[kipId].source_generic_item[store.landmark.id] = {}
-                                newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
-                                newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
+                                newItems[kipId].source_generic_item.stores[store.landmark.id] = {}
+                                newItems[kipId].source_generic_item.stores[store.landmark.id].sizesInStock = [store.size]
+                                newItems[kipId].source_generic_item.stores[store.landmark.id].colorsInStock = [store.color]
                             }
 
                             newItems[kipId].parents.push(store.landmark._id);
@@ -176,8 +177,8 @@ function startJob() {
                             };
                             newItems[kipId].source_generic_item.stores = {}
                             newItems[kipId].source_generic_item.stores[store.landmark.id] = {}
-                            newItems[kipId].source_generic_item.sizesInStock[store.landmark.id] = [store.size]
-                            newItems[kipId].source_generic_item.colorsInStock[store.landmark.id] = [store.color]
+                            newItems[kipId].source_generic_item.stores[store.landmark.id].sizesInStock = [store.size]
+                            newItems[kipId].source_generic_item.stores[store.landmark.id].colorsInStock = [store.color]
                         }
                     })
                 })
