@@ -17,7 +17,7 @@ natural.BayesClassifier.load(classifierPath, null, function(err, classifier) {
   setInterval(function() {
     db.Landmarks.find({
       world: false,
-      'flags.classifierCategoryDone': {$ne: true}
+      'flags.mustRunClassifiers': {$ne: false}
     })
       .select('name description price itemTags')
       .limit(100)
