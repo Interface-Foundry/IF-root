@@ -64,6 +64,8 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.mobileFooterPos;
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
+    $scope.showReportModal = null;
+    $scope.report = {};
 
     $rootScope.$on('$locationChangeState', function(event) {
         event.preventDefault();
@@ -390,6 +392,28 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         }, function(response) {
 
         });
+    }
+    
+    $scope.reportItem = function(status, item, index) {
+        if (status === 'open') {
+            $scope.showReportModal = index;    
+        } else if (status === 'close') {
+            $scope.showReportModal = null;    
+        } else if (status === 'submit') {
+            $http.post('https://kipapp.co/styles/api/items/' + item._id + '/report', {
+                timeReported: new Date(),
+                comment: $scope.report.comment,
+                reason: $scope.report.reason
+            }). then(function (res) {
+            $timeout(function() {$scope.showReportModal = null;}, 15000);    
+//                console.log('res', res);
+                if (res.data.err) {
+
+                } else {}
+            });
+            
+        }
+    
     }
 
     //* * * * * * * * *  * * * * * * * * * * * * * *
