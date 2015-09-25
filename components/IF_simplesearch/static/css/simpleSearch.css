@@ -289,8 +289,12 @@ div.headerBar {
     font-size: 20px;
     vertical-align: middle;
     height: 44px;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
     padding-left: 10px;
 }
 
@@ -302,8 +306,12 @@ div.footerBar {
     font-size: 20px;
     vertical-align: middle;
     height: 44px;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
     padding-left: 10px;
     position: absolute;
     left:0;
@@ -336,8 +344,6 @@ div.footerBar {
 }
 
 .arrange_unit{
-    -webkit-box-sizing:border-box;
-    -moz-box-sizing: border-box;
     box-sizing:border-box;
     display: table-cell;
     vertical-align: top;
@@ -364,8 +370,6 @@ div.footerBar {
     position: relative;
     overflow: hidden;
     display: block;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
     box-sizing: border-box;
     width:100%;
     margin:0 0 18px;
@@ -395,7 +399,6 @@ div.footerBar {
     color:#333;
     cursor: default;
     -webkit-user-select:none;
-    -khtml-user-select:none;
     -moz-user-select:none;
     -ms-user-select:none;
     user-select:none;
@@ -413,7 +416,6 @@ div.footerBar {
     margin: 0;
     border:0;
     outline: 0;
-    -webkit-box-shadow:none;
     box-shadow: none;
     background: none;
     padding: 2px;
@@ -432,12 +434,22 @@ div.footerBar {
 
 /*Flexbox CSS*/
 
+.container {
+    width: 95%;   
+}
+
 .flex-Container {
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: column;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
     margin-top: 20%;
+/*
     margin-left: 15%;
     margin-right: 15%;
+*/
 /*    outline: 1px solid black;*/
 }
 
@@ -495,6 +507,9 @@ div.footerBar {
 
 #topQueryBar {
     background-color: white;
+    width: 75%;
+    margin-left: 12%;
+    margin-right: 12%
 }
 
 .Top-Icon.Query {
@@ -507,15 +522,23 @@ div.footerBar {
 
 .flexBody.Mid-Container {
 /*    outline: 2px solid green;   */
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
     margin-top: 20px;
 
 }
 
 .Mid.Input {
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
     width: 100%;
 }
 
@@ -530,11 +553,21 @@ div.footerBar {
     font-family: arial, sans-serif;
     letter-spacing: 0.9px;
     line-height: 27px;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-align-content: center;
+        -ms-flex-line-pack: center;
+            align-content: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
     top: -10px;
     margin-top: -6px;
 }
@@ -553,9 +586,15 @@ div.footerBar {
     top: -7px;
     visibility:  hidden;
     display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
 
 }
 
@@ -609,8 +648,12 @@ div.footerBar {
 }
 
 .Mid.Tag {
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
 }
 
 .Mid.Tag.Text {
@@ -706,9 +749,20 @@ div.footerBar {
 
 
 .expand {
-    animation: expandContent .25s linear;
+    -webkit-animation: expandContent .25s linear;
+            animation: expandContent .25s linear;
     display:block;
-    animation-fill-mode: forwards;
+    -webkit-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
+}
+
+@-webkit-keyframes expandContent {
+    0% {
+        height: 300px;
+    }
+    100% {
+        height: 850px;
+    }
 }
 
 @keyframes expandContent {
@@ -737,8 +791,12 @@ div.footerBar {
     position: relative;
     background-color: black;
     height: 568px;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
 }
 
 .expandedContentWrapper {
@@ -748,15 +806,23 @@ div.footerBar {
     width: 100%;
     position: relative;
     background-color: black;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
 
 }
 
 .expandedImageWrapper {
     margin-left: 9%;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: column;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
 }
 
 .expandedLargeImage {
@@ -766,13 +832,21 @@ div.footerBar {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
 }
 
 .imageSelectors.Wrapper {
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
     width: auto;
 }
 
@@ -804,9 +878,15 @@ div.footerBar {
 }
 
 .detailsContentWrapper {
+    display: -webkit-flex !important;
+    display: -ms-flexbox !important;
     display: flex !important;
-    flex-direction: column;
-    flex-wrap:wrap;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-flex-wrap:wrap;
+        -ms-flex-wrap:wrap;
+            flex-wrap:wrap;
     width: 66%;
     padding-left: 40px;
 }
@@ -814,7 +894,9 @@ div.footerBar {
 .detailsContent {
     color: white;
     font-size: 18px;
-    flex-grow: 1;
+    -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1;
     width: 50%;
     text-align: justify;
     padding-bottom: 50px;
@@ -856,6 +938,8 @@ div.footerBar {
 }
 
 .expandedButtonsWrapper {
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
 }
 
@@ -872,6 +956,14 @@ div.footerBar {
     margin-top: 50px;
     font-size: 18px;
     display: inline;
+}
+
+.reportItem {
+    color: gray;   
+}
+
+a.reportItem { 
+    cursor: pointer;
 }
 
 .updated-time{
@@ -898,11 +990,56 @@ div.footerBar {
     z-index: 11;
 }
 
-.queryContainer {
+.modalOverlay {
+    position: fixed;
+    background-color: rgba(0,0,0,0.1);
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 99;
     width: 100%;
-    background-color: red;
-    height: 10px;
+}
+
+.modalReport {
+    width: 40%;
+    height: 40%;
+    margin-left: 30%;
+    margin-right: 30%;
+    margin-top: 15%;
+    background-color: white;
+    border-radius: 10px;
+    text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+}
+
+.reportComment {
+    margin-top: 10px;
     display: block;
+    width: 100%;
+}
+
+.reportReason {
+    display: block;
+    width: 100%;
+}
+
+.reportClose {
+    width: 20px;
+    height: 20px;
+    display: block;
+    margin-left: 95%;
+    cursor: pointer;
+}
+
+.reportClose:hover {
+    color: #ccc;   
+}
+
+.submitThanks {
+    content: 'Thanks'   
 }
 
 @media(max-width: 905px) and (min-width: 750px) {
@@ -919,6 +1056,10 @@ div.footerBar {
 }
 
 @media(min-width: 750px) and (max-width: 1250px) {
+    .flex-Container {
+        padding-left: 2%;
+        padding-right: 4%;
+    }
     
     .detailsFromCollapsed {
         font-size: 28px; 
@@ -970,8 +1111,12 @@ div.footerBar {
     
     .collapsedContent {
         padding-left: 2%;  
+        display: -webkit-flex;  
+        display: -ms-flexbox;  
         display: flex;
-        align-items: center;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
     }
     .imageWrapper,
     .descripWrapper {
@@ -981,6 +1126,15 @@ div.footerBar {
     .descripWrapper {
         width: 55%;
     }
+    
+    @-webkit-keyframes expandContent {
+    0% {
+        height: 300px;
+    }
+    100% {
+        height: 690px;
+    }
+}
     
     @keyframes expandContent {
     0% {
@@ -1017,17 +1171,27 @@ div.footerBar {
     }
 
     .mobileButtonWrapper {
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
+        -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+                flex-direction: row;
+        -webkit-flex-wrap: wrap;
+            -ms-flex-wrap: wrap;
+                flex-wrap: wrap;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
     }
 
 
     .btn-default {
         width: 45%;
         overflow: hidden;
-        flex-grow: 1;
+        -webkit-flex-grow: 1;
+            -ms-flex-positive: 1;
+                flex-grow: 1;
         margin-left: 4%;
     }
 
@@ -1049,18 +1213,30 @@ div.footerBar {
     }
     .collapsedContent {
         padding-left: 0;
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
         height: 385px;
         margin-top: 40px;
     }
 
     .imageWrapper {
         padding-left: 0;
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
         width: 100%;
     }
 
@@ -1096,6 +1272,8 @@ div.footerBar {
 
     .Mobile.Button {
         visibility: visible;
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex;
         z-index: 2;
     }
@@ -1123,7 +1301,9 @@ div.footerBar {
     }
 
     .Mid.Input {
-        flex-wrap:wrap;
+        -webkit-flex-wrap:wrap;
+            -ms-flex-wrap:wrap;
+                flex-wrap:wrap;
         width: 80%;
         background-color: white;
         z-index: 1;
@@ -1147,9 +1327,15 @@ div.footerBar {
     }
 
     .mobileImageWrapper {
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
         width: 100%;
     }
 
@@ -1180,3 +1366,5 @@ div.footerBar {
         z-index: -1;
     }
 }
+
+/*# sourceMappingURL=simpleSearch.css.map */
