@@ -358,7 +358,8 @@ var landmarkSchema = new Schema({
             itemFabric: String,
             colors: [] // array of hsl values (so array of vectors)
         },
-        classifierTags: [String]
+        classifierTags: [String],
+        classifiedCategory: String
     },
     flags: {
         humanProcessed: Boolean,
@@ -374,6 +375,7 @@ var landmarkSchema = new Schema({
         justVisualProcessed: Boolean,
         cloudsightProcessed: Boolean,
         classifierFirstPassDone: Boolean,
+        classifierCategoryDone: Boolean,
         needsGooglePlace: Boolean
     }
 
