@@ -5,11 +5,32 @@ var natural = require('natural');
 
 /**
  * Takes a list of words, remomves the stop words, returns array
+ * Some of the tokens may be multiple words if they match a multiple
+ * token work in our fashion tag database
  */
 var tokenizer = new natural.WordTokenizer();
+var multiWordTokens = [];
 var tokenize = module.exports.tokenize = function(text) {
+  // list of final tokens
   var tokens = [];
-  tokenizer.tokenize(text).map(function(token) {
+
+  // first stem
+  var tokenString = tokenizer.tokenize(text).map(function(t) {
+    return natural.PorterStemmer.stem(t.toLowerCase());
+  }).join(' ');
+
+  // check for multi-word tokens
+  multiWordTokens.map(function(t) {
+    if (tokenString.indexOf(t) >= 0) {
+      // take out the multi-word token from the string.
+      tokenString = tokenString.replace(t, '');
+      tokenString = tokenString.replace('  ', ' ');
+      tokenString = tokenString.trim();
+      tokens.push(t);
+    }
+  })
+
+  tokenString.split(' ').map(function(token) {
     if (stopwords.indexOf(token) === -1) {
       tokens.push(natural.PorterStemmer.stem(token.toLowerCase()));
     }
@@ -45,7 +66,19 @@ var tsvfile = fs.readFileSync(__dirname + '/List of Tags in Kip Search - categor
 var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row) {
   row = row.split('\t').filter(function(val) {
     return val !== '';
-  });
+  }).map(function(val, i) {
+    // do not transform header
+    if (i === 0) {
+      return val;
+    }
+    var tokens = tokenize(val);
+
+    // specially handle multi-word fashion database terms
+    if (tokens.length > 1) {
+      multiWordTokens.push(tokens.join(' '));
+    }
+    return tokens.join(' ');
+  })
   return {
     name: row[0].toLowerCase().replace(/ /g, ''),
     boost: row[1], //default, should often be overridden by our combos
