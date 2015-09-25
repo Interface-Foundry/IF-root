@@ -5,7 +5,7 @@ require('colors');
 require('vvv');
 var _ = require('lodash');
 
-// make the trainnig and test sockets
+// make the trainnig and test sets
 var trainingSet = require('./categoryTrainingSet').map(function(item) {
   return {
     _id: item._id,
@@ -20,13 +20,16 @@ var testSet = trainingSet.splice(0, trainingSet.length/20|0);
 // classify jsut the particular specific item column
 var classifier = new natural.BayesClassifier();
 
-//
+var trainedTags = {};
 trainingSet.map(function(t) {
   log.v('adding document ' + t._id)
   classifier.addDocument(t.text, t.tag);
+  trainedTags[t.tag] = trainedTags[t.tag] || 0;
+  trainedTags[t.tag]++;
 })
 
-console.log('training classifier');
+console.log('training with tags:', JSON.stringify(trainedTags, null, 2));
+
 classifier.train();
 console.log('done training');
 
