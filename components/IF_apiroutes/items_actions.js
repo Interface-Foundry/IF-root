@@ -46,7 +46,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
             data: {},
             publicVisible: true,
             privateVisible: true,
-            seenBy: [req.user._id.toString()]
+            seenBy: req.user ? [req.user._id.toString()] : []
         });
 
         if (req.user && req.userId) {
@@ -468,10 +468,6 @@ app.post('/:mongoId/deletesnap', function(req, res) {
 });
 
 app.post('/:mongoId/report', function(req, res, next) {
-    if (USE_MOCK_DATA) {
-        return res.send(defaultResponse);
-    }
-
     if (!req.item.reports) {
         req.item.reports = [req.body];
     } else {
