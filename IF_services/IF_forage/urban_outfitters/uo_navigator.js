@@ -1,3 +1,5 @@
+//Note: If you are getting 'missing id' logs in console, run uo_store_scraper first.
+
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
@@ -5,6 +7,7 @@ var async = require('async');
 var uniquer = require('../../uniquer');
 var request = require('request')
 var item_scraper = require('./uo_scraper')
+var fs = require('fs')
 
 //List of NEW-IN catalogs
 var catalogs = [{
@@ -72,10 +75,18 @@ async.whilst(
                 console.log('Done with catalog.')
                 wait(callback, 10000)
             }).catch(function(err) {
+                if (err) {
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                }
                 console.log('Error with catalog: ', catalog.category)
                 wait(callback, 10000)
             })
         }, function(err) {
+            if (err) {
+                var today = new Date().toString()
+                fs.appendFile('errors.log', '\n' + today  + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+            }
             console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
             wait(loop, 2000000)
         })
@@ -86,31 +97,23 @@ async.whilst(
 
 function loadCatalog(category) {
     return new Promise(function(resolve, reject) {
-        // console.log('!!',category.url)
-
         var options = {
             url: category.url,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-
         console.log('Starting catalog: ', category.category)
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
                 async.eachSeries($('p.product-image>a'), function(item, callback) {
-
                     if (!item.attribs.href) {
                         console.log('invalid!')
                         return callback()
                     }
-                    // http://www.urbanoutfitters.com/urban/catalog/productdetail.jsp?id=36026086&category=MENS_SHOES
                     var detailsUrl = item.attribs.href;
                     detailsUrl = 'http://www.urbanoutfitters.com/urban/catalog/' + detailsUrl.toString().trim()
-
-                     // console.log('!!',detailsUrl)
-
                     item_scraper(detailsUrl, category.category).then(function(result) {
                         console.log('Done.**')
                         wait(callback, 3000)
@@ -123,7 +126,6 @@ function loadCatalog(category) {
                     console.log('Done scraping catalog!')
                     resolve()
                 })
-
             } else {
                 if (error) {
                     console.log('error: ', error)

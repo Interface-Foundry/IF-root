@@ -7,8 +7,9 @@ var uniquer = require('../../uniquer');
 var request = require('request');
 var urlapi = require('url');
 var _ = require('lodash');
+var fs = require('fs');
 var tagParser = require('../tagParser')
-//Global var to hold category
+    //Global var to hold category
 cat = '';
 //Global var to hold fake user object
 owner = {};
@@ -26,14 +27,12 @@ module.exports = function(url, category) {
         async.waterfall([
             function(callback) {
                 loadFakeUser().then(function() {
-                    // console.log(1)
                     callback(null)
                 }).catch(function(err) {
                     callback(err)
                 })
             },
             function(callback) {
-                   // console.log('***',url)
                 scrapeItem(url).then(function(item) {
                     // console.log(2)
                     callback(null, item)
@@ -44,7 +43,7 @@ module.exports = function(url, category) {
             function(item, callback) {
                 cloneItems(item).then(function(items) {
                     // console.log(3)
-                        // console.log('Items: ', items[0].physicalStores[0])
+                    // console.log('Items: ', items[0].physicalStores[0])
                     callback(null, items)
                 }).catch(function(err) {
                     callback(err)
@@ -60,8 +59,11 @@ module.exports = function(url, category) {
             }
         ], function(err, items) {
             if (err) {
-                return reject(err)
-                console.log(err)
+                var today = new Date().toString()
+                fs.appendFile('errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
+                    console.log(err)
+                    return reject(err)
+                });
             }
             console.log('finished scraping item!!', items.length)
             resolve()
@@ -92,7 +94,7 @@ function loadFakeUser() {
                         if (err) {
                             console.log(err)
                         } else {
-                            console.log(o.profileID)
+                            // console.log(o.profileID)
                             owner.profileID = o.profileID
                             owner.name = o.name;
                             owner.mongoId = o._id

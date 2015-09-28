@@ -6,6 +6,7 @@ var uniquer = require('../../uniquer');
 var request = require('request')
 var item_scraper = require('./nordstrom_scraper')
 var states = require('./states');
+var fs = require('fs')
 
 //List of NEW-IN catalogs
 var womens = {
@@ -59,17 +60,26 @@ async.whilst(
                                     console.log('Done with catalog.')
                                     wait(callback, 10000)
                                 }).catch(function(err) {
+                                    if (err) {
+                                        var today = new Date().toString()
+                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                    }
                                     console.log('Error with catalog: ', catalog)
                                     wait(callback, 10000)
                                 })
                             }, function(err) {
+                                if (err) {
+                                    var today = new Date().toString()
+                                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                }
                                 console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
                                 wait(loop, 2000000)
                             })
                         },
                         function(err) {
                             if (err) {
-                                console.log(err);
+                                var today = new Date().toString()
+                                fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                             } else {
                                 cb('Done with state.')
                             }
@@ -78,7 +88,8 @@ async.whilst(
                 },
                 function(err) {
                     if (err) {
-                        console.log(err);
+                        var today = new Date().toString()
+                        fs.appendFile('errors.log', '\n' + today + + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     stateIndex++;
                     if (states[stateIndex]) {
@@ -95,8 +106,10 @@ async.whilst(
         })
     },
     function(err) {
-        if (err) console.log(err)
-
+        if (err) {
+            var today = new Date().toString()
+            fs.appendFile('errors.log', '\n' + today + err, function(err) {});
+        }
     })
 
 
@@ -131,14 +144,18 @@ function loadCatalog(category, zipcode) {
                         wait(callback, 4000)
                     })
                 }, function(err) {
-                    if (err) console.log(err)
+                    if (err) {
+                        var today = new Date().toString()
+                        fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                    }
                     console.log('Done scraping catalog!')
                     resolve()
                 })
 
             } else {
                 if (error) {
-                    console.log('error: ', error)
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error, function(err) {});
                     reject(error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode)

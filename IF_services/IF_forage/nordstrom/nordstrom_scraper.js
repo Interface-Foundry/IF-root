@@ -8,6 +8,7 @@ var uniquer = require('../../uniquer');
 var request = require('request');
 var _ = require('lodash');
 var tagParser = require('../tagParser');
+var fs = require('fs')
 
 
 //Global var to hold category
@@ -37,11 +38,6 @@ module.exports = function(url, category, zipcode) {
                             colorUrls[0] = url
                         }
                         callback(null, colorUrls)
-                    }, function(err) {
-                        if (err) {
-                            console.log(err)
-                        }
-
                     }).catch(function(err) {
                         console.log(err)
                         callback(err)
@@ -96,17 +92,27 @@ module.exports = function(url, category, zipcode) {
                                     }
                                 ],
                                 function(err) {
-                                    if (err) console.log(err)
+                                    if (err) {
+                                        var today = new Date().toString()
+                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n'+ err, function(err) {});
+                                    }
                                     finishedItem()
                                 }) //end of async waterfall processing item
                     }, function(err) {
-                        if (err) console.log(err)
+                        if (err) {
+                            var today = new Date().toString()
+                            fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n' + err, function(err) {});
+                        }
                         callback(null)
                     })
                 }
             ],
             function(err) {
-                if (err) reject(err)
+                if (err) {
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n' + err, function(err) {});
+                    return reject(err)
+                }
                 resolve()
             })
     })
@@ -283,7 +289,7 @@ function scrapeItem(url) {
 function getInventory(newItem, zipcode) {
     return new Promise(function(resolve, reject) {
         var radius = '100'; //max is 100 miles
-        console.log('Item: ',newItem.name, '. Zipcode: ', zipcode)
+        console.log('Item: ', newItem.name, '. Zipcode: ', zipcode)
             // 3073633
         var url = 'http://shop.nordstrom.com/es/GetStoreAvailability?styleid=' + newItem.styleId + '&type=Style&instoreavailability=true&radius=' + radius + '&postalcode=' + zipcode + '&format=json';
         var options = {
@@ -450,13 +456,13 @@ function saveItem(newItem, Stores) {
         var storeIds = Stores.map(function(store) {
             return store._id
         })
-        newStores = storeIds.map(function(id){
+        newStores = storeIds.map(function(id) {
             return id.toString();
         });
         var storeLocs = [];
         Stores.forEach(function(store) {
-            storeLocs.push(store.loc.coordinates)
-        })
+                storeLocs.push(store.loc.coordinates)
+            })
             //Check if item already exists
         db.Landmarks.findOne({
             'source_generic_item.styleId': newItem.styleId
@@ -501,9 +507,9 @@ function saveItem(newItem, Stores) {
 
             //If item exists in db, add new inventory values to the item (removed stocks will be updated in a later function)
             else if (i) {
-                console.log('Item exists: ',i.id)
+                console.log('Item exists: ', i.id)
                 if (i.parents) {
-                    oldStores = i.parents.map(function(id){
+                    oldStores = i.parents.map(function(id) {
                         return id.toString()
                     })
                 }

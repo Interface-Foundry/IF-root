@@ -8,13 +8,14 @@ var async = require('async');
 var uniquer = require('../../uniquer');
 var tagParser = require('../tagParser');
 var _ = require('lodash')
+var fs = require('fs')
 
 //Global var to hold fake user object
 owner = {}
 
-module.exports = function scrapeItem(url) {
-
-    //set global var to indicate category based on catalog url
+module.exports = function scrapeItem(url) { 
+    categoryName = url.split('/')[6]
+        //set global var to indicate category based on catalog url
     if (url.toString().trim().indexOf('/woman') > -1) {
         category = 'womens'
     } else if (url.toString().trim().indexOf('/trf') > -1) {
@@ -45,6 +46,10 @@ module.exports = function scrapeItem(url) {
                     loadFakeUser().then(function(items) {
                         callback(null)
                     }).catch(function(err) {
+                        if (err) {
+                            var today = new Date().toString()
+                            fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + err, function(err) {});
+                        }
                         callback(null)
                     })
                 },
@@ -97,10 +102,12 @@ module.exports = function scrapeItem(url) {
             ],
             function(err, item) {
                 if (err) {
-                    console.log(err)
-                    return reject(err)
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {
+                        console.log(err)
+                        return reject(err)
+                    });
                 }
-
                 resolve()
             });
     })
@@ -352,18 +359,18 @@ function processItems(inventory, itemData) {
                 return store.source_generic_store.storeId
             })
 
-            var updatedParents = itemData.parents.filter(function(store){
+            var updatedParents = itemData.parents.filter(function(store) {
                 return inventoryString.indexOf(store.source_generic_store.storeId) > -1
             })
 
-            var updatedParentMongoIds = updatedParents.map(function(store){
+            var updatedParentMongoIds = updatedParents.map(function(store) {
                 return store._id
             })
 
             var updatedLocs = [];
 
-            updatedParents.forEach(function(store){
-                 updatedLocs.push(store.loc.coordinates[0])
+            updatedParents.forEach(function(store) {
+                updatedLocs.push(store.loc.coordinates)
             })
 
             db.Landmarks.findOne({
@@ -441,8 +448,7 @@ function processItems(inventory, itemData) {
                                 }
 
                                 if (i.loc.coordinates.length < 1) {
-                                    console.log('Need to scrape more stores for this item:', i.id)
-                                    return reject('Need to scrape more stores for this item')
+                                    return reject('Item is out of stock in all stores in db:', i.id)
                                 }
                                 //Save item
                                 i.save(function(e, item) {
