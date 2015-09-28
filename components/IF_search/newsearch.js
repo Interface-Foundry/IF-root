@@ -107,28 +107,30 @@ app.post(searchItemsUrl, function(req, res, next) {
               debugger;
 
               results.map(function(r) {
-                var strparents = r.parents.map(function(_id) { return _id.toString()});
-                r.parents = parents.filter(function(p) {
-                  return strparents.indexOf(p._id.toString()) >= 0;
-                }).sort(function(a, b) {
-                  // sort by location
-                  var a_dist = geolib.getDistance({
-                    longitude: a.loc.coordinates[0],
-                    latitude: a.loc.coordinates[1]
-                  }, {
-                    longitude: req.body.loc.lon,
-                    latitude: req.body.loc.lat
+                if (r.parents && r.parents.length > 0) {
+                  var strparents = r.parents.map(function(_id) { return _id.toString()});
+                  r.parents = parents.filter(function(p) {
+                    return strparents.indexOf(p._id.toString()) >= 0;
+                  }).sort(function(a, b) {
+                    // sort by location
+                    var a_dist = geolib.getDistance({
+                      longitude: a.loc.coordinates[0],
+                      latitude: a.loc.coordinates[1]
+                    }, {
+                      longitude: req.body.loc.lon,
+                      latitude: req.body.loc.lat
+                    });
+                    var b_dist = geolib.getDistance({
+                      longitude: b.loc.coordinates[0],
+                      latitude: b.loc.coordinates[1]
+                    }, {
+                      longitude: req.body.loc.lon,
+                      latitude: req.body.loc.lat
+                    });
+                    return a_dist < b_dist;
                   });
-                  var b_dist = geolib.getDistance({
-                    longitude: b.loc.coordinates[0],
-                    latitude: b.loc.coordinates[1]
-                  }, {
-                    longitude: req.body.loc.lon,
-                    latitude: req.body.loc.lat
-                  });
-                  return a_dist < b_dist;
-                });
-                r.parent = r.parents[0];
+                  r.parent = r.parents[0];
+                }
               })
 
               responseBody.results = results;
@@ -346,7 +348,7 @@ function textSearch(q, page) {
           }, kip.err);
 
   }
-  
+
 /**
  * Search implementation for a query that does not have text
  * Just use mongodb
