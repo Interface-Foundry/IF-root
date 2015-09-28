@@ -3,10 +3,10 @@ var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
-var request = require('request')
-var item_scraper = require('./nordstrom_scraper')
+var request = require('request');
+var item_scraper = require('./nordstrom_scraper');
 var states = require('./states');
-var fs = require('fs')
+var fs = require('fs');
 
 //List of NEW-IN catalogs
 var womens = {
@@ -81,6 +81,8 @@ async.whilst(
                                 var today = new Date().toString()
                                 fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                             } else {
+                                var today = new Date().toString()
+                                fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs for: ', currentState)
                                 cb('Done with state.')
                             }
                         });
@@ -89,7 +91,7 @@ async.whilst(
                 function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('errors.log', '\n' + today + +'Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     stateIndex++;
                     if (states[stateIndex]) {
@@ -100,6 +102,7 @@ async.whilst(
                         console.log('Finished all states!')
                         stateIndex = 0;
                         currentState = states[stateIndex]
+                        fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs for all states!! ')
                         loop()
                     }
                 });

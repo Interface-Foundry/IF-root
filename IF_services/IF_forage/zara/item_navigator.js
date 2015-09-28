@@ -29,7 +29,10 @@ async.whilst(
         }, function(err) {
             if (err) {
                 var today = new Date().toString()
-                fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {});
+                fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err)
+            } else {
+                var today = new Date().toString()
+                fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs. ')
             }
             console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
             wait(loop, 2000000)

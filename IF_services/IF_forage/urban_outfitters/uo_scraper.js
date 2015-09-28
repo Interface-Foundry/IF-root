@@ -21,9 +21,7 @@ owner = {};
 module.exports = function(url, category) {
 
     return new Promise(function(resolve, reject) {
-
         cat = category;
-
         async.waterfall([
             function(callback) {
                 loadFakeUser().then(function() {

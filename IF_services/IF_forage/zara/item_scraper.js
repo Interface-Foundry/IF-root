@@ -1,3 +1,5 @@
+//TODO: Find out max number of stores for inventory check
+
 //NY stores
 // 3074,3818,3037,1260,3946,303,3036
 var request = require('request');
@@ -12,6 +14,10 @@ var fs = require('fs')
 
 //Global var to hold fake user object
 owner = {}
+//Count number of new items saved
+saveCount = 0;
+//TODO: Updatecount
+updateCount = 0;
 
 module.exports = function scrapeItem(url) { 
     categoryName = url.split('/')[6]
@@ -36,8 +42,6 @@ module.exports = function scrapeItem(url) { 
 
     //Flag if item exists
     exists = false;
-    //To account for multi-color items
-    multiColors = []
 
     return new Promise(function(resolve, reject) {
 
@@ -67,13 +71,20 @@ module.exports = function scrapeItem(url) { 
                     })
                 },
                 function(existingItem, callback) {
-                    if (!exists) {
+                    if (!exists || (exists && !existingItem.source_generic_item.tags)) {
+                        //This is the case in which item was previously scraped but without the tags pulled from description
+                        if (exists) {
+                           exists = !exists
+                           // console.log('Removing existing item to be updated.')
+                           //remove outdated item, this doesn't need to happen async
+                           db.Landmarks.remove({'id':existingItem.id})
+                        }
                         scrapeDetails(url).then(function(item) {
                             callback(null, item)
                         }).catch(function(err) {
                             callback(err)
                         })
-                    } else if (exists) {
+                    } else {
                         callback(null, existingItem)
                     }
                 },
@@ -174,7 +185,6 @@ function checkIfScraped(url) {
     })
 }
 
-
 function scrapeDetails(url) {
 
     return new Promise(function(resolve, reject) {
@@ -183,7 +193,9 @@ function scrapeDetails(url) {
             src: url,
             images: [],
             inventory: [],
-            color: ''
+            color: '',
+            description: '',
+            tags: []
         };
 
         var options = {
@@ -196,6 +208,15 @@ function scrapeDetails(url) {
             if ((!error) && (response.statusCode == 200)) {
 
                 $ = cheerio.load(body); //load HTML
+
+                //description
+                var description = $('p.description>span')
+                if (description && description.length > 0) {
+                    // console.log('DESCRIPTION!!', description[0].children[0].data)
+                    newItem.description = description[0].children[0].data
+                    var dtags = newItem.description.split(' ')
+                    newItem.tags = tagParser.parse(dtags)
+                }
 
                 //getting the item price, adding to object
                 if ($('span.price')) {
@@ -404,9 +425,8 @@ function processItems(inventory, itemData) {
             i.owner = owner;
             i.linkback = itemData.src;
             i.linkbackname = 'zara.com';
-            var tags = i.name.split(' ').map(function(word) {
-                return word.toString().toLowerCase()
-            })
+            var tags = i.name.split(' ')
+            tags = tags.concat(itemData.tags)
             tags.forEach(function(tag) {
                 i.itemTags.text.push(tag)
             })
@@ -422,7 +442,6 @@ function processItems(inventory, itemData) {
                     i.id = output;
                     //Update location property for item with location of each store found in inventory.
                     async.eachSeries(inventory, function(store, callback) {
-
                                 db.Landmarks.findOne({
                                     'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
@@ -455,7 +474,8 @@ function processItems(inventory, itemData) {
                                     if (e) {
                                         console.error(e);
                                     }
-                                    console.log('Saved! ', item.id)
+                                    console.log('Saved!', item.id)
+                                    saveCount++
                                     resolve(item)
                                 })
                             }) //end of async.eachSeries
