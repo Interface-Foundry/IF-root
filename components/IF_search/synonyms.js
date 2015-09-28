@@ -9,7 +9,7 @@ var TYPES = {
 /**
  * get the mapping of synonymcs from the spreadsheet
  */
-var data = module.exports.data = fs.readFileSync('./cinnamon-synonym trees - Expands to Include.tsv', 'utf8')
+var data = module.exports.data = fs.readFileSync(__dirname + '/cinnamon-synonym trees - Expands to Include.tsv', 'utf8')
   .split('\r\n')
   .slice(1)
   .map(function(row) {
@@ -24,7 +24,7 @@ var data = module.exports.data = fs.readFileSync('./cinnamon-synonym trees - Exp
   })
 
 // also read the compress sheet
-fs.readFileSync('./cinnamon-synonym trees - Contract-Compress into.tsv', 'utf8')
+fs.readFileSync(__dirname + '/cinnamon-synonym trees - Contract-Compress into.tsv', 'utf8')
   .split('\r\n')
   .slice(1)
   .map(function(row) {
