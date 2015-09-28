@@ -1,25 +1,47 @@
 var stopwords = require('./stopwords');
 var fs = require('fs');
 var natural = require('natural');
-
+var synonyms = require('./synonyms');
 
 /**
  * Takes a list of words, remomves the stop words, returns array
  * Some of the tokens may be multiple words if they match a multiple
  * token work in our fashion tag database
+ *
+ * if expand = true:
+ * Uses the synonym file to expand text so that matches get more hits
+ * /!\ warning /!\ could get unexpected results
+ *
+ * tokenize(string text, bool expand=true)
  */
 var tokenizer = new natural.WordTokenizer();
 var multiWordTokens = [];
-var tokenize = module.exports.tokenize = function(text) {
+var tokenize = module.exports.tokenize = function(text, expand) {
   // list of final tokens
   var tokens = [];
 
-  // first stem
+  //
+  // Stemming
+  // ex: womans bathing suit -> woman bath suit
+  //
   var tokenString = tokenizer.tokenize(text).map(function(t) {
-    return natural.PorterStemmer.stem(t.toLowerCase());
+    return natural.PorterStemmer.stem(t);
   }).join(' ');
 
-  // check for multi-word tokens
+  //
+  // Replace synonyms
+  // ex: woman bath suit -> women swimsuit
+  //
+  if (expand === true) {
+    tokenString = synonyms.compress(tokenString);
+  } else {
+    tokenString = synonyms.expand(tokenString);
+  }
+
+  //
+  // Tokenize
+  // ex: women mini skirt -> ['women', 'mini skirt']
+  //
   multiWordTokens.map(function(t) {
     if (tokenString.indexOf(t) >= 0) {
       // take out the multi-word token from the string.
@@ -32,11 +54,14 @@ var tokenize = module.exports.tokenize = function(text) {
 
   tokenString.split(' ').map(function(token) {
     if (stopwords.indexOf(token) === -1) {
-      tokens.push(natural.PorterStemmer.stem(token.toLowerCase()));
+      tokens.push(natural.PorterStemmer.stem(token));
     }
   })
+
   return tokens;
 }
+
+
 
 
 /**
