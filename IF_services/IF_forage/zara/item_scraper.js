@@ -1,4 +1,6 @@
-//TODO: Find out max number of stores for inventory check
+//TODO:
+//1. Double check catalog var names for errors, is it completing all of them 
+//2. Find out max number of stores for inventory check
 
 //NY stores
 // 3074,3818,3037,1260,3946,303,3036
@@ -14,7 +16,7 @@ var fs = require('fs')
 
 //Global var to hold fake user object
 owner = {}
-//Count number of new items saved
+//TODO: Count number of new items saved
 saveCount = 0;
 //TODO: Updatecount
 updateCount = 0;
@@ -52,7 +54,7 @@ module.exports = function scrapeItem(url) { 
                     }).catch(function(err) {
                         if (err) {
                             var today = new Date().toString()
-                            fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + err, function(err) {});
+                            fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
                         }
                         callback(null)
                     })
@@ -71,7 +73,7 @@ module.exports = function scrapeItem(url) { 
                     })
                 },
                 function(existingItem, callback) {
-                    if (!exists || (exists && !existingItem.source_generic_item.tags)) {
+                    if (!exists || (exists && existingItem.source_generic_item && !existingItem.source_generic_item.tags)) {
                         //This is the case in which item was previously scraped but without the tags pulled from description
                         if (exists) {
                            exists = !exists
@@ -103,7 +105,6 @@ module.exports = function scrapeItem(url) { 
                     })
                 },
                 function(item, inventory, callback) {
-                    // console.log(6)
                     processItems(inventory, item).then(function(item) {
                         callback(null, item)
                     }).catch(function(err) {
@@ -114,7 +115,7 @@ module.exports = function scrapeItem(url) { 
             function(err, item) {
                 if (err) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {
+                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
                         console.log(err)
                         return reject(err)
                     });

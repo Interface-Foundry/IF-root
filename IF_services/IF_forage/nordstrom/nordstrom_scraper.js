@@ -94,7 +94,7 @@ module.exports = function(url, category, zipcode) {
                                 function(err) {
                                     if (err) {
                                         var today = new Date().toString()
-                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n'+ err, function(err) {});
+                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n' + err, function(err) {});
                                     }
                                     finishedItem()
                                 }) //end of async waterfall processing item
@@ -216,7 +216,8 @@ function scrapeItem(url) {
         //construct newItem object
         var newItem = {
             src: url,
-            images: []
+            images: [],
+            tags: []
         };
 
         var options = {
@@ -229,6 +230,25 @@ function scrapeItem(url) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
+
+                // console.log('DESCRIPTION: ', $('ul.style-features>li')[0].children[0].data)
+
+                //Description
+                if ($('ul.style-features>li') && $('ul.style-features>li').length > 0) {
+                    var tempString = '';
+                    for (var key in $('ul.style-features>li')) {
+                        if ($('ul.style-features>li').hasOwnProperty(key)) {
+                            if ($('ul.style-features>li')[key].children && $('ul.style-features>li')[key].children[0]) {
+                                tempString = tempString.concat(' ' + $('ul.style-features>li')[key].children[0].data)
+                            }
+
+                        }
+                    }
+                    tempArray = tempString.split(' ')
+                    newItem.tags = tagParser.parse(tempArray);
+                    console.log('DESCRIPTION! ',newItem.tags )
+                }
+
                 //iterate on images found in HTML
                 $('img').each(function(i, elem) {
                     if (elem.attribs) {
@@ -298,7 +318,6 @@ function getInventory(newItem, zipcode) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
@@ -317,7 +336,6 @@ function getInventory(newItem, zipcode) {
                 }
             }
         })
-
     })
 }
 
@@ -468,23 +486,28 @@ function saveItem(newItem, Stores) {
             'source_generic_item.styleId': newItem.styleId
         }, function(err, i) {
             if (err) console.log(err)
-                //Create new item in db if it does not already exist
-            if (!i) {
+                //Create new item in db if it does not already exist OR if it was created without description tags
+            if (!i || (i && i.source_generic_item && !i.source_generic_item.tags)) {
+                //If item was previously scraped without the description tags, delete it
+                if (i && i.source_generic_item && !i.source_generic_item.tags) {
+                    db.Landmarks.remove({'id':i.id})
+                }
                 var item = new db.Landmarks();
                 item.source_generic_item = newItem;
                 item.source_generic_item.inventory = storeIds;
                 item.parents = storeIds;
                 item.price = parseFloat(newItem.price);
                 item.owner = owner;
-                item.name = item.source_generic_item.name
+                item.name = item.source_generic_item.name;
                 item.linkback = item.source_generic_item.src;
                 item.linkbackname = 'nordstrom.com';
                 item.itemImageURL = item.source_generic_item.images;
-                item.itemTags.text.push('nordstrom')
-                item.itemTags.text.push(cat)
-                var tags = item.name.split(' ').map(function(word) {
+                item.itemTags.text.push('nordstrom');
+                item.itemTags.text.push(cat);
+                var tags = newItem.name.split(' ').map(function(word) {
                     return word.toString().toLowerCase()
                 })
+                tags = tags.concat(newItem.tags)
                 tags.forEach(function(tag) {
                     item.itemTags.text.push(tag)
                 })
@@ -499,7 +522,7 @@ function saveItem(newItem, Stores) {
                         if (e) {
                             console.error(e);
                         }
-                        console.log('Saved item!', item.id)
+                        console.log('Saved item!', item.itemTags.text)
                         return resolve('Saved new item.')
                     })
                 })
@@ -513,7 +536,6 @@ function saveItem(newItem, Stores) {
                         return id.toString()
                     })
                 }
-
                 db.Landmarks.findOne({
                     '_id': i._id
                 }).update({
