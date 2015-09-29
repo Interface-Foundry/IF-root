@@ -238,7 +238,7 @@ var parse = module.exports.parse = function(terms) {
         combo.push(bucket.name);
       }
     })
-    if (!categorized) {
+    if (!categorized && t !== '') {
       bucketTerms.uncategorized.words.push(t);
       combo.push('uncategorized');
     }
