@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app="simpleSearchApp">
+<html lang="en">
 <!-- 
    _  __                ____   
   |"|/ /       ___    U|  _"\ u
@@ -78,25 +78,55 @@ U/| . \\u      | |     |  __/
     ga('create', 'UA-51752546-7', 'auto');
     ga('send', 'pageview');
 
+    
+      
   </script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+<!--    <script src="lib/angular.js"></script>-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-beta.0/angular-route.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-touch.js"></script>
+    
+  <script src="lib/script.js"></script>
+    
+    <script>
+
+        $script([
+            'lib/min/jquery.geocomplete.min.js',
+            'lib/angular-inview.js',
+            'lib/min/angular-smooth-scroll.min.js',    
+            'lib/min/holder.min.js',    
+            'lib/min/jquery.lazyload.min.js',    
+            'moment.min.js',
+            'angular-moment.min.js',
+            'angular-holderjs/src/holder.js',
+            'simpleSearch.js'
+            ], function () {
+                angular.bootstrap(document, ['simpleSearchApp']);
+            });
+        
+    </script>
+
+
+<!--
   <script src="lib/jquery.geocomplete.js"></script>
   <script src="lib/angular-inview.js"></script>
+    
   <script src="lib/angular-smooth-scroll.js"></script>
+  <script src="lib/min/angular-smooth-scroll.min.js"></script>
+  <script src="lib/min/holder.min.js"></script>
+  <script src="lib/min/jquery.lazyload.min.js"></script>
+  <script src="lib/min/jquery.geocomplete.min.js"></script>
   <script src="moment.min.js"></script>
   <script src="angular-moment.min.js"></script>
-  <script src="zepto.min.js"></script>
   <script src="angular-holderjs/src/holder.js"></script>
   <script src="holder.js"></script>
   <script src="jquery.lazyload.js"></script>
   <script src="simpleSearch.js"></script>
+-->
         
 </body>
 </html>
