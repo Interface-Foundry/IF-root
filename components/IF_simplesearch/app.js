@@ -8,7 +8,8 @@ var uuid = require('uuid');
 
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/static'));
-app.use(require('prerender-node').set('prerenderToken', 'G7ZgxSO9pLyeidrHtWgX'));
+// app.use(require('prerender-node').set('prerenderToken', 'G7ZgxSO9pLyeidrHtWgX'));
+app.use(require('prerender-node').set('prerenderServiceUrl', 'http://localhost:3000'));
 
 
 app.get('/*', function(req, res, next) {

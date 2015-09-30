@@ -60,6 +60,7 @@
     "passport-google-oauth": "~0.1.5",
     "passport-local": "~0.1.6",
     "passport-twitter": "~1.0.2",
+    "prerender-node": "^2.1.0",
     "q": "^1.4.1",
     "quickflow": "^1.0.0",
     "read-chunk": "^1.0.1",

@@ -26,11 +26,14 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
         templateUrl: 'partials/results.html',
         controller: 'HomeCtrl'
       })
+      .when('/t/:mongoId', {
+        templateUrl: 'partials/item.html',
+        controller: 'HomeCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
 
-  //  $locationProvider.html5Mode(true);
     $locationProvider.html5Mode({
       enabled: true,
       requireBase: false
@@ -394,6 +397,107 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         });
     }
     
+    $scope.searchOneItem = function(){
+
+        console.log('asdf');
+
+
+        $scope.mongoId = $scope.mongoId.replace(/[^\w\s]/gi, ''); //remove special char
+        $scope.mongoId = $scope.mongoId.replace(/\s+/g,' ').trim(); //remove extra spaces
+        
+        var encodeId = encodeURI($scope.mongoId);
+
+        $location.path('/t/'+ encodeId);
+        // if ($scope.newQuery) {
+        //     $scope.newQuery = false;
+        // }
+
+        $http.get('https://kipapp.co/styles/api/items/'+$scope.mongoId, {}).
+            then(function(response) {
+            
+                //location.path('/t/'+ encodeId);
+                //location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
+                //* * * * * * * * * * * * *
+                //if no results, re-query with US size radius
+                //* * * * * * * * * * * * * 
+
+               //  console.log(response.data.item);
+
+               // $scope.items = response.data.item ;
+                $scope.items = $scope.items.concat(response.data.item);
+
+                if ($scope.items.length < 1){
+                     $scope.noResults = true;
+                     console.log('no results');
+                }
+
+                console.log('data', response.data);
+
+                if ($scope.items && $scope.items.length){
+                    $scope.noResults = false;
+                    for (var i = 0; i < $scope.items.length; i++) {
+                        
+                        // normalize phone numbers
+                        if ($scope.items[i].parent.tel) {
+                            var tmpTel = $scope.items[i].parent.tel;
+                            tmpTel = tmpTel.replace(/[+-\s]/g, '');
+                            
+                            if (tmpTel.length === 11) {
+                                tmpTel = tmpTel.replace(/^1/g, '');   
+                            }
+                            
+                            $scope.items[i].parent.tel = tmpTel.slice(0,3) + '-' + tmpTel.slice(2,5) + '-' + tmpTel.slice(6);
+                            
+                        }
+                        //filter out usernames
+                        if ($scope.items[i].loc && !$scope.items[i].profileID){
+
+                            //make link for directions URL
+                            $scope.items[i].directionsURL = $scope.items[i].loc.coordinates[1] + ',' + $scope.items[i].loc.coordinates[0];
+
+                            //calculate distance btwn user and items
+                            var distance = calcDistance( //haversine
+                                $scope.items[i].loc.coordinates[1],$scope.items[i].loc.coordinates[0],userLat,userLng
+                                );
+                            $scope.items[i].distanceKM = roundFloat(distance,1); //distance in kilometers to 1 decimal
+                            //convert from km to miles
+                            var miles = distance * 1000; //km to m
+                            miles = miles * 0.000621371192; //meters to miles
+                            $scope.items[i].distanceMI = roundFloat(miles,1); //distance in miles
+                        }
+                        else {
+                            if (i > -1) { //remove users from results
+                                $scope.items.splice(i,1);
+                            }
+                        }
+
+                    }
+                }
+
+                $scope.showQueryBar = true;
+                $scope.windowHeight = $document[0].body.scrollHeight;
+
+                // $timeout(function() {
+                //     $("img.holderPlace").lazyload();
+                //     $scope.searchIndex++;
+                //     resultsContainer = $('div.resultsContainer');
+                //     resultsContainer = resultsContainer[0].clientHeight;
+                //     httpBool = false;
+                // }, 500);
+
+                $('#locInputTop').geocomplete({
+                    details: 'form',
+                    types: ['geocode']
+                }).bind("geocode:result", function(event, result) {
+                    $scope.userCity = result.formatted_address;
+                    $scope.newQuery = true;
+                });
+
+        }, function(response) {
+
+        });
+    }
+
     $scope.reportItem = function(status, item, index) {
         if (status === 'open') {
             $scope.showReportModal = index;    
@@ -419,13 +523,16 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     //* * * * * * * * *  * * * * * * * * * * * * * *
     //     RUN KIP
 
-    //this is a search from URL
-    if ($routeParams.query) {
+    if ($routeParams.query) { //process a search query //this is a search from URL
         $scope.query = decodeURI($routeParams.query);
         $scope.userCity = decodeURI($routeParams.cityName);
         userLat = $routeParams.lat;
         userLng = $routeParams.lng;
         $scope.searchItems();
+    }
+    else if ($routeParams.mongoId) { //process singleItem
+        $scope.mongoId = decodeURI($routeParams.mongoId);
+        $scope.searchOneItem();
     }
     else {
         //get location from IP
