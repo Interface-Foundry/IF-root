@@ -101,6 +101,8 @@ var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row) {
     // specially handle multi-word fashion database terms
     if (tokens.length > 1) {
       multiWordTokens.push(tokens.join(' '));
+      //multiWordTokens.push(tokens.join('-')); don't need this because of the tokenizer :)
+      multiWordTokens.push(tokens.join(''));
     }
     return tokens.join(' ');
   })
@@ -238,7 +240,7 @@ var parse = module.exports.parse = function(terms) {
         combo.push(bucket.name);
       }
     })
-    if (!categorized) {
+    if (!categorized && t !== '') {
       bucketTerms.uncategorized.words.push(t);
       combo.push('uncategorized');
     }

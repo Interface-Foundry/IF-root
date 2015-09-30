@@ -45,7 +45,8 @@ var esKipSchemaBase = {
         type: "date"
     },
     tags: {
-        type: 'string'
+        type: 'string',
+        index: 'not_analyzed'
     },
     miscText: {
         type: "string"
