@@ -58,6 +58,8 @@ async.whilst(
                             async.eachSeries(catalogs, function(catalog, callback) {
                                 loadCatalog(catalog, zipcode).then(function(res) {
                                     console.log('Done with catalog.')
+                                    var today = new Date().toString()
+                                    fs.appendFile('progress.log', '\n' + today + 'Finished Category: ' + catalog.category, function(err) {});
                                     wait(callback, 10000)
                                 }).catch(function(err) {
                                     if (err) {
@@ -102,8 +104,9 @@ async.whilst(
                         console.log('Finished all states!')
                         stateIndex = 0;
                         currentState = states[stateIndex]
-                        fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs for all states!! ')
-                        loop()
+                        fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs for all states!!*** ')
+                        // Turn off infinite loop, CRON job will handle it.
+                        // loop()
                     }
                 });
         })

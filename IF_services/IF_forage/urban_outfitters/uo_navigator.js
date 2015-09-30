@@ -11,23 +11,11 @@ var fs = require('fs')
 
 //List of NEW-IN catalogs
 var catalogs = [{
-    category: 'Dress',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_APP_DRESSES&cm_sp=WOMENS-_-L2-_-WOMENS:W_APP_DRESSES#/'
-}, {
-    category: 'Denim',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DENIM&cm_sp=WOMENS-_-L2-_-WOMENS:W-DENIM#/'
+    category: 'T-Shirt',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M-GRAPHICS&cm_sp=MENS-_-L2-_-MENS:M-GRAPHICS#/'
 }, {
     category: 'Top',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_TOPS&cm_sp=WOMENS-_-L2-_-WOMENS:W_TOPS#/'
-}, {
-    category: 'Jacket',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_OUTERWEAR&cm_sp=WOMENS-_-L2-_-WOMENS:W_OUTERWEAR#/'
-}, {
-    category: 'Bottom',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_BOTTOMS&cm_sp=WOMENS-_-L2-_-WOMENS:W_BOTTOMS#/'
-}, {
-    category: 'Underwear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_INTIMATES&cm_sp=WOMENS-_-L2-_-WOMENS:W_INTIMATES'
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_TOPS&cm_sp=MENS-_-L2-_-MENS:M_TOPS#/'
 }, {
     category: 'Activewear',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-WACTIVE&cm_sp=WOMENS-_-L2-_-WOMENS:UOWW-WACTIVE#/'
@@ -37,12 +25,6 @@ var catalogs = [{
 }, {
     category: 'Shoe',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_SHOES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_SHOES#/'
-}, {
-    category: 'T-Shirt',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M-GRAPHICS&cm_sp=MENS-_-L2-_-MENS:M-GRAPHICS#/'
-}, {
-    category: 'Top',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_TOPS&cm_sp=MENS-_-L2-_-MENS:M_TOPS#/'
 }, {
     category: 'Jacket',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_OUTERWEAR&cm_sp=MENS-_-L2-_-MENS:M_OUTERWEAR#/'
@@ -61,6 +43,24 @@ var catalogs = [{
 }, {
     category: 'Shoes',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=MENS_SHOES&cm_sp=MENS-_-L2-_-MENS:MENS_SHOES#/'
+}, {
+    category: 'Dress',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_APP_DRESSES&cm_sp=WOMENS-_-L2-_-WOMENS:W_APP_DRESSES#/'
+}, {
+    category: 'Denim',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DENIM&cm_sp=WOMENS-_-L2-_-WOMENS:W-DENIM#/'
+}, {
+    category: 'Top',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_TOPS&cm_sp=WOMENS-_-L2-_-WOMENS:W_TOPS#/'
+}, {
+    category: 'Jacket',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_OUTERWEAR&cm_sp=WOMENS-_-L2-_-WOMENS:W_OUTERWEAR#/'
+}, {
+    category: 'Bottom',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_BOTTOMS&cm_sp=WOMENS-_-L2-_-WOMENS:W_BOTTOMS#/'
+}, {
+    category: 'Underwear',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_INTIMATES&cm_sp=WOMENS-_-L2-_-WOMENS:W_INTIMATES'
 }]
 
 
@@ -72,6 +72,8 @@ async.whilst(
     function(loop) {
         async.eachSeries(catalogs, function(catalog, callback) {
             loadCatalog(catalog).then(function(res) {
+                var today = new Date().toString()
+                fs.appendFile('progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
                 console.log('Done with catalog.')
                 wait(callback, 10000)
             }).catch(function(err) {
@@ -88,10 +90,9 @@ async.whilst(
                 fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
             } else {
                 var today = new Date().toString()
-                fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs. ')
+                fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs***')
             }
-            console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
-            wait(loop, 2000000)
+            console.log('Finished scraping all catalogs for Urban Outfitters.')
         })
     },
     function(err) {
@@ -118,7 +119,7 @@ function loadCatalog(category) {
                     var detailsUrl = item.attribs.href;
                     detailsUrl = 'http://www.urbanoutfitters.com/urban/catalog/' + detailsUrl.toString().trim()
                     item_scraper(detailsUrl, category.category).then(function(result) {
-                        console.log('Done.**')
+                        // console.log('Done.**')
                         wait(callback, 3000)
                     }).catch(function(err) {
                         console.log(err)

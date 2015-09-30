@@ -246,7 +246,7 @@ function scrapeItem(url) {
                     }
                     tempArray = tempString.split(' ')
                     newItem.tags = tagParser.parse(tempArray);
-                    console.log('DESCRIPTION! ',newItem.tags )
+                    // console.log('DESCRIPTION! ',newItem.tags )
                 }
 
                 //iterate on images found in HTML

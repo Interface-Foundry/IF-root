@@ -108,6 +108,18 @@ function loadFakeUser() {
     })
 }
 
+//Utility function, will be used in the multi-nested DOM elements below
+function hasProp(obj, key) {
+    return key.split(".").every(function(x) {
+        if (typeof obj != "object" || obj === null || !x in obj)
+            return false;
+        obj = obj[x];
+        return true;
+    });
+}
+
+// if (has(user, 'loc.lat'))
+
 function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
         var newItems = []; //multiple colors for item == multiple items
@@ -139,10 +151,18 @@ function scrapeItem(url) {
                             physicalStores: [],
                             tags: []
                         }
+                        // 
                         //Set descriptions
-                    if ($('div.product-description')._root && $('div.product-description')._root['0'].children && $('div.product-description')._root['0'].children[1].children && $('div.product-description')._root['0'].children[1].children[0] && $('div.product-description')._root['0'].children[1].children[0].data) {
-                        newItems[i].tags = tagParser.parse(($('div.product-description')._root['0'].children[1].children[0].data +  $('div.product-description')._root['0'].children[1].children[0].next.next.next.children[0].parent.next.next.data).split(' '))
-                        console.log('DESC TAGS: ',newItems[i].tags)
+                    if ( $('div.product-description')._root && $('div.product-description')._root['0'].children && $('div.product-description')._root['0'].children[1].children && $('div.product-description')._root['0'].children[1].children[0] && $('div.product-description')._root['0'].children[1].children[0].data) {
+                        var materialStr = ''
+                       try {
+                            materialStr = $('div.product-description')._root['0'].children[1].children[0].next.next.next.children[0].parent.next.next.data;
+                        }
+                        catch(error) {
+
+                        }
+                        newItems[i].tags = tagParser.parse(($('div.product-description')._root['0'].children[1].children[0].data + materialStr ).split(' '))
+                        // console.log('DESC TAGS: ', newItems[i].tags)
                     }
 
                     if (body.product.skusInfo.length == i + 1) {
@@ -219,7 +239,7 @@ function cloneItems(newItems) {
                 if ((!error) && (response.statusCode == 200)) {
                     body = JSON.parse(body);
                     item.physicalStores = body.stores; //put store results in each item object
-
+                    // console.log('INV QUERY BODY: ', body)
                 } else {
                     if (error) {
                         console.log('getinventory error ')
@@ -264,9 +284,7 @@ function cloneItems(newItems) {
                     }
                     //CREATE NEW ITEM BY COLOR
                     else {
-
                         currentColorId = colorItemObjs[key][z].colorId; //update currentColorId with latest color in array
-
                         var newItem = { //create final items (there's a better way to do this with underscore =_=)
                             productId: colorItemObjs[key][z].productId,
                             name: colorItemObjs[key][z].name,
@@ -279,7 +297,6 @@ function cloneItems(newItems) {
                             physicalStores: [],
                             tags: colorItemObjs[key][z].tags
                         };
-
                         newItem.sizeIds.push({ //store the sizes for each product / color
                             skuId: colorItemObjs[key][z].skuId,
                             size: colorItemObjs[key][z].size,
@@ -291,7 +308,6 @@ function cloneItems(newItems) {
                                 newItem.physicalStores.push(colorItemObjs[key][z].physicalStores[x]);
                             }
                         }
-
                         //create new item
                         finalItems.push(newItem); //add final item by color (will contain all sizes and skuIDs per size)
                     }
@@ -333,7 +349,7 @@ function saveItems(items) {
                                 'linkbackname': 'urbanoutfitters.com'
                             }, function(err, s) {
                                 if (err) {
-                                    console.log(err)
+                                    console.log('359: ',err)
                                     return callback2()
                                 }
                                 if (!s) {
@@ -354,10 +370,10 @@ function saveItems(items) {
                         },
                         //End of getting store Ids
                         function(err) {
-                            if (err) console.log('355', err)
+                            if (err) console.log('380', err)
 
                             if (storeLocs.length < 1) {
-                                console.log('Item has no inventory, out of stock... skipping..', item)
+                                console.log('Inventory query yielded no "physicalStores" for this item:', item.name)
                                 return callback1()
                             }
 
@@ -368,7 +384,7 @@ function saveItems(items) {
                                 'linkbackname': 'urbanoutfitters.com'
                             }, function(err, match) {
                                 if (err) {
-                                    console.log(err)
+                                    console.log('394: ',err)
                                     return callback1()
                                 }
 
@@ -411,11 +427,11 @@ function saveItems(items) {
                                                 db.Landmarks.remove({
                                                     'id': match.id
                                                 }, function(err, res) {
-                                                    if (err) console.log('!!!', err)
+                                                    if (err) console.log('437', err)
                                                         //Save item
                                                     i.save(function(e, item) {
                                                         if (e) {
-                                                            console.error(e);
+                                                                console.log('441: ',e);
                                                         }
                                                         savedItems.push(item)
                                                         console.log('Saved: ', item.itemTags.text)
@@ -426,7 +442,7 @@ function saveItems(items) {
                                                 //Save item
                                                 i.save(function(e, item) {
                                                     if (e) {
-                                                        console.error(e);
+                                                        console.log('452: ',e);
                                                     }
                                                     savedItems.push(item)
                                                     console.log('Saved: ', item.itemTags.text)
@@ -462,7 +478,7 @@ function saveItems(items) {
 
             }, function(err) {
                 if (err) {
-                    // console.log('Error in saveItems: ',err)
+                    console.log('Error in saveItems: ',err)
                     return reject(err)
                 }
                 resolve(savedItems)
@@ -557,29 +573,6 @@ function saveStores(items) {
         })
     })
 }
-
-
-function updateInventory(inventory, newItem) {
-    return new Promise(function(resolve, reject) {
-        console.log('')
-        if (inventory.stocks && inventory.stocks.length > 0) {
-            inventory.stocks.forEach(function(stock) {
-                newItem.physicalStores.forEach(function(store) {
-                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
-                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
-                        // console.log('MATCH')
-                        store.inventory = stock.sizeStocks;
-                    }
-                })
-            })
-            resolve(newItem)
-        } else {
-            console.log('no inventory? ', inventory)
-            resolve(newItem)
-        }
-    })
-}
-
 
 function getParameterByName(name, url) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
