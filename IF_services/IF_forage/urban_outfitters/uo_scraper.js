@@ -18,9 +18,11 @@ owner = {};
 // skuId ---> need to iterate through all sku based on size (or what is the main URL sku??)
 
 
-module.exports = function(url, category) {
+module.exports = function(url, category, stores) {
 
     return new Promise(function(resolve, reject) {
+        //Create a global var to hold all mongo stores (for later location extraction)
+        stores = stores;
         cat = category;
         async.waterfall([
             function(callback) {
@@ -41,14 +43,14 @@ module.exports = function(url, category) {
             function(item, callback) {
                 cloneItems(item).then(function(items) {
                     // console.log(3)
-                    // console.log('Items: ', items[0].physicalStores[0])
+                        // console.log('Items: ', items[0].physicalStores[0])
                     callback(null, items)
                 }).catch(function(err) {
                     callback(err)
                 })
             },
             function(items, callback) {
-                saveItems(items).then(function(items) {
+                saveItems(items, stores).then(function(items) {
                     // console.log(4)
                     callback(null, items)
                 }).catch(function(err) {
@@ -59,11 +61,11 @@ module.exports = function(url, category) {
             if (err) {
                 var today = new Date().toString()
                 fs.appendFile('errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
-                    console.log('Error 62: ',err)
+                    console.log('Error 62: ', err)
                     return reject(err)
                 });
             }
-            console.log('finished scraping item!!', items.length)
+            console.log('finished scraping. saved item count: ', items.length)
             resolve()
 
         });
@@ -101,7 +103,7 @@ function loadFakeUser() {
                     })
                 }
                 if (e) {
-                    console.log('Could not load user: ',e)
+                    console.log('Could not load user: ', e)
                     reject(e)
                 }
             })
@@ -153,16 +155,15 @@ function scrapeItem(url) {
                         }
                         // 
                         //Set descriptions
-                    if ( $('div.product-description')._root && $('div.product-description')._root['0'].children && $('div.product-description')._root['0'].children[1].children && $('div.product-description')._root['0'].children[1].children[0] && $('div.product-description')._root['0'].children[1].children[0].data) {
+                    if ($('div.product-description')._root && $('div.product-description')._root['0'].children && $('div.product-description')._root['0'].children[1].children && $('div.product-description')._root['0'].children[1].children[0] && $('div.product-description')._root['0'].children[1].children[0].data) {
                         var materialStr = ''
-                       try {
+                        try {
                             materialStr = $('div.product-description')._root['0'].children[1].children[0].next.next.next.children[0].parent.next.next.data;
-                        }
-                        catch(error) {
+                        } catch (error) {
 
                         }
-                        newItems[i].tags = tagParser.parse(($('div.product-description')._root['0'].children[1].children[0].data + materialStr ).split(' '))
-                        // console.log('DESC TAGS: ', newItems[i].tags)
+                        newItems[i].tags = tagParser.parse(($('div.product-description')._root['0'].children[1].children[0].data + materialStr).split(' '))
+                            // console.log('DESC TAGS: ', newItems[i].tags)
                     }
 
                     if (body.product.skusInfo.length == i + 1) {
@@ -335,150 +336,150 @@ function cloneItems(newItems) {
     });
 }
 
-function saveItems(items) {
-    // console.log('!!!!!',items[0].tags)
+function saveItems(items, stores) {
     return new Promise(function(resolve, reject) {
         var savedItems = []
         async.eachSeries(items, function(item, callback1) {
-                var storeIds = []
-                var storeLocs = []
-                console.log('Pulling up stores from db...')
-                async.eachSeries(item.physicalStores, function(store, callback2) {
-                            db.Landmarks.findOne({
-                                'source_generic_store.storeId': store.storeId,
-                                'linkbackname': 'urbanoutfitters.com'
-                            }, function(err, s) {
-                                if (err) {
-                                    console.log('359: ',err)
-                                    return callback2()
-                                }
-                                if (!s) {
-                                    console.log('.')
-                                        //The parent store doesn't exist in db, skip this item for now.
-                                        // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
-                                    console.log('missing store, try running store_scraper again... ', store.storeId)
-                                    return callback2()
-                                }
-                                //Check if the store with storeId exists in db
-                                else if (s) {
-                                    console.log('.')
-                                    storeIds.push(s._id);
-                                    storeLocs.push(s.loc.coordinates)
-                                    return callback2()
-                                }
-                            })
-                        },
-                        //End of getting store Ids
-                        function(err) {
-                            if (err) console.log('380', err)
+                    //Map-out storeIds out of array to use in URL query below.
+                var allStoreIds = stores.map(function(obj) {
+                    return obj.source_generic_store.storeId
+                })
+                var newStoreIds = item.physicalStores.map(function(obj) {
+                    return obj.storeId
+                })
+                var storeIds = [];
+                allStoreIds.forEach(function(aid) {
+                    newStoreIds.forEach(function(nid) {
+                        if (aid.trim() == nid.trim()) {
+                            // console.log('match! : ', nid)
+                            storeIds.push(nid)
+                        }
+                    })
+                })
+                var mongoIds = [];
+                stores.forEach(function(store) {
+                    storeIds.forEach(function(storeId) {
+                        if (store.source_generic_store.storeId.trim() == storeId.trim()) {
+                            mongoIds.push(store._id)
+                        }
+                    })
+                })
+                var storeLocs = [];
+                stores.forEach(function(store) {
+                        var idx = _.indexOf(storeIds, store.source_generic_store.storeId)
+                        if (idx > -1) {
+                            // console.log('matched!')
+                            storeLocs.push(store.loc.coordinates);
+                        }
+                    })
+                    //----
 
-                            if (storeLocs.length < 1) {
-                                console.log('Inventory query yielded no "physicalStores" for this item:', item.name)
-                                return callback1()
-                            }
+                // console.log('storeIds: ', mongoIds, '\nstoreLocs: ', storeLocs)
+                if (storeLocs.length < 1 || storeLocs.length !== storeIds.length) {
+                    console.log('Inventory query yielded no "physicalStores"', item.physicalStores)
+                    return callback1()
+                }
 
-                            //Check if this item exists
-                            db.Landmarks.findOne({
-                                'source_generic_item.skuId': item.skuId,
-                                'source_generic_item.productId': item.productId,
-                                'linkbackname': 'urbanoutfitters.com'
-                            }, function(err, match) {
-                                if (err) {
-                                    console.log('394: ',err)
-                                    return callback1()
-                                }
+                //Check if this item exists
+                db.Landmarks.findOne({
+                    'source_generic_item.skuId': item.skuId,
+                    'source_generic_item.productId': item.productId,
+                    'linkbackname': 'urbanoutfitters.com'
+                }, function(err, match) {
+                    if (err) {
+                        console.log('394: ', err)
+                        return callback1()
+                    }
 
-                                // console.log('!!! match: ', match)
-
-                                if (!match || (match && match.source_generic_item && !match.source_generic_item.tags)) {
-                                    //Create new item for each store in inventory list.
-                                    var i = new db.Landmark();
-                                    i.parents = storeIds
-                                    i.loc.coordinates = storeLocs
-                                    i.world = false;
-                                    i.source_generic_item = item;
-                                    delete i.source_generic_item.physicalStores;
-                                    i.price = parseFloat(item.price);
-                                    i.itemImageURL = item.images;
-                                    i.name = item.name;
-                                    i.owner = owner;
-                                    i.linkback = item.src;
-                                    i.linkbackname = 'urbanoutfitters.com';
-                                    var tags = i.name.split(' ').map(function(word) {
-                                        return word.toString().toLowerCase()
-                                    })
-                                    tags = tags.concat(item.tags)
-                                    tags.forEach(function(tag) {
-                                        i.itemTags.text.push(tag)
-                                    })
-                                    i.itemTags.text.push('Urban Outfitters')
-                                    i.itemTags.text.push(item.color)
-                                    i.itemTags.text = tagParser.parse(i.itemTags.text)
-                                    if (tagParser.colorize(item.color)) {
-                                        i.itemTags.colors.push(tagParser.colorize(item.color))
-                                    }
-                                    i.itemTags.text.push(cat)
-                                    i.hasloc = true;
-                                    i.loc.type = 'MultiPoint';
-                                    uniquer.uniqueId(i.name + i.source_generic_item.skuId, 'Landmark').then(function(output) {
-                                            i.id = output;
-                                            //If item was previously scraped without the description tags, delete it
-                                            if ((match && !match.source_generic_item.tags)) {
-                                                db.Landmarks.remove({
-                                                    'id': match.id
-                                                }, function(err, res) {
-                                                    if (err) console.log('437', err)
-                                                        //Save item
-                                                    i.save(function(e, item) {
-                                                        if (e) {
-                                                                console.log('441: ',e);
-                                                        }
-                                                        savedItems.push(item)
-                                                        console.log('Saved: ', item.itemTags.text)
-                                                        return callback1();
-                                                    })
-                                                })
-                                            } else {
-                                                //Save item
-                                                i.save(function(e, item) {
-                                                    if (e) {
-                                                        console.log('452: ',e);
-                                                    }
-                                                    savedItems.push(item)
-                                                    console.log('Saved: ', item.itemTags.text)
-                                                    return callback1();
-                                                })
+                    if (!match || (match && match.source_generic_item && !match.source_generic_item.tags)) {
+                        //Create new item for each store in inventory list.
+                        // console.log('Scenario 1')
+                        var i = new db.Landmark();
+                        i.parents = mongoIds
+                        i.loc.coordinates = storeLocs
+                        i.world = false;
+                        i.source_generic_item = item;
+                        delete i.source_generic_item.physicalStores;
+                        i.price = parseFloat(item.price);
+                        i.itemImageURL = item.images;
+                        i.name = item.name;
+                        i.owner = owner;
+                        i.linkback = item.src;
+                        i.linkbackname = 'urbanoutfitters.com';
+                        var tags = i.name.split(' ').map(function(word) {
+                            return word.toString().toLowerCase()
+                        })
+                        tags = tags.concat(item.tags)
+                        tags.forEach(function(tag) {
+                            i.itemTags.text.push(tag)
+                        })
+                        i.itemTags.text.push('Urban Outfitters')
+                        i.itemTags.text.push(item.color)
+                        try {
+                            i.itemTags.text = tagParser.parse(i.itemTags.text)
+                        } catch (err) {
+                            console.log('tagParser error: ', err)
+                        }
+                        i.itemTags.text.push(cat)
+                        i.hasloc = true;
+                        i.loc.type = 'MultiPoint';
+                        uniquer.uniqueId(i.name + i.source_generic_item.skuId, 'Landmark').then(function(output) {
+                                i.id = output;
+                                //If item was previously scraped without the description tags, delete the old one then save the new one
+                                if ((match && !match.source_generic_item.tags)) {
+                                    db.Landmarks.remove({
+                                        'id': match.id
+                                    }, function(err, res) {
+                                        if (err) console.log('437', err)
+                                            //Save item
+                                        i.save(function(e, item) {
+                                            if (e) {
+                                                console.log('441: ', e);
                                             }
-                                        }) //end of uniquer
-
-                                } else if (match) {
-                                    // console.log('Item exists, updating inventory...');
-
-                                    db.Landmarks.findOne({
-                                        '_id': match._id,
-                                        'linkbackname': 'urbanoutfitters.com'
-                                    }).update({
-                                        $set: {
-                                            'parents': storeIds,
-                                            'loc.coordinates': storeLocs
-                                        }
-                                    }, function(e, result) {
-                                        if (e) {
-                                            console.log('Inventory update error: ', e)
-                                        }
-                                        console.log('Updated inventory for item.'.result)
-                                        callback1()
+                                            savedItems.push(item)
+                                            console.log('Saved: ', item.id)
+                                            return callback1();
+                                        })
                                     })
 
+                                } else {
+                                    //Otherwise just save the new one
+                                    i.save(function(e, item) {
+                                        if (e) {
+                                            console.log('452: ', e);
+                                        }
+                                        savedItems.push(item)
+                                        console.log('Saved: ', item.id)
+                                        return callback1();
+                                    })
                                 }
-                            })
+                            }) //end of uniquer
 
+                    } else if (match) {
+                            // console.log('Scenario 2')
 
-                        }) //end of inner series
+                        db.Landmarks.findOne({
+                            '_id': match._id,
+                            'linkbackname': 'urbanoutfitters.com'
+                        }).update({
+                            $set: {
+                                'parents': mongoIds,
+                                'loc.coordinates': storeLocs
+                            }
+                        }, function(e, result) {
+                            if (e) {
+                                console.log('Inventory update error: ', e)
+                            }
+                            console.log('Updated inventory for item.',result)
+                            callback1()
+                        })
+
+                    }
+                })
 
             }, function(err) {
                 if (err) {
-                    console.log('Error in saveItems: ',err)
+                    console.log('Error in saveItems: ', err)
                     return reject(err)
                 }
                 resolve(savedItems)
@@ -486,8 +487,6 @@ function saveItems(items) {
 
     })
 }
-
-
 
 function checkIfScraped(url) {
     // first check if we have already scraped this thing
@@ -508,69 +507,6 @@ function checkIfScraped(url) {
                     resolve(url)
                 }
             })
-    })
-}
-
-
-
-
-function saveStores(items) {
-    return new Promise(function(resolve, reject) {
-        var storeIds = []
-        var count = 0
-        async.each(items, function(item, callback) {
-            var store = item.physicalStores[count]
-
-            db.Landmarks
-                .findOne({
-                    'source_generic_store.storeId': store.storeId,
-                    'linkbackname': 'urbanoutfitters.com'
-                })
-                .exec(function(e, s) {
-                    if (e) {
-                        //error
-                        console.log('Error in saveStores(): ', e)
-                        item.physicalStores[count].mongoId = 'null'
-                        count++;
-                        callback()
-                    }
-                    if (!s) {
-                        var n = new db.Landmark();
-                        n.source_zara_store = store;
-                        n.world = true;
-                        n.hasloc = true;
-                        console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
-                        n.loc.coordinates[0] = parseFloat(store.lng);
-                        n.loc.coordinates[1] = parseFloat(store.lat);
-                        uniquer.uniqueId('urban outfitters ' + store.storeAddress, 'Landmark').then(function(output) {
-                            n.id = output;
-                            n.save(function(e, newStore) {
-                                if (e) {
-                                    // console.error(e);
-                                    return callback()
-                                }
-                                item.physicalStores[count].mongoId = newStore._id
-                                count++;
-                                callback()
-                            })
-                        })
-                    } else if (s) {
-                        item.physicalStores[count].mongoId = s._id
-                        count++;
-                        callback()
-                    }
-                })
-        }, function(err) {
-            if (err) {
-                // console.log('Error in saveStores()',err)
-                return reject(err)
-            }
-            item.physicalStores = item.physicalStores.filter(function(val, i) {
-                    return val !== 'null'
-                })
-                // console.log('-_- Updated item: ', item)
-            resolve(item)
-        })
     })
 }
 

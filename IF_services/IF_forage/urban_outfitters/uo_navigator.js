@@ -11,26 +11,44 @@ var fs = require('fs')
 
 //List of NEW-IN catalogs
 var catalogs = [{
-    category: 'T-Shirt',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M-GRAPHICS&cm_sp=MENS-_-L2-_-MENS:M-GRAPHICS#/'
+    category: 'Dress',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_APP_DRESSES&cm_sp=WOMENS-_-L2-_-WOMENS:W_APP_DRESSES#/'
 }, {
     category: 'Top',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_TOPS&cm_sp=MENS-_-L2-_-MENS:M_TOPS#/'
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_TOPS&cm_sp=WOMENS-_-L2-_-WOMENS:W_TOPS#/'
 }, {
-    category: 'Activewear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-WACTIVE&cm_sp=WOMENS-_-L2-_-WOMENS:UOWW-WACTIVE#/'
+    category: 'Jacket',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_OUTERWEAR&cm_sp=WOMENS-_-L2-_-WOMENS:W_OUTERWEAR#/'
 }, {
-    category: 'Accessory',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_ACCESSORIES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_ACCESSORIES'
+    category: 'Bottom',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_BOTTOMS&cm_sp=WOMENS-_-L2-_-WOMENS:W_BOTTOMS#/'
+}, {
+    category: 'Denim',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DENIM&cm_sp=WOMENS-_-L2-_-WOMENS:W-DENIM#/'
 }, {
     category: 'Shoe',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_SHOES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_SHOES#/'
+}, {
+    category: 'Top',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_TOPS&cm_sp=MENS-_-L2-_-MENS:M_TOPS#/'
 }, {
     category: 'Jacket',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_OUTERWEAR&cm_sp=MENS-_-L2-_-MENS:M_OUTERWEAR#/'
 }, {
     category: 'Bottom',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_BOTTOMS&cm_sp=MENS-_-L2-_-MENS:M_BOTTOMS#/'
+}, {
+    category: 'T-Shirt',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M-GRAPHICS&cm_sp=MENS-_-L2-_-MENS:M-GRAPHICS#/'
+}, {
+    category: 'Activewear',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-WACTIVE&cm_sp=WOMENS-_-L2-_-WOMENS:UOWW-WACTIVE#/'
+}, {
+    category: 'Underwear',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_INTIMATES&cm_sp=WOMENS-_-L2-_-WOMENS:W_INTIMATES'
+}, {
+    category: 'Accessory',
+    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_ACCESSORIES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_ACCESSORIES'
 }, {
     category: 'Activewear',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-MACTIVE&cm_sp=MENS-_-L2-_-MENS:UOWW-MACTIVE#/'
@@ -43,24 +61,6 @@ var catalogs = [{
 }, {
     category: 'Shoes',
     url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=MENS_SHOES&cm_sp=MENS-_-L2-_-MENS:MENS_SHOES#/'
-}, {
-    category: 'Dress',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_APP_DRESSES&cm_sp=WOMENS-_-L2-_-WOMENS:W_APP_DRESSES#/'
-}, {
-    category: 'Denim',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DENIM&cm_sp=WOMENS-_-L2-_-WOMENS:W-DENIM#/'
-}, {
-    category: 'Top',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_TOPS&cm_sp=WOMENS-_-L2-_-WOMENS:W_TOPS#/'
-}, {
-    category: 'Jacket',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_OUTERWEAR&cm_sp=WOMENS-_-L2-_-WOMENS:W_OUTERWEAR#/'
-}, {
-    category: 'Bottom',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_BOTTOMS&cm_sp=WOMENS-_-L2-_-WOMENS:W_BOTTOMS#/'
-}, {
-    category: 'Underwear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_INTIMATES&cm_sp=WOMENS-_-L2-_-WOMENS:W_INTIMATES'
 }]
 
 
@@ -70,36 +70,75 @@ async.whilst(
         return true
     },
     function(loop) {
-        async.eachSeries(catalogs, function(catalog, callback) {
-            loadCatalog(catalog).then(function(res) {
-                var today = new Date().toString()
-                fs.appendFile('progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
-                console.log('Done with catalog.')
-                wait(callback, 10000)
-            }).catch(function(err) {
+
+        loadStores().then(function(stores) {
+
+
+            async.eachSeries(catalogs, function(catalog, callback) {
+                loadCatalog(catalog, stores).then(function(res) {
+                    var today = new Date().toString()
+                    fs.appendFile('progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
+                    console.log('Done with catalog.')
+                    wait(callback, 10000)
+                }).catch(function(err) {
+                    if (err) {
+                        var today = new Date().toString()
+                        fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                    }
+                    console.log('Error with catalog: ', catalog.category)
+                    wait(callback, 10000)
+                })
+            }, function(err) {
                 if (err) {
                     var today = new Date().toString()
                     fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                } else {
+                    var today = new Date().toString()
+                    fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
-                console.log('Error with catalog: ', catalog.category)
-                wait(callback, 10000)
+                console.log('Finished scraping all catalogs for Urban Outfitters.')
             })
-        }, function(err) {
+
+
+        }).catch(function(err) {
             if (err) {
-                var today = new Date().toString()
-                fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
-            } else {
-                var today = new Date().toString()
-                fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs***')
+                console.log('Error loading stores: ', err)
             }
-            console.log('Finished scraping all catalogs for Urban Outfitters.')
         })
+
+
     },
     function(err) {
-
+        if (err) console.log('Navigator loop error: ', err)
     })
 
-function loadCatalog(category) {
+
+function loadStores() {
+    return new Promise(function(resolve, reject) {
+        db.Landmarks.find({
+            'source_generic_store': {
+                $exists: true
+            },
+            'linkbackname': 'urbanoutfitters.com'
+        }, function(e, stores) {
+            if (e) {
+                console.log(e)
+                reject(e)
+            }
+            if (!stores) {
+                reject('No stores in db.')
+            }
+            if (stores) {
+                resolve(stores)
+            }
+        })
+    })
+}
+
+
+
+
+function loadCatalog(category, stores) {
     return new Promise(function(resolve, reject) {
         var options = {
             url: category.url,
@@ -118,15 +157,15 @@ function loadCatalog(category) {
                     }
                     var detailsUrl = item.attribs.href;
                     detailsUrl = 'http://www.urbanoutfitters.com/urban/catalog/' + detailsUrl.toString().trim()
-                    item_scraper(detailsUrl, category.category).then(function(result) {
+                    item_scraper(detailsUrl, category.category, stores).then(function(result) {
                         // console.log('Done.**')
                         wait(callback, 3000)
                     }).catch(function(err) {
-                        console.log('Item scraper error: ',err)
+                        console.log('Item scraper error: ', err)
                         wait(callback, 3000)
                     })
                 }, function(err) {
-                    if (err) console.log('async error, nav 129: ',err)
+                    if (err) console.log('async error, nav 129: ', err)
                     console.log('Done scraping catalog!')
                     resolve()
                 })
