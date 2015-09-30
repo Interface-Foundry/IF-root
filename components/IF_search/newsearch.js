@@ -104,7 +104,6 @@ app.post(searchItemsUrl, function(req, res, next) {
               _id: {$in: allParents}
             }, function(e, parents) {
               if (e) { return next(e); }
-              debugger;
 
               results.map(function(r) {
                 if (r.parents && r.parents.length > 0) {
@@ -135,17 +134,17 @@ app.post(searchItemsUrl, function(req, res, next) {
 
               responseBody.results = results;
               res.send(responseBody);
-            })
 
-            // (new db.Analytics({
-            //   anonId: req.anonId,
-            //   userId: req.userId,
-            //   action: 'search',
-            //   data: {
-            //     query: req.body,
-            //     resultCount: results.length
-            //   }
-            // })).save();
+              (new db.Analytics({
+                anonId: req.anonId,
+                userId: req.userId,
+                action: 'search',
+                data: {
+                  query: req.body,
+                  resultCount: results.length
+                }
+              })).save();
+            })
         }, next)
 });
 
