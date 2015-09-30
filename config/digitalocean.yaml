@@ -1,0 +1,15 @@
+env: production
+isProduction: true
+mongodb:
+  url: mongodb://flareon.kipapp.co/foundry,jankeon.kipapp.co/foundry,vaporeon.kipapp.co/foundry
+  backuphost: jankeon.kipapp.co
+  options:
+    replset:
+      rs_name: foundry
+elasticsearch:
+  url: http://elasticsearch-cerulean.kipapp.co:9200
+elasticsearchElk:
+  url: http://elasticsearch-cerulean.kipapp.co:9200
+redis:
+  port: 6379
+  url: redis-thunder.kipapp.co
