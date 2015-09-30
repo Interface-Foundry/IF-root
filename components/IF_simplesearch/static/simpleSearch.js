@@ -1,5 +1,28 @@
 var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMoment','ngRoute', 'angular-inview', 'smoothScroll'])
-
+.filter('httpsURL', function() {
+    
+    return function(input) {
+        if (input.indexOf('https') > -1) {
+            //do nothing
+        } else {
+            var regex = /http/gi;
+            input = input.replace(regex, 'https');
+        }
+        return input;
+    }
+})
+.filter('deCapslock', function() {
+    return function(input) {
+        input = input.toLowerCase();
+        var reg = /\s((a[lkzr])|(c[aot])|(d[ec])|(fl)|(ga)|(hi)|(i[dlna])|(k[sy])|(la)|(m[edainsot])|(n[evhjmycd])|(o[hkr])|(pa)|(ri)|(s[cd])|(t[nx])|(ut)|(v[ta])|(w[aviy]))$/;
+        var state = input.match(reg);
+        if (state !== null) {
+            state = state[0].toUpperCase();
+            input = input.replace(reg, state);
+        }
+        return input;
+    }
+})
 .factory('location', [
     '$location',
     '$route',
@@ -37,9 +60,6 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
     });
   });
 
-
-
-
 simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
@@ -53,6 +73,9 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     var historyCity;
     var resultsContainer;
     var httpBool = false;
+    var xDown = null;
+    var yDown = null;
+    var swipeActive = false;
 
     $scope.showGPS = true;
     $scope.searchIndex = 0;
@@ -61,11 +84,19 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
     $scope.expandedIndex = null;
     $scope.isExpanded = false;
     $scope.outerWidth = $(window)[0].outerWidth;
+    $scope.outerHeight = $(window)[0].outerHeight;
+    $scope.mobileModalHeight;
     $scope.mobileFooterPos;
     $scope.mobileScreen = false;
     $scope.mobileScreenIndex;
     $scope.showReportModal = null;
     $scope.report = {};
+    $scope.mobileImgIndex = 0;
+    $scope.mobileImgCnt = 0;
+    
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        $scope.mobileScreen = true;
+    }
 
     $rootScope.$on('$locationChangeState', function(event) {
         event.preventDefault();
@@ -80,14 +111,8 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         $scope.query = '';   
     }
 
-    if ($scope.outerWidth < 651) {
-        $scope.mobileScreen = true;
-    }
-
     $scope.sayHello = function() {
-        if (!httpBool) {
-                $scope.searchQuery();
-        }
+        if (!httpBool) {$scope.searchQuery();}
     }
 
     $scope.closeMobileWrapper = function(index) {
@@ -100,16 +125,44 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             $scope.mobileScreenIndex = null;
         }
     }
+    
+    $scope.chooseImage = function(index) {
+        $scope.mobileImgIndex = index;   
+    }
 
-    $scope.expandContent = function(index, event) {
+    $scope.expandContent = function(index, event, imgCnt) {
         if ($scope.mobileScreen) {
-//            $scope.mobileScreenIndex = index;
-//            var el = $('.expandMobileWrapper.mWrapper'+index);
-//            console.log('mobview', el);
-//            el.css({
-//                'width': ''+$scope.outerWidth+'px',
-//                'height': '100%'
-//            });
+            
+            if (event === 'close') {
+                $scope.mobileScreenIndex = null;   
+                $('body').removeClass('modalOpen');
+                $('html').removeClass('modalOpen');
+                $('div.container-fluid').removeClass('modalOpen');
+                $(window).off();
+                $(window).off();
+                $scope.mobileImgIndex = 0;
+                $scope.mobileModalHeight = 0;
+            } else {
+            
+                $timeout(function() {
+                    $scope.mobileModalHeight = $('#expandedModal'+index)[0].clientHeight + ((imgCnt - 1) * 40);
+                    var thumbs = $('#thumbContainer'+index);
+                    thumbs.css({
+                        'bottom' : $scope.mobileModalHeight
+                    });
+                }, 100);
+                $scope.mobileScreenIndex = index;
+                $('body').addClass('modalOpen');
+                $('html').addClass('modalOpen');
+                $('div.container-fluid').addClass('modalOpen');
+                $(window).on('touchstart', function(event) {
+    //                console.log('start', event.originalEvent.targetTouches[0].clientX);
+                    xDown = event.originalEvent.targetTouches[0].clientX;
+                    yDown = event.originalEvent.targetTouches[0].clientY;
+                });
+            
+            }
+            
         } else {
             if ($scope.expandedIndex === index) {
                 $scope.expandedIndex = null;
@@ -122,8 +175,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
             } else {
                 $('.row'+index).addClass('expand');
                 $scope.expandedIndex = index;
-            }
-            
+            }   
         }
         
     }
@@ -146,26 +198,6 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 'background-image': "url("+imgIndex+")"
             });
         }
-    }
-
-    $scope.swipeImage = function(direction, parIndex, item, imgIndex) {
-        var newIndex;
-        if (direction == "left") {
-            if (imgIndex < item.itemImageURL.length - 1) {
-                newIndex = imgIndex++;
-            } else {
-                newIndex = 0;
-            }
-        } else if (direction == "right") {
-            if (imgIndex !== 0) {
-                newIndex = imgIndex--;
-            } else {
-                newIndex = item.itemImageURL.length - 1;
-            }
-        }
-        $('.mobileImg'+parIndex).css({
-            'background-image': "url("+item.itemImageURL[newIndex]+")"
-        });
     }
 
     $('#locInput').geocomplete({
@@ -242,6 +274,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         if (type === 'button') {
             $scope.items = [];
             $scope.searchIndex = 0;
+            $('input').blur();
         }
 
         httpBool = true;
@@ -304,6 +337,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
         
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
         if ($scope.newQuery) {
+            
             $scope.newQuery = false;
         }
 
@@ -319,7 +353,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                 //* * * * * * * * * * * * *
                 //if no results, re-query with US size radius
                 //* * * * * * * * * * * * *
-
+            
                 $scope.items = $scope.items.concat(response.data.results);
 
                 if ($scope.items.length < 1){
@@ -333,6 +367,19 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                     $scope.noResults = false;
                     for (var i = 0; i < $scope.items.length; i++) {
                         
+                        //remove user objects
+                        if (!$scope.items[i].owner) {
+                            $scope.items.splice(i, 1);
+                        }
+                        
+                        // if num of images is greater than 6, remove imgs from middle of array
+                        if ($scope.items[i].itemImageURL.length > 6) {
+                            var counter = $scope.items[i].itemImageURL.length - 6;
+                            var imageArray = $scope.items[i].itemImageURL;
+                                var midIndex = imageArray.length / 2;
+                                imageArray = imageArray.splice(midIndex, 2);
+                        }
+                        
                         // normalize phone numbers
                         if ($scope.items[i].parent.tel) {
                             var tmpTel = $scope.items[i].parent.tel;
@@ -341,9 +388,7 @@ simpleSearchApp.controller('HomeCtrl', function ($scope, $http, $location, $docu
                             if (tmpTel.length === 11) {
                                 tmpTel = tmpTel.replace(/^1/g, '');   
                             }
-                            
                             $scope.items[i].parent.tel = tmpTel.slice(0,3) + '-' + tmpTel.slice(2,5) + '-' + tmpTel.slice(6);
-                            
                         }
                         //filter out usernames
                         if ($scope.items[i].loc && !$scope.items[i].profileID){

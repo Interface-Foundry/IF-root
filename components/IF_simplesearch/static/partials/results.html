@@ -36,47 +36,98 @@
 
         <div class="kip-card contentRow row{{$index}}" ng-show="items" ng-repeat="item in items track by $index">
 
-        <div class="collapsedContent">
-            <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
-            <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
-                <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>
-                <img class="holderPlace" data-original="{{::item.itemImageURL[0]}}">
-                <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
+            <div class="collapsedContent">
+                <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
+                <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
+                    <span class="scrollActivate" ng-if="mobileScreen" ng-click="expandContent($index, $event, item.itemImageURL.length)"></span>
+                    <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>
+                    <img class="holderPlace" src="{{::item.itemImageURL[0] | httpsURL}}">
+                    <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
+                </div>
+
+                <div class="col-md-8 descripWrapper">
+                    <span class="item-description updated-time" am-time-ago="item.updated_time" ></span>
+                    <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price | number : 0}} - </span> {{::item.name | deCapslock}}</a></h3>
+
+                    <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{::item.parent.name}} - {{::item.distanceMI}} miles <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
+
+        <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
+         -->
+                    <div class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressString">{{::item.parent.addressString | deCapslock}}</div>
+                    <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{::item.parent.tel}}</p>
+
+                    <div class="mobileButtonWrapper" id="anchor{{::$index}}">
+                        <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default bigMobile" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
+                          <span class="kiplevels-map-outline mapIcon"></span>
+                        Map to {{::item.parent.name}}</a>
+                        <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}">Buy online</a>
+                        <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
+                    <!--
+                    <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+                    <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
+                     -->
+                    </div>
+
+                </div>
+
             </div>
-
-            <div class="col-md-8 descripWrapper">
-                <span class="item-description updated-time" am-time-ago="item.updated_time" ></span>
-                <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price}} - </span> {{::item.name}}</a></h3>
-
-                <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{::item.parent.name}} - {{::item.distanceMI}} miles <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
-
-    <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
-     -->
-                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.addressString">{{::item.parent.addressString}}</p>
-                <p class="item-description" style="margin-bottom:1rem !important;" class="card-text" ng-show="item.parent.tel">{{::item.parent.tel}}</p>
-
-                <div class="mobileButtonWrapper" id="anchor{{::$index}}">
-                    <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default bigMobile" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
-                      <span class="kiplevels-map-outline mapIcon"></span>
-                    Map to {{::item.parent.name}}</a>
-                    <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}">Buy online</a>
-                    <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
-                <!--
-                <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
-                <h1 class="kipFont kip-energized" ng-show="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
-                 -->
+            
+            <div ng-if="mobileScreenIndex == $index" class="expandedMobileModalWrapper">
+                <div class="mobileModalImageSwipe">
+                    <div class="mobileModalTopHeader">
+                        <span class="mobileModal PriceTop">${{::item.price | number : 0}}</span>
+                        <span ng-click="expandContent($index, 'close');" class="modalClose glyphicon glyphicon-remove">
+                            
+                        
+                        </span>
+                    </div>
+                    <div class="mobileModalImageContainer" style="text-align: center;" ng-repeat="pic in item.itemImageURL track by $index">
+                        <img ng-style="{'max-height': '70vh'}" ng-show="mobileImgIndex == $index" src="{{::pic | httpsURL}}">
+                    </div>
+                    
+<!--
+                    <div ng-if="outerHeight > 480" class="swipeDotsContainer">
+                        <span class="imageSwipeDots" ng-repeat="pics in item.itemImageURL track by $index"
+                              ng-class="{'modal-focused' : mobileImgIndex == $index }"
+                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-click="chooseImage($index)"></span>
+                    </div>
+-->
+                   
+                </div>
+                
+                <div class="expandedMobileModal Details" id="expandedModal{{$index}}">
+                    <div class="mobileModal Name">{{::item.name | deCapslock}}</div>
+                     <div class="swipeDotsContainer Short" id="thumbContainer{{$index}}">
+                        <span class="imageSwipeDotsShort" ng-repeat="pics in item.itemImageURL track by $index"
+                              ng-class="{'modal-focusedShort' : mobileImgIndex == $index }"
+                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-click="chooseImage($index)"></span>
+                    </div>
+                    <div class="mobileModal DetailsTop">
+                        <div class="mobileModal Address Parent" style="font-weight: bold">{{::item.parent.name}}</div>
+                        <div class="mobileModal Time" am-time-ago="item.updated_time"></div>
+                    </div>
+                    
+                    <div class="mobileModal Address"> {{::item.parent.addressString | deCapslock}}</div>
+                    <div class="mobileModal Tel">{{::item.parent.tel}}</div>
+                    
+                    <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default modalButton Map" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
+                          <span class="kiplevels-map-outline mapIcon"></span>
+                        Map to {{::item.parent.name}} - {{::item.distanceMI}} miles</a>
+                        <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default modalButton Left" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}"
+                           ng-class="{'is-full' : !item.parent.tel }">Buy online</a>
+                        <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default  modalButton Right" style="color:grey; !important; border-radius:2px;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
                 </div>
 
             </div>
 
-        </div>
-
-        <div ng-if="expandedIndex !== null" class="expandTopWrapper">
+        <div ng-if="expandedIndex == $index" class="expandTopWrapper">
                 <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
-                <div class="expandedImageWrapper">
-                    <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>
+                <div height class="expandedImageWrapper">
+                    <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] | httpsURL}})'}"></div>
                     <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index]}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] | httpsURL}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
                     </div>
                 </div>
 
@@ -95,36 +146,35 @@
                 </div>
                 <br>
                 <div class="expandedButtonsWrapper">
-                    <a class="btn btn-default expandedButtons" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">Map to {{::item.parent.name}}</a>
+                    <a class="btn btn-default expandedButtons" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}"><span class="kiplevels-map-outline mapIcon"></span>Map to {{::item.parent.name}}</a>
                     <a ng-hide="{{!item.linkback}}" class="btn btn-default expandedButtons" ng-href="{{::item.linkback}}">Buy online</a></p>
                     <span ng-show="mobileScreen"><a ng-hide="{{!item.parent.tel}}" class="btn btn-default expandedButtons" href="tel: {{::item.parent.tel}}">Call</a></span>
                 </div>
 
                 <p ng-show="item.linkbackname" style="color:#ccc;">From {{::item.linkbackname}}</p>
-                
-
-            </div>
-
-<!--
-        <div ng-if="mobileScreen" class="expandMobileWrapper mWrapper{{$index}}">
-            <div ng-show="mobileScreenIndex == $index" class="mobileContentWrapper">
-                <div ng-click="closeMobileWrapper($index)" class="closeExpand glyphicon glyphicon-remove"></div>
-
-                <div class="mobileImageWrapper">
-
-
-                    <div class="expandedMobileImage mobileImg{{$index}}" ng-style="{'background-image': 'url({{item.itemImageURL[0]}})'}">
-
-
+                <div class="reportItem">Item inaccurate? <a ng-click="reportItem('open', item, $index);" class="reportItem">Send feedback</a></div>
+                <div ng-if="showReportModal == $index" class="modalOverlay">
+                    <div class="modalReport">
+                        <div ng-click="reportItem('close');" class="reportClose glyphicon glyphicon-remove"></div>
+                        <div>Feedback for {{::item.name}}</div>
+                        <form name="reportForm" ng-submit="reportItem('submit', item)">
+                            <input class="reportComment" ng-model="report.comment" placeholder="Comment">
+                            
+                            <select name="reasonSelect" class="reportReason" ng-model="report.reason">
+                                <option value="">Reason</option>
+                                <option value="option 1">Option 1</option>
+                                <option value="option 2">Option 2</option>
+                                <option value="option 3">Option 3</option>
+                            </select>
+                            <button type="submit" ng-click="reportItem('submit', item);" class="btn btn-default submitReport">
+                                <span ng-show="showReportModal == $index">Submit</span>
+                            </button>
+                            
+                        </form>
                     </div>
-                    <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{item.itemImageURL[$index]}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
-                    </div>
-                    <div class="expandedDescripWrapper">{{item.description}}</div>
                 </div>
+            
             </div>
-        </div>
--->
 
         </div>
 </div>
