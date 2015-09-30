@@ -74,22 +74,8 @@ var scrape = module.exports = function(url){
             });
         }
 
-        var filename = __dirname + url.replace(/.*shoptiques.com\//, '/');
-        if (fs.existsSync(filename)) {
-            fs.readFile(filename, {encoding: 'utf8'}, function(err, data) {
-                if (err) { return console.error(err); }
-                scrapeBody(data);
-            });
-        } else {
-            request(url, function(e, r, b) {
-                fs.writeFile(filename, b, {encoding: 'utf8'}, function(err) {
-                    if (err) { return console.error(err); }
-                    console.log('saved', filename);
-                });
-                scrapeBody(b);
-            });
-        }
+        request(url, function(e, r, b) {
+            scrapeBody(b);
+        });
     });
 };
-
-

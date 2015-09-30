@@ -10,6 +10,7 @@ var filename = require.main ? require.main.filename.split('/').pop() : 'debug';
 console.log('logging data to elasticsearch "logstash-node/' + filename + '"');
 
 var getStackInfo = function() {
+  // todo fix this shit, it broke in different versions of node.
     var stack = traceback();
 
     var s = stack[2];
@@ -34,7 +35,6 @@ module.exports.log = function(data) {
     data["@timestamp"] = new Date();
     data.version = "1";
     data.hostname = hostname;
-    data.stack = getStackInfo();
 
     // only log to elasticsearch if we can
     if (config.elasticsearchElk) {

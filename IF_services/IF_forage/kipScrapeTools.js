@@ -1,3 +1,4 @@
+require('vvv');
 /**
  * A collection of tools to help us scrape sites easier
  */
@@ -73,4 +74,43 @@ var load = module.exports.load = function(url, callback) {
         addPlugins($);
         callback($);
     })
+}
+
+/**
+ * slowLoad is like load but it only does one url at a time and very slowly
+ */
+var slowLoadQueue = [];
+var running = false;
+var slowLoad = module.exports.slowLoad = function(url, callback) {
+  log.v('queueing', url);
+  slowLoadQueue.push({
+    url: url,
+    callback: callback
+  });
+  log.vv(slowLoadQueue);
+  startProcessing();
+}
+
+var startProcessing = function() {
+  if (!running) {
+    run();
+  }
+}
+
+var run = function() {
+  running = true;
+  if (slowLoadQueue.length === 0) {
+    running = false;
+    return;
+  }
+
+  var job = slowLoadQueue.splice(0, 1)[0];
+
+  console.log('processing', job.url);
+  load(job.url, function($) {
+    job.callback($);
+    setTimeout(function() {
+      run();
+    }, 1000)
+  })
 }

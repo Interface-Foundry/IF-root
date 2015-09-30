@@ -33,6 +33,10 @@ var landmarkSchema = new Schema({
         name: String
     },
     valid: Boolean, //are all req. items inputted
+    hidden: {
+      type: Boolean,
+      index: true
+    },
     status: String, //'draft' 'archived' 'public'
     avatar: String,
     hasLoc: Boolean,
@@ -67,7 +71,7 @@ var landmarkSchema = new Schema({
     type: String, //event, place
     subType: {
         type: [String]
-    }, // type of event/place   
+    }, // type of event/place
     category: { //only for landmarks (world:false)
         name: {
             type: String
@@ -267,6 +271,18 @@ var landmarkSchema = new Schema({
     source_shoptiques_store: {},
     source_generic_item: {},
     source_generic_store: {},
+    source_justvisual: {
+        images: [{
+          type: String,
+          ref: 'JustVisual'
+        }], // list of _ids for images
+        keywords: [String] // list of keywords from search
+    },
+    source_cloudsight: {
+      name: String,
+      categories: [String] // warning /!\ often not present /!\
+    },
+
     widgets: {
         twitter: Boolean,
         instagram: Boolean,
@@ -341,7 +357,9 @@ var landmarkSchema = new Schema({
             itemDetail: String,
             itemFabric: String,
             colors: [] // array of hsl values (so array of vectors)
-        }
+        },
+        classifierTags: [String],
+        classifiedCategory: String
     },
     flags: {
         humanProcessed: Boolean,
@@ -353,7 +371,13 @@ var landmarkSchema = new Schema({
         mustProcessImages: {
             type: Boolean,
             default: true
-        }
+        },
+        justVisualProcessed: Boolean,
+        cloudsightProcessed: Boolean,
+        mustRunClassifiers: Boolean,
+        classifierFirstPassDone: Boolean,
+        classifierCategoryDone: Boolean,
+        needsGooglePlace: Boolean
     }
 
 

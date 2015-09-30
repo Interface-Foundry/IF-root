@@ -1,3 +1,7 @@
+//TODO:
+//1. Double check catalog var names for errors, is it completing all of them 
+//2. Find out max number of stores for inventory check
+
 //NY stores
 // 3074,3818,3037,1260,3946,303,3036
 var request = require('request');
@@ -8,13 +12,18 @@ var async = require('async');
 var uniquer = require('../../uniquer');
 var tagParser = require('../tagParser');
 var _ = require('lodash')
+var fs = require('fs')
 
 //Global var to hold fake user object
 owner = {}
+//TODO: Count number of new items saved
+saveCount = 0;
+//TODO: Updatecount
+updateCount = 0;
 
-module.exports = function scrapeItem(url) {
-
-    //set global var to indicate category based on catalog url
+module.exports = function scrapeItem(url) { 
+    categoryName = url.split('/')[6]
+        //set global var to indicate category based on catalog url
     if (url.toString().trim().indexOf('/woman') > -1) {
         category = 'womens'
     } else if (url.toString().trim().indexOf('/trf') > -1) {
@@ -35,8 +44,6 @@ module.exports = function scrapeItem(url) {
 
     //Flag if item exists
     exists = false;
-    //To account for multi-color items
-    multiColors = []
 
     return new Promise(function(resolve, reject) {
 
@@ -45,6 +52,10 @@ module.exports = function scrapeItem(url) {
                     loadFakeUser().then(function(items) {
                         callback(null)
                     }).catch(function(err) {
+                        if (err) {
+                            var today = new Date().toString()
+                            fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
+                        }
                         callback(null)
                     })
                 },
@@ -62,13 +73,20 @@ module.exports = function scrapeItem(url) {
                     })
                 },
                 function(existingItem, callback) {
-                    if (!exists) {
+                    if (!exists || (exists && existingItem.source_generic_item && !existingItem.source_generic_item.tags)) {
+                        //This is the case in which item was previously scraped but without the tags pulled from description
+                        if (exists) {
+                           exists = !exists
+                           // console.log('Removing existing item to be updated.')
+                           //remove outdated item, this doesn't need to happen async
+                           db.Landmarks.remove({'id':existingItem.id})
+                        }
                         scrapeDetails(url).then(function(item) {
                             callback(null, item)
                         }).catch(function(err) {
                             callback(err)
                         })
-                    } else if (exists) {
+                    } else {
                         callback(null, existingItem)
                     }
                 },
@@ -87,7 +105,6 @@ module.exports = function scrapeItem(url) {
                     })
                 },
                 function(item, inventory, callback) {
-                    // console.log(6)
                     processItems(inventory, item).then(function(item) {
                         callback(null, item)
                     }).catch(function(err) {
@@ -97,10 +114,12 @@ module.exports = function scrapeItem(url) {
             ],
             function(err, item) {
                 if (err) {
-                    console.log(err)
-                    return reject(err)
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
+                        console.log(err)
+                        return reject(err)
+                    });
                 }
-
                 resolve()
             });
     })
@@ -167,7 +186,6 @@ function checkIfScraped(url) {
     })
 }
 
-
 function scrapeDetails(url) {
 
     return new Promise(function(resolve, reject) {
@@ -176,7 +194,9 @@ function scrapeDetails(url) {
             src: url,
             images: [],
             inventory: [],
-            color: ''
+            color: '',
+            description: '',
+            tags: []
         };
 
         var options = {
@@ -189,6 +209,15 @@ function scrapeDetails(url) {
             if ((!error) && (response.statusCode == 200)) {
 
                 $ = cheerio.load(body); //load HTML
+
+                //description
+                var description = $('p.description>span')
+                if (description && description.length > 0) {
+                    // console.log('DESCRIPTION!!', description[0].children[0].data)
+                    newItem.description = description[0].children[0].data
+                    var dtags = newItem.description.split(' ')
+                    newItem.tags = tagParser.parse(dtags)
+                }
 
                 //getting the item price, adding to object
                 if ($('span.price')) {
@@ -352,18 +381,18 @@ function processItems(inventory, itemData) {
                 return store.source_generic_store.storeId
             })
 
-            var updatedParents = itemData.parents.filter(function(store){
+            var updatedParents = itemData.parents.filter(function(store) {
                 return inventoryString.indexOf(store.source_generic_store.storeId) > -1
             })
 
-            var updatedParentMongoIds = updatedParents.map(function(store){
+            var updatedParentMongoIds = updatedParents.map(function(store) {
                 return store._id
             })
 
             var updatedLocs = [];
 
-            updatedParents.forEach(function(store){
-                 updatedLocs.push(store.loc.coordinates[0])
+            updatedParents.forEach(function(store) {
+                updatedLocs.push(store.loc.coordinates)
             })
 
             db.Landmarks.findOne({
@@ -397,9 +426,8 @@ function processItems(inventory, itemData) {
             i.owner = owner;
             i.linkback = itemData.src;
             i.linkbackname = 'zara.com';
-            var tags = i.name.split(' ').map(function(word) {
-                return word.toString().toLowerCase()
-            })
+            var tags = i.name.split(' ')
+            tags = tags.concat(itemData.tags)
             tags.forEach(function(tag) {
                 i.itemTags.text.push(tag)
             })
@@ -415,7 +443,6 @@ function processItems(inventory, itemData) {
                     i.id = output;
                     //Update location property for item with location of each store found in inventory.
                     async.eachSeries(inventory, function(store, callback) {
-
                                 db.Landmarks.findOne({
                                     'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
@@ -430,7 +457,7 @@ function processItems(inventory, itemData) {
                                     } else if (s) {
                                         // console.log('Found store coords: ',s.loc)
                                         i.parents.push(s._id)
-                                        i.loc.coordinates.push(s.loc.coordinates[0])
+                                        i.loc.coordinates.push(s.loc.coordinates)
                                         callback()
                                     }
                                 })
@@ -441,15 +468,15 @@ function processItems(inventory, itemData) {
                                 }
 
                                 if (i.loc.coordinates.length < 1) {
-                                    console.log('Need to scrape more stores for this item:', i.id)
-                                    return reject('Need to scrape more stores for this item')
+                                    return reject('Item is out of stock in all stores in db:', i.id)
                                 }
                                 //Save item
                                 i.save(function(e, item) {
                                     if (e) {
                                         console.error(e);
                                     }
-                                    console.log('Saved! ', item.id)
+                                    console.log('Saved!', item.id)
+                                    saveCount++
                                     resolve(item)
                                 })
                             }) //end of async.eachSeries

@@ -35,7 +35,9 @@ module.exports = function(loc, name, address) {
 
                 // resolve with the first good one
                 var place = body.results.reduce(function(p, o) {
-                    if (p) { return p; }
+                    if (p) {
+                      return p;
+                    }
 
                     if (o.name && o.place_id) {
                         return o;
@@ -43,7 +45,12 @@ module.exports = function(loc, name, address) {
                 });
 
                 if (place) {
-                    resolve(place);
+                  var url = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=$PLACE_ID&key=$KEY'
+                    .replace('$KEY', key)
+                    .replace('$PLACE_ID', place.place_id);
+                  return request.get(url, {json: true}, function (e, r, body) {
+                    resolve(body);
+                  })
                 }
             }
             reject({message: 'no place found', query: {loc: loc, name: name, addres: address}, failePlaces: body, url: url});

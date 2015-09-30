@@ -275,7 +275,8 @@ function saveStores(stores) {
                         n.tel = store.storePhone1
                         n.linkback = 'http://www.zara.com';
                         n.linkbackname = 'zara.com'
-                        n.loc.coordinates.push([parseFloat(store.lng),parseFloat(store.lat)]) 
+                        n.loc.type = 'Point'
+                        n.loc.coordinates = [parseFloat(store.lng),parseFloat(store.lat)] 
                         n.name = 'Zara ' + store.storeAddress
                         uniquer.uniqueId('zara ' + store.storeAddress, 'Landmark').then(function(output) {
                             n.id = output;

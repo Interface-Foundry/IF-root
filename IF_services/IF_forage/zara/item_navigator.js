@@ -6,6 +6,7 @@ var uniquer = require('../../uniquer');
 var request = require('request')
 var item_scraper = require('./item_scraper')
 var catalogs = require('./catalogs')
+var fs = require('fs')
 
 //This will loop forever through each of the catalogs 
 async.whilst(
@@ -18,21 +19,34 @@ async.whilst(
                 console.log('Done with catalog.')
                 wait(callback, 10000)
             }).catch(function(err) {
-                console.log('Error with catalog: ', catalog)
+                if (err) {
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {});
+                    console.log('Error with catalog: ', catalog, err)
+                }
                 wait(callback, 10000)
             })
         }, function(err) {
+            if (err) {
+                var today = new Date().toString()
+                fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err)
+            } else {
+                var today = new Date().toString()
+                fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs. ')
+            }
             console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
             wait(loop, 2000000)
         })
     },
     function(err) {
-
+        if (err) {
+            var today = new Date().toString()
+            fs.appendFile('errors.log', '\n' + today + err, function(err) {});
+        }
     })
 
 function loadCatalog(url) {
     return new Promise(function(resolve, reject) {
-
         var options = {
             url: url,
             headers: {
@@ -65,7 +79,8 @@ function loadCatalog(url) {
 
             } else {
                 if (error) {
-                    console.log('error: ', error)
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + categoryName + '\n' + error, function(err) {});
                     reject(error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode)

@@ -26,18 +26,21 @@ router.post('/', function(req, res, next) {
     }
     //If no place was found for this item, create a new place.
     if (req.body.place_id) {
+        console.log(1)
         //If this is a user created place
         if (req.body.place_id == 'custom_location') {
             var newPlace = new db.Landmark();
             newPlace.name = req.body.parent.name;
             newPlace.world = true;
             newPlace.hasloc = true;
+            newPlace.loc.type = 'Point';
             //Might implement these properties in the future
             // newPlace.addressString = '';
             // newPlace.tel = '';
             newPlace.linkback = 'custom';
             newPlace.linkbackname = 'custom';
-            newPlace.loc.coordinates.push(req.body.parent.coordinates)
+            console.log('req.body.parent.coordinates: ', req.body.parent.coordinates )
+            newPlace.loc.coordinates = req.body.parent.coordinates
             uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
                 newPlace.id = output;
                 newPlace.save(function(e, newStore) {
@@ -45,12 +48,15 @@ router.post('/', function(req, res, next) {
                         return next('Error saving new place')
                     }
                     // console.log('Created new custom place: ', newStore)
-                    createItem(req, res, newStore)
+                    createItem(req, res, newStore, next)
                 })
             })
 
 
         } else {
+                console.log(2)
+var copybody = req.body
+//console.log('req.body: -->', copybody)
             //First check if it really doesn't exist in the db yet
             db.Landmarks.findOne({
                 'source_google.place_id': req.body.place_id
@@ -61,20 +67,23 @@ router.post('/', function(req, res, next) {
                 }
                 if (place) {
                     console.log('Place already exists..')
-                    return createItem(req, res, place)
+                    return createItem(req, res, place, next)
                 } else {
+                    //TODO: Front-end needs to send coordinates in req.body.parent.coordinates
                     var newPlace = new db.Landmark();
                     newPlace.world = true;
                     newPlace.hasloc = true;
+newPlace.loc.type = 'Point'
                     newPlace.source_google.place_id = req.body.place_id;
                     addGoogleDetails(newPlace, req.body.place_id).then(function(newPlace) {
                         uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
                             newPlace.id = output;
-                            newPlace.save(function(err, saved) {
+console.log('!!!!!!!!!!!',newPlace)                           
+ newPlace.save(function(err, saved) {
                                 if (err) {
                                     return next('Error saving new place')
                                 }
-                                createItem(req, res, newPlace)
+                                createItem(req, res, newPlace, next)
                             })
                         })
                     })
@@ -87,21 +96,24 @@ router.post('/', function(req, res, next) {
 
         //If place was found
     } else {
-          // console.log(3)
-        if (req.body.parent._id) {
-            db.Landmarks.findById(req.body.parent._id, function(err, parent) {
+          console.log(3)
+         // console.log('req.body:', req.body)
+        if (req.body.parent.mongoId) {
+            console.log(4)
+            db.Landmarks.findById(req.body.parent.mongoId, function(err, parent) {
                 if (err) {
                     err.niceMessage = 'Error checking for existing place.';
                     return next(err);
                 }
                 if (parent && parent.source_google.place_id) {
-                    return createItem(req, res, parent)
+                    return createItem(req, res, parent, next)
                 } else {
                     err.niceMessage = 'That store does not exist.';
                     return next(err);
                 }
             })
         } else {
+                  console.log(5)
             err.niceMessage = 'You must choose a store.';
             return next(err);
         }
@@ -109,11 +121,15 @@ router.post('/', function(req, res, next) {
 });
 
 
-function createItem(req, res, newPlace) {
+function createItem(req, res, newPlace, next) {
     var newItem = new db.Landmark();
-    newItem = _.extend(newItem, req.body);
-    newItem.loc.coordinates.push(newPlace.loc.coordinates[0])
+    newItem.price = req.body.price;
+    newItem.itemTags = req.body.itemTags;
+    newItem.base64 = req.body.base64
+    newItem.hasloc = true;
+    newItem.loc.type = 'MultiPoint'
     if (newPlace) {
+        newItem.loc.coordinates.push(newPlace.loc.coordinates)
         newItem.parents.push(newPlace)
     }
     if (newItem.parent.name) {
@@ -126,8 +142,9 @@ function createItem(req, res, newPlace) {
     //Create a unique id field
     uniquer.uniqueId(newItem.owner.profileID, 'Landmarks').then(function(unique) {
         newItem.id = unique;
+        console.log('base64: ',req.body.base64)
         // //Upload each image in snap to Amazon S3
-        async.eachSeries(newItem.base64, function(buffer, callback) {
+        async.eachSeries(req.body.base64, function(buffer, callback) {
             upload.uploadPicture(newItem.owner.profileID, buffer).then(function(imgURL) {
                 newItem.itemImageURL.push(imgURL)
                 callback(null)
@@ -149,7 +166,7 @@ function createItem(req, res, newPlace) {
                     return next(err);
                 }
                 //Finally send the item
-                // console.log('Saved new item!', item)
+                console.log('Saved new item!', item.id)
                 res.send(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {

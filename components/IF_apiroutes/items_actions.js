@@ -30,7 +30,12 @@ app.use('/:mongoId/:action', function(req, res, next) {
         }
 
         req.item = item;
-        req.ownsItem = item.owner.mongoId === req.user._id.toString();
+
+        if (req.user) {
+          req.ownsItem = item.owner.mongoId === req.user._id.toString();
+        } else {
+          req.ownsItem = false;
+        }
 
         // create an activity object for this action, only save it to the db in each route, though
         req.activity = new db.Activity({
@@ -41,11 +46,11 @@ app.use('/:mongoId/:action', function(req, res, next) {
             data: {},
             publicVisible: true,
             privateVisible: true,
-            seenBy: [req.user._id.toString()]
+            seenBy: req.user ? [req.user._id.toString()] : []
         });
 
         if (req.user && req.userId) {
-            req.activity.userIds.push(req.user._id.toString());
+            req.activity.userIds.push(req.userId);
         }
 
         if (req.item.owner && req.item.owner.mongoId) {
@@ -146,7 +151,7 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
 //   categories: [],
 //   text: []
 //  }
-//note: cloudsight will pull color 
+//note: cloudsight will pull color
 //which will be auto-matched on backend to nearest color available
 app.post('/:mongoId/tag', function(req, res, next) {
     if (!req.ownsItem) {
@@ -463,10 +468,6 @@ app.post('/:mongoId/deletesnap', function(req, res) {
 });
 
 app.post('/:mongoId/report', function(req, res, next) {
-    if (USE_MOCK_DATA) {
-        return res.send(defaultResponse);
-    }
-
     if (!req.item.reports) {
         req.item.reports = [req.body];
     } else {
