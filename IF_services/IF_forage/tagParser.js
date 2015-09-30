@@ -819,6 +819,11 @@ String.prototype.removeStopWords = function() {
     words = cleansed_string.match(/[^\s]+|\s+[^\s+]$/g)
 
     // Review all the words
+    
+    if (!words || words == null || words == undefined) {
+        return ''
+    }
+
     for (x = 0; x < words.length; x++) {
 
         //Remove any word with digits in them "3W" "4E" etc

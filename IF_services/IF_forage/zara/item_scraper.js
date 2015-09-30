@@ -4,6 +4,10 @@
 
 //NY stores
 // 3074,3818,3037,1260,3946,303,3036
+//SF stores
+//3611,3441
+//LA stores
+//6493,3723,3844,3985,3805,3612
 var request = require('request');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -320,8 +324,8 @@ function getInventory(itemData, stores) {
         // var storeIds = stores.map(function(obj) {
         //     return obj.source_generic_store.storeId
         // })
-
-    var storeIds = [3074, 3818, 3037, 1260, 3946, 303, 3036]
+       
+    var storeIds = [3074, 3818, 3037, 1260, 3946, 303, 3036,3611,3441,6493,3723,3844,3985,3805,3612]
 
     // http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/15517003004?physicalStoreId=3036,3037,3074,3818,1260,303,3946&ajaxCall=true
     return new Promise(function(resolve, reject) {

@@ -497,6 +497,10 @@ function saveItem(newItem, Stores) {
                 item.source_generic_item.inventory = storeIds;
                 item.parents = storeIds;
                 item.price = parseFloat(newItem.price);
+                if (isNaN(item.price)) {
+                    console.log('Price for item was NaN: ', item)
+                    return reject('Price was not a number..')
+                }
                 item.owner = owner;
                 item.name = item.source_generic_item.name;
                 item.linkback = item.source_generic_item.src;

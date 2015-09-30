@@ -59,7 +59,7 @@ module.exports = function(url, category) {
             if (err) {
                 var today = new Date().toString()
                 fs.appendFile('errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
-                    console.log(err)
+                    console.log('Error 62: ',err)
                     return reject(err)
                 });
             }
@@ -90,7 +90,7 @@ function loadFakeUser() {
                     fake.profileID = 'urban411'
                     fake.save(function(err, o) {
                         if (err) {
-                            console.log(err)
+                            console.log('93: ', err)
                         } else {
                             // console.log(o.profileID)
                             owner.profileID = o.profileID
@@ -101,7 +101,7 @@ function loadFakeUser() {
                     })
                 }
                 if (e) {
-                    console.log(e)
+                    console.log('Could not load user: ',e)
                     reject(e)
                 }
             })

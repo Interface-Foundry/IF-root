@@ -122,11 +122,11 @@ function loadCatalog(category) {
                         // console.log('Done.**')
                         wait(callback, 3000)
                     }).catch(function(err) {
-                        console.log(err)
+                        console.log('Item scraper error: ',err)
                         wait(callback, 3000)
                     })
                 }, function(err) {
-                    if (err) console.log(err)
+                    if (err) console.log('async error, nav 129: ',err)
                     console.log('Done scraping catalog!')
                     resolve()
                 })
