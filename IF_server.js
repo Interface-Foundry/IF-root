@@ -455,7 +455,7 @@ app.use(require('cors')());
 
 
 //--- SEARCH BABY ----//
-app.use(require('./components/IF_search/items'));
+app.use(require('./components/IF_search/newsearch'));
 //--- SNAP ROUTE ----//
 app.use('/api/snaps', require('./components/IF_apiroutes/snaps'));
 //--- ITEM ROUTER ----//
@@ -583,11 +583,13 @@ app.get('/api/bubblesearch/:type', function(req, res, next) {
 
 //Creates new analytics object
 app.post('/api/analytics/:action', function(req, res) {
-    //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
-    redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
-        res.send('(=^･ｪ･^=)');
-    });
-    // DONE!  then a separate node process dumps the redis cache to db
+  (new db.Analytics({
+    anonId: req.anonId,
+    userId: req.userId,
+    action: req.params.action,
+    data: req.body
+  })).save();
+  res.send('📬')
 });
 
 

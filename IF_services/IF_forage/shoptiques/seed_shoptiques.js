@@ -49,19 +49,13 @@ var offset = 0;
 var urlFormat = 'http://www.shoptiques.com/neighborhoods/$n?max=90&offset=X';
 var neighborhoodIndex = 0;
 var seed = function() {
-    var url = urlFormat.replace('X', offset).replace('$n', neighborhoods[neighborhoodIndex]);
-    if (!url) {
+    if (typeof neighborhoods[neighborhoodIndex] === 'undefined') {
         console.log('done seeding shoptiques');
         process.exit(0);
     }
+    var url = urlFormat.replace('X', offset).replace('$n', neighborhoods[neighborhoodIndex]);
     scrapeCatalogPage(url).then(function() {
-        offset += 90;
-
-        // only scrape the first two pages
-        if (offset > 180) {
-            offset = 0;
-            neighborhoodIndex++;
-        }
+        neighborhoodIndex++;
         seed();
     }).catch(function(e) {
         neighborhoodIndex++;

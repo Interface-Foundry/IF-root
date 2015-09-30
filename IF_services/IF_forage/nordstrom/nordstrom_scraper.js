@@ -1,170 +1,118 @@
+//Updating inventory is tricky for this one as inventory is queried by lat lng zipcode..
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
-var urlify = require('urlify').create({
-    addEToUmlauts: true,
-    szToSs: true,
-    spaces: "_",
-    nonPrintable: "_",
-    trim: true
-});
 var request = require('request');
-var states = require('../zara/states');
+var _ = require('lodash');
+var tagParser = require('../tagParser');
+var fs = require('fs')
+
+
 //Global var to hold category
 cat = '';
 //Global var to hold fake user object
 owner = {};
 
-module.exports = function(url, category) {
-
+module.exports = function(url, category, zipcode) {
+    //Global variable declarations
     cat = category;
-
+    oldStores = [];
+    newStores = [];
     return new Promise(function(resolve, reject) {
-
-        stateIndex = 0;
-        currentState = states[stateIndex]
-        notFoundCount = 0;
-
-        async.whilst(
-            function() {
-                return states[stateIndex]
-            },
-            function(loop) {
-
-                var query = {
-                    'state': currentState
+        async.waterfall([
+                function(callback) {
+                    loadFakeUser().then(function() {
+                        callback(null)
+                    }).catch(function(err) {
+                        console.log('Could not load owner user.')
+                        callback(err)
+                    })
+                },
+                function(callback) {
+                    getColorUrls(url).then(function(colorUrls) {
+                        if (!colorUrls) {
+                            colorUrls = []
+                            colorUrls[0] = url
+                        }
+                        callback(null, colorUrls)
+                    }).catch(function(err) {
+                        console.log(err)
+                        callback(err)
+                    })
+                },
+                function(colorUrls, callback) {
+                    async.eachSeries(colorUrls, function(url, finishedItem) {
+                        async.waterfall([
+                                    function(callback) {
+                                        scrapeItem(url).then(function(item) {
+                                            wait(function() {
+                                                callback(null, item, zipcode)
+                                            }, 3000)
+                                        }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    },
+                                    function(item, zipcode, callback) {
+                                        getInventory(item, zipcode).then(function(inventory) {
+                                            callback(null, item, inventory)
+                                        }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    },
+                                    function(item, inventory, callback) {
+                                        saveStores(item, inventory).then(function(stores) {
+                                            callback(null, item, stores)
+                                        }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    },
+                                    function(item, stores, callback) {
+                                        saveItem(item, stores).then(function(item) {
+                                            callback(null, item, stores)
+                                        }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    },
+                                    function(item, stores, callback) {
+                                        getLatLong(zipcode).then(function(coords) {
+                                            callback(null, item, coords)
+                                        }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    },
+                                    function(item, coords, callback) {
+                                        updateInventory(item, coords).then(function() {
+                                            callback(null)
+                                        }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    }
+                                ],
+                                function(err) {
+                                    if (err) {
+                                        var today = new Date().toString()
+                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n' + err, function(err) {});
+                                    }
+                                    finishedItem()
+                                }) //end of async waterfall processing item
+                    }, function(err) {
+                        if (err) {
+                            var today = new Date().toString()
+                            fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n' + err, function(err) {});
+                        }
+                        callback(null)
+                    })
                 }
-
-                db.Zipcodes.find(query).then(function(zips) {
-                    var count = 0;
-                    console.log('\nCurrent state: ' + currentState)
-                    async.whilst(
-                        function() {
-                            return count <= zips.length
-                        },
-                        function(cb) {
-                            //Load owner user 
-                            loadFakeUser().then(function() {
-                                    //For each zipcode
-                                    async.eachSeries(zips, function(zip, finishedZipcode) {
-                                            zipcode = zip.zipcode
-                                            getColorUrls(url).then(function(colorUrls) {
-                                                    if (!colorUrls) {
-                                                        colorUrls = []
-                                                        colorUrls[0] = url
-                                                    }
-                                                    //For each color available for item
-                                                    async.eachSeries(colorUrls, function(url, finishedItem) {
-                                                            console.log('Scraping>>>', url)
-                                                                //Process Item
-                                                            async.waterfall([
-                                                                        function(callback) {
-                                                                            scrapeItem(url).then(function(item) {
-                                                                                wait(function() {
-                                                                                    callback(null, item, zipcode)
-                                                                                }, 3000)
-
-                                                                            }).catch(function(err) {
-                                                                                callback(err)
-                                                                            })
-                                                                        },
-                                                                        function(item, zipcode, callback) {
-                                                                            getInventory(item, zipcode).then(function(inventory) {
-                                                                                // console.log('hitting this?',inventory)
-                                                                                callback(null, item, inventory)
-                                                                            }).catch(function(err) {
-                                                                                callback(err)
-                                                                            })
-                                                                        },
-                                                                        function(item, inventory, callback) {
-                                                                            saveStores(item, inventory).then(function(stores) {
-                                                                                callback(null, item, stores)
-                                                                            }).catch(function(err) {
-                                                                                callback(err)
-                                                                            })
-                                                                        },
-                                                                        function(item, stores, callback) {
-                                                                            saveItems(item, stores).then(function(items) {
-                                                                                callback(null, item, stores)
-                                                                            }).catch(function(err) {
-                                                                                callback(err)
-                                                                            })
-                                                                        },
-                                                                        function(item, stores, callback) {
-                                                                            getLatLong(zipcode).then(function(coords) {
-                                                                                callback(null, item, stores, coords)
-                                                                            }).catch(function(err) {
-                                                                                callback(err)
-                                                                            })
-                                                                        },
-                                                                        function(item, stores, coords, callback) {
-                                                                            updateInventory(item, stores, coords).then(function() {
-                                                                                callback(null, item)
-                                                                            }).catch(function(err) {
-                                                                                callback(err)
-                                                                            })
-                                                                        }
-                                                                    ],
-                                                                    function(err) {
-                                                                        if (err) console.log(err)
-                                                                        finishedItem()
-                                                                    }) //end of async waterfall processing item
-
-                                                        }, function(err) {
-                                                            if (err) {
-                                                                console.log(err)
-                                                            }
-                                                            //Prematurely ejects states if no new stores found after 15 zipcode searches to save time
-                                                            if (notFoundCount >= 50) {
-                                                                notFoundCount = 0;
-                                                                return cb('Finished ' + currentState + '.')
-                                                            }
-                                                            count++
-                                                            finishedZipcode()
-                                                        }) //end of each series for colors
-
-
-                                                }).catch(function(err) {
-                                                    console.log(err)
-                                                    cb()
-                                                }) // end of getColors
-
-                                        },
-                                        function(err) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                cb('Done with state.')
-                                            }
-                                        });
-
-                                }).catch(function(err) {
-                                    console.log('Could not load owner user.')
-
-                                }) //end of load user
-                        },
-                        function(err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            stateIndex++;
-                            if (states[stateIndex]) {
-                                currentState = states[stateIndex]
-                                console.log('Next state..')
-                                loop()
-                            } else {
-                                console.log('Finished all states!')
-                                return resolve()
-                            }
-                        });
-                })
-            },
+            ],
             function(err) {
-                if (err) console.log(err)
-
+                if (err) {
+                    var today = new Date().toString()
+                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + cat + '\n' + err, function(err) {});
+                    return reject(err)
+                }
                 resolve()
             })
     })
@@ -210,7 +158,7 @@ function getColorUrls(url) {
     return new Promise(function(resolve, reject) {
         var colorUrls = [];
         var colors = [];
-        var results = []
+        var results = [];
         var searchString = url.split('/s/')[1].split('/')[0];
         var searchUrl = 'http://shop.nordstrom.com/sr?origin=keywordsearch&contextualcategoryid=0&keyword=' + searchString
         var baseUrl = 'http://shop.nordstrom.com'
@@ -223,67 +171,34 @@ function getColorUrls(url) {
 
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
-
                 $ = cheerio.load(body); //load HTML
-
                 var obj = $('div.search-results-right-container a');
                 var clr = $('li.selected a')
-
-                //Gather all available selected colors
+                    //Gather all available selected colors
                 for (var i in clr) {
                     if (clr[i].attribs && clr[i].attribs.title) {
                         colors.push(clr[i].attribs.title)
                     }
                 }
-
-                //Here we filter out items with no selected color 
-                // for (var key in obj) {
-                //     if (obj[key].attribs && obj[key].attribs.title && obj[key].attribs['aria-selected']) {
-                //         // console.log(obj[key].attribs)
-                //         if (obj[key].attribs['aria-selected'] == 'True') {
-                //             // .closest('.fashion-display')
-                //             // console.log(obj[key].parent.parent.parent.parent.children[1])
-                //         }
-                //     }
-                // }
-
                 for (var key in obj) {
-
                     if (obj[key].attribs && obj[key].attribs.href && obj[key].attribs.href.indexOf('/s/') > -1 && obj[key].attribs.href.indexOf('#reviewTabs') == -1) {
                         var newUrl = baseUrl + obj[key].attribs.href
-                            // console.log(newUrl)
                         colorUrls.push(newUrl)
                     }
-
-
                 }
-
-                console.log('Found ' + colorUrls.length + ' colors for this item.')
-
-
-
-                // if (colorUrls.length > colors.length) {
-                //     console.log('colors: ', colors, '\n colorUrls: ', colorUrls)
-                // }
-
-
+                console.log('Found ' + colorUrls.length + ' colors for item: ')
                 for (var i = 0; i < colors.length; i++) {
-
                     var object = {
                         color: colors[i],
                         url: colorUrls[i]
                     }
                     results.push(object)
                 }
-                // console.log('done')
                 if (colorUrls.length > 0) {
                     resolve(colorUrls)
                 } else {
                     resolve()
                 }
-
-
-
             } else {
                 if (error) {
                     console.log('error: ', error)
@@ -293,18 +208,16 @@ function getColorUrls(url) {
                 reject()
             }
         })
-
     })
 }
-
-
 
 function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
         //construct newItem object
         var newItem = {
             src: url,
-            images: []
+            images: [],
+            tags: []
         };
 
         var options = {
@@ -316,16 +229,25 @@ function scrapeItem(url) {
 
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
-
                 $ = cheerio.load(body); //load HTML
 
-                // var colors = [];
+                // console.log('DESCRIPTION: ', $('ul.style-features>li')[0].children[0].data)
 
-                // $('div#color-buttons button.option-label img').each(function(i, elem) {
-                //     colors.push(elem.attribs.alt)
-                // })
+                //Description
+                if ($('ul.style-features>li') && $('ul.style-features>li').length > 0) {
+                    var tempString = '';
+                    for (var key in $('ul.style-features>li')) {
+                        if ($('ul.style-features>li').hasOwnProperty(key)) {
+                            if ($('ul.style-features>li')[key].children && $('ul.style-features>li')[key].children[0]) {
+                                tempString = tempString.concat(' ' + $('ul.style-features>li')[key].children[0].data)
+                            }
 
-                // newItem.colors = colors;
+                        }
+                    }
+                    tempArray = tempString.split(' ')
+                    newItem.tags = tagParser.parse(tempArray);
+                    // console.log('DESCRIPTION! ',newItem.tags )
+                }
 
                 //iterate on images found in HTML
                 $('img').each(function(i, elem) {
@@ -339,7 +261,7 @@ function scrapeItem(url) {
                     }
                 });
 
-                //////////Construct item name from Brand Name + Product Name /////////////
+                //Construct item name from Brand Name + Product Name 
                 var brandName = '';
                 //get brand name
                 $("section[id='brand-title']").map(function(i, section) {
@@ -357,7 +279,6 @@ function scrapeItem(url) {
                         }
                     }
                 });
-                //////////////////////////////////////////////////////////////////////////
 
                 //get item price
                 $('td').each(function(i, elem) {
@@ -366,8 +287,6 @@ function scrapeItem(url) {
                     }
                 });
 
-                //get the styleId to query nordstrom server with from the product URL. lastindexof gets item from end of URL. 
-                //split('?') kills anything after productID in URL
                 newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];
 
                 if (newItem.styleId) {
@@ -390,7 +309,8 @@ function scrapeItem(url) {
 function getInventory(newItem, zipcode) {
     return new Promise(function(resolve, reject) {
         var radius = '100'; //max is 100 miles
-        console.log('zipcode: ', zipcode)
+        console.log('Item: ', newItem.name, '. Zipcode: ', zipcode)
+            // 3073633
         var url = 'http://shop.nordstrom.com/es/GetStoreAvailability?styleid=' + newItem.styleId + '&type=Style&instoreavailability=true&radius=' + radius + '&postalcode=' + zipcode + '&format=json';
         var options = {
             url: url,
@@ -398,13 +318,10 @@ function getInventory(newItem, zipcode) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
                 body = JSON.parse(body); //o.m.g. request, just do the double parse and don't ask 
-
-                console.log('NORDSTROM INVENTORY: ', body)
                 resolve(body)
             } else {
                 if (error) {
@@ -419,7 +336,6 @@ function getInventory(newItem, zipcode) {
                 }
             }
         })
-
     })
 }
 
@@ -439,20 +355,8 @@ function saveStores(item, inventory) {
                 }
             };
 
-
-
             request(options, function(error, response, body) {
                 $ = cheerio.load(body); //load HTML
-
-                // if (!body.StoreCollection || !body.StoreCollection[0]) {
-
-                //     wait(10000, function() {
-                //         console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
-                //     })
-                //     return callback()
-                // }
-                //body = JSON.parse(body);
-                // console.log('***Body', body)
 
                 var storeObj = {
                     storeId: item.StoreNumber
@@ -462,20 +366,19 @@ function saveStores(item, inventory) {
                 $('div').each(function(i, elem) {
                     if (elem.attribs && elem.attribs.class) {
 
-                        if (elem.attribs.class == 'leftColumn') { //get store name
-                            storeObj.name = elem.children[0].children[0].data.replace(/[\n\t\r]/g, ""); //the replace here is removing preceding and trailer \r \n \t stuff
+                        if (elem.attribs.class == 'leftColumn') {
+                            storeObj.name = elem.children[0].children[0].data.replace(/[\n\t\r]/g, "");
                         }
 
-                        if (elem.attribs.class == 'storeAddress') { //get street address and phone number
+                        if (elem.attribs.class == 'storeAddress') {
                             for (var i in elem.children) {
                                 if (elem.children[i].data) {
-                                    var cleanData = elem.children[i].data.replace(/\./g, "").replace(/[\n\t\r]/g, ""); //remove periods from phone num
-
-                                    if (/^[(]{0,1}[0-9]{3}[)]{0,1}[-\s\.]{0,1}[0-9]{3}[-\s\.]{0,1}[0-9]{4}$/.test(cleanData)) { //is it a phone #?
+                                    var cleanData = elem.children[i].data.replace(/\./g, "").replace(/[\n\t\r]/g, "");
+                                    if (/^[(]{0,1}[0-9]{3}[)]{0,1}[-\s\.]{0,1}[0-9]{3}[-\s\.]{0,1}[0-9]{4}$/.test(cleanData)) {
                                         storeObj.PhoneNumber = cleanData;
-                                    } else if (!storeObj.StreetAddress) { //if no street data , create data key
+                                    } else if (!storeObj.StreetAddress) {
                                         storeObj.StreetAddress = elem.children[i].data;
-                                    } else { //street data already started, continue adding
+                                    } else {
                                         storeObj.StreetAddress = storeObj.StreetAddress + ' ' + elem.children[i].data;
                                         storeObj.StreetAddress = storeObj.StreetAddress.replace(/[\n\t\r]/g, "");
                                     }
@@ -484,12 +387,12 @@ function saveStores(item, inventory) {
                             }
                         }
 
-                        if (elem.attribs.class == 'date') { //get store hours
+                        if (elem.attribs.class == 'date') {
                             for (var i in elem.children) {
                                 if (elem.children[i].data) {
-                                    if (!storeObj.Hours) { //if no street data , create data key
+                                    if (!storeObj.Hours) {
                                         storeObj.Hours = elem.children[i].data;
-                                    } else { //street data already started, continue adding
+                                    } else {
                                         storeObj.Hours = storeObj.Hours + ' ' + elem.children[i].data;
                                         storeObj.Hours = storeObj.Hours.replace(/[\n\t\r]/g, "");
                                     }
@@ -504,24 +407,6 @@ function saveStores(item, inventory) {
                         }
                     }
                 });
-
-                //console.log(storeObj);
-
-
-                // var storeObj = {
-                //     storeId: item.StoreNumber,
-                //     name: body.StoreCollection[0].StoreName,
-                //     type: body.StoreCollection[0].StoreType,
-                //     StreetAddress: body.StoreCollection[0].StreetAddress,
-                //     City: body.StoreCollection[0].City,
-                //     State: body.StoreCollection[0].State,
-                //     PostalCode: body.StoreCollection[0].PostalCode,
-                //     PhoneNumber: body.StoreCollection[0].PhoneNumber,
-                //     Hours: body.StoreCollection[0].Hours,
-                //     Lat: body.StoreCollection[0].Latitude,
-                //     Lng: body.StoreCollection[0].Longitude
-                // }
-
 
                 //Construct our own unique storeId 
                 uniquer.uniqueId(storeObj.name, 'Landmark').then(function(output) {
@@ -539,13 +424,15 @@ function saveStores(item, inventory) {
                                 if (!store) {
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
+                                    newStore.linkbackname = 'nordstrom.com'
                                     newStore.addressString = storeObj.StreetAddress;
                                     newStore.id = output;
                                     newStore.tel = storeObj.PhoneNumber;
                                     newStore.world = true;
                                     newStore.name = storeObj.name;
                                     newStore.hasloc = true;
-                                    newStore.loc.coordinates.push([storeObj.Lng, storeObj.Lat])
+                                    newStore.loc.type = 'Point'
+                                    newStore.loc.coordinates = [parseFloat(storeObj.Lng), parseFloat(storeObj.Lat)]
                                     delete newStore.source_generic_store.Lng;
                                     delete newStore.source_generic_store.Lat
                                     newStore.save(function(e, s) {
@@ -554,7 +441,6 @@ function saveStores(item, inventory) {
                                         }
                                         console.log('Saved store.', s.id)
                                         notFound = false;
-                                        //Push into proxy array for cloning items at the end of eachseries
                                         Stores.push(s)
                                         setTimeout(function() {
                                             return callback()
@@ -563,7 +449,7 @@ function saveStores(item, inventory) {
                                 }
                                 //If store already exists in db
                                 else if (store) {
-                                    console.log('Store exists.', store.id)
+                                    console.log('.')
                                     Stores.push(store)
                                     setTimeout(function() {
                                         return callback()
@@ -583,58 +469,51 @@ function saveStores(item, inventory) {
     })
 }
 
-function saveItems(newItem, Stores) {
+function saveItem(newItem, Stores) {
     return new Promise(function(resolve, reject) {
         var storeIds = Stores.map(function(store) {
             return store._id
         })
-
+        newStores = storeIds.map(function(id) {
+            return id.toString();
+        });
         var storeLocs = [];
-
         Stores.forEach(function(store) {
-            storeLocs.push(store.loc.coordinates[0])
-        })
-
-        //Check if there is an item with parent field that is equal to store id in db
+                storeLocs.push(store.loc.coordinates)
+            })
+            //Check if item already exists
         db.Landmarks.findOne({
             'source_generic_item.styleId': newItem.styleId
         }, function(err, i) {
             if (err) console.log(err)
-
-            //Create new item in db if it does not already exist
-            if (!i) {
+                //Create new item in db if it does not already exist OR if it was created without description tags
+            if (!i || (i && i.source_generic_item && !i.source_generic_item.tags)) {
+                //If item was previously scraped without the description tags, delete it
+                if (i && i.source_generic_item && !i.source_generic_item.tags) {
+                    db.Landmarks.remove({'id':i.id})
+                }
                 var item = new db.Landmarks();
                 item.source_generic_item = newItem;
                 item.source_generic_item.inventory = storeIds;
                 item.parents = storeIds;
                 item.price = parseFloat(newItem.price);
                 item.owner = owner;
-                item.name = item.source_generic_item.name
+                item.name = item.source_generic_item.name;
                 item.linkback = item.source_generic_item.src;
                 item.linkbackname = 'nordstrom.com';
                 item.itemImageURL = item.source_generic_item.images;
-                var tags = item.name.split(' ').map(function(word) {
-                    word = word.replace(/\W/g, '')
+                item.itemTags.text.push('nordstrom');
+                item.itemTags.text.push(cat);
+                var tags = newItem.name.split(' ').map(function(word) {
                     return word.toString().toLowerCase()
                 })
+                tags = tags.concat(newItem.tags)
                 tags.forEach(function(tag) {
                     item.itemTags.text.push(tag)
                 })
-                item.itemTags.text.push('nordstrom')
-                item.itemTags.text.push(cat)
-                    //Get rid of blank tags
-                var i = item.itemTags.text.length
-                while (i--) {
-                    if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ') {
-                        item.itemTags.text.splice(i, 1)
-                    }
-                }
-                item.parent.mongoId = store._id;
-                item.parent.name = store.name;
-                item.parent.id = store.id;
+                item.itemTags.text = tagParser.parse(item.itemTags.text)
                 item.name = newItem.name;
                 item.world = false;
-                item.loc.type = 'Point';
                 item.loc.coordinates = storeLocs
                 uniquer.uniqueId('nordstrom ' + newItem.name, 'Landmark').then(function(output) {
                     item.id = output;
@@ -643,29 +522,40 @@ function saveItems(newItem, Stores) {
                         if (e) {
                             console.error(e);
                         }
-                        console.log('Saved item!', i.id)
-                        savedItems.push(i)
-                            // console.log('Saved item', i.name)
-                        return callback();
+                        console.log('Saved item!', item.itemTags.text)
+                        return resolve('Saved new item.')
                     })
                 })
             }
 
-            //If item exists in db 
+            //If item exists in db, add new inventory values to the item (removed stocks will be updated in a later function)
             else if (i) {
-                 console.log('Updating item inventory', i.id)
+                console.log('Item exists: ', i.id)
+                if (i.parents) {
+                    oldStores = i.parents.map(function(id) {
+                        return id.toString()
+                    })
+                }
                 db.Landmarks.findOne({
                     '_id': i._id
                 }).update({
-                    $set: {
-                        'source_generic_item.inventory': storeIds
+                    $addToSet: {
+                        'source_generic_item.inventory': {
+                            $each: storeIds
+                        },
+                        'loc.coordinates': {
+                            $each: storeLocs
+                        },
+                        'parents': {
+                            $each: storeIds
+                        }
                     }
                 }, function(e, result) {
                     if (e) {
                         console.log('Inventory update error: ', e)
                     }
-                    console.log('Updated inventory for store.')
-                    return resolve('Finished updating inventory.')
+                    // console.log('Updated inventory.', i)
+                    return resolve('Updated item.')
                 })
             }
         })
@@ -673,6 +563,25 @@ function saveItems(newItem, Stores) {
     })
 }
 
+function distance(lat1, lon1, lat2, lon2, unit) {
+    var radlat1 = Math.PI * lat1 / 180
+    var radlat2 = Math.PI * lat2 / 180
+    var radlon1 = Math.PI * lon1 / 180
+    var radlon2 = Math.PI * lon2 / 180
+    var theta = lon1 - lon2
+    var radtheta = Math.PI * theta / 180
+    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    dist = Math.acos(dist)
+    dist = dist * 180 / Math.PI
+    dist = dist * 60 * 1.1515
+    if (unit == "K") {
+        dist = dist * 1.609344
+    }
+    if (unit == "N") {
+        dist = dist * 0.8684
+    }
+    return dist
+}
 
 function getLatLong(zipcode) {
     return new Promise(function(resolve, reject) {
@@ -721,42 +630,67 @@ function getLatLong(zipcode) {
     })
 }
 
-function updateInventory(item, stores, coords) {
+function updateInventory(item, coords) {
     return new Promise(function(resolve, reject) {
-        var storeIds = stores.map(function(store) {
-                return store.source_generic_store.storeId
-            })
-            //Remove items from mongo that no longer appear in inventory list for this item style
-        db.Landmarks.remove({
-            $and: [{
-                'source_generic_item.styleId': item.styleId
-            }, {
-                'loc': {
-                    //Since the inventory check for nordstrom only returns results 100 miles within zipcode
-                    //We get a central lat long for the current zipcode and run a geowithin 100 miles
-                    //Otherwise mongo would remove all items outside the current zip that match the query.
-                    $geoWithin: {
-                        $centerSphere: [
-                            [parseFloat(coords[0]), parseFloat(coords[1])], 103 / 3963.2
-                        ]
-                    }
-                }
-            }, {
-                'source_generic_item.storeId': {
-                    $nin: storeIds
-                }
-            }]
-        }, function(err, res) {
-            if (err) return reject(err)
-            if (res) {
-                console.log('Removed: ', res.result.n)
+        var d = _.difference(oldStores, newStores);
+        if (d.length < 1) {
+            return resolve('No stores to remove.')
+        }
+        var storesToRemove = []
+            //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
+        db.Landmarks.find({
+            '_id': {
+                $in: d
             }
+        }, function(err, stores) {
+            if (err) {
+                console.log('613', err)
+                return callback()
+            }
+            if (!stores) {
+                console.log('Store not found!')
+                return callback()
+            } else if (stores) {
+                stores.forEach(function(store) {
+                    if (distance(store.loc.coordinates[1], store.loc.coordinates[0], parseFloat(coords[1]), parseFloat(coords[0]), 'K') < 163) {
+                        storesToRemove.push(store)
+                    }
+                })
+                console.log('Found ', storesToRemove.length, ' inventory records to remove.')
+                if (storesToRemove.length > 0) {
+                    var ids = storesToRemove.map(function(store) {
+                        return store._id
+                    })
+                    var locs = []
+                    storesToRemove.forEach(function(store) {
+                        locs.push(store.loc.coordinates)
+                    })
 
-            resolve(item)
+                    db.Landmarks.update({
+                        'source_generic_item.styleId': item.styleId
+                    }, {
+                        $pullAll: {
+                            'parents': storesToRemove,
+                            'source_generic_item.inventory': storesToRemove,
+                            'loc.coordinates': locs
+                        }
+                    }, function(err, res) {
+                        if (err) console.log('644', err)
+                        if (res) {
+                            console.log('Updated inventory.', res)
+                            resolve()
+                        }
+                    })
+
+                } // end of if
+                else {
+                    // console.log('Inventory is up-to-date.')
+                    resolve()
+                }
+            }
         })
     })
 }
-
 
 function wait(callback, delay) {
     var startTime = new Date().getTime();

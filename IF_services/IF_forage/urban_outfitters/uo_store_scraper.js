@@ -94,6 +94,7 @@ function createStores(stores) {
                         n.tel = store.phone_number;
                         n.linkback = 'http://www.urbanoutfitters.com';
                         n.linkbackname = 'urbanoutfitters.com'
+                        n.loc.type = 'Point'
                         n.loc.coordinates[0] = parseFloat(store.longitude);
                         n.loc.coordinates[1] = parseFloat(store.latitude);
                         n.name = 'Urban Outfitters ' + store.name;

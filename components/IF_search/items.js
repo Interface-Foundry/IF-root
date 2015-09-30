@@ -7,6 +7,7 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 var deepcopy = require('deepcopy');
 var kip = require('kip');
+var geolib = require('geolib');
 
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
@@ -52,7 +53,7 @@ var defaultRadius = 2;
     "loc": {"lat": 40.7352793, "lon": -73.990638}
  }
  */
-var searchItemsUrl = '/api/items/search';
+var searchItemsUrl = '/api/items/search_old';
 app.post(searchItemsUrl, function(req, res, next) {
 
     // page is 0-indexed
@@ -100,8 +101,65 @@ app.post(searchItemsUrl, function(req, res, next) {
             }
         })
         .then(function(results) {
-            responseBody.results = results;
-            res.send(responseBody);
+            // first un-mongoose the results
+            results = results.map(function(r) {
+              return r.toObject();
+            })
+
+            // Add the parents here.  fetch them from the db in one query
+            // The goal is to make item.parents a list of landmarks ordered by
+            // distance to the search location.  And make item.parent the
+            // closest one.
+
+            // only make one db call to fetch all the parents in this result set
+            var allParents = results.reduce(function (all, r) {
+              return all.concat(r.parents || []);
+            }, [])
+
+            db.Landmarks.find({
+              _id: {$in: allParents}
+            }, function(e, parents) {
+              if (e) { return next(e); }
+              debugger;
+
+              results.map(function(r) {
+                var strparents = r.parents.map(function(_id) { return _id.toString()});
+                r.parents = parents.filter(function(p) {
+                  return strparents.indexOf(p._id.toString()) >= 0;
+                }).sort(function(a, b) {
+                  // sort by location
+                  var a_dist = geolib.getDistance({
+                    longitude: a.loc.coordinates[0],
+                    latitude: a.loc.coordinates[1]
+                  }, {
+                    longitude: req.body.loc.lon,
+                    latitude: req.body.loc.lat
+                  });
+                  var b_dist = geolib.getDistance({
+                    longitude: b.loc.coordinates[0],
+                    latitude: b.loc.coordinates[1]
+                  }, {
+                    longitude: req.body.loc.lon,
+                    latitude: req.body.loc.lat
+                  });
+                  return a_dist < b_dist;
+                });
+                r.parent = r.parents[0];
+              })
+
+              responseBody.results = results;
+              res.send(responseBody);
+            })
+
+            (new db.Analytics({
+              anonId: req.anonId,
+              userId: req.userId,
+              action: 'search',
+              data: {
+                query: req.body,
+                resultCount: results.length
+              }
+            })).save();
         }, next)
 });
 
@@ -257,7 +315,7 @@ function textSearch(q, page) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^3", "id^2", "parentName^2", "tags^2", "categories", "description"],
+                            fields: ["name^4", "id^3", "parentName^3", "tags^3", "categories^2", "description^2", "miscText"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }
@@ -502,39 +560,21 @@ app.post(trendingItemsUrl, function(req, res, next) {
                     return full;
                 }, [])
             });
+            (new db.Analytics({
+              anonId: req.anonId,
+              userId: req.userId,
+              action: 'trending',
+              data: {
+                query: req.body,
+                resultCount: results.reduce(function(count, r) {
+                  if (r && r._settledValue && r._settledValue.results) {
+                    count = count + r._settledValue.results.length;
+                  }
+                  return count;
+                }, 0)
+              }
+            })).save();
         }, next);
-
-
-    return;
-
-    request.post('http://localhost:2997/api/items/search', {
-        body: {
-            "text": "summer",
-            "radius": 0.5,
-            "loc": {
-                "lat": 40.7352793,
-                "lon": -73.990638
-            }
-        },
-        json: true
-    }, function(e, r, body) {
-
-        res.send({
-            query: req.body,
-            links: links,
-            results: [{
-                category: 'Trending in Summer',
-                results: body.results
-            }, {
-                category: 'Trending near you',
-                results: body.results
-            }]
-        });
-    });
-
-
-
-
 })
 
 //****TEMPORARY FIX: This function will identify duplicate items in response, find the closest item (distance) within those duplicates

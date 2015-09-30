@@ -65,6 +65,21 @@ app.use(function(req, res, next) {
 });
 
 /**
+ * Anonymous session ids.
+ */
+app.use(function(req, res, next) {
+  if (!req.headers['kip-anon-session'] && !req.cookies['kip-anon-session']) {
+    var newSessionId = '324758-' + (Math.random()*(10e6)|0) + '-' + (Math.random()*(10e6)|0);
+    res.cookie('kip-anon-session', newSessionId);
+    req.anonId = newSessionId;
+    res.set({'kip-anon-session': newSessionId});
+  } else {
+    req.anonId = req.headers['kip-anon-session'] || req.cookies['kip-anon-session'];
+  }
+  next();
+})
+
+/**
  * Expects {email, password}
  */
 app.post('/api/auth/login', function(req, res, next) {
