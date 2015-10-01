@@ -2,6 +2,16 @@ var express = require('express');
 var app = express();
 var config = require('config');
 
+// add in health check before sessions
+app.get('/api/healthcheck', function(req, res) {
+    res.send(200);
+});
+
+// proxy. in production, we sit behind a proxy but still want secure session cookies
+if (config.isProduction) {
+    app.set('trust proxy', 1); // trust first proxy
+}
+
 // load the app api at /styles
 app.use('/styles', require('./IF_server'));
 
