@@ -358,7 +358,8 @@ var landmarkSchema = new Schema({
             itemFabric: String,
             colors: [] // array of hsl values (so array of vectors)
         },
-        classifierTags: [String],
+        classifierNameTags: [String],
+        classifierDescTags: [String],
         classifiedCategory: String
     },
     flags: {

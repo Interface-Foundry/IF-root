@@ -106,10 +106,17 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
                 _.get(this, 'meta.humanTags.itemFabric'),
                 _.get(this, 'source_justvisual.keywords'),
                 _.get(this, 'source_cloudsight.categories'),
-                _.get(this, 'meta.classifierTags')
+                _.get(this, 'meta.classifierNameTags')
             ]).filter(function(a) {
                 return typeof a !== 'undefined' && a !== '';
             }).join(' ')))
+        }
+    },
+    descriptionTags: {
+        source: function() {
+            return _.uniq(_.get(this, 'meta.classifierDescTags')).filter(function(a) {
+              return typeof a !== 'undefined' && a !== '';
+            }).join(' ')
         }
     },
     miscText: {
