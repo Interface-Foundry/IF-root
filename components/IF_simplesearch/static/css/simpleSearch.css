@@ -525,6 +525,10 @@ div.footerBar {
     margin-top: 50px;   
 }
 
+.resultsContainer.singleItem {
+    margin-top: 0;   
+}
+
 .flexBody.Mid-Container {
 /*    outline: 2px solid green;   */
     display: -webkit-flex;
@@ -804,6 +808,10 @@ div.footerBar {
             align-items: center;
 }
 
+.expandTopWrapper.singleItem {
+    background-color:white;
+}
+
 .expandedContentWrapper {
 /*    margin-top: -1000px;*/
     z-index: -10;
@@ -900,10 +908,15 @@ div.footerBar {
             flex-wrap:wrap;
     width: 66%;
     padding-left: 40px;
+    color: white;
+}
+
+.detailsContentWrapper.singleItem {
+    color: black;   
 }
 
 .detailsContent {
-    color: white;
+/*    color: white;*/
     font-size: 18px;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
@@ -914,7 +927,7 @@ div.footerBar {
 }
 
 .detailsFromCollapsed {
-    color: white;
+/*    color: white;*/
     font-size: 36px;
 }
 
@@ -1062,6 +1075,10 @@ a.reportItem {
     padding-top: 200px;
 }
 
+.expandedMobileModalWrapper.singleItem {
+    padding-top: 0;   
+}
+
 .swipeDotsContainer {
     display: block;   
     text-align: center;
@@ -1109,6 +1126,10 @@ a.reportItem {
     width: 100%;
     position: relative;
     z-index: -1;
+}
+
+.mobileModalImageSwipe.singleItem {
+    z-index: 5;   
 }
 
 .modalImage {
@@ -1187,6 +1208,11 @@ a.reportItem {
     background-color: rgba(255,255,255,0.5);
 }
 
+.mobileModal.PriceTop.singleItem {
+    position: absolute;
+    padding: 0;
+    padding-left: 1%;
+}
 
 .mobileModal.Tel {
     margin-top: 1vh;
@@ -1246,6 +1272,10 @@ a.reportItem {
 .modalButton.Right {
     width: 42%;
     margin-right: 5% !important;
+}
+
+.has-cursor {
+    cursor: pointer;   
 }
 
 @media(max-width: 905px) and (min-width: 750px) {
@@ -1312,7 +1342,7 @@ a.reportItem {
     }
     
     .imageSelectors {
-        height: 73px;   
+        height: 75px;   
     }
     
     .collapsedContent {

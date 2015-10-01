@@ -6,7 +6,7 @@
 
     <div class="flex-Container Query">
         <div class="flexBody Mid-Container">
-            <a ng-click="returnHome()" class="flexBody Top-Icon Query"></a>
+            <a ng-click="returnHome('home')" class="flexBody Top-Icon Query"></a>
             <form ng-submit="searchQuery()" class="flexBody Mid Input">
                 <div class="Mid-Input Length">
                     <span class="Find-ZTop">Find</span>
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-    <div class="resultsContainer" ng-cloak>
+    <div class="resultsContainer singleItem" ng-cloak>
 
         <div ng-show="noResults" class="flexBody Top noitem" ng-cloak>
             <center>
@@ -33,12 +33,11 @@
 
         <div class="kip-card contentRow row{{$index}}" ng-show="items" ng-repeat="item in items track by $index">
 
-        <div class="collapsedContent">
+        <div ng-if="" class="collapsedContent">
 <!--             <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
  -->            <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
                 <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>
-                <img class="holderPlace" data-original="{{::item.itemImageURL[0]}}">
-                <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
+                <img class="holderPlace" src="{{::item.itemImageURL[0]}}">
             </div>
 
             <div class="col-md-8 descripWrapper">
@@ -68,8 +67,7 @@
 
         </div>
 
-        <div ng-if="expandedIndex !== null" class="expandTopWrapper">
-                <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
+        <div ng-if="!mobileScreen" class="expandTopWrapper singleItem">
                 <div class="expandedImageWrapper">
                     <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>
                     <div class="imageSelectors Wrapper">
@@ -77,7 +75,7 @@
                     </div>
                 </div>
 
-            <div class="detailsContentWrapper">
+            <div class="detailsContentWrapper singleItem">
 
                 <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{::item.price}} - </span> {{::item.name}}</div>
                 <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}} - {{::item.distanceMI}} miles</span>
@@ -104,4 +102,52 @@
 
 
         </div>
+        
+        <div ng-if="mobileScreen" ng-init="singleItemMobile(0, item.itemImageURL.length, item);" class="expandedMobileModalWrapper singleItem">
+                <div class="mobileModalImageSwipe">
+                    <div class="mobileModalTopHeader">
+                        <span class="mobileModal PriceTop singleItem">${{::item.price | number : 0}}</span>
+                    </div>
+                    <div class="mobileModalImageContainer" style="text-align: center;" ng-repeat="pic in item.itemImageURL track by $index">
+                        <img ng-style="{'max-height': '50vh'}" ng-show="mobileImgIndex == $index" src="{{::pic | httpsURL}}">
+                    </div>
+                    
+<!--
+                    <div ng-if="outerHeight > 480" class="swipeDotsContainer">
+                        <span class="imageSwipeDots" ng-repeat="pics in item.itemImageURL track by $index"
+                              ng-class="{'modal-focused' : mobileImgIndex == $index }"
+                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-click="chooseImage($index)"></span>
+                    </div>
+-->
+                   
+                </div>
+                
+                <div class="expandedMobileModal Details" id="expandedModal{{$index}}">
+                    <div class="mobileModal Name">{{::item.name | deCapslock}}</div>
+                     <div class="swipeDotsContainer Short" id="thumbContainer{{$index}}">
+                        <span class="imageSwipeDotsShort" ng-repeat="pics in item.itemImageURL track by $index"
+                              ng-class="{'modal-focusedShort' : mobileImgIndex == $index }"
+                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-click="chooseImage($index)"></span>
+                    </div>
+                    <div class="mobileModal DetailsTop">
+                        <div class="mobileModal Address Parent" style="font-weight: bold">{{::item.parent.name}}</div>
+                        <div class="mobileModal Time" am-time-ago="item.updated_time"></div>
+                    </div>
+                    
+                    <div class="mobileModal Address"> {{item.parent.addressString}}</div>
+                    <div class="mobileModal Tel">{{::item.parent.tel}}</div>
+                    
+                    <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default modalButton Map" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
+                          <span class="kiplevels-map-outline mapIcon"></span>
+                        Map to {{::item.parent.name}}</a>
+                        <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default modalButton Left" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}"
+                           ng-class="{'is-full' : !item.parent.tel }">Buy online</a>
+                        <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default  modalButton Right" style="color:grey; !important; border-radius:2px;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
+                </div>
+
+            </div>
+        
+        
 </div>
