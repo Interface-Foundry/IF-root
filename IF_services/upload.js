@@ -41,6 +41,7 @@ module.exports = {
                                 if (err) {
                                     console.log('44', err)
                                 }
+                                console.log('res: ',res)
                                 reject('Cannot download image.')
                             }
                         });

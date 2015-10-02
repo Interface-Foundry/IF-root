@@ -17,7 +17,7 @@ var uniquer = require('../../uniquer');
 var tagParser = require('../tagParser');
 var _ = require('lodash')
 var fs = require('fs')
-var upload = require('../upload')
+var upload = require('../../upload')
 
 //Global var to hold fake user object
 owner = {}

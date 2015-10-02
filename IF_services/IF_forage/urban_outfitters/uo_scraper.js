@@ -62,10 +62,10 @@ module.exports = function(url, category, stores) {
                     })
                 }, function finished(err) {
                     if (err) {
-                        console.log('Images upload error: ',err) 
+                        console.log('Images upload error: ', err)
                     }
                     // console.log('Finished uploading images: ', items[0].hostedImages)
-                    callback(null,items)
+                    callback(null, items)
                 })
             },
             function(items, callback) {
@@ -397,14 +397,14 @@ function saveItems(items, stores) {
                     //----
 
                 // console.log('storeIds: ', mongoIds, '\nstoreLocs: ', storeLocs)
-                if (storeLocs.length <= 1 || storeLocs.length !== storeIds.length) {
-                    console.log('Inventory query yielded no "physicalStores"', item.physicalStores)
+                if (storeLocs.length < 1 || storeLocs.length !== mongoIds.length) {
+                    console.log('Inventory query yielded no "physicalStores" for ', item.name, ' ', item.physicalStores)
                     return callback1()
                 }
 
                 //Check if this item exists
                 db.Landmarks.findOne({
-                    'source_generic_item.skuId': item.skuId,
+                    'source_generic_item.name': item.name,
                     'source_generic_item.productId': item.productId,
                     'linkbackname': 'urbanoutfitters.com'
                 }, function(err, match) {
@@ -413,9 +413,15 @@ function saveItems(items, stores) {
                         return callback1()
                     }
 
-                    if (!match || (match && match.source_generic_item && (!match.source_generic_item.tags || !match.source_generic_item.hostedImages ))) {
-                        //Create new item for each store in inventory list.
-                        // console.log('Scenario 1')
+                     if (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1) {
+                            console.log('Scenario 0',match.itemImageURL[0])
+                        }
+
+
+                    if (!match || (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
+                        console.log('Scenario 1')
+                            //Create new item for each store in inventory list.
+                      
                         var i = new db.Landmark();
                         i.parents = mongoIds
                         i.loc.coordinates = storeLocs
@@ -445,7 +451,7 @@ function saveItems(items, stores) {
                         i.itemTags.text.push(cat)
                         i.hasloc = true;
                         i.loc.type = 'MultiPoint';
-                        uniquer.uniqueId(i.name + i.source_generic_item.skuId, 'Landmark').then(function(output) {
+                        uniquer.uniqueId(i.name, 'Landmark').then(function(output) {
                                 i.id = output;
                                 //If item was previously scraped without the description tags, delete the old one then save the new one
                                 if ((match && !match.source_generic_item.tags)) {
@@ -478,7 +484,7 @@ function saveItems(items, stores) {
                             }) //end of uniquer
 
                     } else if (match) {
-                        // console.log('Scenario 2')
+                        console.log('Scenario 2')
 
                         db.Landmarks.findOne({
                             '_id': match._id,
@@ -492,7 +498,7 @@ function saveItems(items, stores) {
                             if (e) {
                                 console.log('Inventory update error: ', e)
                             }
-                            console.log('Updated inventory for item.', result)
+                            console.log('Updated inventory for item:', match.id, result)
                             callback1()
                         })
 
