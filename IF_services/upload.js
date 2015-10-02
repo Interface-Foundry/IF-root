@@ -51,8 +51,8 @@ module.exports = {
 
             convertBase64(image).then(function(base64) {
                     var tmpfilename = urlify('temp_' + str + '_' + (new Date().toString()))
-                    var inputPath = "../../../app/dist/temp_general_uploads/" + tmpfilename + ".png";
-                    var outputPath = "../../../app/dist/temp_general_uploads/" + tmpfilename + ".png";
+                    var inputPath = __dirname + "/temp/input/" + tmpfilename + ".png";
+                    var outputPath = __dirname + "/temp/output/" + tmpfilename + ".png";
                     fs.writeFile(inputPath, base64, 'base64', function(err) {
                             if (err) console.log('57', err);
                             // var width = 300; // output width in pixels
