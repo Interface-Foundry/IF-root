@@ -41,7 +41,7 @@ module.exports = {
                                 if (err) {
                                     console.log('44', err)
                                 }
-                                console.log('res: ',res)
+                                console.log('body: ', body)
                                 reject('Cannot download image.')
                             }
                         });
@@ -148,12 +148,12 @@ module.exports = {
             async.eachSeries(array, function iterator(image, cb) {
                 self.uploadPicture(str, image).then(function(url) {
                     images.push(url)
-                    cb()
+                    wait(cb, 1000)
                 }).catch(function(err) {
                     if (err) {
                         console.log('131', err)
                     }
-                    cb()
+                    wait(cb, 1000)
                 })
             }, function finished(err) {
                 if (err) {
