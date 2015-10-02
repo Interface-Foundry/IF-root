@@ -208,7 +208,7 @@ function GO() {
             if (landmarks.length === 0) {
                 if (process.argv[2] === 'rebuild') { console.log('finished'); process.exit(0) }
                 console.log('finished updating elasticsearch, will check again in 10 minutes (current time', new Date(), ')');
-                setTimeout(GO, 1000*60*60*10)
+                setTimeout(GO, 1000*60*10)
                 return;
             }
 
