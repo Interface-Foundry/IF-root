@@ -106,10 +106,17 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
                 _.get(this, 'meta.humanTags.itemFabric'),
                 _.get(this, 'source_justvisual.keywords'),
                 _.get(this, 'source_cloudsight.categories'),
-                _.get(this, 'meta.classifierTags')
+                _.get(this, 'meta.classifierNameTags')
             ]).filter(function(a) {
                 return typeof a !== 'undefined' && a !== '';
             }).join(' ')))
+        }
+    },
+    descriptionTags: {
+        source: function() {
+            return _.uniq(_.get(this, 'meta.classifierDescTags')).filter(function(a) {
+              return typeof a !== 'undefined' && a !== '';
+            }).join(' ')
         }
     },
     miscText: {
@@ -201,7 +208,7 @@ function GO() {
             if (landmarks.length === 0) {
                 if (process.argv[2] === 'rebuild') { console.log('finished'); process.exit(0) }
                 console.log('finished updating elasticsearch, will check again in 10 minutes (current time', new Date(), ')');
-                setTimeout(GO, 1000*60*60*10)
+                setTimeout(GO, 1000*60*10)
                 return;
             }
 
