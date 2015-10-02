@@ -41,9 +41,13 @@ U/| . \\u      | |     |  __/
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css"/>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/css/normalize.css" rel="stylesheet" type="text/css"/>
-    <link href="/css/skeleton.css" rel="stylesheet" type="text/css"/>
-    <link href="/css/simpleSearch.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" rel="stylesheet" type="text/css"/>
+        
+<!--    <link href="/css/normalize.css" rel="stylesheet" type="text/css"/>-->
+<!--    <link href="/css/skeleton.css" rel="stylesheet" type="text/css"/>-->
+    <link href="/simpleSearch.mincat.css" rel="stylesheet" type="text/css"/>
+        
     <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-touch-icon-72x72.png">
@@ -85,36 +89,24 @@ U/| . \\u      | |     |  __/
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-<!--    <script src="lib/angular.js"></script>-->
+<!--    <script src="lib/dev/angular.js"></script>-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-beta.0/angular-route.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
-    
+  <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>    
   <script src="lib/script.js"></script>
     
     <script>
-
+// ASYNC JS LOADER
         $script([
-            'lib/min/jquery.geocomplete.min.js',
-            'lib/angular-inview.js',
-            'lib/min/angular-smooth-scroll.min.js',    
-            'lib/min/holder.min.js',    
-            'lib/min/jquery.lazyload.min.js',    
-            'moment.min.js',
-            'angular-moment.min.js',
-            'angular-holderjs/src/holder.js',
-            'simpleSearch.js'
-            ], function () {
-                angular.bootstrap(document, ['simpleSearchApp']);
-            });
-        
+            'simpleSearch.mincat.js'
+        ], function () {
+            angular.bootstrap(document, ['simpleSearchApp']);   
+        });
     </script>
 
-
-<!--
+<!-- SCRIPTS TO LOAD
   <script src="lib/jquery.geocomplete.js"></script>
   <script src="lib/angular-inview.js"></script>
-    
   <script src="lib/angular-smooth-scroll.js"></script>
   <script src="lib/min/angular-smooth-scroll.min.js"></script>
   <script src="lib/min/holder.min.js"></script>
