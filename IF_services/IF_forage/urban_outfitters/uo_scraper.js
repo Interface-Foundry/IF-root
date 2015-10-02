@@ -8,6 +8,13 @@ var request = require('request');
 var urlapi = require('url');
 var _ = require('lodash');
 var fs = require('fs');
+var urlify = require('urlify').create({
+    addEToUmlauts: true,
+    szToSs: true,
+    spaces: "_",
+    nonPrintable: "_",
+    trim: true
+});
 var tagParser = require('../tagParser')
 var upload = require('../../upload')
     //Global var to hold category
@@ -53,7 +60,7 @@ module.exports = function(url, category, stores) {
             function(items, callback) {
                 async.eachSeries(items, function iterator(item, cb) {
                     // console.log('welp getting here: ', item.images)
-                    upload.uploadPictures('urban_outfitters', item.images).then(function(images) {
+                    upload.uploadPictures('urban_outfitters_' + '_' + item.productId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
                         item.hostedImages = images
                         cb()
                     }).catch(function(err) {
@@ -398,7 +405,10 @@ function saveItems(items, stores) {
 
                 // console.log('storeIds: ', mongoIds, '\nstoreLocs: ', storeLocs)
                 if (storeLocs.length < 1 || storeLocs.length !== mongoIds.length) {
-                    console.log('Inventory query yielded no "physicalStores" for ', item.name, ' ', item.physicalStores)
+                    console.log('Inventory query yielded no "physicalStores" for ', item.name, ' ', item.physicalStores.length)
+                    if (storeLocs.length !== mongoIds.length && item.physicalStores.length && item.physicalStores.length > 1) {
+                        console.log('Try running uo_store_scraper.js')
+                    }
                     return callback1()
                 }
 
@@ -413,15 +423,10 @@ function saveItems(items, stores) {
                         return callback1()
                     }
 
-                     if (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1) {
-                            console.log('Scenario 0',match.itemImageURL[0])
-                        }
-
-
                     if (!match || (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
-                        console.log('Scenario 1')
-                            //Create new item for each store in inventory list.
-                      
+                        // console.log('Scenario 1')
+                        //Create new item for each store in inventory list.
+
                         var i = new db.Landmark();
                         i.parents = mongoIds
                         i.loc.coordinates = storeLocs
@@ -484,7 +489,7 @@ function saveItems(items, stores) {
                             }) //end of uniquer
 
                     } else if (match) {
-                        console.log('Scenario 2')
+                        // console.log('Scenario 2')
 
                         db.Landmarks.findOne({
                             '_id': match._id,

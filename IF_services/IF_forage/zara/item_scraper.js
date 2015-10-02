@@ -77,9 +77,10 @@ module.exports = function scrapeItem(url) { 
                         callback(err)
                     })
                 },
+                // || (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)
                 function(existingItem, callback) {
-                    if (!exists || (exists && existingItem.source_generic_item && !existingItem.source_generic_item.tags)) {
-                        //This is the case in which item was previously scraped but without the tags pulled from description
+                    if (!exists || (exists && existingItem.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
+                        //The || is for the case in which item was previously scraped but without AWS images
                         if (exists) {
                            exists = !exists
                            // console.log('Removing existing item to be updated.')

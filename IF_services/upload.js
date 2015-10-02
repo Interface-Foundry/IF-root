@@ -50,46 +50,11 @@ module.exports = {
             }
 
             convertBase64(image).then(function(base64) {
-                    var tmpfilename = urlify('temp_' + str + '_' + (new Date().toString()))
+                    var tmpfilename = urlify(str + '_' + (new Date().toString()))
                     var inputPath = __dirname + "/temp/input/" + tmpfilename + ".png";
                     var outputPath = __dirname + "/temp/output/" + tmpfilename + ".png";
                     fs.writeFile(inputPath, base64, 'base64', function(err) {
                             if (err) console.log('57', err);
-                            // var width = 300; // output width in pixels
-                            // //Optimal image compression settings using imagemagick
-                            // var args = [
-                            //     inputPath,
-                            //     '-filter',
-                            //     'Triangle',
-                            //     '-define',
-                            //     'filter:support=2',
-                            //     '-thumbnail',
-                            //     '450',
-                            //     '-unsharp' ,
-                            //     '0.25x0.25+8+0.065',
-                            //     '-dither',
-                            //     'None',
-                            //     '-posterize'
-                            //     ,'136',
-                            //     '-quality',
-                            //     '82',
-                            //     '-define',
-                            //     'jpeg:fancy-upsampling=off',
-                            //     '-define', 
-                            //     'png:compression-filter=5',
-                            //     '-define',
-                            //     'png:compression-level=9',
-                            //     '-define',
-                            //     'png:compression-strategy=1',
-                            //     '-define', 
-                            //     'png:exclude-chunk=all',
-                            //     '-interlace', 
-                            //     'none',
-                            //     '-colorspace',
-                            //     'sRGB',
-                            //     '-strip',
-                            //     outputPath
-                            // ];
 
                             im.resize({
                                 srcPath: inputPath,
@@ -100,33 +65,69 @@ module.exports = {
                             }, function(err, stdout, stderr) {
                                 if (err) console.log('83: ', err)
                                 fs.readFile(outputPath, function(err, buffer) {
-                                    var object_key = crypto.createHash('md5').update(tmpfilename).digest('hex');
-                                    // var fileType = buffer.split(';')[0].split('/')[1];
-                                    var current = object_key + ".png"
-                                        // + fileType;
-                                    var awsKey = current;
+                                    var object_key = crypto.createHash('md5').update(str).digest('hex');
+                                    var awsKey = object_key + ".png";
                                     var s3 = new AWS.S3();
-                                    s3.putObject({
+
+                                    //Check if file already exists
+                                    var params = {
                                         Bucket: 'if-server-general-images',
-                                        Key: awsKey,
-                                        Body: buffer,
-                                        ACL: 'public-read'
-                                    }, function(err, data) {
-                                        wait(function() {
-                                            fs.unlink(outputPath)
-                                        }, 200);
-                                        wait(function() {
-                                            fs.unlink(inputPath)
-                                        }, 200);
-                                        if (err) {
-                                            console.log('99', err)
-                                            return reject(err)
+                                        Key: awsKey
+                                    };
+
+                                    //Check if file already exists on AWS
+                                    s3.headObject(params, function(err, metadata) {
+
+                                        //If image does not yet exist
+                                        if (err && err.code == 'NotFound') {
+                                            // console.log('Image does not yet exist on AWS.', awsKey)
+                                            s3.putObject({
+                                                Bucket: 'if-server-general-images',
+                                                Key: awsKey,
+                                                Body: buffer,
+                                                ACL: 'public-read'
+                                            }, function(err, data) {
+                                                wait(function() {
+                                                    fs.unlink(outputPath)
+                                                }, 200);
+                                                wait(function() {
+                                                    fs.unlink(inputPath)
+                                                }, 200);
+                                                if (err) {
+                                                    console.log('99', err)
+                                                    return reject(err)
+                                                } else {
+                                                    var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
+                                                        // console.log('Uploaded!', imgURL)
+                                                    resolve(imgURL)
+                                                }
+                                            });
+
+                                            //If image exists                                       
                                         } else {
-                                            var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
-                                                // console.log('Uploaded!', imgURL)
-                                            resolve(imgURL)
+                                            // console.log('Image already exists on AWS!', awsKey)
+                                            wait(function() {
+                                                fs.unlink(outputPath)
+                                            }, 200);
+                                            wait(function() {
+                                                fs.unlink(inputPath)
+                                            }, 200);
+                                            s3.getSignedUrl('getObject', params, function(err, imgURL) {
+                                                if (err) {
+                                                    console.log('143', err)
+                                                    return reject(err)
+                                                } else {
+                                                    // imgURL = imgURL.split('?AWSAccessKeyId')[0]
+                                                    var imgURLt = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
+                                                        // console.log('imgURL: ',imgURL,'\nimgURLt: ',imgURLt)
+                                                    resolve(imgURLt)
+                                                }
+                                            });
                                         }
                                     });
+
+
+
                                 }); //END OF FS READFILE
                             }); //END OF CONVERT
                         }) // END OF FS WRITEFILE
@@ -145,14 +146,18 @@ module.exports = {
         var images = [];
         // console.log('SELF: ', self)
         return new Promise(function(resolve, reject) {
+            var count = 0
             async.eachSeries(array, function iterator(image, cb) {
+                str = str + '_' + count.toString()
                 self.uploadPicture(str, image).then(function(url) {
                     images.push(url)
+                    count++;
                     wait(cb, 1000)
                 }).catch(function(err) {
                     if (err) {
                         console.log('131', err)
                     }
+                    count++;
                     wait(cb, 1000)
                 })
             }, function finished(err) {
@@ -160,7 +165,9 @@ module.exports = {
                     console.log('137', err)
                     return reject(err)
                 }
+                // console.log('IMAGES!!: ', images)
                 images = _.uniq(images)
+                // console.log('FINAL IMAGES!!: ', images)
                 resolve(images)
             })
         })
