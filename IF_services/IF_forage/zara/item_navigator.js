@@ -17,11 +17,13 @@ async.whilst(
         async.eachSeries(catalogs, function(catalog, callback) {
             loadCatalog(catalog).then(function(res) {
                 console.log('Done with catalog.')
+                var today = new Date().toString()
+                fs.appendFile('progress.log', '\n' + today + 'Finished category: ', catalog)
                 wait(callback, 10000)
             }).catch(function(err) {
                 if (err) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {});
+                        // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {});
                     console.log('Error with catalog: ', catalog, err)
                 }
                 wait(callback, 10000)
@@ -41,7 +43,7 @@ async.whilst(
     function(err) {
         if (err) {
             var today = new Date().toString()
-            fs.appendFile('errors.log', '\n' + today + err, function(err) {});
+                // fs.appendFile('errors.log', '\n' + today + err, function(err) {});
         }
     })
 

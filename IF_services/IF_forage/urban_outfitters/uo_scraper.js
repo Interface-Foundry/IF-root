@@ -9,6 +9,7 @@ var urlapi = require('url');
 var _ = require('lodash');
 var fs = require('fs');
 var tagParser = require('../tagParser')
+var upload = require('../../upload')
     //Global var to hold category
 cat = '';
 //Global var to hold fake user object
@@ -43,10 +44,28 @@ module.exports = function(url, category, stores) {
             function(item, callback) {
                 cloneItems(item).then(function(items) {
                     // console.log(3)
-                        // console.log('Items: ', items[0].physicalStores[0])
+                    // console.log('Items: ', items[0].physicalStores[0])
                     callback(null, items)
                 }).catch(function(err) {
                     callback(err)
+                })
+            },
+            function(items, callback) {
+                async.eachSeries(items, function iterator(item, cb) {
+                    // console.log('welp getting here: ', item.images)
+                    upload.uploadPictures('urban_outfitters', item.images).then(function(images) {
+                        item.hostedImages = images
+                        cb()
+                    }).catch(function(err) {
+                        if (err) console.log('Image upload error: ', err);
+                        cb()
+                    })
+                }, function finished(err) {
+                    if (err) {
+                        console.log('Images upload error: ',err) 
+                    }
+                    // console.log('Finished uploading images: ', items[0].hostedImages)
+                    callback(null,items)
                 })
             },
             function(items, callback) {
@@ -328,6 +347,9 @@ function cloneItems(newItems) {
                             //Remove duplicates
                         item.physicalStores = _.uniq(item.physicalStores, 'storeId');
                         item.physicalStores = _.uniq(item.physicalStores, 'storeName');
+
+                        //Create an AWS images prop for each image here
+                        item.hostedImages = []
                     })
                     // console.log('store: ', finalItems[0].physicalStores[0])
                 resolve(finalItems)
@@ -340,7 +362,7 @@ function saveItems(items, stores) {
     return new Promise(function(resolve, reject) {
         var savedItems = []
         async.eachSeries(items, function(item, callback1) {
-                    //Map-out storeIds out of array to use in URL query below.
+                //Map-out storeIds out of array to use in URL query below.
                 var allStoreIds = stores.map(function(obj) {
                     return obj.source_generic_store.storeId
                 })
@@ -375,7 +397,7 @@ function saveItems(items, stores) {
                     //----
 
                 // console.log('storeIds: ', mongoIds, '\nstoreLocs: ', storeLocs)
-                if (storeLocs.length < 1 || storeLocs.length !== storeIds.length) {
+                if (storeLocs.length <= 1 || storeLocs.length !== storeIds.length) {
                     console.log('Inventory query yielded no "physicalStores"', item.physicalStores)
                     return callback1()
                 }
@@ -401,7 +423,7 @@ function saveItems(items, stores) {
                         i.source_generic_item = item;
                         delete i.source_generic_item.physicalStores;
                         i.price = parseFloat(item.price);
-                        i.itemImageURL = item.images;
+                        i.itemImageURL = item.hostedImages;
                         i.name = item.name;
                         i.owner = owner;
                         i.linkback = item.src;
@@ -456,7 +478,7 @@ function saveItems(items, stores) {
                             }) //end of uniquer
 
                     } else if (match) {
-                            // console.log('Scenario 2')
+                        // console.log('Scenario 2')
 
                         db.Landmarks.findOne({
                             '_id': match._id,
@@ -470,7 +492,7 @@ function saveItems(items, stores) {
                             if (e) {
                                 console.log('Inventory update error: ', e)
                             }
-                            console.log('Updated inventory for item.',result)
+                            console.log('Updated inventory for item.', result)
                             callback1()
                         })
 

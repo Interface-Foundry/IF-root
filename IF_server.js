@@ -797,7 +797,6 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             console.log("Filesize too large.");
             res.sendStatus(500, 'File size is too large.')
         } else {
-
             // console.log('*Successfully passed busboy filters.')
             var stuff_to_hash = filename + (new Date().toString());
             var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');

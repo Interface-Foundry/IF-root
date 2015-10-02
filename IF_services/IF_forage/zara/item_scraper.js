@@ -59,7 +59,7 @@ module.exports = function scrapeItem(url) { 
                     }).catch(function(err) {
                         if (err) {
                             var today = new Date().toString()
-                            fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
+                            // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
                         }
                         callback(null)
                     })
@@ -120,7 +120,7 @@ module.exports = function scrapeItem(url) { 
             function(err, item) {
                 if (err) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
+                    // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
                         console.log(err)
                         return reject(err)
                     });
