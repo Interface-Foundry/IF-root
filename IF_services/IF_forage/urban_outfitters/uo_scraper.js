@@ -413,7 +413,7 @@ function saveItems(items, stores) {
                         return callback1()
                     }
 
-                    if (!match || (match && match.source_generic_item && !match.source_generic_item.tags)) {
+                    if (!match || (match && match.source_generic_item && (!match.source_generic_item.tags || !match.source_generic_item.hostedImages ))) {
                         //Create new item for each store in inventory list.
                         // console.log('Scenario 1')
                         var i = new db.Landmark();

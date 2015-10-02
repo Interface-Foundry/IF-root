@@ -50,42 +50,59 @@ module.exports = {
 
             convertBase64(image).then(function(base64) {
                     var tmpfilename = urlify('temp_' + str + '_' + (new Date().toString()))
-                    var inputPath = "../../temp/input/"+tmpfilename + ".png";
-                    var outputPath = "../../temp/output/"+tmpfilename + ".png";
+                    var inputPath = "../../temp/input/" + tmpfilename + ".png";
+                    var outputPath = "../../temp/output/" + tmpfilename + ".png";
                     fs.writeFile(inputPath, base64, 'base64', function(err) {
                             if (err) console.log('57', err);
-                            var width = 300; // output width in pixels
-                            //Optimal image compression settings using imagemagick
-                            var args = [
-                                inputPath,
-                                '-filter',
-                                'Triangle',
-                                '-define',
-                                'filter:support=2',
-                                // '-thumbnail',
-                                // '300',
-                                // '-unsharp 0.25x0.25+8+0.065',
-                                // '-dither None',
-                                '-posterize 136',
-                                '-quality 82',
-                                '-define jpeg:fancy-upsampling=off',
-                                '-define png:compression-filter=5',
-                                '-define png:compression-level=9',
-                                '-define png:compression-strategy=1',
-                                '-define png:exclude-chunk=all',
-                                '-interlace none',
-                                '-colorspace sRGB',
-                                '-strip',
-                                outputPath
-                            ];
+                            // var width = 300; // output width in pixels
+                            // //Optimal image compression settings using imagemagick
+                            // var args = [
+                            //     inputPath,
+                            //     '-filter',
+                            //     'Triangle',
+                            //     '-define',
+                            //     'filter:support=2',
+                            //     '-thumbnail',
+                            //     '450',
+                            //     '-unsharp' ,
+                            //     '0.25x0.25+8+0.065',
+                            //     '-dither',
+                            //     'None',
+                            //     '-posterize'
+                            //     ,'136',
+                            //     '-quality',
+                            //     '82',
+                            //     '-define',
+                            //     'jpeg:fancy-upsampling=off',
+                            //     '-define', 
+                            //     'png:compression-filter=5',
+                            //     '-define',
+                            //     'png:compression-level=9',
+                            //     '-define',
+                            //     'png:compression-strategy=1',
+                            //     '-define', 
+                            //     'png:exclude-chunk=all',
+                            //     '-interlace', 
+                            //     'none',
+                            //     '-colorspace',
+                            //     'sRGB',
+                            //     '-strip',
+                            //     outputPath
+                            // ];
 
-                            im.convert(args, function(err, stdout, stderr) {
-                                if (err) console.log('83: ',err)
+                            im.resize({
+                                srcPath: inputPath,
+                                dstPath: outputPath,
+                                strip: true,
+                                quality: 82,
+                                width: 450
+                            }, function(err, stdout, stderr) {
+                                if (err) console.log('83: ', err)
                                 fs.readFile(outputPath, function(err, buffer) {
                                     var object_key = crypto.createHash('md5').update(tmpfilename).digest('hex');
                                     // var fileType = buffer.split(';')[0].split('/')[1];
                                     var current = object_key + ".png"
-                                     // + fileType;
+                                        // + fileType;
                                     var awsKey = current;
                                     var s3 = new AWS.S3();
                                     s3.putObject({
@@ -94,12 +111,18 @@ module.exports = {
                                         Body: buffer,
                                         ACL: 'public-read'
                                     }, function(err, data) {
+                                        wait(function() {
+                                            fs.unlink(outputPath)
+                                        }, 200);
+                                        wait(function() {
+                                            fs.unlink(inputPath)
+                                        }, 200);
                                         if (err) {
                                             console.log('99', err)
                                             return reject(err)
                                         } else {
                                             var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
-                                            console.log('Uploaded!', imgURL)
+                                                // console.log('Uploaded!', imgURL)
                                             resolve(imgURL)
                                         }
                                     });
@@ -136,8 +159,16 @@ module.exports = {
                     console.log('137', err)
                     return reject(err)
                 }
+                images = _.uniq(images)
                 resolve(images)
             })
         })
     }
+}
+
+
+function wait(callback, delay) {
+    var startTime = new Date().getTime();
+    while (new Date().getTime() < startTime + delay);
+    callback();
 }
