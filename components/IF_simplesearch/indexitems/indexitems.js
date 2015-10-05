@@ -14,8 +14,8 @@ var stream = db.Landmarks
  .populate('parents')
  .stream()
 stream.on('data', function(lm) {
- console.log(lm.name, lm.parents.map(function(p) {
-   return p.addressString
+ console.log(lm._id, lm.parents.map(function(p) {
+   return p._id
  }));
 })
 

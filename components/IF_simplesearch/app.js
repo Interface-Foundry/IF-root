@@ -4,6 +4,7 @@ var app = express();
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var uuid = require('uuid');
+var compression = require('compression');
 // var request = require('request');
 
 app.use(bodyParser.json());
@@ -11,6 +12,17 @@ app.use(express.static(__dirname + '/static'));
 // app.use(require('prerender-node').set('prerenderToken', 'G7ZgxSO9pLyeidrHtWgX'));
 app.use(require('prerender-node').set('prerenderServiceUrl', 'http://127.0.1.1:3000'));
 app.use(require('prerender-node').set('protocol', 'https'));
+
+app.use(compression());
+
+//express compression
+// var oneDay = 86400000;
+
+
+// app.use(express.static(__dirname + '/app/dist', {
+//     maxAge: oneDay
+// }));
+
 
 
 app.get('/*', function(req, res, next) {
