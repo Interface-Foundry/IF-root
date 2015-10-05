@@ -14,17 +14,17 @@ gulp.task('build', function() {
         .pipe(postcss([ autoprefixer({ browsers: ['last 2 versions'] }),
                         csswring
                       ]))
-        .pipe(concat('simpleSearch.min.css'))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('./static/css/'));
-    gulp.src(['./static/css/simpleSearch.min.css'])
-        .pipe(concat('simpleSearch.mincat.css'))
-        .pipe(gulp.dest('./static'));
+        .pipe(concat('simpleSearch.mincat.css')) //rename file via concat
+        .pipe(sourcemaps.write('.')) 
+        .pipe(gulp.dest('./static')); // pushing mincat.css to static
+    // gulp.src(['./static/css/simpleSearch.min.css'])
+    //     .pipe(concat('simpleSearch.mincat.css'))
+    //     .pipe(gulp.dest('./static'));
     //minify and concat js
      gulp.src('./static/simpleSearch.js')
         .pipe(concat('mincat.js'))
-        .pipe(uglify())
-        .pipe(gulp.dest('./static/'))
+        .pipe(uglify()) //minifies
+        .pipe(gulp.dest('./static')) //save to static
     gulp.src(['./static/lib/tominify/*.js'])
         .pipe(concat('minified.js'))
         .pipe(uglify())
