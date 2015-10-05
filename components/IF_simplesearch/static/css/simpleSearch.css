@@ -33,11 +33,11 @@ body {
 
 @font-face {
 	font-family: 'kiplevels';
-	src:url('/kip/fonts/kiplevels.eot?-y4ype7');
-	src:url('/kip/fonts/kiplevels.eot?#iefix-y4ype7') format('embedded-opentype'),
-		url('/kip/fonts/kiplevels.ttf?-y4ype7') format('truetype'),
-		url('/kip/fonts/kiplevels.woff?-y4ype7') format('woff'),
-		url('/kip/fonts/kiplevels.svg?-y4ype7#kiplevels') format('svg');
+	src:url('fonts/kiplevels.eot?-y4ype7');
+	src:url('fonts/kiplevels.eot?#iefix-y4ype7') format('embedded-opentype'),
+		url('fonts/kiplevels.ttf?-y4ype7') format('truetype'),
+		url('fonts/kiplevels.woff?-y4ype7') format('woff'),
+		url('fonts/kiplevels.svg?-y4ype7#kiplevels') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -879,6 +879,7 @@ div.footerBar {
     margin-right: 1px;
     background-color: gray;
     background-position: center;
+    background-size: cover;
     flex-shrink: 1;
 }
 
@@ -937,6 +938,8 @@ div.footerBar {
     top: 50px;
     right: 0px;
     width: 9%;
+    color: white;
+    cursor: pointer;
 }
 
 .detailsFromCollapsed.Distance {

@@ -137,7 +137,7 @@
                 <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}} - {{::item.distanceMI}} miles</span>
                 <br>
                 <div class="detailsContent">{{::item.description}}</div>
-                <a href="/t/{{item._id}}"><span class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span></a>
+                <span ng-click="returnHome(item);" class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
 
                 <div class="parentWrapper">
                     <p ng-hide="{{!item.parent.addressString}}" class="detailsFromCollapsed Store"> {{::item.parent.addressString}}</p>

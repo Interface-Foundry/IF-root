@@ -78,7 +78,7 @@
             <div class="detailsContentWrapper singleItem">
 
                 <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{::item.price}} - </span> {{::item.name}}</div>
-                <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}} - {{::item.distanceMI}} miles</span>
+                <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}}</span>
                 <br>
                 <div class="detailsContent">{{::item.description}}</div>
                 <a href="/t/{{item._id}}"><span class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span></a>
