@@ -21,7 +21,7 @@ var upload = require('../../upload')
 
 //Global var to hold fake user object
 owner = {}
-//TODO: Count number of new items saved
+    //TODO: Count number of new items saved
 saveCount = 0;
 //TODO: Updatecount
 updateCount = 0;
@@ -59,7 +59,7 @@ module.exports = function scrapeItem(url) { 
                     }).catch(function(err) {
                         if (err) {
                             var today = new Date().toString()
-                            // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
+                                // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
                         }
                         callback(null)
                     })
@@ -82,10 +82,12 @@ module.exports = function scrapeItem(url) { 
                     if (!exists || (exists && existingItem.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
                         //The || is for the case in which item was previously scraped but without AWS images
                         if (exists) {
-                           exists = !exists
-                           // console.log('Removing existing item to be updated.')
-                           //remove outdated item, this doesn't need to happen async
-                           db.Landmarks.remove({'id':existingItem.id})
+                            exists = !exists
+                                // console.log('Removing existing item to be updated.')
+                                //remove outdated item, this doesn't need to happen async
+                            db.Landmarks.remove({
+                                'id': existingItem.id
+                            })
                         }
                         scrapeDetails(url).then(function(item) {
                             callback(null, item)
@@ -111,6 +113,19 @@ module.exports = function scrapeItem(url) { 
                     })
                 },
                 function(item, inventory, callback) {
+                    if (item.partNumber == undefined || item.partNumber == null || !item.partNumber) {
+                       return callback('Partnumber missing from zara API query.')
+                    }
+              
+                    upload.uploadPictures('zara_' + item.partNumber.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
+                        item.hostedImages = images
+                        callback(null, item, inventory)
+                    }).catch(function(err) {
+                        if (err) console.log('Image upload error: ', err);
+                        callback(err)
+                    })
+                },
+                function(item, inventory, callback) {
                     processItems(inventory, item).then(function(item) {
                         callback(null, item)
                     }).catch(function(err) {
@@ -121,11 +136,10 @@ module.exports = function scrapeItem(url) { 
             function(err, item) {
                 if (err) {
                     var today = new Date().toString()
-                    // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
-                        console.log(err)
-                        return reject(err)
-                    });
-                }
+                        // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
+                    console.log(err)
+                    return reject(err)
+                };
                 resolve()
             });
     })
@@ -326,8 +340,8 @@ function getInventory(itemData, stores) {
         // var storeIds = stores.map(function(obj) {
         //     return obj.source_generic_store.storeId
         // })
-       
-    var storeIds = [3074, 3818, 3037, 1260, 3946, 303, 3036,3611,3441,6493,3723,3844,3985,3805,3612]
+
+    var storeIds = [3074, 3818, 3037, 1260, 3946, 303, 3036, 3611, 3441, 6493, 3723, 3844, 3985, 3805, 3612]
 
     // http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/15517003004?physicalStoreId=3036,3037,3074,3818,1260,303,3946&ajaxCall=true
     return new Promise(function(resolve, reject) {
@@ -427,7 +441,7 @@ function processItems(inventory, itemData) {
             i.source_generic_item = itemData;
             i.hasloc = true;
             i.price = parseFloat(itemData.price);
-            i.itemImageURL = itemData.images;
+            i.itemImageURL = itemData.hostedImages;
             i.name = itemData.name;
             i.owner = owner;
             i.linkback = itemData.src;

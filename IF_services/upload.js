@@ -22,7 +22,6 @@ var express = require('express'),
 module.exports = {
     uploadPicture: function(str, image) {
         return new Promise(function(resolve, reject) {
-            // console.log('!!!!honestly guise: ', str, image)
             function convertBase64(image) {
                 return new Promise(function(resolve, reject) {
                     //Detect if the passed image is base64 already or a URI
@@ -55,7 +54,6 @@ module.exports = {
                     var outputPath = __dirname + "/temp/output/" + tmpfilename + ".png";
                     fs.writeFile(inputPath, base64, 'base64', function(err) {
                             if (err) console.log('57', err);
-
                             im.resize({
                                 srcPath: inputPath,
                                 dstPath: outputPath,
@@ -68,19 +66,16 @@ module.exports = {
                                     var object_key = crypto.createHash('md5').update(str).digest('hex');
                                     var awsKey = object_key + ".png";
                                     var s3 = new AWS.S3();
-
                                     //Check if file already exists
                                     var params = {
                                         Bucket: 'if-server-general-images',
                                         Key: awsKey
                                     };
-
                                     //Check if file already exists on AWS
                                     s3.headObject(params, function(err, metadata) {
-
                                         //If image does not yet exist
                                         if (err && err.code == 'NotFound') {
-                                            // console.log('Image does not yet exist on AWS.', awsKey)
+
                                             s3.putObject({
                                                 Bucket: 'if-server-general-images',
                                                 Key: awsKey,
@@ -98,14 +93,14 @@ module.exports = {
                                                     return reject(err)
                                                 } else {
                                                     var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
-                                                        // console.log('Uploaded!', imgURL)
+                                                    console.log('Uploaded to AWS.', imgURL)
                                                     resolve(imgURL)
                                                 }
                                             });
 
                                             //If image exists                                       
                                         } else {
-                                            // console.log('Image already exists on AWS!', awsKey)
+                                            console.log('Image exists.', awsKey)
                                             wait(function() {
                                                 fs.unlink(outputPath)
                                             }, 200);
@@ -117,17 +112,12 @@ module.exports = {
                                                     console.log('143', err)
                                                     return reject(err)
                                                 } else {
-                                                    // imgURL = imgURL.split('?AWSAccessKeyId')[0]
                                                     var imgURLt = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
-                                                        // console.log('imgURL: ',imgURL,'\nimgURLt: ',imgURLt)
                                                     resolve(imgURLt)
                                                 }
                                             });
                                         }
                                     });
-
-
-
                                 }); //END OF FS READFILE
                             }); //END OF CONVERT
                         }) // END OF FS WRITEFILE
@@ -144,7 +134,6 @@ module.exports = {
         var self = this;
         var str = str;
         var images = [];
-        // console.log('SELF: ', self)
         return new Promise(function(resolve, reject) {
             var count = 0
             async.eachSeries(array, function iterator(image, cb) {
@@ -165,15 +154,12 @@ module.exports = {
                     console.log('137', err)
                     return reject(err)
                 }
-                // console.log('IMAGES!!: ', images)
                 images = _.uniq(images)
-                // console.log('FINAL IMAGES!!: ', images)
                 resolve(images)
             })
         })
     }
 }
-
 
 function wait(callback, delay) {
     var startTime = new Date().getTime();

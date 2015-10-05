@@ -9,6 +9,7 @@ var request = require('request');
 var _ = require('lodash');
 var tagParser = require('../tagParser');
 var fs = require('fs')
+var upload = require('../../upload')
 
 
 //Global var to hold category
@@ -66,6 +67,18 @@ module.exports = function(url, category, zipcode) {
                                         saveStores(item, inventory).then(function(stores) {
                                             callback(null, item, stores)
                                         }).catch(function(err) {
+                                            callback(err)
+                                        })
+                                    },
+                                    function(item, stores, callback) {
+                                        if (item.styleId == undefined || item.styleId == null || !item.styleId || item.name == undefined || item.name == null || !item.name) {
+                                            return callback('StyleId missing from Nordstrom API query.')
+                                        }
+                                        upload.uploadPictures('nordstrom_' + item.styleId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
+                                            item.hostedImages = images
+                                            callback(null, item, stores)
+                                        }).catch(function(err) {
+                                            if (err) console.log('Image upload error: ', err);
                                             callback(err)
                                         })
                                     },
@@ -355,8 +368,17 @@ function saveStores(item, inventory) {
                 }
             };
 
+
             request(options, function(error, response, body) {
-                $ = cheerio.load(body); //load HTML
+
+                try {
+                    $ = cheerio.load(body); //load HTML
+                } catch (err) {
+                    console.log('Cheerio Error: ',err)
+                    reject(err)
+                }
+
+
 
                 var storeObj = {
                     storeId: item.StoreNumber
@@ -490,7 +512,9 @@ function saveItem(newItem, Stores) {
             if (!i || (i && i.source_generic_item && !i.source_generic_item.tags)) {
                 //If item was previously scraped without the description tags, delete it
                 if (i && i.source_generic_item && !i.source_generic_item.tags) {
-                    db.Landmarks.remove({'id':i.id})
+                    db.Landmarks.remove({
+                        'id': i.id
+                    })
                 }
                 var item = new db.Landmarks();
                 item.source_generic_item = newItem;
@@ -505,7 +529,7 @@ function saveItem(newItem, Stores) {
                 item.name = item.source_generic_item.name;
                 item.linkback = item.source_generic_item.src;
                 item.linkbackname = 'nordstrom.com';
-                item.itemImageURL = item.source_generic_item.images;
+                item.itemImageURL = newItem.hostedImages;
                 item.itemTags.text.push('nordstrom');
                 item.itemTags.text.push(cat);
                 var tags = newItem.name.split(' ').map(function(word) {
