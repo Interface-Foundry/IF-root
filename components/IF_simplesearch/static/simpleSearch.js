@@ -144,7 +144,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     }
     
     $scope.singleItemMobile = function(index, imgCnt, item) {
-        console.log(item);
+//        console.log(item);
            $timeout(function() {
                     $scope.mobileModalHeight = $('#expandedModal'+index)[0].clientHeight + ((imgCnt - 1) * 40);
                     var thumbs = $('#thumbContainer'+index);
@@ -210,7 +210,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     })
 
     $scope.enlargeImage = function(parIndex, imgIndex) {
-        console.log(parIndex, imgIndex);
+//        console.log(parIndex, imgIndex);
         if ($scope.mobileScreen) {
             $('.mobileImg'+parIndex).css({
                 'background-image': "url("+imgIndex+")"
@@ -493,7 +493,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                      console.log('no results');
                 }
 
-                console.log('data', response.data);
+//                console.log('data', response.data);
 
                 if ($scope.items && $scope.items.length){
                     $scope.noResults = false;
