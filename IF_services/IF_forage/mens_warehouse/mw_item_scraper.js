@@ -9,6 +9,7 @@ var request = require('request');
 var _ = require('lodash');
 var tagParser = require('../tagParser');
 var fs = require('fs');
+var upload = require('../../upload')
 
 module.exports = function(url, category, zipcode) {
     //Global variable declarations
@@ -19,6 +20,7 @@ module.exports = function(url, category, zipcode) {
         async.waterfall([
                 function(callback) {
                     loadFakeUser().then(function() {
+                        console.log(1)
                         callback(null)
                     }).catch(function(err) {
                         console.log('Could not load owner user.')
@@ -27,6 +29,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(callback) {
                     scrapeItem(url).then(function(item) {
+                         console.log(2)
                         wait(function() {
                             callback(null, item)
                         }, 3000)
@@ -36,6 +39,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(item, callback) {
                     getLatLong(zipcode).then(function(coords) {
+                         console.log(3)
                         callback(null, item, coords)
                     }).catch(function(err) {
                         callback(err)
@@ -43,6 +47,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(item, coords, callback) {
                     getInventory(item, coords).spread(function(items, stores) {
+                         console.log(4)
                         callback(null, items, stores)
                     }).catch(function(err) {
                         callback(err)
@@ -50,10 +55,33 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(items, stores, callback) {
                     saveStores(items, stores).spread(function(items, stores) {
+                         console.log(5)
                         callback(null, items, stores)
                     }).catch(function(err) {
                         callback(err)
                     })
+                },
+                function(items, stores, callback) {
+                    async.eachSeries(items, function iterator(item, cb) {
+                        if (item.parentProductId == undefined || item.parentProductId == null || !item.parentProductId) {
+                            return callback('parentProductId missing from Mens Wearhouse API query.')
+                        }
+                        upload.uploadPictures('mw_' + item.parentProductId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
+                            item.hostedImages = images
+                            cb()
+                        }).catch(function(err) {
+                            if (err) console.log('Image upload error: ', err);
+                            cb()
+                        })
+
+                    }, function finished(err) {
+                        if (err) {
+                            console.log('Images upload error: ', err)
+                        }
+                        // console.log('Finished uploading images: ', items[0].hostedImages)
+                        callback(null, items, stores)
+                    })
+
                 },
                 function(items, stores, callback) {
                     saveItems(items, stores).then(function(items) {
@@ -463,6 +491,7 @@ function saveStores(items, stores) {
                 console.log('Error in saveStores()', err)
                 return reject(err)
             }
+
             //Now delete extraneous info from physicalStores and sizeIds properties
             items.forEach(function(item) {
                     item.sizeIds.forEach(function(part) {
@@ -525,7 +554,7 @@ function saveItems(items, Stores) {
                     return callback()
                 }
                 //Create new item in db if it does not already exist
-                if (!i) {
+                if (!i || (i && i.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
                     var newItem = new db.Landmarks();
                     newItem.source_generic_item = item;
                     newItem.loc.type = 'MultiPoint'
@@ -538,7 +567,7 @@ function saveItems(items, Stores) {
                     newItem.name = item.name
                     newItem.linkback = item.src;
                     newItem.linkbackname = 'menswearhouse.com';
-                    newItem.itemImageURL = item.images;
+                    newItem.itemImageURL = item.hostedImages;
                     newItem.itemTags.text.push('menswearhouse')
 
                     var nametags = newItem.name.split(' ').map(function(word) {

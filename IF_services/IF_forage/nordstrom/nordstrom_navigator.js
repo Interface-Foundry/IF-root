@@ -29,7 +29,7 @@ var handbags = {
     category: 'Handbags',
     url: 'http://shop.nordstrom.com/c/handbags-new-arrivals?origin=leftnav'
 }
-var catalogs = [handbags, womens, mens, mshoes, wshoes]
+var catalogs = [womens, mens, mshoes, wshoes,handbags]
 
 stateIndex = 0;
 currentState = states[stateIndex]
