@@ -3,6 +3,7 @@ var app = express.Router();
 var db = require('../IF_schemas/db');
 var async = require('async');
 var RSVP = require('rsvp');
+var mailerTransport = require('../IF_mail/IF_mail.js');
 /**
  * This should be mounted at /api/items
  */
@@ -32,9 +33,9 @@ app.use('/:mongoId/:action', function(req, res, next) {
         req.item = item;
 
         if (req.user) {
-          req.ownsItem = item.owner.mongoId === req.user._id.toString();
+            req.ownsItem = item.owner.mongoId === req.user._id.toString();
         } else {
-          req.ownsItem = false;
+            req.ownsItem = false;
         }
 
         // create an activity object for this action, only save it to the db in each route, though
@@ -247,7 +248,11 @@ app.post('/:mongoId/fave', function(req, res, next) {
     if (req.item.owner && req.item.owner.mongoId) {
         db.Users.update({
             _id: req.item.owner.mongoId
-        }, {$inc: {kip: 5}}, function(err) {
+        }, {
+            $inc: {
+                kip: 5
+            }
+        }, function(err) {
             if (err) {
                 // todo log error to ELK
                 console.error(err);
@@ -422,9 +427,9 @@ app.post('/:mongoId/unreject', function(req, res, next) {
 
     // send a response with the updated item and user
     RSVP.hash({
-        item: itemPromise,
-        user: userPromise
-    })
+            item: itemPromise,
+            user: userPromise
+        })
         .then(function(results) {
             res.send(results);
 
@@ -473,14 +478,36 @@ app.post('/:mongoId/report', function(req, res, next) {
     } else {
         req.item.reports.push(req.body);
     }
+
     req.item.save(function(e) {
         if (e) {
             e.niceMessage = 'Oops there was a problem processing your feedback.  Please try again';
             return next(e);
         }
-        return res.send({
-            user: req.user,
-            item: req.item
+
+        var report = req.item.reports[req.item.reports.length - 1];
+        var s = /(<([^>]+)>)/ig; // just strip out HTML stuff
+        var emailSubject = "Feedback - " + report.reason.replace(s, '');
+        var emailBody = "from: $user\n\nemotion: $emotion\n\ntext: $text"
+            .replace('$user', req.user ? req.user._id : "not logged in")
+            .replace('$anonuser', req.body.anonuserid)
+            .replace('$text', report.comment)
+            .replace(s, '');
+        var feedbackTo = 'hello@interfacefoundry.com';
+        var mailOptions = {
+            to: feedbackTo,
+            from: 'Kip Feedback <feedback@kipapp.co>',
+            subject: emailSubject,
+            text: emailBody
+        };
+        mailerTransport.sendMail(mailOptions, function(err) {
+            if (err) {
+                console.error(err);
+            }
+            return res.send({
+                user: req.user,
+                item: req.item
+            });
         });
     });
 });

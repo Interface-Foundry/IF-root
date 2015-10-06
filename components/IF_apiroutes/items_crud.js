@@ -70,9 +70,7 @@ router.use('/:id*', function(req, res, next) {
     // Version 0.0.4 (9/10/15) changes "parent" to "parents"
     if (semver.gte(req.version, '0.0.4')) {
         query = query.populate('parents', 'name id addressString tel description loc')
-    } else {
-        query = query.populate('parents', 'name id addressString tel description loc')
-    }
+    } 
 
     query.exec(function(err, item) {
         console.log('yay', item);
