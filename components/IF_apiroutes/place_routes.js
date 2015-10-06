@@ -62,6 +62,40 @@ router.post('/nearest', function(req, res) {
         });
 })
 
+//Return closest store given an item ID (for kipsearch.com) 
+router.post('/closestStore', function(req, res) {
+    var loc = {
+        type: 'Point',
+        coordinates: []
+    };
+    loc.coordinates.push(parseFloat(req.body.lat));
+    loc.coordinates.push(parseFloat(req.body.lon));
+    db.Landmarks.aggregate(
+        [{
+            "$geoNear": {
+                "near": loc,
+                "spherical": true,
+                "distanceField": "dis"
+            }
+        }, {
+            "$match": {
+                "source_generic_store": {
+                    "$exists": true
+                }
+            }
+        }, {
+
+            "$limit": 10
+
+        }],
+        function(err, places) {
+            if (err) console.log(err);
+            if (!places) return res.send(440);
+            res.send(places);
+        });
+})
+
+
 
 
 

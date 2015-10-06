@@ -151,140 +151,153 @@ function scrapeItem(url) {
                     }
                 });
                 //iterate on images found in HTML
-                $('div').each(function(i, elem) {
-                    if (elem.attribs) {
-                        if (elem.attribs.id) {
-                            if (elem.attribs.id.indexOf('current_') > -1) {
 
-                                //console.log('current_ ',elem.children[0].data);
-                                if (elem.children[0].data.length > 5) {
-                                    //NEW ITEM CREATED (BY COLOR)
-                                    var itemCollect = {
-                                        sizeIds: [],
-                                        images: [],
-                                        physicalStores: []
-                                    };
-                                    // itemCollect.storeId = (storeId) ? storeId : null;
-                                    // itemCollect.catalogId = catalogId ? catalogId : null;
-                                    newItems.push(itemCollect);
-                                    newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
-                                }
-                            } else if (elem.attribs.id.indexOf('detail_') > -1) {
+                try {
+                    $('div').each(function(i, elem) {
+                        if (elem.attribs) {
+                            if (elem.attribs.id) {
+                                if (elem.attribs.id.indexOf('current_') > -1) {
 
-                                if (elem.children[0].data.length > 5) { //prevent false positive data
-
-                                    if (elem.children[0].data.length < 70) { //filter data glitch
-                                        var detailObj = elem.children[0].next.next.data.replace('",', '{ ProdDetail:{'); //fixing glitchy data incoming from mens warehouse
-                                    } else {
-                                        var detailObj = elem.children[0].data; //no data glitch, proceed
+                                    //console.log('current_ ',elem.children[0].data);
+                                    if (elem.children[0].data.length > 5) {
+                                        //NEW ITEM CREATED (BY COLOR)
+                                        var itemCollect = {
+                                            sizeIds: [],
+                                            images: [],
+                                            physicalStores: []
+                                        };
+                                        // itemCollect.storeId = (storeId) ? storeId : null;
+                                        // itemCollect.catalogId = catalogId ? catalogId : null;
+                                        newItems.push(itemCollect);
+                                        newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
                                     }
+                                } else if (elem.attribs.id.indexOf('detail_') > -1) {
 
-                                    newItems[itemCount].parentProductId = eval("(" + detailObj + ")").ProdDetail.parentProductId; //get parent product ID
-                                    newItems[itemCount].src = eval("(" + detailObj + ")").ProdDetail.SocialURL; //get parent product ID
+                                    if (elem.children[0].data.length > 5) { //prevent false positive data
 
-                                    ////////// EXTRACT TAGS //////////
-                                    var details = eval("(" + detailObj + ")").ProdDetail.details.split("|"); //from details
-                                    if (eval("(" + detailObj + ")").ProdDetail.longDesc) {
-                                        var longDesc = eval("(" + detailObj + ")").ProdDetail.longDesc.split(" "); //from longDescription
-                                    } else {
-                                        var longDesc = ['']; //no longDesc
-                                    }
-                                    var tagMerge = details.concat(longDesc);
-                                    tagMerge = details.concat(longDesc).join(" ");
-
-                                    newItems[itemCount].tags = getNoneStopWords(tagMerge); //add tags to newItem
-                                    newItems[itemCount].tags = eliminateDuplicates(newItems[itemCount].tags);
-
-                                    //remove STOP words from: 
-                                    // http://stackoverflow.com/questions/6686718/javascript-code-to-filter-out-common-words-in-a-string
-                                    function getNoneStopWords(sentence) {
-                                        var common = getStopWords();
-                                        var wordArr = sentence.match(/\w+/g),
-                                            commonObj = {},
-                                            uncommonArr = [],
-                                            word, i;
-                                        for (i = 0; i < common.length; i++) {
-                                            commonObj[common[i].trim()] = true;
+                                        if (elem.children[0].data.length < 70) { //filter data glitch
+                                            var detailObj = elem.children[0].next.next.data.replace('",', '{ ProdDetail:{'); //fixing glitchy data incoming from mens warehouse
+                                        } else {
+                                            var detailObj = elem.children[0].data; //no data glitch, proceed
                                         }
-                                        for (i = 0; i < wordArr.length; i++) {
-                                            word = wordArr[i].trim().toLowerCase();
-                                            if (!commonObj[word]) {
-                                                uncommonArr.push(word);
+
+                                        newItems[itemCount].parentProductId = eval("(" + detailObj + ")").ProdDetail.parentProductId; //get parent product ID
+                                        newItems[itemCount].src = eval("(" + detailObj + ")").ProdDetail.SocialURL; //get parent product ID
+
+                                        ////////// EXTRACT TAGS //////////
+                                        var details = eval("(" + detailObj + ")").ProdDetail.details.split("|"); //from details
+                                        if (eval("(" + detailObj + ")").ProdDetail.longDesc) {
+                                            var longDesc = eval("(" + detailObj + ")").ProdDetail.longDesc.split(" "); //from longDescription
+                                        } else {
+                                            var longDesc = ['']; //no longDesc
+                                        }
+                                        var tagMerge = details.concat(longDesc);
+                                        tagMerge = details.concat(longDesc).join(" ");
+
+                                        newItems[itemCount].tags = getNoneStopWords(tagMerge); //add tags to newItem
+                                        newItems[itemCount].tags = eliminateDuplicates(newItems[itemCount].tags);
+
+                                        //remove STOP words from: 
+                                        // http://stackoverflow.com/questions/6686718/javascript-code-to-filter-out-common-words-in-a-string
+                                        function getNoneStopWords(sentence) {
+                                            var common = getStopWords();
+                                            var wordArr = sentence.match(/\w+/g),
+                                                commonObj = {},
+                                                uncommonArr = [],
+                                                word, i;
+                                            for (i = 0; i < common.length; i++) {
+                                                commonObj[common[i].trim()] = true;
                                             }
+                                            for (i = 0; i < wordArr.length; i++) {
+                                                try {
+                                                    word = wordArr[i].trim().toLowerCase();
+                                                } catch (err) {
+                                                    if (err) console.log('Err line 213: ', err)
+                                                    continue;
+                                                }
+
+                                                if (!commonObj[word]) {
+                                                    uncommonArr.push(word);
+                                                }
+                                            }
+                                            return uncommonArr;
                                         }
-                                        return uncommonArr;
-                                    }
 
-                                    function getStopWords() {
-                                        return ["free", "stand", "features", "adds", "full", "extra", "featuring", "up", "upper", "details", "detail", "down", "featuring", "featuring", "look", "interior", "exterior", "multiple", "single", "a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your", "ain't", "aren't", "can't", "could've", "couldn't", "didn't", "doesn't", "don't", "hasn't", "he'd", "he'll", "he's", "how'd", "how'll", "how's", "i'd", "i'll", "i'm", "i've", "isn't", "it's", "might've", "mightn't", "must've", "mustn't", "shan't", "she'd", "she'll", "she's", "should've", "shouldn't", "that'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "wasn't", "we'd", "we'll", "we're", "weren't", "what'd", "what's", "when'd", "when'll", "when's", "where'd", "where'll", "where's", "who'd", "who'll", "who's", "why'd", "why'll", "why's", "won't", "would've", "wouldn't", "you'd", "you'll", "you're", "you've"];
-                                    }
-                                    //http://stackoverflow.com/questions/9751413/removing-duplicate-element-in-an-array
-                                    function eliminateDuplicates(arr) {
-                                        var i, len = arr.length,
-                                            out = [],
-                                            obj = {};
-                                        for (i = 0; i < len; i++) {
-                                            obj[arr[i]] = 0;
+                                        function getStopWords() {
+                                            return ["free", "stand", "features", "adds", "full", "extra", "featuring", "up", "upper", "details", "detail", "down", "featuring", "featuring", "look", "interior", "exterior", "multiple", "single", "a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your", "ain't", "aren't", "can't", "could've", "couldn't", "didn't", "doesn't", "don't", "hasn't", "he'd", "he'll", "he's", "how'd", "how'll", "how's", "i'd", "i'll", "i'm", "i've", "isn't", "it's", "might've", "mightn't", "must've", "mustn't", "shan't", "she'd", "she'll", "she's", "should've", "shouldn't", "that'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "wasn't", "we'd", "we'll", "we're", "weren't", "what'd", "what's", "when'd", "when'll", "when's", "where'd", "where'll", "where's", "who'd", "who'll", "who's", "why'd", "why'll", "why's", "won't", "would've", "wouldn't", "you'd", "you'll", "you're", "you've"];
                                         }
-                                        for (i in obj) {
-                                            out.push(i);
+                                        //http://stackoverflow.com/questions/9751413/removing-duplicate-element-in-an-array
+                                        function eliminateDuplicates(arr) {
+                                            var i, len = arr.length,
+                                                out = [],
+                                                obj = {};
+                                            for (i = 0; i < len; i++) {
+                                                obj[arr[i]] = 0;
+                                            }
+                                            for (i in obj) {
+                                                out.push(i);
+                                            }
+                                            return out;
                                         }
-                                        return out;
+                                        ///////////////////////////////////////
+
+                                        var imageURL = eval("(" + detailObj + ")").ProdDetail.ProdFullImage;
+                                        newItems[itemCount].images.push('http://images.menswearhouse.com/is/image/TMW/' + imageURL + '?$40Zoom$'); //get parent product ID
+
+                                        //GET IMAGES
+                                        //http://images.menswearhouse.com/is/image/TMW/MW40_726F_03_PRONTO_BLUE_COGNAC_SET?$40Zoom$
+                                        //MW40_726F_03_PRONTO_BLUE_COGNAC_SET
+
+
+                                        readItemPartNumbers(); //parse item parts
+
                                     }
-                                    ///////////////////////////////////////
 
-                                    var imageURL = eval("(" + detailObj + ")").ProdDetail.ProdFullImage;
-                                    newItems[itemCount].images.push('http://images.menswearhouse.com/is/image/TMW/' + imageURL + '?$40Zoom$'); //get parent product ID
+                                } else if (elem.attribs.id.indexOf('swatches_') > -1) {
 
-                                    //GET IMAGES
-                                    //http://images.menswearhouse.com/is/image/TMW/MW40_726F_03_PRONTO_BLUE_COGNAC_SET?$40Zoom$
-                                    //MW40_726F_03_PRONTO_BLUE_COGNAC_SET
+                                    //console.log('swatches_ ',elem.children[0].data);
 
+                                } else if (elem.attribs.id.indexOf('sizes_') > -1) {
 
-                                    readItemPartNumbers(); //parse item parts
+                                    //console.log('sizes_ ',elem.children[0].data);
 
-                                }
-
-                            } else if (elem.attribs.id.indexOf('swatches_') > -1) {
-
-                                //console.log('swatches_ ',elem.children[0].data);
-
-                            } else if (elem.attribs.id.indexOf('sizes_') > -1) {
-
-                                //console.log('sizes_ ',elem.children[0].data);
-
-                                if (elem.children[0].data.length > 5) { //prevent false positive data
-                                    newItems[itemCount].sizeMap = eval("(" + elem.children[0].data + ")").sizeMap; //blah blah JS container or smthing
-                                    readProductSizes();
-                                }
-
-                            } else if (elem.attribs.id.indexOf('pdpprices_') > -1) {
-
-
-                                if (elem.children[0].data.length > 5) {
-                                    newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regListPrice; //get item price
-                                    if (!newItems[itemCount].price) { //get this price if the other one doesn't exist (backup)
-                                        newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regOfferPrice;
+                                    if (elem.children[0].data.length > 5) { //prevent false positive data
+                                        newItems[itemCount].sizeMap = eval("(" + elem.children[0].data + ")").sizeMap; //blah blah JS container or smthing
+                                        readProductSizes();
                                     }
-                                }
 
-                                //console.log('pdpprices_ ',elem.children[0].data);
-                                itemCount++; //SHOULD GO LAST IN LOOP, used to select index in newItems array
+                                } else if (elem.attribs.id.indexOf('pdpprices_') > -1) {
 
-                                //ALL ITEMS ARE COLLECTED, NOW MOVE ON TO INVENTORY
-                                if (itemCount == itemCountLoop) {
-                                    if (newItems[0]) {
-                                        //console.log(newItems);
-                                        resolve(newItems);
-                                    } else {
-                                        console.log('missing params', newItems[0]);
-                                        reject('missing params');
+
+                                    if (elem.children[0].data.length > 5) {
+                                        newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regListPrice; //get item price
+                                        if (!newItems[itemCount].price) { //get this price if the other one doesn't exist (backup)
+                                            newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regOfferPrice;
+                                        }
+                                    }
+
+                                    //console.log('pdpprices_ ',elem.children[0].data);
+                                    itemCount++; //SHOULD GO LAST IN LOOP, used to select index in newItems array
+
+                                    //ALL ITEMS ARE COLLECTED, NOW MOVE ON TO INVENTORY
+                                    if (itemCount == itemCountLoop) {
+                                        if (newItems[0]) {
+                                            //console.log(newItems);
+                                            resolve(newItems);
+                                        } else {
+                                            console.log('missing params', newItems[0]);
+                                            reject('missing params');
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                } catch (err) {
+                    console.log('Scrape Error: ',err)
+                    reject(err)
+                }
+
 
                 function readItemPartNumbers(productId) {
                     var dataString = newItems[itemCount].itemPartNumbersMap;
@@ -710,7 +723,7 @@ function updateInventory(items, coords) {
                     })
                     inv = _.flatten(inv)
                     inv = _.uniq(inv, 'partNumber')
-                    console.log('Updating ',items.length)
+                    console.log('Updating ', items.length)
                     async.eachSeries(items, function iterator(item, callback) {
                         db.Landmarks.update({
                             'source_generic_item.parentProductId': item.parentProductId,

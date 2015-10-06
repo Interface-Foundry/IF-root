@@ -766,6 +766,7 @@ String.prototype.removeStopWords = function() {
         'turns',
         'u',
         'under',
+        'undefined',
         'until',
         'up',
         'upon',
