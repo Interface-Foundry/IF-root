@@ -12,7 +12,7 @@
                     <span class="Find-ZTop">Find</span>
                     <input ng-change="newQuery = true" ng-enter="searchQuery('button')" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall">
                     <span ng-if="query.length >= 1" ng-click="emptyQuery();" class="kiplevels-hate-solid clearField"></span></input></div>
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input id="locInput" ng-change="newQuery = true" ng-enter="searchQuery('button')" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark" select-on-click></input></div>{{userCity}}
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near</span><input id="locInput" ng-change="newQuery = true" ng-enter="searchQuery('button')" class="Find-Input" ng-model="userCity" maxlength="2046" placeholder="address, city, landmark" select-on-click></input></div>
                 <div class="Mid-Input Length Button"><div ng-click="searchQuery('button')" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
             </form>
             <div ng-click="searchQuery('button')" class="Mid-Input Mobile Button Query"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
