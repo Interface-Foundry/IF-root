@@ -39,6 +39,14 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
             return $location;
         }
     ])
+    .factory('storeFactory', function() {
+        return {
+            store: {},
+            setStore: function(newStore) {
+                this.store = newStore;
+            }
+        }
+    })
     .config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
         $routeProvider
             .when('/', {
@@ -66,7 +74,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
         });
     }]);
 
-simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', function($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route) {
+simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'storeFactory', function($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, storeFactory) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
@@ -99,7 +107,7 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
     $scope.report = {};
     $scope.mobileImgIndex = 0;
     $scope.mobileImgCnt = 0;
-    $scope.parent = {};
+    $scope.parent = storeFactory.store;
 
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         $scope.mobileScreen = true;
@@ -118,6 +126,8 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
             $route.reload();
         } else if (loc._id) {
             $location.path('/t/' + loc.parent._id + '/' + loc._id);
+            storeFactory.setStore(loc.parent)
+            console.log('storeFactory: ', storeFactory, 'loc: ', loc)
             $timeout(function() {
                 $route.reload();
             }, 0);
@@ -470,6 +480,9 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
 
     $scope.searchOneItem = function() {
 
+        // console.log('asdf');
+
+
         $scope.mongoId = $scope.mongoId.replace(/[^\w\s]/gi, ''); //remove special char
         $scope.mongoId = $scope.mongoId.replace(/\s+/g, ' ').trim(); //remove extra spaces
 
@@ -485,8 +498,7 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
         //     $scope.newQuery = false;
         // }
 
-
-        $http.get('https://pikachu.kipapp.co/styles/api/items/' + $scope.mongoId, {}).
+        $http.get('https://kipapp.co/styles/api/items/' + $scope.mongoId, {}).
         then(function(response) {
 
             //location.path('/t/'+ encodeId);

@@ -20,8 +20,6 @@
     </div>
   </div>
 
-                <p>TESTING HEHEHEHEHEHEHHEHEHEHEHEHEHEH</p>
-
     <div class="resultsContainer singleItem" ng-cloak>
 
         <div ng-show="noResults" class="flexBody Top noitem" ng-cloak>
@@ -47,7 +45,7 @@
                 <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price}} - </span> {{::item.name}}</a></h3>
 
 
-                
+
                 <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{::item.parent.name}} - {{::item.distanceMI}} miles <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
 
     <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
@@ -82,7 +80,9 @@
             <div class="detailsContentWrapper singleItem">
 
                 <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{::item.price}} - </span> {{::item.name}}</div>
-                <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}}</span>
+                <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::parent.name}}</span>
+                <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::parent.addressString}}</span>
+                <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::parent.tel}}</span>
                 <br>
                 <div class="detailsContent">{{::item.description}}</div>
                 <a href="/t/{{item._id}}"><span class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span></a>
