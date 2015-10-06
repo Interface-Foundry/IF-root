@@ -725,6 +725,17 @@ div.footerBar {
     background-color: #cccccc;
 }
 
+.mobileResultsImage {
+    height: 241px;
+    width: 241px;
+    background-size: cover;
+    background-position: top;
+    background-color:white;
+    background-repeat: no-repeat;
+    position: absolute;
+    z-index: 2;
+}
+
 .holderPlace:first-child {
     pointer-events:none;
 }
@@ -1032,7 +1043,7 @@ a.reportItem {
 }
 
 .modalReport {
-    width: 300px;
+    width: 400px;
     height: 300px;
     margin-top: 15%;
     background-color: white;
@@ -1041,17 +1052,24 @@ a.reportItem {
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 15px;
+    color: black;
 }
 
 .reportComment {
     margin-top: 10px;
     display: block;
     width: 100%;
+    resize: none;
 }
 
 .reportReason {
     display: block;
     width: 100%;
+    color: black;
+}
+
+.reportReason > option {
+    font-size: 14px;
 }
 
 .reportClose {
@@ -1060,7 +1078,9 @@ a.reportItem {
     display: block;
     margin-left: 95%;
     cursor: pointer;
+    color: black;
 }
+
 
 .reportClose:hover {
     color: #ccc;   
@@ -1069,13 +1089,16 @@ a.reportItem {
 /*Expanded Content Mobile Modal*/
 .expandedMobileModalWrapper {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
     background-color: white;
     z-index: 111;
     width: 100%;
-    padding-top: 200px;
+}
+
+.expandedMobileModalScroller {
+    overflow-y: auto;   
 }
 
 .expandedMobileModalWrapper.singleItem {
@@ -1083,17 +1106,21 @@ a.reportItem {
 }
 
 .swipeDotsContainer {
+/*
     display: block;   
     text-align: center;
     margin-top: -1px;
     height: 51px;
+*/
 }
 
 .swipeDotsContainer.Short {
+/*
     position:fixed;
     right: 0;
     text-align: center;
     margin-right: 1%;
+*/
 }
 
 .imageSwipeDots {
@@ -1117,11 +1144,17 @@ a.reportItem {
 }
 
 .modalClose {
-    position: fixed;
-    right: 0;
+/*    position: absolute;*/
     font-size: 20px;
     font-size: 3 rem;
     padding: 10px;
+    
+    text-align: right;
+    display: inline-block;
+    width: 49%;
+}
+
+.CloseGlyph {
     background-color: rgba(255,255,255,0.5);
 }
 
@@ -1159,10 +1192,18 @@ a.reportItem {
     background-color: white;
 }
 
+.mobileModalImage {
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
 .mobileModal.Address {
     display:inline-block;
     text-transform: capitalize;
-    margin-bottom: 1vh;
+/*    margin-bottom: 1vh;*/
+    margin-top: 1vh;
     font-size: 14px;
     text-align: left;
     width: 100%;
@@ -1173,19 +1214,52 @@ a.reportItem {
     width: 66%;
     display: inline-block;   
     padding-left: 1%;
-}
-.mobileModal.Name {
     padding-top: 5px;
+}
+
+.mobileModalcolTop {
+    order: 1;
+    flex-grow: 3;
+}
+
+.mobileModalcolFlex {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    text-align: left;
+    padding-bottom: 5px;
+}
+
+.mobileModal.Name {
+/*    padding-top: 5px;*/
+/*    height: 5vh;*/
+    color: black;
+/*    margin-top: -5vh;*/
+/*    left: 0;*/
+    flex-grow: 1;
+}
+
+.itemName {
+    text-transform: capitalize;
     font-weight: bold;
     font-size: 5vw;
-    text-transform: capitalize;
-    height: 5vh;
-    padding-left: 1%;
-    color: black;
     background-color: rgba(255,255,255,0.5);
-    margin-top: -5vh;
-    position:absolute;
-    left: 0;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
+.mobileModal.Descrip {
+/*    display:inline-block;*/
+    text-transform: capitalize;
+    padding-bottom: 1%;
+    height: 200px;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+    padding-left: 1%;
+    background-color: black;
+    padding-top: 27px;
+    margin-top: -27px;
 }
 
 .mobileModal.Price {
@@ -1203,11 +1277,18 @@ a.reportItem {
 
 .mobileModal.PriceTop {
     font-weight: bold;
-    position: fixed;
+/*    position: absolute;*/
     color: black;
     top: 0;
     font-size: 5vw;
     padding: 10px;
+/*    background-color: rgba(255,255,255,0.5);*/
+    text-align: left;
+    display: inline-block;
+    width: 49%;
+}
+
+.PriceInner {
     background-color: rgba(255,255,255,0.5);
 }
 
@@ -1224,6 +1305,7 @@ a.reportItem {
     width: 100%;
     text-align: left;
     padding-left: 1%;
+    padding-bottom: 5px;
 }
 
 .mobileModal.Time {
@@ -1231,8 +1313,7 @@ a.reportItem {
     display: inline-block;
     right: 5px;
     color: white;
-    width: 33%;
-    height: 5vh;
+    width: 32%;
     padding-right: 1%;
 }
 
@@ -1243,6 +1324,8 @@ a.reportItem {
     width: 100%;
     font-size: 3.5vw;
     height: 30vh;
+/*    position: absolute;*/
+/*  add height here*/
 }
 
 .modal-focusedShort {
@@ -1386,6 +1469,14 @@ a.reportItem {
 }
 
 @media(max-width: 750px) {
+    .is-single {
+        color: black !important;   
+    }
+    .is-full-single {
+        width: 90% !important;
+        margin-left: 5% !important;
+    }
+    
     .is-full {
         width: 90% !important;
         margin-left: 1% !important;
@@ -1473,7 +1564,7 @@ a.reportItem {
             -ms-flex-align: center;
                 align-items: center;
         height: 385px;
-        margin-top: 70px;
+        margin-top: 50px;
     }
 
     .imageWrapper {

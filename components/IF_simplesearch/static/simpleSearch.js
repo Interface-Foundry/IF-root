@@ -160,20 +160,15 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
     }
 
     $scope.singleItemMobile = function(index, imgCnt, item) {
-        //        console.log(item);
-        $timeout(function() {
-            $scope.mobileModalHeight = $('#expandedModal' + index)[0].clientHeight + ((imgCnt - 1) * 40);
-            var thumbs = $('#thumbContainer' + index);
-            thumbs.css({
-                'bottom': $scope.mobileModalHeight
-            });
-        }, 100);
+
     }
 
     $scope.expandContent = function(index, event, imgCnt) {
         if ($scope.mobileScreen) {
             if (event === 'close') {
+
                 $scope.mobileScreenIndex = null;
+
                 $('body').removeClass('modalOpen');
                 $('html').removeClass('modalOpen');
                 $('div.container-fluid').removeClass('modalOpen');
@@ -182,13 +177,16 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
                 $scope.mobileImgIndex = 0;
                 $scope.mobileModalHeight = 0;
             } else {
-                $timeout(function() {
-                    $scope.mobileModalHeight = $('#expandedModal' + index)[0].clientHeight + ((imgCnt - 1) * 40);
-                    var thumbs = $('#thumbContainer' + index);
-                    thumbs.css({
-                        'bottom': $scope.mobileModalHeight
-                    });
-                }, 100);
+
+//                $timeout(function() {
+//                    $scope.mobileModalHeight = $scope.outerHeight * (.7);
+//                    console.log($scope.mobileModalHeight);
+//                    var image = $('#mobMod'+index);
+//                    image.css({
+//                        'height' : $scope.mobileModalHeight
+//                    });
+//                }, 100);
+
                 $scope.mobileScreenIndex = index;
                 $('body').addClass('modalOpen');
                 $('html').addClass('modalOpen');
@@ -361,7 +359,7 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
     };
 
     //https://kipapp.co/styles/api/items/search?page=
-    //http://pikachu.kipapp.co/api/items/search?page
+    //https://kipapp.co/api/items/search?page
 
 
 
@@ -589,15 +587,15 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
         } else if (status === 'close') {
             $scope.showReportModal = null;
         } else if (status === 'submit') {
+            
             $http.post('https://kipapp.co/styles/api/items/' + item._id + '/report', {
                 timeReported: new Date(),
                 comment: $scope.report.comment,
                 reason: $scope.report.reason
-            }).then(function(res) {
-                $timeout(function() {
-                    $scope.showReportModal = null;
-                }, 15000);
-                //                console.log('res', res);
+            }). then(function (res) {
+            $timeout(function() {$scope.showReportModal = null;}, 0);    
+//                console.log('res', res);
+
                 if (res.data.err) {
 
                 } else {}
@@ -605,6 +603,13 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
 
         }
 
+    }
+    
+    $scope.closeOverlay = function(event) {
+        var ele = event.toElement;
+        if (event.target.classList[0] == 'modalOverlay') {
+            $scope.reportItem('close');   
+        }
     }
 
     //* * * * * * * * *  * * * * * * * * * * * * * *
@@ -618,7 +623,39 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
         $scope.searchItems();
     } else if ($routeParams.mongoId) { //process singleItem
         $scope.mongoId = decodeURI($routeParams.mongoId);
+
         $scope.parentId = decodeURI($routeParams.parentId);
+
+               //get location from IP
+        $http.get('https://kipapp.co/styles/api/geolocation').
+        then(function(res) {
+            if (res.data.lat === 38) {
+              $('#locInput').geocomplete("find", "NYC");
+              return;
+            }
+            userLat = res.data.lat;
+            userLng = res.data.lng;
+
+            //get neighborhood name via lat lng from google
+            $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+res.data.lat+','+res.data.lng+'&sensor=true').
+            then(function(res2) {
+                for (var i = 0; i < res2.data.results.length; i++) {
+                    if (res2.data.results[i].geometry.location_type == 'APPROXIMATE'){
+                        res2.data.results[i].formatted_address = res2.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
+                        $scope.userCity = res2.data.results[i].formatted_address;
+                        historyCity = $scope.userCity;
+                        $scope.loadingLoc = false;
+                        break;
+                    }
+                }
+            }, function() {
+            });
+
+        }, function(res) {
+            //if IP broken get HTML5 geoloc
+            $scope.getGPSLocation();
+        });        
+
         $scope.searchOneItem();
     } else {
         //get location from IP
