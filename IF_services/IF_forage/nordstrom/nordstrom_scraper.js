@@ -313,7 +313,7 @@ function scrapeItem(url) {
                     console.log('error: ', error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode);
-                    reject('response.statusCode')
+                    reject(response.statusCode)
                 }
             }
         })
@@ -436,7 +436,8 @@ function saveStores(item, inventory) {
 
                         //Check if store exists in db
                         db.Landmarks.findOne({
-                                'source_generic_store.storeId': storeObj.storeId
+                                'source_generic_store.storeId': storeObj.storeId,
+                                'linkbackname':'nordstrom.com'
                             }, function(err, store) {
                                 if (err) {
                                     console.log(err)
@@ -445,7 +446,7 @@ function saveStores(item, inventory) {
                                     }, 800);
                                 }
                                 //If store does not exist in db yet, create it.
-                                if (!store) {
+                                if (!store || (store && store.linkbackname !== 'nordstrom.com')) {
                                     // console.log('CREATING NEW STORE')
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
