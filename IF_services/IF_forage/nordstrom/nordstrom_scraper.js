@@ -313,6 +313,7 @@ function scrapeItem(url) {
                     console.log('error: ', error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode);
+                    reject('response.statusCode')
                 }
             }
         })
