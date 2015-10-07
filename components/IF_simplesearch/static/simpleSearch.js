@@ -102,6 +102,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.searchIndex = 0;
     $scope.items = [];
     $scope.newQuery = null;
+    
     $scope.expandedIndex = null;
     $scope.isExpanded = false;
     $scope.outerWidth = $(window)[0].outerWidth;
@@ -115,6 +116,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.mobileImgIndex = 0;
     $scope.mobileImgCnt = 0;
     $scope.parent = storeFactory.store;
+    // https://github.com/rzajac/angularjs-slider for range slider docs
+    $scope.searchSlider = {
+        min: 5,
+        ceil: 50,
+        floor: 0.1
+    };
 
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         $scope.mobileScreen = true;
@@ -248,7 +255,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         types: ['geocode']
     }).bind("geocode:result", function(event, result) {
         $scope.userCity = result.formatted_address;
-        $scope.newQuery = true;
     });
 
 
@@ -318,7 +324,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $scope.searchIndex = 0;
             $('input').blur();
         }
-
+        
         httpBool = true;
 
         //* * * * * * * * * * * * *
@@ -376,7 +382,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
-        
+
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
 
         $http.post('https://kipapp.co/styles/api/items/search?page=' + $scope.searchIndex, {
@@ -386,6 +392,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 lon: userLng
             },
             radius: 5,
+//            radius: $scope.searchSlider.min,
         }).then(function(response) {
             
 //                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
@@ -394,25 +401,24 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 //if no results, re-query with US size radius
                 //* * * * * * * * * * * * *
             
-                if ($scope.newQuery) {
+                if ($scope.newQuery === true) {
                     $scope.items = $scope.items.concat(response.data.results);    
                     ResCache.put('user', $scope.items);
+                    ResCache.put('query', encodeQuery);
                     $scope.newQuery = false;
                 } else {
                     var prevItems = ResCache.get('user');
-                    $scope.items = prevItems;
+                    var oldQuery = ResCache.get('query');
+                    if (encodeQuery !== oldQuery) {
+                        $scope.items = $scope.items.concat(response.data.results);    
+                        ResCache.put('user', $scope.items);
+                        ResCache.put('query', encodeQuery);
+                        $scope.newQuery = false;   
+                    } else {
+                        $scope.items = prevItems;           
+                    }
                 }
             
-                
-            
-                
-                if ($scope.items.length < 1){
-                     $scope.noResults = true;
-                     console.log('no results');
-                }
-
-//            $scope.items = $scope.items.concat(response.data.results);
-
             if ($scope.items.length < 1) {
                 $scope.noResults = true;
                 console.log('no results');
@@ -482,12 +488,11 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 httpBool = false;
             }, 500);
 
-            $('#locInputTop').geocomplete({
+            $('#locInput').geocomplete({
                 details: 'form',
                 types: ['geocode']
             }).bind("geocode:result", function(event, result) {
                 $scope.userCity = result.formatted_address;
-                $scope.newQuery = true;
             });
 
         }, function(response) {
@@ -511,9 +516,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         var encodedParentId = encodeURI($scope.parentId);
 
         $location.path('/t/' + encodedParentId + '/' + encodedMongoId);
-        // if ($scope.newQuery) {
-        //     $scope.newQuery = false;
-        // }
 
         $http.get('https://kipapp.co/styles/api/items/' + $scope.mongoId, {}).
         then(function(response) {
@@ -587,12 +589,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             //     httpBool = false;
             // }, 500);
 
-            $('#locInputTop').geocomplete({
+            $('#locInput').geocomplete({
                 details: 'form',
                 types: ['geocode']
             }).bind("geocode:result", function(event, result) {
                 $scope.userCity = result.formatted_address;
-                $scope.newQuery = true;
+                
             });
 
         }, function(response) {
