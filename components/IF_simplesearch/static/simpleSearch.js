@@ -22,7 +22,13 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
             }
             return input;
         }
+
     })
+.factory('ResCache', ['$cacheFactory', function($cacheFactory) {
+    return $cacheFactory('resCache', {
+        capacity: 3    
+    });
+}])
     .factory('location', [
         '$location',
         '$route',
@@ -36,6 +42,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
                 });
                 return $location;
             };
+
             return $location;
         }
     ])
@@ -74,7 +81,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
         });
     }]);
 
-simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'storeFactory', function($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, storeFactory) {
+simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'ResCache', 'storeFactory', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, ResCache, storeFactory) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
@@ -369,12 +376,8 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
 
         var encodeQuery = encodeURI($scope.query);
         var encodeCity = encodeURI($scope.userCity);
-
-        $location.path('/q/' + encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
-        if ($scope.newQuery) {
-
-            $scope.newQuery = false;
-        }
+        
+        $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
 
         $http.post('https://kipapp.co/styles/api/items/search?page=' + $scope.searchIndex, {
             text: $scope.query,
@@ -383,16 +386,32 @@ simpleSearchApp.controller('HomeCtrl', ['$scope', '$http', '$location', '$docume
                 lon: userLng
             },
             radius: 5,
-        }).
-        then(function(response) {
+        }).then(function(response) {
+            
+//                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
+                location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
+                //* * * * * * * * * * * * *
+                //if no results, re-query with US size radius
+                //* * * * * * * * * * * * *
+            
+                if ($scope.newQuery) {
+                    $scope.items = $scope.items.concat(response.data.results);    
+                    ResCache.put('user', $scope.items);
+                    $scope.newQuery = false;
+                } else {
+                    var prevItems = ResCache.get('user');
+                    $scope.items = prevItems;
+                }
+            
+                
+            
+                
+                if ($scope.items.length < 1){
+                     $scope.noResults = true;
+                     console.log('no results');
+                }
 
-            //                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
-            location.skipReload().path('/q/' + encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
-            //* * * * * * * * * * * * *
-            //if no results, re-query with US size radius
-            //* * * * * * * * * * * * *
-
-            $scope.items = $scope.items.concat(response.data.results);
+//            $scope.items = $scope.items.concat(response.data.results);
 
             if ($scope.items.length < 1) {
                 $scope.noResults = true;
