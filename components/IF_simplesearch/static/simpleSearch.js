@@ -84,9 +84,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     var xDown = null;
     var yDown = null;
     var swipeActive = false;
-    ResCache.put('hi', ['bye']);
-    var test = ResCache.get('hi');
-    console.log('type', typeof test);
 
     $scope.showGPS = true;
     $scope.searchIndex = 0;
