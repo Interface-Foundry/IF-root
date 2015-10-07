@@ -23,6 +23,11 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
         return input;
     }
 })
+.factory('ResCache', ['$cacheFactory', function($cacheFactory) {
+    return $cacheFactory('resCache', {
+        capacity: 3    
+    });
+}])
 .factory('location', [
     '$location',
     '$route',
@@ -63,7 +68,7 @@ var simpleSearchApp = angular.module('simpleSearchApp',['ngHolder','angularMomen
     });
   }]);
 
-simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route) {
+simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'ResCache', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, ResCache) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
@@ -79,6 +84,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     var xDown = null;
     var yDown = null;
     var swipeActive = false;
+    ResCache.put('hi', ['bye']);
+    var test = ResCache.get('hi');
+    console.log('type', typeof test);
 
     $scope.showGPS = true;
     $scope.searchIndex = 0;
@@ -358,10 +366,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         var encodeCity = encodeURI($scope.userCity);
         
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
-        if ($scope.newQuery) {
-            
-            $scope.newQuery = false;
-        }
+        
 
         $http.post('https://kipapp.co/styles/api/items/search?page='+$scope.searchIndex, {
             text: $scope.query,
@@ -375,9 +380,23 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 //* * * * * * * * * * * * *
                 //if no results, re-query with US size radius
                 //* * * * * * * * * * * * *
+                console.log($scope.test);
             
-                $scope.items = $scope.items.concat(response.data.results);
-
+                if ($scope.newQuery) {
+                    console.log('new query');
+                    $scope.items = $scope.items.concat(response.data.results);    
+                    ResCache.put('user', $scope.items);
+                    $scope.newQuery = false;
+                } else {
+                    var prevItems = ResCache.get('user');
+                    $scope.items = prevItems;
+                    console.log('prevcache', prevItems);
+                    console.log('previtems', $scope.items);
+                }
+            
+                
+            
+                
                 if ($scope.items.length < 1){
                      $scope.noResults = true;
                      console.log('no results');
@@ -439,7 +458,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
                 $scope.showQueryBar = true;
                 $scope.windowHeight = $document[0].body.scrollHeight;
-
+                
                 $timeout(function() {
                     $("img.holderPlace").lazyload();
                     $scope.searchIndex++;
@@ -488,6 +507,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                //  console.log(response.data.item);
 
                // $scope.items = response.data.item ;
+                console.log('factd',$scope.prevItems);
                 $scope.items = $scope.items.concat(response.data.item);
 
                 if ($scope.items.length < 1){
@@ -596,6 +616,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     //     RUN KIP
 
     if ($routeParams.query) { //process a search query //this is a search from URL
+        console.log('searching again');
         $scope.query = decodeURI($routeParams.query);
         $scope.userCity = decodeURI($routeParams.cityName);
         userLat = $routeParams.lat;
