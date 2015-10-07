@@ -1,4 +1,4 @@
-//Updating inventory is tricky for this one as inventory is queried by lat lng zipcode..
+ // Garden state mall location: -74.078476,40.915989
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -331,6 +331,8 @@ function getInventory(newItem, zipcode) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
+
+        console.log('Nordstrom URL: ',url)
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
@@ -368,7 +370,6 @@ function saveStores(item, inventory) {
                 }
             };
 
-
             request(options, function(error, response, body) {
 
                 try {
@@ -377,9 +378,6 @@ function saveStores(item, inventory) {
                     console.log('Cheerio Error: ',err)
                     reject(err)
                 }
-
-
-
                 var storeObj = {
                     storeId: item.StoreNumber
                 };
@@ -432,6 +430,9 @@ function saveStores(item, inventory) {
 
                 //Construct our own unique storeId 
                 uniquer.uniqueId(storeObj.name, 'Landmark').then(function(output) {
+
+                    // console.log('STORE: ',storeObj.name, storeObj.storeId)
+
                         //Check if store exists in db
                         db.Landmarks.findOne({
                                 'source_generic_store.storeId': storeObj.storeId
@@ -444,6 +445,7 @@ function saveStores(item, inventory) {
                                 }
                                 //If store does not exist in db yet, create it.
                                 if (!store) {
+                                    // console.log('CREATING NEW STORE')
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
                                     newStore.linkbackname = 'nordstrom.com'
@@ -469,8 +471,10 @@ function saveStores(item, inventory) {
                                         }, 800);
                                     })
                                 }
+                                   
                                 //If store already exists in db
                                 else if (store) {
+                                    // console.log('STORE EXISTS: ', store._id,store.name, store.source_generic_store,store.addressString)
                                     console.log('.')
                                     Stores.push(store)
                                     setTimeout(function() {
@@ -505,7 +509,8 @@ function saveItem(newItem, Stores) {
             })
             //Check if item already exists
         db.Landmarks.findOne({
-            'source_generic_item.styleId': newItem.styleId
+            'source_generic_item.styleId': newItem.styleId,
+             'source_generic_item.name':newItem.name
         }, function(err, i) {
             if (err) console.log(err)
                 //Create new item in db if it does not already exist OR if it was created without description tags
@@ -551,7 +556,7 @@ function saveItem(newItem, Stores) {
                             console.error(e);
                         }
                         console.log('Saved item!', item.itemTags.text)
-                        return resolve('Saved new item.')
+                        return resolve(item)
                     })
                 })
             }
@@ -583,7 +588,7 @@ function saveItem(newItem, Stores) {
                         console.log('Inventory update error: ', e)
                     }
                     // console.log('Updated inventory.', i)
-                    return resolve('Updated item.')
+                    return resolve(i)
                 })
             }
         })
@@ -695,7 +700,8 @@ function updateInventory(item, coords) {
                     })
 
                     db.Landmarks.update({
-                        'source_generic_item.styleId': item.styleId
+                        'source_generic_item.styleId': item.source_generic_item.styleId,
+                        'source_generic_item.name': item.source_generic_item.name
                     }, {
                         $pullAll: {
                             'parents': storesToRemove,

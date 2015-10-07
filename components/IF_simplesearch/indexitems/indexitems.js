@@ -35,12 +35,17 @@ stream.on('data', function(lm) {
     if (lm.parents.length > 0) {
         async.eachSeries(lm.parents, function iterator(parent, callback) {
             if (!parent || !lm || !parent._id || parent._id == undefined || parent._id == null || !lm._id || lm._id == undefined || lm._id == null) {
-                console.log('undefined yo')
                 return callback()
             }
             var urlEl = root.ele('url')
             var locEl = urlEl.ele('loc', null, 'http://www.kipsearch.com/t/' + parent._id + '/' + lm._id)
-                //might change this to a week from when this is run?
+            if (lm.itemImageURL && lm.itemImageURL.length > 0) {
+                var i = 0
+                lm.itemImageURL.forEach(function(url) {
+                    urlEl.ele('image:image', null, url)
+                })
+            }
+
             var lastmodEl = urlEl.ele('lastmod', {}, (new Date().toString()))
             var changefreq = urlEl.ele('changefreq', {}, 'weekly')
             count++;
