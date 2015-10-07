@@ -112,7 +112,7 @@
                 <div class="mobileModalImageContainer" style="text-align: center;" ng-repeat="pic in item.itemImageURL track by $index">
         
     
-        <div class="mobileModalImage" ng-style="{'height': '{{outerHeight * .5}}px', 'background-image': 'url({{::pic | httpsURL}})'}" ng-show="mobileImgIndex == $index">
+        <div class="mobileModalImage" ng-style="{'height': '{{outerHeight * .5}}px', 'background-image': 'url({{::pic }})'}" ng-show="mobileImgIndex == $index">
             <div class="mobileModalcolTop">
                 <span class="mobileModal PriceTop" style="width: 100%;"><span class=PriceInner>${{::item.price | number : 0}}</span></span>
             
@@ -123,7 +123,7 @@
                 <div class="swipeDotsContainer Short" id="thumbContainer{{$index}}">
                     <span class="imageSwipeDotsShort" ng-repeat="pics in item.itemImageURL track by $index"
                           ng-class="{'modal-focusedShort' : mobileImgIndex == $index }"
-                          ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                          ng-style="{'background-image' : 'url({{::pics }})'}"
                           ng-click="chooseImage($index)"></span>
                 </div>
             </div>
@@ -139,7 +139,7 @@
                     <div ng-if="outerHeight > 480" class="swipeDotsContainer">
                         <span class="imageSwipeDots" ng-repeat="pics in item.itemImageURL track by $index"
                               ng-class="{'modal-focused' : mobileImgIndex == $index }"
-                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-style="{'background-image' : 'url({{::pics }})'}"
                               ng-click="chooseImage($index)"></span>
                     </div>
 -->

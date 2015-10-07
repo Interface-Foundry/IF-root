@@ -135,6 +135,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         if (loc === 'home') {
             $location.path('/');
             $timeout(function() {
+                console.log('route');
                 $route.reload();
             }, 0);
             $route.reload();
@@ -324,7 +325,15 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $scope.searchIndex = 0;
             $('input').blur();
         }
+        if ($scope.userCity.indexOf('/') > -1) {
+            var reg = /[^\w\s]/ig;
+            $scope.userCity = $scope.userCity.replace(reg, '');
+        }
         
+        if ($scope.query.indexOf('/') > -1) {
+            var reg = /[^\w\s]/ig;
+            $scope.query = $scope.query.replace(reg, '');
+        }
         httpBool = true;
 
         //* * * * * * * * * * * * *
@@ -333,7 +342,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         //check if location was modified by user
         if ($scope.userCity !== historyCity) {
-
+        
             historyCity = $scope.userCity;
             var encodeCity = encodeURI(historyCity);
 

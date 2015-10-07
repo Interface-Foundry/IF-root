@@ -41,8 +41,8 @@
                 <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
                     <span class="scrollActivate" ng-if="mobileScreen" ng-click="expandContent($index, $event, item.itemImageURL.length)"></span>
                     <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>
-                    <div class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[0] | httpsURL}})'}"></div>
-<!--                    <img class="holderPlace" src="{{::item.itemImageURL[0] | httpsURL}}"> -->
+                    <div class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
+<!--                    <img class="holderPlace" src="{{::item.itemImageURL[0] }}"> -->
                     <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
                 </div>
 
@@ -80,7 +80,7 @@
     <div class="mobileModalImageContainer" style="text-align: center;" ng-repeat="pic in item.itemImageURL track by $index">
         
     
-        <div class="mobileModalImage" ng-style="{'height': '{{outerHeight * .7}}px', 'background-image': 'url({{::pic | httpsURL}})'}" ng-show="mobileImgIndex == $index">
+        <div class="mobileModalImage" ng-style="{'height': '{{outerHeight * .7}}px', 'background-image': 'url({{::pic }})'}" ng-show="mobileImgIndex == $index">
             <div class="mobileModalcolTop">
                 <span class="mobileModal PriceTop"><span class=PriceInner>${{::item.price | number : 0}}</span></span>
                 <span ng-click="expandContent($index, 'close');" class="modalClose"><span class="CloseGlyph glyphicon glyphicon-remove"></span></span>
@@ -91,7 +91,7 @@
                 <div class="swipeDotsContainer Short" id="thumbContainer{{$index}}">
                     <span class="imageSwipeDotsShort" ng-repeat="pics in item.itemImageURL track by $index"
                           ng-class="{'modal-focusedShort' : mobileImgIndex == $index }"
-                          ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                          ng-style="{'background-image' : 'url({{::pics }})'}"
                           ng-click="chooseImage($index)"></span>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                     <div ng-if="outerHeight > 480" class="swipeDotsContainer">
                         <span class="imageSwipeDots" ng-repeat="pics in item.itemImageURL track by $index"
                               ng-class="{'modal-focused' : mobileImgIndex == $index }"
-                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-style="{'background-image' : 'url({{::pics }})'}"
                               ng-click="chooseImage($index)"></span>
                     </div>
 -->
@@ -120,7 +120,7 @@
                      <div class="swipeDotsContainer Short" id="thumbContainer{{$index}}">
                         <span class="imageSwipeDotsShort" ng-repeat="pics in item.itemImageURL track by $index"
                               ng-class="{'modal-focusedShort' : mobileImgIndex == $index }"
-                              ng-style="{'background-image' : 'url({{::pics | httpsURL}})'}"
+                              ng-style="{'background-image' : 'url({{::pics }})'}"
                               ng-click="chooseImage($index)"></span>
                     </div>
 -->
@@ -145,9 +145,9 @@
         <div ng-if="expandedIndex == $index" class="expandTopWrapper">
                 <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
                 <div height class="expandedImageWrapper">
-                    <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] | httpsURL}})'}"></div>
+                    <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
                     <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] | httpsURL}})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
                     </div>
                 </div>
 
