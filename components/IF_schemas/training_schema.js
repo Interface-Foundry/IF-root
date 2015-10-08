@@ -11,7 +11,7 @@ var trainingSchema = mongoose.Schema({
     ref: 'Landmark'
   },
 
-  // the title of the item
+  // obvious text fields
   name: String,
   description: String,
 
@@ -20,6 +20,9 @@ var trainingSchema = mongoose.Schema({
 
   // list of image urls, hopefully pointing to S3
   images: [String],
+
+  // could potentially be of use somehow
+  price: Number,
 
   // defines which set of points this belongs to (see descriptions)
   trainingset: {
