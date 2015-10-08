@@ -116,6 +116,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.mobileImgIndex = 0;
     $scope.mobileImgCnt = 0;
     $scope.parent = storeFactory.store;
+    $scope.infBool = false;
     // https://github.com/rzajac/angularjs-slider for range slider docs
     $scope.searchSlider = {
         min: 5,
