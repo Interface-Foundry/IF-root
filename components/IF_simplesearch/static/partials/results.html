@@ -40,9 +40,9 @@
                 <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
                 <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
                     <span class="scrollActivate" ng-if="mobileScreen" ng-click="expandContent($index, $event, item.itemImageURL.length)"></span>
-                    <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>
-                    <div class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
-<!--                    <img class="holderPlace" src="{{::item.itemImageURL[0] }}"> -->
+<!--                    <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>-->
+                    <div id="collapseTop" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)" class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>
+                    <div id="collapseBot" class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[1]}})'}"></div>
                     <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
                 </div>
 
@@ -145,9 +145,10 @@
         <div ng-if="expandedIndex == $index" class="expandTopWrapper">
                 <div ng-click="expandContent($index, $event)" class="closeExpand glyphicon glyphicon-remove"></div>
                 <div height class="expandedImageWrapper">
-                    <div class="expandedLargeImage largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
+                    <div id="expandTop" class="expandedLargeImage imageTop{{$index}} largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
+                    <div id="expandBot" class="expandedLargeImage imageBot{{$index}} largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
                     <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-mouseenter="enlargeImage($parent.$index, item.itemImageURL[$index])" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
                     </div>
                 </div>
 
@@ -157,6 +158,7 @@
                 <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}} - {{::item.distanceMI}} miles</span>
                 <br>
                 <div class="detailsContent">{{::item.description}}</div>
+                <span id="updatedTime" ng-init="grabTime();" ng-click="returnHome(item);" class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
                 <span ng-click="returnHome(item);" class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
 
                 <div class="parentWrapper">
@@ -187,8 +189,7 @@
                                 <option value="Other">Other</option>
                             </select>
                             <textarea class="reportComment" ng-model="report.comment" placeholder="Comment"></textarea>
-                            <button type="submit" ng-click="reportItem('submit', item);" class="btn btn-default submitReport">
-                                <span ng-if="showReportModal == $index">Submit</span>
+                            <button ng-if="showReportModal == $index" id="reportSubmit" type="submit" ng-click="reportItem('submit', item);" class="btn btn-default submitReport">Submit
                             </button>
                             
                         </form>
