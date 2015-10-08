@@ -116,6 +116,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.mobileImgIndex = 0;
     $scope.mobileImgCnt = 0;
     $scope.parent = storeFactory.store;
+    $scope.infBool = false;
     // https://github.com/rzajac/angularjs-slider for range slider docs
     $scope.searchSlider = {
         min: 5,
@@ -165,6 +166,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
     $scope.sayHello = function() {
         if (!httpBool) {
+            $scope.infBool = true;
             $scope.searchQuery();
         }
     }
@@ -443,6 +445,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                         ResCache.put('user', $scope.items);
                         ResCache.put('query', encodeQuery);
                         $scope.newQuery = false;   
+                    } else if ($scope.infBool) {
+                        $scope.items = $scope.items.concat(response.data.results);    
+                        ResCache.put('user', $scope.items);
+                        ResCache.put('query', encodeQuery);
+                        $scope.newQuery = false;   
+                        $scope.infBool = false;
                     } else {
                         $scope.items = prevItems;           
                     }
