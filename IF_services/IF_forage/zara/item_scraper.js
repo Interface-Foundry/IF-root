@@ -54,6 +54,7 @@ module.exports = function scrapeItem(url) { 
 
         async.waterfall([
                 function(callback) {
+                    console.log(1)
                     loadFakeUser().then(function(items) {
                         callback(null)
                     }).catch(function(err) {
@@ -66,7 +67,9 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(callback) {
                     checkIfScraped(url).then(function(items) {
+                        console.log(2)
                         if (items && items.length > 0) {
+                            // console.log('Item exists', items[0].itemImageURL[0])
                             exists = true;
                             existingItem = items[0]; //proxy var for later processing
                             callback(null, existingItem)
@@ -79,9 +82,12 @@ module.exports = function scrapeItem(url) { 
                 },
                 // || (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)
                 function(existingItem, callback) {
+                    console.log(3)
                     if (!exists || (exists && existingItem.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
+                        // console.log(1)
                         //The || is for the case in which item was previously scraped but without AWS images
                         if (exists) {
+                            // console.log(2)
                             exists = !exists
                                 // console.log('Removing existing item to be updated.')
                                 //remove outdated item, this doesn't need to happen async
@@ -95,11 +101,13 @@ module.exports = function scrapeItem(url) { 
                             callback(err)
                         })
                     } else {
+                        // console.log(3)
                         callback(null, existingItem)
                     }
                 },
                 function(item, callback) {
                     loadStores().then(function(stores) {
+                        console.log(4)
                         callback(null, item, stores)
                     }).catch(function(err) {
                         callback(err)
@@ -107,26 +115,33 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(item, stores, callback) {
                     getInventory(item, stores).then(function(inventory) {
+                        console.log(5)
                         callback(null, item, inventory)
                     }).catch(function(err) {
                         callback(err)
                     })
                 },
                 function(item, inventory, callback) {
-                    if (item.partNumber == undefined || item.partNumber == null || !item.partNumber) {
-                       return callback('Partnumber missing from zara API query.')
+                    console.log(6)
+                    if (!exists) {
+                        upload.uploadPictures('zara_' + item.partNumber.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
+                                        console.log(6.5)
+                            item.hostedImages = images
+                            callback(null, item, inventory)
+                        }).catch(function(err) {
+                                   console.log(6.9)
+                            if (err) console.log(err.lineNumber + 'Image upload error: ', err);
+                            callback(err)
+                        })
+                    } else {
+                        callback(null, item, inventory)
                     }
-              
-                    upload.uploadPictures('zara_' + item.partNumber.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
-                        item.hostedImages = images
-                        callback(null, item, inventory)
-                    }).catch(function(err) {
-                        if (err) console.log('Image upload error: ', err);
-                        callback(err)
-                    })
+
                 },
                 function(item, inventory, callback) {
+                                console.log(7)
                     processItems(inventory, item).then(function(item) {
+                                    console.log(8)
                         callback(null, item)
                     }).catch(function(err) {
                         callback(err)
@@ -137,7 +152,7 @@ module.exports = function scrapeItem(url) { 
                 if (err) {
                     var today = new Date().toString()
                         // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
-                    console.log(err)
+                    console.log(err.lineNumber + err)
                     return reject(err)
                 };
                 resolve()
@@ -164,7 +179,7 @@ function loadFakeUser() {
                     fake.profileID = 'zara1204'
                     fake.save(function(err, o) {
                         if (err) {
-                            console.log(err)
+                            console.log(err.lineNumber + err)
                         } else {
                             console.log(o.profileID)
                             owner.profileID = o.profileID
@@ -175,7 +190,7 @@ function loadFakeUser() {
                     })
                 }
                 if (e) {
-                    console.log(e)
+                    console.log(e.lineNumber + e)
                     reject(e)
                 }
             })
@@ -189,10 +204,27 @@ function checkIfScraped(url) {
             .find({
                 'source_generic_item.src': url.toString().trim()
             })
+            .sort({
+                '_id': -1
+            })
             .populate('parents')
             .exec(function(e, items) {
                 if (items) {
-                    // console.log('Item exists.',items.length)
+                    //TODO DELETE ALL OLD ITEMS
+                    if (items.length > 1) {
+                        var toDelete = []
+                        for (var i = 1; i < items.length; i++) {
+                            toDelete.push(items[i]._id)
+                        }
+                        db.Landmarks.remove({
+                            '_id': {
+                                $in: toDelete
+                            }
+                        }, function(err, res) {
+                            if (err) console.log(err.lineNumber + ': ', err)
+                            console.log('Deleted old items: ', res.result.n)
+                        })
+                    }
                     return resolve(items)
                 }
                 if (!items) {
@@ -290,10 +322,10 @@ function scrapeDetails(url) {
                 }
             } else {
                 if (error) {
-                    console.log('error: ', error)
+                    console.log(error.lineNumber + ': ', error)
                     reject(error)
                 } else if (response.statusCode !== 200) {
-                    console.log('response.statusCode: ', response.statusCode)
+                    console.log('Error response status: ', response.statusCode)
                     reject(response.statusCode)
                 }
             }
@@ -315,7 +347,7 @@ function loadStores() {
             'linkbackname': 'zara.com'
         }, function(e, stores) {
             if (e) {
-                console.log(e)
+                console.log(e.lineNumber + e)
                 reject(e)
             }
             if (!stores) {
@@ -331,7 +363,7 @@ function loadStores() {
     })
 }
 
-
+//TODO QUERY SUBSETS OF 5 OR SO STOREID QUERIES 
 function getInventory(itemData, stores) {
 
     //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
@@ -365,10 +397,10 @@ function getInventory(itemData, stores) {
                 resolve(inventory)
             } else {
                 if (error) {
-                    console.log('getInventory error ')
+                    console.log(error.lineNumber + ': ', error)
                     reject(error)
                 } else {
-                    console.log('bad response')
+                    console.log('Bad response')
                     reject('Bad response from inventory request')
                 }
             }
@@ -377,7 +409,7 @@ function getInventory(itemData, stores) {
     })
 }
 
-function processItems(inventory, itemData) {
+function processItems(inventory, itemData, url) {
 
     return new Promise(function(resolve, reject) {
 
@@ -386,8 +418,6 @@ function processItems(inventory, itemData) {
         }
         //If this item has already been scraped, update inventory,parents, and location fields of item.
         if (exists) {
-
-            // console.log('itemData.parents',itemData)
 
             var inventoryStoreIds = inventory.map(function(store) {
                 return store.physicalStoreId.toString().trim()
@@ -421,14 +451,16 @@ function processItems(inventory, itemData) {
                 $set: {
                     'source_generic_item.inventory': inventory,
                     'parents': updatedParentMongoIds,
-                    'loc.coordinates': updatedLocs
+                    'loc.coordinates': updatedLocs,
+                    'updated_time': new Date()
                 }
             }, function(e, result) {
                 if (e) {
-                    console.log('Inventory update error: ', e)
+                    console.log(e.lineNumber + 'Inventory update error: ', e)
                 }
-                console.log('Updated inventory for item.')
-                return resolve('Finished updating inventory.')
+                console.log('Finished updating inventory: ', result.n, 'for :', itemData.id)
+
+                return resolve()
             })
 
         } //end of if item exists
@@ -467,7 +499,7 @@ function processItems(inventory, itemData) {
                                     'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
                                     if (err) {
-                                        console.log(err)
+                                        console.log(err.lineNumber + err)
                                         return callback()
                                     }
                                     if (!s) {
@@ -484,7 +516,7 @@ function processItems(inventory, itemData) {
                             },
                             function(e) {
                                 if (e) {
-                                    console.log(e)
+                                    console.log(e.lineNumber + e)
                                 }
 
                                 if (i.loc.coordinates.length < 1) {
@@ -493,7 +525,7 @@ function processItems(inventory, itemData) {
                                 //Save item
                                 i.save(function(e, item) {
                                     if (e) {
-                                        console.error(e);
+                                        console.log(e.lineNumber + e);
                                     }
                                     console.log('Saved!', item.id)
                                     saveCount++

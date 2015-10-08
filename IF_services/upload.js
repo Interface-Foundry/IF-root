@@ -38,7 +38,7 @@ module.exports = {
                                 resolve(body)
                             } else {
                                 if (err) {
-                                    console.log('44', err)
+                                    console.log(err.lineNumber + err)
                                 }
                                 console.log('body: ', body)
                                 reject('Cannot download image.')
@@ -61,7 +61,7 @@ module.exports = {
                                 quality: 82,
                                 width: 450
                             }, function(err, stdout, stderr) {
-                                if (err) console.log('83: ', err)
+                                if (err) console.log(err.lineNumber +  err)
                                 fs.readFile(outputPath, function(err, buffer) {
                                     var object_key = crypto.createHash('md5').update(str).digest('hex');
                                     var awsKey = object_key + ".png";
@@ -89,7 +89,7 @@ module.exports = {
                                                     fs.unlink(inputPath)
                                                 }, 200);
                                                 if (err) {
-                                                    console.log('99', err)
+                                                    console.log(err.lineNumber +  err)
                                                     return reject(err)
                                                 } else {
                                                     var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
@@ -109,7 +109,7 @@ module.exports = {
                                             }, 200);
                                             s3.getSignedUrl('getObject', params, function(err, imgURL) {
                                                 if (err) {
-                                                    console.log('143', err)
+                                                    console.log(err.lineNumber +  err)
                                                     return reject(err)
                                                 } else {
                                                     var imgURLt = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
@@ -123,7 +123,7 @@ module.exports = {
                         }) // END OF FS WRITEFILE
                 }).catch(function(err) {
                     if (err) {
-                        console.log('112', err)
+                        console.log(err.lineNumber + err)
                         reject('There was an error in converting the image')
                     }
 
@@ -144,14 +144,14 @@ module.exports = {
                     wait(cb, 1000)
                 }).catch(function(err) {
                     if (err) {
-                        console.log('131', err)
+                        console.log(err.lineNumber +  err)
                     }
                     count++;
                     wait(cb, 1000)
                 })
             }, function finished(err) {
                 if (err) {
-                    console.log('137', err)
+                    console.log(err.lineNumber +  err)
                     return reject(err)
                 }
                 images = _.uniq(images)

@@ -1,3 +1,7 @@
+//TODO: ADD ALL DEPTS TO CATALOGS NOT NEW
+//http://shop.nordstrom.com/c/mens-dress-shirts-ties?dept=8000001&origin=topnav#category=b60137266&type=category&defaultsize3=&size=&width=&color=&price=&brand=&stores=&instoreavailability=false&lastfilter=&sizeFinderId=6&resultsmode=&segmentId=0&page=2&partial=1&pagesize=100&contextualsortcategoryid=0
+//
+
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
@@ -8,6 +12,7 @@ var item_scraper = require('./nordstrom_scraper');
 var states = require('./states');
 var fs = require('fs');
 
+//TODO: Nordstrom iteratoe through all results
 //List of NEW-IN catalogs
 var womens = {
     category: 'Womens',
@@ -66,13 +71,13 @@ async.whilst(
                                         var today = new Date().toString()
                                         fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                                     }
-                                    console.log('Error with catalog: ', catalog)
+                                    console.log((new Error).lineNumber + 'Error with catalog: ', catalog)
                                     wait(callback, 10000)
                                 })
                             }, function(err) {
                                 if (err) {
                                     var today = new Date().toString()
-                                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                    fs.appendFile('errors.log', '\n' + today + (new Error).lineNumber + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                                 }
                                 console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
                                 wait(loop, 2000000)
@@ -81,7 +86,7 @@ async.whilst(
                         function(err) {
                             if (err) {
                                 var today = new Date().toString()
-                                fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                fs.appendFile('errors.log', '\n' + today + (new Error).lineNumber + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                             } else {
                                 var today = new Date().toString()
                                 fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs for: ', currentState)
@@ -93,7 +98,7 @@ async.whilst(
                 function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + +'Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('errors.log', '\n' + today + (new Error).lineNumber + 'Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     stateIndex++;
                     if (states[stateIndex]) {
@@ -146,13 +151,13 @@ function loadCatalog(category, zipcode) {
                     item_scraper(detailsUrl, category.category, zipcode).then(function(result) {
                         wait(callback, 4000)
                     }).catch(function(err) {
-                        console.log(err)
+                        console.log((new Error).lineNumber + err)
                         wait(callback, 4000)
                     })
                 }, function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('errors.log', '\n' + today + (new Error).lineNumber + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     console.log('Done scraping catalog!')
                     resolve()
@@ -164,7 +169,7 @@ function loadCatalog(category, zipcode) {
                     fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error, function(err) {});
                     reject(error)
                 } else if (response.statusCode !== 200) {
-                    console.log('response.statusCode: ', response.statusCode)
+                    console.log((new Error).lineNumber + 'response.statusCode: ', response.statusCode)
                     reject(response.statusCode)
                 }
             }

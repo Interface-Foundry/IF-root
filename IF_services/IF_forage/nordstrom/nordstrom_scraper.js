@@ -28,7 +28,7 @@
                      loadFakeUser().then(function() {
                          callback(null)
                      }).catch(function(err) {
-                         console.log('Could not load owner user.')
+                         console.log(err.lineNumber + 'Could not load owner user.')
                          callback(err)
                      })
                  },
@@ -40,7 +40,7 @@
                          }
                          callback(null, colorUrls)
                      }).catch(function(err) {
-                         console.log(err)
+                         console.log(err.lineNumber + err)
                          callback(err)
                      })
                  },
@@ -462,7 +462,7 @@
                                      delete newStore.source_generic_store.Lat
                                      newStore.save(function(e, s) {
                                          if (e) {
-                                             console.log('Error saving new store: ', e)
+                                             console.log((new Error).lineNumber + e)
                                          }
                                          console.log('Saved store.', s.id)
                                          notFound = false;
@@ -487,7 +487,7 @@
              }); //end of request
 
          }, function(err, res) {
-             if (err) console.log(err)
+             if (err) console.log((new Error).lineNumber + err)
              if (notFound) {
                  notFoundCount++
              }
@@ -513,7 +513,7 @@
              'source_generic_item.styleId': newItem.styleId,
              'source_generic_item.name': newItem.name
          }, function(err, i) {
-             if (err) console.log(err)
+             if (err) console.log((new Error).lineNumber + err)
                  //Create new item in db if it does not already exist OR if it was created without description tags
              if (!i || (i && i.source_generic_item && !i.source_generic_item.tags)) {
                  //If item was previously scraped without the description tags, delete it
@@ -583,11 +583,16 @@
                          'parents': {
                              $each: storeIds
                          }
+                     },
+                     $set: {
+                         'updated_time': new Date()
                      }
                  }, function(e, result) {
                      if (e) {
-                         console.log('Inventory update error: ', e)
+                         console.log((new Error).lineNumber + e)
                      }
+
+
                      // console.log('Updated inventory.', i)
                      return resolve(i)
                  })
@@ -622,7 +627,7 @@
          db.Zipcodes.findOne({
              zipcode: zipcode
          }, function(err, result) {
-             if (err) console.log(err)
+             if (err) console.log((new Error).lineNumber + err)
              if (result && result.loc.coordinates) {
                  resolve(result.loc.coordinates)
              } else {
@@ -645,17 +650,17 @@
                                      newCoords.loc.coordinates = results;
                                      newCoords.zipcode = zipcode;
                                      newCoords.save(function(err, saved) {
-                                         if (err) console.log(err)
+                                         if (err) console.log((new Error).lineNumber + err)
                                          console.log('Zipcode saved.')
                                      })
                                      resolve(results)
                                  }
                              } else {
-                                 console.log('Error: ', zipcode)
+                                 console.log((new Error).lineNumber + 'Error: ', zipcode)
                                  reject()
                              }
                          } else {
-                             console.log('Error: ', error)
+                             console.log((new Error).lineNumber + 'Error: ', error)
                              reject(error)
                          }
                      });
@@ -678,7 +683,7 @@
              }
          }, function(err, stores) {
              if (err) {
-                 console.log('613', err)
+                 console.log((new Error).lineNumber + err)
                  return callback()
              }
              if (!stores) {
@@ -712,7 +717,7 @@
                          }
                      }, function(err, res) {
                          if (err) {
-                             console.log('644', err)
+                             console.log((new Error).lineNumber + err)
                              return resolve()
                          }
                          if (res) {
