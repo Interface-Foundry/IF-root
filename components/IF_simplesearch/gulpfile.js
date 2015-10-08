@@ -34,7 +34,7 @@ gulp.task('minify', function() {
         .pipe(concat('minified.js'))
         .pipe(uglify())
         .pipe(gulp.dest('./static/lib/min'));
-    gulp.src(['./static/lib/min/moment.min.js', './static/mincat.js', './static/lib/min/*.js', '!./static/dev/*.js', '!.static/dev/tominify/*'])
+    gulp.src([ '!.static/lib/min/moment-angular.min.js', './static/lib/min/moment.min.js', './static/mincat.js', './static/lib/min/*.js', '!./static/dev/*.js', '!.static/dev/tominify/*'])
         .pipe(sourcemaps.init())
         .pipe(concat('simpleSearch.mincat.js'))
         .pipe(sourcemaps.write())

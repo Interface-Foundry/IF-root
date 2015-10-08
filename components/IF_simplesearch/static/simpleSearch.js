@@ -1,5 +1,5 @@
 var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMoment', 'ngRoute', 'angular-inview', 'smoothScroll'])
-    .filter('httpsURL', function() {
+    .filter('httpsURL', [function() {
 
         return function(input) {
             if (input.indexOf('https') > -1) {
@@ -10,8 +10,8 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
             }
             return input;
         }
-    })
-    .filter('deCapslock', function() {
+    }])
+    .filter('deCapslock', [function() {
         return function(input) {
             input = input.toLowerCase();
             var reg = /\s((a[lkzr])|(c[aot])|(d[ec])|(fl)|(ga)|(hi)|(i[dlna])|(k[sy])|(la)|(m[edainsot])|(n[evhjmycd])|(o[hkr])|(pa)|(ri)|(s[cd])|(t[nx])|(ut)|(v[ta])|(w[aviy]))$/;
@@ -23,7 +23,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
             return input;
         }
 
-    })
+    }])
 .factory('ResCache', ['$cacheFactory', function($cacheFactory) {
     return $cacheFactory('resCache', {
         capacity: 3    
@@ -122,6 +122,16 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         ceil: 50,
         floor: 0.1
     };
+    
+    
+    $scope.grabTime = function() {
+        $timeout(function() {
+            var ele = $('#updatedTime')[0].innerHTML;
+            console.log('time grab', ele);
+        }, 500);    
+    }
+    
+    
 
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         $scope.mobileScreen = true;
@@ -245,9 +255,19 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 'background-image': "url(" + imgIndex + ")"
             });
         } else {
-            $('.largeImage' + parIndex).css({
+            $('.imageBot' + parIndex).css({
                 'background-image': "url(" + imgIndex + ")"
             });
+            
+            $('#expandTop').addClass('is-disappearing');
+            $timeout(function() {
+               $('.imageTop' + parIndex).css({
+                    'background-image': "url(" + imgIndex + ")"
+                }); 
+                $('#expandTop').removeClass('is-disappearing');
+            }, 400);
+            
+            
         }
     }
 
@@ -438,7 +458,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             if ($scope.items && $scope.items.length) {
                 $scope.noResults = false;
                 for (var i = 0; i < $scope.items.length; i++) {
-
+                    
                     //remove user objects
                     if (!$scope.items[i].owner) {
                         $scope.items.splice(i, 1);
@@ -612,6 +632,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     }
 
     $scope.reportItem = function(status, item, index) {
+        
         if (status === 'open') {
             $scope.showReportModal = index;
         } else if (status === 'close') {
@@ -623,8 +644,14 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 comment: $scope.report.comment,
                 reason: $scope.report.reason
             }). then(function (res) {
-            $timeout(function() {$scope.showReportModal = null;}, 0);    
-//                console.log('res', res);
+                    var ele = $('#reportSubmit');
+                    ele[0].innerHTML = 'Thanks!';
+                    ele.css({
+                        'backgroundColor': 'lightgreen'
+                    });
+                $timeout(function() {
+                    $scope.showReportModal = null;
+                }, 1000);
 
                 if (res.data.err) {
 
