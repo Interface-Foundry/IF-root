@@ -49,8 +49,7 @@
                 <div class="col-md-8 descripWrapper">
 <!--                    FIX GOES HERE-->
                     <a ng-click="returnHome(item);"><span class="item-description updated-time has-cursor" am-time-ago="item.updated_time"></span></a>
-                    <h3 class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price | number : 0}} - </span> {{::item.name | deCapslock}}</a></h3>
-
+                    <h3 scroll-to="anchor{{$index}}" duration="250" easing="easeOut" class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price | number : 0}} - </span> {{::item.name | deCapslock}}</a></h3>
                     <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{::item.parent.name}} - {{::item.distanceMI}} miles <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
 
         <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>
@@ -137,7 +136,7 @@
                         <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default modalButton Left" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}"
                            ng-class="{'is-full' : !item.parent.tel }">Buy online</a>
                         <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default  modalButton Right" style="color:grey; !important; border-radius:2px;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
-                    <div class="mobileModal Descrip"> {{::item.description}}</div>
+                    <div class="mobileModal Descrip"> {{::item.description | limitTo: 470}}<span ng-show="item.description.length > 470">...</span></div>
                 </div>
 </div>
             </div>
@@ -157,7 +156,8 @@
                 <div class="detailsFromCollapsed" ng-show="item.name"><span ng-show="item.price">${{::item.price}} - </span> {{::item.name}}</div>
                 <span class="detailsFromCollapsed Store" style="margin-top:5px;">{{::item.parent.name}} - {{::item.distanceMI}} miles</span>
                 <br>
-                <div class="detailsContent">{{::item.description}}</div>
+                <div class="detailsContent">{{::item.description | limitTo: 470}}<span ng-show="item.description.length > 470">...</span></div> 
+
                 <span id="updatedTime" ng-init="grabTime();" ng-click="returnHome(item);" class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
                 <span ng-click="returnHome(item);" class="detailsFromCollapsed Time" am-time-ago="item.updated_time"></span>
 

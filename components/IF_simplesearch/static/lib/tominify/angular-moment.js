@@ -350,7 +350,6 @@
 						$rootScope.$broadcast('amMoment:localeChanged');
 
 					}
-                    console.log('result', result);
 					return result;
 				};
 
@@ -612,7 +611,6 @@
 					value = amMoment.preprocessDate(value);
                     
 					date = moment(value);
-                    console.log (value, date);
 					if (!date.isValid()) {
 						return '';
 					}
