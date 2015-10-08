@@ -1,0 +1,26 @@
+
+
+
+<div id='map'></div>
+<div style="position:absolute; z-index:8; float:right;">
+
+  <select ng-model="selectedOption" ng-options="option.name for option in options">
+  </select>
+
+</div>
+
+<style>
+.leaflet-popup-content-wrapper {
+  background-color: #fff;
+  border: 1px solid gray;
+}
+ #map { position:absolute; top:0; bottom:0; width:100%; z-index:5;}
+
+
+/*@media screen and (max-width: 768px){
+    .snap-content{
+        z-index: 0 !important;
+    }
+}*/
+
+</style>
