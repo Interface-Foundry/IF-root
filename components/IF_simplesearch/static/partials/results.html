@@ -42,7 +42,7 @@
                     <span class="scrollActivate" ng-if="mobileScreen" ng-click="expandContent($index, $event, item.itemImageURL.length)"></span>
 <!--                    <span class="scrollActivate" ng-if="!mobileScreen" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)"></span>-->
                     <div id="collapseTop" scroll-to="anchor{{$index}}" duration="250" easing="easeOut" ng-click="expandContent($index, $event)" class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[0]}})'}"></div>
-                    <div id="collapseBot" class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[1]}})'}"></div>
+                    <div id="collapseBot" class="mobileResultsImage" ng-style="{'background-image': 'url({{::item.itemImageURL[item.itemImageURL.length - 1]}})'}"></div>
                     <img class="holderPlace Sub" holder="holder.js/240x240/text:?" alt="{{::item.name}}" title="{{::item.name}}">
                 </div>
 

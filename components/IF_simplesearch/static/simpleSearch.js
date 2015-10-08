@@ -122,6 +122,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         ceil: 50,
         floor: 0.1
     };
+    $scope.infBool = false;
     
     
     $scope.grabTime = function() {
@@ -165,6 +166,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
     $scope.sayHello = function() {
         if (!httpBool) {
+            $scope.infBool = true;
             $scope.searchQuery();
         }
     }
@@ -443,6 +445,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                         ResCache.put('user', $scope.items);
                         ResCache.put('query', encodeQuery);
                         $scope.newQuery = false;   
+                    } else if ($scope.infBool) {
+                        $scope.items = $scope.items.concat(response.data.results);    
+                        ResCache.put('user', $scope.items);
+                        ResCache.put('query', encodeQuery);
+                        $scope.newQuery = false;   
+                        $scope.infBool = false;
                     } else {
                         $scope.items = prevItems;           
                     }
