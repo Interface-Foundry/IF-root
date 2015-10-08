@@ -57,6 +57,7 @@ app.use(function(req, res, next) {
                 if (u) {
                     req.user = u;
                     req.userId = u._id.toString();
+                    req.isAdmin = u.admin === true;
                 }
                 next();
             });

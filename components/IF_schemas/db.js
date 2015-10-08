@@ -45,6 +45,7 @@ var schemas = [
     {filename: 'serverwidgets_schema', single: 'ServerWidget', plural: 'ServerWidgets'},
     {filename: 'sticker_schema', single: 'Sticker', plural: 'Stickers'},
     {filename: 'style_schema', single: 'Style', plural: 'Styles'},
+    {filename: 'training_schema', single: 'TrainingData', plural: 'TrainingDatas'},
     {filename: 'twitter_schema', single: 'Twitter', plural: 'Twitters'},
     {filename: 'user_schema', single: 'User', plural: 'Users'},
     {filename: 'visit_schema', single: 'Visit', plural: 'Visits'},

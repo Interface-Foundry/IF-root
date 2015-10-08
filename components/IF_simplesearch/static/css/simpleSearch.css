@@ -729,11 +729,27 @@ div.footerBar {
     height: 241px;
     width: 241px;
     background-size: cover;
-    background-position: top;
+    background-position: center;
     background-color:white;
     background-repeat: no-repeat;
     position: absolute;
     z-index: 2;
+    opacity: 1;
+    transition: opacity .5s ease-in-out;
+}
+
+#collapseTop {
+    z-index: 2;
+    opacity: 1;
+}
+
+#collapseTop:hover {
+    opacity: 0;   
+}
+
+#collapseBot {
+    position: relative;
+    z-index: 1;
 }
 
 .holderPlace:first-child {
@@ -856,6 +872,7 @@ div.footerBar {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    transition: opacity .5s ease-in-out;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
@@ -864,7 +881,46 @@ div.footerBar {
             flex-direction: row;
 }
 
+#expandTop {
+    position: absolute;
+    z-index: 2;
+}
+
+#expandBot {
+    position: relative;
+    z-index: 1;
+}
+
+.is-disappearing {
+    animation: disappear .5s ease-in-out;   
+    animation-fill-mode: forwards;
+}
+
+.is-appearing {
+    animation: appear .5s ease-in-out;   
+    animation-fill-mode: forwards;
+}
+
+@keyframes disappear {
+    0% {
+        opacity: 1;   
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes appear {
+    0% {
+        opacity: 0;   
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 .imageSelectors.Wrapper {
+    z-index: 3;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
@@ -880,7 +936,7 @@ div.footerBar {
     background-color: white;
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center top;
     display: inline-block;
 
 }
@@ -889,7 +945,7 @@ div.footerBar {
     margin-left: 1px;
     margin-right: 1px;
     background-color: gray;
-    background-position: center;
+    background-position: top;
     background-size: cover;
     flex-shrink: 1;
 }
@@ -951,6 +1007,10 @@ div.footerBar {
     width: 9%;
     color: white;
     cursor: pointer;
+}
+
+#updatedTime {
+    visibility: hidden;
 }
 
 .detailsFromCollapsed.Distance {

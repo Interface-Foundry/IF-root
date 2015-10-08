@@ -71,6 +71,7 @@
     "request-promise": "^0.4.2",
     "rsvp": "^3.0.20",
     "scrape": "^0.2.3",
+    "scrapequest": "^1.0.0",
     "semver": "^5.0.1",
     "shapefile": "^0.3.0",
     "should": "^7.1.0",
