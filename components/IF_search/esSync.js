@@ -87,7 +87,7 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
           this.name,
           _.get(this, 'source_cloudsight.name') || ''
         ].filter(function(v) {
-          return v !== '';
+          return !!v;
         }).map(function(s) {
           return searchterms.tokenize(s);
         }))
