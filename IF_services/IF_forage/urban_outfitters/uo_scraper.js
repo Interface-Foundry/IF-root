@@ -497,7 +497,8 @@ function saveItems(items, stores) {
                         }).update({
                             $set: {
                                 'parents': mongoIds,
-                                'loc.coordinates': storeLocs
+                                'loc.coordinates': storeLocs,
+                                'updated_time': new Date()
                             }
                         }, function(e, result) {
                             if (e) {

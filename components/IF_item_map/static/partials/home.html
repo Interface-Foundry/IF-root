@@ -1,0 +1,36 @@
+
+
+
+<div id='map'></div>
+<div ng-show="loading" style="position:absolute; z-index:7; width:100%; height:100%; background-color:#fff; opacity:0.8;">
+	<center>
+		<h1>You look nice today</h1>
+		<h4>This might take a while...how are things? 😅</h4>
+		<h5>The weather is so weird, ikr</h5>
+		<img src="img/ajax-loader.gif">
+	</center>
+</div>
+<div style="position:absolute; z-index:8; padding-left:48px; padding-top:8px;">
+
+  <select ng-model="selectedOption" ng-options="option.name for option in options">
+  </select>
+  <br>
+  <p ng-show="itemCount" style="background-color:white; opacity:0.8;">{{itemCount}} items found ✨</p>
+
+</div>
+
+<style>
+.leaflet-popup-content-wrapper {
+  background-color: #fff;
+  border: 1px solid gray;
+}
+ #map { position:absolute; top:0; bottom:0; width:100%; z-index:5;}
+
+
+/*@media screen and (max-width: 768px){
+    .snap-content{
+        z-index: 0 !important;
+    }
+}*/
+
+</style>

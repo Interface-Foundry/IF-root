@@ -20,7 +20,6 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.4.1",
     "gulp-util": "^3.0.6",
-    "redis-stream": "^0.1.0",
     "xmlbuilder": "^3.1.0"
   }
 }

@@ -7,29 +7,15 @@ var request = require('request');
 var item_scraper = require('./nordstrom_scraper');
 var states = require('./states');
 var fs = require('fs');
+var _ = require('lodash');
+var catalogs = require('./catalogs')
 
-//List of NEW-IN catalogs
-var womens = {
-    category: 'Womens',
-    url: 'http://shop.nordstrom.com/c/womens-new-arrivals?dept=8000001&origin=topnav'
+//Error check for all the catalogs in the catalogs.js file, just to make sure since there are a lot of variables and links in there..
+for (var i = 0; i < catalogs.length; i++) {
+    if (!catalogs[i] || catalogs[i] == undefined || catalogs[i] == null) {
+        console.log('There is  a type in the catalogs file.  Please check at index: ',i)
+    }
 }
-var mens = {
-    category: 'Mens',
-    url: 'http://shop.nordstrom.com/c/mens-clothing-whats-new?origin=leftnav'
-}
-var wshoes = {
-    category: 'Womens Shoes',
-    url: 'http://shop.nordstrom.com/c/womens-shoe-new?dept=8000001&origin=topnav'
-}
-var mshoes = {
-    category: 'Mens Shoes',
-    url: 'http://shop.nordstrom.com/c/mens-shoes-whats-new?origin=leftnav'
-}
-var handbags = {
-    category: 'Handbags',
-    url: 'http://shop.nordstrom.com/c/handbags-new-arrivals?origin=leftnav'
-}
-var catalogs = [mens, womens, mshoes, wshoes,handbags]
 
 stateIndex = 0;
 currentState = states[stateIndex]
@@ -64,7 +50,7 @@ async.whilst(
                                 }).catch(function(err) {
                                     if (err) {
                                         var today = new Date().toString()
-                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                                     }
                                     console.log('Error with catalog: ', catalog)
                                     wait(callback, 10000)
@@ -72,7 +58,8 @@ async.whilst(
                             }, function(err) {
                                 if (err) {
                                     var today = new Date().toString()
-                                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                    console.log('There was an error with current catalog, moving onto next one...')
+                                    fs.appendFile('errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
                                 }
                                 console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
                                 wait(loop, 2000000)
@@ -81,7 +68,7 @@ async.whilst(
                         function(err) {
                             if (err) {
                                 var today = new Date().toString()
-                                fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err, function(err) {});
+                                fs.appendFile('errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
                             } else {
                                 var today = new Date().toString()
                                 fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs for: ', currentState)
@@ -93,7 +80,7 @@ async.whilst(
                 function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + +'Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
                     }
                     stateIndex++;
                     if (states[stateIndex]) {
@@ -105,8 +92,8 @@ async.whilst(
                         stateIndex = 0;
                         currentState = states[stateIndex]
                         fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs for all states!!*** ')
-                        // Turn off infinite loop, CRON job will handle it.
-                        // loop()
+                            // Turn off infinite loop, CRON job will handle it.
+                            // loop()
                     }
                 });
         })
@@ -119,55 +106,129 @@ async.whilst(
     })
 
 
-function loadCatalog(category, zipcode) {
+function loadCatalog(catalog, zipcode) {
     return new Promise(function(resolve, reject) {
-
         var options = {
-            url: category.url,
+            url: catalog.url,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-
-        console.log('Starting catalog: ', category.category, ' for zipcode: ', zipcode)
+        console.log('Starting catalog: ', catalog.category, ' for zipcode: ', zipcode)
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
-                async.eachSeries($('div.main-content-right a'), function(item, callback) {
-                    if ((item.attribs.href.indexOf('?origin=category') == -1) || (item.attribs.href == '#') || (item.attribs.href.indexOf('/s/') == -1)) {
-                        // console.log('invalid!')
-                        return callback()
+
+                //----Parse out all page links from body----//
+                var pages = [];
+                for (var key in $('ul.page-numbers>li>a')) {
+                    if ($('ul.page-numbers>li>a').hasOwnProperty(key) && $('ul.page-numbers>li>a')[key].attribs && $('ul.page-numbers>li>a')[key].attribs.href) {
+                        pages.push($('ul.page-numbers>li>a')[key].attribs.href)
                     }
-                    var detailsUrl = item.attribs.href;
-                    detailsUrl = 'http://shop.nordstrom.com' + detailsUrl.toString().trim()
+                }
+                pages = _.uniq(pages)
+                var pageLinks = pages.length > 0 ? [catalog.url, catalog.url.concat(pages[0]), catalog.url.concat(pages[1]), catalog.url.concat(pages[2])] : [catalog.url]
+                if (pageLinks.length > 1) {
+                    var linkFormat = pages[0].split('page=')[0].concat('page=')
+                    var lastVisiblePageNum = parseInt(pages[pages.length - 2].split('=')[2])
+                    var lastPageNum = parseInt(pages[pages.length - 1].split('=')[2])
+                    for (var i = lastVisiblePageNum + 1; i <= lastPageNum; i++) {
+                        var link = catalog.url.concat((linkFormat.concat(i)))
+                        pageLinks.push(link)
+                    }
+                }
+               
 
-                    // console.log('Scraping>>>', detailsUrl)
-
-                    item_scraper(detailsUrl, category.category, zipcode).then(function(result) {
-                        wait(callback, 4000)
-                    }).catch(function(err) {
-                        console.log(err)
-                        wait(callback, 4000)
-                    })
-                }, function(err) {
+                //Load pages and scrape each page.
+                loadPages(pageLinks, zipcode, catalog).then(function() {
+                    console.log('Finished scraping all pages for catalog: ', catalog.category)
+                    resolve();
+                }).catch(function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                        return reject(err)
                     }
-                    console.log('Done scraping catalog!')
-                    resolve()
+                    reject()
                 })
+
 
             } else {
                 if (error) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error, function(err) {});
+                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error);
                     reject(error)
                 } else if (response.statusCode !== 200) {
-                    console.log('response.statusCode: ', response.statusCode)
+                    console.log('Error - Response.statusCode: ', response.statusCode)
                     reject(response.statusCode)
                 }
             }
+        })
+    })
+}
+
+function loadPages(links, zipcode, catalog) {
+    return new Promise(function(resolve, reject) {
+
+        //Loop through each page in the catalog.
+        async.eachSeries(links, function iterator(link, callback1) {
+            var options = {
+                url: link,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+                }
+            };
+            request(options, function(error, response, body) {
+                if ((!error) && (response.statusCode == 200)) {
+                    $ = cheerio.load(body); 
+
+                    //Loop through each item in the page.
+                    async.eachSeries($('div.main-content-right a'), function(item, callback2) {
+                        if ((item.attribs.href.indexOf('?origin=category') == -1) || (item.attribs.href == '#') || (item.attribs.href.indexOf('/s/') == -1)) {
+                            // console.log('invalid!')
+                            return callback2()
+                        }
+                        var detailsUrl = item.attribs.href;
+                        detailsUrl = 'http://shop.nordstrom.com' + detailsUrl.toString().trim()
+
+                        // console.log('Scraping>>>', detailsUrl)
+
+                        item_scraper(detailsUrl, catalog.category, zipcode).then(function(result) {
+                            wait(callback2, 4000)
+                        }).catch(function(err) {
+                            console.log(err.lineNumber + err)
+                            wait(callback2, 4000)
+                        })
+                    }, function(err) {
+                        if (err) {
+                            var today = new Date().toString()
+                            fs.appendFile('errors.log', '\n' + today + err.lineNumber + ' Category: ' + catalog.category + '\n' + err);
+                        }
+                        console.log('************Finished scraping page..')
+                        callback1()
+                    })
+
+
+                } else {
+                    if (error) {
+                        var today = new Date().toString()
+                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error);
+                        callback1()
+                    } else if (response.statusCode !== 200) {
+                        console.log('Error - Response.statusCode: ', response.statusCode)
+                        callback1()
+                    }
+                }
+            })
+        }, function finished(err) {
+            if (err) {
+                var today = new Date().toString()
+                fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                return reject(err)
+            }
+             console.log('!!!!!********Finished all pages..')
+            resolve()
+
         })
     })
 }

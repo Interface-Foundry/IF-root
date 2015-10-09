@@ -29,7 +29,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(callback) {
                     scrapeItem(url).then(function(item) {
-                         console.log(2)
+                        console.log(2)
                         wait(function() {
                             callback(null, item)
                         }, 3000)
@@ -39,7 +39,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(item, callback) {
                     getLatLong(zipcode).then(function(coords) {
-                         console.log(3)
+                        console.log(3)
                         callback(null, item, coords)
                     }).catch(function(err) {
                         callback(err)
@@ -47,7 +47,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(item, coords, callback) {
                     getInventory(item, coords).spread(function(items, stores) {
-                         console.log(4)
+                        console.log(4)
                         callback(null, items, stores)
                     }).catch(function(err) {
                         callback(err)
@@ -55,7 +55,7 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(items, stores, callback) {
                     saveStores(items, stores).spread(function(items, stores) {
-                         console.log(5)
+                        console.log(5)
                         callback(null, items, stores)
                     }).catch(function(err) {
                         callback(err)
@@ -322,7 +322,7 @@ function scrapeItem(url) {
                         }
                     });
                 } catch (err) {
-                    console.log('Scrape Error: ',err)
+                    console.log('Scrape Error: ', err)
                     reject(err)
                 }
 
@@ -618,6 +618,9 @@ function saveItems(items, Stores) {
                             'parents': {
                                 $each: storeIds
                             }
+                        },
+                        $set: {
+                            'updated_time': new Date()
                         }
                     }, function(e, result) {
                         if (e) {
