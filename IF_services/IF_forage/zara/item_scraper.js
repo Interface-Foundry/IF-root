@@ -116,32 +116,32 @@ module.exports = function scrapeItem(url) { 
                 function(item, stores, callback) {
                     getInventory(item, stores).then(function(inventory) {
                         console.log(5)
-                        callback(null, item, inventory)
+                        callback(null, item, inventory, stores)
                     }).catch(function(err) {
                         callback(err)
                     })
                 },
-                function(item, inventory, callback) {
+                function(item, inventory, stores, callback) {
                     console.log(6)
                     if (!exists) {
                         upload.uploadPictures('zara_' + item.partNumber.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
-                                        console.log(6.5)
+                            console.log(6.5)
                             item.hostedImages = images
-                            callback(null, item, inventory)
+                            callback(null, item, inventory, stores)
                         }).catch(function(err) {
-                                   console.log(6.9)
+                            console.log(6.9)
                             if (err) console.log(err.lineNumber + 'Image upload error: ', err);
                             callback(err)
                         })
                     } else {
-                        callback(null, item, inventory)
+                        callback(null, item, inventory, stores)
                     }
 
                 },
-                function(item, inventory, callback) {
-                                console.log(7)
-                    processItems(inventory, item).then(function(item) {
-                                    console.log(8)
+                function(item, inventory, stores, callback) {
+                    console.log(7)
+                    processItems(inventory, item, stores).then(function(item) {
+                        console.log(8)
                         callback(null, item)
                     }).catch(function(err) {
                         callback(err)
@@ -381,9 +381,9 @@ function getInventory(itemData, stores) {
         //     return obj.source_generic_store.storeId
         // })
 
-// 3074, 3818, 3037, 1260, 3946, 303, 3036, 
-
-    var storeIds = [3611, 3441, 6493, 3723, 3844, 3985, 3805, 3612,3613,3322,6498]
+    // 3074, 3818, 3037, 1260, 3946, 303, 3036, 
+    // x x x x x x
+    var storeIds = [3611, 3441, 6493, 3723, 3844, 3985, 3805, 3612, 3613]
 
     // http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/15517003004?physicalStoreId=3036,3037,3074,3818,1260,303,3946&ajaxCall=true
     return new Promise(function(resolve, reject) {
@@ -395,12 +395,13 @@ function getInventory(itemData, stores) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-        // console.log('apiURL: ',apiUrl)
+        console.log('apiURL: ', apiUrl)
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body)
-                if (!body.stocks) {
-                    console.log('No stocks.')
+                if (!body.stocks || body.stocks.length < 1 || body.stocks == null) {
+                    console.log('No stocks.', body)
+                    return reject('No stocks for this item.')
                 }
                 var inventory = body.stocks
                     // console.log('INVENTORY: ',JSON.stringify(inventory))
@@ -419,56 +420,61 @@ function getInventory(itemData, stores) {
     })
 }
 
-function processItems(inventory, itemData, url) {
+function processItems(inventory, itemData, Stores) {
 
     return new Promise(function(resolve, reject) {
 
-        if (!inventory && inventory.length < 1) {
+        if (!inventory || inventory.length < 1 || inventory == null) {
+            console.log('No inventory found for this item. Aborting.', inventory)
             return reject('No inventory found for this item. Aborting.')
         }
         //If this item has already been scraped, update inventory,parents, and location fields of item.
         if (exists) {
+            if (!itemData.parents) {
+                console.log('This item has no parents!', itemData._id)
+                return reject('This item has no parents.')
+            }
 
             var inventoryStoreIds = inventory.map(function(store) {
                 return store.physicalStoreId.toString().trim()
             })
-            var inventoryString = inventoryStoreIds.join()
-            if (!itemData.parents) {
-                console.log('This item has no parents!', itemData._id)
-                return reject('This item has no parents!')
-            }
-            var dbStoreIds = itemData.parents.map(function(store) {
-                return store.source_generic_store.storeId
+            var inventoryStoreString = inventoryStoreIds.join()
+            var inventoryParentIds = [];
+
+            Stores.forEach(function(store) {
+                if (inventoryStoreString.indexOf(store.source_generic_store.storeId.toString().trim()) > -1) {
+                    inventoryParentIds.push(store._id)
+                }
             })
 
-            var updatedParents = itemData.parents.filter(function(store) {
-                return inventoryString.indexOf(store.source_generic_store.storeId) > -1
-            })
-
-            var updatedParentMongoIds = updatedParents.map(function(store) {
-                return store._id
-            })
+            var inventoryParentIdsString = inventoryParentIds.join()
 
             var updatedLocs = [];
 
-            updatedParents.forEach(function(store) {
-                updatedLocs.push(store.loc.coordinates)
+            Stores.forEach(function(store) {
+                if (inventoryParentIdsString.indexOf(store._id) > -1)
+                    updatedLocs.push(store.loc.coordinates)
             })
+
+            if (inventoryParentIds.length !== updatedLocs.length) {
+                console.log('Lengths dont match up:', inventoryParentIds, updatedLocs)
+                return reject('Lengths dont match up!')
+            }
 
             db.Landmarks.findOne({
                 '_id': itemData._id
             }).update({
                 $set: {
                     'source_generic_item.inventory': inventory,
-                    'parents': updatedParentMongoIds,
+                    'parents': inventoryParentIds,
                     'loc.coordinates': updatedLocs,
                     'updated_time': new Date()
                 }
             }, function(e, result) {
                 if (e) {
-                    console.log(e.lineNumber + 'Inventory update error: ', e)
+                    console.log('Inventory update error: ', e)
                 }
-                console.log('Finished updating inventory: ', result.n, 'for :', itemData.id)
+                console.log('Finished updating inventory: ', inventoryParentIds.length, ' locations with item :', itemData.id)
 
                 return resolve()
             })
