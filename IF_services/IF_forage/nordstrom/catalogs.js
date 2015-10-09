@@ -203,6 +203,6 @@ var newhandbags = {
     url: 'http://shop.nordstrom.com/c/handbags-new-arrivals?origin=leftnav'
 }
 
-var catalogs = [wgloves, wbelts, wscarves, whatsandhairs, wwinter, wsunglasses, wshapewear, wsleepwear, whosiery, wdress, wtop, wjeans, wsweaters, wcoats, wjackets, wpants, wsuit, wskirt, wswimsuit, wactivewear, wunderwear, wpetite, mcoat, msuit, mdressshirt, mcasualshirt, mpoloshirt, mtshirt, msweater, mtuxedo, mpants, mjeans, mshorts, mswimwear, mworkout, msleepwear, munderwear, wshoes, mshoes, whandbagsandwallets, wwatches, wjewelry, wfinejewelry, wglasses, wluggage,wnew, mnew, wnewshoes,mnewshoes,newhandbags]
+var catalogs = [wdress, wtop, wjeans, wsweaters, wcoats, wjackets, wpants, wsuit, wskirt,  mcoat, msuit, mdressshirt, mcasualshirt, mpoloshirt, mtshirt, msweater, mtuxedo, mpants, mjeans, mshorts, wunderwear, wshoes, mshoes, wswimsuit, wactivewear, wpetite,mswimwear, mworkout, msleepwear, munderwear, whandbagsandwallets, wwatches, wjewelry, wfinejewelry, wglasses, wgloves, wbelts, wscarves, whatsandhairs, wwinter, wsunglasses, wshapewear, wsleepwear, whosiery,wluggage,wnew, mnew, wnewshoes,mnewshoes,newhandbags]
 
 module.exports = catalogs
