@@ -33,6 +33,7 @@ app.post('/query', function(req, res, next) {
             },
             'linkbackname': req.body.name
         })
+        .select('name itemImageURL loc parents')
         .populate('parents')
         .exec(function(err,data){
             if (err){ console.log (err)}
@@ -82,6 +83,7 @@ app.post('/query', function(req, res, next) {
                 $exists: true
             }
         })
+        .select('name itemImageURL loc parents')
         .populate('parents')
         .exec(function(err,data){
             if (err){ console.log (err)}
