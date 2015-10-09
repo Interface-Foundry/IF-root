@@ -11,7 +11,7 @@ var _ = require('lodash');
 var catalogs = require('./catalogs')
 
 //Error check for all the catalogs in the catalogs.js file, just to make sure since there are a lot of variables and links in there..
-for (var i = 0; i < catalongs.length; i++) {
+for (var i = 0; i < catalogs.length; i++) {
     if (!catalogs[i] || catalogs[i] == undefined || catalogs[i] == null) {
         console.log('There is  a type in the catalogs file.  Please check at index: ',i)
     }
