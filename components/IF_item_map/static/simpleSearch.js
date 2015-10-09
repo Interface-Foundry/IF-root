@@ -57,7 +57,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$document', '$timeout
         //$scope.selectedOption = $scope.options[1];
 
         $scope.$watch('selectedOption', function(v) {
-            if (v.name){
+            if (v && v.name){
               getItems(v.name,v.value);  
             }
             
