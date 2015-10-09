@@ -80,12 +80,18 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$document', '$timeout
                 name:name,
                 val:val
             }
-            
+
+            if ($scope.markers){
+                $scope.markers.clearLayers();
+            }
+
+            $scope.markers = new L.MarkerClusterGroup();
+
             $http.post('/query',data).
             then(function(res) {        
                 console.log(res);
 
-                var markers = new L.MarkerClusterGroup();
+                
 
                 for (var i = 0; i < res.data.length; i++) {
                     var marker = L.marker(new L.LatLng(res.data[i].lat, res.data[i].lng), {
@@ -93,11 +99,11 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$document', '$timeout
                         title: res.data[i].name
                     });
                     marker.bindPopup('<p>'+res.data[i].name+'<br>Item Id: '+res.data[i].item_id+'<br>Parent Id: '+res.data[i].parent_id+'</p>');
-                    markers.addLayer(marker);
+                    $scope.markers.addLayer(marker);
                 }
 
                 $scope.itemCount = res.data.length;
-                map.addLayer(markers);
+                map.addLayer($scope.markers);
                 $scope.loading = false;
 
             });
