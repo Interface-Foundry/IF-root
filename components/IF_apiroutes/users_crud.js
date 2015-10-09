@@ -68,6 +68,15 @@ app.put('/:xmongoId', function(req, res, next) {
         req.body.profileID = req.body.profileID.toLowerCase();
     }
 
+    // don't let anyone mark themselves as "admin"
+    if (req.body.admin && !req.user.admin) {
+      console.log('hacker alert: someone attempted to make themselves an admin');
+      console.log('should ban', req.ip, 'and user', req.userId);
+
+      // pretend nothing is amiss, though, and continue on
+      delete req.user.admin;
+    }
+
     _.merge(req.user, req.body);
 
     req.user.save(function(err, user) {

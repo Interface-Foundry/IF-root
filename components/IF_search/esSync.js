@@ -79,16 +79,29 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
         source: 'owner.name'
     },
     name: {
+      type: 'string',
       source: function () {
         // the name property will be both the mongo document name
         // and the name found by cloudsight if any
-        return [
+        return _.flatten([
           this.name,
           _.get(this, 'source_cloudsight.name') || ''
         ].filter(function(v) {
-          return v !== '';
-        });
-      }
+          return !!v;
+        }).map(function(s) {
+          return searchterms.tokenize(s);
+        }))
+      },
+      index: 'not_analyzed'
+    },
+    brand: {
+        type: 'string',
+        source: function() {
+          var brand = _.get(this, 'linkbackname', '').split('.')[0];
+          if (brand && brand !== 'shoptiques') {
+            return brand;
+          }
+        }
     },
     categories: {
         type: 'string',
@@ -96,6 +109,7 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
         source: 'itemTags.categories'
     },
     tags: {
+        type: 'string',
         source: function() {
             return _.uniq(searchterms.tokenize(_.flattenDeep([
                 _.get(this, 'itemTags.text'),
@@ -110,29 +124,32 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
             ]).filter(function(a) {
                 return typeof a !== 'undefined' && a !== '';
             }).join(' ')))
-        }
+        },
+        index: 'not_analyzed',
     },
     descriptionTags: {
+        type: 'string',
         source: function() {
             return _.uniq(_.get(this, 'meta.classifierDescTags')).filter(function(a) {
               return typeof a !== 'undefined' && a !== '';
             }).join(' ')
-        }
+        },
+        index: 'not_analyzed'
     },
-    miscText: {
-      source: function() {
-        return _.flattenDeep([
-          (_.get(this, 'source_justvisual.images') || []).map(function(i) {
-            return [
-              _.get(i, 'description'),
-              _.get(i, 'title')
-            ];
-          })
-        ]).filter(function(a) {
-            return typeof a !== 'undefined' && a !== '';
-        })
-      }
-    },
+    // miscText: {
+    //   source: function() {
+    //     return _.flattenDeep([
+    //       (_.get(this, 'source_justvisual.images') || []).map(function(i) {
+    //         return [
+    //           _.get(i, 'description'),
+    //           _.get(i, 'title')
+    //         ];
+    //       })
+    //     ]).filter(function(a) {
+    //         return typeof a !== 'undefined' && a !== '';
+    //     })
+    //   }
+    // },
     // override some defaults from kipSchemaBase
     location: {
         source: 'addressString'
@@ -267,19 +284,19 @@ function mongoToEs(schema, doc) {
     }, {});
 
     // build a custom full text field with our custom tokenizer
-    if (hasFullText) {
-      var fullText = Object.keys(schema).reduce(function(fullText, k) {
-        if (schema[k].type === 'string') {
-          if (esDoc[k] instanceof Array) {
-            fullText.push(searchterms.tokenize(_.flatten(esDoc[k]).join(' ')));
-          } else if (typeof esDoc[k] === 'string') {
-            fullText.push(searchterms.tokenize(esDoc[k]))
-          }
-        }
-        return fullText; // array of token arrays
-      }, []);
-      esDoc.fullText = _.flatten(fullText).join(' ');
-    }
+    // if (hasFullText) {
+    //   var fullText = Object.keys(schema).reduce(function(fullText, k) {
+    //     if (schema[k].type === 'string') {
+    //       if (esDoc[k] instanceof Array) {
+    //         fullText.push(searchterms.tokenize(_.flatten(esDoc[k]).join(' ')));
+    //       } else if (typeof esDoc[k] === 'string') {
+    //         fullText.push(searchterms.tokenize(esDoc[k]))
+    //       }
+    //     }
+    //     return fullText; // array of token arrays
+    //   }, []);
+    //   esDoc.fullText = _.flatten(fullText).join(' ');
+    // }
     return esDoc;
 }
 
