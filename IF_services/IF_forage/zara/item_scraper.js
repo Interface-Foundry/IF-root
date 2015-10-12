@@ -424,65 +424,73 @@ function processItems(inventory, itemData, Stores) {
 
     return new Promise(function(resolve, reject) {
 
-        if (!inventory || inventory.length < 1 || inventory == null) {
-            console.log('No inventory found for this item. Aborting.', inventory)
-            return reject('No inventory found for this item. Aborting.')
-        }
-        //If this item has already been scraped, update inventory,parents, and location fields of item.
-        if (exists) {
-            if (!itemData.parents) {
-                console.log('This item has no parents!', itemData._id)
-                return reject('This item has no parents.')
+            if (!inventory || inventory.length < 1 || inventory == null) {
+                console.log('No inventory found for this item. Aborting.', inventory)
+                return reject('No inventory found for this item. Aborting.')
+            }
+            //If this item has already been scraped, update inventory,parents, and location fields of item.
+            if (exists) {
+                if (!itemData.parents) {
+                    console.log('This item has no parents!', itemData._id)
+                    return reject('This item has no parents.')
+                }
+
+                var inventoryStoreIds = inventory.map(function(store) {
+                    return store.physicalStoreId.toString().trim()
+                })
+                var inventoryStoreString = inventoryStoreIds.join()
+                var inventoryParentIds = [];
+
+                Stores.forEach(function(store) {
+                    if (inventoryStoreString.indexOf(store.source_generic_store.storeId.toString().trim()) > -1) {
+                        inventoryParentIds.push(store._id)
+                    }
+                })
+
+                var inventoryParentIdsString = inventoryParentIds.join()
+
+                var updatedLocs = [];
+
+                Stores.forEach(function(store) {
+                    if (inventoryParentIdsString.indexOf(store._id) > -1)
+                        updatedLocs.push(store.loc.coordinates)
+                })
+
+                if (inventoryParentIds.length !== updatedLocs.length) {
+                    console.log('Lengths dont match up:', inventoryParentIds, updatedLocs)
+                    return reject('Lengths dont match up!')
+                }
+
+                db.Landmarks.findOne({
+                    '_id': itemData._id
+                }).update({
+                    $set: {
+                        'source_generic_item.inventory': inventory,
+                        'parents': inventoryParentIds,
+                        'loc.coordinates': updatedLocs,
+                        'updated_time': new Date()
+                    }
+                }, function(e, result) {
+                    if (e) {
+                        console.log('Inventory update error: ', e)
+                    }
+                    console.log('Finished updating inventory: ', inventoryParentIds.length, ' locations with item :', itemData.id)
+
+                    return resolve()
+                })
+
+            } //end of if item exists
+
+            //If item has not been scraped, create a new item 
+            if (!exists) {
+                
+            //Create new item in db if it does not already exist OR if it was created without s3 image links
+                if (itemData.itemImageURL[0] && itemData.indexOf('s3.amazonaws.com') == -1)) {
+                db.Landmarks.remove({
+                    'id': itemData.id
+                })
             }
 
-            var inventoryStoreIds = inventory.map(function(store) {
-                return store.physicalStoreId.toString().trim()
-            })
-            var inventoryStoreString = inventoryStoreIds.join()
-            var inventoryParentIds = [];
-
-            Stores.forEach(function(store) {
-                if (inventoryStoreString.indexOf(store.source_generic_store.storeId.toString().trim()) > -1) {
-                    inventoryParentIds.push(store._id)
-                }
-            })
-
-            var inventoryParentIdsString = inventoryParentIds.join()
-
-            var updatedLocs = [];
-
-            Stores.forEach(function(store) {
-                if (inventoryParentIdsString.indexOf(store._id) > -1)
-                    updatedLocs.push(store.loc.coordinates)
-            })
-
-            if (inventoryParentIds.length !== updatedLocs.length) {
-                console.log('Lengths dont match up:', inventoryParentIds, updatedLocs)
-                return reject('Lengths dont match up!')
-            }
-
-            db.Landmarks.findOne({
-                '_id': itemData._id
-            }).update({
-                $set: {
-                    'source_generic_item.inventory': inventory,
-                    'parents': inventoryParentIds,
-                    'loc.coordinates': updatedLocs,
-                    'updated_time': new Date()
-                }
-            }, function(e, result) {
-                if (e) {
-                    console.log('Inventory update error: ', e)
-                }
-                console.log('Finished updating inventory: ', inventoryParentIds.length, ' locations with item :', itemData.id)
-
-                return resolve()
-            })
-
-        } //end of if item exists
-
-        //If item has not been scraped, create a new item 
-        if (!exists) {
             //Create new item for each store in inventory list.
             var i = new db.Landmark();
             i.world = false;

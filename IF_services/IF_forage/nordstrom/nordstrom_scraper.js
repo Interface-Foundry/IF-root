@@ -429,6 +429,10 @@
                      }
                  });
 
+                 if (!storeObj.name) {
+                    storeObj.name = 'nordstrom'
+                 }    
+                 
                  //Construct our own unique storeId 
                  uniquer.uniqueId(storeObj.name, 'Landmark').then(function(output) {
 
