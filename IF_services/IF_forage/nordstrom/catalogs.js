@@ -2,6 +2,10 @@ var wdress = {
     category: 'Womens Dress',
     url: 'http://shop.nordstrom.com/c/womens-dresses-shop?dept=8000001&origin=topnav'
 }
+var wformal = {
+    category: 'Womens Formal',
+    url: 'http://shop.nordstrom.com/c/womens-formal-dresses?origin=topnav'
+}
 var wtop = {
     category: 'Womens Top',
     url: 'http://shop.nordstrom.com/c/womens-tops-tees?dept=8000001&origin=topnav'
@@ -203,6 +207,6 @@ var newhandbags = {
     url: 'http://shop.nordstrom.com/c/handbags-new-arrivals?origin=leftnav'
 }
 
-var catalogs = [wdress, wtop, wjeans, wsweaters, wcoats, wjackets, wpants, wsuit, wskirt,  mcoat, msuit, mdressshirt, mcasualshirt, mpoloshirt, mtshirt, msweater, mtuxedo, mpants, mjeans, mshorts, wunderwear, wshoes, mshoes, wswimsuit, wactivewear, wpetite,mswimwear, mworkout, msleepwear, munderwear, whandbagsandwallets, wwatches, wjewelry, wfinejewelry, wglasses, wgloves, wbelts, wscarves, whatsandhairs, wwinter, wsunglasses, wshapewear, wsleepwear, whosiery,wluggage,wnew, mnew, wnewshoes,mnewshoes,newhandbags]
+var catalogs = [wformal,wdress, wtop, wjeans, wsweaters, wcoats, wjackets, wpants, wsuit, wskirt,  mcoat, msuit, mdressshirt, mcasualshirt, mpoloshirt, mtshirt, msweater, mtuxedo, mpants, mjeans, mshorts, wunderwear, wshoes, mshoes, wswimsuit, wactivewear, wpetite,mswimwear, mworkout, msleepwear, munderwear, whandbagsandwallets, wwatches, wjewelry, wfinejewelry, wglasses, wgloves, wbelts, wscarves, whatsandhairs, wwinter, wsunglasses, wshapewear, wsleepwear, whosiery,wluggage,wnew, mnew, wnewshoes,mnewshoes,newhandbags]
 
 module.exports = catalogs

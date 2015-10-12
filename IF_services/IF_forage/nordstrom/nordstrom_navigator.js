@@ -253,3 +253,5 @@ function wait(callback, delay) {
     while (new Date().getTime() < startTime + delay);
     callback();
 }
+
+var tempCatalog = []
