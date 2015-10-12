@@ -147,7 +147,8 @@
                     <div id="expandTop" class="expandedLargeImage imageTop{{$index}} largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
                     <div id="expandBot" class="expandedLargeImage imageBot{{$index}} largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
                     <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-mouseenter="enlargeImage($parent.$index, item.itemImageURL[$index])" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                        
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-mouseenter="enlargeImage($parent.$index, item.itemImageURL[$index])" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"><div class="smoverlay"></div></div>
                     </div>
                 </div>
 
