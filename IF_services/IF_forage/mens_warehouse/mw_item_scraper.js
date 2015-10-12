@@ -582,6 +582,9 @@ function saveItems(items, Stores) {
                     newItem.itemTags.text = tagParser.parse(newItem.itemTags.text)
                     delete newItem.source_generic_item.tags
                     delete newItem.source_generic_item.physicalStores
+                    if (!newItem.name) {
+                        newItem.name = 'MW'
+                    }
                     uniquer.uniqueId('menswearhouse ' + newItem.name, 'Landmark').then(function(output) {
                         newItem.id = output;
                         //Save item

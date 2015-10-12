@@ -417,7 +417,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
 
-        $http.post('https://kipapp.co/styles/api/items/search?page=' + $scope.searchIndex, {
+        $http.post('http://localhost:2997/styles/api/items/search?page=' + $scope.searchIndex, {
             text: $scope.query,
             loc: {
                 lat: userLat,
@@ -555,7 +555,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         $location.path('/t/' + encodedParentId + '/' + encodedMongoId);
 
-        $http.get('https://kipapp.co/styles/api/items/' + $scope.mongoId, {}).
+        $http.get('http://localhost:2997/styles/api/items/' + $scope.mongoId, {}).
         then(function(response) {
 
             //location.path('/t/'+ encodeId);
@@ -648,7 +648,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $scope.showReportModal = null;
         } else if (status === 'submit') {
             
-            $http.post('https://kipapp.co/styles/api/items/' + item._id + '/report', {
+            $http.post('http://localhost:2997/styles/api/items/' + item._id + '/report', {
                 timeReported: new Date(),
                 comment: $scope.report.comment,
                 reason: $scope.report.reason
@@ -693,7 +693,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         $scope.parentId = decodeURI($routeParams.parentId);
 
                //get location from IP
-        $http.get('https://kipapp.co/styles/api/geolocation').
+        $http.get('http://localhost:2997/styles/api/geolocation').
         then(function(res) {
             if (res.data.lat === 38) {
               $('#locInput').geocomplete("find", "NYC");
@@ -725,7 +725,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         $scope.searchOneItem();
     } else {
         //get location from IP
-        $http.get('https://kipapp.co/styles/api/geolocation').
+        $http.get('http://localhost:2997/styles/api/geolocation').
         then(function(res) {
             if (res.data.lat === 38) {
                 $('#locInput').geocomplete("find", "NYC");

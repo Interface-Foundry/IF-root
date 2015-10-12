@@ -456,6 +456,9 @@ function saveItems(items, stores) {
                         i.itemTags.text.push(cat)
                         i.hasloc = true;
                         i.loc.type = 'MultiPoint';
+                        if (!i.name) {
+                            i.name = 'UO'
+                        }
                         uniquer.uniqueId(i.name, 'Landmark').then(function(output) {
                                 i.id = output;
                                 //If item was previously scraped without the description tags, delete the old one then save the new one

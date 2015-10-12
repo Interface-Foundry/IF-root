@@ -13,7 +13,7 @@ var catalogs = require('./catalogs')
 //Error check for all the catalogs in the catalogs.js file, just to make sure since there are a lot of variables and links in there..
 for (var i = 0; i < catalogs.length; i++) {
     if (!catalogs[i] || catalogs[i] == undefined || catalogs[i] == null) {
-        console.log('There is  a type in the catalogs file.  Please check at index: ',i)
+        console.log('There is  a type in the catalogs file.  Please check at index: ', i)
     }
 }
 
@@ -120,24 +120,33 @@ function loadCatalog(catalog, zipcode) {
                 $ = cheerio.load(body); //load HTML
 
                 //----Parse out all page links from body----//
-                var pages = [];
-                for (var key in $('ul.page-numbers>li>a')) {
-                    if ($('ul.page-numbers>li>a').hasOwnProperty(key) && $('ul.page-numbers>li>a')[key].attribs && $('ul.page-numbers>li>a')[key].attribs.href) {
-                        pages.push($('ul.page-numbers>li>a')[key].attribs.href)
+                try {
+                    var pages = [];
+                    for (var key in $('ul.page-numbers>li>a')) {
+                        if ($('ul.page-numbers>li>a').hasOwnProperty(key) && $('ul.page-numbers>li>a')[key].attribs && $('ul.page-numbers>li>a')[key].attribs.href) {
+                            pages.push($('ul.page-numbers>li>a')[key].attribs.href)
+                        }
                     }
-                }
-                pages = _.uniq(pages)
-                var pageLinks = pages.length > 0 ? [catalog.url, catalog.url.concat(pages[0]), catalog.url.concat(pages[1]), catalog.url.concat(pages[2])] : [catalog.url]
-                if (pageLinks.length > 1) {
-                    var linkFormat = pages[0].split('page=')[0].concat('page=')
-                    var lastVisiblePageNum = parseInt(pages[pages.length - 2].split('=')[2])
-                    var lastPageNum = parseInt(pages[pages.length - 1].split('=')[2])
-                    for (var i = lastVisiblePageNum + 1; i <= lastPageNum; i++) {
-                        var link = catalog.url.concat((linkFormat.concat(i)))
-                        pageLinks.push(link)
+                    pages = _.uniq(pages)
+                    var pageLinks = pages.length > 0 ? [catalog.url, catalog.url.concat(pages[0]), catalog.url.concat(pages[1]), catalog.url.concat(pages[2])] : [catalog.url]
+                    if (pageLinks.length > 1) {
+                        var linkFormat = pages[0].split('page=')[0].concat('page=')
+                        var lastVisiblePageNum = parseInt(pages[pages.length - 2].split('=')[2])
+                        var lastPageNum = parseInt(pages[pages.length - 1].split('=')[2])
+                        for (var i = lastVisiblePageNum + 1; i <= lastPageNum; i++) {
+                            var link = catalog.url.concat((linkFormat.concat(i)))
+                            pageLinks.push(link)
+                        }
                     }
+                } catch (err) {
+                    if (err) {
+                        console.log('There was an error in parsing out page numbers.')
+                        var today = new Date().toString()
+                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                    }
+                    return reject('There was an error in parsing out page numbers.')
                 }
-               
+
 
                 //Load pages and scrape each page.
                 loadPages(pageLinks, zipcode, catalog).then(function() {
@@ -180,7 +189,12 @@ function loadPages(links, zipcode, catalog) {
             };
             request(options, function(error, response, body) {
                 if ((!error) && (response.statusCode == 200)) {
-                    $ = cheerio.load(body); 
+                    $ = cheerio.load(body);
+
+                    if (!$('div.main-content-right a')) {
+                        console.log('Skipping Page..', link)
+                        return callback2()
+                    }
 
                     //Loop through each item in the page.
                     async.eachSeries($('div.main-content-right a'), function(item, callback2) {
@@ -226,7 +240,7 @@ function loadPages(links, zipcode, catalog) {
                 fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                 return reject(err)
             }
-             console.log('!!!!!********Finished all pages..')
+            console.log('!!!!!********Finished all pages..')
             resolve()
 
         })

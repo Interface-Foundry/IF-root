@@ -55,7 +55,7 @@ module.exports = function scrapeItem(url) { 
         async.waterfall([
                 function(callback) {
                     console.log(1)
-                    loadFakeUser().then(function(items) {
+                    loadMongoObjects().then(function(items) {
                         callback(null)
                     }).catch(function(err) {
                         if (err) {
@@ -161,7 +161,7 @@ module.exports = function scrapeItem(url) { 
 }
 
 
-function loadFakeUser() {
+function loadMongoObjects() {
     return new Promise(function(resolve, reject) {
         db.Users
             .findOne({
@@ -485,7 +485,7 @@ function processItems(inventory, itemData, Stores) {
             if (!exists) {
                 
             //Create new item in db if it does not already exist OR if it was created without s3 image links
-                if (itemData.itemImageURL[0] && itemData.indexOf('s3.amazonaws.com') == -1)) {
+                if (itemData.id && itemData.itemImageURL[0] && itemData.indexOf('s3.amazonaws.com') == -1)) {
                 db.Landmarks.remove({
                     'id': itemData.id
                 })
@@ -515,6 +515,9 @@ function processItems(inventory, itemData, Stores) {
                 i.itemTags.colors.push(tagParser.colorize(itemData.color))
             }
             i.source_generic_item.inventory = inventory
+            if (!itemData.name) {
+                itemData.name = 'Zara'
+            }
             uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
                     i.id = output;
                     //Update location property for item with location of each store found in inventory.
@@ -543,8 +546,8 @@ function processItems(inventory, itemData, Stores) {
                                     console.log(e.lineNumber + e)
                                 }
 
-                                if (i.loc.coordinates.length < 1) {
-                                    return reject('Item is out of stock in all stores in db:', i.id)
+                                if (i.loc.coordinates.length < 1 || i.parents.length < 1) {
+                                     
                                 }
                                 //Save item
                                 i.save(function(e, item) {
