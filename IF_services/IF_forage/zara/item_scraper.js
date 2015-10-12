@@ -19,12 +19,9 @@ var _ = require('lodash')
 var fs = require('fs')
 var upload = require('../../upload')
 
-//Global var to hold fake user object
+//Global vars to hold default mongo objects
 owner = {}
-    //TODO: Count number of new items saved
-saveCount = 0;
-//TODO: Updatecount
-updateCount = 0;
+notfoundstore = {}
 
 module.exports = function scrapeItem(url) { 
     categoryName = url.split('/')[6]
@@ -54,8 +51,15 @@ module.exports = function scrapeItem(url) { 
 
         async.waterfall([
                 function(callback) {
-                    console.log(1)
-                    loadMongoObjects().then(function(items) {
+                    // console.log(1)
+                    loadMongoObjects().then(function(results) {
+                        if (results[0].isFulfilled()) {
+                            owner = results[0].value()
+                        }
+                        if (results[1].isFulfilled()) {
+                            notfoundstore = results[1].value()
+                        }
+                        // console.log('Loaded mongo objects: ', owner.profileID, notfoundstore.id)
                         callback(null)
                     }).catch(function(err) {
                         if (err) {
@@ -67,7 +71,7 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(callback) {
                     checkIfScraped(url).then(function(items) {
-                        console.log(2)
+                        // console.log(2)
                         if (items && items.length > 0) {
                             // console.log('Item exists', items[0].itemImageURL[0])
                             exists = true;
@@ -82,7 +86,7 @@ module.exports = function scrapeItem(url) { 
                 },
                 // || (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)
                 function(existingItem, callback) {
-                    console.log(3)
+                    // console.log(3)
                     if (!exists || (exists && existingItem.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
                         // console.log(1)
                         //The || is for the case in which item was previously scraped but without AWS images
@@ -107,7 +111,7 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(item, callback) {
                     loadStores().then(function(stores) {
-                        console.log(4)
+                        // console.log(4)
                         callback(null, item, stores)
                     }).catch(function(err) {
                         callback(err)
@@ -115,22 +119,22 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(item, stores, callback) {
                     getInventory(item, stores).then(function(inventory) {
-                        console.log(5)
+                        // console.log(5)
                         callback(null, item, inventory, stores)
                     }).catch(function(err) {
                         callback(err)
                     })
                 },
                 function(item, inventory, stores, callback) {
-                    console.log(6)
+                    // console.log(6)
                     if (!exists) {
                         upload.uploadPictures('zara_' + item.partNumber.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
-                            console.log(6.5)
+                            // console.log(6.5)
                             item.hostedImages = images
                             callback(null, item, inventory, stores)
                         }).catch(function(err) {
-                            console.log(6.9)
-                            if (err) console.log(err.lineNumber + 'Image upload error: ', err);
+                            // console.log(6.9)
+                            if (err) console.log('Image upload error: ', err);
                             callback(err)
                         })
                     } else {
@@ -139,9 +143,9 @@ module.exports = function scrapeItem(url) { 
 
                 },
                 function(item, inventory, stores, callback) {
-                    console.log(7)
+                    // console.log(7)
                     processItems(inventory, item, stores).then(function(item) {
-                        console.log(8)
+                        // console.log(8)
                         callback(null, item)
                     }).catch(function(err) {
                         callback(err)
@@ -152,7 +156,7 @@ module.exports = function scrapeItem(url) { 
                 if (err) {
                     var today = new Date().toString()
                         // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + '\n' + err, function(err) {
-                    console.log(err.lineNumber + err)
+                    console.log(err)
                     return reject(err)
                 };
                 resolve()
@@ -162,39 +166,31 @@ module.exports = function scrapeItem(url) { 
 
 
 function loadMongoObjects() {
-    return new Promise(function(resolve, reject) {
-        db.Users
-            .findOne({
-                'profileID': 'zara1204'
-            }).exec(function(e, o) {
-                if (o) {
-                    owner.profileID = o.profileID
-                    owner.name = o.name;
-                    owner.mongoId = o._id
-                    resolve()
-                }
-                if (!o) {
-                    var fake = new db.User()
-                    fake.name = 'Zara'
-                    fake.profileID = 'zara1204'
-                    fake.save(function(err, o) {
-                        if (err) {
-                            console.log(err.lineNumber + err)
-                        } else {
-                            console.log(o.profileID)
-                            owner.profileID = o.profileID
-                            owner.name = o.name;
-                            owner.mongoId = o._id
-                            resolve()
-                        }
-                    })
-                }
-                if (e) {
-                    console.log(e.lineNumber + e)
-                    reject(e)
-                }
-            })
+
+    var user = db.Users.findOne({
+        'profileID': 'zara1204'
+    }).exec();
+
+    var store = db.Landmarks.findOne({
+        'id': 'notfound_9999'
+    }).exec();
+
+    return Promise.settle([user, store]).then(function(arry) {
+        var u = arry[0];
+        var s = arry[1];
+        if (u.isFulfilled()) {
+            owner.profileID = u.profileID
+            owner.name = u.name;
+            owner.mongoId = u._id
+        }
+
+        if (s.isFulfilled()) {
+            notfoundstore = s
+        }
+
+        return arry;
     })
+
 }
 
 function checkIfScraped(url) {
@@ -221,7 +217,7 @@ function checkIfScraped(url) {
                                 $in: toDelete
                             }
                         }, function(err, res) {
-                            if (err) console.log(err.lineNumber + ': ', err)
+                            if (err) console.log(err)
                             console.log('Deleted old items: ', res.result.n)
                         })
                     }
@@ -395,14 +391,11 @@ function getInventory(itemData, stores) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-        console.log('apiURL: ', apiUrl)
+        // console.log('apiURL: ', apiUrl)
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body)
-                if (!body.stocks || body.stocks.length < 1 || body.stocks == null) {
-                    console.log('No stocks.', body)
-                    return reject('No stocks for this item.')
-                }
+                
                 var inventory = body.stocks
                     // console.log('INVENTORY: ',JSON.stringify(inventory))
                 resolve(inventory)
@@ -424,75 +417,62 @@ function processItems(inventory, itemData, Stores) {
 
     return new Promise(function(resolve, reject) {
 
+
+        //If this item has already been scraped, update inventory,parents, and location fields of item.
+        if (exists) {
             if (!inventory || inventory.length < 1 || inventory == null) {
-                console.log('No inventory found for this item. Aborting.', inventory)
-                return reject('No inventory found for this item. Aborting.')
+                console.log('No inventory found for this item.', itemData.id)
+                inventory = []
             }
-            //If this item has already been scraped, update inventory,parents, and location fields of item.
-            if (exists) {
-                if (!itemData.parents) {
-                    console.log('This item has no parents!', itemData._id)
-                    return reject('This item has no parents.')
+
+            if (!itemData.parents) {
+                console.log('This item has no parents!', itemData._id)
+                return reject('This item has no parents.')
+            }
+
+            var updatedInv = updateInventory(inventory, Stores)
+
+            if (updatedInv[0] == null) {
+                console.log('Item parents and locations property lengths dont match up, skipping: ', updatedInv)
+                return reject('Item parents and locations property lengths dont match up, skipping item.')
+            }
+
+            if (updatedInv[0].length < 1 || updatedInv[1].length < 1) {
+                updatedInv[0] = [notfoundstore._id]
+                updatedInv[1] = [notfoundstore.loc.coordinates]
+            }
+
+            db.Landmarks.findOne({
+                '_id': itemData._id
+            }).update({
+                $set: {
+                    'source_generic_item.inventory': inventory,
+                    'parents': updatedInv[0],
+                    'loc.coordinates': updatedInv[1],
+                    'updated_time': new Date()
                 }
-
-                var inventoryStoreIds = inventory.map(function(store) {
-                    return store.physicalStoreId.toString().trim()
-                })
-                var inventoryStoreString = inventoryStoreIds.join()
-                var inventoryParentIds = [];
-
-                Stores.forEach(function(store) {
-                    if (inventoryStoreString.indexOf(store.source_generic_store.storeId.toString().trim()) > -1) {
-                        inventoryParentIds.push(store._id)
-                    }
-                })
-
-                var inventoryParentIdsString = inventoryParentIds.join()
-
-                var updatedLocs = [];
-
-                Stores.forEach(function(store) {
-                    if (inventoryParentIdsString.indexOf(store._id) > -1)
-                        updatedLocs.push(store.loc.coordinates)
-                })
-
-                if (inventoryParentIds.length !== updatedLocs.length) {
-                    console.log('Lengths dont match up:', inventoryParentIds, updatedLocs)
-                    return reject('Lengths dont match up!')
+            }, function(e, result) {
+                if (e) {
+                    console.log('Inventory update error: ', e)
                 }
+                console.log('Finished updating inventory.')
+                return resolve()
+            })
 
-                db.Landmarks.findOne({
-                    '_id': itemData._id
-                }).update({
-                    $set: {
-                        'source_generic_item.inventory': inventory,
-                        'parents': inventoryParentIds,
-                        'loc.coordinates': updatedLocs,
-                        'updated_time': new Date()
-                    }
-                }, function(e, result) {
-                    if (e) {
-                        console.log('Inventory update error: ', e)
-                    }
-                    console.log('Finished updating inventory: ', inventoryParentIds.length, ' locations with item :', itemData.id)
+        } //end of if item exists
 
-                    return resolve()
-                })
+        //If item has not been scraped, create a new item 
+        if (!exists) {
 
-            } //end of if item exists
-
-            //If item has not been scraped, create a new item 
-            if (!exists) {
-                
-            //Create new item in db if it does not already exist OR if it was created without s3 image links
-                if (itemData.id && itemData.itemImageURL[0] && itemData.indexOf('s3.amazonaws.com') == -1)) {
-                db.Landmarks.remove({
-                    'id': itemData.id
-                })
+            if (!inventory || inventory.length < 1 || inventory == null) {
+                console.log('No inventory found for this item.', itemData.id)
+                inventory = []
             }
 
             //Create new item for each store in inventory list.
             var i = new db.Landmark();
+            i.parents = [notfoundstore._id]
+            i.loc.coordinates = [notfoundstore.loc.coordinates]
             i.world = false;
             i.source_generic_item = itemData;
             i.hasloc = true;
@@ -526,7 +506,7 @@ function processItems(inventory, itemData, Stores) {
                                     'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
                                     if (err) {
-                                        console.log(err.lineNumber + err)
+                                        console.log(err)
                                         return callback()
                                     }
                                     if (!s) {
@@ -543,23 +523,58 @@ function processItems(inventory, itemData, Stores) {
                             },
                             function(e) {
                                 if (e) {
-                                    console.log(e.lineNumber + e)
+                                    console.log(e)
                                 }
 
-                                if (i.loc.coordinates.length < 1 || i.parents.length < 1) {
-                                     
-                                }
                                 //Save item
                                 i.save(function(e, item) {
                                     if (e) {
-                                        console.log(e.lineNumber + e);
+                                        console.log(e);
                                     }
                                     console.log('Saved!', item.id)
-                                    saveCount++
                                     resolve(item)
                                 })
                             }) //end of async.eachSeries
                 }) //end of uniquer
         } //end of if not exists
     })
+}
+
+
+function updateInventory(inventory, Stores) {
+
+    if (!inventory || inventory == null || inventory.length && inventory.length == 0) {
+        return [
+            [notfoundstore._id],
+            [notfoundstore.loc.coordinates]
+        ]
+    }
+
+    var inventoryStoreIds = inventory.map(function(store) {
+        return store.physicalStoreId.toString().trim()
+    })
+    var inventoryStoreString = inventoryStoreIds.join()
+    var inventoryParentIds = [];
+
+    Stores.forEach(function(store) {
+        if (inventoryStoreString.indexOf(store.source_generic_store.storeId.toString().trim()) > -1) {
+            inventoryParentIds.push(store._id)
+        }
+    })
+
+    var inventoryParentIdsString = inventoryParentIds.join()
+
+    var updatedLocs = [];
+
+    Stores.forEach(function(store) {
+        if (inventoryParentIdsString.indexOf(store._id) > -1)
+            updatedLocs.push(store.loc.coordinates)
+    })
+
+    if (inventoryParentIds.length !== updatedLocs.length) {
+        console.log('Lengths dont match up:', inventoryParentIds, updatedLocs)
+        return [null, null]
+    } else {
+        return [inventoryParentIds, updatedLocs]
+    }
 }

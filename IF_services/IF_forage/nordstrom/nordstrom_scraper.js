@@ -432,7 +432,7 @@
                  if (!storeObj.name) {
                     storeObj.name = 'nordstrom'
                  }    
-                 
+
                  //Construct our own unique storeId 
                  uniquer.uniqueId(storeObj.name, 'Landmark').then(function(output) {
 
@@ -466,7 +466,7 @@
                                      delete newStore.source_generic_store.Lat
                                      newStore.save(function(e, s) {
                                          if (e) {
-                                             console.log((new Error).lineNumber + e)
+                                             console.log(e)
                                          }
                                          console.log('Saved store.', s.id)
                                          notFound = false;
@@ -491,7 +491,7 @@
              }); //end of request
 
          }, function(err, res) {
-             if (err) console.log((new Error).lineNumber + err)
+             if (err) console.log(err)
              if (notFound) {
                  notFoundCount++
              }
@@ -517,7 +517,7 @@
              'source_generic_item.styleId': newItem.styleId,
              'source_generic_item.name': newItem.name
          }, function(err, i) {
-             if (err) console.log((new Error).lineNumber + err)
+             if (err) console.log(err)
                  //Create new item in db if it does not already exist OR if it was created without description tags
              if (!i || (i && i.source_generic_item && !i.source_generic_item.tags)) {
                  //If item was previously scraped without the description tags, delete it
@@ -593,7 +593,7 @@
                      }
                  }, function(e, result) {
                      if (e) {
-                         console.log((new Error).lineNumber + e)
+                         console.log(e)
                      }
 
 
@@ -631,7 +631,7 @@
          db.Zipcodes.findOne({
              zipcode: zipcode
          }, function(err, result) {
-             if (err) console.log((new Error).lineNumber + err)
+             if (err) console.log(err)
              if (result && result.loc.coordinates) {
                  resolve(result.loc.coordinates)
              } else {
@@ -654,17 +654,17 @@
                                      newCoords.loc.coordinates = results;
                                      newCoords.zipcode = zipcode;
                                      newCoords.save(function(err, saved) {
-                                         if (err) console.log((new Error).lineNumber + err)
+                                         if (err) console.log(err)
                                          console.log('Zipcode saved.')
                                      })
                                      resolve(results)
                                  }
                              } else {
-                                 console.log((new Error).lineNumber + 'Error: ', zipcode)
+                                 console.log('Error: ', zipcode)
                                  reject()
                              }
                          } else {
-                             console.log((new Error).lineNumber + 'Error: ', error)
+                             console.log('Error: ', error)
                              reject(error)
                          }
                      });
@@ -687,7 +687,7 @@
              }
          }, function(err, stores) {
              if (err) {
-                 console.log((new Error).lineNumber + err)
+                 console.log(err)
                  return callback()
              }
              if (!stores) {
@@ -721,7 +721,7 @@
                          }
                      }, function(err, res) {
                          if (err) {
-                             console.log((new Error).lineNumber + err)
+                             console.log(err)
                              return resolve()
                          }
                          if (res) {
