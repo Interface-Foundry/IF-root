@@ -26,7 +26,7 @@ saveCount = 0;
 //TODO: Updatecount
 updateCount = 0;
 
-module.exports = function scrapeItem(url) { 
+module.exports = function scrapeItem(url) { 
     categoryName = url.split('/')[6]
         //set global var to indicate category based on catalog url
     if (url.toString().trim().indexOf('/woman') > -1) {
