@@ -20,7 +20,6 @@ async.whilst(
 
         loadStores().then(function(stores) {
 
-
             async.eachSeries(catalogs, function(catalog, callback) {
                 loadCatalog(catalog, stores).then(function(res) {
                     var today = new Date().toString()
@@ -43,10 +42,9 @@ async.whilst(
                     var today = new Date().toString()
                     fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
-                console.log('Finished scraping all catalogs for Urban Outfitters.')
+                console.log('Finished scraping all catalogs for Urban Outfitters.');
+
             })
-
-
         }).catch(function(err) {
             if (err) {
                 console.log('Error loading stores: ', err)
@@ -83,8 +81,6 @@ function loadStores() {
 }
 
 
-
-
 function loadCatalog(category, stores) {
     return new Promise(function(resolve, reject) {
         var options = {
@@ -94,9 +90,55 @@ function loadCatalog(category, stores) {
             }
         };
         console.log('Starting catalog: ', category.category)
+
+        var nextPage = ''
+
+        async.doWhilst(
+            function(callback) {
+                if (nextPage) {
+                    options.url = nextPage;
+                }
+                console.log('Scraping: ', options.url)
+
+                loadPage(options,nextPage,category,stores).then(function(startVal) {
+                    if (!startVal) {
+                        nextPage = ''
+                    }
+                    setTimeout(callback, 1000);
+                }).catch(function(err) {
+                    if (err) console.log(err);
+                    setTimeout(callback, 1000);
+                })
+
+            },
+            function() {
+                return nextPage !== '';
+            },
+            function(err) {
+                if (err) console.log('err')
+                console.log('Finished Catalog.')
+            }
+        );
+
+    })
+}
+
+function loadPage(options, nextPage,category,stores) {
+    return new Promise(function(resolve, reject) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
+
+                var startVal = ''
+                try {
+                    startVal = $('.pagination a')['0'].attribs.href.split('&startValue=')[1]
+                } catch (err) {
+                    if (err) console.log(err)
+                    return reject('No pagination element.')
+                }
+
+                nextPage = category.url.split('#')[0].concat('&startValue=' + startVal);
+
                 async.eachSeries($('p.product-image>a'), function(item, callback) {
                     if (!item.attribs.href) {
                         console.log('invalid!')
@@ -113,9 +155,11 @@ function loadCatalog(category, stores) {
                     })
                 }, function(err) {
                     if (err) console.log('async error, nav 129: ', err)
-                    console.log('Done scraping catalog!')
-                    resolve()
+                    console.log('Done scraping page.')
+                    resolve(startVal)
                 })
+
+
             } else {
                 if (error) {
                     console.log('error: ', error)
@@ -125,6 +169,8 @@ function loadCatalog(category, stores) {
                     reject(response.statusCode)
                 }
             }
+
+
         })
     })
 }

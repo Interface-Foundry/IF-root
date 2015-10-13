@@ -542,30 +542,24 @@ function processItems(inventory, itemData, Stores) {
 
 
 function updateInventory(inventory, Stores) {
-
     if (!inventory || inventory == null || inventory.length && inventory.length == 0) {
         return [
             [notfoundstore._id],
             [notfoundstore.loc.coordinates]
         ]
     }
-
     var inventoryStoreIds = inventory.map(function(store) {
         return store.physicalStoreId.toString().trim()
     })
     var inventoryStoreString = inventoryStoreIds.join()
     var inventoryParentIds = [];
-
     Stores.forEach(function(store) {
         if (inventoryStoreString.indexOf(store.source_generic_store.storeId.toString().trim()) > -1) {
             inventoryParentIds.push(store._id)
         }
     })
-
     var inventoryParentIdsString = inventoryParentIds.join()
-
     var updatedLocs = [];
-
     Stores.forEach(function(store) {
         if (inventoryParentIdsString.indexOf(store._id) > -1)
             updatedLocs.push(store.loc.coordinates)

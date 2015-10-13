@@ -14,8 +14,9 @@
 
  //Global var to hold category
  cat = '';
- //Global var to hold fake user object
- owner = {};
+//Global vars to hold default mongo objects
+owner = {}
+notfoundstore = {}
 
  module.exports = function(url, category, zipcode) {
      //Global variable declarations
@@ -25,12 +26,22 @@
      return new Promise(function(resolve, reject) {
          async.waterfall([
                  function(callback) {
-                     loadFakeUser().then(function() {
-                         callback(null)
-                     }).catch(function(err) {
-                         console.log(err.lineNumber + 'Could not load owner user.')
-                         callback(err)
-                     })
+                     loadMongoObjects().then(function(results) {
+                        if (results[0].isFulfilled()) {
+                            owner = results[0].value()
+                        }
+                        if (results[1].isFulfilled()) {
+                            notfoundstore = results[1].value()
+                        }
+                        // console.log('Loaded mongo objects: ', owner.profileID, notfoundstore.id)
+                        callback(null)
+                    }).catch(function(err) {
+                        if (err) {
+                            var today = new Date().toString()
+                                // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
+                        }
+                        callback(null)
+                    })
                  },
                  function(callback) {
                      getColorUrls(url).then(function(colorUrls) {
@@ -131,40 +142,32 @@
      })
  }
 
- function loadFakeUser() {
-     return new Promise(function(resolve, reject) {
-         db.Users
-             .findOne({
-                 'profileID': 'nordstrom4201'
-             }).exec(function(e, o) {
-                 if (o) {
-                     owner.profileID = o.profileID
-                     owner.name = o.name;
-                     owner.mongoId = o._id
-                     resolve()
-                 }
-                 if (!o) {
-                     var fake = new db.User()
-                     fake.name = 'Nordstrom'
-                     fake.profileID = 'nordstrom4201'
-                     fake.save(function(err, o) {
-                         if (err) {
-                             console.log(err)
-                         } else {
-                             console.log(o.profileID)
-                             owner.profileID = o.profileID
-                             owner.name = o.name;
-                             owner.mongoId = o._id
-                             resolve()
-                         }
-                     })
-                 }
-                 if (e) {
-                     console.log(e)
-                     reject(e)
-                 }
-             })
+ function loadMongoObjects() {
+
+     var user = db.Users.findOne({
+         'profileID': 'nordstrom4201'
+     }).exec();
+
+     var store = db.Landmarks.findOne({
+         'id': 'notfound_9999'
+     }).exec();
+
+     return Promise.settle([user, store]).then(function(arry) {
+         var u = arry[0];
+         var s = arry[1];
+         if (u.isFulfilled()) {
+             owner.profileID = u.profileID
+             owner.name = u.name;
+             owner.mongoId = u._id
+         }
+
+         if (s.isFulfilled()) {
+             notfoundstore = s
+         }
+
+         return arry;
      })
+
  }
 
  function getColorUrls(url) {
@@ -430,8 +433,8 @@
                  });
 
                  if (!storeObj.name) {
-                    storeObj.name = 'nordstrom'
-                 }    
+                     storeObj.name = 'nordstrom'
+                 }
 
                  //Construct our own unique storeId 
                  uniquer.uniqueId(storeObj.name, 'Landmark').then(function(output) {
@@ -679,7 +682,7 @@
          if (d.length < 1) {
              return resolve('No stores to remove.')
          }
-         var storesToRemove = []
+         var storesToRemove = [];
              //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
          db.Landmarks.find({
              '_id': {
