@@ -8,68 +8,7 @@ var uniquer = require('../../uniquer');
 var request = require('request')
 var item_scraper = require('./uo_scraper')
 var fs = require('fs')
-
-//List of NEW-IN catalogs
-var catalogs = [{
-        category: 'Rompers Jumpsuits',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-APP-ROMPERS&cm_sp=WOMENS-_-L3-_-W_APP_DRESSES:W-APP-ROMPERS#/'
-    }
-    , {
-        category: 'Party Dress',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DRESSES-PARTY&cm_sp=WOMENS-_-L3-_-W_APP_DRESSES:W-DRESSES-PARTY#/'
-    }, {
-        category: 'Dress',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_APP_DRESSES&cm_sp=WOMENS-_-L2-_-WOMENS:W_APP_DRESSES#/'
-    }, {
-        category: 'Top',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_TOPS&cm_sp=WOMENS-_-L2-_-WOMENS:W_TOPS#/'
-    }, {
-        category: 'Jacket',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_OUTERWEAR&cm_sp=WOMENS-_-L2-_-WOMENS:W_OUTERWEAR#/'
-    }, {
-        category: 'Bottom',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_BOTTOMS&cm_sp=WOMENS-_-L2-_-WOMENS:W_BOTTOMS#/'
-    }, {
-        category: 'Denim',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DENIM&cm_sp=WOMENS-_-L2-_-WOMENS:W-DENIM#/'
-    }, {
-        category: 'Shoe',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_SHOES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_SHOES#/'
-    }, {
-        category: 'Top',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_TOPS&cm_sp=MENS-_-L2-_-MENS:M_TOPS#/'
-    }, {
-        category: 'Jacket',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_OUTERWEAR&cm_sp=MENS-_-L2-_-MENS:M_OUTERWEAR#/'
-    }, {
-        category: 'Bottom',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_BOTTOMS&cm_sp=MENS-_-L2-_-MENS:M_BOTTOMS#/'
-    }, {
-        category: 'T-Shirt',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M-GRAPHICS&cm_sp=MENS-_-L2-_-MENS:M-GRAPHICS#/'
-    }, {
-        category: 'Activewear',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-WACTIVE&cm_sp=WOMENS-_-L2-_-WOMENS:UOWW-WACTIVE#/'
-    }, {
-        category: 'Underwear',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_INTIMATES&cm_sp=WOMENS-_-L2-_-WOMENS:W_INTIMATES'
-    }, {
-        category: 'Accessory',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_ACCESSORIES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_ACCESSORIES'
-    }, {
-        category: 'Activewear',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-MACTIVE&cm_sp=MENS-_-L2-_-MENS:UOWW-MACTIVE#/'
-    }, {
-        category: 'Underwear',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_ACC_UNDERWEAR&cm_sp=MENS-_-L2-_-MENS:M_ACC_UNDERWEAR#/'
-    }, {
-        category: 'Accessories',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=MENS_ACCESSORIES&cm_sp=MENS-_-L2-_-MENS:MENS_ACCESSORIES#/'
-    }, {
-        category: 'Shoes',
-        url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=MENS_SHOES&cm_sp=MENS-_-L2-_-MENS:MENS_SHOES#/'
-    }
-]
+var catalogs = require('./catalogs.js')
 
 
 //This will loop forever through each of the catalogs listed above
