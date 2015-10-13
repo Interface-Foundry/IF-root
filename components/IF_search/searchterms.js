@@ -32,11 +32,8 @@ var tokenize = module.exports.tokenize = function(text, expand) {
   // Replace synonyms
   // ex: woman bath suit -> women swimsuit
   //
-  if (expand === true) {
-    tokenString = synonyms.expand(tokenString);
-  } else {
-    tokenString = synonyms.compress(tokenString);
-  }
+  tokenString = synonyms.expand(tokenString);
+  tokenString = synonyms.compress(tokenString);
 
   //
   // Tokenize

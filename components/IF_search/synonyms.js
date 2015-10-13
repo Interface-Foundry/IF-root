@@ -108,7 +108,7 @@ var expandText = module.exports.expand = function(text) {
     })
 
     if (hit) {
-      text += ' ' + s.words.join(' ');
+      text += ' ' + s.root;
     }
   })
   return text;
