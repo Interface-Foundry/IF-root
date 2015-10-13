@@ -1,5 +1,7 @@
 body {
     font-family: 'Open Sans', arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
@@ -513,6 +515,8 @@ div.footerBar {
     margin-right: 12%
 }
 
+
+
 .Top-Icon.Query {
     margin-top: -20px;
 }
@@ -682,17 +686,13 @@ div.footerBar {
     bottom: 0;
     right: 0;
     margin-right: 14px;
-    margin-bottom: 16px;
-    background:white;
-    border:1px solid #ccc;
+    margin-bottom: 16px;    
     width:42px; height:55px;
     position:fixed;
     z-index: 100;
 }
 
 .scrollTop:hover{
-    background:#ddd;
-    border:1px solid #ccc;
 }
 
 
@@ -866,8 +866,8 @@ div.footerBar {
 }
 
 .expandedLargeImage {
-    height: 450px;
-    width: 450px;
+    height: 485px;
+    width: 485px;
     background-color: white;
     background-size: contain;
     background-repeat: no-repeat;
@@ -927,7 +927,7 @@ div.footerBar {
     -webkit-flex-direction: row;
         -ms-flex-direction: row;
             flex-direction: row;
-    width: 450px;
+    width: 485px;
 }
 
 .imageSelectors {
@@ -950,9 +950,20 @@ div.footerBar {
     flex-shrink: 1;
 }
 
+.smoverlay {
+    height: 75px;
+    width: 75px !important;   
+    background-color: gray;
+    position: absolute;
+    opacity: 0;
+}
+
+.smoverlay:hover {
+    opacity: 0.1;   
+}
+
 .soloImg:hover {
     cursor: pointer;
-    outline: 1px solid black;
 }
 
 .descripWrapper {
@@ -1414,6 +1425,10 @@ a.reportItem {
     flex-grow: 1;
 }
 
+a#buyOnlineButton {
+    border-radius: 2px !important;
+}
+
 
 .modalButton.Right {
     width: 42%;
@@ -1767,6 +1782,12 @@ a.reportItem {
     
     .flexBody.Foot {
         z-index: -1;
+    }
+}
+
+@media(max-width: 414px) {
+    #locateGly {
+        padding-right: 11px !important;   
     }
 }
 

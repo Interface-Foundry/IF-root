@@ -32,11 +32,8 @@ var tokenize = module.exports.tokenize = function(text, expand) {
   // Replace synonyms
   // ex: woman bath suit -> women swimsuit
   //
-  if (expand === true) {
-    tokenString = synonyms.expand(tokenString);
-  } else {
-    tokenString = synonyms.compress(tokenString);
-  }
+  tokenString = synonyms.expand(tokenString);
+  tokenString = synonyms.compress(tokenString);
 
   //
   // Tokenize
@@ -119,7 +116,7 @@ var itembucket = buckets.reduce(function(bucket, b) {
     bucket.words = bucket.words.concat(b.words);
   }
   return bucket;
-}, {name: 'item', boost: 50, words: []})
+}, {name: 'item', boost: 8, words: []})
 buckets = buckets.filter(function(b) {
   return b.name.indexOf('item') < 0;
 })
@@ -128,7 +125,7 @@ buckets.push(itembucket);
 // also add the colors
 buckets.push({
   name: 'colors',
-  boost: 30,
+  boost: 6,
   words: tokenize(colors.join(' '))
 })
 

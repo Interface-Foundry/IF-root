@@ -14,7 +14,7 @@
 
                 <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-init="newQuery = true;" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus><span ng-if="query.length >= 1" ng-click="emptyQuery();" class="kiplevels-hate-solid clearField"></span></input></div>
 
-                <div class="Mid-Input Length"><span class="Find-ZTop">Near </span><span class="locateButton"><i tooltip data-placement="top" data-toggle="tooltip" title="Locate Me" ng-hide="loadingLoc || hideGPSIcon" style="cursor:pointer; z-index:12; float:right; padding-right:23px; padding-top:4px; opacity:0.4; cursor:pointer;" ng-click="getGPSLocation()" class="glyphicon glyphicon-screenshot"></i></span>
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near </span><span class="locateButton"><i id="locateGly" tooltip data-placement="top" data-toggle="tooltip" title="Locate Me" style="cursor:pointer; z-index:12; float:right; padding-right:23px; padding-top:4px; opacity:0.4; cursor:pointer;" ng-click="getGPSLocation()" class="glyphicon glyphicon-screenshot"></i></span>
 
                   <input id="locInput" ng-enter="searchQuery()" ng-model="userCity"
                     class="Find-Input" ng-class="loadingLoc ? 'loading-gif' : 'noloading-gif'" maxlength="2046" placeholder="address, city, landmark" select-on-click>

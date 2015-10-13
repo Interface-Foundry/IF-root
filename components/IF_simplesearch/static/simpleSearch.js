@@ -81,7 +81,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
         });
     }]);
 
-simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'ResCache', 'storeFactory', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, ResCache, storeFactory) {
+simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'ResCache', 'storeFactory', '$anchorScroll', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, ResCache, storeFactory, $anchorScroll) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
     // * * * * * * * * ** * * * * * * * * *
@@ -126,13 +126,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.infBool = false;
     
     
-    $scope.grabTime = function() {
-        $timeout(function() {
-            var ele = $('#updatedTime')[0].innerHTML;
-            console.log('time grab', ele);
-        }, 500);    
-    }
-    
     
 
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -147,7 +140,8 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         if (loc === 'home') {
             $location.path('/');
             $timeout(function() {
-                console.log('route');
+//                console.log('route');
+                $rootScope.searchTitle = null;
                 $route.reload();
             }, 0);
             $route.reload();
@@ -411,8 +405,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.searchItems = function() {
         var encodeQuery = null;
         var encodeCity = null;
-
+        
         var encodeQuery = encodeURI($scope.query);
+        $rootScope.searchTitle = encodeQuery;
         var encodeCity = encodeURI($scope.userCity);
 
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);

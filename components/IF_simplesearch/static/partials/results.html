@@ -61,7 +61,7 @@
                         <a style="margin-bottom:1rem !important; border-radius:2px;" class="btn btn-default bigMobile" style="color:#fff !important;" ng-href="https://maps.google.com?saddr=Current+Location&daddr={{item.directionsURL}}">
                           <span class="kiplevels-map-outline mapIcon"></span>
                         Map to {{::item.parent.name}}</a>
-                        <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}">Buy online</a>
+                        <a id="buyOnlineButton" ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" ng-href="{{::item.linkback}}">Buy online</a>
                         <a ng-if="mobileScreen && item.parent.tel.length > 1" style="margin-bottom:1rem !important;" class="btn btn-default" style="color:grey !important; border-radius:2px;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
                     <!--
                     <h1 class="kipFont kip-energized" ng-hide="{{item.faves.length}} == 0"> <span>{{item.faves.length}}</span></h1>
@@ -147,7 +147,8 @@
                     <div id="expandTop" class="expandedLargeImage imageTop{{$index}} largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
                     <div id="expandBot" class="expandedLargeImage imageBot{{$index}} largeImage{{::$index}}" ng-style="{'background-image': 'url({{::item.itemImageURL[0] }})'}"></div>
                     <div class="imageSelectors Wrapper">
-                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-mouseenter="enlargeImage($parent.$index, item.itemImageURL[$index])" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"></div>
+                        
+                        <div class="imageSelectors soloImg"  ng-repeat="image in item.itemImageURL track by $index" ng-style="{'background-image': 'url({{::item.itemImageURL[$index] }})'}" ng-mouseenter="enlargeImage($parent.$index, item.itemImageURL[$index])" ng-click="enlargeImage($parent.$index, item.itemImageURL[$index])"><div class="smoverlay"></div></div>
                     </div>
                 </div>
 
