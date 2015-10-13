@@ -515,6 +515,8 @@ div.footerBar {
     margin-right: 12%
 }
 
+
+
 .Top-Icon.Query {
     margin-top: -20px;
 }
@@ -1423,6 +1425,10 @@ a.reportItem {
     flex-grow: 1;
 }
 
+a#buyOnlineButton {
+    border-radius: 2px !important;
+}
+
 
 .modalButton.Right {
     width: 42%;
@@ -1776,6 +1782,12 @@ a.reportItem {
     
     .flexBody.Foot {
         z-index: -1;
+    }
+}
+
+@media(max-width: 414px) {
+    #locateGly {
+        padding-right: 11px !important;   
     }
 }
 
