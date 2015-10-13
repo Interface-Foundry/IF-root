@@ -1,4 +1,4 @@
-module.exports = [
+[
   {
     "_id": "561d46dcaa13b81f3b5a61a2",
     "id": "two_tone_jumpsuit",
@@ -181,21 +181,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.3584,
-          34.07113
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -208,7 +200,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -400,25 +392,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -432,7 +412,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -764,41 +744,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -816,7 +768,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -1065,33 +1017,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.42,
-          34.0597
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -1107,7 +1039,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -1495,45 +1427,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -1552,7 +1452,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -2060,49 +1960,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -2122,7 +1986,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -2407,29 +2271,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -2444,7 +2292,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -2738,41 +2586,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -2790,7 +2610,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -3147,49 +2967,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -3209,7 +2993,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -3403,29 +3187,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.42,
-          34.0597
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -3440,7 +3208,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -3886,45 +3654,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -3943,7 +3679,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -4394,41 +4130,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -4446,7 +4154,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -4978,49 +4686,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -5040,7 +4712,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -5564,49 +5236,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.25651,
-          34.1457
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -5626,7 +5262,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
@@ -5937,45 +5573,13 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
+      "type": "MultiPoint",
       "coordinates": [
         [
-          0,
-          90
-        ],
-        [
-          -122.40736,
-          37.78414
-        ],
-        [
-          -122.40613,
-          37.78866
-        ],
-        [
-          -118.26082,
-          34.04936
-        ],
-        [
-          -118.34,
-          34.1014
-        ],
-        [
-          -118.3584,
-          34.07113
-        ],
-        [
-          -118.153,
-          34.1457
-        ],
-        [
-          -118.42,
-          34.0597
-        ],
-        [
-          -118.437,
-          34.1569
+          -73.81240694999997,
+          40.707311088379946
         ]
-      ],
-      "type": "MultiPoint"
+      ]
     },
     "owner": {
       "profileID": "zara1204",
@@ -5994,7 +5598,7 @@ module.exports = [
     ],
     "parent": {
       "name": "Zara",
-      "addressString": "580 Broadway",
+      "addressString": "580 Broadway New York",
       "tel": "(212) 343-1725",
       "loc": {
         "type": "MultiPoint",
