@@ -14,7 +14,8 @@ U/| . \\u      | |     |  __/
 -->
 <head>
     <meta charset="utf-8"/>
-    <title>Kip - Search for things in IRL stores around you</title>
+    <span ng-if="!searchTitle"><title>Kip - Search for things in IRL stores around you</title></span>
+    <span ng-if="searchTitle"><title>{{searchTitle}}</title></span>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="fragment" content="!">  
     <meta name="prerender-status-code" content="301">
@@ -86,8 +87,8 @@ U/| . \\u      | |     |  __/
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
- <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script> -->
-    <script src="lib/dev/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script> 
+<!--    <script src="lib/dev/angular.js"></script>-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-beta.0/angular-route.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>    
