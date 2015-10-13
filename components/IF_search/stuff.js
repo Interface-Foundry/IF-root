@@ -181,10 +181,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -204,8 +204,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -390,10 +390,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -414,8 +414,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -740,10 +740,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -768,8 +768,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -1011,10 +1011,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -1037,8 +1037,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -1419,10 +1419,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -1448,8 +1448,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -1950,10 +1950,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -1980,8 +1980,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -2259,10 +2259,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -2284,8 +2284,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -2572,10 +2572,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -2600,8 +2600,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -2951,10 +2951,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -2981,8 +2981,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -3169,10 +3169,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -3194,8 +3194,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -3634,10 +3634,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -3663,8 +3663,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -4108,10 +4108,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -4136,8 +4136,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -4662,10 +4662,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -4692,8 +4692,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -5210,10 +5210,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -5240,8 +5240,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
@@ -5545,10 +5545,10 @@ module.exports = [
     "landmarkCategories": [],
     "subType": [],
     "loc": {
-      "type": "MultiPoint",
+      "type": "Point",
       "coordinates": [
-        -73.81240694999997,
-        40.707311088379946
+        -73.9923314,
+        40.7378461
       ]
     },
     "owner": {
@@ -5574,8 +5574,8 @@ module.exports = [
         "type": "MultiPoint",
         "coordinates": [
           [
-            -73.81240694999997,
-            40.707311088379946
+            -73.9923314,
+            40.7378461
           ]
         ]
       }
