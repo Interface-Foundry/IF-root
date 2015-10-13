@@ -27,13 +27,16 @@ var tokenize = module.exports.tokenize = function(text, expand) {
   var tokenString = tokenizer.tokenize(text).map(function(t) {
     return natural.PorterStemmer.stem(t);
   }).join(' ');
+  expand && console.log(tokenString);
 
   //
   // Replace synonyms
   // ex: woman bath suit -> women swimsuit
   //
-  tokenString = synonyms.expand(tokenString);
   tokenString = synonyms.compress(tokenString);
+  expand && console.log(tokenString);
+  tokenString = synonyms.expand(tokenString);
+  expand && console.log(tokenString);
 
   //
   // Tokenize
