@@ -187,6 +187,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
     $scope.expandContent = function(index, event, imgCnt) {
         if ($scope.mobileScreen) {
+            $scope.outerHeight = $(window)[0].outerHeight;
             if (event === 'close') {
 
                 $scope.mobileScreenIndex = null;
