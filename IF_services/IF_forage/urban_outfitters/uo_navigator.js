@@ -23,13 +23,13 @@ async.whilst(
             async.eachSeries(catalogs, function(catalog, callback) {
                 loadCatalog(catalog, stores).then(function(res) {
                     var today = new Date().toString()
-                    fs.appendFile('progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
+                    fs.appendFile('./logs/progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
                     console.log('Done with catalog.')
                     wait(callback, 10000)
                 }).catch(function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     console.log('Error with catalog: ', catalog.category)
                     wait(callback, 10000)
@@ -37,10 +37,10 @@ async.whilst(
             }, function(err) {
                 if (err) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                    fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                 } else {
                     var today = new Date().toString()
-                    fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs***')
+                    fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
                 console.log('Finished scraping all catalogs for Urban Outfitters.');
 

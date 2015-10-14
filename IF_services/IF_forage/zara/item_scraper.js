@@ -1,13 +1,4 @@
-//TODO:
-//1. Double check catalog var names for errors, is it completing all of them 
-//2. Find out max number of stores for inventory check
 
-//NY stores
-// 3074,3818,3037,1260,3946,303,3036
-//SF stores
-//3611,3441
-//LA stores
-//6493,3723,3844,3985,3805,3612
 var request = require('request');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -59,7 +50,6 @@ module.exports = function scrapeItem(url) { 
                         if (results[1].isFulfilled()) {
                             notfoundstore = results[1].value()
                         }
-                        // console.log('Loaded mongo objects: ', owner.profileID, notfoundstore.id)
                         callback(null)
                     }).catch(function(err) {
                         if (err) {
@@ -84,17 +74,12 @@ module.exports = function scrapeItem(url) { 
                         callback(err)
                     })
                 },
-                // || (match && match.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)
                 function(existingItem, callback) {
-                    // console.log(3)
                     if (!exists || (exists && existingItem.itemImageURL[0].indexOf('s3.amazonaws.com') == -1)) {
-                        // console.log(1)
                         //The || is for the case in which item was previously scraped but without AWS images
                         if (exists) {
-                            // console.log(2)
                             exists = !exists
-                                // console.log('Removing existing item to be updated.')
-                                //remove outdated item, this doesn't need to happen async
+                                //Remove outdated item, this doesn't need to happen sync
                             db.Landmarks.remove({
                                 'id': existingItem.id
                             })
@@ -105,25 +90,47 @@ module.exports = function scrapeItem(url) { 
                             callback(err)
                         })
                     } else {
-                        // console.log(3)
                         callback(null, existingItem)
                     }
                 },
                 function(item, callback) {
                     loadStores().then(function(stores) {
-                        // console.log(4)
                         callback(null, item, stores)
                     }).catch(function(err) {
                         callback(err)
                     })
                 },
                 function(item, stores, callback) {
-                    getInventory(item, stores).then(function(inventory) {
-                        // console.log(5)
-                        callback(null, item, inventory, stores)
-                    }).catch(function(err) {
-                        callback(err)
-                    })
+                    var CA = [3611, 3441, 6493, 3723, 3844, 3985, 3805, 3612, 3613]
+                    var NY = [3074, 3818, 3037, 1260, 3946, 303, 3036]
+                    var totalInventory = [];
+                    async.waterfall([
+                        function(cb) {
+                            getInventory(item, CA).then(function(inventory) {
+                                totalInventory = totalInventory.concat(inventory)
+                                cb(null, totalInventory)
+                            }).catch(function(err) {
+                                cb(err)
+                            })
+                        },
+                        function(totalInventory, cb) {
+                            getInventory(item, NY).then(function(inventory) {
+                                totalInventory = totalInventory.concat(inventory)
+                                cb(null, totalInventory)
+                            }).catch(function(err) {
+                                cb(err)
+                            })
+                        }
+                    ], function(err, totalInventory) {
+                        if (err) {
+                            console.log('Inventory error: ', err)
+                            return callback(err)
+                        }
+                        // console.log('Total Inventory is : ', totalInventory)
+                        callback(null, item, totalInventory, stores)
+                    });
+
+
                 },
                 function(item, inventory, stores, callback) {
                     // console.log(6)
@@ -359,32 +366,15 @@ function loadStores() {
     })
 }
 
+// var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/02398310800?physicalStoreId=' + storeIds.join() + '&ajaxCall=true';
+// http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/15517003004?physicalStoreId=3036,3037,3074,3818,1260,303,3946&ajaxCall=true
+function getInventory(item, ids) {
+    // console.log('Calling getInventory for stores: ', ids)
+        //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
+    var Item = !exists ? item : item.source_generic_item
 
-
-//NY stores
-// 3074,3818,3037,1260,3946,303,3036
-//SF stores
-//3611,3441
-//LA stores
-//6493,3723,3844,3985,3805,3612
-
-function getInventory(itemData, stores) {
-
-    //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
-    var Item = !exists ? itemData : itemData.source_generic_item
-        //Map-out storeIds out of array to use in URL query below.
-        // var storeIds = stores.map(function(obj) {
-        //     return obj.source_generic_store.storeId
-        // })
-
-    // 3074, 3818, 3037, 1260, 3946, 303, 3036, 
-    // x x x x x x
-    var storeIds = [3611, 3441, 6493, 3723, 3844, 3985, 3805, 3612, 3613]
-
-    // http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/15517003004?physicalStoreId=3036,3037,3074,3818,1260,303,3946&ajaxCall=true
     return new Promise(function(resolve, reject) {
-        // var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/02398310800?physicalStoreId=' + storeIds.join() + '&ajaxCall=true';
-        var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + Item.campaign + '/product/part-number/' + Item.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
+        var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + Item.campaign + '/product/part-number/' + Item.partNumber + '?physicalStoreId=' + ids.join() + '&ajaxCall=true'
         var options = {
             url: apiUrl,
             headers: {
@@ -395,7 +385,7 @@ function getInventory(itemData, stores) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body)
-                
+
                 var inventory = body.stocks
                     // console.log('INVENTORY: ',JSON.stringify(inventory))
                 resolve(inventory)
@@ -416,7 +406,6 @@ function getInventory(itemData, stores) {
 function processItems(inventory, itemData, Stores) {
 
     return new Promise(function(resolve, reject) {
-
 
         //If this item has already been scraped, update inventory,parents, and location fields of item.
         if (exists) {

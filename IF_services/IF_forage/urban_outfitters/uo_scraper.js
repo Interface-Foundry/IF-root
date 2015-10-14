@@ -42,12 +42,12 @@ module.exports = function(url, category, stores) {
                     if (results[1].isFulfilled()) {
                         notfoundstore = results[1].value()
                     }
-                    // console.log('Loaded mongo objects: ', owner.profileID, notfoundstore.id)
+                
                     callback(null)
                 }).catch(function(err) {
                     if (err) {
                         var today = new Date().toString()
-                            // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
+                            fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                     }
                     callback(null)
                 })
@@ -98,7 +98,7 @@ module.exports = function(url, category, stores) {
         ], function(err, items) {
             if (err) {
                 var today = new Date().toString()
-                fs.appendFile('errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
+                fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
                     console.log('Error 62: ', err)
                     return reject(err)
                 });
@@ -119,7 +119,7 @@ module.exports = function(url, category, stores) {
 
 function loadMongoObjects() {
     var user = db.Users.findOne({
-        'profileID': 'zara1204'
+        'profileID': 'urban411'
     }).exec();
     var store = db.Landmarks.findOne({
         'id': 'notfound_9999'
@@ -236,8 +236,10 @@ function scrapeItem(url) {
             } else {
                 if (error) {
                     console.log('error: ', error)
+                    reject(error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode)
+                    reject(response.statusCode)
                 }
             }
         })

@@ -82,8 +82,11 @@ notfoundstore = {}
                                          })
                                      },
                                      function(item, stores, callback) {
-                                         if (item.styleId == undefined || item.styleId == null || !item.styleId || item.name == undefined || item.name == null || !item.name) {
+                                         if (item.styleId == undefined || item.styleId == null || !item.styleId) {
                                              return callback('StyleId missing from Nordstrom API query.')
+                                         }
+                                         if (item.name == undefined || item.name == null || !item.name) {
+                                            item.name = 'item'
                                          }
                                          upload.uploadPictures('nordstrom_' + item.styleId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
                                              item.hostedImages = images

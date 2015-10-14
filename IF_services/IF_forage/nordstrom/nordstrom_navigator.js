@@ -45,12 +45,12 @@ async.whilst(
                                 loadCatalog(catalog, zipcode).then(function(res) {
                                     console.log('Done with catalog.')
                                     var today = new Date().toString()
-                                    fs.appendFile('progress.log', '\n' + today + 'Finished Category: ' + catalog.category, function(err) {});
+                                    fs.appendFile('./logs/progress.log', '\n' + today + 'Finished Category: ' + catalog.category, function(err) {});
                                     wait(callback, 10000)
                                 }).catch(function(err) {
                                     if (err) {
                                         var today = new Date().toString()
-                                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                                        fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                                     }
                                     console.log('Error with catalog: ', catalog)
                                     wait(callback, 10000)
@@ -59,7 +59,7 @@ async.whilst(
                                 if (err) {
                                     var today = new Date().toString()
                                     console.log('There was an error with current catalog, moving onto next one...')
-                                    fs.appendFile('errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
+                                    fs.appendFile('./logs/errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
                                 }
                                 console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
                                 wait(loop, 2000000)
@@ -68,10 +68,10 @@ async.whilst(
                         function(err) {
                             if (err) {
                                 var today = new Date().toString()
-                                fs.appendFile('errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
+                                fs.appendFile('./logs/errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
                             } else {
                                 var today = new Date().toString()
-                                fs.appendFile('progress.log', '\n' + today + '*Finished scraping all catalogs for: ', currentState)
+                                fs.appendFile('./logs/progress.log', '\n' + today + '*Finished scraping all catalogs for: ', currentState)
                                 cb('Done with state.')
                             }
                         });
@@ -80,7 +80,7 @@ async.whilst(
                 function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
+                        fs.appendFile('./logs/errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
                     }
                     stateIndex++;
                     if (states[stateIndex]) {
@@ -91,7 +91,7 @@ async.whilst(
                         console.log('Finished all states!')
                         stateIndex = 0;
                         currentState = states[stateIndex]
-                        fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs for all states!!*** ')
+                        fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs for all states!!*** ')
                             // Turn off infinite loop, CRON job will handle it.
                             // loop()
                     }
@@ -101,7 +101,7 @@ async.whilst(
     function(err) {
         if (err) {
             var today = new Date().toString()
-            fs.appendFile('errors.log', '\n' + today + err, function(err) {});
+            fs.appendFile('./logs/errors.log', '\n' + today + err, function(err) {});
         }
     })
 
@@ -142,7 +142,7 @@ function loadCatalog(catalog, zipcode) {
                     if (err) {
                         console.log('There was an error in parsing out page numbers.')
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                        fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                     }
                     return reject('There was an error in parsing out page numbers.')
                 }
@@ -155,7 +155,7 @@ function loadCatalog(catalog, zipcode) {
                 }).catch(function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                        fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                         return reject(err)
                     }
                     reject()
@@ -165,7 +165,7 @@ function loadCatalog(catalog, zipcode) {
             } else {
                 if (error) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error);
+                    fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error);
                     reject(error)
                 } else if (response.statusCode !== 200) {
                     console.log('Error - Response.statusCode: ', response.statusCode)
@@ -216,7 +216,7 @@ function loadPages(links, zipcode, catalog) {
                     }, function(err) {
                         if (err) {
                             var today = new Date().toString()
-                            fs.appendFile('errors.log', '\n' + today + err.lineNumber + ' Category: ' + catalog.category + '\n' + err);
+                            fs.appendFile('./logs/errors.log', '\n' + today + err.lineNumber + ' Category: ' + catalog.category + '\n' + err);
                         }
                         console.log('************Finished scraping page..')
                         callback1()
@@ -226,7 +226,7 @@ function loadPages(links, zipcode, catalog) {
                 } else {
                     if (error) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error);
+                        fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + error);
                         callback1()
                     } else if (response.statusCode !== 200) {
                         console.log('Error - Response.statusCode: ', response.statusCode)
@@ -237,10 +237,10 @@ function loadPages(links, zipcode, catalog) {
         }, function finished(err) {
             if (err) {
                 var today = new Date().toString()
-                fs.appendFile('errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
+                fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                 return reject(err)
             }
-            console.log('!!!!!********Finished all pages..')
+            console.log('********Finished all pages..')
             resolve()
 
         })
