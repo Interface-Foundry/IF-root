@@ -1331,6 +1331,7 @@ a.reportItem {
     background-color: black;
     padding-top: 27px;
     margin-top: -27px;
+    margin-bottom: 25px;
 }
 
 .mobileModal.Price {
