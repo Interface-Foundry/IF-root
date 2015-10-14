@@ -102,6 +102,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.searchIndex = 0;
     $scope.items = [];
     $scope.newQuery = null;
+    $scope.hideItem = {};
     
     $scope.expandedIndex = null;
     $scope.isExpanded = false;
@@ -159,6 +160,17 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         $scope.query = '';
     }
 
+    $scope.sayBye = function(index, inview, event) {
+//        console.log('func', index, inview, event);
+        if (!inview) {
+            $scope.hideItem[index] = true;
+        } else if (inview) {
+            if ($scope.hideItem[index] === true) {
+                $scope.hideItem[index] = false;   
+            }
+        }
+    }
+    
     $scope.sayHello = function() {
         if (!httpBool) {
             $scope.infBool = true;
@@ -459,7 +471,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             }
 
             //                console.log('data', response.data);
-
+                
             if ($scope.items && $scope.items.length) {
                 $scope.noResults = false;
                 for (var i = 0; i < $scope.items.length; i++) {
