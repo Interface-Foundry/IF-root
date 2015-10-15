@@ -12,7 +12,6 @@ var bodyParser = require('body-parser');
 var _ = require('lodash');
 var pageSize = 20;
 var defaultRadius = 2;
-var blacktieshit = require('./stuff.js');
 
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
@@ -133,10 +132,6 @@ app.post(searchItemsUrl, function(req, res, next) {
                 }
               })
 
-              if (page === 0 && req.body.text && req.body.text.indexOf('black tie women') >= 0) {
-                console.log('black tie women hack');
-                results = blacktieshit.concat(results);
-              }
               responseBody.results = results;
               res.send(responseBody);
 

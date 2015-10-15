@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+var searchterms = require('../components/IF_search/searchterms');
+var str = process.argv.slice(2).join(' ');
+console.log(searchterms.tokenize(str).join(' '));
