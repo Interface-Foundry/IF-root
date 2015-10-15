@@ -1,5 +1,3 @@
-//Note: If you are getting 'missing id' logs in console, run uo_store_scraper first.
-
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
@@ -8,61 +6,7 @@ var uniquer = require('../../uniquer');
 var request = require('request')
 var item_scraper = require('./uo_scraper')
 var fs = require('fs')
-
-//List of NEW-IN catalogs
-var catalogs = [{
-    category: 'Dress',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_APP_DRESSES&cm_sp=WOMENS-_-L2-_-WOMENS:W_APP_DRESSES#/'
-}, {
-    category: 'Top',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_TOPS&cm_sp=WOMENS-_-L2-_-WOMENS:W_TOPS#/'
-}, {
-    category: 'Jacket',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_OUTERWEAR&cm_sp=WOMENS-_-L2-_-WOMENS:W_OUTERWEAR#/'
-}, {
-    category: 'Bottom',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_BOTTOMS&cm_sp=WOMENS-_-L2-_-WOMENS:W_BOTTOMS#/'
-}, {
-    category: 'Denim',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W-DENIM&cm_sp=WOMENS-_-L2-_-WOMENS:W-DENIM#/'
-}, {
-    category: 'Shoe',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_SHOES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_SHOES#/'
-}, {
-    category: 'Top',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_TOPS&cm_sp=MENS-_-L2-_-MENS:M_TOPS#/'
-}, {
-    category: 'Jacket',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_OUTERWEAR&cm_sp=MENS-_-L2-_-MENS:M_OUTERWEAR#/'
-}, {
-    category: 'Bottom',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_BOTTOMS&cm_sp=MENS-_-L2-_-MENS:M_BOTTOMS#/'
-}, {
-    category: 'T-Shirt',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M-GRAPHICS&cm_sp=MENS-_-L2-_-MENS:M-GRAPHICS#/'
-}, {
-    category: 'Activewear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-WACTIVE&cm_sp=WOMENS-_-L2-_-WOMENS:UOWW-WACTIVE#/'
-}, {
-    category: 'Underwear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=W_INTIMATES&cm_sp=WOMENS-_-L2-_-WOMENS:W_INTIMATES'
-}, {
-    category: 'Accessory',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=WOMENS_ACCESSORIES&cm_sp=WOMENS-_-L2-_-WOMENS:WOMENS_ACCESSORIES'
-}, {
-    category: 'Activewear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=UOWW-MACTIVE&cm_sp=MENS-_-L2-_-MENS:UOWW-MACTIVE#/'
-}, {
-    category: 'Underwear',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=M_ACC_UNDERWEAR&cm_sp=MENS-_-L2-_-MENS:M_ACC_UNDERWEAR#/'
-}, {
-    category: 'Accessories',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=MENS_ACCESSORIES&cm_sp=MENS-_-L2-_-MENS:MENS_ACCESSORIES#/'
-}, {
-    category: 'Shoes',
-    url: 'http://www.urbanoutfitters.com/urban/catalog/category.jsp?id=MENS_SHOES&cm_sp=MENS-_-L2-_-MENS:MENS_SHOES#/'
-}]
-
+var catalogs = require('./catalogs.js')
 
 //This will loop forever through each of the catalogs listed above
 async.whilst(
@@ -70,20 +14,17 @@ async.whilst(
         return true
     },
     function(loop) {
-
         loadStores().then(function(stores) {
-
-
             async.eachSeries(catalogs, function(catalog, callback) {
                 loadCatalog(catalog, stores).then(function(res) {
                     var today = new Date().toString()
-                    fs.appendFile('progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
+                    fs.appendFile('./logs/progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
                     console.log('Done with catalog.')
                     wait(callback, 10000)
                 }).catch(function(err) {
                     if (err) {
                         var today = new Date().toString()
-                        fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                        fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     console.log('Error with catalog: ', catalog.category)
                     wait(callback, 10000)
@@ -91,15 +32,14 @@ async.whilst(
             }, function(err) {
                 if (err) {
                     var today = new Date().toString()
-                    fs.appendFile('errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                    fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                 } else {
                     var today = new Date().toString()
-                    fs.appendFile('progress.log', '\n' + today + '***Finished scraping all catalogs***')
+                    fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
-                console.log('Finished scraping all catalogs for Urban Outfitters.')
+                console.log('Finished scraping all catalogs for Urban Outfitters.');
+
             })
-
-
         }).catch(function(err) {
             if (err) {
                 console.log('Error loading stores: ', err)
@@ -136,8 +76,6 @@ function loadStores() {
 }
 
 
-
-
 function loadCatalog(category, stores) {
     return new Promise(function(resolve, reject) {
         var options = {
@@ -147,9 +85,55 @@ function loadCatalog(category, stores) {
             }
         };
         console.log('Starting catalog: ', category.category)
+
+        var nextPage = ''
+
+        async.doWhilst(
+            function(callback) {
+                if (nextPage) {
+                    options.url = nextPage;
+                }
+                console.log('Scraping: ', options.url)
+
+                loadPage(options,nextPage,category,stores).then(function(startVal) {
+                    if (!startVal) {
+                        nextPage = ''
+                    }
+                    setTimeout(callback, 1000);
+                }).catch(function(err) {
+                    if (err) console.log(err);
+                    setTimeout(callback, 1000);
+                })
+
+            },
+            function() {
+                return nextPage !== '';
+            },
+            function(err) {
+                if (err) console.log('err')
+                console.log('Finished Catalog.')
+            }
+        );
+
+    })
+}
+
+function loadPage(options, nextPage,category,stores) {
+    return new Promise(function(resolve, reject) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
+                
+                var startVal = ''
+                try {
+                    startVal = $('.pagination a')['0'].attribs.href.split('&startValue=')[1]
+                } catch (err) {
+                    if (err) console.log(err)
+                    return reject('No pagination element.')
+                }
+
+                nextPage = category.url.split('#')[0].concat('&startValue=' + startVal);
+
                 async.eachSeries($('p.product-image>a'), function(item, callback) {
                     if (!item.attribs.href) {
                         console.log('invalid!')
@@ -166,9 +150,11 @@ function loadCatalog(category, stores) {
                     })
                 }, function(err) {
                     if (err) console.log('async error, nav 129: ', err)
-                    console.log('Done scraping catalog!')
-                    resolve()
+                    console.log('Done scraping page.')
+                    resolve(startVal)
                 })
+
+
             } else {
                 if (error) {
                     console.log('error: ', error)
@@ -178,6 +164,8 @@ function loadCatalog(category, stores) {
                     reject(response.statusCode)
                 }
             }
+
+
         })
     })
 }
