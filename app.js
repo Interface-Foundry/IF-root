@@ -1,6 +1,10 @@
 var express = require('express');
 var app = express();
 var config = require('config');
+var helmet = require('helmet');
+
+// security for free
+app.use(helmet());
 
 // add in health check before sessions
 app.get('/api/healthcheck', function(req, res) {
