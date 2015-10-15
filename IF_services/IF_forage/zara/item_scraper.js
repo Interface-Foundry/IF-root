@@ -42,7 +42,6 @@ module.exports = function scrapeItem(url) { 
 
         async.waterfall([
                 function(callback) {
-                    // console.log(1)
                     loadMongoObjects().then(function(results) {
                         if (results[0].isFulfilled()) {
                             owner = results[0].value()
@@ -61,7 +60,7 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(callback) {
                     checkIfScraped(url).then(function(items) {
-                        // console.log(2)
+                        // console.log(2,items)
                         if (items && items.length > 0) {
                             // console.log('Item exists', items[0].itemImageURL[0])
                             exists = true;
@@ -213,8 +212,8 @@ function checkIfScraped(url) {
             .populate('parents')
             .exec(function(e, items) {
                 if (items) {
-                    //TODO DELETE ALL OLD ITEMS
                     if (items.length > 1) {
+                        console.log('Total items found.',items.length)
                         var toDelete = []
                         for (var i = 1; i < items.length; i++) {
                             toDelete.push(items[i]._id)
@@ -225,7 +224,7 @@ function checkIfScraped(url) {
                             }
                         }, function(err, res) {
                             if (err) console.log(err)
-                            console.log('Deleted old items: ', res.result.n)
+                            console.log('Deleted old items: ', toDelete)
                         })
                     }
                     return resolve(items)

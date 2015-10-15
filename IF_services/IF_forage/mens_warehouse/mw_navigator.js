@@ -3,10 +3,11 @@ var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
-var request = require('request')
+var request = require('request');
 var item_scraper = require('./mw_item_scraper')
 var states = require('./states');
 var catalogs = require('./catalogs');
+var Nightmare = require('nightmare');
 
 stateIndex = 0;
 currentState = states[stateIndex]
@@ -17,9 +18,13 @@ async.whilst(
         return states[stateIndex]
     },
     function(loop) {
+
         var query = {
             'state': currentState
         }
+
+        console.log('Starting...', currentState)
+
         db.Zipcodes.find(query).then(function(zips) {
             var count = 0;
             console.log('\nCurrent state: ' + currentState)
@@ -78,16 +83,35 @@ async.whilst(
 
 function loadCatalog(category, zipcode) {
     return new Promise(function(resolve, reject) {
+        console.log('Starting catalog: ', category.url, ' for zipcode: ', zipcode)
         var options = {
             url: category.url,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-        console.log('Starting catalog: ', category.url, ' for zipcode: ', zipcode)
+        // console.log('URL: ',category.url)
+
+        new Nightmare()
+            .on('responsive', function(lel) {
+                console.log('Response!', lel)
+            })
+            .goto(category.url)
+            .scrollTo(bottom, right)
+            .run(function(err, nightmare) {
+                if (err) {
+                    console.log(err);
+                }
+                console.log('Done.');
+            });
+
+
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
+                // var totalPageNumber = parseInt($('#catalog_search_result_information')['0'].children[0].data.split('totalPageNumber: ')[1].split(',')[0])
+                // console.log('INPUT TAGS: ', totalPageNumber)
+
                 async.eachSeries($('div.prod-img>a'), function(item, callback) {
                     var detailsUrl = item.attribs.href;
                     item_scraper(detailsUrl, category.category, zipcode).then(function(result) {

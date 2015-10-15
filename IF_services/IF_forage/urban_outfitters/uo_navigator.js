@@ -128,7 +128,7 @@ function loadPage(options, nextPage,category,stores) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
-
+                
                 var startVal = ''
                 try {
                     startVal = $('.pagination a')['0'].attribs.href.split('&startValue=')[1]

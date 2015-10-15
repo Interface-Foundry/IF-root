@@ -8,9 +8,8 @@
  var request = require('request');
  var _ = require('lodash');
  var tagParser = require('../tagParser');
- var fs = require('fs')
- var upload = require('../../upload')
-
+ var fs = require('fs');
+ var upload = require('../../upload');
 
  //Global var to hold category
  cat = '';

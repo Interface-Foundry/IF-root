@@ -1,4 +1,3 @@
-//Updating inventory is tricky for this one as inventory is queried by lat lng zipcode..
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -12,24 +11,33 @@ var fs = require('fs');
 var upload = require('../../upload')
 
 module.exports = function(url, category, zipcode) {
-    //Global variable declarations
-    owner = {};
+
+    //Global vars 
+    owner = {}
+    notfoundstore = {}
     oldStores = [];
     newStores = [];
+
     return new Promise(function(resolve, reject) {
         async.waterfall([
                 function(callback) {
-                    loadFakeUser().then(function() {
-                        console.log(1)
+                    loadMongoObjects().then(function(results) {
+                        if (results[0].isFulfilled()) {
+                            owner = results[0].value()
+                        }
+                        if (results[1].isFulfilled()) {
+                            notfoundstore = results[1].value()
+                        }
                         callback(null)
                     }).catch(function(err) {
-                        console.log('Could not load owner user.')
-                        callback(err)
+                        if (err) {
+                            console.log(err)
+                        }
+                        callback(null)
                     })
                 },
                 function(callback) {
                     scrapeItem(url).then(function(item) {
-                        console.log(2)
                         wait(function() {
                             callback(null, item)
                         }, 3000)
@@ -39,7 +47,6 @@ module.exports = function(url, category, zipcode) {
                 },
                 function(item, callback) {
                     getLatLong(zipcode).then(function(coords) {
-                        console.log(3)
                         callback(null, item, coords)
                     }).catch(function(err) {
                         callback(err)
@@ -65,6 +72,9 @@ module.exports = function(url, category, zipcode) {
                     async.eachSeries(items, function iterator(item, cb) {
                         if (item.parentProductId == undefined || item.parentProductId == null || !item.parentProductId) {
                             return callback('parentProductId missing from Mens Wearhouse API query.')
+                        }
+                        if (!item.name) {
+                            item.name = 'item'
                         }
                         upload.uploadPictures('mw_' + item.parentProductId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
                             item.hostedImages = images
@@ -112,42 +122,27 @@ module.exports = function(url, category, zipcode) {
     })
 }
 
-function loadFakeUser() {
-    return new Promise(function(resolve, reject) {
-        db.Users
-            .findOne({
-                'profileID': 'menswearhouse333'
-            }).exec(function(e, o) {
-                if (o) {
-                    owner.profileID = o.profileID
-                    owner.name = o.name;
-                    owner.mongoId = o._id
-                    resolve()
-                }
-                if (!o) {
-                    var fake = new db.User()
-                    fake.name = 'Mens Wearhouse'
-                    fake.profileID = 'menswearhouse333'
-                    fake.save(function(err, o) {
-                        if (err) {
-                            console.log(err)
-                        } else {
-                            console.log(o.profileID)
-                            owner.profileID = o.profileID
-                            owner.name = o.name;
-                            owner.mongoId = o._id
-                            resolve()
-                        }
-                    })
-                }
-                if (e) {
-                    console.log(e)
-                    reject(e)
-                }
-            })
+function loadMongoObjects() {
+    var user = db.Users.findOne({
+        'profileID': 'menswearhouse333'
+    }).exec();
+    var store = db.Landmarks.findOne({
+        'id': 'notfound_9999'
+    }).exec();
+    return Promise.settle([user, store]).then(function(arry) {
+        var u = arry[0];
+        var s = arry[1];
+        if (u.isFulfilled()) {
+            owner.profileID = u.profileID
+            owner.name = u.name;
+            owner.mongoId = u._id
+        }
+        if (s.isFulfilled()) {
+            notfoundstore = s
+        }
+        return arry;
     })
 }
-
 
 function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
@@ -163,14 +158,6 @@ function scrapeItem(url) {
                 $ = cheerio.load(body); //load HTML
                 var itemCountLoop = 0; //used to compare num items to current loop
                 var itemCount = 0;
-
-                // $('p.help-links a.flat-btn').each(function(i, elem) {
-                //     if (elem.attribs && elem.attribs.href && elem.attribs.href.indexOf('catalogId') > -1 && elem.attribs.href.indexOf('storeId') > -1) {
-                //         var catalogId = elem.attribs.href.split('?')[1].split('=')[1].split('&')[0]
-                //     }
-                // })
-
-                // console.log('CatalogId: ',catalogId)
 
                 //initial count of num of items to collect
                 $('div').each(function(i, elem) {
@@ -382,7 +369,6 @@ function scrapeItem(url) {
     })
 }
 
-
 function getInventory(newItems, coords) {
     return new Promise(function(resolve, reject) {
         var storesToSave = []
@@ -390,7 +376,7 @@ function getInventory(newItems, coords) {
             async.eachSeries(item.sizeIds, function iterator(sizeItem, callback2) {
                 var radius = 200; //TODO: Test if this is max radius
                 var url = 'http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance=' + radius + '&latlong=' + parseFloat(coords[1]) + ',' + parseFloat(coords[0]) + '&partNumber=' + sizeItem.partNumber + ''; //note: you can get a list of all stores by lat lng by removing the partNumber val
-                // console.log('Inventory URL: ', url)
+                // console.log('Inventory URL /: ', url)
                 var options = {
                     url: url,
                     headers: {
@@ -441,7 +427,6 @@ function getInventory(newItems, coords) {
 function saveStores(items, stores) {
     return new Promise(function(resolve, reject) {
         var Stores = [];
-        // console.log('stores', stores.length)
         async.eachSeries(stores, function(store, callback) {
             db.Landmarks.findOne({
                     'source_generic_store.stlocId': store.stlocId,
@@ -640,7 +625,6 @@ function saveItems(items, Stores) {
             if (err) {
                 console.log('Inventory update error: ', e)
             }
-            // console.log('Updated inventory.', i)
             return resolve(Items)
         })
     })
@@ -715,15 +699,13 @@ function getLatLong(zipcode) {
 
 function updateInventory(items, coords) {
     return new Promise(function(resolve, reject) {
-        // console.log('old stores: ',oldStores, 'new stores: ', newStores)
         var d = _.difference(oldStores, newStores);
-        // console.log('difference: ',d)
         if (d.length < 1 || d == null) {
             console.log('No inventory to update')
             return resolve('No stores to remove.')
         }
         var storesToRemove = []
-            //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
+        //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
         db.Landmarks.find({
             '_id': {
                 $in: d
@@ -756,10 +738,24 @@ function updateInventory(items, coords) {
                     storesToRemove.forEach(function(store) {
                         inv.concat(store.source_generic_store.inventory)
                     })
+
                     inv = _.flatten(inv)
                     inv = _.uniq(inv, 'partNumber')
                     console.log('Updating ', items.length)
                     async.eachSeries(items, function iterator(item, callback) {
+                        var toAddParent = [];
+                        var toAddLoc = [];
+
+                        if (storesToRemove.length >= item.parents.length || locs.length >= item.loc.coordinates.length) {
+                            console.log('No stocks left.')
+                            toAddParent = [notfoundstore._id];
+                            toAddLoc = [notfoundstore.loc.coordinates];
+                        }
+
+                        if (storesToRemove.length !== locs.length) {
+                            return callback('storesToRemove.length and locs.length in update function do not match up. Aborting.')
+                        }
+
                         db.Landmarks.update({
                             'source_generic_item.parentProductId': item.parentProductId,
                             'name': item.name,
@@ -769,6 +765,17 @@ function updateInventory(items, coords) {
                                 'parents': storesToRemove,
                                 'source_generic_item.inventory': inv,
                                 'loc.coordinates': locs
+                            },
+                            $addToSet: {
+                                'loc.coordinates': {
+                                    $each: toAddLoc
+                                },
+                                'parents': {
+                                    $each: toAddParent
+                                }
+                            },
+                            $set: {
+                                'updated_time': new Date()
                             }
                         }, function(err, res) {
                             if (err) console.log('726', err)
