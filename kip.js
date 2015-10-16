@@ -1,3 +1,5 @@
+require('colors');
+
 /**
  * Prints an error to the screen and returns true.
  * function(e, item) {
@@ -6,7 +8,7 @@
  */
 module.exports.err = function(e) {
     if (e) {
-        console.error(e);
+        console.error(e.toString().red);
         return true;
     }
 };
@@ -16,8 +18,8 @@ module.exports.err = function(e) {
  */
 module.exports.fatal = function(e) {
     if (e) {
-        console.error('FATAL ERROR 🔥💀')
-        console.error(e);
+        console.error('FATAL ERROR 🔥💀'.red)
+        console.error(e.toString().red);
         process.exit(1);
     }
 }
@@ -42,4 +44,17 @@ module.exports.debug = function(o) {
     if (process.NODE_ENV !== 'production') {
         console.log(JSON.stringify(o, null, 2));
     }
+}
+
+/**
+ * GTFO
+ */
+module.exports.exit = function(code) {
+  if (code && code > 0) {
+    console.error(('kip exiting with code ' + code).red);
+    process.exit(code);
+  } else {
+    console.log('kip exited successfully'.green);
+    process.exit();
+  }
 }
