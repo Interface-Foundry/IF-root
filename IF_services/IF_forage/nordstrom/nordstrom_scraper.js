@@ -11,8 +11,8 @@
  var fs = require('fs');
  var upload = require('../../upload');
 
- //Global var to hold category
- cat = '';
+//Global var to hold category
+cat = '';
 //Global vars to hold default mongo objects
 owner = {}
 notfoundstore = {}

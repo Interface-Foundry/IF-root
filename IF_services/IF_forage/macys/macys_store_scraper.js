@@ -6,6 +6,7 @@ var async = require('async');
 var q = require('q');
 var uniquer = require('../../uniquer');
 var states = require('./states');
+var fs = require)('fs')
 
 stateIndex = 0;
 
