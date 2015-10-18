@@ -10,10 +10,16 @@ var secret = 'SlytherinOrGTFO';  // lol
 var open = require('open');
 var expiresInMinutes = 10 * 365 * 24 * 60; // 10 years
 
+app.use(function(req, res, next) {
+  console.log(app.mountpath + req.path);
+  next();
+})
 
 // Use cookie session ids
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+app.use(express.static(__dirname + '/static'));
 
 // Use the same authentication as regular kip
 app.use('/', require('../IF_auth/new_auth'));
@@ -26,15 +32,15 @@ app.get('/login', function(req, res) {
   res.sendfile(__dirname + '/login.html');
 })
 
-app.use('/', function(req, res, next) {
+app.use('*', function(req, res, next) {
+  debugger;
   if (!req.isAdmin) {
-    res.redirect('/login');
+    console.log('redirecting to ', app.mountpath + '/login');
+    res.redirect(app.mountpath + '/login');
   } else {
     next();
   }
 })
-
-app.use(express.static(__dirname + '/static'));
 
 // get the reset page
 app.get('/', function(req, res, next) {

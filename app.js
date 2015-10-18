@@ -19,8 +19,13 @@ if (config.isProduction) {
 // load the app api at /styles
 app.use('/styles', require('./IF_server'));
 
+// load the admin interface only if we're in test
+if (!config.isProduction) {
+  app.use('/admin', require('./components/IF_admin/app'));
+}
+
 // redirect everything else to kipsearch.com
-app.get('/*', function(req, res) {
+app.get('/adsfasdfdasf*', function(req, res) {
   res.redirect('https://kipsearch.com');
 })
 

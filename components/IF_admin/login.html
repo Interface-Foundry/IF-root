@@ -9,7 +9,7 @@
     }
 </style>
 <script src="http://adodson.com/hello.js/dist/hello.all.min.js"></script>
-<script src="/nanojax.min.js"></script>
+<script src="/admin/zepto.min.js"></script>
 <script>
     hello.init({
         facebook: 1401271990193674
@@ -21,7 +21,7 @@
         // Call user information, for the given network
         hello(auth.network).api('/me').then(function(r) {
             // Inject it into the container
-            nanoajax.ajax({url: '/api/auth/verify-facebook', method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+            nanoajax.ajax({url: '/admin/api/auth/verify-facebook', type: 'POST', headers: {'Content-Type': 'application/json'}, data: JSON.stringify({
                 user: r,
                 auth: {authResponse: {accessToken: auth.authResponse.access_token}}
             })}, function (code, responseText, request) {
@@ -33,22 +33,39 @@
     });
 
     function kipLogin() {
-        nanoajax.ajax({url: '/api/auth/login', method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value
-        })}, function (code, responseText, request) {
-            if (code === 200) {
-                location.reload();
+        event.preventDefault();
+        var data = {
+          email: $('#email').val(),
+          password: $('#password').val()
+        };
+        $.ajax({
+          url: '/admin/api/auth/login',
+          type: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          data: JSON.stringify(data),
+          success: function (data) {
+            if (!data.err) {
+              window.location.replace('/admin');
+            } else {
+              $('form').append('<div>' + new Date() + ': error logging in</div>');
             }
+          },
+          error: function() {
+            $('form').append('<div>' + new Date() + ': error logging in</div>');
+          }
         });
 
         return false;
     }
+
+    $(function() {
+      $('form').submit(kipLogin);
+    })
 </script>
 <div>
     plz log in to kip
 </div>
-<form onsubmit="return kipLogin()">
+<form>
     <input id="email" name="email" placeholder="email" type="email">
     <input id = "password" name="password" placeholder="password" type="password">
     <input type="submit" value="log in">
