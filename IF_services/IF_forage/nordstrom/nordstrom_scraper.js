@@ -11,11 +11,11 @@
  var fs = require('fs');
  var upload = require('../../upload');
 
-//Global var to hold category
-cat = '';
-//Global vars to hold default mongo objects
-owner = {}
-notfoundstore = {}
+ //Global var to hold category
+ cat = '';
+ //Global vars to hold default mongo objects
+ owner = {}
+ notfoundstore = {}
 
  module.exports = function(url, category, zipcode) {
      //Global variable declarations
@@ -26,21 +26,21 @@ notfoundstore = {}
          async.waterfall([
                  function(callback) {
                      loadMongoObjects().then(function(results) {
-                        if (results[0].isFulfilled()) {
-                            owner = results[0].value()
-                        }
-                        if (results[1].isFulfilled()) {
-                            notfoundstore = results[1].value()
-                        }
-                        // console.log('Loaded mongo objects: ', owner.profileID, notfoundstore.id)
-                        callback(null)
-                    }).catch(function(err) {
-                        if (err) {
-                            var today = new Date().toString()
-                                // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
-                        }
-                        callback(null)
-                    })
+                         if (results[0].isFulfilled()) {
+                             owner = results[0].value()
+                         }
+                         if (results[1].isFulfilled()) {
+                             notfoundstore = results[1].value()
+                         }
+                         // console.log('Loaded mongo objects: ', owner.profileID, notfoundstore.id)
+                         callback(null)
+                     }).catch(function(err) {
+                         if (err) {
+                             var today = new Date().toString()
+                                 // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + category + err, function(err) {});
+                         }
+                         callback(null)
+                     })
                  },
                  function(callback) {
                      getColorUrls(url).then(function(colorUrls) {
@@ -85,7 +85,7 @@ notfoundstore = {}
                                              return callback('StyleId missing from Nordstrom API query.')
                                          }
                                          if (item.name == undefined || item.name == null || !item.name) {
-                                            item.name = 'item'
+                                             item.name = 'item'
                                          }
                                          upload.uploadPictures('nordstrom_' + item.styleId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
                                              item.hostedImages = images
@@ -472,10 +472,11 @@ notfoundstore = {}
                                      newStore.save(function(e, s) {
                                          if (e) {
                                              console.log(e)
-                                         }
-                                         console.log('Saved store.', s.id)
-                                         notFound = false;
-                                         Stores.push(s)
+                                         } else {
+                                             console.log('Saved store.', s.id)
+                                             notFound = false;
+                                             Stores.push(s)
+                                         } 
                                          setTimeout(function() {
                                              return callback()
                                          }, 800);
@@ -685,7 +686,7 @@ notfoundstore = {}
              return resolve('No stores to remove.')
          }
          var storesToRemove = [];
-             //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
+         //For each difference store, calculate if it is within 100 miles of inventory query range (the relevant sphere)
          db.Landmarks.find({
              '_id': {
                  $in: d

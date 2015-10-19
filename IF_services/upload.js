@@ -20,7 +20,8 @@ var express = require('express'),
     Promise = require('bluebird');
 
 module.exports = {
-    uploadPicture: function(str, image) {
+    uploadPicture: function(str, image, quality) {
+        var qual = quality ? quality : 82
         return new Promise(function(resolve, reject) {
             function convertBase64(image) {
                 return new Promise(function(resolve, reject) {
@@ -58,10 +59,10 @@ module.exports = {
                                 srcPath: inputPath,
                                 dstPath: outputPath,
                                 strip: true,
-                                quality: 82,
+                                quality: qual,
                                 width: 450
                             }, function(err, stdout, stderr) {
-                                if (err) console.log(err.lineNumber +  err)
+                                if (err) console.log(err.lineNumber + err)
                                 fs.readFile(outputPath, function(err, buffer) {
                                     var object_key = crypto.createHash('md5').update(str).digest('hex');
                                     var awsKey = object_key + ".png";
@@ -75,21 +76,30 @@ module.exports = {
                                     s3.headObject(params, function(err, metadata) {
                                         //If image does not yet exist
                                         if (err && err.code == 'NotFound') {
-
                                             s3.putObject({
                                                 Bucket: 'if-server-general-images',
                                                 Key: awsKey,
                                                 Body: buffer,
                                                 ACL: 'public-read'
                                             }, function(err, data) {
-                                                wait(function() {
-                                                    fs.unlink(outputPath)
-                                                }, 200);
-                                                wait(function() {
-                                                    fs.unlink(inputPath)
-                                                }, 200);
+                                                if (outputPath) {
+                                                    // console.log('OUTPUT PATH: ', outputPath)
+                                                    wait(function() {
+                                                        fs.unlink(outputPath, function(err, res) {
+                                                            // if (err) console.log('fs error: ', err)
+                                                        })
+                                                    }, 500);
+                                                }
+                                                if (inputPath) {
+                                                    // console.log('INPUT PATH: ', inputPath)
+                                                    wait(function() {
+                                                        fs.unlink(inputPath, function(err, res) {
+                                                            // if (err) console.log('fs error: ', err)
+                                                        })
+                                                    }, 500);
+                                                }
                                                 if (err) {
-                                                    console.log(err.lineNumber +  err)
+                                                    console.log(err.lineNumber + err)
                                                     return reject(err)
                                                 } else {
                                                     var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
@@ -101,15 +111,25 @@ module.exports = {
                                             //If image exists                                       
                                         } else {
                                             console.log('Image exists.', awsKey)
-                                            wait(function() {
-                                                fs.unlink(outputPath)
-                                            }, 200);
-                                            wait(function() {
-                                                fs.unlink(inputPath)
-                                            }, 200);
+                                            if (outputPath) {
+                                                // console.log('OUTPUT PATH: ', outputPath)
+                                                wait(function() {
+                                                    fs.unlink(outputPath, function(err, res) {
+                                                        // if (err) console.log('fs error: ', err)
+                                                    })
+                                                }, 500);
+                                            }
+                                            if (inputPath) {
+                                                // console.log('INPUT PATH: ', inputPath)
+                                                wait(function() {
+                                                    fs.unlink(inputPath, function(err, res) {
+                                                        // if (err) console.log('fs error: ', err)
+                                                    })
+                                                }, 500);
+                                            }
                                             s3.getSignedUrl('getObject', params, function(err, imgURL) {
                                                 if (err) {
-                                                    console.log(err.lineNumber +  err)
+                                                    // console.log(err.lineNumber + err)
                                                     return reject(err)
                                                 } else {
                                                     var imgURLt = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
@@ -144,14 +164,14 @@ module.exports = {
                     wait(cb, 1000)
                 }).catch(function(err) {
                     if (err) {
-                        console.log(err.lineNumber +  err)
+                        console.log(err.lineNumber + err)
                     }
                     count++;
                     wait(cb, 1000)
                 })
             }, function finished(err) {
                 if (err) {
-                    console.log(err.lineNumber +  err)
+                    console.log(err.lineNumber + err)
                     return reject(err)
                 }
                 images = _.uniq(images)

@@ -199,7 +199,10 @@ function createStores(stores) {
                 return reject(err)
             }
 
-            console.log('Saved ', Stores.length, ' stores.')
+            if (Stores && Stores.length > 0) {
+                console.log('Saved ', Stores.length, ' stores.')
+            }
+
             resolve(Stores)
         })
     })
