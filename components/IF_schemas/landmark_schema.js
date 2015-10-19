@@ -16,7 +16,10 @@ var landmarkSchema = new Schema({
         unique: true,
         lowercase: true
     },
-    world: Boolean,
+    world: {
+      type: Boolean,
+      index: true
+    },
     parent: {
         mongoId: String,
         id: String,
@@ -339,7 +342,10 @@ var landmarkSchema = new Schema({
         reason: String
     }],
     linkback: String, // linking back to a page you may have found an item
-    linkbackname: String, // the display name for the link
+    linkbackname: {
+      type: String, // the display name for the link
+      index: true
+    },
 
     // make it easy to kill test data
     testData: {
