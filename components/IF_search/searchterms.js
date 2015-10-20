@@ -156,6 +156,15 @@ for (var i = 1; i < comboTsv[8].length; i++) {
     }];
 }
 
+var fashionTokenize = module.exports.fashionTokenize = function(query) {
+  DEBUG && console.log('q:', query);
+  var tokens = tokenize(query);
+  DEBUG && console.log('tokenized:', tokens);
+  tokens = synonyms.synonymize(tokens);
+  DEBUG && console.log('syn:', tokens);
+  return tokens.split(' ');
+}
+
 
 /**
  * Takes a list of words, remomves the stop words, and splits the remaining
@@ -168,12 +177,7 @@ for (var i = 1; i < comboTsv[8].length; i++) {
  * }
  */
 var parse = module.exports.parse = function(query) {
-  DEBUG && console.log('q:', query);
-  var tokens = tokenize(query);
-  DEBUG && console.log('tokenized:', tokens);
-  tokens = synonyms.synonymize(tokens);
-  DEBUG && console.log('syn:', tokens);
-
+  var tokens = fashionTokenize(query).join(' '); // better as a single string
   bucketTerms = buckets.reduce(function(bucketTerms, bucket) {
     if (bucket.name == 'boost') {
       debugger;

@@ -89,7 +89,7 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
         ].filter(function(v) {
           return !!v;
         }).map(function(s) {
-          return searchterms.tokenize(s);
+          return searchterms.fashionTokenize(s);
         }))
       },
       index: 'not_analyzed'
@@ -111,7 +111,7 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
     tags: {
         type: 'string',
         source: function() {
-            return _.uniq(searchterms.tokenize(_.flattenDeep([
+            return _.uniq(searchterms.fashionTokenize(_.flattenDeep([
                 _.get(this, 'itemTags.text'),
                 _.get(this, 'meta.humanTags.itemType'),
                 _.get(this, 'meta.humanTags.itemStyle'),

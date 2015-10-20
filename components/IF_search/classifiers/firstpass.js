@@ -1,5 +1,6 @@
 var db = require('db');
 var searchterms = require('../searchterms');
+var tokenize = require('../tokenize');
 var _ = require('lodash');
 var get = _.get;
 var kip = require('kip');
@@ -23,7 +24,7 @@ function processItem() {
     l.map(function(i) {
 
       // classifierNameTags = ['ugli', 'christma', 'sweater'];  (special tokenized)
-      i.meta.classifierNameTags = _.uniq(searchterms.tokenize(_.flattenDeep([
+      i.meta.classifierNameTags = _.uniq(searchterms.fashionTokenize(_.flattenDeep([
         i.name,
         // i.description,
         // i.itemTags.categories,
@@ -32,7 +33,7 @@ function processItem() {
       ]).join(' ')));
 
       // description tags must be actual tokens from the spreadsheet
-      i.meta.classifierDescTags = _.uniq(searchterms.tokenize(_.flattenDeep([
+      i.meta.classifierDescTags = _.uniq(searchterms.fashionTokenize(_.flattenDeep([
         i.description,
         i.itemTags.categories,
         i.itemTags.text,
