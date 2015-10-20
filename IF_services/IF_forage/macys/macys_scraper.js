@@ -42,10 +42,10 @@ module.exports = function(url, category, stores) {
                     if (results[1].isFulfilled()) {
                         notfoundstore = results[1].value()
                     }
-
                     callback(null)
                 }).catch(function(err) {
                     if (err) {
+                        console.log('48: ',err)
                         var today = new Date().toString()
                         fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                     }
@@ -56,6 +56,7 @@ module.exports = function(url, category, stores) {
                 scrapeItem(url).then(function(items) {
                     callback(null, items, stores)
                 }).catch(function(err) {
+                    console.log('59: ',err)
                     callback(err)
                 })
             },
@@ -63,6 +64,7 @@ module.exports = function(url, category, stores) {
                 getInventory(items, stores).then(function(items) {
                     callback(null, items, stores)
                 }).catch(function(err) {
+                    console.log('67: ',err)
                     callback(err)
                 })
             },
@@ -89,20 +91,20 @@ module.exports = function(url, category, stores) {
                 saveItems(items, stores, notfoundstore, url).then(function(items) {
                     callback(null, items)
                 }).catch(function(err) {
-                    console.log(err)
+                    console.log('94: ',err)
                     callback(err)
                 })
             }
         ], function(err, items) {
             if (err) {
+                 console.log('100: ',err)
                 var today = new Date().toString()
-                fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
-                    console.log('Error 62: ', err)
+                fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
                     return reject(err)
                 });
             }
             if (items) {
-                console.log('finished scraping. saved item count: ', items.length)
+                // console.log('finished scraping. saved item count: ', items.length)
                 resolve()
             } else if (!items) {
                 console.log('No items saved.', items)
@@ -139,8 +141,10 @@ function loadMongoObjects() {
 
 function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
+
         var newItems = []; //multiple colors for item == multiple items
         var latestColor;
+
         var options = {
             url: url,
             headers: {
@@ -159,9 +163,16 @@ function scrapeItem(url) {
                         prices.push(price)
                     }
                 }
+
+                if (prices == null || prices.length < 1 || !prices) {
+                    console.log('Could not find prices for this item: ',url)
+                    return reject('Could not find prices for this item.')
+                }
+
                 var price = prices.reduce(function(a, b, i, arr) {
                     return Math.min(a, b)
                 });
+
                 var itemObjects = [];
                 var imageElements = JSON.parse(body.toString().split('MACYS.pdp.primaryImages[')[1].split('= ')[1].split('};')[0].concat('}'));
                 var imgBaseURL = 'http://slimages.macysassets.com/is/image/MCY/products/';
@@ -241,7 +252,7 @@ function getInventory(items, Stores) {
         var finalItems = []
         async.eachSeries(items, function iterator(item, finishedItem) {
             item.storeIds = []
-            console.log('For item :', item.name)
+            // console.log('Getting inventory for item :', item.name)
             async.eachSeries(item.upcNumbers, function iterator(upcNumber, finishedSku) {
                 // console.log('Querying upc number...', upcNumber)
                 var url = 'http://www1.macys.com/api/store/v2/stores/' + storeIds.join() + '?upcNumber=' + upcNumber + '&_fields=name,locationNumber,inventories,schedule,address,attributes'
@@ -379,7 +390,7 @@ function saveItems(items, stores, notfoundstore, url) {
                             if (e) {
                                 console.log('Inventory update error: ', e)
                             }
-                            console.log('Updated inventory for item:', match.id, result)
+                            // console.log('Updated inventory for item:', match.id, result)
                             callback()
                         })
 

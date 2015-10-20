@@ -2,72 +2,6 @@ var catalogs = [{
     category: 'Womens Activewear',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-activewear?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1'
 }, {
-    category: 'Womens Bra',
-    url: 'http://www1.macys.com/shop/womens-clothing/bras?id=55799&edge=hybrid'
-}, {
-    category: 'Womens Bridal Lingerie',
-    url: 'http://www1.macys.com/shop/womens-clothing/bridal-lingerie?id=55767&edge=hybrid'
-},
-{
-    category: 'Womens Corset Bustier',
-    url: 'http://www1.macys.com/shop/womens-clothing/corset-bustier?id=58246&edge=hybrid'
-},
-{
-    category: 'Womens Camisole Tanktop',
-    url: 'http://www1.macys.com/shop/womens-clothing/camisoles-tank-tops?id=55800&edge=hybrid'
-},
-{
-    category: 'Womens Designer Lingerie',
-    url: 'http://www1.macys.com/shop/womens-clothing/designer-lingerie?id=65739&edge=hybrid'
-},
-{
-    category: 'Womens Lingerie Accessories',
-    url: 'http://www1.macys.com/shop/womens-clothing/lingerie-accessories?id=62988&edge=hybrid'
-},
-{
-    category: 'Womens Lingerie Sets',
-    url: 'http://www1.macys.com/shop/womens-clothing/lingerie-sets?id=55804&edge=hybrid'
-},
-{
-    category: 'Womens Panties',
-    url: 'http://www1.macys.com/shop/womens-clothing/panties?id=55805&edge=hybrid'
-},
-{
-    category: 'Womens Panties',
-    url: 'http://www1.macys.com/shop/womens-clothing/panties?id=55805&edge=hybrid'
-},
-{
-    category: 'Womens Sexy Lingerie',
-    url: 'http://www1.macys.com/shop/womens-clothing/sexy-lingerie?id=68110&edge=hybrid'
-},
-{
-    category: 'Womens Sexy Lingerie',
-    url: 'http://www1.macys.com/shop/womens-clothing/sexy-lingerie?id=68110&edge=hybrid'
-},
-{
-    category: 'Womens Slips',
-    url: 'http://www1.macys.com/shop/womens-clothing/slips?id=55807&edge=hybrid'
-},
-{
-    category: 'Womens Sports Bras',
-    url: 'http://www1.macys.com/shop/womens-clothing/bras/Bra_features/Sports?id=55799'
-},
-{
-    category: 'Womens Socks Tights',
-    url: 'http://www1.macys.com/shop/handbags-accessories/socks-tights?id=40546&edge=hybrid'
-},
-{
-    category: 'Womens Socks Tights',
-    url: 'http://www1.macys.com/shop/handbags-accessories/socks-tights?id=40546&edge=hybrid'
-},
-
-
-
-
-
-
-
-{
     category: 'Womens Coats',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-coats?id=269&edge=hybrid&cm_sp=us_hdr-_-women-_-269_coats_COL1'
 }, {
@@ -181,6 +115,51 @@ var catalogs = [{
 }, {
     category: 'Mens Underwear',
     url: 'http://www1.macys.com/shop/mens-clothing/mens-underwear?id=57&edge=hybrid&cm_sp=us_hdr-_-men-_-57_underwear_COL1'
+}, {
+    category: 'Womens Bra',
+    url: 'http://www1.macys.com/shop/womens-clothing/bras?id=55799&edge=hybrid'
+}, {
+    category: 'Womens Bridal Lingerie',
+    url: 'http://www1.macys.com/shop/womens-clothing/bridal-lingerie?id=55767&edge=hybrid'
+}, {
+    category: 'Womens Corset Bustier',
+    url: 'http://www1.macys.com/shop/womens-clothing/corset-bustier?id=58246&edge=hybrid'
+}, {
+    category: 'Womens Camisole Tanktop',
+    url: 'http://www1.macys.com/shop/womens-clothing/camisoles-tank-tops?id=55800&edge=hybrid'
+}, {
+    category: 'Womens Designer Lingerie',
+    url: 'http://www1.macys.com/shop/womens-clothing/designer-lingerie?id=65739&edge=hybrid'
+}, {
+    category: 'Womens Lingerie Accessories',
+    url: 'http://www1.macys.com/shop/womens-clothing/lingerie-accessories?id=62988&edge=hybrid'
+}, {
+    category: 'Womens Lingerie Sets',
+    url: 'http://www1.macys.com/shop/womens-clothing/lingerie-sets?id=55804&edge=hybrid'
+}, {
+    category: 'Womens Panties',
+    url: 'http://www1.macys.com/shop/womens-clothing/panties?id=55805&edge=hybrid'
+}, {
+    category: 'Womens Panties',
+    url: 'http://www1.macys.com/shop/womens-clothing/panties?id=55805&edge=hybrid'
+}, {
+    category: 'Womens Sexy Lingerie',
+    url: 'http://www1.macys.com/shop/womens-clothing/sexy-lingerie?id=68110&edge=hybrid'
+}, {
+    category: 'Womens Sexy Lingerie',
+    url: 'http://www1.macys.com/shop/womens-clothing/sexy-lingerie?id=68110&edge=hybrid'
+}, {
+    category: 'Womens Slips',
+    url: 'http://www1.macys.com/shop/womens-clothing/slips?id=55807&edge=hybrid'
+}, {
+    category: 'Womens Sports Bras',
+    url: 'http://www1.macys.com/shop/womens-clothing/bras/Bra_features/Sports?id=55799'
+}, {
+    category: 'Womens Socks Tights',
+    url: 'http://www1.macys.com/shop/handbags-accessories/socks-tights?id=40546&edge=hybrid'
+}, {
+    category: 'Womens Socks Tights',
+    url: 'http://www1.macys.com/shop/handbags-accessories/socks-tights?id=40546&edge=hybrid'
 }]
 
 module.exports = catalogs

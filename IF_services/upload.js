@@ -110,7 +110,7 @@ module.exports = {
 
                                             //If image exists                                       
                                         } else {
-                                            console.log('Image exists.', awsKey)
+                                            // console.log('Image exists.', awsKey)
                                             if (outputPath) {
                                                 // console.log('OUTPUT PATH: ', outputPath)
                                                 wait(function() {
