@@ -1,19 +1,19 @@
 Weights																								
 terms																								
 2-term																								
-51	gender	major event	item	item	item	item	item	item	style	brand	major event	feeling	style detail	period 	style	major event	period	major event	gender	age	gender	gender	item	
-49	item	item	color	minor event	item detail	fabric	period	feeling	item	gender	brand	brand	brand	style	fabric	style 	major event	fabric	age	major event	style	period	minor item	
+9	gender	major event	item	item	item	item	item	item	style	brand	major event	feeling	style detail	period 	style	major event	period	major event	gender	age	gender	gender	item	
+8	item	item	color	minor event	item detail	fabric	period	feeling	item	gender	brand	brand	brand	style	fabric	style 	major event	fabric	age	major event	style	period	minor item	
 																								
 3-term																								
-41	item	item	item	item	item	item	item	item	item	item	item 	item	major event	gender	gender	gender	gender	item	gender	item	gender	item	size	size
-39	gender	color	minor event	detail	color	fabric	color	style	period	period	color	style	color	major event	style	period	style	gender	major event	gender	item	size	minor event	item
-20	color	brand	brand	brand	detail	detail	fabric	color	color	style	feeling	feeling	item	color	minor event	item	item	fabric	item	feeling	age	color	fabric	major event
+9	item	item	item	item	item	item	item	item	item	item	item 	item	major event	gender	gender	gender	gender	item	gender	item	gender	item	size	size
+8	gender	color	minor event	detail	color	fabric	color	style	period	period	color	style	color	major event	style	period	style	gender	major event	gender	item	size	minor event	item
+6	color	brand	brand	brand	detail	detail	fabric	color	color	style	feeling	feeling	item	color	minor event	item	item	fabric	item	feeling	age	color	fabric	major event
 																								
 4-term																								
-37	item																							
-23	gender																							
-21	fabric																							
-19	color																							
+9	item																							
+7	gender																							
+6	fabric																							
+4	color																							
 																								
 5-term																								
 27	item																							

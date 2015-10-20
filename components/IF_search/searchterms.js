@@ -2,67 +2,13 @@ var stopwords = require('./stopwords');
 var fs = require('fs');
 var natural = require('natural');
 var synonyms = require('./synonyms');
+var tokenize = require('./tokenize');
 
-/**
- * Takes a list of words, remomves the stop words, returns array
- * Some of the tokens may be multiple words if they match a multiple
- * token work in our fashion tag database
- *
- * if expand = true:
- * Uses the synonym file to expand text so that matches get more hits
- * /!\ warning /!\ could get unexpected results
- *
- * tokenize(string text, bool expand=true)
- */
-var tokenizer = new natural.WordTokenizer();
-var multiWordTokens = [];
-var tokenize = module.exports.tokenize = function(text, expand) {
-  // list of final tokens
-  var tokens = [];
+var DEBUG = false;
 
-  //
-  // Stemming
-  // ex: womans bathing suit -> woman bath suit
-  //
-  var tokenString = tokenizer.tokenize(text).map(function(t) {
-    return natural.PorterStemmer.stem(t);
-  }).join(' ');
-  expand && console.log(tokenString);
-
-  //
-  // Replace synonyms
-  // ex: woman bath suit -> women swimsuit
-  //
-  tokenString = synonyms.compress(tokenString);
-  expand && console.log(tokenString);
-  tokenString = synonyms.expand(tokenString);
-  expand && console.log(tokenString);
-
-  //
-  // Tokenize
-  // ex: women mini skirt -> ['women', 'mini skirt']
-  //
-  multiWordTokens.map(function(t) {
-    if (tokenString.indexOf(t) >= 0) {
-      // take out the multi-word token from the string.
-      tokenString = tokenString.replace(t, '');
-      tokenString = tokenString.replace('  ', ' ');
-      tokenString = tokenString.trim();
-      tokens.push(t);
-    }
-  })
-
-  tokenString.split(' ').map(function(token) {
-    if (stopwords.indexOf(token) === -1) {
-      tokens.push(natural.PorterStemmer.stem(token));
-    }
-  })
-
-  return tokens;
+function tokenRegex(word) {
+  return new RegExp('\\b' + word + '\\b')
 }
-
-
-
 
 /**
  * Get the list of colors and color values
@@ -72,8 +18,9 @@ var colormap = module.exports.colormap = {};
 var colors = module.exports.colors = rgbtxt.map(function(line) {
   line = line.split('\t');
   if (line[0] && line[1]) {
-    colormap[line[0]] = line[1];
-    return line[0];
+    color = tokenize(line[0]);
+    colormap[color] = line[1];
+    return color;
   }
 })
 
@@ -83,33 +30,27 @@ var colors = module.exports.colors = rgbtxt.map(function(line) {
  *
  * buckets: [{
  *  name: 'item',
+ *  bitmask: 2,
  *  boost: 50,
  *  words: ['jacket', 'skiboots', etc]
  * }]
  */
 var tsvfile = fs.readFileSync(__dirname + '/List of Tags in Kip Search - category terms.tsv',  'utf8').split('\r\n');
-var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row) {
-  row = row.split('\t').filter(function(val) {
-    return val !== '';
-  }).map(function(val, i) {
+var buckets = module.exports.buckets = tsvfile.slice(1).map(function(row, bucketIndex) {
+  row = row.split('\t').map(function(val, i) {
     // do not transform header
     if (i === 0) {
       return val;
     }
-    var tokens = tokenize(val);
-
-    // specially handle multi-word fashion database terms
-    if (tokens.length > 1) {
-      multiWordTokens.push(tokens.join(' '));
-      //multiWordTokens.push(tokens.join('-')); don't need this because of the tokenizer :)
-      multiWordTokens.push(tokens.join(''));
-    }
-    return tokens.join(' ');
+    return tokenize(val);
+  }).filter(function(val) {
+    return val !== '';
   })
   return {
     name: row[0].toLowerCase().replace(/ /g, ''),
+    bitmask: Math.pow(2, bucketIndex + 2),  // + 2 because the first two are reserved for "color" and "item"
     boost: row[1], //default, should often be overridden by our combos
-    words: tokenize(row.slice(2).join(' '))
+    words: row.slice(2)
   }
 });
 
@@ -119,7 +60,7 @@ var itembucket = buckets.reduce(function(bucket, b) {
     bucket.words = bucket.words.concat(b.words);
   }
   return bucket;
-}, {name: 'item', boost: 8, words: []})
+}, {name: 'item', bitmask: 2, boost: 8, words: []})
 buckets = buckets.filter(function(b) {
   return b.name.indexOf('item') < 0;
 })
@@ -128,13 +69,19 @@ buckets.push(itembucket);
 // also add the colors
 buckets.push({
   name: 'colors',
+  bitmask: 1,
   boost: 6,
-  words: tokenize(colors.join(' '))
+  words: colors
 })
 
 // make a bucket hash instead of array.
 bucketHash = buckets.reduce(function(h, b) {
   h[b.name] = b;
+  return h;
+}, {})
+
+bucketBitmaskHash = buckets.reduce(function(h, b) {
+  h[b.bitmask] = b;
   return h;
 }, {})
 
@@ -220,44 +167,60 @@ for (var i = 1; i < comboTsv[8].length; i++) {
  *  }
  * }
  */
-var parse = module.exports.parse = function(terms) {
-  var tokens = tokenize(terms);
+var parse = module.exports.parse = function(query) {
+  DEBUG && console.log('q:', query);
+  var tokens = tokenize(query);
+  DEBUG && console.log('tokenized:', tokens);
+  tokens = synonyms.synonymize(tokens);
+  DEBUG && console.log('syn:', tokens);
 
-  var combo = [];
-  var bucketTerms = tokens.reduce(function (bucketTerms, t) {
-    var categorized = false;
-    buckets.map(function(bucket) {
-      if (bucket.words.indexOf(t) >= 0) {
-        // init this bucket if necessary
-        if (!bucketTerms[bucket.name]) {
-          bucketTerms[bucket.name] = {
-            words: [],
-            boost: bucket.boost
-          }
-        }
-        bucketTerms[bucket.name].words.push(t);
-        categorized = true;
-        combo.push(bucket.name);
+  bucketTerms = buckets.reduce(function(bucketTerms, bucket) {
+    if (bucket.name == 'boost') {
+      debugger;
+    }
+    var matches = bucket.words.reduce(function(matches, word) {
+      if (tokens.match(tokenRegex(word))) {
+        matches.push(word);
       }
-    })
-    if (!categorized && t !== '') {
-      bucketTerms.uncategorized.words.push(t);
-      combo.push('uncategorized');
+      return matches;
+    }, [])
+    if (matches.length > 0) {
+      bucketTerms[bucket.name] = {
+        words: matches,
+        boost: bucket.boost
+      };
     }
     return bucketTerms;
-  }, {'uncategorized': {words: [], boost: 0}});
+  }, {})
+  DEBUG && console.log('b:', bucketTerms);
 
-  if (bucketTerms.uncategorized.words.length === 0) {
-    delete bucketTerms.uncategorized;
-  }
-
-  // check to see if we need to apply custom weights for a SECRET COMBO
-  // up up down down left right left right b a
-  if (combos[combo.sort().join('|')]) {
-    combos[combo.sort().join('|')].map(function(bucket) {
+  var comboKey = Object.keys(bucketTerms).sort().join('|').replace(/ /g, '').toLowerCase();
+  var combo = combos[comboKey];
+  if (combo) {
+    combo.map(function(bucket) {
       bucketTerms[bucket.name].boost = bucket.boost;
     })
   }
+  DEBUG && console.log('c:', combo);
+
+  // add uncategorized terms
+  var uncategorizedTerms = tokens.split(' ').reduce(function(uncategorizedTerms, token) {
+    Object.keys(bucketTerms).map(function(bucket) {
+      if (bucketTerms[bucket].words.indexOf(token) >= 0) {
+        uncategorizedTerms.splice(uncategorizedTerms.indexOf(token), 1);
+      }
+    })
+    return uncategorizedTerms;
+  }, tokens.split(' '))
+
+  if (uncategorizedTerms.length > 0) {
+    bucketTerms.uncategorized = {
+      words: uncategorizedTerms,
+      boost: 1
+    }
+  }
+
+  DEBUG && console.log('final:', bucketTerms)
 
   return bucketTerms;
 
