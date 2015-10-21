@@ -150,7 +150,7 @@ module.exports = {
                 }) //END OF CONVERTBASE64
         }); //END OF BLUEBIRD
     },
-    uploadPictures: function(str, array) {
+    uploadPictures: function(str, array, quality) {
         var self = this;
         var str = str;
         var images = [];
@@ -158,7 +158,7 @@ module.exports = {
             var count = 0
             async.eachSeries(array, function iterator(image, cb) {
                 str = str + '_' + count.toString()
-                self.uploadPicture(str, image).then(function(url) {
+                self.uploadPicture(str, image,quality).then(function(url) {
                     images.push(url)
                     count++;
                     wait(cb, 1000)

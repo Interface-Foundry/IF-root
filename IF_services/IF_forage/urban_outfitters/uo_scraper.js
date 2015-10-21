@@ -71,7 +71,7 @@ module.exports = function(url, category, stores) {
             },
             function(items, callback) {
                 async.eachSeries(items, function iterator(item, cb) {
-                    upload.uploadPictures('urban_outfitters_' + '_' + item.productId.trim() + item.name.replace(/\s/g, '_'), item.images).then(function(images) {
+                    upload.uploadPictures('urban_outfitters_' + '_' + item.productId.trim() + item.name.replace(/\s/g, '_'), item.images, 70).then(function(images) {
                         item.hostedImages = images
                         cb()
                     }).catch(function(err) {

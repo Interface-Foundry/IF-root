@@ -146,7 +146,7 @@ function loadCatalog(category, stores) {
         function loadPages(url, category, stores) {
 
             return new Promise(function(resolve, reject) {
-                var nightmare = Nightmare({ show: true });
+                var nightmare = Nightmare();
                 nightmare
                     .goto(url)
                     .wait()
