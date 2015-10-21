@@ -35,7 +35,7 @@ async.whilst(
                             zipcode = zip.zipcode;
                             //Reset save flag
                             saveFlag = 0;
-                            if (notFoundCount >= 30) {
+                            if (notFoundCount >= 50) {
                                 console.log('Looks like all stores for this state have been scraped, moving on... ', notFoundCount)
                                 notFoundCount = 0;
                                 stateIndex = stateIndex + 1
