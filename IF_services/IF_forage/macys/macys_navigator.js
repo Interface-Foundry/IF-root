@@ -88,42 +88,6 @@ function loadCatalog(category, stores) {
         // var onePageUrl = 'http://www1.macys.com/shop/' + catInput + '/Pageindex,Productsperpage/1,All?id=' + category.id;
 
         console.log('Starting catalog: ', category.category, '\n')
-
-
-        function loadPages(url, category,stores) {
-            return new Promise(function(resolve, reject) {
-                // var catalogUrl = pageCount > 1 ? 'http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/' + pageCount + ',40?id=' + category.id + '&edge=hybrid' : category.url
-                // console.log('URL: ', catalogUrl)
-                vo(run)(function(err, result) {
-                    if (err) console.log('NIGHTMARE ERR: ',err)
-                        resolve({next:''})
-                });
-
-                function* run() {
-                    var nightmare = Nightmare();
-                    var pageData = yield nightmare
-                        .goto(url)
-                        .wait()
-                        .wait(5000)
-                        .scrollTo(1000000, 0)
-                        .wait()
-                        .wait(10000)
-                        .evaluate(function() {
-                            // now we're executing inside the browser scope.
-                            return {
-                                items: $.map($("a.imageLink"), function(a) {
-                                    return $(a).attr("href").trim()
-                                }),
-                                next: $('a.arrowRight').prop('href').trim()
-                            }
-                        })
-                    console.log('Ending Nightmare...')
-                    yield nightmare.end();
-                    setTimeout(resolve(pageData), 1000);
-                }
-            })
-        }
-
         next = ''
         pageCount = 2;
         async.doWhilst(
@@ -131,13 +95,13 @@ function loadCatalog(category, stores) {
                 //Set global variable here
                 var url = next ? next : category.url
                 console.log('Current page: ', url)
-                loadPages(url, category,stores).then(function(data) {
+                loadPages(url, category, stores).then(function(data) {
                     if (data.next && data.next.length > 0) {
                         console.log('Data: ', data.items.length)
-                         var catInput = category.url.split('/PageIndex')[0].split('/shop/')[1].split('?id=')[0]
-                         category.id = category.url.split('?id=')[1].split('&')[0]
+                        var catInput = category.url.split('/PageIndex')[0].split('/shop/')[1].split('?id=')[0]
+                        category.id = category.url.split('?id=')[1].split('&')[0]
                         next = 'http://www1.macys.com/shop/' + catInput + '/Pageindex,Productsperpage/' + pageCount + ',40?id=' + category.id + '&edge=hybrid'
-                        pageCount++;
+
                         async.eachSeries(data.items, function(item, finishedItem) {
                                 var detailsUrl = 'http://www1.macys.com' + item.toString().trim()
                                 console.log('\nScraping: ', detailsUrl, '\n');
@@ -151,12 +115,10 @@ function loadCatalog(category, stores) {
                             },
                             function(err) {
                                 if (err) console.log('192: ', err)
-                                    console.log('Finished page.')
+                                pageCount++;
+                                console.log('Finished page.')
                                 setTimeout(finishedPage, 1000);
                             })
-
-
-                        console.log('Next page: ', next);
                     } else {
                         console.log('That was the last page')
                         next = ''
@@ -180,14 +142,41 @@ function loadCatalog(category, stores) {
                 resolve()
             }
         );
+
+        function loadPages(url, category, stores) {
+
+            return new Promise(function(resolve, reject) {
+                var nightmare = Nightmare();
+                nightmare
+                    .goto(url)
+                    .wait()
+                    .wait(5000)
+                    .scrollTo(1000000, 0)
+                    .wait()
+                    .wait(10000)
+                    .evaluate(function() {
+                        // now we're executing inside the browser scope.
+                        return {
+                            items: $.map($("a.imageLink"), function(a) {
+                                return $(a).attr("href").trim()
+                            }),
+                            next: $('a.arrowRight').prop('href').trim()
+                        }
+                    }).then(function(pageData) {
+                        setTimeout(resolve(pageData), 1000);
+                        console.log('Exiting nightmare..');
+                        nightmare.end();
+                    })
+            })
+        }
     })
 }
 
- // ** URL to get an array of all productIDs in a catalog // http://www1.macys.com/catalog/category/facetedmeta?edge=hybrid&parentCategoryId=118&categoryId=29891&facet=false&dynamicfacet=true&pageIndex=3&productsPerPage=40&
-        // ** URL to load pages // http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/35,40?id=29891&edge=hybrid
-        // ** URL to load all items per category on one page // http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/1,All?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1
-        // ** category.url: http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/1,All?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1
-        // var catInput = category.url.split('/PageIndex')[0].split('/shop/')[1].split('?id=')[0]
+// ** URL to get an array of all productIDs in a catalog // http://www1.macys.com/catalog/category/facetedmeta?edge=hybrid&parentCategoryId=118&categoryId=29891&facet=false&dynamicfacet=true&pageIndex=3&productsPerPage=40&
+// ** URL to load pages // http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/35,40?id=29891&edge=hybrid
+// ** URL to load all items per category on one page // http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/1,All?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1
+// ** category.url: http://www1.macys.com/shop/womens-clothing/womens-activewear/Pageindex,Productsperpage/1,All?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1
+// var catInput = category.url.split('/PageIndex')[0].split('/shop/')[1].split('?id=')[0]
 
 function wait(callback, delay) {
     var startTime = new Date().getTime();

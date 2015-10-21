@@ -30,12 +30,14 @@ notfoundstore = {};
 module.exports = function(url, category, stores) {
 
     return new Promise(function(resolve, reject) {
+          // console.log(0)
         //Create a global var to hold all mongo stores (for later location extraction)
         stores = stores;
         cat = category;
         async.waterfall([
             function(callback) {
                 loadMongoObjects().then(function(results) {
+                    // console.log(1)
                     if (results[0].isFulfilled()) {
                         owner = results[0].value()
                     }
@@ -54,6 +56,7 @@ module.exports = function(url, category, stores) {
             },
             function(callback) {
                 scrapeItem(url).then(function(items) {
+                      // console.log(2)
                     callback(null, items, stores)
                 }).catch(function(err) {
                     console.log('59: ',err)
@@ -62,6 +65,7 @@ module.exports = function(url, category, stores) {
             },
             function(items, stores, callback) {
                 getInventory(items, stores).then(function(items) {
+                      // console.log(3)
                     callback(null, items, stores)
                 }).catch(function(err) {
                     console.log('67: ',err)
@@ -70,6 +74,7 @@ module.exports = function(url, category, stores) {
             },
             function(items, stores, callback) {
                 async.eachSeries(items, function iterator(item, cb) {
+                      // console.log(4)
                     if (!item.name) {
                         item.name = 'item'
                     }
@@ -89,6 +94,7 @@ module.exports = function(url, category, stores) {
             },
             function(items, callback) {
                 saveItems(items, stores, notfoundstore, url).then(function(items) {
+                      // console.log(5)
                     callback(null, items)
                 }).catch(function(err) {
                     console.log('94: ',err)
@@ -319,7 +325,7 @@ function saveItems(items, stores, notfoundstore, url) {
                     updatedInv[1] = [notfoundstore.loc.coordinates]
                 }
 
-                // console.log('ITEM: ',item)
+                console.log('Saving item: ',item.name)
 
                 //Check if this item exists
                 db.Landmarks.findOne({
