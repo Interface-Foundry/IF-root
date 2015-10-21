@@ -14,9 +14,9 @@
          var deferred = q.defer();
          input = input.trim().toLowerCase()
          var newUnique;
-         console.log('input: ',input, collection)
+         // console.log('input: ',input, collection)
          urlify(input, function(input) {
-            console.log('INPUT!!:',input)
+            // console.log('INPUT!!:',input)
              db[collection].find({
                  'id': input
              }, function(err, data) {

@@ -319,8 +319,11 @@ function saveItems(items, stores, notfoundstore, url) {
                     updatedInv[1] = [notfoundstore.loc.coordinates]
                 }
 
+                // console.log('ITEM: ',item)
+
                 //Check if this item exists
                 db.Landmarks.findOne({
+                    'name': item.name,
                     'linkback': url,
                     'linkbackname': 'macys.com'
                 }, function(err, match) {
@@ -390,7 +393,7 @@ function saveItems(items, stores, notfoundstore, url) {
                             if (e) {
                                 console.log('Inventory update error: ', e)
                             }
-                            // console.log('Updated inventory for item:', match.id, result)
+                            console.log('Updated inventory for item:', match.id)
                             callback()
                         })
 
