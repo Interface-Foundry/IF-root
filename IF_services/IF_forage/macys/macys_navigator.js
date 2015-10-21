@@ -146,7 +146,7 @@ function loadCatalog(category, stores) {
         function loadPages(url, category, stores) {
 
             return new Promise(function(resolve, reject) {
-                var nightmare = Nightmare();
+                var nightmare = Nightmare({ show: true });
                 nightmare
                     .goto(url)
                     .wait()
@@ -166,6 +166,8 @@ function loadCatalog(category, stores) {
                         setTimeout(resolve(pageData), 1000);
                         console.log('Exiting nightmare..');
                         nightmare.end();
+                    },function(err) {
+                        if(err) console.log('Error: ',err)
                     })
             })
         }
