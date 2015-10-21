@@ -21,7 +21,9 @@ var testQueries = [
   'cropped denim jacket',
   'flanel button down',
   'light washed skinny jeans',
-  'dark washed skinny jeans'
+  'dark washed skinny jeans',
+  'mens jacket',
+  'mens suit'
 ];
 
 var google_trends = fs.readFileSync('./google_trends.txt', 'utf8').split('\n');

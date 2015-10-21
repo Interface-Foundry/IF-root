@@ -1,5 +1,5 @@
 var fs = require('fs');
-var natural = require('natural');
+var tokenize = require('./tokenize');
 
 var TYPES = {
   EXPAND: 1,
@@ -15,10 +15,10 @@ var data = module.exports.data = fs.readFileSync(__dirname + '/cinnamon-synonym 
   .map(function(row) {
     row = row.split('\t');
     return {
-      root: natural.PorterStemmer.stem(row[0]),
+      root: tokenize(row[0]),
       words: row.filter(function(w) {
           return typeof w === 'string' && w !== '';
-        }).map(natural.PorterStemmer.stem),
+        }).map(tokenize),
       type: TYPES.EXPAND
     };
   })
@@ -30,10 +30,10 @@ fs.readFileSync(__dirname + '/cinnamon-synonym trees - Contract-Compress into.ts
   .map(function(row) {
     row = row.split('\t');
     data.push({
-      root: natural.PorterStemmer.stem(row[0]),
+      root: tokenize(row[0]),
       words: row.slice(1).filter(function(w) {
           return typeof w === 'string' && w !== '';
-        }).map(natural.PorterStemmer.stem),
+        }).map(tokenize),
       type: TYPES.COMPRESS
     })
   });
@@ -100,6 +100,10 @@ var expandText = module.exports.expand = function(text) {
   }
 
   data.map(function(s) {
+    if (text.indexOf(s.root) >= 0) {
+      return;
+    }
+
     var hit = false;
     s.expandRegexs.map(function(r) {
       if (text.match(r)) {
@@ -114,16 +118,24 @@ var expandText = module.exports.expand = function(text) {
   return text;
 }
 
+/**
+ * synonymize
+ * @input text Tokenized string, such as "black offic pant" (not "black office pants")
+ */
+var synonymize = module.exports.synonymize = function(text) {
+  text = compressText(text);
+  return expandText(text);
+}
+
 var test = function() {
   var should = require('should');
+
   strings = [
-    {string: 'womans bathing suits', compressed: 'women bath suit'}
-  ];
-  strings.map(function(s) {
-    s.string = s.string.split(' ').map(natural.PorterStemmer.stem).join(' ');
-    console.log("testing", s.string);
-    compressText(s.string).should.equal(s.compressed);
-    console.log(expandText(s.string));
+    'black tie women',
+    'formal wear',
+    'black gown'
+  ].map(function(s) {
+    console.log(s, ':', synonymize(s))
   })
 }
 
