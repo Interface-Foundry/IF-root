@@ -1,3 +1,15 @@
+//TO RUN ON UBUNTU SERVERS 
+//I know this is so annoying
+//
+// sudo apt-get update
+
+// sudo apt-get install -y libgtk2.0-0 libgconf-2-4 libasound2 libxtst6 libxss1 libnss3 xvfb
+
+// npm install segmentio/nightmare
+
+// DEBUG=nightmare xvfb-run --server-args="-screen 0 1024x768x24" node macys_navigator.js
+
+
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
@@ -9,7 +21,7 @@ var fs = require('fs');
 var _ = require('lodash');
 var catalogs = require('./catalogs.js');
 var Nightmare = require('nightmare');
-var vo = require('vo');
+
 
 //This will loop forever through each of the catalogs listed above
 async.whilst(
@@ -146,6 +158,41 @@ function loadCatalog(category, stores) {
         function loadPages(url, category, stores) {
 
             return new Promise(function(resolve, reject) {
+
+                // function getLinks() {
+                //     var links = document.querySelectorAll('a.imageLink');
+                //     return Array.prototype.map.call(links, function(e) {
+                //         return e.getAttribute('href').trim();
+                //     });
+                // }
+
+                // function getNext() {
+                //     var links = document.querySelectorAll('a.arrowRight');
+                //     return Array.prototype.map.call(links, function(e) {
+                //         return e.getAttribute('href').trim();
+                //     });
+                // }
+
+                // casper.start(url, function() {
+                //     this.wait(5000, function() {
+                //         this.echo("I've waited for 5 seconds.");
+                //     });
+                // }).then(function() {
+                //     this.scrollToBottom();
+                // }).then(function() {
+                //      this.wait(10000, function() {
+                //         this.echo("I've waited for 10 seconds.");
+                //     });
+                // }).then(function() {
+                //     var itemLinks = this.evaluate(getLinks);
+                //     var nextLinks = this.evaluate(getNext);
+                //     var pageData = {
+                //         items: itemLinks,
+                //         next: nextLinks
+                //     }
+                //     setTimeout(resolve(pageData), 1000);
+                // });
+
                 var nightmare = Nightmare();
                 nightmare
                     .goto(url)
