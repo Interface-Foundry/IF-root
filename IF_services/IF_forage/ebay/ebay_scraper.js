@@ -22,7 +22,7 @@ nindex = 0
 
 async.whilst(
     function() {
-        return nodes.length < 50
+        return nodes.length < 150
     },
     function loop(restart) {
         console.log('Looped!', nodes.length);
@@ -34,14 +34,14 @@ async.whilst(
             if (leaf == true) {
                 console.log('Level complete. ');
                 if (nodes && nodes.length > 0) {
-                    if (nodes[nindex]) {
-                        
-                    }
+                    // if (nodes[nindex]) {
+
+                    // }
                     nindex++;
                     restart()
                 }
             } else {
-                console.log('NOT level complete.')
+                console.log('Not level complete.')
                 nindex++;
                 restart()
             }
@@ -49,8 +49,23 @@ async.whilst(
     },
     function finished(err) {
         if (err) console.log(err)
-        fs.appendFile('./finished.js', '\n' + JSON.stringify(nodes), function(err) {})
-        console.log('Final nodes: ', nodes.length)
+        //Build tree
+        var map = {},
+            node, tree = [];
+        for (var i = 0; i < nodes.length; i += 1) {
+            node = nodes[i];
+            node.children = [];
+            map[node.CategoryID] = i; // use map to look-up the parents
+            if (node.CategoryParentID !== "-1") {
+                nodes[map[node.CategoryParentID]].children.push(node);
+            } else {
+                tree.push(node);
+            }
+        }
+        console.log('Tree length',tree.length);
+        fs.appendFile('./nodes.js', '\n' + JSON.stringify(nodes), function(err) {})
+        fs.appendFile('./tree.js', '\n' + JSON.stringify(tree), function(err) {})
+        console.log('Finished: ', nodes.length)
 
     })
 
@@ -74,7 +89,7 @@ function buildNodes(url) {
                 var leafReached = false
                 async.eachSeries(categoryArray, function iterator(category, callback) {
                     category.children = []
-                    
+
                     nodes.push(category)
                     if (category.LeafCategory) {
                         leafReached = true;

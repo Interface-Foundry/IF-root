@@ -190,7 +190,9 @@ function loadCatalog(category, stores) {
                     }).then(function(pageData) {
                         console.log('Exiting nightmare..');
                         nightmare.end(function() {
-                            setTimeout(resolve(pageData), 1000);
+                            wait(function() {
+                               return resolve(pageData)
+                            }, 2000);
                         });
                     }, function(err) {
                         if (err) console.log('Error: ', err)
