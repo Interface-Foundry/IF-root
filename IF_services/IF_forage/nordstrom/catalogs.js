@@ -209,4 +209,25 @@ var newhandbags = {
 
 var catalogs = [wformal,wdress, wtop, wjeans, wsweaters, wcoats, wjackets, wpants, wsuit, wskirt,  mcoat, msuit, mdressshirt, mcasualshirt, mpoloshirt, mtshirt, msweater, mtuxedo, mpants, mjeans, mshorts, wunderwear, wshoes, mshoes, wswimsuit, wactivewear, wpetite,mswimwear, mworkout, msleepwear, munderwear, whandbagsandwallets, wwatches, wjewelry, wfinejewelry, wglasses, wgloves, wbelts, wscarves, whatsandhairs, wwinter, wsunglasses, wshapewear, wsleepwear, whosiery,wluggage,wnew, mnew, wnewshoes,mnewshoes,newhandbags]
 
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex ;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+catalogs = shuffle(catalogs)
+
 module.exports = catalogs

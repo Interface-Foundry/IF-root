@@ -7,7 +7,7 @@
 
 // npm install segmentio/nightmare
 
-// NODE_ENV=production DEBUG=nightmare xvfb-run -a node ~/root/IF_services/IF_forage/macys/macys_navigator.js
+// NODE_ENV=production xvfb-run -a node ~/root/IF_services/IF_forage/macys/macys_navigator.js
 
 var cheerio = require('cheerio');
 var db = require('db');
@@ -20,6 +20,8 @@ var fs = require('fs');
 var _ = require('lodash');
 var catalogs = require('./catalogs.js');
 var Nightmare = require('nightmare');
+// var phantom = require('phantom');
+
 
 
 //This will loop forever through each of the catalogs listed above
@@ -118,27 +120,37 @@ function loadCatalog(category, stores) {
                                 console.log('\nScraping: ', detailsUrl, '\n');
                                 item_scraper(detailsUrl, category.category, stores).then(function(result) {
                                     console.log('Done with item.')
-                                    wait(finishedItem, 3000)
+                                    wait(function() {
+                                        finishedItem()
+                                    }, 3000)
                                 }).catch(function(err) {
                                     console.log('Item scraper error: ', err)
-                                    wait(finishedItem, 3000)
+                                    wait(function() {
+                                        finishedItem()
+                                    }, 3000)
                                 })
                             },
                             function(err) {
                                 if (err) console.log('192: ', err)
                                 pageCount++;
                                 console.log('Finished page.')
-                                setTimeout(finishedPage, 1000);
+                                wait(function() {
+                                    finishedPage()
+                                }, 1000);
                             })
                     } else {
                         console.log('That was the last page')
                         next = ''
-                        setTimeout(finishedPage, 1000);
+                        wait(function() {
+                            finishedPage()
+                        }, 1000);
                     }
 
                 }).catch(function(err) {
                     if (err) console.log('99', err);
-                    setTimeout(callback, 1000);
+                    wait(function() {
+                        callback()
+                    }, 1000);
                 })
             },
             function() {
@@ -158,6 +170,88 @@ function loadCatalog(category, stores) {
 
             return new Promise(function(resolve, reject) {
 
+                //****NIGHTMARE ATTEMPT****** 
+                var nightmare = Nightmare();
+                nightmare
+                    .goto(url)
+                    .wait()
+                    .wait(5000)
+                    .scrollTo(1000000, 0)
+                    .wait()
+                    .wait(10000)
+                    .evaluate(function() {
+                        // now we're executing inside the browser scope.
+                        return {
+                            items: $.map($("a.imageLink"), function(a) {
+                                return $(a).attr("href")
+                            }),
+                            next: $("a.arrowRight").prop("href")
+                        }
+                    }).then(function(pageData) {
+                        setTimeout(resolve(pageData), 1000);
+                        console.log('Exiting nightmare..');
+                        nightmare.end();
+                    },function(err) {
+                        if(err) console.log('Error: ',err)
+                            reject(err)
+                    })
+
+
+
+                //****NODE PHANTOM ATTEMPT******
+                // phantom.create(function(ph) {
+                //     ph.createPage(function(page) {
+                //         page.open(url,
+                //             function(status) {
+                //                 console.log('Opened site? %s', status);
+                //                 // page.scrollPosition = {
+                //                 //     top: 100000,
+                //                 //     left: 0
+                //                 // };
+
+                //                 page.evaluate(function() {
+                //                     console.log('Evaluating page..')
+                //                     try {
+                //                         var itemElements = document.querySelectorAll('a.imageLink')
+                //                         var items = Array.prototype.map.call(linkElements, function(e) {
+                //                             return e.getAttribute('href').trim();
+                //                         });
+                //                         var nextElements = document.querySelectorAll('a.arrowRight')
+                //                         var next = Array.prototype.map.call(nextElements, function(e) {
+                //                             return e.getAttribute('href').trim();
+                //                         });
+                //                         var data = {
+                //                             items: items,
+                //                             next: next
+                //                         }
+                //                         console.log('!!', data)
+                //                         resolve(data)
+                //                     } catch (err) {
+                //                         console.log('OMGGGS', err)
+                //                     }
+                //                 })
+
+                //                 // wait(function() {
+                //                 //     delayedScrape(page, ph).then(function(data) {
+                //                 //         console.log('Data: ', data)
+                //                 //         ph.exit();
+                //                 //         wait(function() {
+                //                 //             resolve(data)
+                //                 //         }, 1000);
+                //                 //     }, function(err) {
+                //                 //         ph.exit();
+                //                 //         if (err) {
+                //                 //             console.log('188:', err)
+                //                 //             reject(err)
+                //                 //         }
+                //                 //     })
+                //                 // }, 6000)
+                //             });
+                //     });
+                // });
+
+
+                //****CASPER ATTEMPT****** (failed due to using only old version of phantom and no longer maintained)
                 // function getLinks() {
                 //     var links = document.querySelectorAll('a.imageLink');
                 //     return Array.prototype.map.call(links, function(e) {
@@ -192,29 +286,8 @@ function loadCatalog(category, stores) {
                 //     setTimeout(resolve(pageData), 1000);
                 // });
 
-                var nightmare = Nightmare();
-                nightmare
-                    .goto(url)
-                    .wait()
-                    .wait(5000)
-                    .scrollTo(1000000, 0)
-                    .wait()
-                    .wait(10000)
-                    .evaluate(function() {
-                        // now we're executing inside the browser scope.
-                        return {
-                            items: $.map($("a.imageLink"), function(a) {
-                                return $(a).attr("href").trim()
-                            }),
-                            next: $('a.arrowRight').prop('href').trim()
-                        }
-                    }).then(function(pageData) {
-                        setTimeout(resolve(pageData), 1000);
-                        console.log('Exiting nightmare..');
-                        nightmare.end();
-                    },function(err) {
-                        if(err) console.log('Error: ',err)
-                    })
+
+
             })
         }
     })
