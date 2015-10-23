@@ -99,12 +99,16 @@ module.exports = {
                                                     }, 500);
                                                 }
                                                 if (err) {
-                                                    console.log(err.lineNumber + err)
-                                                    return reject(err)
+                                                      console.log('Upload error: ' + err)
+                                                    wait(function() {
+                                                         return reject(err)
+                                                    }, 1000)
                                                 } else {
                                                     var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
                                                     console.log('Uploaded to AWS.', imgURL)
-                                                    resolve(imgURL)
+                                                    wait(function() {
+                                                        resolve(imgURL)
+                                                    }, 1000)
                                                 }
                                             });
 
@@ -129,11 +133,15 @@ module.exports = {
                                             }
                                             s3.getSignedUrl('getObject', params, function(err, imgURL) {
                                                 if (err) {
-                                                    // console.log(err.lineNumber + err)
-                                                    return reject(err)
+                                                    console.log('s3 getSigned Url error: ' + err)
+                                                    wait(function() {
+                                                         return reject(err)
+                                                    }, 1000)
                                                 } else {
                                                     var imgURLt = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
-                                                    resolve(imgURLt)
+                                                    wait(function() {
+                                                        resolve(imgURLt)
+                                                    }, 1000)
                                                 }
                                             });
                                         }
@@ -158,7 +166,7 @@ module.exports = {
             var count = 0
             async.eachSeries(array, function iterator(image, cb) {
                 str = str + '_' + count.toString()
-                self.uploadPicture(str, image,quality).then(function(url) {
+                self.uploadPicture(str, image, quality).then(function(url) {
                     images.push(url)
                     count++;
                     wait(cb, 1000)

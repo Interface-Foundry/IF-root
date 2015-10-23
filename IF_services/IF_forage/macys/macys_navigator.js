@@ -7,8 +7,7 @@
 
 // npm install segmentio/nightmare
 
-// DEBUG=nightmare xvfb-run --server-args="-screen 0 1024x768x24" node macys_navigator.js
-
+// NODE_ENV=production DEBUG=nightmare xvfb-run -a node ~/root/IF_services/IF_forage/macys/macys_navigator.js
 
 var cheerio = require('cheerio');
 var db = require('db');
