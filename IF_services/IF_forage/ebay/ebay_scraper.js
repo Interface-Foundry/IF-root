@@ -18,30 +18,34 @@ var findByCategoryUrl = 'http://svcs.ebay.com/services/search/FindingService/v1?
 var topLevelUrl = 'http://open.api.ebay.com/Shopping?callname=GetCategoryInfo&appid=' + APP_ID + '&version=677&siteid=0&CategoryID=' + root + '&IncludeSelector=ChildCategories'
 
 nodes = []
+nindex = 0
 
-nodeIndex = 0
 async.whilst(
     function() {
         return nodes.length < 50
     },
     function loop(restart) {
-        var url = (nodes && nodes.length > 0) ? 'http://open.api.ebay.com/Shopping?callname=GetCategoryInfo&appid=' + APP_ID + '&version=677&siteid=0&CategoryID=' + nodes[nodeIndex].CategoryID + '&IncludeSelector=ChildCategories' : topLevelUrl
-
-
-        buildNodes(url).then(function(levelComplete) {
-            if (levelComplete) {
+        console.log('Looped!', nodes.length);
+        // nodes[nindex] = []
+        var currentCategory = (nindex == 0) ? root : nodes[nindex].CategoryID
+        var url = 'http://open.api.ebay.com/Shopping?callname=GetCategoryInfo&appid=' + APP_ID + '&version=677&siteid=0&CategoryID=' + currentCategory + '&IncludeSelector=ChildCategories'
+        console.log('URL: ', url);
+        buildNodes(url).then(function(leaf) {
+            if (leaf == true) {
+                console.log('Level complete. ');
                 if (nodes && nodes.length > 0) {
-                    console.log('Gathered ', nodes.length, ' nodes for level ', nodeIndex)
-                    // console.log(nodes[nodes.length - 1].CategoryName)
-                    i++;
+                    if (nodes[nindex]) {
+                        
+                    }
+                    nindex++;
                     restart()
                 }
             } else {
+                console.log('NOT level complete.')
+                nindex++;
                 restart()
             }
         })
-
-
     },
     function finished(err) {
         if (err) console.log(err)
@@ -70,9 +74,9 @@ function buildNodes(url) {
                 var leafReached = false
                 async.eachSeries(categoryArray, function iterator(category, callback) {
                     category.children = []
-
-                    nodes.push(category);
-                    if (!category.LeafCategory) {
+                    
+                    nodes.push(category)
+                    if (category.LeafCategory) {
                         leafReached = true;
                     }
                     callback()

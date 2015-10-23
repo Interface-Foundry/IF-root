@@ -188,12 +188,13 @@ function loadCatalog(category, stores) {
                             next: $("a.arrowRight").prop("href")
                         }
                     }).then(function(pageData) {
-                        setTimeout(resolve(pageData), 1000);
                         console.log('Exiting nightmare..');
-                        nightmare.end();
-                    },function(err) {
-                        if(err) console.log('Error: ',err)
-                            reject(err)
+                        nightmare.end(function() {
+                            setTimeout(resolve(pageData), 1000);
+                        });
+                    }, function(err) {
+                        if (err) console.log('Error: ', err)
+                        reject(err)
                     })
 
 
