@@ -6,6 +6,8 @@ mongodb:
   options:
     replset:
       rs_name: foundry
+      socketOptions:
+        keepAlive: 1
 elasticsearch:
   url: http://elasticsearch-cerulean.internal.kipapp.co:9200
 elasticsearchElk:
