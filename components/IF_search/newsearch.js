@@ -107,7 +107,9 @@ app.post(searchItemsUrl, function(req, res, next) {
 
               results.map(function(r) {
                 if (r.parents && r.parents.length > 0) {
-                  var strparents = r.parents.map(function(_id) { return _id.toString()});
+                  var strparents = r.parents
+                    .filter(function(_id) { return !!_id })
+                    .map(function(_id) { return _id.toString()});
                   r.parents = parents.filter(function(p) {
                     return strparents.indexOf(p._id.toString()) >= 0;
                   }).sort(function(a, b) {
