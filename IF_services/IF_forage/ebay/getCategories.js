@@ -19,24 +19,32 @@ var topLevelUrl = 'http://open.api.ebay.com/Shopping?callname=GetCategoryInfo&ap
 
 nodes = []
 nindex = 0
+notfinished = true
 
 async.whilst(
     function() {
-        return nodes.length < 150
+        return notfinished
     },
     function loop(restart) {
-        console.log('Looped!', nodes.length);
+        console.log('Nodes: ', nodes.length);
         // nodes[nindex] = []
         var currentCategory = (nindex == 0) ? root : nodes[nindex].CategoryID
+        if (nodes[nindex] && nodes[nindex].CategoryLevel && nodes[nindex].CategoryLevel >= 5) {
+            console.log('I guess its finished?')
+            notfinished = !notfinished
+            restart('finished')
+        }
         var url = 'http://open.api.ebay.com/Shopping?callname=GetCategoryInfo&appid=' + APP_ID + '&version=677&siteid=0&CategoryID=' + currentCategory + '&IncludeSelector=ChildCategories'
-        console.log('URL: ', url);
+        if (nodes[nindex] && nodes[nindex].CategoryName) {
+            console.log('Category: ', nodes[nindex].CategoryName);
+        }
         buildNodes(url).then(function(leaf) {
             if (leaf == true) {
                 console.log('Level complete. ');
                 if (nodes && nodes.length > 0) {
-                    // if (nodes[nindex]) {
-
-                    // }
+                    if (nodes[nindex] && nodes[nindex].CategoryName) {
+                        console.log('Category: ', nodes[nindex].CategoryName);
+                    }
                     nindex++;
                     restart()
                 }
@@ -49,7 +57,8 @@ async.whilst(
     },
     function finished(err) {
         if (err) console.log(err)
-        //Build tree
+        console.log('Collected nodes.. building tree..')
+            //Build tree
         var map = {},
             node, tree = [];
         for (var i = 0; i < nodes.length; i += 1) {
@@ -62,11 +71,13 @@ async.whilst(
                 tree.push(node);
             }
         }
-        console.log('Tree length',tree.length);
-        fs.appendFile('./nodes.js', '\n' + JSON.stringify(nodes), function(err) {})
-        fs.appendFile('./tree.js', '\n' + JSON.stringify(tree), function(err) {})
-        console.log('Finished: ', nodes.length)
-
+        console.log('Scraped ',nodes.length, ' nodes.');
+        var categories = _.chain(tree).flatten(tree, true).uniq(tree, "CategoryID").value();
+        console.log('Found ', categories.length, ' categories.')
+        fs.appendFile('./test.js', '\n' + JSON.stringify(categories), function(err) {
+            if (err) console.log(err)
+            console.log('Tree built!')
+        })
     })
 
 function buildNodes(url) {
@@ -79,7 +90,10 @@ function buildNodes(url) {
             }
         };
         request(options, function(error, response, body) {
+
             if ((!error) && (response.statusCode == 200)) {
+
+
                 body = JSON.parse(body)
                 if (!body.CategoryArray) {
                     console.log('Empty results', body)
@@ -89,7 +103,6 @@ function buildNodes(url) {
                 var leafReached = false
                 async.eachSeries(categoryArray, function iterator(category, callback) {
                     category.children = []
-
                     nodes.push(category)
                     if (category.LeafCategory) {
                         leafReached = true;
@@ -102,8 +115,6 @@ function buildNodes(url) {
                     // console.log('FINISHED...', nodes.length)
                     return resolve(leafReached)
                 })
-
-
 
             } else {
                 if (error) {

@@ -30,7 +30,7 @@ notfoundstore = {};
 module.exports = function(url, category, stores) {
 
     return new Promise(function(resolve, reject) {
-          // console.log(0)
+        // console.log(0)
         //Create a global var to hold all mongo stores (for later location extraction)
         stores = stores;
         cat = category;
@@ -47,7 +47,7 @@ module.exports = function(url, category, stores) {
                     callback(null)
                 }).catch(function(err) {
                     if (err) {
-                        console.log('48: ',err)
+                        console.log('48: ', err)
                         var today = new Date().toString()
                         fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                     }
@@ -56,25 +56,25 @@ module.exports = function(url, category, stores) {
             },
             function(callback) {
                 scrapeItem(url).then(function(items) {
-                      // console.log(2)
+                    // console.log(2)
                     callback(null, items, stores)
                 }).catch(function(err) {
-                    console.log('59: ',err)
+                    console.log('59: ', err)
                     callback(err)
                 })
             },
             function(items, stores, callback) {
                 getInventory(items, stores).then(function(items) {
-                      // console.log(3)
+                    // console.log(3)
                     callback(null, items, stores)
                 }).catch(function(err) {
-                    console.log('67: ',err)
+                    console.log('67: ', err)
                     callback(err)
                 })
             },
             function(items, stores, callback) {
                 async.eachSeries(items, function iterator(item, cb) {
-                      // console.log(4)
+                    // console.log(4)
                     if (!item.name) {
                         item.name = 'item'
                     }
@@ -94,16 +94,16 @@ module.exports = function(url, category, stores) {
             },
             function(items, callback) {
                 saveItems(items, stores, notfoundstore, url).then(function(items) {
-                      // console.log(5)
+                    // console.log(5)
                     callback(null, items)
                 }).catch(function(err) {
-                    console.log('94: ',err)
+                    console.log('94: ', err)
                     callback(err)
                 })
             }
         ], function(err, items) {
             if (err) {
-                 console.log('100: ',err)
+                console.log('100: ', err)
                 var today = new Date().toString()
                 fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
                     return reject(err)
@@ -163,15 +163,21 @@ function scrapeItem(url) {
                 $ = cheerio.load(body);
                 var prices = [];
                 for (var key in $('div.standardProdPricingGroup>span')) {
-                    if ($('div.standardProdPricingGroup>span').hasOwnProperty(key) && $('div.standardProdPricingGroup>span')[key].children && $('div.standardProdPricingGroup>span')[key].children[0] && $('div.standardProdPricingGroup>span')[key].children[0].data) {
+                    if ($('div.standardProdPricingGroup span').hasOwnProperty(key) && $('div.standardProdPricingGroup span')[key].children && $('div.standardProdPricingGroup span')[key].children[0] && $('div.standardProdPricingGroup span')[key].children[0].data) {
                         // console.log('*****',$('div.standardProdPricingGroup>span')[key].children[0].data)
-                        var price = parseFloat($('div.standardProdPricingGroup>span')[key].children[0].data.split('$')[1])
-                        prices.push(price)
-                    }
+
+                        try {
+                            var price = parseFloat($('div.standardProdPricingGroup span')[key].children[0].data.split('$')[1])
+                            prices.push(price)
+                        } catch (err) {
+                            if (err)
+                                return reject('Could not find prices for this item.')
+                        }
+                    } 
                 }
 
                 if (prices == null || prices.length < 1 || !prices) {
-                    console.log('Could not find prices for this item: ',url)
+                    console.log('Could not find prices for this item: ', url)
                     return reject('Could not find prices for this item.')
                 }
 
@@ -258,7 +264,7 @@ function getInventory(items, Stores) {
         var finalItems = []
         async.eachSeries(items, function iterator(item, finishedItem) {
             item.storeIds = []
-            // console.log('Getting inventory for item :', item.name)
+                // console.log('Getting inventory for item :', item.name)
             async.eachSeries(item.upcNumbers, function iterator(upcNumber, finishedSku) {
                 // console.log('Querying upc number...', upcNumber)
                 var url = 'http://www1.macys.com/api/store/v2/stores/' + storeIds.join() + '?upcNumber=' + upcNumber + '&_fields=name,locationNumber,inventories,schedule,address,attributes'
@@ -273,9 +279,9 @@ function getInventory(items, Stores) {
                     if ((!error) && (response.statusCode == 200)) {
                         body = JSON.parse(body);
                         body.stores.store.forEach(function(store) {
-                            item.storeIds.push(store.address.id)
-                        })
-                        // console.log('Found ', item.storeIds.length, ' stores.')
+                                item.storeIds.push(store.address.id)
+                            })
+                            // console.log('Found ', item.storeIds.length, ' stores.')
                         setTimeout(function() {
                             finishedSku()
                         }, 800);
@@ -325,7 +331,7 @@ function saveItems(items, stores, notfoundstore, url) {
                     updatedInv[1] = [notfoundstore.loc.coordinates]
                 }
 
-                console.log('Saving item: ',item.name)
+                console.log('Saving item: ', item.name)
 
                 //Check if this item exists
                 db.Landmarks.findOne({

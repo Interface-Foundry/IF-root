@@ -50,7 +50,8 @@ var schemas = [
     {filename: 'user_schema', single: 'User', plural: 'Users'},
     {filename: 'visit_schema', single: 'Visit', plural: 'Visits'},
     {filename: 'worldchat_schema', single: 'Worldchat', plural: 'Worldchats'},
-    {filename: 'zipcode_schema', single: 'Zipcode', plural: 'Zipcodes'}
+    {filename: 'zipcode_schema', single: 'Zipcode', plural: 'Zipcodes'},
+    {filename: 'ebayCategories_schema', single: 'EbayCategory', plural: 'EbayCategories'}
 ];
 
 module.exports = {

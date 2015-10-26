@@ -49,7 +49,7 @@
                              deferred.resolve(newUnique)
                          });
                  } else {
-                     console.log(input +' is already unique')
+                     // console.log(input +' is already unique')
                      deferred.resolve(input)
                  }
              });
