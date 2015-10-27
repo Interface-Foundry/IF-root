@@ -29,11 +29,11 @@ async.whilst(
     },
     function(loop) {
         loadStores().then(function(stores) {
-            console.log(1)
+            // console.log(1)
             async.eachSeries(catalogs, function(catalog, callback) {
-                console.log(2)
+                // console.log(2)
                 loadCatalog(catalog, stores).then(function(res) {
-                    console.log(3)
+                    // console.log(3)
                     var today = new Date().toString()
                     console.log('catalog.category', catalog.category)
                     var catName = catalog.category.trim()
@@ -124,7 +124,7 @@ function loadCatalog(category, stores) {
                                                 finishedItem()
                                             }, 3000)
                                         })
-                                        .timeout(420000)
+                                        .timeout(820000)
                                         .catch(function(err) {
                                             if (err) console.log('Item scraper error: ', err)
                                             var today = new Date().toString()
@@ -149,7 +149,7 @@ function loadCatalog(category, stores) {
                             }, 1000);
                         }
                     })
-                    .timeout(120000)
+                    .timeout(820000)
                     .catch(function(err) {
                         if (err) console.log('99', err);
                         var today = new Date().toString()
