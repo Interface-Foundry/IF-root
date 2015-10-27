@@ -119,16 +119,19 @@ function loadCatalog(category, stores) {
                                     var detailsUrl = 'http://www1.macys.com' + item.toString().trim()
                                     console.log('\nScraping: ', detailsUrl, '\n');
                                     item_scraper(detailsUrl, category.category, stores).then(function(result) {
-                                        console.log('Done with item.')
-                                        wait(function() {
-                                            finishedItem()
-                                        }, 3000)
-                                    }).catch(function(err) {
-                                        console.log('Item scraper error: ', err)
-                                        wait(function() {
-                                            finishedItem()
-                                        }, 3000)
-                                    })
+                                            console.log('Done with item.')
+                                            wait(function() {
+                                                finishedItem()
+                                            }, 3000)
+                                        })
+                                        .timeout(420000)
+                                        .catch(function(err) {
+                                            if (err) console.log('Item scraper error: ', err)
+                                            var today = new Date().toString()
+                                            wait(function() {
+                                                finishedItem()
+                                            }, 3000)
+                                        })
                                 },
                                 function(err) {
                                     if (err) console.log('192: ', err)
@@ -151,7 +154,7 @@ function loadCatalog(category, stores) {
                         if (err) console.log('99', err);
                         var today = new Date().toString()
                         fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + category.category + '\n' + 'Timed out!!!', function(err) {});
-                        return reject('loadPages function timed out!')
+                        return reject('LoadPages error.')
                     })
             },
             function() {
@@ -199,20 +202,12 @@ function loadCatalog(category, stores) {
                             if (err) console.log('Error: ', err)
                             reject(err)
                         })
-                        // } catch (err) {
-                        //     if (err) console.log('Nightmare error: ', err)
-                        //     reject(err)
-                        // }
-
                 })
                 .cancellable()
                 .catch(function(e) {
-                    nightmare.end()
                     throw e;
                 })
         }
-
-
     })
 }
 

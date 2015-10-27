@@ -30,97 +30,96 @@ notfoundstore = {};
 module.exports = function(url, category, stores) {
 
     return new Promise(function(resolve, reject) {
-        // console.log(0)
-        //Create a global var to hold all mongo stores (for later location extraction)
-        stores = stores;
-        cat = category;
-        async.waterfall([
-            function(callback) {
-                loadMongoObjects().then(function(results) {
-                    // console.log(1)
-                    if (results[0].isFulfilled()) {
-                        owner = results[0].value()
-                    }
-                    if (results[1].isFulfilled()) {
-                        notfoundstore = results[1].value()
-                    }
-                    callback(null)
-                }).catch(function(err) {
-                    if (err) {
-                        console.log('48: ', err)
-                        var today = new Date().toString()
-                        fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
-                    }
-                    callback(null)
-                })
-            },
-            function(callback) {
-                scrapeItem(url).then(function(items) {
-                    // console.log(2)
-                    callback(null, items, stores)
-                }).catch(function(err) {
-                    console.log('59: ', err)
-                    callback(err)
-                })
-            },
-            function(items, stores, callback) {
-                getInventory(items, stores).then(function(items) {
-                    // console.log(3)
-                    callback(null, items, stores)
-                }).catch(function(err) {
-                    console.log('67: ', err)
-                    callback(err)
-                })
-            },
-            function(items, stores, callback) {
-                async.eachSeries(items, function iterator(item, cb) {
-                    // console.log(4)
-                    if (!item.name) {
-                        item.name = 'item'
-                    }
-                    upload.uploadPicture('macys_' + item.name.replace(/\s/g, '_'), item.imageUrl, 100).then(function(image) {
-                        item.hostedImages = [image]
-                        cb()
+            // console.log(0)
+            //Create a global var to hold all mongo stores (for later location extraction)
+            stores = stores;
+            cat = category;
+            async.waterfall([
+                function(callback) {
+                    loadMongoObjects().then(function(results) {
+                        // console.log(1)
+                        if (results[0].isFulfilled()) {
+                            owner = results[0].value()
+                        }
+                        if (results[1].isFulfilled()) {
+                            notfoundstore = results[1].value()
+                        }
+                        callback(null)
                     }).catch(function(err) {
-                        if (err) console.log('Image upload error: ', err);
-                        cb()
+                        if (err) {
+                            console.log('48: ', err)
+                            var today = new Date().toString()
+                            fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
+                        }
+                        callback(null)
                     })
-                }, function finished(err) {
-                    if (err) {
-                        console.log('Images upload error: ', err)
-                    }
-                    callback(null, items)
-                })
-            },
-            function(items, callback) {
-                saveItems(items, stores, notfoundstore, url).then(function(items) {
-                    // console.log(5)
-                    callback(null, items)
-                }).catch(function(err) {
-                    console.log('94: ', err)
-                    callback(err)
-                })
-            }
-        ], function(err, items) {
-            if (err) {
-                console.log('100: ', err)
-                var today = new Date().toString()
-                fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
-                    return reject(err)
-                });
-            }
-            if (items) {
-                // console.log('finished scraping. saved item count: ', items.length)
-                resolve()
-            } else if (!items) {
-                console.log('No items saved.', items)
-                reject()
-            }
-
-
-        });
-
-    })
+                },
+                function(callback) {
+                    scrapeItem(url).then(function(items) {
+                        // console.log(2)
+                        callback(null, items, stores)
+                    }).catch(function(err) {
+                        console.log('59: ', err)
+                        callback(err)
+                    })
+                },
+                function(items, stores, callback) {
+                    getInventory(items, stores).then(function(items) {
+                        // console.log(3)
+                        callback(null, items, stores)
+                    }).catch(function(err) {
+                        console.log('67: ', err)
+                        callback(err)
+                    })
+                },
+                function(items, stores, callback) {
+                    async.eachSeries(items, function iterator(item, cb) {
+                        // console.log(4)
+                        if (!item.name) {
+                            item.name = 'item'
+                        }
+                        upload.uploadPicture('macys_' + item.name.replace(/\s/g, '_'), item.imageUrl, 100).then(function(image) {
+                            item.hostedImages = [image]
+                            cb()
+                        }).catch(function(err) {
+                            if (err) console.log('Image upload error: ', err);
+                            cb()
+                        })
+                    }, function finished(err) {
+                        if (err) {
+                            console.log('Images upload error: ', err)
+                        }
+                        callback(null, items)
+                    })
+                },
+                function(items, callback) {
+                    saveItems(items, stores, notfoundstore, url).then(function(items) {
+                        // console.log(5)
+                        callback(null, items)
+                    }).catch(function(err) {
+                        console.log('94: ', err)
+                        callback(err)
+                    })
+                }
+            ], function(err, items) {
+                if (err) {
+                    console.log('100: ', err)
+                    var today = new Date().toString()
+                    fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
+                        return reject(err)
+                    });
+                }
+                if (items) {
+                    resolve()
+                } else if (!items) {
+                    console.log('No items saved.', items)
+                    reject()
+                }
+            });
+        }).cancellable()
+        .catch(function(e) {
+            throw e;
+        })
 }
 
 function loadMongoObjects() {
@@ -173,7 +172,7 @@ function scrapeItem(url) {
                             if (err)
                                 return reject('Could not find prices for this item.')
                         }
-                    } 
+                    }
                 }
 
                 if (prices == null || prices.length < 1 || !prices) {

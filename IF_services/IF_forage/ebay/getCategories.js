@@ -14,7 +14,7 @@ var CERT_ID = 'e2885f30-57c3-4c92-8b97-8ffe6fec4fda'
 //Top categoryID for Clothing, Shoes & Accessories
 var root = '11450'
 
-var findByCategoryUrl = 'http://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findItemsByCategory&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=' + 'Kip246d35-a1ac-41ca-aed1-97e635a44de' + '&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&categoryId=10181&paginationInput.entriesPerPage=2'
+var findByCategoryUrl = 'http://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findItemsByCategory&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=' + 'Kip246d35-a1ac-41ca-aed1-97e635a44de' + '&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&categoryId=10181'
 var topLevelUrl = 'http://open.api.ebay.com/Shopping?callname=GetCategoryInfo&appid=' + APP_ID + '&version=677&siteid=0&CategoryID=' + root + '&IncludeSelector=ChildCategories'
 
 nodes = []
@@ -29,7 +29,7 @@ async.whilst(
         console.log('Nodes: ', nodes.length);
         // nodes[nindex] = []
         var currentCategory = (nindex == 0) ? root : nodes[nindex].CategoryID
-        if (nodes[nindex] && nodes[nindex].CategoryLevel && nodes[nindex].CategoryLevel >= 5) {
+        if (nodes[nindex] && nodes[nindex].CategoryLevel && nodes[nindex].CategoryLevel >= 6) {
             console.log('I guess its finished?')
             notfinished = !notfinished
             restart('finished')
@@ -71,14 +71,45 @@ async.whilst(
                 tree.push(node);
             }
         }
-        console.log('Scraped ',nodes.length, ' nodes.');
-        var categories = _.chain(tree).flatten(tree, true).uniq(tree, "CategoryID").value();
+        console.log('Scraped ', nodes.length, ' nodes.');
+        var categories = _.chain(nodes).flatten(nodes, true).uniq(nodes, "CategoryID").value();
         console.log('Found ', categories.length, ' categories.')
-        fs.appendFile('./test.js', '\n' + JSON.stringify(categories), function(err) {
-            if (err) console.log(err)
-            console.log('Tree built!')
-        })
+            // fs.appendFile('./lel.js', '\n' + JSON.stringify(categories), function(err) {
+            //     if (err) console.log(err)
+            //     console.log('Tree built!')
+            // })
+        // db.EbayCategories.find({}, function(err, categories) {
+        //     if (err) {
+        //         console.log('Error: ',err);
+        //         return;
+        //     }
+        //     var i = 0;
+        //     async.whilst(
+        //         function() {
+        //             return i <= categories.length 
+        //         },
+        //         function loop(restart) {
+
+        //             async.eachSeries(categories, function iterator(category, callback) {
+
+        //                 if (nodes.children.length > 0) {
+
+        //                 }
+
+        //             }, function complete() {
+
+        //             })
+
+        //         },
+        //         function finished(err) {
+        //             if (err) console.log(err);
+
+
+        //         })
     })
+
+var done = false;
+
 
 function buildNodes(url) {
     return new Promise(function(resolve, reject) {
@@ -90,24 +121,42 @@ function buildNodes(url) {
             }
         };
         request(options, function(error, response, body) {
-
             if ((!error) && (response.statusCode == 200)) {
-
-
                 body = JSON.parse(body)
                 if (!body.CategoryArray) {
                     console.log('Empty results', body)
                     return reject('Empty results')
                 }
+
                 var categoryArray = body.CategoryArray.Category
                 var leafReached = false
+
                 async.eachSeries(categoryArray, function iterator(category, callback) {
-                    category.children = []
                     nodes.push(category)
                     if (category.LeafCategory) {
                         leafReached = true;
                     }
-                    callback()
+
+                    db.EbayCategory.findOne({
+                        'CategoryID': category.CategoryID
+                    }, function(err, match) {
+
+                        if (err) {
+                            console.log('124: ', err)
+                        }
+
+                        if (!match) {
+                            var categoryDoc = new db.EbayCategory(category)
+                            categoryDoc.save(function(err, saved) {
+                                if (err) console.log('130', err)
+                                console.log('Saved!: ', saved)
+                                return callback()
+                            })
+                        } else {
+                            callback();
+                        }
+                    })
+
                 }, function finished(err) {
                     if (err) {
                         console.log('41: ', err)
