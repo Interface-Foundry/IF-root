@@ -14,7 +14,7 @@ if (mongoose.connection.readyState == 0) {
             config: config.mongodb
         });
     });
-    db_conn.on('open', function(){
+    db_conn.on('open', function() {
         console.log('connected to mongodb', config.mongodb.url);
     });
 }
@@ -29,30 +29,99 @@ if (mongoose.connection.readyState == 0) {
  * Schema definition
  * @type {{filename: string, single: string, plural: string}[]}
  */
-var schemas = [
-    {filename: 'activity_schema', single: 'Activity', plural: 'Activities'},
-    {filename: 'analytics_schema', single: 'Analytic', plural: 'Analytics'},
-    {filename: 'announcements_schema', single: 'Announcement', plural: 'Announcements'},
-    {filename: 'anon_user_schema', single: 'AnonUser', plural: 'AnonUsers'},
-    {filename: 'contest_schema', single: 'Contest', plural: 'Contests'},
-    {filename: 'contestEntry_schema', single: 'ContestEntry', plural: 'ContestEntries'},
-    {filename: 'instagram_schema', single: 'Instagram', plural: 'Instagrams'},
-    {filename: 'job_schema', single: 'Job', plural: 'Jobs'},
-    {filename: 'justvisual_schema', single: 'JustVisual', plural: 'JustVisuals'},
-    {filename: 'landmark_schema', single: 'Landmark', plural: 'Landmarks'},
-    {filename: 'look_schema', single: 'Look', plural: 'Looks'},
-    {filename: 'project_schema', single: 'Project', plural: 'Projects'},
-    {filename: 'serverwidgets_schema', single: 'ServerWidget', plural: 'ServerWidgets'},
-    {filename: 'sticker_schema', single: 'Sticker', plural: 'Stickers'},
-    {filename: 'style_schema', single: 'Style', plural: 'Styles'},
-    {filename: 'training_schema', single: 'TrainingData', plural: 'TrainingDatas'},
-    {filename: 'twitter_schema', single: 'Twitter', plural: 'Twitters'},
-    {filename: 'user_schema', single: 'User', plural: 'Users'},
-    {filename: 'visit_schema', single: 'Visit', plural: 'Visits'},
-    {filename: 'worldchat_schema', single: 'Worldchat', plural: 'Worldchats'},
-    {filename: 'zipcode_schema', single: 'Zipcode', plural: 'Zipcodes'},
-    {filename: 'ebayCategories_schema', single: 'EbayCategory', plural: 'EbayCategories'}
-];
+var schemas = [{
+    filename: 'activity_schema',
+    single: 'Activity',
+    plural: 'Activities'
+}, {
+    filename: 'analytics_schema',
+    single: 'Analytic',
+    plural: 'Analytics'
+}, {
+    filename: 'announcements_schema',
+    single: 'Announcement',
+    plural: 'Announcements'
+}, {
+    filename: 'anon_user_schema',
+    single: 'AnonUser',
+    plural: 'AnonUsers'
+}, {
+    filename: 'contest_schema',
+    single: 'Contest',
+    plural: 'Contests'
+}, {
+    filename: 'contestEntry_schema',
+    single: 'ContestEntry',
+    plural: 'ContestEntries'
+}, {
+    filename: 'instagram_schema',
+    single: 'Instagram',
+    plural: 'Instagrams'
+}, {
+    filename: 'job_schema',
+    single: 'Job',
+    plural: 'Jobs'
+}, {
+    filename: 'justvisual_schema',
+    single: 'JustVisual',
+    plural: 'JustVisuals'
+}, {
+    filename: 'landmark_schema',
+    single: 'Landmark',
+    plural: 'Landmarks'
+}, {
+    filename: 'look_schema',
+    single: 'Look',
+    plural: 'Looks'
+}, {
+    filename: 'project_schema',
+    single: 'Project',
+    plural: 'Projects'
+}, {
+    filename: 'serverwidgets_schema',
+    single: 'ServerWidget',
+    plural: 'ServerWidgets'
+}, {
+    filename: 'sticker_schema',
+    single: 'Sticker',
+    plural: 'Stickers'
+}, {
+    filename: 'style_schema',
+    single: 'Style',
+    plural: 'Styles'
+}, {
+    filename: 'training_schema',
+    single: 'TrainingData',
+    plural: 'TrainingDatas'
+}, {
+    filename: 'twitter_schema',
+    single: 'Twitter',
+    plural: 'Twitters'
+}, {
+    filename: 'user_schema',
+    single: 'User',
+    plural: 'Users'
+}, {
+    filename: 'visit_schema',
+    single: 'Visit',
+    plural: 'Visits'
+}, {
+    filename: 'worldchat_schema',
+    single: 'Worldchat',
+    plural: 'Worldchats'
+}, {
+    filename: 'zipcode_schema',
+    single: 'Zipcode',
+    plural: 'Zipcodes'
+}, {
+    filename: 'ebayCategories_schema',
+    single: 'EbayCategory',
+    plural: 'EbayCategories'
+}, {
+    filename: 'ebayItem_schema',
+    single: 'EbayItem',
+    plural: 'EbayItems'
+}];
 
 module.exports = {
     connection: mongoose.connection,
@@ -62,11 +131,13 @@ module.exports = {
 /**
  * Expose all the single and plural versions
  */
-schemas.map(function (schema) {
+schemas.map(function(schema) {
     var model = require('./' + schema.filename);
     module.exports[schema.single] = model;
     module.exports[schema.plural] = model;
-    model.schema.plugin(ensureIndexes, {mongoose: mongoose});
+    model.schema.plugin(ensureIndexes, {
+        mongoose: mongoose
+    });
 });
 
 

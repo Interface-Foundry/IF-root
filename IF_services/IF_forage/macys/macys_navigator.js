@@ -36,10 +36,10 @@ async.whilst(
                     // console.log(3)
                     var today = new Date().toString()
                     console.log('catalog.category', catalog.category)
-                    var catName = catalog.category.trim()
+                    var catName = catalog.category.trim();
                     fs.appendFile('./logs/progress.log', '\n' + today + 'Finished scraping  category: ' + catName)
-                    console.log('Done with catalog.')
-                    wait(callback, 10000)
+                    console.log('Done with catalog.');
+                    wait(callback, 10000);
                 }).catch(function(err) {
                     if (err) {
                         console.log('27: ', err)

@@ -820,7 +820,7 @@ String.prototype.removeStopWords = function() {
     words = cleansed_string.match(/[^\s]+|\s+[^\s+]$/g)
 
     // Review all the words
-    
+
     if (!words || words == null || words == undefined) {
         return ''
     }
