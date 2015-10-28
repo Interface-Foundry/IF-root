@@ -37,14 +37,14 @@ async.whilst(
                     var today = new Date().toString()
                     console.log('catalog.category', catalog.category)
                     var catName = catalog.category.trim();
-                    fs.appendFile('./logs/progress.log', '\n' + today + 'Finished scraping  category: ' + catName)
+                    // fs.appendFile('./logs/progress.log', '\n' + today + 'Finished scraping  category: ' + catName)
                     console.log('Done with catalog.');
                     wait(callback, 10000);
                 }).catch(function(err) {
                     if (err) {
                         console.log('27: ', err)
                         var today = new Date().toString()
-                        fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                        // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                     }
                     console.log('Error with catalog: ', catalog.category)
                     wait(callback, 10000)
@@ -53,10 +53,10 @@ async.whilst(
                 if (err) {
                     console.log('35: ', err)
                     var today = new Date().toString()
-                    fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                    // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
                 } else {
                     var today = new Date().toString()
-                    fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
+                    // fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
                 console.log('Finished scraping all catalogs for Urban Outfitters.');
 
@@ -153,7 +153,7 @@ function loadCatalog(category, stores) {
                     .catch(function(err) {
                         if (err) console.log('99', err);
                         var today = new Date().toString()
-                        fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + category.category + '\n' + 'Timed out!!!', function(err) {});
+                        // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + category.category + '\n' + 'Timed out!!!', function(err) {});
                         return reject('LoadPages error.')
                     })
             },

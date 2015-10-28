@@ -49,7 +49,7 @@ module.exports = function(url, category, stores) {
                         if (err) {
                             console.log('48: ', err)
                             var today = new Date().toString()
-                            fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
+                            // fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                         }
                         callback(null)
                     })
@@ -105,7 +105,7 @@ module.exports = function(url, category, stores) {
                 if (err) {
                     console.log('100: ', err)
                     var today = new Date().toString()
-                    fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
+                    // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
                         return reject(err)
                     });
                 }
