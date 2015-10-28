@@ -14,7 +14,8 @@ var ebayItemSchema = new Schema({
     images: [],
     category: String,
     details: [],
-    tags: []
+    mainTags: [],
+    descriptionTags: []
 });
 
 
