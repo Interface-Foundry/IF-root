@@ -107,7 +107,7 @@ module.exports = function(url, category, stores) {
                     var today = new Date().toString()
                     // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
                         return reject(err)
-                    });
+                   
                 }
                 if (items) {
                     resolve()
