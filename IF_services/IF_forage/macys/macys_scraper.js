@@ -105,9 +105,7 @@ module.exports = function(url, category, stores) {
                 if (err) {
                     console.log('100: ', err)
                     var today = new Date().toString()
-                        // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
                     return reject(err)
-                        // });
                 }
                 if (items) {
                     resolve()
@@ -170,18 +168,18 @@ function scrapeItem(url) {
                         } catch (err) {
                             if (err)
                                 for (var key in $('div#priceInfo span')) {
-                                if ($('div#priceInfo span').hasOwnProperty(key) && $('div#priceInfo span')[key].children && $('div#priceInfo span')[key].children[0] && $('div#priceInfo span')[key].children[0].data) {
-                                    console.log('*****', $('div#priceInfo span')[key].children[0].data)
+                                    if ($('div#priceInfo span').hasOwnProperty(key) && $('div#priceInfo span')[key].children && $('div#priceInfo span')[key].children[0] && $('div#priceInfo span')[key].children[0].data) {
+                                        console.log('*****', $('div#priceInfo span')[key].children[0].data)
 
-                                    try {
-                                        var price = parseFloat($('div.standardProdPricingGroup span')[key].children[0].data.split('$')[1])
-                                        prices.push(price)
-                                    } catch (err) {
-                                        if (err) console.log(err)
-                                        return reject('Could not find prices for this item.')
+                                        try {
+                                            var price = parseFloat($('div.standardProdPricingGroup span')[key].children[0].data.split('$')[1])
+                                            prices.push(price)
+                                        } catch (err) {
+                                            if (err) console.log(err)
+                                            return reject('Could not find prices for this item.')
+                                        }
                                     }
                                 }
-                            }
                         }
                     }
                 }
