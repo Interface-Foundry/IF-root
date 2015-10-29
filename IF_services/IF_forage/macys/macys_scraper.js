@@ -37,7 +37,7 @@ module.exports = function(url, category, stores) {
             async.waterfall([
                 function(callback) {
                     loadMongoObjects().then(function(results) {
-                        // console.log(1)
+                        console.log('Loading Mongo Objects...')
                         if (results[0].isFulfilled()) {
                             owner = results[0].value()
                         }
@@ -49,14 +49,14 @@ module.exports = function(url, category, stores) {
                         if (err) {
                             console.log('48: ', err)
                             var today = new Date().toString()
-                            // fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
+                                // fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                         }
                         callback(null)
                     })
                 },
                 function(callback) {
                     scrapeItem(url).then(function(items) {
-                        // console.log(2)
+                        console.log('Scraping items...')
                         callback(null, items, stores)
                     }).catch(function(err) {
                         console.log('59: ', err)
@@ -65,7 +65,7 @@ module.exports = function(url, category, stores) {
                 },
                 function(items, stores, callback) {
                     getInventory(items, stores).then(function(items) {
-                        // console.log(3)
+                        console.log('Getting inventory...')
                         callback(null, items, stores)
                     }).catch(function(err) {
                         console.log('67: ', err)
@@ -105,9 +105,9 @@ module.exports = function(url, category, stores) {
                 if (err) {
                     console.log('100: ', err)
                     var today = new Date().toString()
-                    // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
-                        return reject(err)
-                    });
+                        // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(error) {
+                    return reject(err)
+                        // });
                 }
                 if (items) {
                     resolve()
@@ -164,13 +164,24 @@ function scrapeItem(url) {
                 for (var key in $('div.standardProdPricingGroup>span')) {
                     if ($('div.standardProdPricingGroup span').hasOwnProperty(key) && $('div.standardProdPricingGroup span')[key].children && $('div.standardProdPricingGroup span')[key].children[0] && $('div.standardProdPricingGroup span')[key].children[0].data) {
                         // console.log('*****',$('div.standardProdPricingGroup>span')[key].children[0].data)
-
                         try {
                             var price = parseFloat($('div.standardProdPricingGroup span')[key].children[0].data.split('$')[1])
                             prices.push(price)
                         } catch (err) {
                             if (err)
-                                return reject('Could not find prices for this item.')
+                                for (var key in $('div#priceInfo span')) {
+                                if ($('div#priceInfo span').hasOwnProperty(key) && $('div#priceInfo span')[key].children && $('div#priceInfo span')[key].children[0] && $('div#priceInfo span')[key].children[0].data) {
+                                    console.log('*****', $('div#priceInfo span')[key].children[0].data)
+
+                                    try {
+                                        var price = parseFloat($('div.standardProdPricingGroup span')[key].children[0].data.split('$')[1])
+                                        prices.push(price)
+                                    } catch (err) {
+                                        if (err) console.log(err)
+                                        return reject('Could not find prices for this item.')
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -179,11 +190,9 @@ function scrapeItem(url) {
                     console.log('Could not find prices for this item: ', url)
                     return reject('Could not find prices for this item.')
                 }
-
                 var price = prices.reduce(function(a, b, i, arr) {
                     return Math.min(a, b)
                 });
-
                 var itemObjects = [];
                 var imageElements = JSON.parse(body.toString().split('MACYS.pdp.primaryImages[')[1].split('= ')[1].split('};')[0].concat('}'));
                 var imgBaseURL = 'http://slimages.macysassets.com/is/image/MCY/products/';
@@ -220,24 +229,22 @@ function scrapeItem(url) {
                             src: url
                         }
                         var inventory = [];
-                        var upcNumbers = []
+                        var upcNumbers = [];
+
                         totalInventory.forEach(function(itemType) {
                             if (itemType.color.trim() == key.trim()) {
-                                inventory.push(itemType)
-
-                                upcNumbers.push(itemType.upc)
+                                inventory.push(itemType);
+                                upcNumbers.push(itemType.upc);
                             }
                         })
+
                         item.inventory = inventory
                         item.upcNumbers = upcNumbers
                         itemObjects.push(item)
                     }
                 }
-
-
                 // console.log('itemObjects: ',JSON.stringify(itemObjects));
                 resolve(itemObjects)
-
 
             } else {
                 if (error) {
@@ -249,8 +256,6 @@ function scrapeItem(url) {
                 }
             }
         })
-
-
     })
 }
 
@@ -258,51 +263,85 @@ function scrapeItem(url) {
 function getInventory(items, Stores) {
     return new Promise(function(resolve, reject) {
         var storeIds = Stores.map(function(store) {
-            return store.source_generic_store.id
-        })
+                return store.source_generic_store.id
+            })
+            //Split the ALL STOREIDs array into groups of 10, maybe the Macys API will play nicer.. 
+        var storeArrays = [],
+            size = 10;
+        while (storeIds.length > 0) {
+            storeArrays.push(storeIds.splice(0, size));
+        }
+        console.log('Total store Ids', storeIds.length, '. There are ', storeArrays.length, ' groups of 10 stores.')
         var finalItems = []
+
+        //--- FOR EACH TYPE OF COLOR ITEM
         async.eachSeries(items, function iterator(item, finishedItem) {
             item.storeIds = []
                 // console.log('Getting inventory for item :', item.name)
-            async.eachSeries(item.upcNumbers, function iterator(upcNumber, finishedSku) {
-                // console.log('Querying upc number...', upcNumber)
-                var url = 'http://www1.macys.com/api/store/v2/stores/' + storeIds.join() + '?upcNumber=' + upcNumber + '&_fields=name,locationNumber,inventories,schedule,address,attributes'
-                var options = {
-                    url: url,
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
-                    }
-                };
-                // console.log('URL: ', url)
-                request(options, function(error, response, body) {
-                    if ((!error) && (response.statusCode == 200)) {
-                        body = JSON.parse(body);
-                        body.stores.store.forEach(function(store) {
-                                item.storeIds.push(store.address.id)
-                            })
-                            // console.log('Found ', item.storeIds.length, ' stores.')
-                        setTimeout(function() {
-                            finishedSku()
-                        }, 800);
-                    } else {
-                        if (error) {
-                            console.log('getinventory error ')
-                            reject(error)
-                        } else {
-                            console.log('bad response')
-                            reject('Bad response from inventory request')
+                // console.log('There are ', storeArrays.length, ' store arrays.');
+                // console.log('store arrays : ', storeArrays)
+
+            //--- FOR EACH GROUP OF 10 STORES
+            var idx = 0
+            async.eachSeries(storeArrays, function iterator(ids, finishedStoreArray) {
+                // console.log('\n'+ idx + '\nCurrent store array: ',ids)
+                idx++
+
+                //--- FOR EACH UPC NUMBER (SPECIFIC ID FOR COLOR/SIZE COMBINATION OF ITEM)
+                async.eachSeries(item.upcNumbers, function iterator(upcNumber, finishedSku) {
+
+                    var url = 'http://www1.macys.com/api/store/v2/stores/' + ids.join() + '?upcNumber=' + upcNumber + '&_fields=name,locationNumber,inventories,schedule,address,attributes'
+                    var options = {
+                        url: url,
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                         }
-                    }
-                });
+                    };
+                    // console.log('INVENTORY URL: ', url)
+                    request(options, function(error, response, body) {
+                        if ((!error) && (response.statusCode == 200)) {
+                            body = JSON.parse(body);
+                            if (!body.stores.store) {
+                                // console.log('Empty response: ', response)
+                                return finishedStoreArray()
+                            }
 
+                            body.stores.store.forEach(function(store) {
+                                if (store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory && store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory.storeAvailability == "AVAILABLE") {
+                                    item.storeIds.push(store.address.id.toString().trim());
+                                }
+                            })
+                            console.log(upcNumber, ' found in : ', body.stores.store.length, ' stores...')
+                                // console.log('Found ', item.storeIds.length, ' stores.')
+                            wait(function() {
+                                finishedSku();
+                            }, 800);
+                        } else {
+                            if (error) {
+                                console.log('getinventory error ')
+                                reject(error)
+                            } else {
+                                console.log('bad response')
+                                reject('Bad response from inventory request')
+                            }
+                        }
+                    });
 
-            }, function(err) {
-                if (err) console.log('238', err)
-                item.storeIds = _.uniq(_.flatten(item.storeIds))
-                    // console.log('Finished item!', item.name)
+                }, function(err) {
+                    if (err) console.log('238', err);
+                    finishedStoreArray()
+                })
+
+            }, function finishedStoreArrays(err) {
+                if (err) console.log(err);
+                // console.log('Unprocessed item.storeIds: ', item.storeIds)
+                item.storeIds = _.uniq(item.storeIds)
+                    // console.log('Processed item.storeIds: ', item.storeIds)
+                console.log('Item: ', item.name, 'was found in :', item.storeIds.length, ' stores!')
                 finalItems.push(item)
                 finishedItem()
             })
+
 
         }, function(err) {
             if (err) console.log('279: ', err)
@@ -318,11 +357,12 @@ function saveItems(items, stores, notfoundstore, url) {
     return new Promise(function(resolve, reject) {
         var savedItems = []
         async.eachSeries(items, function(item, callback) {
-                var updatedInv = updateInventory(item.storeIds, stores, notfoundstore)
+
+                var updatedInv = updateInventory(item.storeIds, stores, notfoundstore);
 
                 if (updatedInv[0] == null) {
-                    console.log('Item parents and locations property lengths dont match up, skipping: ', updatedInv)
-                    return callback()
+                    console.log('Item parents and locations property lengths dont match up, skipping: ', updatedInv);
+                    return callback();
                 }
 
                 if (updatedInv[0].length < 1 || updatedInv[1].length < 1) {
@@ -330,7 +370,7 @@ function saveItems(items, stores, notfoundstore, url) {
                     updatedInv[1] = [notfoundstore.loc.coordinates]
                 }
 
-                console.log('Saving item: ', item.name)
+                // console.log('Saving item: ', item.name);
 
                 //Check if this item exists
                 db.Landmarks.findOne({
@@ -404,7 +444,7 @@ function saveItems(items, stores, notfoundstore, url) {
                             if (e) {
                                 console.log('Inventory update error: ', e)
                             }
-                            console.log('Updated inventory for item:', match.id)
+                            // console.log('Updated inventory for item:', match.id)
                             callback()
                         })
 
@@ -422,6 +462,13 @@ function saveItems(items, stores, notfoundstore, url) {
     })
 }
 
+
+
+function wait(callback, delay) {
+    var startTime = new Date().getTime();
+    while (new Date().getTime() < startTime + delay);
+    callback();
+}
 
 function updateInventory(inventory, Stores, notfoundstore) {
 
@@ -451,6 +498,7 @@ function updateInventory(inventory, Stores, notfoundstore) {
         console.log('Lengths dont match up:', inventoryParentIds, updatedLocs)
         return [null, null]
     } else {
+        console.log('Updated inventory to ', inventoryParentIds.length, ' items.')
         return [inventoryParentIds, updatedLocs]
     }
 
