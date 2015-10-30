@@ -23,10 +23,6 @@ cat = '';
 owner = {};
 notfoundstore = {};
 
-// http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance=50&selectedColor=054&skuId=32175697&zipCode=10002
-// skuId ---> need to iterate through all sku based on size (or what is the main URL sku??)
-
-
 module.exports = function(url, category, stores) {
 
     return new Promise(function(resolve, reject) {
@@ -261,42 +257,31 @@ function scrapeItem(url) {
 function getInventory(items, Stores) {
     return new Promise(function(resolve, reject) {
         var storeIds = Stores.map(function(store) {
-            return store.source_generic_store.id
+            return store.source_generic_store.locationNumber
         })
 
         //Split the ALL STOREIDs array into groups of 10, maybe the Macys API will play nicer.. 
-        // var storeArrays = [],
-        //     size = 10;
-        // while (storeIds.length > 0) {
-        //     storeArrays.push(storeIds.splice(0, size));
-        // }
-
-        //Split the ALL STOREIDs array into groups by State, maybe the Macys API will play nicer.. 
-        var groupedStores = _.groupBy(Stores, 'source_generic_store.address.state')
-        var storeArrays = []
-
-        // console.log('****',groupedStoresObj)
-
-        for (var key in groupedStores) {
-            if (groupedStores.hasOwnProperty(key)) {
-                console.log(key)
-                groupedStores[key] = groupedStores[key].map(function(store) {
-                    return store.source_generic_store.address.id
-                })
-                storeArrays.push(groupedStores[key])
-            }
+        var storeArrays = [],
+            size = 15;
+        while (storeIds.length > 0) {
+            storeArrays.push(storeIds.splice(0, size));
         }
 
-        // groupedArrays.forEach(function(array) {
-        //     array.map(function(store) {
-        //         return store.source_generic_store.address.state
-        //     })
-        //     storeArrays.push(array)
-        //         // return store.source_generic_store.id;
-        // })
-        console.log('NEW STORE ARRAAAYYSSS:', storeArrays)
+        //Split the ALL STOREIDs array into groups by State, maybe the Macys API will play nicer.. 
+        // var groupedStores = _.groupBy(Stores, 'source_generic_store.address.state')
+        // var storeArrays = []
+        // for (var key in groupedStores) {
+        //     if (groupedStores.hasOwnProperty(key)) {
+        //         // console.log(key)
+        //         groupedStores[key] = groupedStores[key].map(function(store) {
+        //             return store.source_generic_store.locationNumber
+        //         })
+        //         storeArrays.push(groupedStores[key])
+        //     }
+        // }
+        // console.log('NEW STORE ARRAAAYYSSS:', storeArrays)
 
-        console.log('Total store Ids', storeIds.length, '. There are ', storeArrays.length, ' groups of 10 stores.')
+        console.log('Total store Ids', storeIds.length, '. There are ', storeArrays.length, ' groups of 15 (max API) stores.')
         var finalItems = [];
 
         //--- FOR EACH TYPE OF COLOR ITEM
@@ -306,15 +291,13 @@ function getInventory(items, Stores) {
                 // console.log('There are ', storeArrays.length, ' store arrays.');
                 // console.log('store arrays : ', storeArrays)
 
-            //--- FOR EACH GROUP OF 10 STORES
+            //--- FOR EACH GROUP OF STORES
             var idx = 0
             async.eachSeries(storeArrays, function iterator(ids, finishedStoreArray) {
                 console.log('\nCurrent store array #', idx, '\n')
-                idx++
-
+                idx++;
                 //--- FOR EACH UPC NUMBER (SPECIFIC ID FOR COLOR/SIZE COMBINATION OF ITEM)
                 async.eachSeries(item.upcNumbers, function iterator(upcNumber, finishedSku) {
-
                     var url = 'http://www1.macys.com/api/store/v2/stores/' + ids.join() + '?upcNumber=' + upcNumber + '&_fields=name,locationNumber,inventories,schedule,address,attributes'
                     var options = {
                         url: url,
@@ -327,8 +310,8 @@ function getInventory(items, Stores) {
                         if ((!error) && (response.statusCode == 200)) {
                             body = JSON.parse(body);
                             if (!body.stores.store) {
-                                console.log('!!! Empty response...')
-                                return finishedSku()
+                                console.log('\n\n\nEmpty response...\n\n\n')
+                                return finishedStoreArray()
                             }
 
                             body.stores.store.forEach(function(store) {
@@ -337,7 +320,7 @@ function getInventory(items, Stores) {
                                     }
                                 })
                                 // console.log(upcNumber, ' found in : ', body.stores.store.length, ' stores...')
-                            console.log('.')
+                            console.log('Found: ',body.stores.store.length,'\n')
                             wait(function() {
                                 finishedSku();
                             }, 800);
@@ -362,7 +345,7 @@ function getInventory(items, Stores) {
                 // console.log('Unprocessed item.storeIds: ', item.storeIds)
                 item.storeIds = eliminateDuplicates(item.storeIds)
                     // console.log('Processed item.storeIds: ', item.storeIds)
-                console.log('Item: ', item.name, 'was found in :', item.storeIds.length, ' stores!')
+                console.log('\n\nItem: ', item.name, 'was found in :', item.storeIds.length, ' stores!\n\n')
                 finalItems.push(item)
                 finishedItem()
             })
