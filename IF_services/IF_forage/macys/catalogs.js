@@ -1,12 +1,12 @@
 var catalogs = [{
+    category: 'Womens Dress',
+    url: 'http://www1.macys.com/shop/womens-clothing/dresses?id=5449&edge=hybrid&cm_sp=us_hdr-_-women-_-5449_dresses_COL1'
+}, {
     category: 'Womens Activewear',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-activewear?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1'
 }, {
     category: 'Womens Coats',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-coats?id=269&edge=hybrid&cm_sp=us_hdr-_-women-_-269_coats_COL1'
-}, {
-    category: 'Womens Dress',
-    url: 'http://www1.macys.com/shop/womens-clothing/dresses?id=5449&edge=hybrid&cm_sp=us_hdr-_-women-_-5449_dresses_COL1'
 }, {
     category: 'Womens Jacket Blazer',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-jackets?id=120&edge=hybrid&cm_sp=us_hdr-_-women-_-120_jackets-%26-blazers_COL1'
@@ -163,24 +163,25 @@ var catalogs = [{
 }]
 
 function shuffle(array) {
-  var currentIndex = array.length, temporaryValue, randomIndex ;
+    var currentIndex = array.length,
+        temporaryValue, randomIndex;
 
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
 
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
 
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
 
-  return array;
+    return array;
 }
 
-catalogs = shuffle(catalogs)
+// catalogs = shuffle(catalogs)
 
 module.exports = catalogs

@@ -74,11 +74,9 @@ async.whilst(
                         },
                         function(err) {
                             if (err) {
-                                var today = new Date().toString()
-                                fs.appendFile('./logs/errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
+                                console.log(err)
                             } else {
-                                var today = new Date().toString()
-                                fs.appendFile('./logs/progress.log', '\n' + today + '*Finished scraping all catalogs for: ', currentState)
+
                                 cb('Done with state.')
                             }
                         });
@@ -86,8 +84,7 @@ async.whilst(
                 },
                 function(err) {
                     if (err) {
-                        var today = new Date().toString()
-                        fs.appendFile('./logs/errors.log', '\n' + today + err.lineNumber + 'Category: ' + catalog.category + '\n' + err);
+                        console.log(err)
                     }
                     stateIndex++;
                     if (states[stateIndex]) {
@@ -98,9 +95,7 @@ async.whilst(
                         console.log('Finished all states!')
                         stateIndex = 0;
                         currentState = states[stateIndex]
-                        fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs for all states!!*** ')
-                            // Turn off infinite loop, CRON job will handle it.
-                            // loop()
+                        loop()
                     }
 
                 })
@@ -109,8 +104,7 @@ async.whilst(
     },
     function(err) {
         if (err) {
-            var today = new Date().toString()
-            fs.appendFile('./logs/errors.log', '\n' + today + err, function(err) {});
+           console.log(err)
         }
     });
 
@@ -123,7 +117,7 @@ function getStores(lat, lng) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-
+        return reject('Could not find prices for this item.')
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
