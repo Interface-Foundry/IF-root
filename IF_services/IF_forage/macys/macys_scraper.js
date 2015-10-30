@@ -44,7 +44,7 @@ module.exports = function(url, category, stores) {
                     }).catch(function(err) {
                         if (err) {
                             console.log('48: ', err)
-                            var today = new Date().toString()
+                            // var today = new Date().toString()
                                 // fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                         }
                         callback(null)

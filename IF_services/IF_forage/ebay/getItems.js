@@ -74,10 +74,7 @@ function run() {
                                                     ebayItem.save(function(err, saved) {
                                                         if (err) console.log('130', err)
                                                         console.log('Saved.')
-                                                        fs.appendFile('./results.js', '\n' + JSON.stringify(saved.name), function(err) {
-                                                            if (err) console.log(err)
-                                                        })
-                                                        return finishedItem()
+                                                        return finishedItem();
                                                     })
                                                 }).catch(function(err) {
                                                     if (err) console.log('53: ', err)
