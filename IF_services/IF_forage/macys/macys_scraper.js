@@ -281,7 +281,7 @@ function getInventory(items, Stores) {
         // }
         // console.log('NEW STORE ARRAAAYYSSS:', storeArrays)
 
-        console.log('Total store Ids', storeIds.length, '. There are ', storeArrays.length, ' groups of 15 (max API) stores.')
+        console.log('There are ', storeArrays.length, ' groups of 15 stores.')
         var finalItems = [];
 
         //--- FOR EACH TYPE OF COLOR ITEM
@@ -305,13 +305,13 @@ function getInventory(items, Stores) {
                             'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                         }
                     };
-                    console.log('Url: ',url)
+                    // console.log('Url: ',url)
                     request(options, function(error, response, body) {
                         if ((!error) && (response.statusCode == 200)) {
                             body = JSON.parse(body);
                             if (!body.stores.store) {
                                 console.log('\n\n\nEmpty response...\n\n\n')
-                                return finishedStoreArray()
+                                return finishedSku();
                             }
 
                             body.stores.store.forEach(function(store) {
@@ -319,8 +319,9 @@ function getInventory(items, Stores) {
                                         item.storeIds.push(store.address.id.toString().trim());
                                     }
                                 })
+                            console.log('.')
                                 // console.log(upcNumber, ' found in : ', body.stores.store.length, ' stores...')
-                            console.log('Found: ',body.stores.store.length,'\n')
+                            // console.log('Found: ',body.stores.store.length,'\n');
                             wait(function() {
                                 finishedSku();
                             }, 800);
