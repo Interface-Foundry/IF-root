@@ -420,7 +420,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         var encodeCity = null;
         
         var encodeQuery = encodeURI($scope.query);
-        $rootScope.searchTitle = encodeQuery;
+        $rootScope.searchTitle = $scope.query + ' - Kip';
         var encodeCity = encodeURI($scope.userCity);
 
         $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
