@@ -1232,8 +1232,8 @@ a.reportItem {
 }
 
 .imageSwipeDotsShort {
-    height: 40px;
-    width: 40px;
+    height: 60px;
+    width: 60px;
     display: block;
     background-color: black;
     background-size: contain;
@@ -1358,6 +1358,10 @@ a.reportItem {
     padding-top: 27px;
     margin-top: -27px;
     margin-bottom: 25px;
+    padding-left: 16px;
+    padding-right: 10px;
+    color: #ccc;
+    font-weight: normal;
 }
 
 .mobileModal.Price {
@@ -1370,20 +1374,33 @@ a.reportItem {
     font-size: 5vw;
     text-transform: capitalize;
     height: 5vh;
-    padding-left: 1%;
+    padding-left: 1%; 
+}
+
+.mobileModal .storeInfo {
+    font-weight: 100 ;
+    font-size: .7em;
+    color: #ccc;
+    margin-top: -6px;
+}
+
+.mobileCloseGlyph {
+    color: #ccc;
 }
 
 .mobileModal.PriceTop {
-    font-weight: bold;
+    font-weight: 500;
+    margin-top: -10px;
 /*    position: absolute;*/
-    color: black;
+    color: white;
+    background-color: black;
     top: 0;
-    font-size: 5vw;
+    font-size: 6vw;
     padding: 10px;
 /*    background-color: rgba(255,255,255,0.5);*/
     text-align: left;
     display: inline-block;
-    width: 49%;
+    width: 100%;
 }
 
 .PriceInner {
@@ -1422,6 +1439,7 @@ a.reportItem {
     width: 100%;
     font-size: 3.5vw;
     height: 30vh;
+    padding-top: 10px;
 /*    position: absolute;*/
 /*  add height here*/
 }
@@ -1439,16 +1457,16 @@ a.reportItem {
 }
 
 .modalButton.Map {
-    width: 90%;
+    width: 95%;
     display: block;
-    margin-left: 5%;
-    margin-right: 5%;
+    margin-left: 12px;
+    margin-right: 1px;
 }
 
 .modalButton.Left {
-    width: 42%;
+    width: 45%;
 /*    margin-left: 5% !important;*/
-    margin-right: 1%;
+    margin-left: 10px;
     flex-grow: 1;
 }
 
@@ -1458,8 +1476,8 @@ a#buyOnlineButton {
 
 
 .modalButton.Right {
-    width: 42%;
-    margin-right: 5% !important;
+    width: 45%;
+    margin-right: 10px;
 }
 
 .has-cursor {
@@ -1585,8 +1603,10 @@ a#buyOnlineButton {
     }
     
     .is-full {
-        width: 90% !important;
-        margin-left: 1% !important;
+        width: 95% !important;
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+        /*margin-left: 1% !important;*/
     }
     .container {
         width: 100%;
@@ -1598,7 +1618,7 @@ a#buyOnlineButton {
     }
 
     .container-fluid {
-        overflow-x: hidden;
+        overflow: hidden;
     }
     
     #topQueryBar {

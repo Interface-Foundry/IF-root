@@ -1,1 +1,946 @@
-function calcDistance(e,t,o,n){var r=Array.prototype.map.call(arguments,function(e){return e/180*Math.PI}),o=r[0],n=r[1],e=r[2],t=r[3],a=6372.8,i=e-o,s=t-n,l=Math.sin(i/2)*Math.sin(i/2)+Math.sin(s/2)*Math.sin(s/2)*Math.cos(o)*Math.cos(e),c=2*Math.asin(Math.sqrt(l));return a*c}function roundFloat(e,t){return"undefined"==typeof t||0===+t?Math.round(e):(e=+e,t=+t,isNaN(e)||"number"!=typeof t||t%1!==0?NaN:(e=e.toString().split("e"),e=Math.round(+(e[0]+"e"+(e[1]?+e[1]+t:t))),e=e.toString().split("e"),+(e[0]+"e"+(e[1]?+e[1]-t:-t))))}var simpleSearchApp=angular.module("simpleSearchApp",["ngHolder","angularMoment","ngRoute","angular-inview","smoothScroll"]).filter("httpsURL",[function(){return function(e){if(e.indexOf("https")>-1);else{var t=/http/gi;e=e.replace(t,"https")}return e}}]).filter("deCapslock",[function(){return function(e){e=e.toLowerCase();var t=/\s((a[lkzr])|(c[aot])|(d[ec])|(fl)|(ga)|(hi)|(i[dlna])|(k[sy])|(la)|(m[edainsot])|(n[evhjmycd])|(o[hkr])|(pa)|(ri)|(s[cd])|(t[nx])|(ut)|(v[ta])|(w[aviy]))$/,o=e.match(t);return null!==o&&(o=o[0].toUpperCase(),e=e.replace(t,o)),e}}]).factory("ResCache",["$cacheFactory",function(e){return e("resCache",{capacity:3})}]).factory("location",["$location","$route","$rootScope",function(e,t,o){return e.skipReload=function(){var n=t.current,r=o.$on("$locationChangeSuccess",function(){t.current=n,r()});return e},e}]).factory("storeFactory",function(){return{store:{},setStore:function(e){this.store=e}}}).config(["$routeProvider","$locationProvider",function(e,t){e.when("/",{templateUrl:"partials/home.html",controller:"HomeCtrl"}).when("/q/:query/:lat/:lng/:cityName",{templateUrl:"partials/results.html",controller:"HomeCtrl"}).when("/t/:parentId/:mongoId",{templateUrl:"partials/item.html",controller:"HomeCtrl"}).otherwise({redirectTo:"/"}),t.html5Mode({enabled:!0,requireBase:!1})}]);simpleSearchApp.controller("HomeCtrl",["$scope","$http","$location","$document","$timeout","$interval","amMoment","$window","$routeParams","location","$rootScope","$route","ResCache","storeFactory","$anchorScroll",function(e,t,o,n,r,a,i,s,l,c,d,u,p,m,g){function h(o){console.log(o),f=o.coords.latitude,y=o.coords.longitude,t.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+f+","+y+"&sensor=true").then(function(t){for(var o=0;o<t.data.results.length;o++)if("APPROXIMATE"==t.data.results[o].geometry.location_type){t.data.results[o].formatted_address=t.data.results[o].formatted_address.replace(", USA",""),e.userCity=t.data.results[o].formatted_address,I=e.userCity,e.loadingLoc=!1;break}},function(e){})}console.log("Want to API with us? Get in touch: hello@interfacefoundry.com");var f,y,I,w,v=!1,C=null,S=null;e.showGPS=!0,e.searchIndex=0,e.items=[],e.newQuery=null,e.expandedIndex=null,e.isExpanded=!1,e.outerWidth=$(window)[0].outerWidth,e.outerHeight=$(window)[0].outerHeight,e.mobileModalHeight,e.mobileFooterPos,e.mobileScreen=!1,e.mobileScreenIndex,e.showReportModal=null,e.report={},e.mobileImgIndex=0,e.mobileImgCnt=0,e.parent=m.store,e.infBool=!1,e.searchSlider={min:5,ceil:50,floor:.1},e.infBool=!1,/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)&&(e.mobileScreen=!0),d.$on("$locationChangeState",function(e){e.preventDefault()}),e.returnHome=function(e){"home"===e?(o.path("/"),r(function(){d.searchTitle=null,u.reload()},0),u.reload()):e._id&&(o.path("/t/"+e.parent._id+"/"+e._id),m.setStore(e.parent),console.log("storeFactory: ",m,"loc: ",e),r(function(){u.reload()},0))},e.emptyQuery=function(){e.query=""},e.sayHello=function(){v||(e.infBool=!0,e.searchQuery())},e.closeMobileWrapper=function(t){if(e.mobileScreen){var o=$(".expandMobileWrapper.mWrapper"+t);o.css({width:""+e.outerWidth+"px",height:"0"}),e.mobileScreenIndex=null}},e.chooseImage=function(t){e.mobileImgIndex=t},e.singleItemMobile=function(e,t,o){},e.expandContent=function(t,o,n){e.mobileScreen?(e.outerHeight=$(window)[0].outerHeight,"close"===o?(e.mobileScreenIndex=null,$("body").removeClass("modalOpen"),$("html").removeClass("modalOpen"),$("div.container-fluid").removeClass("modalOpen"),$(window).off(),$(window).off(),e.mobileImgIndex=0,e.mobileModalHeight=0):(e.mobileScreenIndex=t,$("body").addClass("modalOpen"),$("html").addClass("modalOpen"),$("div.container-fluid").addClass("modalOpen"),$(window).on("touchstart",function(e){C=e.originalEvent.targetTouches[0].clientX,S=e.originalEvent.targetTouches[0].clientY}))):e.expandedIndex===t?(e.expandedIndex=null,$(".row"+t).removeClass("expand"),e.isExpanded=!1):null!==e.expandedIndex?($(".row"+e.expandedIndex).removeClass("expand"),$(".row"+t).addClass("expand"),e.expandedIndex=t):($(".row"+t).addClass("expand"),e.expandedIndex=t)},$(window).on("click",function(t){"collapsedContent"===t.target.className&&($(".row"+e.expandedIndex).removeClass("expand"),e.expandedIndex=null)}),e.enlargeImage=function(t,o){e.mobileScreen?$(".mobileImg"+t).css({"background-image":"url("+o+")"}):($(".imageBot"+t).css({"background-image":"url("+o+")"}),$("#expandTop").addClass("is-disappearing"),r(function(){$(".imageTop"+t).css({"background-image":"url("+o+")"}),$("#expandTop").removeClass("is-disappearing")},400))},$("#locInput").geocomplete({details:"form",types:["geocode"]}).bind("geocode:result",function(t,o){e.userCity=o.formatted_address}),e.getGPSLocation=function(){e.loadingLoc=!0,navigator.geolocation?navigator.geolocation.getCurrentPosition(h):console.log("no geolocation support")},document.onclick=function(t){e.itemHighlight="form-grey",e.locationHighlight="form-grey"},e.scrollTop=function(){o.hash("topQueryBar"),g()},e.randomSearch=function(t){var o=["70s","vintage","fur","orange","health goth"];e.query=o[Math.floor(Math.random()*o.length)],e.searchQuery()},e.searchThis=function(t){e.query=t,e.searchQuery()},e.searchQuery=function(o){if("button"===o&&(e.items=[],e.searchIndex=0,$("input").blur()),e.userCity.indexOf("/")>-1){var n=/[^\w\s]/gi;e.userCity=e.userCity.replace(n,"")}if(e.query.indexOf("/")>-1){var n=/[^\w\s]/gi;e.query=e.query.replace(n,"")}if(v=!0,e.userCity!==I){I=e.userCity;var r=encodeURI(I);t.get("https://maps.googleapis.com/maps/api/geocode/json?address="+r+"&key=AIzaSyCABdI8Lpm5XLQZh-O4SpmShqMEKqKteUg").then(function(t){t.data.results[0]&&t.data.results[0].geometry&&(f=t.data.results[0].geometry.location.lat,y=t.data.results[0].geometry.location.lng),e.searchItems()},function(e){})}else e.searchItems()},e.searchItems=function(){var a=null,i=null,a=encodeURI(e.query);d.searchTitle=a;var i=encodeURI(e.userCity);o.path("/q/"+a+"/"+f+"/"+y+"/"+i),t.post("https://kipapp.co/styles/api/items/search?page="+e.searchIndex,{text:e.query,loc:{lat:f,lon:y},radius:5}).then(function(t){if(c.skipReload().path("/q/"+a+"/"+f+"/"+y+"/"+i).replace(),e.newQuery===!0)e.items=e.items.concat(t.data.results),p.put("user",e.items),p.put("query",a),e.newQuery=!1;else{var o=p.get("user"),s=p.get("query");a!==s?(e.items=e.items.concat(t.data.results),p.put("user",e.items),p.put("query",a),e.newQuery=!1):e.infBool?(e.items=e.items.concat(t.data.results),p.put("user",e.items),p.put("query",a),e.newQuery=!1,e.infBool=!1):e.items=o}if(e.items.length<1&&(e.noResults=!0,console.log("no results")),e.items&&e.items.length){e.noResults=!1;for(var l=0;l<e.items.length;l++){if(e.items[l].owner||e.items.splice(l,1),e.items[l].itemImageURL.length>6){var d=(e.items[l].itemImageURL.length-6,e.items[l].itemImageURL),u=d.length/2;d=d.splice(u,2)}if(e.items[l].parent.tel){var m=e.items[l].parent.tel;m=m.replace(/[+-\s]/g,""),11===m.length&&(m=m.replace(/^1/g,"")),e.items[l].parent.tel=m.slice(0,3)+"-"+m.slice(2,5)+"-"+m.slice(6)}if(e.items[l].loc&&!e.items[l].profileID){e.items[l].directionsURL=e.items[l].loc.coordinates[1]+","+e.items[l].loc.coordinates[0];var g=calcDistance(e.items[l].loc.coordinates[1],e.items[l].loc.coordinates[0],f,y);e.items[l].distanceKM=roundFloat(g,1);var h=1e3*g;h=.000621371192*h,e.items[l].distanceMI=roundFloat(h,1)}else l>-1&&e.items.splice(l,1)}}e.showQueryBar=!0,e.windowHeight=n[0].body.scrollHeight,r(function(){$("img.holderPlace").lazyload(),e.searchIndex++,w=$("div.resultsContainer"),w=w[0].clientHeight,v=!1},500),$("#locInput").geocomplete({details:"form",types:["geocode"]}).bind("geocode:result",function(t,o){e.userCity=o.formatted_address})},function(e){})},e.searchOneItem=function(){e.mongoId=e.mongoId.replace(/[^\w\s]/gi,""),e.mongoId=e.mongoId.replace(/\s+/g," ").trim();var r=encodeURI(e.mongoId);e.parentId=e.parentId.replace(/[^\w\s]/gi,""),e.parentId=e.parentId.replace(/\s+/g," ").trim();var a=encodeURI(e.parentId);o.path("/t/"+a+"/"+r),t.get("https://kipapp.co/styles/api/items/"+e.mongoId,{}).then(function(t){if(e.items=e.items.concat(t.data.item),e.items.length<1&&(e.noResults=!0,console.log("no results")),e.items&&e.items.length){e.noResults=!1;for(var o=0;o<e.items.length;o++){if(e.items[o].parent.tel){var r=e.items[o].parent.tel;r=r.replace(/[+-\s]/g,""),11===r.length&&(r=r.replace(/^1/g,"")),e.items[o].parent.tel=r.slice(0,3)+"-"+r.slice(2,5)+"-"+r.slice(6)}if(e.items[o].loc&&!e.items[o].profileID){e.items[o].directionsURL=e.items[o].loc.coordinates[1]+","+e.items[o].loc.coordinates[0];var a=calcDistance(e.items[o].loc.coordinates[1],e.items[o].loc.coordinates[0],f,y);e.items[o].distanceKM=roundFloat(a,1);var i=1e3*a;i=.000621371192*i,e.items[o].distanceMI=roundFloat(i,1)}else o>-1&&e.items.splice(o,1)}}e.showQueryBar=!0,e.windowHeight=n[0].body.scrollHeight,$("#locInput").geocomplete({details:"form",types:["geocode"]}).bind("geocode:result",function(t,o){e.userCity=o.formatted_address})},function(e){})},e.reportItem=function(o,n,a){"open"===o?e.showReportModal=a:"close"===o?e.showReportModal=null:"submit"===o&&t.post("https://kipapp.co/styles/api/items/"+n._id+"/report",{timeReported:new Date,comment:e.report.comment,reason:e.report.reason}).then(function(t){var o=$("#reportSubmit");o[0].innerHTML="Thanks!",o.css({backgroundColor:"lightgreen"}),r(function(){e.showReportModal=null},1e3),t.data.err})},e.closeOverlay=function(t){t.toElement;"modalOverlay"==t.target.classList[0]&&e.reportItem("close")},l.query?(e.query=decodeURI(l.query),e.userCity=decodeURI(l.cityName),f=l.lat,y=l.lng,e.searchItems()):l.mongoId?(e.mongoId=decodeURI(l.mongoId),e.parentId=decodeURI(l.parentId),t.get("https://kipapp.co/styles/api/geolocation").then(function(o){return 38===o.data.lat?void $("#locInput").geocomplete("find","NYC"):(f=o.data.lat,y=o.data.lng,void t.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+o.data.lat+","+o.data.lng+"&sensor=true").then(function(t){for(var o=0;o<t.data.results.length;o++)if("APPROXIMATE"==t.data.results[o].geometry.location_type){t.data.results[o].formatted_address=t.data.results[o].formatted_address.replace(", USA",""),e.userCity=t.data.results[o].formatted_address,I=e.userCity,e.loadingLoc=!1;break}},function(){}))},function(t){e.getGPSLocation()}),e.searchOneItem()):(t.get("https://kipapp.co/styles/api/geolocation").then(function(o){return 38===o.data.lat?void $("#locInput").geocomplete("find","NYC"):(f=o.data.lat,y=o.data.lng,void t.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+o.data.lat+","+o.data.lng+"&sensor=true").then(function(t){for(var o=0;o<t.data.results.length;o++)if("APPROXIMATE"==t.data.results[o].geometry.location_type){t.data.results[o].formatted_address=t.data.results[o].formatted_address.replace(", USA",""),e.userCity=t.data.results[o].formatted_address,I=e.userCity,e.loadingLoc=!1;break}},function(){}))},function(t){e.getGPSLocation()}),/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)&&(e.getGPSLocation(),e.hideGPSIcon=!0)),angular.element(document).ready(function(){e.windowHeight=s.height+"px",e.windowWidth=window.width+"px"})}]),simpleSearchApp.directive("autoFocus",["$timeout",function(e){return{restrict:"AC",link:function(t,o){e(function(){o[0].focus()},0)}}}]),simpleSearchApp.directive("afterResults",["$document",function(e){return{restrict:"E",replace:!0,scope:{windowHeight:"="},link:function(t,o,n){console.log(t.$parent.windowHeight),t.$parent.$last&&(t.windowHeight=e[0].body.clientHeight,console.log(t.windowHeight))}}}]),simpleSearchApp.directive("selectOnClick",["$window",function(e){return{restrict:"A",link:function(t,o,n){o.on("click",function(){e.getSelection().toString()||this.setSelectionRange(0,this.value.length)})}}}]),simpleSearchApp.directive("ngEnter",function(){return function(e,t,o){t.bind("keydown keypress",function(t){13===t.which&&(e.$apply(function(){e.$eval(o.ngEnter,{event:t})}),t.preventDefault())})}}),simpleSearchApp.directive("tooltip",function(){return{restrict:"A",link:function(e,t,o){$(t).hover(function(){$(t).tooltip("show")},function(){$(t).tooltip("hide")})}}}),simpleSearchApp.service("searchQuery",function(){var e=[],t=function(t){e=[],e.push(t)},o=function(){return e};return{addSearch:t,getSearch:o}});
+var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMoment', 'ngRoute', 'angular-inview', 'smoothScroll'])
+    .filter('httpsURL', [function() {
+
+        return function(input) {
+            if (input.indexOf('https') > -1) {
+                //do nothing
+            } else {
+                var regex = /http/gi;
+                input = input.replace(regex, 'https');
+            }
+            return input;
+        }
+    }])
+    .filter('deCapslock', [function() {
+        return function(input) {
+            input = input.toLowerCase();
+            var reg = /\s((a[lkzr])|(c[aot])|(d[ec])|(fl)|(ga)|(hi)|(i[dlna])|(k[sy])|(la)|(m[edainsot])|(n[evhjmycd])|(o[hkr])|(pa)|(ri)|(s[cd])|(t[nx])|(ut)|(v[ta])|(w[aviy]))$/;
+            var state = input.match(reg);
+            if (state !== null) {
+                state = state[0].toUpperCase();
+                input = input.replace(reg, state);
+            }
+            return input;
+        }
+
+    }])
+.factory('ResCache', ['$cacheFactory', function($cacheFactory) {
+    return $cacheFactory('resCache', {
+        capacity: 3    
+    });
+}])
+    .factory('location', [
+        '$location',
+        '$route',
+        '$rootScope',
+        function($location, $route, $rootScope) {
+            $location.skipReload = function() {
+                var lastRoute = $route.current;
+                var un = $rootScope.$on('$locationChangeSuccess', function() {
+                    $route.current = lastRoute;
+                    un();
+                });
+                return $location;
+            };
+
+            return $location;
+        }
+    ])
+    .factory('storeFactory', function() {
+        return {
+            store: {},
+            setStore: function(newStore) {
+                this.store = newStore;
+            }
+        }
+    })
+    .config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+        $routeProvider
+            .when('/', {
+                templateUrl: 'partials/home.html',
+                controller: 'HomeCtrl'
+            })
+            .when('/q/:query/:lat/:lng/:cityName', {
+                templateUrl: 'partials/results.html',
+                controller: 'HomeCtrl'
+            })
+            //Individual page
+            //add place ID parameter
+            //Add address/ phone # and store name, hours on this page
+            .when('/t/:parentId/:mongoId', {
+                templateUrl: 'partials/item.html',
+                controller: 'HomeCtrl'
+            })
+            .otherwise({
+                redirectTo: '/'
+            });
+
+        $locationProvider.html5Mode({
+            enabled: true,
+            requireBase: false
+        });
+    }]);
+
+simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'ResCache', 'storeFactory', '$anchorScroll', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, ResCache, storeFactory, $anchorScroll) {
+
+    console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
+    // * * * * * * * * ** * * * * * * * * *
+    //ON LOAD PAGE, first get IP loc. banner pop up, get more accurate results? use GPS?
+    //popup little menu after search with miles adjuster & button to get GPS results
+    //* * * * * * * * * * * * * * * * * * *
+
+    var userLat;
+    var userLng;
+    var historyCity;
+    var resultsContainer;
+    var httpBool = false;
+    var xDown = null;
+    var yDown = null;
+    var swipeActive = false;
+
+    $scope.showGPS = true;
+    $scope.searchIndex = 0;
+    $scope.items = [];
+    $scope.newQuery = null;
+    $scope.hideItem = {};
+    
+    $scope.expandedIndex = null;
+    $scope.isExpanded = false;
+    $scope.outerWidth = $(window)[0].outerWidth;
+    $scope.outerHeight = $(window)[0].outerHeight;
+    $scope.mobileModalHeight;
+    $scope.mobileFooterPos;
+    $scope.mobileScreen = window.innerWidth <= 768;
+    $scope.mobileScreenIndex;
+    $scope.showReportModal = null;
+    $scope.report = {};
+    $scope.mobileImgIndex = 0;
+    $scope.mobileImgCnt = 0;
+    $scope.parent = storeFactory.store;
+    $scope.infBool = false;
+    // https://github.com/rzajac/angularjs-slider for range slider docs
+    $scope.searchSlider = {
+        min: 5,
+        ceil: 50,
+        floor: 0.1
+    };
+    $scope.infBool = false;
+    
+    
+    
+
+    /*if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        $scope.mobileScreen = true;
+    }*/
+
+    $rootScope.$on('$locationChangeState', function(event) {
+        event.preventDefault();
+    });
+    //Fix here
+    $scope.returnHome = function(loc) {
+        if (loc === 'home') {
+            $location.path('/'); 
+            $timeout(function() {
+//                console.log('route');
+                $rootScope.searchTitle = null;
+                $route.reload();
+            }, 0);
+            $route.reload();
+        } else if (loc._id) {
+            $location.path('/t/' + loc.parent._id + '/' + loc._id);
+            storeFactory.setStore(loc.parent)
+            console.log('storeFactory: ', storeFactory, 'loc: ', loc)
+            $timeout(function() {
+                $route.reload();
+            }, 0); 
+        }
+    };
+
+    $scope.emptyQuery = function() {
+        $scope.query = '';
+    };
+
+    $scope.sayBye = function(index, inview, event) {
+//        console.log('func', index, inview, event);
+        if (!inview) {
+            $scope.hideItem[index + 1] = true;
+        } else if (inview) {
+            $scope.hideItem[index] = false;
+            $scope.hideItem[index - 1] = false;
+            $scope.hideItem[index - 2] = false;
+            $scope.hideItem[index - 3] = false;
+            $scope.hideItem[index - 4] = false;
+            $scope.hideItem[index - 5] = false;
+            $scope.hideItem[index + 1] = false; 
+            $scope.hideItem[index + 2] = false;
+            $scope.hideItem[index + 3] = false;
+            $scope.hideItem[index + 4] = false;
+            $scope.hideItem[index + 5] = false;
+        }
+    };
+    
+    $scope.sayHello = function() {
+        if (!httpBool) {
+            $scope.infBool = true;
+            $scope.searchQuery();
+        }
+    }
+
+    $scope.closeMobileWrapper = function(index) {
+        if ($scope.mobileScreen) {
+            var el = $('.expandMobileWrapper.mWrapper' + index);
+            el.css({
+                'width': '' + $scope.outerWidth + 'px',
+                'height': '0'
+            });
+            $scope.mobileScreenIndex = null;
+        }
+    }
+
+    $scope.chooseImage = function(index) {
+        $scope.mobileImgIndex = index;
+    }
+
+    $scope.singleItemMobile = function(index, imgCnt, item) {
+
+    };
+
+    $scope.expandContent = function(index, event, imgCnt) {
+        if ($scope.mobileScreen) {
+            $scope.outerHeight = $(window)[0].outerHeight;
+            if (event === 'close') {
+
+                $scope.mobileScreenIndex = null;
+
+                $('body').removeClass('modalOpen');
+                $('html').removeClass('modalOpen');
+                $('div.container-fluid').removeClass('modalOpen');
+                $(window).off();
+                $(window).off();
+                $scope.mobileImgIndex = 0;
+                $scope.mobileModalHeight = 0;
+            } else {
+
+//                $timeout(function() {
+//                    $scope.mobileModalHeight = $scope.outerHeight * (.7);
+//                    console.log($scope.mobileModalHeight);
+//                    var image = $('#mobMod'+index);
+//                    image.css({
+//                        'height' : $scope.mobileModalHeight
+//                    });
+//                }, 100);
+
+                $scope.mobileScreenIndex = index;
+                $('body').addClass('modalOpen');
+                $('html').addClass('modalOpen');
+                $('div.container-fluid').addClass('modalOpen');
+                $(window).on('touchstart', function(event) {
+                    //                console.log('start', event.originalEvent.targetTouches[0].clientX);
+                    xDown = event.originalEvent.targetTouches[0].clientX;
+                    yDown = event.originalEvent.targetTouches[0].clientY;
+                });
+
+            }
+
+        } else {
+            if ($scope.expandedIndex === index) {
+                $('.row' + index).removeClass('expand');
+                $('.row' + index).addClass('contract');
+                $timeout(function(){
+                    $scope.isExpanded = false;
+                    $scope.expandedIndex = null;
+                }, 250);
+            } else if ($scope.expandedIndex !== null) {
+                $('.row' + $scope.expandedIndex).removeClass('expand');
+                $('.row' + index).addClass('expand');
+                $scope.expandedIndex = index;
+            } else {
+                $('.row' + index).removeClass('contract');
+                $('.row' + index).addClass('expand');
+                $scope.expandedIndex = index;
+            }
+        }
+
+    }
+
+    $(window).on('click', function(event) {
+        if (event.target.className === "collapsedContent") {
+            $('.row' + $scope.expandedIndex).removeClass('expand');
+            $scope.expandedIndex = null;
+        }
+    })
+
+    $scope.enlargeImage = function(parIndex, imgIndex) {
+        //        console.log(parIndex, imgIndex);
+        if ($scope.mobileScreen) {
+            $('.mobileImg' + parIndex).css({
+                'background-image': "url(" + imgIndex + ")"
+            });
+        } else {
+            $('.imageBot' + parIndex).css({
+                'background-image': "url(" + imgIndex + ")"
+            });
+            
+            $('#expandTop').addClass('is-disappearing');
+            $timeout(function() {
+               $('.imageTop' + parIndex).css({
+                    'background-image': "url(" + imgIndex + ")"
+                }); 
+                $('#expandTop').removeClass('is-disappearing');
+            }, 400);
+            
+            
+        }
+    }
+
+    $('#locInput').geocomplete({
+        details: 'form',
+        types: ['geocode']
+    }).bind("geocode:result", function(event, result) {
+        $scope.userCity = result.formatted_address;
+    });
+
+
+    //* * * * * * * * *
+    // LOAD FUNCTIONS
+
+    //get loc from GPS
+    $scope.getGPSLocation = function() {
+        $scope.loadingLoc = true;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log('no geolocation support');
+        }
+    }
+
+    function showPosition(position) {
+        console.log(position);
+        userLat = position.coords.latitude;
+        userLng = position.coords.longitude;
+
+        //get neighborhood name via lat lng from google
+        $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + userLat + ',' + userLng + '&sensor=true').
+        then(function(res) {
+            for (var i = 0; i < res.data.results.length; i++) {
+                if (res.data.results[i].geometry.location_type == 'APPROXIMATE') {
+                    res.data.results[i].formatted_address = res.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
+                    $scope.userCity = res.data.results[i].formatted_address;
+                    historyCity = $scope.userCity;
+                    $scope.loadingLoc = false;
+
+                    break;
+                }
+            }
+        }, function(res) {
+            //if IP broken get HTML5 geoloc
+            //$scope.getLocation();
+        });
+    }
+
+    //why isn't this working to update ng-class :\ can't unselect input box right now
+    document.onclick = function(e) {
+        $scope.itemHighlight = "form-grey";
+        $scope.locationHighlight = "form-grey";
+    };
+
+
+    $scope.scrollTop = function() {
+        $location.hash('topQueryBar');
+        $anchorScroll();
+    }
+
+    $scope.randomSearch = function(query) {
+        var tempRandomTrends = ['70s', 'vintage', 'fur', 'orange', 'health goth'];
+        $scope.query = tempRandomTrends[Math.floor(Math.random() * tempRandomTrends.length)];
+        $scope.searchQuery();
+    }
+
+    $scope.searchThis = function(query) {
+        $scope.query = query;
+        $scope.searchQuery();
+    }
+
+    $scope.searchQuery = function(type) {
+        if (type === 'button') {
+            $scope.items = [];
+            $scope.searchIndex = 0;
+            $('input').blur();
+        }
+        if ($scope.userCity.indexOf('/') > -1) {
+            var reg = /[^\w\s]/ig;
+            $scope.userCity = $scope.userCity.replace(reg, '');
+        }
+        
+        if ($scope.query.indexOf('/') > -1) {
+            var reg = /[^\w\s]/ig;
+            $scope.query = $scope.query.replace(reg, '');
+        }
+        httpBool = true;
+
+        //* * * * * * * * * * * * *
+        //Tap images to see more?
+        //* * * * * * * * * * * * *
+
+        //check if location was modified by user
+        if ($scope.userCity !== historyCity) {
+        
+            historyCity = $scope.userCity;
+            var encodeCity = encodeURI(historyCity);
+
+            $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeCity + '&key=AIzaSyCABdI8Lpm5XLQZh-O4SpmShqMEKqKteUg').
+            then(function(res) {
+
+                if (res.data.results[0] && res.data.results[0].geometry) {
+                    userLat = res.data.results[0].geometry.location.lat;
+                    userLng = res.data.results[0].geometry.location.lng;
+                }
+
+
+
+                //put in new lat/lng then fire searchItems();
+                $scope.searchItems();
+
+
+                // userLat = res.data.lat;
+                // userLng = res.data.lng;
+
+                // historyLat = userLat;
+                // historyLng = userLng;
+                // $scope.userCity = res.data.cityName;
+
+            }, function(res) {
+                //if IP broken get HTML5 geoloc
+                //$scope.getGPSLocation();
+            });
+
+
+
+        } else {
+            $scope.searchItems();
+        }
+
+    };
+
+    //https://kipapp.co/styles/api/items/search?page=
+    //https://kipapp.co/api/items/search?page
+
+
+
+    $scope.searchItems = function() {
+        var encodeQuery = null;
+        var encodeCity = null;
+        
+        var encodeQuery = encodeURI($scope.query);
+        $rootScope.searchTitle = $scope.query + ' - Kip';
+        var encodeCity = encodeURI($scope.userCity);
+
+        $location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
+
+        $http.post('https://kipapp.co/styles/api/items/search?page=' + $scope.searchIndex, {
+            text: $scope.query,
+            loc: {
+                lat: userLat,
+                lon: userLng
+            },
+            radius: 5,
+//            radius: $scope.searchSlider.min,
+        }).then(function(response) {
+            
+//                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
+                location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
+                //* * * * * * * * * * * * *
+                //if no results, re-query with US size radius
+                //* * * * * * * * * * * * *
+            
+                if ($scope.newQuery === true) {
+                    $scope.items = $scope.items.concat(response.data.results);    
+                    ResCache.put('user', $scope.items);
+                    ResCache.put('query', encodeQuery);
+                    $scope.newQuery = false;
+                } else {
+                    var prevItems = ResCache.get('user');
+                    var oldQuery = ResCache.get('query');
+                    if (encodeQuery !== oldQuery) {
+                        $scope.items = $scope.items.concat(response.data.results);    
+                        ResCache.put('user', $scope.items);
+                        ResCache.put('query', encodeQuery);
+                        $scope.newQuery = false;   
+                    } else if ($scope.infBool) {
+                        $scope.items = $scope.items.concat(response.data.results);    
+                        ResCache.put('user', $scope.items);
+                        ResCache.put('query', encodeQuery);
+                        $scope.newQuery = false;   
+                        $scope.infBool = false;
+                    } else {
+                        $scope.items = prevItems;           
+                    }
+                }
+            
+            if ($scope.items.length < 1) {
+                $scope.noResults = true;
+                console.log('no results');
+            }
+
+            //                console.log('data', response.data);
+                
+            if ($scope.items && $scope.items.length) {
+                $scope.noResults = false;
+                for (var i = 0; i < $scope.items.length; i++) {
+                    
+                    //remove user objects
+                    if (!$scope.items[i].owner) {
+                        $scope.items.splice(i, 1);
+                    }
+
+                    // if num of images is greater than 6, remove imgs from middle of array
+                    if ($scope.items[i].itemImageURL.length > 6) {
+                        var counter = $scope.items[i].itemImageURL.length - 6;
+                        var imageArray = $scope.items[i].itemImageURL;
+                        var midIndex = imageArray.length / 2;
+                        imageArray = imageArray.splice(midIndex, 2);
+                    }
+
+                    // normalize phone numbers
+                    if ($scope.items[i].parent.tel) {
+                        var tmpTel = $scope.items[i].parent.tel;
+                        tmpTel = tmpTel.replace(/[+-\s]/g, '');
+
+                        if (tmpTel.length === 11) {
+                            tmpTel = tmpTel.replace(/^1/g, '');
+                        }
+                        $scope.items[i].parent.tel = tmpTel.slice(0, 3) + '-' + tmpTel.slice(2, 5) + '-' + tmpTel.slice(6);
+                    }
+                    //filter out usernames
+                    if ($scope.items[i].loc && !$scope.items[i].profileID) {
+
+                        //make link for directions URL
+                        $scope.items[i].directionsURL = $scope.items[i].loc.coordinates[1] + ',' + $scope.items[i].loc.coordinates[0];
+
+                        //calculate distance btwn user and items
+                        var distance = calcDistance( //haversine
+                            $scope.items[i].loc.coordinates[1], $scope.items[i].loc.coordinates[0], userLat, userLng
+                        );
+                        $scope.items[i].distanceKM = roundFloat(distance, 1); //distance in kilometers to 1 decimal
+                        //convert from km to miles
+                        var miles = distance * 1000; //km to m
+                        miles = miles * 0.000621371192; //meters to miles
+                        $scope.items[i].distanceMI = roundFloat(miles, 1); //distance in miles
+                    } else {
+                        if (i > -1) { //remove users from results
+                            $scope.items.splice(i, 1);
+                        }
+                    }
+
+                }
+            }
+
+            $scope.showQueryBar = true;
+            $scope.windowHeight = $document[0].body.scrollHeight;
+
+            $timeout(function() {
+                $("img.holderPlace").lazyload();
+                $scope.searchIndex++;
+                resultsContainer = $('div.resultsContainer');
+                resultsContainer = resultsContainer[0].clientHeight;
+                httpBool = false;
+            }, 500);
+
+            $('#locInput').geocomplete({
+                details: 'form',
+                types: ['geocode']
+            }).bind("geocode:result", function(event, result) {
+                $scope.userCity = result.formatted_address;
+            });
+
+        }, function(response) {
+
+        });
+    }
+
+    $scope.searchOneItem = function() {
+
+        // console.log('asdf');
+
+
+        $scope.mongoId = $scope.mongoId.replace(/[^\w\s]/gi, ''); //remove special char
+        $scope.mongoId = $scope.mongoId.replace(/\s+/g, ' ').trim(); //remove extra spaces
+
+        var encodedMongoId = encodeURI($scope.mongoId);
+
+        $scope.parentId = $scope.parentId.replace(/[^\w\s]/gi, ''); //remove special char
+        $scope.parentId = $scope.parentId.replace(/\s+/g, ' ').trim(); //remove extra spaces
+
+        var encodedParentId = encodeURI($scope.parentId);
+
+        $location.path('/t/' + encodedParentId + '/' + encodedMongoId);
+
+        $http.get('https://kipapp.co/styles/api/items/' + $scope.mongoId, {}).
+        then(function(response) {
+
+            //location.path('/t/'+ encodeId);
+            //location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
+            //* * * * * * * * * * * * *
+            //if no results, re-query with US size radius
+            //* * * * * * * * * * * * * 
+
+            //  console.log(response.data.item);
+
+            // $scope.items = response.data.item ;
+            $scope.items = $scope.items.concat(response.data.item);
+
+            if ($scope.items.length < 1) {
+                $scope.noResults = true;
+                console.log('no results');
+            }
+
+            //                console.log('data', response.data);
+
+            if ($scope.items && $scope.items.length) {
+                $scope.noResults = false;
+                for (var i = 0; i < $scope.items.length; i++) {
+
+                    // normalize phone numbers
+                    if ($scope.items[i].parent.tel) {
+                        var tmpTel = $scope.items[i].parent.tel;
+                        tmpTel = tmpTel.replace(/[+-\s]/g, '');
+
+                        if (tmpTel.length === 11) {
+                            tmpTel = tmpTel.replace(/^1/g, '');
+                        }
+
+                        $scope.items[i].parent.tel = tmpTel.slice(0, 3) + '-' + tmpTel.slice(2, 5) + '-' + tmpTel.slice(6);
+
+                    }
+                    //filter out usernames
+                    if ($scope.items[i].loc && !$scope.items[i].profileID) {
+
+                        //make link for directions URL
+                        $scope.items[i].directionsURL = $scope.items[i].loc.coordinates[1] + ',' + $scope.items[i].loc.coordinates[0];
+
+                        //calculate distance btwn user and items
+                        var distance = calcDistance( //haversine
+                            $scope.items[i].loc.coordinates[1], $scope.items[i].loc.coordinates[0], userLat, userLng
+                        );
+                        $scope.items[i].distanceKM = roundFloat(distance, 1); //distance in kilometers to 1 decimal
+                        //convert from km to miles
+                        var miles = distance * 1000; //km to m
+                        miles = miles * 0.000621371192; //meters to miles
+                        $scope.items[i].distanceMI = roundFloat(miles, 1); //distance in miles
+                    } else {
+                        if (i > -1) { //remove users from results
+                            $scope.items.splice(i, 1);
+                        }
+                    }
+
+                }
+            }
+
+            $scope.showQueryBar = true;
+            $scope.windowHeight = $document[0].body.scrollHeight;
+
+            // $timeout(function() {
+            //     $("img.holderPlace").lazyload();
+            //     $scope.searchIndex++;
+            //     resultsContainer = $('div.resultsContainer');
+            //     resultsContainer = resultsContainer[0].clientHeight;
+            //     httpBool = false;
+            // }, 500);
+
+            $('#locInput').geocomplete({
+                details: 'form',
+                types: ['geocode']
+            }).bind("geocode:result", function(event, result) {
+                $scope.userCity = result.formatted_address;
+                
+            });
+
+        }, function(response) {
+
+        });
+    }
+
+    $scope.reportItem = function(status, item, index) {
+        
+        if (status === 'open') {
+            $scope.showReportModal = index;
+        } else if (status === 'close') {
+            $scope.showReportModal = null;
+        } else if (status === 'submit') {
+            
+            $http.post('https://kipapp.co/styles/api/items/' + item._id + '/report', {
+                timeReported: new Date(),
+                comment: $scope.report.comment,
+                reason: $scope.report.reason
+            }). then(function (res) {
+                    var ele = $('#reportSubmit');
+                    ele[0].innerHTML = 'Thanks!';
+                    ele.css({
+                        'backgroundColor': 'lightgreen'
+                    });
+                $timeout(function() {
+                    $scope.showReportModal = null;
+                }, 1000);
+
+                if (res.data.err) {
+
+                } else {}
+            });
+
+        }
+
+    }
+    
+    $scope.closeOverlay = function(event) {
+        var ele = event.toElement;
+        if (event.target.classList[0] == 'modalOverlay') {
+            $scope.reportItem('close');   
+        }
+    }
+
+    //* * * * * * * * *  * * * * * * * * * * * * * *
+    //     RUN KIP
+
+    if ($routeParams.query) { //process a search query //this is a search from URL
+        $scope.query = decodeURI($routeParams.query);
+        $scope.userCity = decodeURI($routeParams.cityName);
+        userLat = $routeParams.lat;
+        userLng = $routeParams.lng;
+        $scope.searchItems();
+    } else if ($routeParams.mongoId) { //process singleItem
+        $scope.mongoId = decodeURI($routeParams.mongoId);
+
+        $scope.parentId = decodeURI($routeParams.parentId);
+
+               //get location from IP
+        $http.get('https://kipapp.co/styles/api/geolocation').
+        then(function(res) {
+            if (res.data.lat === 38) {
+              $('#locInput').geocomplete("find", "NYC");
+              return;
+            }
+            userLat = res.data.lat;
+            userLng = res.data.lng;
+
+            //get neighborhood name via lat lng from google
+            $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+res.data.lat+','+res.data.lng+'&sensor=true').
+            then(function(res2) {
+                for (var i = 0; i < res2.data.results.length; i++) {
+                    if (res2.data.results[i].geometry.location_type == 'APPROXIMATE'){
+                        res2.data.results[i].formatted_address = res2.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
+                        $scope.userCity = res2.data.results[i].formatted_address;
+                        historyCity = $scope.userCity;
+                        $scope.loadingLoc = false;
+                        break;
+                    }
+                }
+            }, function() {
+            });
+
+        }, function(res) {
+            //if IP broken get HTML5 geoloc
+            $scope.getGPSLocation();
+        });        
+
+        $scope.searchOneItem();
+    } else {
+        //get location from IP
+        $http.get('https://kipapp.co/styles/api/geolocation').
+        then(function(res) {
+            if (res.data.lat === 38) {
+                $('#locInput').geocomplete("find", "NYC");
+                return;
+            }
+            userLat = res.data.lat;
+            userLng = res.data.lng;
+
+            //get neighborhood name via lat lng from google
+            $http.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + res.data.lat + ',' + res.data.lng + '&sensor=true').
+            then(function(res2) {
+                for (var i = 0; i < res2.data.results.length; i++) {
+                    if (res2.data.results[i].geometry.location_type == 'APPROXIMATE') {
+                        res2.data.results[i].formatted_address = res2.data.results[i].formatted_address.replace(", USA", ""); //remove COUNTRY from USA rn (temp)
+                        $scope.userCity = res2.data.results[i].formatted_address;
+                        historyCity = $scope.userCity;
+                        $scope.loadingLoc = false;
+                        break;
+                    }
+                }
+            }, function() {});
+
+        }, function(res) {
+            //if IP broken get HTML5 geoloc
+            $scope.getGPSLocation();
+        });
+
+        //check if mobile or tablet. warning: there is no perfect way to do this, so need to keep testing on this.
+        //via: http://jstricks.com/detect-mobile-devices-javascript-jquery/
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            $scope.getGPSLocation(); //get GPS loc cause mobile device
+            $scope.hideGPSIcon = true;
+        }
+    }
+
+
+
+    angular.element(document).ready(function() {
+        $scope.windowHeight = $window.height + 'px'; //position
+        $scope.windowWidth = window.width + 'px';
+    });
+
+}]);
+
+
+function calcDistance(lat2, lon2, lat1, lon1) {
+    //haversine formula
+    //http://stackoverflow.com/a/14561433/665082
+    var radians = Array.prototype.map.call(arguments, function(deg) {
+        return deg / 180.0 * Math.PI;
+    });
+    var lat1 = radians[0],
+        lon1 = radians[1],
+        lat2 = radians[2],
+        lon2 = radians[3];
+    var R = 6372.8; // km
+    var dLat = lat2 - lat1;
+    var dLon = lon2 - lon1;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+    var c = 2 * Math.asin(Math.sqrt(a));
+    return R * c;
+}
+
+function roundFloat(value, exp) {
+    //http://stackoverflow.com/a/21323330/665082
+    if (typeof exp === 'undefined' || +exp === 0)
+        return Math.round(value);
+    value = +value;
+    exp = +exp;
+    if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0))
+        return NaN;
+    // Shift
+    value = value.toString().split('e');
+    value = Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp)));
+    // Shift back
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp));
+}
+
+
+//auto focus the search input box
+simpleSearchApp.directive('autoFocus', ['$timeout', function($timeout) {
+    return {
+        restrict: 'AC',
+        link: function(_scope, _element) {
+            $timeout(function() {
+                _element[0].focus();
+            }, 0);
+        }
+    };
+}]);
+
+simpleSearchApp.directive('afterResults', ['$document', function($document) {
+    return {
+        restrict: "E",
+        replace: true,
+        scope: {
+            windowHeight: '='
+        },
+        link: function(scope, element, attrs) {
+            console.log(scope.$parent.windowHeight);
+            if (scope.$parent.$last) {
+                // console.log(scope.windowHeight);
+                // console.log($document[0].body.scrollHeight);
+                // console.log($document[0].body.clientHeight);
+
+                scope.windowHeight = $document[0].body.clientHeight;
+                console.log(scope.windowHeight);
+            }
+        }
+    };
+}]);
+
+simpleSearchApp.directive('selectOnClick', ['$window', function($window) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            element.on('click', function() {
+                if (!$window.getSelection().toString()) {
+                    // Required for mobile Safari
+                    this.setSelectionRange(0, this.value.length)
+                }
+            });
+        }
+    };
+}]);
+
+simpleSearchApp.directive('ngEnter', function() {
+    return function(scope, element, attrs) {
+        element.bind("keydown keypress", function(event) {
+            if (event.which === 13) {
+                scope.$apply(function() {
+                    scope.$eval(attrs.ngEnter, {
+                        'event': event
+                    });
+                });
+
+                event.preventDefault();
+            }
+        });
+    };
+});
+
+simpleSearchApp.directive('tooltip', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            $(element).hover(function() {
+                // on mouseenter
+                $(element).tooltip('show');
+            }, function() {
+                // on mouseleave
+                $(element).tooltip('hide');
+            });
+        }
+    };
+});
+
+simpleSearchApp.service('searchQuery', function() {
+        var searchParams = [];
+
+        var addSearch = function(newObj) {
+            searchParams = [];
+            searchParams.push(newObj);
+        };
+
+        var getSearch = function() {
+            return searchParams;
+        };
+
+        return {
+            addSearch: addSearch,
+            getSearch: getSearch
+        };
+
+    })
+    // simpleSearchApp.directive('stringToTimestamp', function() {
+    //         return {
+    //             require: 'ngModel',
+    //             link: function(scope, ele, attr, ngModel) {
+    //                 // view to model
+    //                 ngModel.$parsers.push(function(value) {
+    //                     return Date.parse(value);
+    //                 });
+    //             }
+    //         }
+    //     });
+    // app.directive('hires', function() {
+    //   return {
+    //     restrict: 'A',
+    //     scope: { hires: '@' },
+    //     link: function(scope, element, attrs) {
+    //         element.one('load', function() {
+    //             element.attr('src', scope.hires);
+    //         });
+    //     }
+    //   };
+    // });

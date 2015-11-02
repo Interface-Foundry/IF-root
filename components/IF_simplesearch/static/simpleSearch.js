@@ -139,7 +139,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     //Fix here
     $scope.returnHome = function(loc) {
         if (loc === 'home') {
-            $location.path('/');
+            $location.path('/'); 
             $timeout(function() {
 //                console.log('route');
                 $rootScope.searchTitle = null;
@@ -152,13 +152,13 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             console.log('storeFactory: ', storeFactory, 'loc: ', loc)
             $timeout(function() {
                 $route.reload();
-            }, 0);
+            }, 0); 
         }
-    }
+    };
 
     $scope.emptyQuery = function() {
         $scope.query = '';
-    }
+    };
 
     $scope.sayBye = function(index, inview, event) {
 //        console.log('func', index, inview, event);
@@ -168,8 +168,14 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $scope.hideItem[index] = false;
             $scope.hideItem[index - 1] = false;
             $scope.hideItem[index - 2] = false;
+            $scope.hideItem[index - 3] = false;
+            $scope.hideItem[index - 4] = false;
+            $scope.hideItem[index - 5] = false;
             $scope.hideItem[index + 1] = false; 
             $scope.hideItem[index + 2] = false;
+            $scope.hideItem[index + 3] = false;
+            $scope.hideItem[index + 4] = false;
+            $scope.hideItem[index + 5] = false;
         }
     };
     

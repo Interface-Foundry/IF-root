@@ -29,29 +29,37 @@ gulp.task('sass', function() {
 });
 
 gulp.task('minify', function() {
-
-    gulp.src(['./static/lib/tominify/*.js'])
+    /*gulp.src(['./static/lib/min/angular.min.js'])
+        .pipe(concat('minified.js'))*/
+    gulp.src(['./static/lib/min/angular.min.js', './static/lib/min/angular-route.min.js', './static/lib/min/ui-bootstrap-tpls-0.13.4.min.js', './static/lib/tominify/*.js'])
         .pipe(concat('minified.js'))
-        .pipe(uglify())
+        //.pipe(uglify())
         .pipe(gulp.dest('./static/lib/min'));
-    gulp.src([ '!.static/lib/min/moment-angular.min.js', './static/lib/min/moment.min.js', './static/mincat.js', './static/lib/min/*.js', '!./static/dev/*.js', '!.static/dev/tominify/*'])
+    gulp.src([ './static/lib/min/minified.js','./static/lib/min/*.js','!.static/lib/min/moment-angular.min.js', './static/lib/min/moment.min.js', './static/mincat.js', '!./static/dev/*.js', '!.static/dev/tominify/*'])
         .pipe(sourcemaps.init())
         .pipe(concat('simpleSearch.mincat.js'))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('./static'));
     gulp.src('./static/simpleSearch.js')
         .pipe(concat('mincat.js'))
-        .pipe(uglify()) //minifies
-        .pipe(gulp.dest('./static')) //save to static
-})
+        //.pipe(sourcemaps.init())
+        //.pipe(uglify()) //minifies
+        //.pipe(sourcemaps.write())
+        .pipe(gulp.dest('./static')); //save to static
+});
 
-// gulp.task('watch', function() {
-//     // watch scss files
-//     // gulp.watch('./static/css/*.css', function() {
-//     //     gulp.run('sass');
-//     // });
-//     gulp.watch('./**/*.js', function() {
-//         gulp.run('default');
-//     });
+gulp.task('watch', function () {
+    gulp.watch('./static/css/simpleSearch.css', ['sass']);
+    gulp.watch('./static/simpleSearch.js', ['default']);
+});
+/*
+gulp.task('watch', function() {
+    // watch scss files
+    gulp.watch('./static/css/simpleSearch.css', function() {
+        gulp.run('sass');
+    });
+    gulp.watch('./simpleSearch.js', function() {
+        gulp.run('default');
+    });
 
-// });
+});*/
