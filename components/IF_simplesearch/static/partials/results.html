@@ -170,7 +170,7 @@
                     <span ng-show="mobileScreen"><a ng-hide="{{!item.parent.tel}}" class="btn btn-default expandedButtons" href="tel: {{::item.parent.tel}}">Call</a></span>
                 </div>
 
-                <p ng-show="item.linkbackname" style="color:#ccc;">From {{::item.linkbackname}}</p>
+                <p ng-show="item.linkbackname" class="linkback-name">From {{::item.linkbackname}}</p>
                 <div class="reportItem">Item inaccurate? <a ng-click="reportItem('open', item, $index);" class="reportItem">Send feedback</a></div>
                 <div ng-if="showReportModal == $index" class="modalOverlay" ng-click="closeOverlay($event);">
                     <div class="modalReport">

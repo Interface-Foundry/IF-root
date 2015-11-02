@@ -110,7 +110,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.outerHeight = $(window)[0].outerHeight;
     $scope.mobileModalHeight;
     $scope.mobileFooterPos;
-    $scope.mobileScreen = false;
+    $scope.mobileScreen = window.innerWidth <= 768;
     $scope.mobileScreenIndex;
     $scope.showReportModal = null;
     $scope.report = {};
@@ -129,9 +129,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     
     
 
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    /*if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         $scope.mobileScreen = true;
-    }
+    }*/
 
     $rootScope.$on('$locationChangeState', function(event) {
         event.preventDefault();
@@ -163,13 +163,15 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.sayBye = function(index, inview, event) {
 //        console.log('func', index, inview, event);
         if (!inview) {
-            $scope.hideItem[index] = true;
+            $scope.hideItem[index + 1] = true;
         } else if (inview) {
-            if ($scope.hideItem[index] === true) {
-                $scope.hideItem[index] = false;   
-            }
+            $scope.hideItem[index] = false;
+            $scope.hideItem[index - 1] = false;
+            $scope.hideItem[index - 2] = false;
+            $scope.hideItem[index + 1] = false; 
+            $scope.hideItem[index + 2] = false;
         }
-    }
+    };
     
     $scope.sayHello = function() {
         if (!httpBool) {
@@ -195,7 +197,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
     $scope.singleItemMobile = function(index, imgCnt, item) {
 
-    }
+    };
 
     $scope.expandContent = function(index, event, imgCnt) {
         if ($scope.mobileScreen) {
@@ -236,14 +238,18 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         } else {
             if ($scope.expandedIndex === index) {
-                $scope.expandedIndex = null;
                 $('.row' + index).removeClass('expand');
-                $scope.isExpanded = false;
+                $('.row' + index).addClass('contract');
+                $timeout(function(){
+                    $scope.isExpanded = false;
+                    $scope.expandedIndex = null;
+                }, 250);
             } else if ($scope.expandedIndex !== null) {
                 $('.row' + $scope.expandedIndex).removeClass('expand');
                 $('.row' + index).addClass('expand');
                 $scope.expandedIndex = index;
             } else {
+                $('.row' + index).removeClass('contract');
                 $('.row' + index).addClass('expand');
                 $scope.expandedIndex = index;
             }

@@ -1466,6 +1466,11 @@ a#buyOnlineButton {
     cursor: pointer;   
 }
 
+.linkback-name {
+    color: #ccc;
+    font-size: .8em;
+}
+
 @media(max-width: 905px) and (min-width: 750px) {
     .detailsContentWrapper {
         padding-left: 10px;
