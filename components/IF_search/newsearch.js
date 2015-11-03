@@ -102,7 +102,9 @@ app.post(searchItemsUrl, function(req, res, next) {
 
             db.Landmarks.find({
               _id: {$in: allParents}
-            }, function(e, parents) {
+            })
+            .select('-meta -source_generic_item -source_justvisual')
+            .exec(function(e, parents) {
               if (e) { return next(e); }
 
               results.map(function(r) {
@@ -131,6 +133,7 @@ app.post(searchItemsUrl, function(req, res, next) {
                     return a_dist > b_dist;
                   });
                   r.parent = r.parents[0];
+                  delete r.parents
                 }
               })
 
@@ -302,7 +305,7 @@ function textSearch(q, page) {
               }
           }
       };
-      //kip.prettyPrint(fuzzyQuery)
+      kip.prettyPrint(fuzzyQuery)
 
       return es.search(fuzzyQuery)
           .then(function(results) {
@@ -663,12 +666,12 @@ function eliminateDuplicates(res, q, pageSize) {
 
 
 if (!module.parent) {
-  app.listen(8080, function(e) {
+  app.listen(9090, function(e) {
     if(e) {
       console.log(e);
       process.exit(1);
     }
-    console.log("kip style search listening on 8080")
+    console.log("kip style search listening on 9090")
   })
 } else {
   module.exports = app;
