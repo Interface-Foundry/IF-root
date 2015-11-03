@@ -9,7 +9,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
                 input = input.replace(regex, 'https');
             }
             return input;
-        }
+        };
     }])
     .filter('deCapslock', [function() {
         return function(input) {
@@ -21,7 +21,7 @@ var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMom
                 input = input.replace(reg, state);
             }
             return input;
-        }
+        };
 
     }])
 .factory('ResCache', ['$cacheFactory', function($cacheFactory) {
@@ -110,7 +110,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.outerHeight = $(window)[0].outerHeight;
     $scope.mobileModalHeight;
     $scope.mobileFooterPos;
-    $scope.mobileScreen = window.innerWidth <= 768;
+    $scope.mobileScreen = window.innerWidth <= 750;
     $scope.mobileScreenIndex;
     $scope.showReportModal = null;
     $scope.report = {};
@@ -132,6 +132,30 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     /*if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         $scope.mobileScreen = true;
     }*/
+
+    $scope.hideExpandedOnClick = function(event){
+        hideExpanded();
+    };
+
+    function hideExpanded (){
+        $('.row' + $scope.expandedIndex).removeClass('expand');
+        $('.row' + $scope.expandedIndex).addClass('contract');
+        $timeout(function(){
+            $scope.isExpanded = false;
+            $scope.expandedIndex = null;
+        }, 250);
+        $scope.hideItem[$scope.expandedIndex + 1] = false;
+        $scope.hideItem[$scope.expandedIndex + 2] = false;
+        $scope.hideItem[$scope.expandedIndex + 3] = false;
+        $scope.hideItem[$scope.expandedIndex + 4] = false;
+        $scope.hideItem[$scope.expandedIndex + 5] = false;
+    }
+
+    $scope.hideExpandedOnEsc = function(event){
+        if (event.keyCode === 27){
+            hideExpanded();
+        }
+    };
 
     $rootScope.$on('$locationChangeState', function(event) {
         event.preventDefault();
@@ -160,22 +184,27 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         $scope.query = '';
     };
 
-    $scope.sayBye = function(index, inview, event) {
+    $scope.sayBye = function(index, inview, event, part) {
 //        console.log('func', index, inview, event);
-        if (!inview) {
-            $scope.hideItem[index + 1] = true;
-        } else if (inview) {
+        if (!inview && $scope.expandedIndex !== index) {
+            $scope.hideItem[index] = true;
+        } else if (inview && part === 'bottom') {
+            $scope.hideItem[index] = false;
+            $scope.hideItem[index + 1] = false;
+            $scope.hideItem[index + 2] = false;
+            $scope.hideItem[index + 3] = false;
+            $scope.hideItem[index + 4] = false;
+            $scope.hideItem[index + 5] = false;
+        } else if (inview && part === 'top') {
             $scope.hideItem[index] = false;
             $scope.hideItem[index - 1] = false;
             $scope.hideItem[index - 2] = false;
             $scope.hideItem[index - 3] = false;
             $scope.hideItem[index - 4] = false;
             $scope.hideItem[index - 5] = false;
-            $scope.hideItem[index + 1] = false; 
-            $scope.hideItem[index + 2] = false;
-            $scope.hideItem[index + 3] = false;
-            $scope.hideItem[index + 4] = false;
-            $scope.hideItem[index + 5] = false;
+        }
+        else{
+            $scope.hideItem[index] = false;
         }
     };
     
@@ -206,6 +235,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     };
 
     $scope.expandContent = function(index, event, imgCnt) {
+        $scope.mobileScreen = window.innerWidth <= 750;
         if ($scope.mobileScreen) {
             $scope.outerHeight = $(window)[0].outerHeight;
             if (event === 'close') {
@@ -901,7 +931,7 @@ simpleSearchApp.directive('tooltip', function() {
                 $(element).tooltip('hide');
             });
         }
-    };
+    }; 
 });
 
 simpleSearchApp.service('searchQuery', function() {
@@ -921,7 +951,46 @@ simpleSearchApp.service('searchQuery', function() {
             getSearch: getSearch
         };
 
-    })
+    });
+
+simpleSearchApp.directive('dlEnterKey', function() {
+    return function(scope, element, attrs) {
+
+        element.bind("keydown keypress", function(event) {
+            var keyCode = event.which || event.keyCode;
+
+            // If enter key is pressed
+            if (keyCode === 13) {
+                scope.$apply(function() {
+                        // Evaluate the expression
+                    scope.$eval(attrs.dlEnterKey);
+                });
+
+                event.preventDefault();
+            }
+        });
+    };
+});
+
+/*simpleSearchApp.directive("outsideClick", ['$document', function( $document){
+return {
+    link: function( $scope, $element, $attributes ){
+        console.log('asdlkajsdaslkdjaslkdj');
+        var scopeExpression = $attributes.outsideClick,
+            onDocumentClick = function(event){
+                if(event.target.id !== 'expanded') {
+                    $scope.isExpanded = false; 
+                }
+            };
+
+        $document.on("click", onDocumentClick);
+
+        $element.on('$destroy', function() {
+            $document.off("click", onDocumentClick);
+        });
+    }
+}; 
+}]);*/
     // simpleSearchApp.directive('stringToTimestamp', function() {
     //         return {
     //             require: 'ngModel',
