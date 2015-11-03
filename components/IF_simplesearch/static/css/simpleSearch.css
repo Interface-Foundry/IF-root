@@ -1347,7 +1347,6 @@ a.reportItem {
 
 .mobileModal.Descrip {
 /*    display:inline-block;*/
-    text-transform: capitalize;
     padding-bottom: 1%;
     height: 200px;
     font-size: 14px;

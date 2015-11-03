@@ -139,7 +139,7 @@
                             Map to {{::item.parent.name}}</a>
                         <a ng-hide="{{!item.linkback}}" style="margin-bottom:1rem !important;" class="btn btn-default modalButton Left" style="color:grey !important;" ng-href="{{::item.linkback}}" ng-class="{'is-full' : !item.parent.tel }">Buy online</a>
                         <a ng-if="mobileScreen && item.parent.tel" style="margin-bottom:1rem !important;" class="btn btn-default  modalButton Right" style="color:grey; !important;" href="tel: {{item.parent.tel}}"><span class="kiplevels-phone-outline callIcon"></span>Call</a>
-                        <div class="mobileModal Descrip"> {{::item.description | limitTo: 470 | deCapslock}}<span ng-show="item.description.length > 470">...</span></div>
+                        <div class="mobileModal Descrip"> {{::item.description | limitTo: 470}}<span ng-show="item.description.length > 470">...</span></div>
                     </div>
                 </div>
             </div>
