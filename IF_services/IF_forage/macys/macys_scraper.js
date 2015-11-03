@@ -456,7 +456,6 @@ function saveItems(items, stores, notfoundstore, url) {
                             // console.log('Updated inventory for item:', match.id)
                             callback()
                         })
-
                     }
                 })
 

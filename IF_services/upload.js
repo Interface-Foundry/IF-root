@@ -51,8 +51,8 @@ module.exports = {
 
             convertBase64(image).then(function(base64) {
                     var tmpfilename = urlify(str + '_' + (new Date().toString()))
-                    var inputPath = __dirname + "/temp/input/" + tmpfilename + ".png";
-                    var outputPath = __dirname + "/temp/output/" + tmpfilename + ".png";
+                    var inputPath = __dirname + "/temp/" + tmpfilename + ".png";
+                    var outputPath = __dirname + "/temp/" + tmpfilename + ".png";
                     fs.writeFile(inputPath, base64, 'base64', function(err) {
                             if (err) console.log('57', err);
                             im.resize({
