@@ -3,8 +3,6 @@ var fs = require('fs');
 var path = require('path');
 var rimraf = require('rimraf');
 
-
-
 //Routinely checks size of image directory and removes images older than 2 weeks
 //from: http://stackoverflow.com/questions/19167297/in-node-delete-all-files-older-than-an-hour
 async.whilst(
@@ -34,9 +32,8 @@ async.whilst(
             });
           }
         });
-
-        setTimeout(callback, 100000); // Check every 5 minutes
-        
+        console.log('Finished cleanup, checking again in 30 minutes.')
+        setTimeout(callback, 1800000); // Check every 30 minutes
     },
     function (err) {
     }
