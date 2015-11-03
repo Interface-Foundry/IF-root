@@ -514,7 +514,7 @@ function processItems(inventory, itemData, Stores) {
                                         // console.log('Found store coords: ',s.loc)
                                         i.parents.push(s._id)
                                         i.loc.coordinates.push(s.loc.coordinates)
-                                        callback()
+                                        wait(callback,200)
                                     }
                                 })
                             },
@@ -522,7 +522,6 @@ function processItems(inventory, itemData, Stores) {
                                 if (e) {
                                     console.log(e)
                                 }
-
                                 //Save item
                                 i.save(function(e, item) {
                                     if (e) {
@@ -568,3 +567,13 @@ function updateInventory(inventory, Stores) {
         return [inventoryParentIds, updatedLocs]
     }
 }
+
+
+function wait(callback, delay) {
+    var startTime = new Date().getTime();
+    while (new Date().getTime() < startTime + delay);
+    callback();
+}
+
+
+
