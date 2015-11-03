@@ -1,4 +1,3 @@
-
 var request = require('request');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -94,41 +93,43 @@ module.exports = function scrapeItem(url) { 
                 },
                 function(item, callback) {
                     loadStores().then(function(stores) {
+                        // console.log('Stores found: ',stores.length)
                         callback(null, item, stores)
                     }).catch(function(err) {
                         callback(err)
                     })
                 },
                 function(item, stores, callback) {
-                    var CA = [3611, 3441, 6493, 3723, 3844, 3985, 3805, 3612, 3613]
-                    var NY = [3074, 3818, 3037, 1260, 3946, 303, 3036]
-                    var totalInventory = [];
-                    async.waterfall([
-                        function(cb) {
-                            getInventory(item, CA).then(function(inventory) {
-                                totalInventory = totalInventory.concat(inventory)
-                                cb(null, totalInventory)
-                            }).catch(function(err) {
-                                cb(err)
-                            })
-                        },
-                        function(totalInventory, cb) {
-                            getInventory(item, NY).then(function(inventory) {
-                                totalInventory = totalInventory.concat(inventory)
-                                cb(null, totalInventory)
-                            }).catch(function(err) {
-                                cb(err)
-                            })
-                        }
-                    ], function(err, totalInventory) {
-                        if (err) {
-                            console.log('Inventory error: ', err)
-                            return callback(err)
-                        }
-                        // console.log('Total Inventory is : ', totalInventory)
-                        callback(null, item, totalInventory, stores)
-                    });
 
+                    var storeIds = stores.map(function(store) {
+                        return parseInt(store.source_generic_store.storeId)
+                    })
+
+                    //Split the ALL STOREIDs array into groups of 10, maybe the Macys API will play nicer.. 
+                    var storeArrays = [],
+                        size = 10;
+                    while (storeIds.length > 0) {
+                        storeArrays.push(storeIds.splice(0, size));
+                    }
+
+                     var totalInventory = []
+
+                    async.eachSeries(storeArrays, function iterator(ids, finishedStoreArray) {
+                       
+                        getInventory(item, ids).then(function(inventory) {
+                            totalInventory = totalInventory.concat(inventory)
+                            finishedStoreArray(null, totalInventory)
+                        }).catch(function(err) {
+                            if (err) console.log('125: ', err)
+                            finishedStoreArray(err)
+                        })
+
+                    }, function done(err) {
+
+                        if (err) console.log('123: ', err);
+
+                        callback(null, item, totalInventory, stores);
+                    })
 
                 },
                 function(item, inventory, stores, callback) {
@@ -213,7 +214,7 @@ function checkIfScraped(url) {
             .exec(function(e, items) {
                 if (items) {
                     if (items.length > 1) {
-                        console.log('Total items found.',items.length)
+                        console.log('Total items found.', items.length)
                         var toDelete = []
                         for (var i = 1; i < items.length; i++) {
                             toDelete.push(items[i]._id)
@@ -341,12 +342,20 @@ function scrapeDetails(url) {
 function loadStores() {
     return new Promise(function(resolve, reject) {
 
-
         db.Landmarks.find({
-            'source_generic_store': {
-                $exists: true
+            "loc": {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [-73.9894285, 40.7393083]
+                    },
+                    $maxDistance: 9656064
+                }
             },
-            'linkbackname': 'zara.com'
+            "linkbackname": "zara.com",
+            "source_generic_store": {
+                $exists: true
+            }
         }, function(e, stores) {
             if (e) {
                 console.log(e.lineNumber + e)
@@ -361,26 +370,28 @@ function loadStores() {
             }
         })
 
-
     })
+
 }
 
 // var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/02398310800?physicalStoreId=' + storeIds.join() + '&ajaxCall=true';
 // http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/I2015/product/part-number/15517003004?physicalStoreId=3036,3037,3074,3818,1260,303,3946&ajaxCall=true
 function getInventory(item, ids) {
     // console.log('Calling getInventory for stores: ', ids)
-        //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
+    //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
     var Item = !exists ? item : item.source_generic_item
 
     return new Promise(function(resolve, reject) {
         var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + Item.campaign + '/product/part-number/' + Item.partNumber + '?physicalStoreId=' + ids.join() + '&ajaxCall=true'
+
         var options = {
             url: apiUrl,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
-        // console.log('apiURL: ', apiUrl)
+
+        console.log('apiURL: ', apiUrl)
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body)
@@ -451,12 +462,10 @@ function processItems(inventory, itemData, Stores) {
 
         //If item has not been scraped, create a new item 
         if (!exists) {
-
             if (!inventory || inventory.length < 1 || inventory == null) {
                 console.log('No inventory found for this item.', itemData.id)
                 inventory = []
             }
-
             //Create new item for each store in inventory list.
             var i = new db.Landmark();
             i.parents = [notfoundstore._id]
@@ -527,7 +536,6 @@ function processItems(inventory, itemData, Stores) {
         } //end of if not exists
     })
 }
-
 
 function updateInventory(inventory, Stores) {
     if (!inventory || inventory == null || inventory.length && inventory.length == 0) {

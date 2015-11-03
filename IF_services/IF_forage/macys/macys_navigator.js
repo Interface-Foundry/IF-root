@@ -59,7 +59,6 @@ async.whilst(
                         // fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
                 console.log('Finished scraping all catalogs for Urban Outfitters.');
-
             })
         }).catch(function(err) {
             if (err) {
