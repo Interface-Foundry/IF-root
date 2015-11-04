@@ -475,7 +475,7 @@ function processItems(inventory, itemData, Stores) {
             i.hasloc = true;
             i.price = parseFloat(itemData.price);
             i.itemImageURL = itemData.hostedImages;
-            i.name = itemData.name;
+            i.name = itemData.name.replace(/[^\w\s]/gi, '');
             i.owner = owner;
             i.linkback = itemData.src;
             i.linkbackname = 'zara.com';
@@ -514,7 +514,7 @@ function processItems(inventory, itemData, Stores) {
                                         // console.log('Found store coords: ',s.loc)
                                         i.parents.push(s._id)
                                         i.loc.coordinates.push(s.loc.coordinates)
-                                        wait(callback,2000)
+                                        wait(callback,1000)
                                     }
                                 })
                             },

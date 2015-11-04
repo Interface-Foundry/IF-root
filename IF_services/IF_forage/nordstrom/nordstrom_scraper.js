@@ -542,7 +542,7 @@
                      return reject('Price was not a number..')
                  }
                  item.owner = owner;
-                 item.name = item.source_generic_item.name;
+                 item.name = item.source_generic_item.name.replace(/[^\w\s]/gi, '');
                  item.linkback = item.source_generic_item.src;
                  item.linkbackname = 'nordstrom.com';
                  item.itemImageURL = newItem.hostedImages;

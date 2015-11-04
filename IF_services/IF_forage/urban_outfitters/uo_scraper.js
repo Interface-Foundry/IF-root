@@ -406,7 +406,7 @@ function saveItems(items, stores) {
                         delete i.source_generic_item.physicalStores;
                         i.price = parseFloat(item.price);
                         i.itemImageURL = item.hostedImages;
-                        i.name = item.name;
+                        i.name = item.name.replace(/[^\w\s]/gi, '');
                         i.owner = owner;
                         i.linkback = item.src;
                         i.linkbackname = 'urbanoutfitters.com';
