@@ -480,12 +480,15 @@ Landmark.generateIdFromName = function(name) {
 Landmark.itemLocationHack = function(item, loc) {
     if (item.loc.type === 'MultiPoint') {
         item.loc.type = 'Point';
+
+        // If there is no location to go by, choose a store for them
+        // (this should not be the case for kipsearch.com)
         if (!loc) {
             // Randomize the coordinates
             // >_>
             // <_<
             // T_T
-            item.loc.coordinates = item.loc.coordinates[Math.random()*item.loc.coordinates|0];
+            item.loc.coordinates = item.loc.coordinates[Math.random()*item.loc.coordinates.length|0];
             item.otherLocations = [];
             return item;
         }
@@ -504,8 +507,9 @@ Landmark.itemLocationHack = function(item, loc) {
                         lon: c[0],
                         lat: c[1]
                     }
-                }).sort(function(a, b) {
-                    return a.distance < b.distance;
+                })
+                .sort(function(a, b) {
+                    return a.distance - b.distance;
                 }).map(function(c) {
                     return [c.lon, c.lat]
                 });
