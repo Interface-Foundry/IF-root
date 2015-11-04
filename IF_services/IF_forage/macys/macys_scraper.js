@@ -44,7 +44,7 @@ module.exports = function(url, category, stores) {
                     }).catch(function(err) {
                         if (err) {
                             console.log('48: ', err)
-                            // var today = new Date().toString()
+                                // var today = new Date().toString()
                                 // fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                         }
                         callback(null)
@@ -315,13 +315,13 @@ function getInventory(items, Stores) {
                             }
 
                             body.stores.store.forEach(function(store) {
-                                    if (store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory && store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory.storeAvailability == "AVAILABLE") {
-                                        item.storeIds.push(store.address.id.toString().trim());
-                                    }
-                                })
+                                if (store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory && store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory.storeAvailability == "AVAILABLE") {
+                                    item.storeIds.push(store.address.id.toString().trim());
+                                }
+                            })
                             console.log('.')
                                 // console.log(upcNumber, ' found in : ', body.stores.store.length, ' stores...')
-                            // console.log('Found: ',body.stores.store.length,'\n');
+                                // console.log('Found: ',body.stores.store.length,'\n');
                             wait(function() {
                                 finishedSku();
                             }, 800);
@@ -379,8 +379,6 @@ function saveItems(items, stores, notfoundstore, url) {
                     updatedInv[1] = [notfoundstore.loc.coordinates]
                 }
 
-                // console.log('Saving item: ', item.name);
-
                 //Check if this item exists
                 db.Landmarks.findOne({
                     'name': item.name,
@@ -435,7 +433,7 @@ function saveItems(items, stores, notfoundstore, url) {
                                         console.log('Saved: ', item.id)
                                     }
 
-                                    callback();
+                                    wait(callback, 2000);
                                 })
                             }) //end of uniquer
 
@@ -454,7 +452,7 @@ function saveItems(items, stores, notfoundstore, url) {
                                 console.log('Inventory update error: ', e)
                             }
                             // console.log('Updated inventory for item:', match.id)
-                            callback()
+                            wait(callback, 2000);
                         })
                     }
                 })

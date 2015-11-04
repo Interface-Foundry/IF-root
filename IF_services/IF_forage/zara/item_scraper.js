@@ -78,9 +78,9 @@ module.exports = function scrapeItem(url) { 
                         if (exists) {
                             exists = !exists
                                 //Remove outdated item, this doesn't need to happen sync
-                            db.Landmarks.remove({
-                                'id': existingItem.id
-                            })
+                            // db.Landmarks.remove({
+                            //     'id': existingItem.id
+                            // })
                         }
                         scrapeDetails(url).then(function(item) {
                             callback(null, item)
