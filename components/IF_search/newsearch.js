@@ -130,10 +130,10 @@ app.post(searchItemsUrl, function(req, res, next) {
                       longitude: req.body.loc.lon,
                       latitude: req.body.loc.lat
                     });
-                    return a_dist > b_dist;
+                    return a_dist - b_dist;
                   });
                   r.parent = r.parents[0];
-                  delete r.parents
+                  delete r.parents;
                 }
               })
 
@@ -329,7 +329,9 @@ function textSearch(q, page) {
                   _id: {
                       $in: ids
                   }
-              }).exec();
+              })
+              .select(db.Landmark.frontEndSelect)
+              .exec();
 
               return Promise.settle([users, items]).then(function(arry) {
                   var u = arry[0];
