@@ -69,7 +69,7 @@ function loadCatalog(url) {
                     console.log('Scraping>>>', detailsUrl)
                     item_scraper(detailsUrl).then(function(result) {
                         // console.log('Done.')
-                        wait(callback,200)
+                        wait(callback,2000)
                     }).catch(function(err) {
                         callback()
                     })

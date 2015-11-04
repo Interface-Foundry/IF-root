@@ -514,7 +514,7 @@ function processItems(inventory, itemData, Stores) {
                                         // console.log('Found store coords: ',s.loc)
                                         i.parents.push(s._id)
                                         i.loc.coordinates.push(s.loc.coordinates)
-                                        wait(callback,200)
+                                        wait(callback,2000)
                                     }
                                 })
                             },
