@@ -173,11 +173,11 @@ function scrapeItem(url) {
                                         } catch (err) {
                                             if (err) console.log(err)
 
-                                            for (var key in $('div#priceInfo span')) {
-                                                if ($('div#priceInfo span').hasOwnProperty(key) && $('div#priceInfo span')[key].children && $('div#priceInfo span')[key].children[0] && $('div#priceInfo span')[key].children[0].data) {
-                                                    console.log('*****', $('div#priceInfo span')[key].children[0].data)
+                                            for (var key in $('span.priceSale')) {
+                                                if ($('span.priceSale').hasOwnProperty(key) && $('span.priceSale')[key].children && $('span.priceSale')[key].children[0] && $('span.priceSale')[key].children[0].data) {
+                                                    console.log('*****', $('span.priceSale')[key].children[0].data)
                                                     try {
-                                                        var price = parseFloat($('div.standardProdPricingGroup span')[key].children[0].data.split('$')[1])
+                                                        var price = parseFloat($('span.priceSale')[key].children[0].data.split('$')[1])
                                                         prices.push(price)
                                                     } catch (err) {
                                                         if (err) console.log(err)
@@ -185,7 +185,7 @@ function scrapeItem(url) {
                                                     }
                                                 }
                                             }
-                                            // return reject('Could not find prices for this item.')
+
                                         }
                                     }
                                 }

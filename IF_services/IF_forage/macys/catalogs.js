@@ -1,4 +1,7 @@
 var catalogs = [{
+    category: 'Womens Activewear',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-activewear?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1'
+}, {
     category: 'Womens Dress',
     url: 'http://www1.macys.com/shop/womens-clothing/dresses?id=5449&edge=hybrid&cm_sp=us_hdr-_-women-_-5449_dresses_COL1'
 }, {
@@ -58,9 +61,6 @@ var catalogs = [{
 }, {
     category: 'Mens Big Tall',
     url: 'http://www1.macys.com/shop/mens-clothing/big-and-tall?id=45758&edge=hybrid&cm_sp=us_hdr-_-men-_-45758_big-%26-tall_COL1'
-}, {
-    category: 'Womens Activewear',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-activewear?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1'
 }, {
     category: 'Womens Skirt',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-skirts?id=131&edge=hybrid&cm_sp=us_hdr-_-women-_-131_skirts_COL1'
@@ -182,6 +182,6 @@ function shuffle(array) {
     return array;
 }
 
-catalogs = shuffle(catalogs)
+// catalogs = shuffle(catalogs)
 
 module.exports = catalogs
