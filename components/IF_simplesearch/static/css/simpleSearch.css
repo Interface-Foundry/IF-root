@@ -35,11 +35,12 @@ body {
 
 @font-face {
 	font-family: 'kiplevels';
-	src:url('fonts/kiplevels.eot?-y4ype7');
-	src:url('fonts/kiplevels.eot?#iefix-y4ype7') format('embedded-opentype'),
-		url('fonts/kiplevels.ttf?-y4ype7') format('truetype'),
-		url('fonts/kiplevels.woff?-y4ype7') format('woff'),
-		url('fonts/kiplevels.svg?-y4ype7#kiplevels') format('svg');
+	src:url('../fonts/kiplevels.eot?-y4ype7');
+	src:url('../fonts/kiplevels.eot?#iefix-y4ype7') format('embedded-opentype'),
+		url('../fonts/kiplevels.ttf?-y4ype7') format('truetype'),
+        url('../fonts/kiplevels.woff?-y4ype7') format('woff'),
+		url('../fonts/kiplevels.woff2?-y4ype7') format('woff'),
+		url('../fonts/kiplevels.svg?-y4ype7#kiplevels') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }

@@ -1,31 +1,63 @@
 var postcss = require('gulp-postcss');
-var autoprefixer = require('autoprefixer');
+var prefix = require('autoprefixer');
 var uglify = require('gulp-uglify');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var csswring = require('csswring');
-var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
+var clean = require('gulp-clean');
+var minifyHtml = require('gulp-minify-html');
+var minifyCss = require('gulp-minify-css');
+var usemin = require('gulp-usemin');
 
 gulp.task('default', ['sass', 'minify']);
 
-gulp.task('sass', function() {
-    //minify css
-    gulp.src('./static/css/simpleSearch.css')
-        .pipe(sourcemaps.init())
-        .pipe(postcss([autoprefixer({
-                browsers: ['last 2 versions']
-            }),
-            csswring
-        ]))
-        .pipe(concat('simpleSearch.mincat.css')) //rename file via concat
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('./static')); // pushing mincat.css to static
-    // gulp.src(['./static/css/simpleSearch.min.css'])
-    //     .pipe(concat('simpleSearch.mincat.css'))
-    //     .pipe(gulp.dest('./static'));
-    //minify and concat js
+gulp.task('clean', function(){
+    return gulp.src('dist/')
+        .pipe(clean());
+});
 
+gulp.task('templates', ['clean'], function(){
+    return gulp.src(['./static/**/*.html'])
+        .pipe(gulp.dest('dist/'));
+});
+
+gulp.task('favicon', ['clean'], function(){
+    return gulp.src(['./static/favicon/*'])
+        .pipe(gulp.dest('dist/favicon/'));
+});
+gulp.task('fonts', ['clean'], function(){
+    return gulp.src(['./static/fonts/*'])
+        .pipe(gulp.dest('dist/fonts/'));
+});
+gulp.task('img', ['clean'], function(){
+    return gulp.src(['./static/img/*'])
+        .pipe(gulp.dest('dist/img/'));
+});
+
+gulp.task('css', function() {
+    //minify css
+    /*gulp.src('./static/css/vendor/*.css')
+        .pipe(concat('vendor.css'))
+        .pipe(gulp.dest('dist/css/'));*/
+    gulp.src('./static/css/.css')
+        .pipe(postcss([autoprefixer({ browsers: ['last 2 versions']})]))
+        .pipe(minifyCss());
+});
+
+gulp.task('dist', ['clean','templates', 'favicon', 'fonts', 'img', 'usemin']);
+
+
+
+gulp.task('usemin',['clean'],function() {
+  return gulp.src('./simpleSearch.html')
+    .pipe(usemin({
+      venderCss: ['concat'],
+      css: [minifyCss()],
+      html: [ minifyHtml({ empty: true }) ],
+      js: [ uglify(), 'concat' ],
+      vendor: [ uglify(), 'concat' ]
+    }))
+    .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('minify', function() {

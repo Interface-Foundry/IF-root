@@ -134,7 +134,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     }*/
 
     $scope.hideExpandedOnClick = function(event){
-        hideExpanded();
+        if($scope.isExpanded){
+            hideExpanded();
+        }
     };
 
     function hideExpanded (){
@@ -235,6 +237,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     };
 
     $scope.expandContent = function(index, event, imgCnt) {
+        $timeout(function(){
+            $scope.isExpanded = true;
+        }, 250);
         $scope.mobileScreen = window.innerWidth <= 750;
         if ($scope.mobileScreen) {
             $scope.outerHeight = $(window)[0].outerHeight;
@@ -291,7 +296,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             }
         }
 
-    }
+    };
 
     $(window).on('click', function(event) {
         if (event.target.className === "collapsedContent") {

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ng-app="simpleSearchApp">
 <!-- 
    _  __                ____   
   |"|/ /       ___    U|  _"\ u
@@ -12,18 +12,19 @@ U/| . \\u      | |     |  __/
 ~ Kip Search ~
 ~ v0.1 Beta ~ 
 -->
-<head>
-    <meta charset="utf-8"/>
-    <span ng-if="!searchTitle"><title>Kip - Search for things in IRL stores around you</title></span>
-    <span ng-if="searchTitle"><title>{{searchTitle}}</title></span>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="fragment" content="!">  
-    <meta name="prerender-status-code" content="301">
-    <meta name="prerender-header" content="Location: https://kipsearch.com">
-    <meta name="description" content="Search for clothing in physical stores around you">
 
-    <!-- Open Graph data -->
-    <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article:http://ogp.me/ns/article#">
+<head>
+  <meta charset="utf-8" />
+  <span ng-if="!searchTitle"><title>Kip - Search for things in IRL stores around you</title></span>
+  <span ng-if="searchTitle"><title>{{searchTitle}}</title></span>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fragment" content="!">
+  <meta name="prerender-status-code" content="301">
+  <meta name="prerender-header" content="Location: https://kipsearch.com">
+  <meta name="description" content="Search for clothing in physical stores around you">
+  <!-- Open Graph data -->
+
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article:http://ogp.me/ns/article#">
     <meta property="og:title" content="Kip" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kipsearch.com/" />
@@ -39,14 +40,6 @@ U/| . \\u      | |     |  __/
     <meta name="twitter:creator" content="@alyxmxe">
     <!-- Twitter Summary card images must be at least 120x120px -->
     <meta name="twitter:image" content="https://kipsearch.com/img/purp_kip_logo.png">
-
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css"/>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css" rel="stylesheet" type="text/css"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" rel="stylesheet" type="text/css"/>
-<!--    <link href="/css/normalize.css" rel="stylesheet" type="text/css"/>-->
-<!--    <link href="/css/skeleton.css" rel="stylesheet" type="text/css"/>-->
-    <link href="/simpleSearch.mincat.css" rel="stylesheet" type="text/css"/>
     <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-touch-icon-72x72.png">
@@ -65,62 +58,62 @@ U/| . \\u      | |     |  __/
     <meta name="msapplication-TileImage" content="/favicon/mstile-144x144.png">
     <meta name="theme-color" content="#ffffff">
     <base href="/">
+    
+    <!-- build:venderCss(./static/) ./css/vendor.css -->
+    <link href="css/fonts.css" rel="stylesheet" type="text/css" />
+    <link href="css/normalize.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/skeleton.min.css" rel="stylesheet" type="text/css" />
+    <!-- endbuild -->
 
-</head>
+    <!-- build:css(./static/) ./css/kip.css -->
+    <link href="css/simpleSearch.css" rel="stylesheet" type="text/css" />
+    <!-- endbuild -->
+  </head>
 
-<body>
-
-  <div ng-view></div>
-
-  <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <body>
+    <div ng-view></div>
+    <script>
+    (function(i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function() {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
     ga('create', 'UA-51752546-7', 'auto');
     ga('send', 'pageview');
-
-    
-      
-  </script>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script> 
-<!--    <script src="lib/dev/angular.js"></script>-->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-beta.0/angular-route.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap.min.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>    
-  <script src="lib/script.js"></script>
-    
-    <script>
-// ASYNC JS LOADER
-        $script([
-            'simpleSearch.mincat.js'
-        ], function () {
-            angular.bootstrap(document, ['simpleSearchApp']);   
-        });
     </script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
 
-<!-- SCRIPTS TO LOAD
-  <script src="lib/jquery.geocomplete.js"></script>
-  <script src="lib/angular-inview.js"></script>
-  <script src="lib/angular-smooth-scroll.js"></script>
-  <script src="lib/min/angular-smooth-scroll.min.js"></script>
-  <script src="lib/min/holder.min.js"></script>
-  <script src="lib/min/jquery.lazyload.min.js"></script>
-  <script src="lib/min/jquery.geocomplete.min.js"></script>
-  <script src="moment.min.js"></script>
-  <script src="angular-moment.min.js"></script>
-  <script src="angular-holderjs/src/holder.js"></script>
-  <script src="holder.js"></script>
-  <script src="jquery.lazyload.js"></script>
-  <script src="simpleSearch.js"></script>
--->
-        
-</body>
+    <!-- build:vendor(./static/) js/vendor.js -->
+    <script src="lib/vendor/angular.min.js"></script>
+    <script src="lib/vendor/angular-route.min.js"></script>
+    <script src="lib/vendor/jquery-2.1.4.js"></script>
+    <script src="lib/vendor/bootstrap.min.js"></script>
+    <script src="lib/vendor/ui-bootstrap-tpls-0.13.4.min.js"></script>
+    <script src="lib/vendor/jquery.geocomplete.min.js"></script>
+    <script src="lib/vendor/angular-inview.js"></script>
+    <script src="lib/vendor/angular-smooth-scroll.min.js"></script>
+    <script src="lib/vendor/angular-smooth-scroll.min.js"></script>
+    <script src="lib/vendor/holder.min.js"></script>
+    <script src="lib/vendor/jquery.lazyload.min.js"></script>
+    <script src="lib/vendor/jquery.geocomplete.min.js"></script>
+    <script src="lib/vendor/jquery.lazyload.min.js"></script>
+    <script src="lib/vendor/moment.min.js"></script>
+    <script src="lib/vendor/angular-moment.js"></script>
+    <script src="lib/vendor/ng-holder-directive.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js(./static/) js/kip.js -->
+    <script src="simpleSearch.js"></script>
+    <!-- endbuild -->
+  </body>
+
 </html>
-
-
-
