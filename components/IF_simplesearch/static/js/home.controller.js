@@ -1,86 +1,3 @@
-var simpleSearchApp = angular.module('simpleSearchApp', ['ngHolder', 'angularMoment', 'ngRoute', 'angular-inview', 'smoothScroll'])
-    .filter('httpsURL', [function() {
-
-        return function(input) {
-            if (input.indexOf('https') > -1) {
-                //do nothing
-            } else {
-                var regex = /http/gi;
-                input = input.replace(regex, 'https');
-            }
-            return input;
-        };
-    }])
-    .filter('deCapslock', [function() {
-        return function(input) {
-            input = input.toLowerCase();
-            var reg = /\s((a[lkzr])|(c[aot])|(d[ec])|(fl)|(ga)|(hi)|(i[dlna])|(k[sy])|(la)|(m[edainsot])|(n[evhjmycd])|(o[hkr])|(pa)|(ri)|(s[cd])|(t[nx])|(ut)|(v[ta])|(w[aviy]))$/;
-            var state = input.match(reg);
-            if (state !== null) {
-                state = state[0].toUpperCase();
-                input = input.replace(reg, state);
-            }
-            return input;
-        };
-
-    }])
-.factory('ResCache', ['$cacheFactory', function($cacheFactory) {
-    return $cacheFactory('resCache', {
-        capacity: 3    
-    });
-}])
-    .factory('location', [
-        '$location',
-        '$route',
-        '$rootScope',
-        function($location, $route, $rootScope) {
-            $location.skipReload = function() {
-                var lastRoute = $route.current;
-                var un = $rootScope.$on('$locationChangeSuccess', function() {
-                    $route.current = lastRoute;
-                    un();
-                });
-                return $location;
-            };
-
-            return $location;
-        }
-    ])
-    .factory('storeFactory', function() {
-        return {
-            store: {},
-            setStore: function(newStore) {
-                this.store = newStore;
-            }
-        }
-    })
-    .config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-        $routeProvider
-            .when('/', {
-                templateUrl: 'partials/home.html',
-                controller: 'HomeCtrl'
-            })
-            .when('/q/:query/:lat/:lng/:cityName', {
-                templateUrl: 'partials/results.html',
-                controller: 'HomeCtrl'
-            })
-            //Individual page
-            //add place ID parameter
-            //Add address/ phone # and store name, hours on this page
-            .when('/t/:parentId/:mongoId', {
-                templateUrl: 'partials/item.html',
-                controller: 'HomeCtrl'
-            })
-            .otherwise({
-                redirectTo: '/'
-            });
-
-        $locationProvider.html5Mode({
-            enabled: true,
-            requireBase: false
-        });
-    }]);
-
 simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$document', '$timeout', '$interval', 'amMoment', '$window', '$routeParams', 'location', '$rootScope', '$route', 'ResCache', 'storeFactory', '$anchorScroll', function ($scope, $http, $location, $document, $timeout, $interval, amMoment, $window, $routeParams, location, $rootScope, $route, ResCache, storeFactory, $anchorScroll) {
 
     console.log('Want to API with us? Get in touch: hello@interfacefoundry.com');
@@ -133,7 +50,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         $scope.mobileScreen = true;
     }*/
 
-    $scope.hideExpandedOnClick = function(event){
+    $scope.hideExpandedOnClick = function(){
         if($scope.isExpanded){
             hideExpanded();
         }
@@ -823,7 +740,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         $scope.windowWidth = window.width + 'px';
     });
 
-}]);
 
 
 function calcDistance(lat2, lon2, lat1, lon1) {
@@ -860,142 +776,8 @@ function roundFloat(value, exp) {
     return +(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp));
 }
 
-
-//auto focus the search input box
-simpleSearchApp.directive('autoFocus', ['$timeout', function($timeout) {
-    return {
-        restrict: 'AC',
-        link: function(_scope, _element) {
-            $timeout(function() {
-                _element[0].focus();
-            }, 0);
-        }
-    };
 }]);
 
-simpleSearchApp.directive('afterResults', ['$document', function($document) {
-    return {
-        restrict: "E",
-        replace: true,
-        scope: {
-            windowHeight: '='
-        },
-        link: function(scope, element, attrs) {
-            console.log(scope.$parent.windowHeight);
-            if (scope.$parent.$last) {
-                // console.log(scope.windowHeight);
-                // console.log($document[0].body.scrollHeight);
-                // console.log($document[0].body.clientHeight);
-
-                scope.windowHeight = $document[0].body.clientHeight;
-                console.log(scope.windowHeight);
-            }
-        }
-    };
-}]);
-
-simpleSearchApp.directive('selectOnClick', ['$window', function($window) {
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-            element.on('click', function() {
-                if (!$window.getSelection().toString()) {
-                    // Required for mobile Safari
-                    this.setSelectionRange(0, this.value.length)
-                }
-            });
-        }
-    };
-}]);
-
-simpleSearchApp.directive('ngEnter', function() {
-    return function(scope, element, attrs) {
-        element.bind("keydown keypress", function(event) {
-            if (event.which === 13) {
-                scope.$apply(function() {
-                    scope.$eval(attrs.ngEnter, {
-                        'event': event
-                    });
-                });
-
-                event.preventDefault();
-            }
-        });
-    };
-});
-
-simpleSearchApp.directive('tooltip', function() {
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-            $(element).hover(function() {
-                // on mouseenter
-                $(element).tooltip('show');
-            }, function() {
-                // on mouseleave
-                $(element).tooltip('hide');
-            });
-        }
-    }; 
-});
-
-simpleSearchApp.service('searchQuery', function() {
-        var searchParams = [];
-
-        var addSearch = function(newObj) {
-            searchParams = [];
-            searchParams.push(newObj);
-        };
-
-        var getSearch = function() {
-            return searchParams;
-        };
-
-        return {
-            addSearch: addSearch,
-            getSearch: getSearch
-        };
-
-    });
-
-simpleSearchApp.directive('dlEnterKey', function() {
-    return function(scope, element, attrs) {
-
-        element.bind("keydown keypress", function(event) {
-            var keyCode = event.which || event.keyCode;
-
-            // If enter key is pressed
-            if (keyCode === 13) {
-                scope.$apply(function() {
-                        // Evaluate the expression
-                    scope.$eval(attrs.dlEnterKey);
-                });
-
-                event.preventDefault();
-            }
-        });
-    };
-});
-
-/*simpleSearchApp.directive("outsideClick", ['$document', function( $document){
-return {
-    link: function( $scope, $element, $attributes ){
-        console.log('asdlkajsdaslkdjaslkdj');
-        var scopeExpression = $attributes.outsideClick,
-            onDocumentClick = function(event){
-                if(event.target.id !== 'expanded') {
-                    $scope.isExpanded = false; 
-                }
-            };
-
-        $document.on("click", onDocumentClick);
-
-        $element.on('$destroy', function() {
-            $document.off("click", onDocumentClick);
-        });
-    }
-}; 
-}]);*/
     // simpleSearchApp.directive('stringToTimestamp', function() {
     //         return {
     //             require: 'ngModel',
