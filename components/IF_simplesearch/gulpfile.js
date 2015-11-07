@@ -9,7 +9,7 @@ var minifyHtml = require('gulp-minify-html');
 var minifyCss = require('gulp-minify-css');
 var usemin = require('gulp-usemin');
 
-gulp.task('default', ['sass', 'minify']);
+gulp.task('default', ['dist']);
 
 gulp.task('clean', function(){
     return gulp.src('dist/')
@@ -37,7 +37,7 @@ gulp.task('img', ['clean'], function(){
 gulp.task('usemin',['clean'],function() {
   return gulp.src('./simpleSearch.html')
     .pipe(usemin({
-      venderCss: ['concat'],
+      venderCss: [minifyCss(),'concat'],
       css: [minifyCss()],
       html: [ minifyHtml({ empty: true }) ],
       js: [ uglify(), 'concat' ],
