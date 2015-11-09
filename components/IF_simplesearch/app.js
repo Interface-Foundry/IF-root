@@ -28,7 +28,6 @@ app.use(compression());
 
 
 app.get('/*', function(req, res, next) {
-    console.log(process.env.NODE_ENV);
     res.sendfile(defaultPage);
 });
 

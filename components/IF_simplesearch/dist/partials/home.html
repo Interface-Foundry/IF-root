@@ -1,0 +1,45 @@
+
+<div class="container">
+  <div ng-hide="showQueryBar" >
+
+      <div class="flex-Container">
+
+        <div class="flexBody Top">
+            <a ng-href="/"><div class="flexBody Top-Icon"></div></a>
+            <h1 class="Top-Tag">Search for clothes in IRL stores around you  <i style="padding-left:5px; font-size:13px; opacity:0.6;">  <span class="beta">BETA</span></i></h1>
+        </div>
+
+        <div class="flexBody Mid-Container">
+            <form class="flexBody Mid Input">
+
+                <div class="Mid-Input Length"><span class="Find-ZTop">Find</span><input ng-enter="searchQuery()" ng-init="newQuery = true;" ng-model="query" maxlength="2046" class="Find-Input" placeholder="blue dress, office, fall" auto-focus><span ng-if="query.length >= 1" ng-click="emptyQuery();" class="kiplevels-hate-solid clearField"></span></input></div>
+
+                <div class="Mid-Input Length"><span class="Find-ZTop">Near </span><span class="locateButton"><i id="locateGly" tooltip data-placement="top" data-toggle="tooltip" title="Locate Me" style="cursor:pointer; z-index:12; float:right; padding-right:23px; padding-top:4px; opacity:0.4; cursor:pointer;" ng-click="getGPSLocation()" class="glyphicon glyphicon-screenshot"></i></span>
+
+                  <input id="locInput" ng-enter="searchQuery()" ng-model="userCity"
+                    class="Find-Input" ng-class="loadingLoc ? 'loading-gif' : 'noloading-gif'" maxlength="2046" placeholder="address, city, landmark" select-on-click>
+                  </input>
+            
+                
+                </div>
+                <div class="Mid-Input Length Button"><div ng-click="searchQuery();" type="submit" class="flexBody Mid Button"><div>Kip Search</div></div></div>
+            </form>
+            <div ng-click="searchQuery()" class="Mid-Input Mobile Button"><i class="Mobile-Icon glyphicon glyphicon-search"></i></div>
+        </div>
+        <div class="flexBody Mid Tag">
+            <div class="Mid Tag Text">
+                <div>Trending: <a ng-click="searchThis('70s')">#70s</a> <a ng-click="searchThis('fall')">#fall</a> <a ng-click="searchThis('blue dress')">#blue dress</a></div>
+            </div>
+ 
+            
+            
+        </div>
+        <div class="flexBody Foot">
+          <h2>Over 1,000,000 items on sale</h2>
+          <h6 style="margin-bottom:0px;" class="u-full-width u-textAlignCenter">Have something to sell? <a href="http://kipstyles.co/blog/adding-snaps-using-style-snap-to-kip/">Add your own items</a> to Kip Search with our <a href="https://itunes.apple.com/us/app/kip-styles/id1024791354?mt=8">iPhone</a> or <a href="https://play.google.com/store/apps/details?id=com.kip">Android</a> app</h6>
+
+        </div>
+
+      </div>
+    </div>
+</div>
