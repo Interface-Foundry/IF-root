@@ -5,10 +5,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var uuid = require('uuid');
 var compression = require('compression');
+var base = process.env.NODE_ENV !== 'production' ?  __dirname + '/static' : __dirname + '/dist';
+var defaultPage = process.env.NODE_ENV !== 'production' ?  __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
 // var request = require('request');
 
 app.use(bodyParser.json());
-app.use(express.static(__dirname + '/static'));
+app.use(express.static(base));
 // app.use(require('prerender-node').set('prerenderToken', 'G7ZgxSO9pLyeidrHtWgX'));
 app.use(require('prerender-node').set('prerenderServiceUrl', 'http://127.0.1.1:3000'));
 app.use(require('prerender-node').set('protocol', 'https'));
@@ -26,7 +28,7 @@ app.use(compression());
 
 
 app.get('/*', function(req, res, next) {
-    res.sendfile(__dirname + '/simpleSearch.html');
+    res.sendfile(defaultPage);
 });
 
 // app.post('/getLoc', function (req, res, next) {
