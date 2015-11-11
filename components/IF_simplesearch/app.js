@@ -5,8 +5,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var uuid = require('uuid');
 var compression = require('compression');
-var base = process.env.NODE_ENV !== 'production' ?  __dirname + '/static' : __dirname + '/dist';
-var defaultPage = process.env.NODE_ENV !== 'production' ?  __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
+var base = process.env.NODE_ENV !== 'digitalocean' ?  __dirname + '/static' : __dirname + '/dist';
+var defaultPage = process.env.NODE_ENV !== 'digitalocean' ?  __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
 // var request = require('request');
 
 app.use(bodyParser.json());
