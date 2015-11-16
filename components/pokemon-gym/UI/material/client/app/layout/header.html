@@ -12,7 +12,7 @@
                      'bg-danger': ['16','26','36'].indexOf(main.skin) >= 0 }">
         <a href="#/">
             <span class="logo-icon zmdi zmdi-view-dashboard"></span>
-            <span class="logo-text">{{main.brand}}</span>
+            <span class="logo-text">Pokémon Gym</span>
         </a>
     </div>
 
@@ -246,60 +246,7 @@
                 </div>
 
             </li>
-            <li class="search-box visible-md visible-lg">
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="zmdi zmdi-search"></i></span>
-                    <input type="text" class="form-control" placeholder="{{ 'SEARCH' | translate }}">
-                    <span class="input-bar"></span>
-                </div>
-            </li>
-            <li class="dropdown" uib-dropdown is-open="status.isopenEmail">
-                <a href="javascript:;" class="dropdown-toggle" uib-dropdown-toggle ng-disabled="disabled" md-button aria-label="email" aria-label="email" aria-label="email">
-                    <i class="zmdi zmdi-email"></i>
-                    <span class="badge badge-danger">3</span>
-                </a>
-                <div class="uib-dropdown-menu with-arrow panel panel-default dropdown-menu-scaleIn">
-                    <div class="panel-heading"> You have 3 mails. </div>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <a href="javascript:;" class="media">
-                                <span class="media-left media-icon">
-                                    <span class="btn-icon btn-icon-round btn-success"><i class="zmdi zmdi-email"></i></span>
-                                </span>
-                                <div class="media-body">
-                                    <span class="block">Lisa sent you a mail</span>
-                                    <span class="text-muted block">2min ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="javascript:;" class="media">
-                                <span class="media-left media-icon">
-                                    <span class="btn-icon btn-icon-round btn-info"><i class="zmdi zmdi-email"></i></span>
-                                </span>
-                                <div class="media-body">
-                                    <span class="block">Jane sent you a mail</span>
-                                    <span class="text-muted">3 hours ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="javascript:;" class="media">
-                                <span class="media-left media-icon">
-                                    <span class="btn-icon btn-icon-round btn-danger"><i class="zmdi zmdi-email"></i></span>
-                                </span>
-                                <div class="media-body">
-                                    <span class="block">Lynda sent you a mail</span>
-                                    <span class="text-muted">9 hours ago</span>
-                                </div>
-                            </a>
-                        </li>                         
-                    </ul>
-                    <div class="panel-footer">
-                        <a href="#/mail/inbox">Show all mails.</a>
-                    </div>
-                </div>
-            </li>
+
         </ul> 
 
         <ul class="nav-right pull-right list-unstyled">
@@ -330,25 +277,6 @@
                             <span data-translate="LOG_OUT"></span>
                         </a>
                     </li>
-                </ul>
-            </li>
-            <li class="dropdown langs text-normal" data-ng-controller="LangCtrl" uib-dropdown is-open="status.isopenLang">
-                <a href="javascript:;" class="dropdown-toggle active-flag" uib-dropdown-toggle ng-disabled="disabled" md-button aria-label="lang">
-                    <div class="flag {{ getFlag() }}"></div>
-                </a>
-                <ul class="uib-dropdown-menu with-arrow    pull-right list-langs dropdown-menu-scaleIn" role="menu">
-                    <li data-ng-show="lang !== 'English' ">
-                        <a href="javascript:;" data-ng-click="setLang('English')"><div class="flag flags-american"></div> English</a></li>
-                    <li data-ng-show="lang !== 'Español' ">
-                        <a href="javascript:;" data-ng-click="setLang('Español')"><div class="flag flags-spain"></div> Español</a></li>
-                    <li data-ng-show="lang !== 'Portugal' ">
-                        <a href="javascript:;" data-ng-click="setLang('Portugal')"><div class="flag flags-portugal"></div> Portugal</a></li>
-                    <li data-ng-show="lang !== '中文' ">
-                        <a href="javascript:;" data-ng-click="setLang('中文')"><div class="flag flags-china"></div> 中文</a></li>
-                    <li data-ng-show="lang !== '日本語' ">
-                        <a href="javascript:;" data-ng-click="setLang('日本語')"><div class="flag flags-japan"></div> 日本語</a></li>
-                    <li data-ng-show="lang !== 'Русский язык' ">
-                        <a href="javascript:;" data-ng-click="setLang('Русский язык')"><div class="flag flags-russia"></div> Русский язык</a></li>
                 </ul>
             </li>
         </ul>
