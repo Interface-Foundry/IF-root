@@ -5,9 +5,21 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var uuid = require('uuid');
 var compression = require('compression');
-var base = process.env.NODE_ENV !== 'production' ?  __dirname + '/static' : __dirname + '/dist';
-var defaultPage = process.env.NODE_ENV !== 'production' ?  __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
-// var request = require('request');
+var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist';
+var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
+var fs = require('fs')
+
+var fsstat = fs.statSync('../../../IF-Shopify/app.js')
+
+if (fsstat.isFile()) {
+    var kipShopify = require('../../../IF-Shopify/app')
+    console.log('kip shopify loaded..')
+    app.use('/shopify', kipShopify);
+
+} else {
+    console.log('Shopify did not load.')
+}
+
 
 app.use(bodyParser.json());
 app.use(express.static(base));
@@ -40,11 +52,11 @@ app.get('/*', function(req, res, next) {
 //       }
 //     })
 
-    
+
 //     res.send();
 // });
 
-app.post('/search', function (req, res, next) {
+app.post('/search', function(req, res, next) {
     console.log(req.body);
 
     // if (req.body && req.body.email && req.body.password  && req.body.token) {
