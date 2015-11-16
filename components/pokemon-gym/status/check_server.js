@@ -29,5 +29,7 @@ if (!module.parent) {
     } else {
       console.log(json.host);
     }
+
+    console.log(JSON.stringify(json, null, 2))
   });
 }
