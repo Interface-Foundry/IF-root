@@ -20,7 +20,10 @@ var servers = [
   'pikachu.internal.kipapp.co',
   'flareon.internal.kipapp.co',
   'vaporeon.internal.kipapp.co',
-  'jankeon.internal.kipapp.co'
+  'jankeon.internal.kipapp.co',
+  'charmander.internal.kipapp.co',
+  'elasticsearch-cerulean.internal.kipapp.co',
+  'elasticsearch-vermillion.internal.kipapp.co'
 ]
 app.get('/status', function(req, res) {
   check_server.list(servers, function(e, stats) {
