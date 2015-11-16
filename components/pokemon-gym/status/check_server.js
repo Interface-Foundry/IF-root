@@ -18,7 +18,7 @@ var check_server = module.exports = function(host, callback) {
     if (done) {
       return;
     }
-    
+
     done = true;
     if (e) {
       return callback({
@@ -33,7 +33,7 @@ var check_server = module.exports = function(host, callback) {
       done = true;
       callback(null,  {host: host, err: 'timeout'})
     }
-  }, 5000)
+  }, 3000)
 }
 
 // check many servers
