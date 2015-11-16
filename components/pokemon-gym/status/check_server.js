@@ -9,16 +9,17 @@ var async = require('async')
  * usage: check_server('pikachu.internal.kipapp.co', function(json) {})
  */
 var check_server = module.exports = function(host, callback) {
-  var timedOut = false;
+  var done = false;
 
   request({
     url: 'http://' + host + ':8911/status',
     json: true
   }, function(e, r, b) {
-    if (timedOut) {
+    if (done) {
       return;
     }
-
+    
+    done = true;
     if (e) {
       return callback({
         err: 'Could not get statistics for server: '
@@ -28,8 +29,10 @@ var check_server = module.exports = function(host, callback) {
   })
 
   setTimeout(function() {
-    timedOut = true;
-    callback(null,  {host: host, err: 'timeout'})
+    if (!done) {
+      done = true;
+      callback(null,  {host: host, err: 'timeout'})
+    }
   }, 5000)
 }
 
