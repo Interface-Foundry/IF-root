@@ -6,10 +6,30 @@ var morgan = require('morgan')
 app.use(bodyParser.json());
 app.use(morgan())
 
+//
+// Server status monitoring
+//
+var check_server = require('../status/check_server')
+var servers = [
+  'pikachu.internal.kipapp.co',
+  'flareon.internal.kipapp.co',
+  'vaporeon.internal.kipapp.co',
+  'jankeon.internal.kipapp.co'
+]
 app.get('/status', function(req, res) {
-  res.send([{host: 'example'}])
+  check_server.list(servers, function(e, stats) {
+    if(e) {
+      res.status(500);
+      res.send(e);
+    } else {
+      res.send(stats);
+    }
+  })
 })
 
+//
+// Query testing
+//
 app.post('/query', function(req, res) {
   res.send({
     elasticsearchQuery: {deep: {nested: {query: 'example'}}},
@@ -20,24 +40,36 @@ app.post('/query', function(req, res) {
   })
 })
 
+//
+// Error monitoring
+//
 app.get('/errors/node', function(req, res) {
   res.send([{
-    message: 'example',
-    stack: 'example'
+    "@timestamp": (new Date()).toISOString(),
+    message: 'example ERROR: type error',
+    stack: 'example at line 33:12',
+    niceMessage: 'example nice message \\(^ヮ^)/',
+    devMessage: 'example dev message, like "TODO was no time to handle multiple shopify stores"'
   }])
 })
 
 app.get('/errors/front-end', function(req, res) {
   res.send([{
-    message: 'example',
-    stack: 'example'
+    "@timestamp": (new Date()).toISOString(),
+    message: 'example ERROR: type error',
+    stack: 'example at line 33:12',
+    niceMessage: 'example nice message \\(^ヮ^)/',
+    devMessage: 'example dev message, like "TODO was no time to handle multiple shopify stores"'
   }])
 })
 
 app.get('/errors/processing', function(req, res) {
   res.send([{
-    message: 'example',
-    stack: 'example'
+    "@timestamp": (new Date()).toISOString(),
+    message: 'example ERROR: type error',
+    stack: 'example at line 33:12',
+    niceMessage: 'example nice message \\(^ヮ^)/',
+    devMessage: 'example dev message, like "TODO was no time to handle multiple shopify stores"'
   }])
 })
 

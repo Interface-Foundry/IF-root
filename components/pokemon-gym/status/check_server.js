@@ -1,5 +1,6 @@
 'use strict';
 var request = require('request')
+var async = require('async')
 
 /**
  * Check the status for a host
@@ -8,18 +9,35 @@ var request = require('request')
  * usage: check_server('pikachu.internal.kipapp.co', function(json) {})
  */
 var check_server = module.exports = function(host, callback) {
+  var timedOut = false;
+
   request({
     url: 'http://' + host + ':8911/status',
     json: true
   }, function(e, r, b) {
+    if (timedOut) {
+      return;
+    }
+
     if (e) {
       return callback({
         err: 'Could not get statistics for server: '
       })
     }
-
-    callback(r.body);
+    callback(null, r.body);
   })
+
+  setTimeout(function() {
+    timedOut = true;
+    callback(null,  {host: host, err: 'timeout'})
+  }, 5000)
+}
+
+// check many servers
+var check_servers = module.exports.list = function(hosts, callback) {
+  async.map(hosts, function(host, done) {
+    check_server(host, done)
+  }, callback)
 }
 
 if (!module.parent) {
