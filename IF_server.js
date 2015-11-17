@@ -596,8 +596,11 @@ app.post('/api/analytics/:action', function(req, res) {
 /* Logging front end errors */
 var frontendLog = Log('kipsearch.com');
 app.post('/api/logging/error', function(req, res) {
-  req.body['']
   frontendLog.error(req.body);
+  res.send('📬')
+})
+app.post('/api/logging/log', function(req, res) {
+  frontendLog(req.body);
   res.send('📬')
 })
 
