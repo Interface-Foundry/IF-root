@@ -5,6 +5,8 @@
 var config = require('config');
 var _ = require('lodash');
 var os = require('os');
+var elasticsearch = require('elasticsearch');
+console.log(config.elasticsearchElk);
 
 var parent = module.parent;
 while (parent.parent) {
@@ -14,10 +16,22 @@ var filename = parent.filename.split(/[/\\]/).pop();
 var hostname = os.hostname();
 
 if (config.elasticsearchElk) {
-  console.log('logging data to elasticsearch ' + config.elasticsearchElk.url + '/logstash-node/' + filename);
-  var es = require('elasticsearch').Client({
-      host: config.elasticsearchElk.url
+  // logs elasticsearch stuff, flesh out later once we know what's useful
+  var ESLogger = function(config) {
+      var defaultLogger = function() {};
+
+      this.error = defaultLogger;
+      this.warning = defaultLogger;
+      this.info = defaultLogger;
+      this.debug = defaultLogger;
+      this.trace = defaultLogger;
+      this.close = defaultLogger;
+  };
+  var es = new elasticsearch.Client({
+      host: config.elasticsearchElk.url,
+      log: ESLogger
   });
+  debugger;
 } else {
   console.log('not logging to elasticsearch')
 }
@@ -72,6 +86,7 @@ var Log = module.exports = function(type) {
           }, function(e, r) {
               // who watches the watchers
               if (e) {
+                  console.error(e);
                   console.error('ERROR LOG AGGREGATOR DOWN - CHECK ELASTICSEARCH ON', config.elasticsearchElk.url);
               }
           });

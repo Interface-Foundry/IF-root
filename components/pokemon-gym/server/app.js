@@ -40,9 +40,10 @@ app.get('/status', function(req, res) {
 //
 // Query testing
 //
+var search = require('../../IF_search/newsearch')
 app.post('/query', function(req, res) {
   res.send({
-    elasticsearchQuery: {deep: {nested: {query: 'example'}}},
+    elasticsearchQuery: search.getQuery(req.body, 0),
     results: [{
       elasticsearchDoc: {text: 'example'},
       mongoDoc: {id: 'example', description: 'example'}
