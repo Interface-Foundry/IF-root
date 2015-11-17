@@ -1,0 +1,10 @@
+
+<div class="page page-table" data-ng-controller="ErrorsCtrl">
+
+    <h2 class="section-header">Node.js Errors</h2>
+
+    <div ng-repeat="error in errors">
+        <pre>{{error | json}}</pre>
+    </div>
+    
+</div>

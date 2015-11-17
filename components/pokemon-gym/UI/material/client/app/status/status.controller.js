@@ -1,20 +1,11 @@
 (function () {
     'use strict';
 
-    angular.module('app.query')
-        .controller('QueryCtrl', ['$scope', '$filter', '$http',QueryCtrl]);
+    angular.module('app.status')
+        .controller('StatusCtrl', ['$scope', '$filter', '$http',StatusCtrl]);
 
-    function QueryCtrl($scope, $filter, $http) {
+    function StatusCtrl($scope, $filter, $http) {
 
-
-
-      // the response will be: {
-      //   elasticsearchQuery: {a big document},
-      //   results: [{
-      //     elasticsearchDoc: {},
-      //     mongoDoc: {}
-      //   }]
-      // }
 
         var init;
 
@@ -33,79 +24,17 @@
         $scope.currentPage = 1;
         $scope.currentPage = [];
 
-        $scope.radius = 5;
+        $scope.loading=true;
 
-    $scope.searchItems = function() {
+        $http.get('http://pikachu.kipapp.co:9999/status').
+        then(function(res) {        
+            console.log(res);
 
-        $scope.results;
+            $scope.servers = res.data;
 
-        if (!$scope.query){
-          $scope.query = 'null';
-        }
-        if (!$scope.userLat || !$scope.userLng){
-          $scope.userLat = 40.739432799999996;
-          $scope.userLng = -73.9891253;
-        }
-        if (!$scope.radius){
-          $scope.radius = 5;
-        }
+            $scope.loading = false;
 
-        $http.post('http://pikachu.kipapp.co:9999/query', {
-            text: $scope.query,
-            loc: {
-                lat: $scope.userLat,
-                lon: $scope.userLng
-            },
-            radius: $scope.radius,
-        }).then(function(res) {
-
-          $scope.results = res.data;
-
-          console.log(res.data)
-
-        }); 
-    }
-        // $http.post('/query',data).
-        // then(function(res) {        
-        //     console.log(res);
-
-        //     // for (var i = 0; i < res.data.length; i++) {
-        //     //     var marker = L.marker(new L.LatLng(res.data[i].lat, res.data[i].lng), {
-        //     //         icon: L.mapbox.marker.icon({'marker-symbol': 'post', 'marker-color': '0044FF'}),
-        //     //         title: res.data[i].name
-        //     //     });
-        //     //     marker.bindPopup('<p>'+res.data[i].name+'<br>Item Id: '+res.data[i].item_id+'<br>Parent Id: '+res.data[i].parent_id+'</p>');
-        //     //     $scope.markers.addLayer(marker);
-        //     // }
-
-        //     // $scope.itemCount = res.data.length;
-        //     // map.addLayer($scope.markers);
-        //     // $scope.loading = false;
-
-        // });
-
-
-
-
-        //get loc from GPS
-        $scope.getGPSLocation = function() {
-
-            $scope.loadingLoc = true;
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else {
-                console.log('no geolocation support');
-            }
-        }
-
-        function showPosition(position) {
-            console.log(position);
-            $scope.userLat = position.coords.latitude;
-            $scope.userLng = position.coords.longitude;
-            $scope.loadingLoc = false;
-            $scope.$apply();
-        }
-
+        });
 
 
         $scope.timestamp = "2015-11-16T20:00:55.395Z";

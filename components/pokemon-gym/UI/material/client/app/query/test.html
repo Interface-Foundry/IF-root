@@ -1,0 +1,31 @@
+
+<div class="page page-table" data-ng-controller="QueryCtrl">
+
+    <div class="row ui-section">
+    <div class="col-lg-8 clearfix">
+
+      <form novalidate class="simple-form">
+        Query text: <input style="width:500px;" type="text" ng-model="query" /><br />
+        Lat: <input type="text" ng-model="userLat" ng-change/>
+        Lng: <input type="text" ng-model="userLng" ng-change/> <button ng-hide="loadingLoc" ng-click="getGPSLocation()">LOCATE ME!</button><div ng-show="loadingLoc">LOADING GPS!</div><br/>
+        Radius: <input type="number" min="0.0001" max="10000" ng-model="radius" /><br />
+        <input type="submit" ng-click="searchItems()" value="Search" />
+      </form>
+
+    </div>
+    <div class="row">
+        <div ng-show="results">
+            <br><br><br><br>
+            <h2 class="section-header">elasticsearchQuery</h2>
+            <pre>{{results.elasticsearchQuery | json}}</pre>
+
+            <h2 class="section-header">results</h2>
+            <pre>{{results.results | json}}</pre>
+
+        </div>
+    </div>
+
+
+    </div>
+    
+</div>
