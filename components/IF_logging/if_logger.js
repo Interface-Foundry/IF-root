@@ -31,7 +31,6 @@ if (config.elasticsearchElk) {
       host: config.elasticsearchElk.url,
       log: ESLogger
   });
-  debugger;
 } else {
   console.log('not logging to elasticsearch')
 }

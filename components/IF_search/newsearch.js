@@ -361,6 +361,8 @@ function elasticsearchQuery(q, page) {
       }
   };
 
+  return fuzzyQuery;
+
 }
 
 /**

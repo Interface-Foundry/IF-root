@@ -3,6 +3,7 @@ var app = express()
 var bodyParser = require('body-parser')
 var morgan = require('morgan')
 var config = require('config')
+var request = require('request')
 
 app.use(bodyParser.json());
 app.use(morgan())
@@ -41,13 +42,29 @@ app.get('/status', function(req, res) {
 // Query testing
 //
 var search = require('../../IF_search/newsearch')
+var searchterms = require('../../IF_search/searchterms');
 app.post('/query', function(req, res) {
-  res.send({
-    elasticsearchQuery: search.getQuery(req.body, 0),
-    results: [{
-      elasticsearchDoc: {text: 'example'},
-      mongoDoc: {id: 'example', description: 'example'}
-    }]
+  var q = search.getQuery(req.body, 0)
+  var terms = searchterms.parse(req.body.text);
+  request({
+    method: 'POST',
+    url: 'https://kipapp.co/styles/api/items/search',
+    body: req.body,
+    json: true
+  }, function(e, r, b) {
+    if (e) {
+      console.error('error', e);
+    }
+    
+    res.send({
+      fashionTerms: terms,
+      elasticsearchQuery: q,
+      results: r.body.results.map(function(r) {
+        return {
+          mongoDoc: r
+        }
+      })
+    })
   })
 })
 
@@ -55,9 +72,21 @@ app.post('/query', function(req, res) {
 // Error monitoring
 //
 var elasticsearch = require('elasticsearch')
-var es = elasticsearch.Client({
-  host: config.elasticsearchElk.url
-})
+// logs elasticsearch stuff, flesh out later once we know what's useful
+var ESLogger = function(config) {
+    var defaultLogger = function() {};
+
+    this.error = defaultLogger;
+    this.warning = defaultLogger;
+    this.info = defaultLogger;
+    this.debug = defaultLogger;
+    this.trace = defaultLogger;
+    this.close = defaultLogger;
+};
+var es = new elasticsearch.Client({
+    host: config.elasticsearchElk.url,
+    log: ESLogger
+});
 console.log('elasticserach on', config.elasticsearchElk.url)
 app.get('/errors/node', function(req, res) {
   var query = {
