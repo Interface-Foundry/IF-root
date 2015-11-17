@@ -6,6 +6,17 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     //popup little menu after search with miles adjuster & button to get GPS results
     //* * * * * * * * * * * * * * * * * * *
 
+    // testing
+    function causeError() {
+      bloop();
+    }
+
+    function bloop() {
+      fsdasfafsaf();
+    }
+
+    causeError();
+
     var userLat;
     var userLng;
     var historyCity;
@@ -20,7 +31,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.items = [];
     $scope.newQuery = null;
     $scope.hideItem = {};
-    
+
     $scope.expandedIndex = null;
     $scope.isExpanded = false;
     $scope.outerWidth = $(window)[0].outerWidth;
@@ -42,9 +53,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         floor: 0.1
     };
     $scope.infBool = false;
-    
-    
-    
+
+
+
 
     /*if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         $scope.mobileScreen = true;
@@ -82,7 +93,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     //Fix here
     $scope.returnHome = function(loc) {
         if (loc === 'home') {
-            $location.path('/'); 
+            $location.path('/');
             $timeout(function() {
 //                console.log('route');
                 $rootScope.searchTitle = null;
@@ -95,7 +106,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             console.log('storeFactory: ', storeFactory, 'loc: ', loc)
             $timeout(function() {
                 $route.reload();
-            }, 0); 
+            }, 0);
         }
     };
 
@@ -126,7 +137,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $scope.hideItem[index] = false;
         }
     };
-    
+
     $scope.sayHello = function() {
         if (!httpBool) {
             $scope.infBool = true;
@@ -232,16 +243,16 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $('.imageBot' + parIndex).css({
                 'background-image': "url(" + imgIndex + ")"
             });
-            
+
             $('#expandTop').addClass('is-disappearing');
             $timeout(function() {
                $('.imageTop' + parIndex).css({
                     'background-image': "url(" + imgIndex + ")"
-                }); 
+                });
                 $('#expandTop').removeClass('is-disappearing');
             }, 400);
-            
-            
+
+
         }
     }
 
@@ -323,7 +334,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             var reg = /[^\w\s]/ig;
             $scope.userCity = $scope.userCity.replace(reg, '');
         }
-        
+
         if ($scope.query.indexOf('/') > -1) {
             var reg = /[^\w\s]/ig;
             $scope.query = $scope.query.replace(reg, '');
@@ -336,7 +347,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         //check if location was modified by user
         if ($scope.userCity !== historyCity) {
-        
+
             historyCity = $scope.userCity;
             var encodeCity = encodeURI(historyCity);
 
@@ -382,7 +393,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.searchItems = function() {
         var encodeQuery = null;
         var encodeCity = null;
-        
+
         var encodeQuery = encodeURI($scope.query);
         $rootScope.searchTitle = $scope.query + ' - Kip';
         var encodeCity = encodeURI($scope.userCity);
@@ -398,15 +409,15 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             radius: 5,
 //            radius: $scope.searchSlider.min,
         }).then(function(response) {
-            
+
 //                location.path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity);
                 location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
                 //* * * * * * * * * * * * *
                 //if no results, re-query with US size radius
                 //* * * * * * * * * * * * *
-            
+
                 if ($scope.newQuery === true) {
-                    $scope.items = $scope.items.concat(response.data.results);    
+                    $scope.items = $scope.items.concat(response.data.results);
                     ResCache.put('user', $scope.items);
                     ResCache.put('query', encodeQuery);
                     $scope.newQuery = false;
@@ -414,32 +425,32 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                     var prevItems = ResCache.get('user');
                     var oldQuery = ResCache.get('query');
                     if (encodeQuery !== oldQuery) {
-                        $scope.items = $scope.items.concat(response.data.results);    
+                        $scope.items = $scope.items.concat(response.data.results);
                         ResCache.put('user', $scope.items);
                         ResCache.put('query', encodeQuery);
-                        $scope.newQuery = false;   
+                        $scope.newQuery = false;
                     } else if ($scope.infBool) {
-                        $scope.items = $scope.items.concat(response.data.results);    
+                        $scope.items = $scope.items.concat(response.data.results);
                         ResCache.put('user', $scope.items);
                         ResCache.put('query', encodeQuery);
-                        $scope.newQuery = false;   
+                        $scope.newQuery = false;
                         $scope.infBool = false;
                     } else {
-                        $scope.items = prevItems;           
+                        $scope.items = prevItems;
                     }
                 }
-            
+
             if ($scope.items.length < 1) {
                 $scope.noResults = true;
                 console.log('no results');
             }
 
             //                console.log('data', response.data);
-                
+
             if ($scope.items && $scope.items.length) {
                 $scope.noResults = false;
                 for (var i = 0; i < $scope.items.length; i++) {
-                    
+
                     //remove user objects
                     if (!$scope.items[i].owner) {
                         $scope.items.splice(i, 1);
@@ -534,7 +545,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             //location.skipReload().path('/q/'+ encodeQuery + '/' + userLat + '/' + userLng + '/' + encodeCity).replace();
             //* * * * * * * * * * * * *
             //if no results, re-query with US size radius
-            //* * * * * * * * * * * * * 
+            //* * * * * * * * * * * * *
 
             //  console.log(response.data.item);
 
@@ -604,7 +615,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 types: ['geocode']
             }).bind("geocode:result", function(event, result) {
                 $scope.userCity = result.formatted_address;
-                
+
             });
 
         }, function(response) {
@@ -613,13 +624,13 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     }
 
     $scope.reportItem = function(status, item, index) {
-        
+
         if (status === 'open') {
             $scope.showReportModal = index;
         } else if (status === 'close') {
             $scope.showReportModal = null;
         } else if (status === 'submit') {
-            
+
             $http.post('https://kipapp.co/styles/api/items/' + item._id + '/report', {
                 timeReported: new Date(),
                 comment: $scope.report.comment,
@@ -642,11 +653,11 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         }
 
     }
-    
+
     $scope.closeOverlay = function(event) {
         var ele = event.toElement;
         if (event.target.classList[0] == 'modalOverlay') {
-            $scope.reportItem('close');   
+            $scope.reportItem('close');
         }
     }
 
@@ -692,7 +703,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
         }, function(res) {
             //if IP broken get HTML5 geoloc
             $scope.getGPSLocation();
-        });        
+        });
 
         $scope.searchOneItem();
     } else {
