@@ -269,7 +269,6 @@ app.post('/email/confirm', isLoggedIn, function(req, res, next) {
     crypto.randomBytes(20, function(err, buf) {
         var token = buf.toString('hex');
         var email = req.user.local.email;
-
         User.findOne({
             'local.email': email
         }, function(err, user) {
