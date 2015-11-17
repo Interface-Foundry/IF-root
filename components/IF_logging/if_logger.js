@@ -60,7 +60,7 @@ function createLogObject(data) {
     }
 
     data["@timestamp"] = (new Date()).toISOString();
-    data["@version"] = "1";
+    // data["@version"] = "1";
     data["@host"] = hostname;
 
     return data;
@@ -76,12 +76,12 @@ var Log = module.exports = function(type) {
     var me = this;
     me.type = type || filename;
     me.log = function(data) {
-      createLogObject(data);
+      data = createLogObject(data);
       // only log to elasticsearch if we can
       if (config.elasticsearchElk) {
-          es.index({
+          es.create({
               index: 'logstash-node',
-              type: filename,
+              type: me.type,
               body: data
           }, function(e, r) {
               // who watches the watchers
