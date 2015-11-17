@@ -1,5 +1,5 @@
 var db = require('db');
-var logger = require('./if_logger');
+var log = require('./if_logger')();
 
 db.map(function(schema) {
     schema.collection.stats(function(e, s) {
@@ -13,7 +13,7 @@ db.map(function(schema) {
                 s.wiredTiger = JSON.stringify(s.wiredTiger);
             }
 
-            logger.log(s)
+            log(s)
         }
     })
 });

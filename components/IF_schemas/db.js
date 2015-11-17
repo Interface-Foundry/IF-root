@@ -2,13 +2,13 @@ var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
 var ensureIndexes = require('mongoose-hook-ensure-indexes')
 var config = require('config');
-var logger = require('../IF_logging/if_logger');
+var log = require('../IF_logging/if_logger')();
 
 if (mongoose.connection.readyState == 0) {
     mongoose.connect(config.mongodb.url, config.mongodb.options);
     var db_conn = mongoose.connection;
     db_conn.on('error', function(err) {
-        logger.log({
+        log.error({
             message: 'error connecting to mongodb',
             err: err,
             config: config.mongodb

@@ -1,4 +1,5 @@
-var logger = require('../IF_logging/if_logger');
+var Log = require('../IF_logging/if_logger');
+var log = Log();
 module.exports = function(app, passport, landmarkSchema) {
 
 // normal routes ===============================================================
@@ -12,7 +13,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 	// LOGOUT ==============================
 	app.get('/api/user/logout', function(req, res) {
-		logger.log({
+		log({
 			user: req.user && req.user._id,
 			message: 'logout'
 		});
@@ -31,8 +32,8 @@ module.exports = function(app, passport, landmarkSchema) {
 		// LOGIN ===============================
 		// show the login form
 
-		// // route to test if the user is logged in or not 
-		// app.get('/api/user/loggedin', function(req, res) { 
+		// // route to test if the user is logged in or not
+		// app.get('/api/user/loggedin', function(req, res) {
 
 		// 	if (req.isAuthenticated()){
 		// 		res.send(req.user);
@@ -40,14 +41,14 @@ module.exports = function(app, passport, landmarkSchema) {
 		// 	else {
 		// 		res.sendStatus(500);
 		// 	}
-		// }); 
+		// });
 
 		// process the login form
 		// app.post('/api/user/login', passport.authenticate('local-login', {
 		// 	successRedirect: '/',
 		// 	failureRedirect: '/'}),
 		// function(req,res){
-			
+
 		// 	console.log('--------- /API/USER/LOGIN -------------');
 		// 	console.log(req.cookies);
 		// 	console.log(req.user);
@@ -66,7 +67,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		// 	 else {
 		// 	 	res.send(req.user);
 		// 	 }
-		   
+
 		//  })(req, res, next);
 		// });
 
@@ -78,19 +79,19 @@ module.exports = function(app, passport, landmarkSchema) {
 			// console.log('--------- /API/USER/LOGIN -------------');
 			// console.log(req);
 			res.status(200).send(req.user);
-			logger.log({
+			log({
 				message: 'login',
 				type: 'local',
 				user: req.user && req.user._id
 			});
 		});
 
-		app.post('/api/user/login-basic', passport.authenticate('local-basic', {}), 
+		app.post('/api/user/login-basic', passport.authenticate('local-basic', {}),
 		function(req, res) {
 			console.log('req.body is.', req.body)
 			console.log('req.user is', req.user)
 			res.status(200).send(req.user);
-			logger.log({
+			log({
 				message: 'login',
 				type: 'basic',
 				user: req.user && req.user._id
@@ -98,7 +99,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		});
 
 
-		// app.post('/api/user/login', 
+		// app.post('/api/user/login',
 		//   passport.authenticate('local-login', { }),
 		//   function(req, res) {
 		// 	    console.log('--------- /API/USER/LOGIN -------------');
@@ -113,7 +114,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		//    else {
 		//    	res.send(req.user);
 		//    }
-		   
+
 		//  })(req, res, next);
 		// });
 
@@ -123,7 +124,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 		}), function(req,res){
 			res.send(req.user);
-			logger.log({
+			log({
 				message: 'signup',
 				type: 'local',
 				user: req.user && req.user._id
@@ -143,7 +144,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		}), function (req, res) {
 		  res.redirect(req.session.redirect || '/');
 		  delete req.session.redirect;
-			logger.log({
+			log({
 				message: 'login',
 				type: 'facebook',
 				user: req.user && req.user._id
@@ -172,7 +173,7 @@ module.exports = function(app, passport, landmarkSchema) {
 			passport.authenticate('client_facebook', function(err, user, info){
 				if (err || !user){
 					res.status(400).send(info);
-					logger.log({
+					log({
 						err: info,
 						message: 'login failed',
 						type: 'facebook.mobile',
@@ -182,7 +183,7 @@ module.exports = function(app, passport, landmarkSchema) {
 					req.login(user, function(err){
 						if (err){
 							res.status(400).send(err);
-							logger.log({
+							log({
 								err: err,
 								message: 'login failed',
 								type: 'facebook.mobile',
@@ -190,7 +191,7 @@ module.exports = function(app, passport, landmarkSchema) {
 							});
 						} else {
 							res.json(user);
-							logger.log({
+							log({
 								message: 'login',
 								type: 'facebook.mobile',
 								user: req.user && req.user._id
@@ -223,13 +224,13 @@ module.exports = function(app, passport, landmarkSchema) {
 		  delete req.session.redirect;
 		});
 
-	
+
 	// bearer login via token auth --------------------------------
 
 	app.get('/auth/bearer', passport.authenticate('bearer', { session: false }),
 		function(req, res) {
 	        res.send(200,'logged in');
-			logger.log({
+			log({
 				message: 'login',
 				type: 'bearer',
 				user: req.user && req.user._id
@@ -238,7 +239,7 @@ module.exports = function(app, passport, landmarkSchema) {
 	);
 
 
-	
+
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
 // =============================================================================
@@ -341,11 +342,11 @@ module.exports = function(app, passport, landmarkSchema) {
 // 	if (!req.isAuthenticated()){
 // 		res.send(401);  //send unauthorized
 // 	}
-		 
+
 // 	else{
 // 		return next();
 // 	}
-		
+
 // }
 
 

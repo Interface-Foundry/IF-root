@@ -3,14 +3,18 @@
  * @type {*|exports|module.exports}
  */
 var config = require('config');
-var traceback = require('traceback');
+var _ = require('lodash');
 var os = require('os');
+
+var parent = module.parent;
+while (parent.parent) {
+  parent = parent.parent;
+}
+var filename = parent.filename.split(/[/\\]/).pop();
 var hostname = os.hostname();
-var filename = require.main ? require.main.filename.split('/').pop() : 'debug';
 
 if (config.elasticsearchElk) {
-  console.log('logging data to elasticsearch "logstash-node/' + filename + '"');
-  console.log('on server', config.elasticsearchElk.url)
+  console.log('logging data to elasticsearch ' + config.elasticsearchElk.url + '/logstash-node/' + filename);
   var es = require('elasticsearch').Client({
       host: config.elasticsearchElk.url
   });
@@ -19,7 +23,7 @@ if (config.elasticsearchElk) {
 }
 
 var getStackInfo = function() {
-  // todo fix this shit, it broke in different versions of node.
+  // TODO fix this shit, it broke in different versions of node.
     var stack = traceback();
 
     var s = stack[2];
@@ -43,7 +47,7 @@ function createLogObject(data) {
 
     data["@timestamp"] = (new Date()).toISOString();
     data["@version"] = "1";
-    data.host = hostname;
+    data["@host"] = hostname;
 
     return data;
 }
@@ -51,34 +55,45 @@ function createLogObject(data) {
 //
 // Main logger. Pass literally anything here.
 //
-module.exports.log = function(data) {
-    data = createLogObject(data);
-    // only log to elasticsearch if we can
-    if (config.elasticsearchElk) {
-        es.index({
-            index: 'logstash-node',
-            type: filename,
-            body: data
-        }, function(e, r) {
-            // who watches the watchers
-            if (e) {
-                console.error('ERROR LOG AGGREGATOR DOWN - CHECK ELASTICSEARCH ON', config.elasticsearchElk.url);
-            }
-        });
+var Log = module.exports = function(type) {
+    if (!(this instanceof Log)) {
+      return new Log(type)
+    }
+    var me = this;
+    me.type = type || filename;
+    me.log = function(data) {
+      createLogObject(data);
+      // only log to elasticsearch if we can
+      if (config.elasticsearchElk) {
+          es.index({
+              index: 'logstash-node',
+              type: filename,
+              body: data
+          }, function(e, r) {
+              // who watches the watchers
+              if (e) {
+                  console.error('ERROR LOG AGGREGATOR DOWN - CHECK ELASTICSEARCH ON', config.elasticsearchElk.url);
+              }
+          });
+      }
+      // always log to the console
+      console.log(data);
     }
 
-    // always log to the console
-    console.log(data);
+    //
+    // Main error logger.  adds @error = true to the logged object
+    //
+    me.log.error = function(data) {
+      data = createLogObject(data);
+      data['@error'] = true;
+      me.log(data);
+    }
+
+    return me.log;
+
 };
 
-//
-// Main error logger.  adds @error = true to the logged object
-//
-module.exports.error = function(data) {
-  data = createLogObject(data);
-  data['@error'] = true;
-  module.exports.log(data);
-}
+
 
 // Happy fun times express stuff
 module.exports.reqProperties = function(req) {
