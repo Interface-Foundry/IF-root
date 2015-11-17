@@ -121,6 +121,10 @@ var schemas = [{
     filename: 'ebayItem_schema',
     single: 'EbayItem',
     plural: 'EbayItems'
+},{
+    filename: 'credentials_schema',
+    single: 'Credential',
+    plural: 'Credentials'
 }];
 
 module.exports = {

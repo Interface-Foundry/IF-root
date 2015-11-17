@@ -13,11 +13,11 @@ var fsstat = fs.statSync('../../../IF-Shopify/app.js')
 
 if (fsstat.isFile()) {
     var kipShopify = require('../../../IF-Shopify/app')
-    console.log('kip shopify loaded..')
+    console.log('\n\n**Kip shopify loaded..\n\n')
     app.use('/shopify', kipShopify);
 
 } else {
-    console.log('Shopify did not load.')
+    console.log('\n\n**Shopify did not load.\n\n')
 }
 
 

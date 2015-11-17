@@ -1,0 +1,62 @@
+header.jumbotron
+
+-homelink = JSON.stringify(homelink)
+
+div.row
+    div.span3(style="position:fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);")
+        form(action='/add',method='post',style="margin-top:100px")
+            h3.
+                List your products on Kip for free!
+            br
+            label Enter your physical store address:
+            br
+            input(type="text", name="street", placeholder="101 Kip Street",size=50)
+            br
+            input(type="text", name="city", placeholder="New York",size=50)
+            br
+            input(type="text", name="state", placeholder="NY",size=50)
+            br
+            input(type="text", name="zipcode", placeholder="10001",size=50)
+            br
+            input(type="text", name="tel",placeholder="212-867-5309" size=50)
+            br
+            br
+            input(type="checkbox", name="online")
+            My  Store is online only.
+            br
+            br
+            input(type="submit", value="Submit")
+        div.accordion#accordion     
+        - if (typeof(products[0]) == 'undefined')
+            div.accordion-group
+                div.accordion-heading
+                    em Glups, you don't have any product to be shown!
+        - else
+            - each product, i in products
+                div.accordion-group
+                    div.accordion-heading
+                    a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="##{product.id}")
+                        |#{product.title} 
+                        span.pull-right.muted #{product.price_range}          
+                div(id="#{product.id}", class="accordion-body collapse")
+                    div.accordion-inner
+                    - if(product.images)
+                        - if(product.images.first)
+                            div.polaroid
+                            a(href="#modal-#{product.id}", data-toggle="modal")
+                                    img(src="#{product.images.first.medium}")
+
+                    p
+                        strong Type: 
+                        | #{product.product_type}
+
+                    p !{product.body_html}
+                    
+                    br
+
+                    div(id="#modal-#{product.id}", class="modal hide fade", style="display:none")
+                        div.modal-header
+                            a.close(data-dismiss="modal") ×
+                            h3=product.title
+                        div.modal-body
+ 
