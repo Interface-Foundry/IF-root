@@ -4,9 +4,14 @@ var bodyParser = require('body-parser')
 var morgan = require('morgan')
 var config = require('config')
 var request = require('request')
+var auth = require('basic-auth-connect')
 
 app.use(bodyParser.json());
 app.use(morgan())
+
+
+app.use(auth('kip', 'vampirecat1200'))
+app.use(express.static(__dirname + '/../UI/material/dist'));
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -55,7 +60,7 @@ app.post('/query', function(req, res) {
     if (e) {
       console.error('error', e);
     }
-    
+
     res.send({
       fashionTerms: terms,
       elasticsearchQuery: q,
