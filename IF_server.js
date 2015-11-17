@@ -3639,11 +3639,8 @@ app.use(function error_handler(err, req, res, next) {
     }
 
     // send the error to our aggregation server
-    logger.log({
-        message: 'error',
-        req: logger.reqProperties(req),
-        err: err
-    });
+    err.req = logger.reqProperties(req)
+    logger.error(err);
 });
 
 
