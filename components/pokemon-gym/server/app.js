@@ -57,6 +57,7 @@ var elasticsearch = require('elasticsearch')
 var es = elasticsearch.Client({
   host: config.elasticsearchElk.url
 })
+console.log('elasticserach on', config.elasticsearchElk.url)
 app.get('/errors/node', function(req, res) {
   var query = {
     body: {
@@ -73,7 +74,7 @@ app.get('/errors/node', function(req, res) {
     }
   }
 
-  es.query(query, function(results) {
+  es.search(query).then(function(results) {
     res.send(results.hits.hits.map(function(doc) {
       return doc._source;
     }));
