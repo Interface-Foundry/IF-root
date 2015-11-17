@@ -60,8 +60,8 @@ var es = elasticsearch.Client({
 console.log('elasticserach on', config.elasticsearchElk.url)
 app.get('/errors/node', function(req, res) {
   var query = {
+    index: 'logstash-node',
     body: {
-      index: 'logstash-node',
       size: 20,
       sort: [{
         "@timestamp": {
