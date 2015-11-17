@@ -230,6 +230,9 @@ function search(q, page) {
             });
         }
         q.loc.lon = parseFloat(q.loc.lon);
+        if (q.loc.lon > 180 && q.loc.lon <= 360) {
+          q.loc.lon = q.loc.lon - 360;
+        }
         if (q.loc.lon > 180 || q.loc.lon < -180) {
             return Promise.reject({
                 niceMessage: 'Could not complete search',
