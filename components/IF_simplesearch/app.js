@@ -27,7 +27,7 @@ app.use(express.static(base));
 app.use(require('prerender-node').set('prerenderServiceUrl', 'http://127.0.1.1:3000'));
 app.use(require('prerender-node').set('protocol', 'https'));
 
-app.use(compression());
+// app.use(compression());
 
 //express compression
 // var oneDay = 86400000;
