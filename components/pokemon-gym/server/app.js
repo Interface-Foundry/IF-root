@@ -2,6 +2,7 @@ var express = require('express')
 var app = express()
 var bodyParser = require('body-parser')
 var morgan = require('morgan')
+var config = require('config')
 
 app.use(bodyParser.json());
 app.use(morgan())
@@ -52,14 +53,31 @@ app.post('/query', function(req, res) {
 //
 // Error monitoring
 //
+var elasticsearch = require('elasticsearch')
+var es = elasticsearch.Client({
+  host: config.elasticsearchElk.url
+})
 app.get('/errors/node', function(req, res) {
-  res.send([{
-    "@timestamp": (new Date()).toISOString(),
-    message: 'example ERROR: type error',
-    stack: 'example at line 33:12',
-    niceMessage: 'example nice message \\(^ヮ^)/',
-    devMessage: 'example dev message, like "TODO was no time to handle multiple shopify stores"'
-  }])
+  var query = {
+    body: {
+      index: 'logstash-node',
+      size: 20,
+      sort: [{
+        "@timestamp": {
+          order: 'desc'
+        }
+      }],
+      query: {
+        match_all: {}
+      }
+    }
+  }
+
+  es.query(query, function(results) {
+    res.send(results.hits.hits.map(function(doc) {
+      return doc._source;
+    }));
+  });
 })
 
 app.get('/errors/front-end', function(req, res) {
