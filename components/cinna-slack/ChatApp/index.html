@@ -1,0 +1,67 @@
+<html>
+   <head>
+      <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+      <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+      <script type="text/javascript">
+         var socket = io.connect("localhost:8000");
+         
+
+        setTimeout(function(){
+            $( "#msg" ).focus();
+        }, 0);
+        
+         function sendMessage() {
+             var message = $("#msg").val();
+             $("#msg").val('');
+             socket.emit("msgToClient",  { msg: message });
+         }
+
+         socket.on("msgFromSever", function(data) {
+
+            if (checkImgURL(data.message)){ //image URL
+              var msgP = "<img width='400' src='" + data.message + "''><br>";
+
+            }
+            else if (/^(ftp|http|https):\/\/[^ "]+$/.test(data.message)){ //reg url
+              var msgP = "<a target='_blank' href=' " + data.message + "'>"+data.message+"</a><br>";
+
+            }
+            else { //else
+              var msgP = "<p> " + data.message + "</p><br>";
+
+            }
+
+            function checkImgURL(url) {
+                return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
+            }
+
+           $(".chats").append(msgP);
+
+            var wtf = $('.chats');
+            var height = wtf[0].scrollHeight;
+            wtf.scrollTop(height);
+
+         })
+
+      </script>
+      <style type="text/css">
+         .chats {
+           border: 1px solid #ccc;
+           height: 85%;
+           overflow-y: scroll;
+           width: 100%;
+           margin-bottom: 30px;
+           background-color:white;
+         }
+         #msg {  width: 85%; height:35px; font-size:16px;}
+      </style>
+      <head>
+   <body style="background:#ccc;">
+    <center>
+      <img width="60" src="https://kipsearch.com/img/kip_logo_purp.svg">
+      <div class="chats"></div>
+      <input type="text" id="msg" onkeydown="if (event.keyCode == 13) document.getElementById('sendbutton').click()"/>
+      <button id="sendbutton" onclick="sendMessage()" >Send</button>
+    </center>
+   </body>
+   <html>
