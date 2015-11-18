@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask import (
     Flask,
     abort,
@@ -12,6 +10,11 @@ from flask import (
 from PIL import Image, ImageFont, ImageDraw
 import urllib2 as urllib
 import io
+import boto
+import cStringIO
+import time
+import random
+import string
 
 app = Flask(__name__)
 
@@ -21,12 +24,17 @@ DESKTOP_HEIGHT = 800
 MOBILE_WIDTH = 0 # TODO
 MOBILE_HEIGHT = 800 # TODO
 PADDING = 5
-BGCOLOR = 'white' # TODO what is this
+BGCOLOR = 'white'
+BUCKET = 'if-kip-chat-images'
+REGION = 'us-east-1'
 
 NUMBER_IMAGES = []
 for i in [1, 2, 3, 4, 5, 6]:
     f = 'Numbers-' + `i` + '-Black-icon.png'
     NUMBER_IMAGES.append(Image.open(f))
+
+conn = boto.s3.connect_to_region(REGION)
+bucket = conn.get_bucket(BUCKET)
 
 @app.route('/', methods=['POST'])
 def index():
@@ -61,9 +69,13 @@ def index():
         img.paste(im, (x, y))
         img.paste(NUMBER_IMAGES[i], (x + PADDING, 2 * PADDING), mask=NUMBER_IMAGES[i])
 
-    img.save('./test.png', quality=95)
+    cStringImg = cStringIO.StringIO()
+    img.save(cStringImg, 'PNG', quality=95)
+    s3filename = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(24)) + '.png'
+    k = bucket.new_key(s3filename)
+    k.set_contents_from_string(cStringImg.getvalue(), headers={"Content-Type": "image/png"})
 
-    return images[0]
+    return 'https://s3.amazonaws.com/' + BUCKET + '/' + s3filename
 
 def download_image(url):
     fd = urllib.urlopen(url)
