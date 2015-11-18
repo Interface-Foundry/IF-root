@@ -7,6 +7,12 @@ from flask import (
     jsonify
 )
 
+print 'loading data, usually takes 75 seconds on my mac'
+import os
+from spacy.en import English, LOCAL_DATA_DIR
+data_dir = os.environ.get('SPACY_DATA', LOCAL_DATA_DIR)
+nlp = English(data_dir=data_dir)
+
 app = Flask(__name__)
 
 @app.route('/parse', methods=['GET', 'POST'])
@@ -15,8 +21,9 @@ def parse():
 
     res = edict({})
     res.original = str(request.json['text'])
-    b = TextBlob(str(b.correct()))
-    res.corrected = str(b)
+    res.corrected = str(b.correct())
+
+    doc = nlp(u"{}".format(res.corrected), tag=True, parse=True)
     res.noun_phrases = str(b.noun_phrases)
 
     return jsonify(res)
