@@ -18,50 +18,64 @@ var createServerSnippet =  function(req, res) {
 var app = http.createServer(createServerSnippet).listen(8000);
 console.log("listening localhost:8000");
 
+var messageHistory = {};
+
 var io = require('socket.io').listen(app);
 io.sockets.on('connection', function(socket) {
     console.log("socket connected");
 
     socket.on("msgToClient", function(data) {
-        //data.msg <<<--- incoming message
-        // var msg;
-        // if (data.msg == 'pic'){
-        //  msg = 'http://www.thinkgeek.com/images/products/zoom/f044_portal2_aperture_test_subject_hat.jpg';
-        // }
-        // else if (data.msg == 'url'){
-        //  msg = 'https://kipsearch.com';
-        // }
-        // else {
-        //  msg = 'you sent '+data.msg;
-        // }
-        routeNLP(data.msg);
+
+        routeNLP(data.msg); //also send channel ID of slack user
         
     })
 });
 
 
-function routeNLP(msg){ //pushing incoming messages to python
-    //http request, wait for response, push to incomingAction()
 
-    var sampleResponse = {
-        action: 'initialQuery',
-        tokens: msg
+function routeNLP(msg){ //pushing incoming messages to python
+    
+    //SENDING (msg) MESSAGE TO PYTHON:
+    //http request, wait for response, push to incomingAction()
+    var sampleRes = {
+        bucket: 'search',
+        action: 'initial',
+        tokens: msg,
+        channel: '3EL18A0M' //example of slack channel (the user who is chatting) --> please send back from python
     };
 
-    incomingAction(sampleResponse);
+    //ON PYTHON RESPONSE, PROCESS 
+    incomingAction(sampleRes);
 }
 
 function incomingAction(data){ //sentence breakdown incoming from python
 
-
-    //sort selection
-    switch (data.action) {
-        case 'initialQuery':  
-            searchAmazon(data);
+    //sort context bucket (search vs. banter vs. purchase)
+    switch (data.bucket) {
+        case 'search':  
+            searchBucket(data);
             break;        
+        case 'banter':  
+            banterBucket(data);
+            break; 
+        case 'purchase':  
+            purchaseBucket(data);
+            break; 
         default:
-            console.log('default');
+            searchBucket(data);
     }
+
+    //***** SAVE INCOMING STATE ******//
+    //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
+    //var chatChannel = data.channel;
+    if (!messageHistory[data.channel]){ //new user, set up chat states
+        messageHistory[data.channel] = {};
+        messageHistory[data.channel].search = []; //random chats
+        messageHistory[data.channel].banter = []; //search 
+        messageHistory[data.channel].purchase = []; //finalizing search and purchase
+    }
+    saveState(data); //push new state
+    //* * * * * * * * * * * * * * * * //
 
 
     //EXPECTING FROM PYTHON:
@@ -71,6 +85,52 @@ function incomingAction(data){ //sentence breakdown incoming from python
     //     sentenceTree: [...],
     //     tokens: []
     // }
+
+}
+
+//* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
+
+function searchBucket(data){
+
+    //sort search action type
+    switch (data.action) {
+        case 'initial':  
+            searchInitial(data);
+            break;        
+        case 'similar':
+            searchSimilar(data);
+            break;
+        case 'modify':
+            searchModify(data);
+            break;
+        case 'focus':
+            searchFocus(data);
+            break;
+        default:
+            searchInitial(data);
+    }
+
+}
+
+function banterBucket(data){
+    //sort search action type
+    switch (data.action) {
+        case 'question':  
+            break;        
+        default:
+    }
+}
+
+function purchaseBucket(data){
+    //sort search action type
+    switch (data.action) {
+        case 'save':  
+            break;        
+        default:    
+    }
+}
+
+//* * * * * SEARCH ACTIONS * * * * * * * * //
 
     //* * * * * * * * *
     //BUCKET 1: Search
@@ -104,33 +164,68 @@ function incomingAction(data){ //sentence breakdown incoming from python
     //is there any size medium? (HISTORICAL FOCUS N = 3 [USER QUESTION FLAG]) ---> Find if Medium of item ---> IF(item == M){return item detail, ASK FOR CART ADD} ELSE {MODIFY N SIMILAR ITEM IN MEDIUM SIZE}
 
 
+function searchInitial(data){
+
+    searchAmazon(data,'keywords');
+}
+
+function searchSimilar(data){
+
+    //RECALL LAST ITEM IN HISTORY
+
+    //AMAZON SIMILAR SEARCH
+    searchAmazon(data,'similar');
+
+}
+
+function searchModify(data){
+
+    //
+
+}
+
+function searchFocus(data){
+
+}
+
+//* * * * * BANTER ACTIONS * * * * * * * * //
+
     //* * * * * * * * *
     //BUCKET 2: Banter
     //* * * * * * * * *
     //how shall i respond?
 
+//* * * * * * ORDER ACTIONS * * * * * * * * //
 
-    //* * * * * * * * *
+    //* * * * * * * * * *
     //BUCKET 3: Ordering
-    //* * * * * * * * *
+    //* * * * * * * * * * 
     //what order state are we in?
     // save 1 ---> store item in cart ---> RETURN "SAVED FOR LATER"
     // save all ---> 
     // view cart ---> get all items in cart ---> RETURN CART? or return URL TO amazon?
     // would you like me to get it for you? [kip question flag, wait for response] (PHASE 2)
 
-}
 
+//* * * * * * PROCESS ACTIONS * * * * * * * //
+
+function recallHistory(user,callback){
+
+    //get history of user (last search state)
+    callback();
+
+}
+    
 function outgoingResponse(res){ //what we're replying to user with
 
-    io.sockets.emit("msgFromSever", {message: res[0].MediumImage[0].URL[0]});
+    io.sockets.emit("msgFromSever", {message: res[0].LargeImage[0].URL[0]});
 }
 
 function stitchResults(){
     //stitch(['http://url1.png', ...], function(e, stitched_url){})
 }
 
-function searchAmazon(data){
+function searchAmazon(data, type){
 
     //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
     //browsenode
@@ -138,7 +233,11 @@ function searchAmazon(data){
     //maximum price
     //minimum price
     //related item page
+
+    //* * * * * PARSING searchIndex for PERSONA * * * * * * * * * * * * * * * * * *//
     //searchIndex (CATEGORY)
+    //CASE: generic search for clothing / accessory without "men" or "women"
+    //-----------> refer to M to W weightage in USER PERSONA cache [5,1] (# of times searched with men vs. women in query. log each query and ++ to PERSONA array)
 
     client.itemSearch({  
       // searchIndex: 'DVD',
@@ -151,6 +250,55 @@ function searchAmazon(data){
 
       console.log('amazon err ',err[0].Error[0]);
     });
+
+}
+
+//type: search, 
+function saveState(data){
+
+    //STORE CHAT IN HISTORY
+    //RECORDING CHATS PER CHANNEL
+    switch (data.bucket) {
+        case 'search':  
+            messageHistory[data.channel].search.push({ 
+                channel:data.channel,
+                bucket:data.bucket,
+                action:data.action,
+                tokens:data.tokens
+                // ts: data.ts, //timestamp
+                // user: data.user, //user id
+                // text: data.text, //message
+                // team: data.team, //team id
+                // context: context, //our first convo
+                // searchState: searchState,
+                // botResponse: botResponse
+            });
+            break;   
+        case 'banter':
+            messageHistory[data.channel].banter.push({ 
+                ts: data.ts, //timestamp
+                user: data.user, //user id
+                text: data.text, //message
+                team: data.team, //team id
+                context: context, //our first convo
+                searchState: searchState,
+                botResponse: botResponse
+            });
+            break;
+        case 'purchase':
+            messageHistory[data.channel].purchase.push({ 
+                ts: data.ts, //timestamp
+                user: data.user, //user id
+                text: data.text, //message
+                team: data.team, //team id
+                context: context, //our first convo
+                searchState: searchState,
+                botResponse: botResponse
+            });    
+        default:
+    }
+
+    console.log(messageHistory[data.channel]);
 
 }
 
