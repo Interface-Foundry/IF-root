@@ -33,6 +33,6 @@ def parse():
     return jsonify(res)
 
 if __name__ == '__main__':
-    print 'running app on port 5000'
+    print 'running app on port 8083'
     app.debug = True
-    app.run()
+    app.run(host="0.0.0.0", port=8083)

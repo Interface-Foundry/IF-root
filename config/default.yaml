@@ -34,3 +34,4 @@ meetupAuth:
   consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
   callbackURL: https://kipapp.co/auth/meetup/callback
 picstitch: http://pikachu.kipapp.co:5000
+nlp: http://192.168.1.20:8083

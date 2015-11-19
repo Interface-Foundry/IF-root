@@ -35,7 +35,7 @@ var parse = module.exports.parse = function(text, callback) {
 
   request({
     method: 'POST',
-    url: 'http://localhost:5000/parse',
+    url: config.nlp + '/parse',
     json: true,
     body: {
       text: text
