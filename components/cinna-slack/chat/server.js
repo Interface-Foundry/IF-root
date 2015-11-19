@@ -26,21 +26,36 @@ io.sockets.on('connection', function(socket) {
 
     socket.on("msgToClient", function(data) {
 
+        //FUNCTION WITH CALLBACK TO PYTHON, CALLBACK PASSES DATA TO incomingAction():
         routeNLP(data.msg); //also send channel ID of slack user
-        
+
     })
 });
 
 
 
 function routeNLP(msg){ //pushing incoming messages to python
+
+    //TEMPORARY
+    if (msg == 'similar'){
+        var actionS = 'similar';
+    }
+    else if (msg == 'modify'){
+        var actionS = 'modify';
+    }
+    else if (msg == 'focus'){
+        var actionS = 'focus';
+    }
+    else {
+        var actionS = 'initial';
+    }
     
     //SENDING (msg) MESSAGE TO PYTHON:
     //http request, wait for response, push to incomingAction()
     var sampleRes = {
         bucket: 'search',
-        action: 'initial',
-        searchSelect: [2], //which item for search selct
+        action: actionS, //initial, similar, modified, focus
+        searchSelect: [1], //which item for search select
         tokens: msg,
         channel: '3EL18A0M' //example of slack channel (the user who is chatting) --> please send back from python
     };
@@ -165,18 +180,34 @@ function searchSimilar(data){
 
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
-
         //SIMILAR SEARCH AMAZON API
-        searchAmazon(item,'similar');
-
+        searchAmazon(item,'similar',data);
     });
-
-
 }
 
 function searchModify(data){
 
-    //
+    //RECALL LAST ITEM IN SEARCH HISTORY
+    recallHistory(data, function(item){ 
+
+        console.log('query data ',data);
+        console.log('recalled history data ',item);
+
+
+
+        if (item.amazon){
+            for (var i = 0; i < data.searchSelect; i++) { //for items user is interested in
+                 messageHistory[data.channel].search[histLength].amazon.push(results[i]);
+            }           
+        }
+        else {
+            console.log('no Amazon data found in last history item. can not modify search')
+        }
+
+
+        // //SIMILAR SEARCH AMAZON API
+        // searchAmazon(item,'initial',data);
+    });
 
 }
 
@@ -218,7 +249,7 @@ function saveHistory(data,results,type){
                 bucket:data.bucket,
                 action:data.action,
                 tokens:data.tokens,
-                ts: new Date()
+                ts: new Date(),
                 // ts: data.ts, //timestamp
                 // user: data.user, //user id
                 // text: data.text, //message
@@ -227,9 +258,14 @@ function saveHistory(data,results,type){
                 // searchState: searchState,
                 // botResponse: botResponse
             });
-            if (type && type =='amazon'){ //store history with results from amazon
-                messageHistory[data.channel].search.amazon = results[0];
-                console.log(messageHistory[data.channel].search);
+
+            //store history with results from amazon
+            if (type == 'amazon'){ 
+                var histLength = messageHistory[data.channel].search.length - 1; //retrieve position of history item in arr
+                messageHistory[data.channel].search[histLength].amazon = [];
+                for (var i = 0; i < results.length; i++) { //adding amazon results to hist
+                     messageHistory[data.channel].search[histLength].amazon.push(results[i]);
+                }
             }
             break;   
         case 'banter':
@@ -279,10 +315,13 @@ function recallHistory(data,callback){
 ///////////////////////////////////////////
 
 
-function searchAmazon(data, type){
+//searches Amazon (NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
+function searchAmazon(data, type, query){
 
     switch (type) {
         case 'initial':  
+
+            //MODIFY searchIndex if persona weight > x
 
             client.itemSearch({  
               // searchIndex: 'DVD',
@@ -290,11 +329,7 @@ function searchAmazon(data, type){
               responseGroup: 'ItemAttributes,Offers,Images'
             }).then(function(results){
 
-                //console.log('AMAZON ',results);
-                console.log('AMAZON ',results[0].ItemAttributes[0]);
-
-              outgoingResponse(results);
-
+              outgoingResponse(results,'stitch','amazon');
               saveHistory(data,results,'amazon'); //push new state, pass amazon results 
 
             }).catch(function(err){
@@ -306,38 +341,72 @@ function searchAmazon(data, type){
 
         case 'similar':
 
-            if (data.amazon && data.amazon.itemId){ //we have a previously saved amazon session
+            if (data.amazon){ //we have a previously saved amazon session
+
+                //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
+                var IdArray = [];
+                for (var i = 0; i < query.searchSelect.length; i++) { //match item choices to product IDs
+                    var searchNum = query.searchSelect[i];
+                    IdArray.push(data.amazon[searchNum - 1].ASIN[0]);
+                }
+                var ItemIdString = IdArray.toString();
+                //////////
 
                 client.similarityLookup({  
-                  // searchIndex: 'DVD',
-                  ItemId: data.amazon[2 - 1].ASIN[0], //get search focus item
+                  ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
                   Keywords: data.tokens,
+                  SimilarityType: 'Intersection', //other option is "Random" <<< test which is better results
                   responseGroup: 'ItemAttributes,Offers,Images'
                 }).then(function(results){
 
-                  outgoingResponse(results);
-                }).catch(function(err){
-                    saveHistory(data); //push new state
+                    outgoingResponse(results,'stitch','amazon');
+                    saveHistory(data,results,'amazon'); //push new state, pass amazon results 
 
+                }).catch(function(err){
                   console.log('amazon err ',err[0].Error[0]);
                 });   
 
-                //MERGE N(+N) ITEMS WITH AMAZON COMBINED ID SEARCH: SimilarityType
-                //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/SimilarityLookup.html
-
             }
             else {
-                searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search
+                searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
             }
-
-
 
             break;
         case 'modify':
 
+            if (data.amazon){ //we have a previously saved amazon session
+
+                // //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
+                // var IdArray = [];
+                // for (var i = 0; i < query.searchSelect.length; i++) { //match item choices to product IDs
+                //     var searchNum = query.searchSelect[i];
+                //     IdArray.push(data.amazon[searchNum - 1].ASIN[0]);
+                // }
+                // var ItemIdString = IdArray.toString();
+                // //////////
+
+                // client.similarityLookup({  
+                //   ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
+                //   Keywords: data.tokens,
+                //   SimilarityType: 'Intersection', //other option is "Random" <<< test which is better results
+                //   responseGroup: 'ItemAttributes,Offers,Images'
+                // }).then(function(results){
+
+                //     outgoingResponse(results,'stitch','amazon');
+                //     saveHistory(data,results,'amazon'); //push new state, pass amazon results 
+
+                // }).catch(function(err){
+                //   console.log('amazon err ',err[0].Error[0]);
+                // });   
+
+            }
+            else {
+                searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+            }
+
             break;
         case 'focus':
-            con
+            break;
         default:
     }
 
@@ -356,20 +425,44 @@ function searchAmazon(data, type){
 
 }
 
-
+function outgoingResponse(data,action,source){ //what we're replying to user with    
     
-function outgoingResponse(res){ //what we're replying to user with
-
-    //STITCH RESULTS (data,function(url)){ }
-
-    io.sockets.emit("msgFromSever", {message: res[0].LargeImage[0].URL[0]});
+    //stitch images before send to user
+    if (action == 'stitch'){
+        stitchResults(data, source,function(url){
+            io.sockets.emit("msgFromSever", {message: url});
+        });
+    }
+    else {
+        io.sockets.emit("msgFromSever", {message: data[0].LargeImage[0].URL[0]});
+    } 
 }
 
-function stitchResults(data,callback){
-    //stitch(['http://url1.png', ...], function(e, stitched_url){})
+//stitch 3 images together into single image
+function stitchResults(data,source,callback){
+    //rules to get 3 image urls
+    switch (source) {
+        case 'amazon':  
+            //adding images for stiching
+            var toStitch = [];
+
+            for (var i = 0; i < 3; i++) { 
+                if (data[i].MediumImage[0].URL[0]){
+                    toStitch.push(data[i].MediumImage[0].URL[0]);
+                }
+                else {
+                    console.log('Item URL Missing! Stitch pic needs 3 item images');
+                }
+            }
+            break;   
+    }
+    //call to stitch service
+    stitch(toStitch, function(e, stitched_url){
+        console.log(e);
+        console.log(stitched_url);
+        callback(stitched_url);
+    })
 }
-
-
 
 
 function addToCart(){
@@ -377,6 +470,8 @@ function addToCart(){
 }
 
 function outputCart(){
+
+    //Pass array of ASIN with quanities to Mitsu cart
 
 }
 
