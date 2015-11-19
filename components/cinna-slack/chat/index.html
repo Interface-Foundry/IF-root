@@ -19,7 +19,7 @@
          socket.on("msgFromSever", function(data) {
 
             if (checkImgURL(data.message)){ //image URL
-              var msgP = "<img width='400' src='" + data.message + "''><br>";
+              var msgP = "<img width='250' src='" + data.message + "''><br>";
 
             }
             else if (/^(ftp|http|https):\/\/[^ "]+$/.test(data.message)){ //reg url
@@ -35,11 +35,14 @@
                 return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
             }
 
-           $(".chats").append(msgP);
+           $(".chats").append(msgP);  
 
-            var wtf = $('.chats');
-            var height = wtf[0].scrollHeight;
-            wtf.scrollTop(height);
+           $(".chats").animate({ scrollTop: $(".chats").attr("scrollHeight") }, 3000);
+
+            // $(".chats").scrollTop($(document).height());
+            // var wtf = $('.chats');
+            // var height = wtf[0].scrollHeight;
+            // wtf.scrollTop(height);
 
          })
 
@@ -59,7 +62,7 @@
    <body style="background:#ccc;">
     <center>
       <img width="60" src="https://kipsearch.com/img/kip_logo_purp.svg">
-      <div class="chats"></div>
+      <div id="chatwindow" class="chats"></div>
       <input type="text" id="msg" onkeydown="if (event.keyCode == 13) document.getElementById('sendbutton').click()"/>
       <button id="sendbutton" onclick="sendMessage()" >Send</button>
     </center>
