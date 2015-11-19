@@ -17,13 +17,17 @@ app = Flask(__name__)
 
 @app.route('/parse', methods=['GET', 'POST'])
 def parse():
-    b = TextBlob(request.json['text'])
+    text = request.json['text']
+    b = TextBlob(text)
 
     res = edict({})
-    res.original = str(request.json['text'])
-    res.corrected = str(b.correct())
-
-    doc = nlp(u"{}".format(res.corrected), tag=True, parse=True)
+    res.original = str(text)
+    doc = nlp(u"{}".format(text), tag=True, parse=True)
+    pos = []
+    for token in doc[:]:
+        pos.append([token.orth_, token.pos_])
+    print pos
+    res.parts_of_speech = pos
     res.noun_phrases = str(b.noun_phrases)
 
     return jsonify(res)
