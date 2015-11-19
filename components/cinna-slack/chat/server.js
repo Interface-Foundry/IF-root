@@ -1,6 +1,6 @@
 var http = require('http');
 var fs = require('fs');
-var amazon = require('amazon-product-api'); //npm amazon-product-api
+var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 
 var client = amazon.createClient({
@@ -40,6 +40,7 @@ function routeNLP(msg){ //pushing incoming messages to python
     var sampleRes = {
         bucket: 'search',
         action: 'initial',
+        searchSelect: [2], //which item for search selct
         tokens: msg,
         channel: '3EL18A0M' //example of slack channel (the user who is chatting) --> please send back from python
     };
@@ -49,6 +50,18 @@ function routeNLP(msg){ //pushing incoming messages to python
 }
 
 function incomingAction(data){ //sentence breakdown incoming from python
+
+    //***** SAVE INCOMING STATE ******//
+    //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
+    //var chatChannel = data.channel;
+    if (!messageHistory[data.channel]){ //new user, set up chat states
+        messageHistory[data.channel] = {};
+        messageHistory[data.channel].search = []; //random chats
+        messageHistory[data.channel].banter = []; //search 
+        messageHistory[data.channel].purchase = []; //finalizing search and purchase
+        messageHistory[data.channel].persona = []; //learn about our user
+    }
+    //* * * * * * * * * * * * * * * * //
 
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -64,27 +77,6 @@ function incomingAction(data){ //sentence breakdown incoming from python
         default:
             searchBucket(data);
     }
-
-    //***** SAVE INCOMING STATE ******//
-    //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
-    //var chatChannel = data.channel;
-    if (!messageHistory[data.channel]){ //new user, set up chat states
-        messageHistory[data.channel] = {};
-        messageHistory[data.channel].search = []; //random chats
-        messageHistory[data.channel].banter = []; //search 
-        messageHistory[data.channel].purchase = []; //finalizing search and purchase
-    }
-    saveState(data); //push new state
-    //* * * * * * * * * * * * * * * * //
-
-
-    //EXPECTING FROM PYTHON:
-    // {
-    //     //bucket: class, //search, banter, ordering <-- not needed probably
-    //     nodePosition: [...], 
-    //     sentenceTree: [...],
-    //     tokens: []
-    // }
 
 }
 
@@ -166,15 +158,19 @@ function purchaseBucket(data){
 
 function searchInitial(data){
 
-    searchAmazon(data,'keywords');
+    searchAmazon(data,'initial');
 }
 
 function searchSimilar(data){
 
-    //RECALL LAST ITEM IN HISTORY
+    //RECALL LAST ITEM IN SEARCH HISTORY
+    recallHistory(data, function(item){
 
-    //AMAZON SIMILAR SEARCH
-    searchAmazon(data,'similar');
+        //SIMILAR SEARCH AMAZON API
+        searchAmazon(item,'similar');
+
+    });
+
 
 }
 
@@ -209,62 +205,20 @@ function searchFocus(data){
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
 
-function recallHistory(user,callback){
 
-    //get history of user (last search state)
-    callback();
 
-}
-    
-function outgoingResponse(res){ //what we're replying to user with
+////////////// HISTORY ACTIONS ///////////////
 
-    io.sockets.emit("msgFromSever", {message: res[0].LargeImage[0].URL[0]});
-}
-
-function stitchResults(){
-    //stitch(['http://url1.png', ...], function(e, stitched_url){})
-}
-
-function searchAmazon(data, type){
-
-    //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
-    //browsenode
-    //keywords
-    //maximum price
-    //minimum price
-    //related item page
-
-    //* * * * * PARSING searchIndex for PERSONA * * * * * * * * * * * * * * * * * *//
-    //searchIndex (CATEGORY)
-    //CASE: generic search for clothing / accessory without "men" or "women"
-    //-----------> refer to M to W weightage in USER PERSONA cache [5,1] (# of times searched with men vs. women in query. log each query and ++ to PERSONA array)
-
-    client.itemSearch({  
-      // searchIndex: 'DVD',
-      Keywords: data.tokens,
-      responseGroup: 'ItemAttributes,Offers,Images'
-    }).then(function(results){
-
-      outgoingResponse(results);
-    }).catch(function(err){
-
-      console.log('amazon err ',err[0].Error[0]);
-    });
-
-}
-
-//type: search, 
-function saveState(data){
-
-    //STORE CHAT IN HISTORY
-    //RECORDING CHATS PER CHANNEL
+//store chat message in history
+function saveHistory(data,results,type){
     switch (data.bucket) {
         case 'search':  
             messageHistory[data.channel].search.push({ 
                 channel:data.channel,
                 bucket:data.bucket,
                 action:data.action,
-                tokens:data.tokens
+                tokens:data.tokens,
+                ts: new Date()
                 // ts: data.ts, //timestamp
                 // user: data.user, //user id
                 // text: data.text, //message
@@ -273,6 +227,10 @@ function saveState(data){
                 // searchState: searchState,
                 // botResponse: botResponse
             });
+            if (type && type =='amazon'){ //store history with results from amazon
+                messageHistory[data.channel].search.amazon = results[0];
+                console.log(messageHistory[data.channel].search);
+            }
             break;   
         case 'banter':
             messageHistory[data.channel].banter.push({ 
@@ -298,9 +256,120 @@ function saveState(data){
         default:
     }
 
-    console.log(messageHistory[data.channel]);
+}
+
+//get user history
+function recallHistory(data,callback){
+    //get by bucket type
+    switch (data.bucket) {
+        case 'search':  
+            var arrLength = messageHistory[data.channel].search.length-1;
+            callback(messageHistory[data.channel].search[arrLength]); //get last item in arr
+            break;   
+        case 'banter':
+            var arrLength = messageHistory[data.channel].banter.length-1;
+            callback(messageHistory[data.channel].banter[arrLength]); //get last item in arr
+            break;
+        case 'purchase':
+            var arrLength = messageHistory[data.channel].purchase.length-1;
+            callback(messageHistory[data.channel].purchase[arrLength]); //get last item in arr
+        default:
+    }
+}
+///////////////////////////////////////////
+
+
+function searchAmazon(data, type){
+
+    switch (type) {
+        case 'initial':  
+
+            client.itemSearch({  
+              // searchIndex: 'DVD',
+              Keywords: data.tokens,
+              responseGroup: 'ItemAttributes,Offers,Images'
+            }).then(function(results){
+
+                //console.log('AMAZON ',results);
+                console.log('AMAZON ',results[0].ItemAttributes[0]);
+
+              outgoingResponse(results);
+
+              saveHistory(data,results,'amazon'); //push new state, pass amazon results 
+
+            }).catch(function(err){
+
+              console.log('amazon err ',err[0].Error[0]);
+            });   
+
+            break;   
+
+        case 'similar':
+
+            if (data.amazon && data.amazon.itemId){ //we have a previously saved amazon session
+
+                client.similarityLookup({  
+                  // searchIndex: 'DVD',
+                  ItemId: data.amazon[2 - 1].ASIN[0], //get search focus item
+                  Keywords: data.tokens,
+                  responseGroup: 'ItemAttributes,Offers,Images'
+                }).then(function(results){
+
+                  outgoingResponse(results);
+                }).catch(function(err){
+                    saveHistory(data); //push new state
+
+                  console.log('amazon err ',err[0].Error[0]);
+                });   
+
+                //MERGE N(+N) ITEMS WITH AMAZON COMBINED ID SEARCH: SimilarityType
+                //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/SimilarityLookup.html
+
+            }
+            else {
+                searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search
+            }
+
+
+
+            break;
+        case 'modify':
+
+            break;
+        case 'focus':
+            con
+        default:
+    }
+
+    //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
+    //browsenode
+    //keywords
+    //maximum price
+    //minimum price
+    //related item page
+
+    //* * * * * PARSING searchIndex for PERSONA * * * * * * * * * * * * * * * * * *//
+    //searchIndex (CATEGORY)
+    //CASE: generic search for clothing / accessory without "men" or "women"
+    //-----------> refer to M to W weightage in USER PERSONA cache [5,1] (# of times searched with men vs. women in query. log each query and ++ to PERSONA array)
+
 
 }
+
+
+    
+function outgoingResponse(res){ //what we're replying to user with
+
+    //STITCH RESULTS (data,function(url)){ }
+
+    io.sockets.emit("msgFromSever", {message: res[0].LargeImage[0].URL[0]});
+}
+
+function stitchResults(data,callback){
+    //stitch(['http://url1.png', ...], function(e, stitched_url){})
+}
+
+
 
 
 function addToCart(){
