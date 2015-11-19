@@ -113,6 +113,10 @@ function searchBucket(data){
         case 'focus':
             searchFocus(data);
             break;
+        case 'back':
+            searchBack(data); 
+        case 'more':
+            searchMore(data); //Search more from same query
         default:
             searchInitial(data);
     }
@@ -190,18 +194,84 @@ function searchModify(data){
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){ 
 
-        console.log('query data ',data);
-        console.log('recalled history data ',item);
+        //mock parsed sentence data from python
+        var dataModify = 'color';
+        var newColor = 'blue';
+        var newTexture = 'wool';
+        var newSize = 'XL';
 
+        var cSearch = ''; //construct new search string
 
-
+        //amazon obj exists in recalled item
         if (item.amazon){
+
             for (var i = 0; i < data.searchSelect; i++) { //for items user is interested in
-                 messageHistory[data.channel].search[histLength].amazon.push(results[i]);
+
+                var searchSelect = data.searchSelect[i]; //get item selected
+                var itemAttrib = item.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                //cSearch = cSearch + itemAttrib[0].Title[0]; //add in full title of item
+
+                //removing brand name to extend search
+                if (itemAttrib[0].Brand){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                }
+                if (itemAttrib[0].ClothingSize){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                }
+                if (itemAttrib[0].Department){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                }
+                if (itemAttrib[0].ProductGroup){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                }
+                if (itemAttrib[0].ProductTypeName){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].ProductTypeName[0];
+                }
+                if (itemAttrib[0].ProductGroup){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                }
+                if (itemAttrib[0].Binding){
+                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], ""); 
+                    cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                }
+
+                console.log(itemAttrib[0]);
+
+                //SORT WHICH TRAITS TO MODIFY
+                switch (dataModify) {
+
+                    // CASES: color, size, price, genericDetail (texture, material, brand, etc.) 
+
+                    case 'color': 
+
+                        // if (itemAttrib[0].Color){ //remove old color if color exists
+                        //     cSearch = cSearch.replace(itemAttrib[0].Color[0], ""); //removing references to OLD COLOR 
+                        // }
+
+                        cSearch = newColor + ' ' + cSearch; //add new color 
+                        console.log(cSearch);
+                        data.tokens = cSearch; //replace search string in data obj
+                        searchInitial(data); //do a new search
+
+                        break;        
+                    
+                }
+
+
+
+                
             }           
         }
         else {
-            console.log('no Amazon data found in last history item. can not modify search')
+            console.log('no Amazon data found in last history item. can not modify search');
+            searchInitial(data); //do a search anyway
         }
 
 
@@ -213,6 +283,15 @@ function searchModify(data){
 
 function searchFocus(data){
 
+}
+
+function searchMore(data){
+    //go to end of search results array (3 at a time). if hit end of search array V
+    //use amazon search itemPage to advance to more results
+}
+
+function searchBack(data){
+    //SKIP BACK to history items (use recallHistory w. # of steps == 2)
 }
 
 //* * * * * BANTER ACTIONS * * * * * * * * //
@@ -248,6 +327,7 @@ function saveHistory(data,results,type){
                 channel:data.channel,
                 bucket:data.bucket,
                 action:data.action,
+                searchSelect:data.searchSelect,
                 tokens:data.tokens,
                 ts: new Date(),
                 // ts: data.ts, //timestamp
@@ -295,22 +375,28 @@ function saveHistory(data,results,type){
 }
 
 //get user history
-function recallHistory(data,callback){
+function recallHistory(data,callback,steps){
+
+    //if # of steps to recall
+    if (!steps){
+        var steps = 1;
+    }
     //get by bucket type
     switch (data.bucket) {
         case 'search':  
-            var arrLength = messageHistory[data.channel].search.length-1;
+            var arrLength = messageHistory[data.channel].search.length - steps; //# of steps to reverse. default is 1
             callback(messageHistory[data.channel].search[arrLength]); //get last item in arr
             break;   
         case 'banter':
-            var arrLength = messageHistory[data.channel].banter.length-1;
+            var arrLength = messageHistory[data.channel].banter.length - steps; //# of steps to reverse. default is 1
             callback(messageHistory[data.channel].banter[arrLength]); //get last item in arr
             break;
         case 'purchase':
-            var arrLength = messageHistory[data.channel].purchase.length-1;
+            var arrLength = messageHistory[data.channel].purchase.length - steps; //# of steps to reverse. default is 1
             callback(messageHistory[data.channel].purchase[arrLength]); //get last item in arr
         default:
-    }
+    }      
+
 }
 ///////////////////////////////////////////
 
@@ -321,14 +407,14 @@ function searchAmazon(data, type, query){
     switch (type) {
         case 'initial':  
 
-            //MODIFY searchIndex if persona weight > x
+            //MODIFY searchIndex if persona weight > x\
+            //IDENTIFY BRAND NAME TO SEARCH BY BRAND
 
             client.itemSearch({  
               // searchIndex: 'DVD',
               Keywords: data.tokens,
               responseGroup: 'ItemAttributes,Offers,Images'
             }).then(function(results){
-
               outgoingResponse(results,'stitch','amazon');
               saveHistory(data,results,'amazon'); //push new state, pass amazon results 
 
@@ -374,7 +460,23 @@ function searchAmazon(data, type, query){
             break;
         case 'modify':
 
-            if (data.amazon){ //we have a previously saved amazon session
+            //if (data.amazon){ //we have a previously saved amazon session
+
+
+                client.itemSearch({  
+                  // searchIndex: 'DVD',
+                  Keywords: data.tokens,
+                  responseGroup: 'ItemAttributes,Offers,Images'
+                }).then(function(results){
+
+                  outgoingResponse(results,'stitch','amazon');
+                  saveHistory(data,results,'amazon'); //push new state, pass amazon results 
+
+                }).catch(function(err){
+
+                  console.log('amazon err ',err[0].Error[0]);
+
+                });   
 
                 // //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
                 // var IdArray = [];
@@ -399,10 +501,10 @@ function searchAmazon(data, type, query){
                 //   console.log('amazon err ',err[0].Error[0]);
                 // });   
 
-            }
-            else {
-                searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
-            }
+            // }
+            // else {
+            //     searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+            // }
 
             break;
         case 'focus':
@@ -458,8 +560,9 @@ function stitchResults(data,source,callback){
     }
     //call to stitch service
     stitch(toStitch, function(e, stitched_url){
-        console.log(e);
-        console.log(stitched_url);
+        if(e){
+            console.log('stitch err ',e);
+        }
         callback(stitched_url);
     })
 }
