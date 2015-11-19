@@ -33,3 +33,4 @@ meetupAuth:
   consumerKey: vgmujlff2vflhtutplkaf15h
   consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
   callbackURL: https://kipapp.co/auth/meetup/callback
+picstitch: http://pikachu.kipapp.co:5000

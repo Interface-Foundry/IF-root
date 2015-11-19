@@ -4,7 +4,7 @@ var config = require('config')
 var stitch = module.exports = function(imageUrls, callback) {
   request({
     method: 'POST',
-    url: 'http://localhost:5000',
+    url: config.picstitch,
     json: true,
     body: imageUrls
   }, function(e, r, b) {
