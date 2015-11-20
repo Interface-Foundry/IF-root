@@ -1,7 +1,8 @@
-import easydict as edict
+from easydict import EasyDict as edict
 
 # expects a dict with text, blob, and doc
 def parse(data):
+    print 'sup bitches'
     res = edict({})
     res.original = data.text
 
@@ -15,5 +16,5 @@ def parse(data):
         pos.append([token.orth_, token.pos_])
     print pos
     res.parts_of_speech = pos
-    res.noun_phrases = str(b.noun_phrases)
+    res.noun_phrases = str(data.blob.noun_phrases)
     return res
