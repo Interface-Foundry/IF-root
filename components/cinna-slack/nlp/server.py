@@ -1,4 +1,7 @@
 from easydict import EasyDict as edict
+import reloader
+reloader.enable()
+from parser import parse
 
 from textblob import TextBlob
 from flask import (
@@ -16,21 +19,13 @@ nlp = English(data_dir=data_dir)
 app = Flask(__name__)
 
 @app.route('/parse', methods=['GET', 'POST'])
-def parse():
-    text = request.json['text']
-    b = TextBlob(text)
-
-    res = edict({})
-    res.original = str(text)
-    doc = nlp(u"{}".format(text), tag=True, parse=True)
-    pos = []
-    for token in doc[:]:
-        pos.append([token.orth_, token.pos_])
-    print pos
-    res.parts_of_speech = pos
-    res.noun_phrases = str(b.noun_phrases)
-
-    return jsonify(res)
+def parse_message():
+    data = edict({})
+    data.text = request.json['text']
+    data.blob = TextBlob(text)
+    data.doc = nlp(u"{}".format(text), tag=True, parse=True)
+    
+    return jsonify(parse(data))
 
 if __name__ == '__main__':
     print 'running app on port 8083'
