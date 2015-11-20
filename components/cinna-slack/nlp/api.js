@@ -59,7 +59,9 @@ var parse = module.exports.parse = function(text, callback) {
     if (e) {
       return callback(e);
     } else {
-      return callback(null, nlpToResult(b));
+      var res = nlpToResult(b);
+      console.log(res)
+      return callback(null, res);
     }
   })
 }
@@ -123,6 +125,19 @@ function quickparse(text) {
 function nlpToResult(nlp) {
   console.log(nlp)
 
+  // check for more
+  if (nlp.focus.length === 1) {
+    for (var i = 0; i < nlp.parts_of_speech.length; i++) {
+      if (nlp.parts_of_speech[i][0] === 'more') {
+        return {
+          bucket: BUCKET.search,
+          action: ACTION.similar,
+          searchSelect: nlp.focus
+        }
+      }
+    }
+  }
+
   // simple case
   if (nlp.ss.length === 1) {
     var s = nlp.ss[0];
@@ -134,6 +149,7 @@ function nlpToResult(nlp) {
       }
     }
   }
+
 
 
   return {

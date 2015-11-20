@@ -3,7 +3,9 @@ from easydict import EasyDict as edict
 # expects a dict with text, blob, and doc
 def parse(data):
     print 'entering parser method'
+    print data.text
     res = edict({})
+    res.text = data.text
     res.original = data.text
 
     sentences = data.blob.sentences
@@ -34,7 +36,7 @@ def parse(data):
         if (sent.find('second') > 0) or (sent.find('2') > 0) or (sent.find('two')> 0):
             s.focus.append(2)
         if (sent.find('third') > 0) or (sent.find('3') > 0) or (sent.find('three')> 0):
-            s.focus.append(2)
+            s.focus.append(3)
 
     for i, sent in enumerate(data.doc.sents):
         s = ss[i]
@@ -50,9 +52,15 @@ def parse(data):
         else:
             s.isQuestion = False
 
-
-
     res.ss = ss
+
+    # All focus
+    res.focus = set([])
+    for s in res.ss:
+        for f in s.focus:
+            res.focus.add(f)
+
+    res.focus = list(res.focus)
 
     pos = []
     for token in data.doc[:]:

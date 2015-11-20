@@ -9,7 +9,7 @@ request({
   method: 'POST',
   json: true,
   body: {
-    text: 'i like the first one'
+    text: 'more like 2'
   }
 }, function(e, r, b){
   if (e) { return console.log(e) }
