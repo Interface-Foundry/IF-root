@@ -9,7 +9,7 @@ request({
   method: 'POST',
   json: true,
   body: {
-    text: 'I am a cat lover, are you?'
+    text: 'the second one looks good. does it come in orange?'
   }
 }, function(e, r, b){
   if (e) { return console.log(e) }
