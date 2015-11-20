@@ -114,8 +114,10 @@ function searchBucket(data){
             break;
         case 'back':
             searchBack(data);
+            break;
         case 'more':
             searchMore(data); //Search more from same query
+            break;
         default:
             searchInitial(data);
     }

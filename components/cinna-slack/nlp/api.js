@@ -1,6 +1,7 @@
 var request = require('request')
 var config = require('config')
-var normalize = require('node-normalizer')
+// var normalize = require('node-normalizer')
+var qtypes = require('qtypes')
 
 var debug = require('debug')('nlp')
 
@@ -18,6 +19,9 @@ var ACTION = {
   more: 'more',
   back: 'back'
 }
+
+
+var question;
 
 /**
  * Call this with the text from slack
@@ -38,8 +42,11 @@ var parse = module.exports.parse = function(text, callback) {
     return callback(null, simpleResult)
   }
 
-  var normalizedText = normalize.clean(text); // TODO might take too long (70ms)
+  var normalizedText = text; //normalize.clean(text); // TODO might take too long (70ms)
   debug('normalized:', normalizedText)
+
+  var qtype = question.classify(normalizedText);
+  debug('qtype:', qtype)
 
   request({
     method: 'POST',
@@ -107,9 +114,7 @@ function quickparse(text) {
   })
 
   if (!found) {
-    res.action = 'initial'
-    res.tokens = text;
-    return res
+    return false;
   } else {
     return res
   }
@@ -161,8 +166,9 @@ if (!module.parent) {
     'I like the thrid one',
     'is there any size medium?'
   ];
-  normalize.loadData(function() {
-    debug('loaded data')
+  new qtypes(function(q) {
+    question = q;
+    debug('loaded qtypes')
     sentences.map(function(a) {
       parse(a, function(e, res) {
         if (e) {
@@ -175,8 +181,9 @@ if (!module.parent) {
     })
   })
 } else {
-  normalize.loadData(function() {
-    debug('loaded data')
+  new qtypes(function(q) {
+    question = q;
+    debug('loaded qtypes')
     console.log('NLP ready')
   })
 }
