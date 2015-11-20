@@ -1,7 +1,7 @@
 var request = require('request')
 var config = require('config')
 // var normalize = require('node-normalizer')
-var qtypes = require('qtypes')
+// var qtypes = require('qtypes')
 
 var debug = require('debug')('nlp')
 
@@ -45,8 +45,8 @@ var parse = module.exports.parse = function(text, callback) {
   var normalizedText = text; //normalize.clean(text); // TODO might take too long (70ms)
   debug('normalized:', normalizedText)
 
-  var qtype = question.classify(normalizedText);
-  debug('qtype:', qtype)
+  // var qtype = question.classify(normalizedText);
+  // debug('qtype:', qtype)
 
   request({
     method: 'POST',
@@ -166,24 +166,15 @@ if (!module.parent) {
     'I like the thrid one',
     'is there any size medium?'
   ];
-  new qtypes(function(q) {
-    question = q;
-    debug('loaded qtypes')
-    sentences.map(function(a) {
-      parse(a, function(e, res) {
-        if (e) {
-          console.error(e);
-        } else {
-          console.log(a);
-          console.log(res);
-        }
-      })
+  sentences.map(function(a) {
+    parse(a, function(e, res) {
+      if (e) {
+        console.error(e);
+      } else {
+        console.log(a);
+        console.log(res);
+      }
     })
   })
 } else {
-  new qtypes(function(q) {
-    question = q;
-    debug('loaded qtypes')
-    console.log('NLP ready')
-  })
 }
