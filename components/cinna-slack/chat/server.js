@@ -33,8 +33,6 @@ io.sockets.on('connection', function(socket) {
     })
 });
 
-
-
 function routeNLP(msg){ //pushing incoming messages to python
 
     nlp.parse(msg, function(e, res) {
@@ -63,7 +61,8 @@ function routeNLP(msg){ //pushing incoming messages to python
     })
 }
 
-function incomingAction(data){ //sentence breakdown incoming from python
+//sentence breakdown incoming from python
+function incomingAction(data){ 
 
     //***** SAVE INCOMING STATE ******//
     //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
@@ -91,7 +90,6 @@ function incomingAction(data){ //sentence breakdown incoming from python
         default:
             searchBucket(data);
     }
-
 }
 
 //* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
@@ -176,9 +174,9 @@ function purchaseBucket(data){
     //is there any size medium? (HISTORICAL FOCUS N = 3 [USER QUESTION FLAG]) ---> Find if Medium of item ---> IF(item == M){return item detail, ASK FOR CART ADD} ELSE {MODIFY N SIMILAR ITEM IN MEDIUM SIZE}
 
 
-function searchInitial(data){
+function searchInitial(data,flag){
 
-    searchAmazon(data,'initial');
+    searchAmazon(data,'initial','none',flag);
 }
 
 function searchSimilar(data){
@@ -190,7 +188,7 @@ function searchSimilar(data){
     });
 }
 
-function searchModify(data){
+function searchModify(data, flag){
 
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
@@ -212,38 +210,41 @@ function searchModify(data){
                 var itemAttrib = item.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
 
                 //cSearch = cSearch + itemAttrib[0].Title[0]; //add in full title of item
+                //^ parse above into token, sort priority??
 
-                //removing brand name to extend search
-                if (itemAttrib[0].Brand){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
-                    cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                if (flag !== 'weakSearch'){
+                    console.log('weakSearch FALSE');
+                    //add brand 
+                    if (itemAttrib[0].Brand){ 
+                        cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                    }
+                    //add clothing size
+                    if (itemAttrib[0].ClothingSize){
+                        cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                    }
                 }
-                if (itemAttrib[0].ClothingSize){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
-                    cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                else {
+                    console.log('weakSearch TRUE');
                 }
+
                 if (itemAttrib[0].Department){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
                     cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
                 }
                 if (itemAttrib[0].ProductGroup){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
                     cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
                 }
                 if (itemAttrib[0].ProductTypeName){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
                     cSearch = cSearch + ' ' + itemAttrib[0].ProductTypeName[0];
                 }
                 if (itemAttrib[0].ProductGroup){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
                     cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
                 }
                 if (itemAttrib[0].Binding){
-                    //cSearch = cSearch.replace(itemAttrib[0].Brand[0], "");
                     cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
                 }
 
-                console.log(itemAttrib[0]);
+               // console.log(itemAttrib[0]);
 
                 //SORT WHICH TRAITS TO MODIFY
                 switch (dataModify) {
@@ -252,14 +253,9 @@ function searchModify(data){
 
                     case 'color':
 
-                        // if (itemAttrib[0].Color){ //remove old color if color exists
-                        //     cSearch = cSearch.replace(itemAttrib[0].Color[0], ""); //removing references to OLD COLOR
-                        // }
-
                         cSearch = newColor + ' ' + cSearch; //add new color
-                        console.log(cSearch);
                         data.tokens = cSearch; //replace search string in data obj
-                        searchInitial(data); //do a new search
+                        searchInitial(data,flag); //do a new search
 
                         break;
 
@@ -402,26 +398,50 @@ function recallHistory(data,callback,steps){
 ///////////////////////////////////////////
 
 
-//searches Amazon (NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
-function searchAmazon(data, type, query){
+//searches Amazon 
+//(NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
+function searchAmazon(data, type, query, flag){
+
+    //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
+    //browsenode
+    //keywords
+    //maximum price
+    //minimum price
+    //related item page
 
     switch (type) {
         case 'initial':
 
+            //IDEAS:
             //MODIFY searchIndex if persona weight > x\
-            //IDENTIFY BRAND NAME TO SEARCH BY BRAND
+            //IDENTIFY BRAND NAME TO SEARCH BY BRAND?
 
+            //AMAZON BASIC SEARCH
             client.itemSearch({
               // searchIndex: 'DVD',
               Keywords: data.tokens,
               responseGroup: 'ItemAttributes,Offers,Images'
+
             }).then(function(results){
-              outgoingResponse(results,'stitch','amazon');
+              outgoingResponse(results,'stitch','amazon'); //send back msg to user
               saveHistory(data,results,'amazon'); //push new state, pass amazon results
 
             }).catch(function(err){
 
-              console.log('amazon err ',err[0].Error[0]);
+                //handle err codes. do stuff.
+                if (err[0].Error[0].Code[0]){
+                    switch (err[0].Error[0].Code[0]) {
+
+                        //CASE: No results for search
+                        case 'AWS.ECommerceService.NoExactMatches':
+                            //do a weak search
+                            weakSearch(data,type,query,flag); 
+                            break;
+
+                        default:
+                            console.log('amazon err ',err[0].Error[0]); 
+                    }                  
+                }                 
             });
 
             break;
@@ -429,6 +449,10 @@ function searchAmazon(data, type, query){
         case 'similar':
 
             if (data.amazon){ //we have a previously saved amazon session
+                
+                if (!flag){ //no flag passed in
+                    flag = 'Intersection';
+                }
 
                 //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
                 var IdArray = [];
@@ -439,93 +463,59 @@ function searchAmazon(data, type, query){
                 var ItemIdString = IdArray.toString();
                 //////////
 
+                //AMAZON SIMILARITY QUERY 
+                // [NOTE: functionality not in default AWS node lib. had to extend it!]
                 client.similarityLookup({
                   ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
                   Keywords: data.tokens,
-                  SimilarityType: 'Intersection', //other option is "Random" <<< test which is better results
+                  SimilarityType: flag, //other option is "Random" <<< test which is better results
                   responseGroup: 'ItemAttributes,Offers,Images'
-                }).then(function(results){
 
-                    outgoingResponse(results,'stitch','amazon');
+                }).then(function(results){
+                    outgoingResponse(results,'stitch','amazon'); //send msg to user
                     saveHistory(data,results,'amazon'); //push new state, pass amazon results
 
                 }).catch(function(err){
                   console.log('amazon err ',err[0].Error[0]);
+                  console.log('SIMILAR FAILED: should we fire random query or mod query');
+                  //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
                 });
-
             }
             else {
                 searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
             }
 
             break;
-        case 'modify':
 
-            //if (data.amazon){ //we have a previously saved amazon session
-
-
-                client.itemSearch({
-                  // searchIndex: 'DVD',
-                  Keywords: data.tokens,
-                  responseGroup: 'ItemAttributes,Offers,Images'
-                }).then(function(results){
-
-                  outgoingResponse(results,'stitch','amazon');
-                  saveHistory(data,results,'amazon'); //push new state, pass amazon results
-
-                }).catch(function(err){
-
-                  console.log('amazon err ',err[0].Error[0]);
-
-                });
-
-                // //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
-                // var IdArray = [];
-                // for (var i = 0; i < query.searchSelect.length; i++) { //match item choices to product IDs
-                //     var searchNum = query.searchSelect[i];
-                //     IdArray.push(data.amazon[searchNum - 1].ASIN[0]);
-                // }
-                // var ItemIdString = IdArray.toString();
-                // //////////
-
-                // client.similarityLookup({
-                //   ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
-                //   Keywords: data.tokens,
-                //   SimilarityType: 'Intersection', //other option is "Random" <<< test which is better results
-                //   responseGroup: 'ItemAttributes,Offers,Images'
-                // }).then(function(results){
-
-                //     outgoingResponse(results,'stitch','amazon');
-                //     saveHistory(data,results,'amazon'); //push new state, pass amazon results
-
-                // }).catch(function(err){
-                //   console.log('amazon err ',err[0].Error[0]);
-                // });
-
-            // }
-            // else {
-            //     searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
-            // }
-
-            break;
         case 'focus':
             break;
         default:
     }
 
-    //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
-    //browsenode
-    //keywords
-    //maximum price
-    //minimum price
-    //related item page
 
-    //* * * * * PARSING searchIndex for PERSONA * * * * * * * * * * * * * * * * * *//
-    //searchIndex (CATEGORY)
-    //CASE: generic search for clothing / accessory without "men" or "women"
-    //-----------> refer to M to W weightage in USER PERSONA cache [5,1] (# of times searched with men vs. women in query. log each query and ++ to PERSONA array)
+}
 
+//re-search but with less specific terms
+function weakSearch(data,type,query,flag){
+    //sort incoming flags for redundant searches
+    switch (flag) {
+        case 'weakSearch': //we already did weakSearch
+            console.log('ALREADY TRIED weakSearch FLAG!');
+            console.log('HANDLE weaker Search here');
+            break;
+        default:
+            //no results, trying weak search
+            console.log('no results');
 
+            //select weakSearch action (initial, modify, etc)
+            switch (data.action) { 
+                case 'modify':
+                    searchModify(data, 'weakSearch');
+                    break;
+                default:
+                    console.log('weak search not enabled for '+ data.action);
+            }       
+    }
 }
 
 function outgoingResponse(data,action,source){ //what we're replying to user with
@@ -550,11 +540,8 @@ function stitchResults(data,source,callback){
             var toStitch = [];
 
             for (var i = 0; i < 3; i++) {
-                if (data[i].MediumImage[0].URL[0]){
+                if (data[i].MediumImage && data[i].MediumImage[0].URL[0]){
                     toStitch.push(data[i].MediumImage[0].URL[0]);
-                }
-                else {
-                    console.log('Item URL Missing! Stitch pic needs 3 item images');
                 }
             }
             break;
