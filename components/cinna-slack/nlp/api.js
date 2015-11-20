@@ -114,9 +114,7 @@ function quickparse(text) {
   })
 
   if (!found) {
-    res.action = ACTION.initial;
-    res.tokens = text;
-    return res;
+    return false
   } else {
     return res
   }
@@ -124,10 +122,24 @@ function quickparse(text) {
 
 function nlpToResult(nlp) {
   console.log(nlp)
-  var isq = isQuestion(nlp);
+
+  // simple case
+  if (nlp.ss.length === 1) {
+    var s = nlp.ss[0];
+    if (!s.isQuestion) {
+      return {
+        bucket: BUCKET.search,
+        action: ACTION.initial,
+        tokens: [nlp.original]
+      }
+    }
+  }
+
+
   return {
     bucket: BUCKET.search,
-
+    action: ACTION.initial,
+    tokens: [nlp.original]
   }
 }
 
@@ -152,6 +164,7 @@ function isQuestion(nlp) {
 }
 
 if (!module.parent) {
+  request(config.nlp + '/reload')
   var sentences = [
     'find me a coffee machine',
     'search luxury socks',

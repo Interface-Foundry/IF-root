@@ -9,9 +9,10 @@ request({
   method: 'POST',
   json: true,
   body: {
-    text: 'the second one looks good. does it come in orange?'
+    text: 'hacker\'s black hat'
   }
 }, function(e, r, b){
   if (e) { return console.log(e) }
   console.log(b)
+  console.log(b.ss)
 })
