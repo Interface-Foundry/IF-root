@@ -1,5 +1,8 @@
 var request = require('request')
 var config = require('config')
+var normalize = require('node-normalizer')
+
+var debug = require('debug')('nlp')
 
 var BUCKET = {
   search: 'search',
@@ -28,17 +31,22 @@ var ACTION = {
     };
   */
 var parse = module.exports.parse = function(text, callback) {
+  debug('parsing:' + text)
   var simpleResult = quickparse(text);
   if (simpleResult) {
+    debug('found simple result')
     return callback(null, simpleResult)
   }
+
+  var normalizedText = normalize.clean(text); // TODO might take too long (70ms)
+  debug('normalized:', normalizedText)
 
   request({
     method: 'POST',
     url: config.nlp + '/parse',
     json: true,
     body: {
-      text: text
+      text: normalizedText
     }
   }, function(e, r, b) {
     if (e) {
@@ -99,7 +107,9 @@ function quickparse(text) {
   })
 
   if (!found) {
-    return false
+    res.action = 'initial'
+    res.tokens = text;
+    return res
   } else {
     return res
   }
@@ -151,14 +161,22 @@ if (!module.parent) {
     'I like the thrid one',
     'is there any size medium?'
   ];
-  sentences.map(function(a) {
-    parse(a, function(e, res) {
-      if (e) {
-        console.error(e);
-      } else {
-        console.log(a);
-        console.log(res);
-      }
+  normalize.loadData(function() {
+    debug('loaded data')
+    sentences.map(function(a) {
+      parse(a, function(e, res) {
+        if (e) {
+          console.error(e);
+        } else {
+          console.log(a);
+          console.log(res);
+        }
+      })
     })
+  })
+} else {
+  normalize.loadData(function() {
+    debug('loaded data')
+    console.log('NLP ready')
   })
 }
