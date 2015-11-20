@@ -1,5 +1,6 @@
 var http = require('http');
 var fs = require('fs');
+var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
@@ -194,76 +195,76 @@ function searchModify(data, flag){
     recallHistory(data, function(item){
 
         //mock parsed sentence data from python
-        var dataModify = 'color';
-        var newColor = 'blue';
-        var newTexture = 'wool';
-        var newSize = 'XL';
+        var dataModify = 'price';
+        // var newColor = 'blue';
+        // var newTexture = 'wool';
+        // var newSize = 'extra large';
+        var dataVal = 'less';
 
         var cSearch = ''; //construct new search string
 
-        //amazon obj exists in recalled item
+        //CONSTRUCT QUERY FROM AMAZON OBJECT
         if (item.amazon){
 
-            for (var i = 0; i < data.searchSelect; i++) { //for items user is interested in
+            //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+            switch (dataModify) {
+                
+                case 'price':
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'modify':dataModify,
+                        'val':dataVal
+                    }); 
+                    break;
 
-                var searchSelect = data.searchSelect[i]; //get item selected
-                var itemAttrib = item.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+                case 'brand':
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'modify':dataModify,
+                        'val':dataVal
+                    }); 
+                    break;
 
-                //cSearch = cSearch + itemAttrib[0].Title[0]; //add in full title of item
-                //^ parse above into token, sort priority??
+                default:
+                    constructAmazonQuery(); //nm just construct a new query 
+            }   
 
-                //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                if (flag !== 'weakSearch'){
-                    console.log('weakSearch FALSE');
-                    //add brand 
-                    if (itemAttrib[0].Brand){ 
-                        cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+
+            function constructAmazonQuery(){
+                async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+
+                    var itemAttrib = item.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                    //cSearch = cSearch + itemAttrib[0].Title[0]; //add in full title of item
+                    //^ parse above into token, sort priority??
+
+                    //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                    if (flag !== 'weakSearch'){
+                        console.log('weakSearch FALSE');
+                        //add brand 
+                        if (itemAttrib[0].Brand){ 
+                            cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                        }
+                        //add clothing size
+                        if (itemAttrib[0].ClothingSize){
+                            cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                        }
                     }
-                    //add clothing size
-                    if (itemAttrib[0].ClothingSize){
-                        cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                    else {
+                        console.log('weakSearch TRUE');
+                    }   
+                    if (itemAttrib[0].Department){
+                        cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
                     }
-                }
-                else {
-                    console.log('weakSearch TRUE');
-                }
+                    if (itemAttrib[0].ProductGroup){
+                        cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                    }
+                    if (itemAttrib[0].Binding){
+                        cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                    }
 
-                if (itemAttrib[0].Department){
-                    cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
-                }
-                if (itemAttrib[0].ProductGroup){
-                    cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                }
-                if (itemAttrib[0].ProductTypeName){
-                    cSearch = cSearch + ' ' + itemAttrib[0].ProductTypeName[0];
-                }
-                if (itemAttrib[0].ProductGroup){
-                    cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                }
-                if (itemAttrib[0].Binding){
-                    cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
-                }
-
-               // console.log(itemAttrib[0]);
-
-                //SORT WHICH TRAITS TO MODIFY
-                switch (dataModify) {
-
-                    // CASES: color, size, price, genericDetail (texture, material, brand, etc.)
-
-                    case 'color':
-
-                        cSearch = newColor + ' ' + cSearch; //add new color
-                        data.tokens = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-
-                        break;
-
-                }
-
-
-
-
+                    callback();
+                }, function done(){
+                    addModifier(); //done processing constructing new search, add modifier and run query
+                });
             }
         }
         else {
@@ -271,9 +272,56 @@ function searchModify(data, flag){
             searchInitial(data); //do a search anyway
         }
 
+        //after query construction, add modifier and fire search
+        function addModifier(){
 
-        // //SIMILAR SEARCH AMAZON API
-        // searchAmazon(item,'initial',data);
+            console.log('ADDED')
+            //SORT WHICH TRAITS TO MODIFY
+            switch (dataModify) {
+                // CASES: color, size, price, genericDetail 
+                case 'color':
+
+                    cSearch = dataVal + ' ' + cSearch; //add new color
+                    data.tokens = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                    break;
+
+                case 'size':
+
+                    cSearch = dataVal + ' ' + cSearch; //add new color
+                    data.tokens = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                    break;
+
+                //texture, fabric, coating, etc
+                case 'material':
+
+                    cSearch = dataVal + ' ' + cSearch; //add new color
+                    data.tokens = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                    break;
+
+                // //brand name
+                // case 'brand': 
+
+                //     cSearch = newColor + ' ' + cSearch; //add new color
+                //     data.tokens = cSearch; //replace search string in data obj
+                //     searchInitial(data,flag); //do a new search
+                //     break;
+
+                //unsortable modifier
+                case 'genericDetail': 
+
+                    cSearch = dataVal + ' ' + cSearch; //add new color
+                    data.tokens = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                    break;
+            }          
+        }
+
+
+
+
     });
 
 }
@@ -314,90 +362,6 @@ function searchBack(data){
 
 
 
-////////////// HISTORY ACTIONS ///////////////
-
-//store chat message in history
-function saveHistory(data,results,type){
-    switch (data.bucket) {
-        case 'search':
-            messageHistory[data.channel].search.push({
-                channel:data.channel,
-                bucket:data.bucket,
-                action:data.action,
-                searchSelect:data.searchSelect,
-                tokens:data.tokens,
-                ts: new Date(),
-                // ts: data.ts, //timestamp
-                // user: data.user, //user id
-                // text: data.text, //message
-                // team: data.team, //team id
-                // context: context, //our first convo
-                // searchState: searchState,
-                // botResponse: botResponse
-            });
-
-            //store history with results from amazon
-            if (type == 'amazon'){
-                var histLength = messageHistory[data.channel].search.length - 1; //retrieve position of history item in arr
-                messageHistory[data.channel].search[histLength].amazon = [];
-                for (var i = 0; i < results.length; i++) { //adding amazon results to hist
-                     messageHistory[data.channel].search[histLength].amazon.push(results[i]);
-                }
-            }
-            break;
-        case 'banter':
-            messageHistory[data.channel].banter.push({
-                ts: data.ts, //timestamp
-                user: data.user, //user id
-                text: data.text, //message
-                team: data.team, //team id
-                context: context, //our first convo
-                searchState: searchState,
-                botResponse: botResponse
-            });
-            break;
-        case 'purchase':
-            messageHistory[data.channel].purchase.push({
-                ts: data.ts, //timestamp
-                user: data.user, //user id
-                text: data.text, //message
-                team: data.team, //team id
-                context: context, //our first convo
-                searchState: searchState,
-                botResponse: botResponse
-            });
-        default:
-    }
-
-}
-
-//get user history
-function recallHistory(data,callback,steps){
-
-    //if # of steps to recall
-    if (!steps){
-        var steps = 1;
-    }
-    //get by bucket type
-    switch (data.bucket) {
-        case 'search':
-            var arrLength = messageHistory[data.channel].search.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.channel].search[arrLength]); //get last item in arr
-            break;
-        case 'banter':
-            var arrLength = messageHistory[data.channel].banter.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.channel].banter[arrLength]); //get last item in arr
-            break;
-        case 'purchase':
-            var arrLength = messageHistory[data.channel].purchase.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.channel].purchase[arrLength]); //get last item in arr
-        default:
-    }
-
-}
-///////////////////////////////////////////
-
-
 //searches Amazon 
 //(NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
 function searchAmazon(data, type, query, flag){
@@ -409,9 +373,24 @@ function searchAmazon(data, type, query, flag){
     //minimum price
     //related item page
 
+
+    //* * * * * * * * *  NN CLASSIFICATION NEEDED * * * * * * * * //
+    // & & & & & & & & & & & & & & & & & & & & & & & & & & & & & &//
+    // * * * * CLASSIFY incoming searches into categories --> search amazon with BrowseNode ---> better results
+    
+
     switch (type) {
         case 'initial':
 
+            if (flag && flag.val){
+                console.log('FLAG PASSING ',flag.val);
+                 console.log('FLAG PASSING ',flag);
+                 if (flag.val == 'size'){
+
+                 }
+                //switch parse flags (price, brand)
+            }
+            console.log(data.tokens);
             //IDEAS:
             //MODIFY searchIndex if persona weight > x\
             //IDENTIFY BRAND NAME TO SEARCH BY BRAND?
@@ -451,7 +430,7 @@ function searchAmazon(data, type, query, flag){
             if (data.amazon){ //we have a previously saved amazon session
                 
                 if (!flag){ //no flag passed in
-                    flag = 'Intersection';
+                    flag = 'Intersection'; //default 
                 }
 
                 //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
@@ -591,3 +570,89 @@ function search(){
 function addCart(){
 
 }
+
+
+
+////////////// HISTORY ACTIONS ///////////////
+
+//store chat message in history
+function saveHistory(data,results,type){
+    switch (data.bucket) {
+        case 'search':
+            messageHistory[data.channel].search.push({
+                channel:data.channel,
+                bucket:data.bucket,
+                action:data.action,
+                searchSelect:data.searchSelect,
+                tokens:data.tokens,
+                ts: new Date(),
+                // ts: data.ts, //timestamp
+                // user: data.user, //user id
+                // text: data.text, //message
+                // team: data.team, //team id
+                // context: context, //our first convo
+                // searchState: searchState,
+                // botResponse: botResponse
+            });
+
+            //store history with results from amazon
+            if (type == 'amazon'){
+                var histLength = messageHistory[data.channel].search.length - 1; //retrieve position of history item in arr
+                messageHistory[data.channel].search[histLength].amazon = [];
+                for (var i = 0; i < results.length; i++) { //adding amazon results to hist
+                     messageHistory[data.channel].search[histLength].amazon.push(results[i]);
+                }
+            }
+            break;
+        case 'banter':
+            messageHistory[data.channel].banter.push({
+                ts: data.ts, //timestamp
+                user: data.user, //user id
+                text: data.text, //message
+                team: data.team, //team id
+                context: context, //our first convo
+                searchState: searchState,
+                botResponse: botResponse
+            });
+            break;
+        case 'purchase':
+            messageHistory[data.channel].purchase.push({
+                ts: data.ts, //timestamp
+                user: data.user, //user id
+                text: data.text, //message
+                team: data.team, //team id
+                context: context, //our first convo
+                searchState: searchState,
+                botResponse: botResponse
+            });
+        default:
+    }
+
+}
+
+//get user history
+function recallHistory(data,callback,steps){
+
+    //if # of steps to recall
+    if (!steps){
+        var steps = 1;
+    }
+    //get by bucket type
+    switch (data.bucket) {
+        case 'search':
+            var arrLength = messageHistory[data.channel].search.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.channel].search[arrLength]); //get last item in arr
+            break;
+        case 'banter':
+            var arrLength = messageHistory[data.channel].banter.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.channel].banter[arrLength]); //get last item in arr
+            break;
+        case 'purchase':
+            var arrLength = messageHistory[data.channel].purchase.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.channel].purchase[arrLength]); //get last item in arr
+        default:
+    }
+
+}
+///////////////////////////////////////////
+
