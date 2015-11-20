@@ -114,7 +114,9 @@ function quickparse(text) {
   })
 
   if (!found) {
-    return false;
+    res.action = ACTION.initial;
+    res.tokens = text;
+    return res;
   } else {
     return res
   }
