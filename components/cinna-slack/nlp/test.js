@@ -9,7 +9,7 @@ request({
   method: 'POST',
   json: true,
   body: {
-    text: 'hacker\'s black hat'
+    text: 'i like the first one'
   }
 }, function(e, r, b){
   if (e) { return console.log(e) }
