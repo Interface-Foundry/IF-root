@@ -90,6 +90,10 @@ var runQuery = function (credentials, method) {
 
 var createClient = function (credentials) {
   return {
+    createCart: runQuery(credentials, 'CartCreate'),
+    addCart: runQuery(credentials, 'CartAdd'),
+    getCart: runQuery(credentials, 'CartGet'),
+    clearCart: runQuery(credentials,'CartClear'),
     similarityLookup: runQuery(credentials, 'SimilarityLookup'),
     itemSearch: runQuery(credentials, 'ItemSearch'),
     itemLookup: runQuery(credentials, 'ItemLookup'),

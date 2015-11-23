@@ -100,6 +100,7 @@ var generateQueryString = function (query, method, credentials) {
 
   // generate query
   unsignedString = Object.keys(params).map(function (key) {
+    key = key.replace('*','.')
     return key + "=" + encodeURIComponent(params[key]);
   }).join("&")
 
