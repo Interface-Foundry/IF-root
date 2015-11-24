@@ -154,6 +154,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     };
 
     $scope.expandContent = function(index, event, imgCnt) {
+
         $timeout(function(){
             $scope.isExpanded = true;
         }, 250);
@@ -324,10 +325,15 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             $scope.userCity = $scope.userCity.replace(reg, '');
         }
         
-        if ($scope.query.indexOf('/') > -1) {
+        if (!$scope.query){ //no query added
+            $scope.query = 'winter';  
+        }
+
+        if ($scope.query && $scope.query.indexOf('/') > -1) {
             var reg = /[^\w\s]/ig;
             $scope.query = $scope.query.replace(reg, '');
         }
+
         httpBool = true;
 
         //* * * * * * * * * * * * *
@@ -382,7 +388,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     $scope.searchItems = function() {
         var encodeQuery = null;
         var encodeCity = null;
-        
+
         var encodeQuery = encodeURI($scope.query);
         $rootScope.searchTitle = $scope.query + ' - Kip';
         var encodeCity = encodeURI($scope.userCity);
