@@ -196,15 +196,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             }
 
         } else {
+            event.stopPropagation();
             if ($scope.expandedIndex === index) {
-                $('.row' + index).removeClass('expand');
-                $('.row' + index).addClass('contract');
-                $timeout(function(){
-                    $scope.isExpanded = false;
-                    $scope.expandedIndex = null;
-                }, 250);
+                hideExpanded();
             } else if ($scope.expandedIndex !== null) {
                 $('.row' + $scope.expandedIndex).removeClass('expand');
+                $('.row' + index).removeClass('contract');
                 $('.row' + index).addClass('expand');
                 $scope.expandedIndex = index;
             } else {
@@ -213,7 +210,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 $scope.expandedIndex = index;
             }
         }
-
     };
 
     $(window).on('click', function(event) {
