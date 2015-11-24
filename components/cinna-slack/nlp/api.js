@@ -150,7 +150,13 @@ function nlpToResult(nlp) {
     }
   }
 
-
+  // break out the entities into stores, locations, etc
+  nlp.locaitons = [];
+  nlp.entities.map(function(e) {
+    if (e[1] === 'GPE') {
+      nlp.locations.push(e[0])
+    }
+  })
 
   return {
     bucket: BUCKET.search,

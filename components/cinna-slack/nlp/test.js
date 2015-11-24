@@ -9,7 +9,7 @@ request({
   method: 'POST',
   json: true,
   body: {
-    text: 'more like 2'
+    text: 'shorts in San Francisco'
   }
 }, function(e, r, b){
   if (e) { return console.log(e) }
