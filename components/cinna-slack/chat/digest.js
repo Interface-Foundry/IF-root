@@ -12,6 +12,7 @@ var natural = require('natural'),
     wordnet = new natural.WordNet(__dirname + '/dict'),
     db = require('db'),
     async = require('async'),
+    _ = require('lodash'),
     urlify = require('urlify').create({
         addEToUmlauts: true,
         szToSs: true,
@@ -38,7 +39,8 @@ var data = {
 mongoStream.on('data', function(item) {
     // console.log('item.name: ', item.images.length);
 
-    item.images.forEach(function(img) {
+    async.eachSeries(item.images, function iterator(img, finishedImage) {
+        console.log('Starting Image...')
         var obj = {
             captions: [],
             file_path: ''
@@ -108,73 +110,129 @@ mongoStream.on('data', function(item) {
         // console.log('*****', variables, absolutes)
         var firstIteration = item.name;
         details.forEach(function(detail) {
-                if (detail) {
-                    firstIteration.concat(' ' + detail.Value)
-                }
-            })
-            console.log('\nfirst: ', firstIteration, '\n')
+            if (detail) {
+                firstIteration.concat(' ' + detail.Value)
+            }
+        })
+        console.log('\nfirst: ', firstIteration, '\n')
         var secondIteration = firstIteration;
-        if (absolutes.length > 0) {
-            // console.log('\n\n\nVAR')
+        if (variables.length > 0) {
             var tokens = secondIteration.split(' ');
-            console.log('Tokens: ',tokens)
-            var synResults = []
-            tokens.forEach(function(token) {
-                async.eachSeries(absolutes, function iterator(variable, cb) {
-                    console.log('Looking up: ',variable.Value[0])
-                    var options = {
-                        url: 'http://localhost:5000/syn',
-                        body: variable.Value[0]
-                    }
+            // console.log('Tokens: ', tokens)
+            console.log('Variables: ', variables)
+            var candidates = []
+            async.eachSeries(tokens, function iterator(token, finishedToken) {
 
-                    request.post(options, function(err, res, body) {
-                        if (!err && res.statusCode == 200) {
-                            console.log('Result: ',body)
-                            synResults.push(body)
+                    async.eachSeries(variables, function iterator(variable, finishedVariable) {
+                            var word = variable.Value[0]
 
-                            // console.log('Result: ',synonyms)
-
-                            wait(cb, 5000)
-
-                            // resolve(body)
-                        } else {
-                            if (err) {
-                                console.log('133', err)
+                            if (word.split(' ').length > 1) {
+                                console.log('Input is longer than one word, skipping: ', word)
+                                return finishedVariable()
                             }
+                            if (word.length <= 2) {
+                                console.log('Not a word skipping', word)
+                                return finishedVariable()
+                            }
+                            // word = word.replace(/'s/g, ''); //get rid of 's stuff (apostrophes and plurals, like "women's" or "men's". this removes the 's)
+                            word = word.replace(/[^\w\s]/gi, ''); //remove all special characters
+                            // tags = tags.replace(/\s+/g, ' ').trim(); //remove extra spaces from removing chars
+                            console.log('Looking up: ', word)
 
-                            wait(cb, 5000)
-                                // console.log('err body: ', JSON.stringify(body))
-                                // reject('Error requesting synonyms.')
-                        }
-                    });
+                            checkWord(word).then(function(res1) {
+                                var bool = JSON.parse(res1).isWord
+                                console.log('Is it a word? :', bool)
+                                if (bool == 'true') {
+                                    getSynonyms(word).then(function(res2) {
+                                        var results = JSON.parse(res2)
+                                        console.log('Syns: ', results)
 
-                }, function done() {
-                    console.log('done line 159')
-                    console.log('Final: ',synResults)
+                                        var i = results.synonyms.length
+                                        while (i--) {
+                                            if (results.synonyms[i].toLowerCase().trim() == variable.Name.toLowerCase().trim()) {
+                                                results.synonyms.splice[i,1]
+                                            }
+                                        }
+
+                                      
+                                        if (results.synonyms && results.synonyms.length > 0 && candidates) {
+                                            candidates.push(results)
+                                        } else {
+                                            console.log('No synonyms found.')
+                                        }
+                                        finishedVariable()
+                                    })
+                                } else {
+                                    console.log('Not a word!')
+                                    finishedVariable()
+                                }
+                            })
+                        },
+                        function finishedVariables() {
+                            // console.log('done line 159')
+                            // console.log('Final: ', synResults)
+                            finishedToken()
+                        })
+                },
+                function finishedTokens(err) {
+                    if (err) console.log('167: ', err)
+                    candidates = _.uniq(candidates, 'original')
+                    console.log('Final: ', candidates)
                 })
-
-            })
         }
+
+    }, function finishedImages(err) {
+
     })
+
 })
 
 mongoStream.on('end', function() {
-    console.log('\n\nStream ended.\n\n')
+    // console.log('\n\nStream ended.\n\n')
 
-
-    // wordnet.lookup('bag', function(results) {
-    //     console.log('\n\nGOT HERE! ')
-    //     results.forEach(function(result) {
-    //         console.log('------------------------------------');
-    //         // console.log(result.synsetOffset);
-    //         // console.log(result.pos);
-    //         // console.log(result.lemma);
-    //         console.log(result.synonyms);
-    //         // console.log(result.gloss);
-    //     });
-    // });
 
 })
+
+function checkWord(word) {
+    return new Promise(function(resolve, reject) {
+        var options = {
+            url: 'http://localhost:5000/check',
+            body: word
+        }
+        request.post(options, function(err, res, body) {
+            if (!err && res.statusCode == 200) {
+                // console.log('Result: ', body)
+                resolve(body)
+            } else {
+                if (err) {
+                    console.log('133', err)
+                }
+                resolve(body)
+            }
+        });
+    })
+}
+
+function getSynonyms(word) {
+    return new Promise(function(resolve, reject) {
+        var options = {
+            url: 'http://localhost:5000/syn',
+            body: word
+        }
+        request.post(options, function(err, res, body) {
+            if (!err && res.statusCode == 200) {
+                // console.log('Result: ', body)
+                resolve(body)
+            } else {
+                if (err) {
+                    console.log('133', err)
+                }
+                resolve(body)
+            }
+        });
+    })
+}
+
 
 function convertBase64(image) {
     return new Promise(function(resolve, reject) {

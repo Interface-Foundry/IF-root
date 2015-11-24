@@ -23,7 +23,10 @@ def wordCheck():
   res.original = str(request.data)
   meaning = dictionary.meaning(request.data)
   print meaning
-  res.meaning = meaning 
+  if meaning is None:
+    res.isWord = 'false'
+  else:
+    res.isWord = 'true'
   return jsonify(res)
 
 if __name__ == '__main__':
