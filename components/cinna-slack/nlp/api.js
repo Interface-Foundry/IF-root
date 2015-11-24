@@ -150,6 +150,11 @@ function nlpToResult(nlp) {
     }
   }
 
+  // parse out the focused element for each sentence
+  // if there is an ordinal, that's the focus
+
+
+
   // break out the entities into stores, locations, etc
   nlp.locaitons = [];
   nlp.entities.map(function(e) {

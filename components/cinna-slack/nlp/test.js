@@ -1,18 +1,43 @@
 var request = require('request')
+require('colors')
 
+var PRINT_SUCCESS = true;
+
+var messages = [
+  {
+    m: 'skinny black jeans',
+    r: {
+      tokens: ['skinny black jeans']
+    }
+  },
+  {
+    m: 'Levi skinny black jeans New York',
+    r: {
+      tokens: ['skinny black jeans'],
+      location: 'New York',
+      brand: 'Levi'
+    }
+  }
+];
+
+
+// run the module reloader
 request({
   url: 'http://localhost:8083/reload'
 })
 
-request({
-  url: 'http://localhost:8083/parse',
-  method: 'POST',
-  json: true,
-  body: {
-    text: 'shorts in San Francisco'
-  }
-}, function(e, r, b){
-  if (e) { return console.log(e) }
-  console.log(b)
-  console.log(b.ss)
+// test the messages
+messages.map(function(o) {
+  request({
+    url: 'http://localhost:8083/parse',
+    method: 'POST',
+    json: true,
+    body: {
+      text: o.m
+    }
+  }, function(e, r, b) {
+    console.log(b)
+    console.log(b.ss)
+
+  })
 })

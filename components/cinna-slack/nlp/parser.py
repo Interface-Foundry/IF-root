@@ -1,17 +1,20 @@
 from easydict import EasyDict as edict
 
-# expects a dict with text, blob, and doc
+# data.text is the original text
+# data.blob is the output of TextBlob
+# data.doc is the output of spaCy
 def parse(data):
     print 'entering parser method'
     print data.text
+
+    # Create the object we will return from the api
     res = edict({})
     res.text = data.text
-    res.original = data.text
 
     sentences = data.blob.sentences
 
-    # Entities
-    res.entities = [] #list(data.doc.ents)
+    # ALL Entities in every sentence
+    res.entities = []
     for entity in list(data.doc.ents):
         res.entities.append([entity.orth_, entity.label_])
 
