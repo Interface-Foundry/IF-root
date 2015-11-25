@@ -408,7 +408,16 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 //* * * * * * * * * * * * *
             
                 if ($scope.newQuery === true) {
-                    $scope.items = $scope.items.concat(response.data.results);    
+                     var newQueryIds = [];
+                        $scope.items.forEach(function(item){
+                            newQueryIds.push(item.id);
+                        });
+                        response.data.results.forEach(function(item){
+                            if(newQueryIds.indexOf(item.id) < 0){
+                                newQueryIds.push(item.id);
+                                $scope.items.push(item);
+                            }
+                        });
                     ResCache.put('user', $scope.items);
                     ResCache.put('query', encodeQuery);
                     $scope.newQuery = false;
@@ -421,7 +430,16 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                         ResCache.put('query', encodeQuery);
                         $scope.newQuery = false;   
                     } else if ($scope.infBool) {
-                        $scope.items = $scope.items.concat(response.data.results);    
+                        var scrollQueryIds = [];
+                        $scope.items.forEach(function(item){
+                            scrollQueryIds.push(item.id);
+                        });
+                        response.data.results.forEach(function(item){
+                            if(scrollQueryIds.indexOf(item.id) < 0){
+                                scrollQueryIds.push(item.id);
+                                $scope.items.push(item);
+                            }
+                        });
                         ResCache.put('user', $scope.items);
                         ResCache.put('query', encodeQuery);
                         $scope.newQuery = false;   
