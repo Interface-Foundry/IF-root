@@ -1,12 +1,7 @@
-// synonyms
-// material - absolute
-// color - variable
-// brand - absolute
-// size - variable - m --> medium  (filter out longer than x chars)
-// season - variable
-// 
-// 
-// 
+// TODO: 
+// Get better sample set data.
+// Go through tokens and if words are like : Sweater, Outfit, Boy, Baby, Man, Women, syn it.
+//  
 var natural = require('natural'),
     tokenizer = new natural.WordTokenizer(),
     wordnet = new natural.WordNet(__dirname + '/dict'),
@@ -27,7 +22,7 @@ var natural = require('natural'),
 var mongoStream = db.EbayItems
     .find({})
     .sort({
-        '_id': -1
+        '_id': 1
     })
     .limit(5)
     .stream();
@@ -38,152 +33,235 @@ var data = {
 
 mongoStream.on('data', function(item) {
     // console.log('item.name: ', item.images.length);
-
-    async.eachSeries(item.images, function iterator(img, finishedImage) {
-        console.log('Starting Image...')
-        var obj = {
-            captions: [],
-            file_path: ''
+    console.log('Starting Image...')
+    var obj = {
+        captions: [],
+        file_path: ''
+    }
+    var filename = urlify(item.itemId + (new Date().toString())) + ".png"
+        // console.log('filename: ',filename)
+    var path = __dirname + "/temp/" + filename;
+    obj.file_path = path;
+    var brand, material, gender, size, color, season, style = {}
+    var details = [brand, material, gender, size, color, season, style]
+    var variables = [];
+    var absolutes = [];
+    item.details.forEach(function(detail) {
+        switch (detail.Name) {
+            case 'Brand':
+                brand = {
+                    Name: 'Brand',
+                    Value: detail.Value
+                }
+                absolutes.push(brand)
+                break;
+            case 'Material':
+                material = {
+                    Name: 'Material',
+                    Value: detail.Value
+                }
+                absolutes.push(material)
+                break;
+            case 'Gender':
+                gender = {
+                    Name: 'Gender',
+                    Value: detail.Value
+                }
+                absolutes.push(gender)
+                break;
+            case 'Size':
+                size = {
+                    Name: 'Size',
+                    Value: detail.Value
+                }
+                absolutes.push(size)
+                break;
+            case 'Color':
+                color = {
+                    Name: 'Color',
+                    Value: detail.Value
+                }
+                absolutes.push(color)
+                break;
+            case 'Season':
+                season = {
+                    Name: 'Season',
+                    Value: detail.Value
+                }
+                absolutes.push(season)
+                break;
+            case 'Style':
+                style = {
+                    Name: 'Style',
+                    Value: detail.Value
+                }
+                variables.push(style)
+                break;
         }
-        var filename = urlify(item.itemId + (new Date().toString())) + ".png"
-            // console.log('filename: ',filename)
-        var path = __dirname + "/temp/" + filename;
-        obj.file_path = path;
-        var brand, material, gender, size, color, season, style = {}
-        var details = [brand, material, gender, size, color, season, style]
-        var variables = [];
-        var absolutes = [];
-        item.details.forEach(function(detail) {
-            switch (detail.Name) {
-                case 'Brand':
-                    brand = {
-                        Name: 'Brand',
-                        Value: detail.Value
-                    }
-                    absolutes.push(brand)
-                    break;
-                case 'Material':
-                    material = {
-                        Name: 'Material',
-                        Value: detail.Value
-                    }
-                    absolutes.push(material)
-                    break;
-                case 'Gender':
-                    gender = {
-                        Name: 'Gender',
-                        Value: detail.Value
-                    }
-                    absolutes.push(gender)
-                    break;
-                case 'Size':
-                    size = {
-                        Name: 'Size',
-                        Value: detail.Value
-                    }
-                    absolutes.push(size)
-                    break;
-                case 'Color':
-                    color = {
-                        Name: 'Color',
-                        Value: detail.Value
-                    }
-                    variables.push(color)
-                    break;
-                case 'Season':
-                    season = {
-                        Name: 'Season',
-                        Value: detail.Value
-                    }
-                    variables.push(season)
-                    break;
-                case 'Style':
-                    style = {
-                        Name: 'Style',
-                        Value: detail.Value
-                    }
-                    variables.push(style)
-                    break;
-            }
-        })
+    })
 
-        // console.log('*****', variables, absolutes)
-        var firstIteration = item.name;
-        details.forEach(function(detail) {
-            if (detail) {
-                firstIteration.concat(' ' + detail.Value)
-            }
-        })
-        console.log('\nfirst: ', firstIteration, '\n')
-        var secondIteration = firstIteration;
-        if (variables.length > 0) {
-            var tokens = secondIteration.split(' ');
-            // console.log('Tokens: ', tokens)
-            console.log('Variables: ', variables)
-            var candidates = []
-            async.eachSeries(tokens, function iterator(token, finishedToken) {
+    console.log('DETAILS: ', variables, absolutes)
+    var firstIteration = item.name;
+    absolutes.forEach(function(detail) {
+        if (detail) {
+            // console.log('Adding detail: ', detail.Name, detail.Value[0])
+            firstIteration = firstIteration.concat(' ' + detail.Value[0])
+        }
+    })
+    variables.forEach(function(detail) {
+        if (detail) {
+            // console.log('Adding detail: ', detail.Name, detail.Value[0])
+            firstIteration = firstIteration.concat(' ' + detail.Value[0])
+        }
+    })
+    console.log('\nfirst: ', firstIteration, '\n')
+    var secondIteration = firstIteration;
+    if (variables.length == 0) {
 
-                    async.eachSeries(variables, function iterator(variable, finishedVariable) {
-                            var word = variable.Value[0]
 
-                            if (word.split(' ').length > 1) {
-                                console.log('Input is longer than one word, skipping: ', word)
-                                return finishedVariable()
-                            }
-                            if (word.length <= 2) {
-                                console.log('Not a word skipping', word)
-                                return finishedVariable()
-                            }
-                            // word = word.replace(/'s/g, ''); //get rid of 's stuff (apostrophes and plurals, like "women's" or "men's". this removes the 's)
-                            word = word.replace(/[^\w\s]/gi, ''); //remove all special characters
-                            // tags = tags.replace(/\s+/g, ' ').trim(); //remove extra spaces from removing chars
-                            console.log('Looking up: ', word)
+        var tokens = secondIteration.split(' ');
+        // console.log('Tokens: ', tokens)
+        // console.log('Variables: ', variables)
+        var exchangables = []
+        async.eachSeries(variables, function iterator(variable, finishedVariable) {
+                var word = variable.Value[0]
 
-                            checkWord(word).then(function(res1) {
-                                var bool = JSON.parse(res1).isWord
-                                console.log('Is it a word? :', bool)
-                                if (bool == 'true') {
-                                    getSynonyms(word).then(function(res2) {
-                                        var results = JSON.parse(res2)
-                                        console.log('Syns: ', results)
+                if (word.split(' ').length > 1) {
+                    if (variable.Name == 'Material') {
+                        word = word.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '');
+                    } else {
+                        console.log('Input is longer than one word, skipping: ', word)
+                        return finishedVariable()
+                    }
+                }
+                console.log('***', word)
+                if (word.length <= 2) {
+                    console.log('Not a word skipping', word)
+                    return finishedVariable()
+                }
+                // word = word.replace(/'s/g, ''); //get rid of 's stuff (apostrophes and plurals, like "women's" or "men's". this removes the 's)
+                word = word.replace(/[^\w\s]/gi, ''); //remove all special characters
+                // tags = tags.replace(/\s+/g, ' ').trim(); //remove extra spaces from removing chars
+                console.log('Looking up: ', word)
 
-                                        var i = results.synonyms.length
-                                        while (i--) {
-                                            if (results.synonyms[i].toLowerCase().trim() == variable.Name.toLowerCase().trim()) {
-                                                results.synonyms.splice[i,1]
-                                            }
-                                        }
-
-                                      
-                                        if (results.synonyms && results.synonyms.length > 0 && candidates) {
-                                            candidates.push(results)
-                                        } else {
-                                            console.log('No synonyms found.')
-                                        }
-                                        finishedVariable()
-                                    })
-                                } else {
-                                    console.log('Not a word!')
-                                    finishedVariable()
+                checkWord(word).then(function(res1) {
+                    var bool = JSON.parse(res1).isWord
+                        // console.log('Is it a word? :', bool)
+                    if (bool == 'true' || variable.Name == 'Color' || variable.Name == 'Season' || variable.Name == 'Style') {
+                        getSynonyms(word).then(function(res2) {
+                            var results = JSON.parse(res2)
+                                // console.log('Syns: ', results)
+                            var i = results.synonyms.length
+                            while (i--) {
+                                // console.log(results.synonyms[i].toLowerCase().trim(),variable.Name.toLowerCase().trim())
+                                if (results.synonyms[i].toLowerCase().trim() == variable.Name.toLowerCase().trim()) {
+                                    results.synonyms.splice(i, 1)
                                 }
-                            })
-                        },
-                        function finishedVariables() {
-                            // console.log('done line 159')
-                            // console.log('Final: ', synResults)
+                            }
+                            if (results.synonyms && results.synonyms.length > 0) {
+                                exchangables.push(results)
+                            } else {
+                                console.log('No synonyms found.')
+                            }
+                            finishedVariable()
+                        })
+                    } else {
+                        console.log('Not a word!')
+                        finishedVariable()
+                    }
+                })
+            },
+            function finishedVariables(err) {
+                if (err) console.log('167: ', err)
+                exchangables = _.uniq(exchangables, 'original')
+                console.log('Results: ', exchangables)
+                    // [ { original: 'Purple',
+                    // synonyms: [ 'color', 'mauve', 'plum', 'amaranthine', 'lilac' ] } ]
+
+                var skipWords = exchangables.map(function(obj) {
+                        return obj.original.toLowerCase().trim()
+                    }).join(' ')
+                    // console.log('skipWords ', skipWords)
+                async.eachSeries(tokens, function iterator(token, finishedToken) {
+                        token = token.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '')
+                        if (skipWords.indexOf(token.toLowerCase().trim()) > -1) {
+                            // console.log('Token is variable, skipping...')
+                        }
+                        // console.log('Token: ', token)
+                        checkWord(token).then(function(res1) {
+                            var bool = JSON.parse(res1).isWord
+                                // console.log('Is it a word? :', bool)
+                            if (bool == 'true') {
+                                getSynonyms(token).then(function(res2) {
+                                    var results = JSON.parse(res2);
+                                    // console.log('Syns: ', results)
+                                    if (results.synonyms && results.synonyms.length > 0) {
+                                        exchangables.push(results)
+                                    } else {
+                                        // console.log('No synonyms found.')
+                                    }
+                                    finishedToken()
+                                })
+                            } else {
+                                // console.log('Not an exchangable candidate...')
+                                finishedToken()
+                            }
+                        })
+                    },
+                    function finishedTokens(err) {
+                        if (err) console.log('167: ', err)
+                        exchangables = _.uniq(exchangables, 'original')
+                        console.log('Exchangeables: ', exchangables)
+                        exchangables.forEach(function(replacement) {
+                            if (secondIteration.indexOf(replacement.original) > -1) {
+                                secondIteration = secondIteration.replace(replacement.original, replacement.synonyms[0])
+                            }
+                        })
+                        console.log('First iteration: ', firstIteration)
+                        console.log('Second Iteration: ', secondIteration)
+                        finishedImage()
+                    })
+            })
+
+    } else {
+        console.log('\n\nNO VARIABLES\n\n')
+        async.eachSeries(tokens, function iterator(token, finishedToken) {
+                token = token.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '')
+                // console.log('Token: ', token)
+                checkWord(token).then(function(res1) {
+                    var bool = JSON.parse(res1).isWord
+                        // console.log('Is it a word? :', bool)
+                    if (bool == 'true') {
+                        getSynonyms(token).then(function(res2) {
+                            var results = JSON.parse(res2);
+                            // console.log('Syns: ', results)
+                            if (results.synonyms && results.synonyms.length > 0) {
+                                exchangables.push(results)
+                            } else {
+                                console.log('No synonyms found.')
+                            }
                             finishedToken()
                         })
-                },
-                function finishedTokens(err) {
-                    if (err) console.log('167: ', err)
-                    candidates = _.uniq(candidates, 'original')
-                    console.log('Final: ', candidates)
+                    } else {
+                        // console.log('Not an exchangable candidate...')
+                        finishedToken()
+                    }
                 })
-        }
-
-    }, function finishedImages(err) {
-
-    })
+            },
+            function finishedTokens(err) {
+                if (err) console.log('167: ', err)
+                exchangables = _.uniq(exchangables, 'original')
+                console.log('Exchangables: ', exchangables)
+                exchangables.forEach(function(replacement) {
+                    if (secondIteration.indexOf(replacement.original) > -1) {
+                        secondIteration = secondIteration.replace(replacement.original, replacement.synonyms[0])
+                    }
+                })
+                console.log('First iteration: ', firstIteration)
+                console.log('Second Iteration: ', secondIteration)
+                finishedImage()
+            })
+    }
 
 })
 

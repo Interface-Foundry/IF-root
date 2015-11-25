@@ -26,6 +26,10 @@ def wordCheck():
   if meaning is None:
     res.isWord = 'false'
   else:
+    for key in meaning:
+      if key != 'Adjective':
+        res.isWord = 'false'
+        return jsonify(res) 
     res.isWord = 'true'
   return jsonify(res)
 
