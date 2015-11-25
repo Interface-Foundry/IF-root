@@ -29,11 +29,6 @@ var es = new elasticsearch.Client({
     log: ESLogger
 });
 
-
-// parse user if we're running this on it's own server
-if (!module.parent) {
-  //app.use(require('../IF_auth/new_auth.js'));
-}
 app.use(cookieParser());
 app.use(bodyParser.json());
 
@@ -130,7 +125,7 @@ app.post(searchItemsUrl, function(req, res, next) {
                       longitude: req.body.loc.lon,
                       latitude: req.body.loc.lat
                     });
-                    return a_dist - b_dist;
+                    return a_dist > b_dist;
                   });
                   r.parent = r.parents[0];
                   delete r.parents;
@@ -230,6 +225,9 @@ function search(q, page) {
             });
         }
         q.loc.lon = parseFloat(q.loc.lon);
+        if (q.loc.lon > 180) {
+          q.loc.lon = q.loc.lon - 360;
+        }
         if (q.loc.lon > 180 || q.loc.lon < -180) {
             return Promise.reject({
                 niceMessage: 'Could not complete search',
@@ -313,44 +311,16 @@ function textSearch(q, page) {
                   return r._id;
               });
 
-              var users = db.Users.find({
-                  $or: [{
-                      'profileID': q.text
-                  }, {
-                      'local.email': q.text
-                  }, {
-                      'facebook.email': q.text
-                  }, {
-                      'name': q.text
-                  }]
-              }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
-
               var items = db.Landmarks.find({
                   _id: {
                       $in: ids
                   }
               })
               .select(db.Landmark.frontEndSelect)
-              .exec();
-
-              return Promise.settle([users, items]).then(function(arry) {
-                  var u = arry[0];
-                  var i = arry[1];
-
-                  if (u.isFulfilled() && i.isFulfilled()) {
-                      var results = u.value().concat(i.value().map(function(i) {
-                          return db.Landmark.itemLocationHack(i, q.loc);
-                      }));
-                      return results
-                  } else if (i.isFulfilled() && !u.isFulfilled()) {
-                      return i.value().map(function(i) {
-                          return db.Landmark.itemLocationHack(i, q.loc);
-                      });
-                  } else if (u.isFulfilled() && !i.isFulfilled()) {
-                      return u.value()
-                  }
+              .exec()
+              .then(function(items) {
+                return db.Landmarks.itemLocationHack(items, q.loc);
               })
-
           }, kip.err);
 
   }
