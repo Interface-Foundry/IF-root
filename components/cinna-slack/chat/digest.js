@@ -1,4 +1,5 @@
 // TODO: 
+// Hard code: Seasons, maybe Colors
 // Choose appropriate array in returned synonym data depending on category arg
 // Hard Adjective Check
 // 
@@ -142,7 +143,7 @@ function parseItem(item) {
                         Name: 'Style',
                         Value: detail.Value[0]
                     }
-                    variables.push(style)
+                    absolutes.push(style)
                     break;
             }
         })
@@ -190,7 +191,7 @@ function parseItem(item) {
                     checkWord(word).then(function(res1) {
                         var bool = res1.isWord
                         if (bool == 'true') {
-                            getSynonyms(word).then(function(res2) {
+                            getSynonyms(word, variable.Name).then(function(res2) {
                                 var results = res2
                                 if (results.synonyms && results.synonyms.length > 0) {
                                     exchangables.push(results)
@@ -334,8 +335,30 @@ function compareWords(word1, word2) {
         }
         request.post(options, function(err, res, body) {
             if (!err && res.statusCode == 200) {
-                body = JSON.parse(body)
-                console.log('Result: ', body)
+                // body = JSON.parse(body)
+
+                body.results = body.results.filter(function(set) {
+                    return set.target.toLowerCase().trim() !== word1.toLowerCase().trim()
+                })
+
+                body.results = body.results.filter(function(set) {
+                    return set.score > 0.05
+                })
+
+                body.results.forEach(function(set) {
+                    set.target = set.target.split("Synset(")[1].split("')")[0].split('.')[0].replace(/[^\w\s]/gi, '')
+                })
+
+                
+
+                body.results = _.sortBy(body.results, function(n) {
+                    return n.score;
+                });
+
+                // body.results = body.results.filter(function(set) {
+                //     return set.first.toLowerCase().trim() == word1.toLowerCase().trim()
+                // })
+                console.log('\n\n\nTarget: ',word1,'\n', body)
                 resolve(body)
             } else {
                 if (err) {
@@ -348,7 +371,7 @@ function compareWords(word1, word2) {
 }
 
 
-function getSynonyms(word) {
+function getSynonyms(word, category) {
     return new Promise(function(resolve, reject) {
         var options = {
             url: 'http://localhost:5000/syn',
@@ -357,6 +380,19 @@ function getSynonyms(word) {
         request.post(options, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 body = JSON.parse(body)
+
+                // if (category) {
+                //     switch (category) {
+                //         case 'Season':
+                //             //do stuff
+                //              // console.log('\n\n\nTargeted synonyms: ',body.synonyms[4])
+
+                //             break;
+                //         case 'Color':
+                //             break
+                //     }
+                // }
+
                 body.synonyms = _.flatten(body.synonyms)
                 body.synonyms = _.uniq(body.synonyms)
                 body.synonyms.splice(0, 1)
@@ -369,7 +405,7 @@ function getSynonyms(word) {
 
                 async.eachSeries(body.synonyms, function iterator(word, cb) {
                     compareWords(body.original, word).then(function() {
-                        cb()
+                        wait(cb, 1000)
                     })
                 }, function done() {
 
