@@ -1,8 +1,6 @@
 // TODO: 
+// // Check EbayScraper data (urgent)
 // Hard code: Seasons, maybe Colors
-// Choose appropriate array in returned synonym data depending on category arg
-// Hard Adjective Check
-// 
 
 var mongoose = require('mongoose'),
     db = require('db'),
@@ -18,15 +16,16 @@ var mongoose = require('mongoose'),
     request = require('request'),
     Promise = require('es6-promise').Promise,
     fs = require('fs'),
-    client = require('../../../redis.js');
+    client = require('../../../redis.js'),
+    STOP_STRING = require('./stop_words').list.join(' ')
 
 var mongoStream = db.EbayItems
     .find({})
     .sort({
         '_id': 1
     })
-    .skip(500)
-    .limit(5)
+    .skip(700)
+    .limit(50)
     .lean()
     .stream();
 
@@ -34,8 +33,13 @@ var data = {
     images: []
 }
 
+//## Uncomment below and run file to clear redis queue
+//## Careful with this, overdoing it will break the list in redis ::shrug::
+console.log('clearing list..')
+client.ltrim('trainx',1,0)
+
 mongoStream.on('data', function(item) {
-    client.rpush('train', JSON.stringify(item), function(err, reply) {
+    client.rpush('trainx', JSON.stringify(item), function(err, reply) {
         if (err) {
             err.niceMessage = 'Could not save item';
             err.devMessage = 'REDIS QUEUE ERR';
@@ -51,11 +55,10 @@ mongoStream.on('end', function() {
 
 
 var timer = new InvervalTimer(function() {
-    client.lrange('train', 0, -1, function(err, items) {
-            //## Uncomment below and run file to clear redis queue
-            // console.log('clearing list..')
-            // client.ltrim('train',1,0)
-            console.log('Queue: ' + items.length)
+    client.lrange('trainx', 0, -1, function(err, items) {
+            if (items && items.length > 0) {
+                console.log('Queue: ' + items.length)
+            }
             if (items.length > 0) {
                 // console.log('Pausing timer')
                 timer.pause();
@@ -81,7 +84,7 @@ var timer = new InvervalTimer(function() {
 function parseItem(item) {
     return new Promise(function(resolve, reject) {
         // console.log('item.name: ', item.images.length);
-        console.log('Starting...')
+        console.log('Starting...', item.details)
         var obj = {
             captions: [],
             file_path: ''
@@ -166,18 +169,19 @@ function parseItem(item) {
         var secondIteration = firstIteration;
         var tokens = secondIteration.split(' ');
         if (variables.length !== 0) {
+            console.log('\nSituation: Details exist for item.\n')
             var exchangables = []
             async.eachSeries(variables, function iterator(variable, finishedVariable) {
                     var word = variable.Value
-
+                    var cat = variable.Name ? variable.Name.toLowerCase().trim() : 'general'
                     if (word.split(' ').length > 1) {
-                        if (variable.Name == 'Material') {
-                            console.log('127')
-                            word = word.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '');
-                        } else {
-                            console.log('Input is longer than one word, skipping: ', word)
-                            return finishedVariable()
-                        }
+                        // if (variable.Name == 'Material') {
+                        //     console.log('127')
+                        //     word = word.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '');
+                        // } else {
+                        console.log('Input is longer than one word, skipping: ', word)
+                        return finishedVariable()
+                            // }
                     }
                     // console.log('***', word)
                     if (word.length <= 2) {
@@ -190,8 +194,9 @@ function parseItem(item) {
 
                     checkWord(word).then(function(res1) {
                         var bool = res1.isWord
-                        if (bool == 'true') {
-                            getSynonyms(word, variable.Name).then(function(res2) {
+                        if (bool == 'true' && STOP_STRING.indexOf(word.toLowerCase().trim())) {
+                            console.log('Finding synonyms for: ',word)
+                            getSynonyms(word, cat).then(function(res2) {
                                 var results = res2
                                 if (results.synonyms && results.synonyms.length > 0) {
                                     exchangables.push(results)
@@ -212,7 +217,7 @@ function parseItem(item) {
                     exchangables = _.uniq(exchangables, 'original')
                     async.eachSeries(tokens, function iterator(token, finishedToken) {
                             token = token.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '')
-                            if (token && STOP_WORDS.join(' ').indexOf(token.toLowerCase().trim()) > -1) {
+                            if (token && STOP_STRING.indexOf(token.toLowerCase().trim()) > -1) {
                                 // console.log('This token is untouchable: ', token)
                                 return finishedToken()
                             }
@@ -225,7 +230,7 @@ function parseItem(item) {
                             checkWord(token).then(function(res) {
                                 var bool = res.isWord
                                 if (bool == 'true') {
-                                    getSynonyms(token).then(function(results) {
+                                    getSynonyms(token, 'general').then(function(results) {
                                         if (results.synonyms && results.synonyms.length > 0) {
                                             exchangables.push(results)
                                         }
@@ -253,11 +258,11 @@ function parseItem(item) {
                 })
 
         } else {
-
+            console.log('\nSituation: No details for item.\n')
             if (tokens && tokens.length > 0) {
                 async.eachSeries(tokens, function iterator(token, finishedToken) {
                         token = token.replace(/[^\w\s]/gi, '').replace(/[0-9]/g, '')
-                        if (token && STOP_WORDS.join(' ').indexOf(token.toLowerCase().trim()) > -1) {
+                        if (token && STOP_STRING.indexOf(token.toLowerCase().trim()) > -1) {
                             // console.log('This token is untouchable: ', token)
                             return finishedToken()
                         }
@@ -270,7 +275,7 @@ function parseItem(item) {
                         checkWord(token).then(function(res) {
                             var bool = res.isWord
                             if (bool == 'true') {
-                                getSynonyms(token).then(function(results) {
+                                getSynonyms(token, 'general').then(function(results) {
                                     if (results.synonyms && results.synonyms.length > 0) {
                                         exchangables.push(results)
                                     } else {
@@ -336,29 +341,22 @@ function compareWords(word1, word2) {
         request.post(options, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 // body = JSON.parse(body)
-
                 body.results = body.results.filter(function(set) {
                     return set.target.toLowerCase().trim() !== word1.toLowerCase().trim()
                 })
-
                 body.results = body.results.filter(function(set) {
-                    return set.score > 0.05
+                    return set.score > 0.1
                 })
-
                 body.results.forEach(function(set) {
                     set.target = set.target.split("Synset(")[1].split("')")[0].split('.')[0].replace(/[^\w\s]/gi, '')
                 })
-
-                
-
                 body.results = _.sortBy(body.results, function(n) {
                     return n.score;
                 });
-
                 // body.results = body.results.filter(function(set) {
                 //     return set.first.toLowerCase().trim() == word1.toLowerCase().trim()
                 // })
-                console.log('\n\n\nTarget: ',word1,'\n', body)
+                // console.log('\nTarget: ', word1, '\n', body)
                 resolve(body)
             } else {
                 if (err) {
@@ -373,43 +371,34 @@ function compareWords(word1, word2) {
 
 function getSynonyms(word, category) {
     return new Promise(function(resolve, reject) {
+        var data = {
+            word: word,
+            category: category
+        }
         var options = {
             url: 'http://localhost:5000/syn',
-            body: word
+            json: true,
+            body: data
         }
         request.post(options, function(err, res, body) {
             if (!err && res.statusCode == 200) {
-                body = JSON.parse(body)
-
-                // if (category) {
-                //     switch (category) {
-                //         case 'Season':
-                //             //do stuff
-                //              // console.log('\n\n\nTargeted synonyms: ',body.synonyms[4])
-
-                //             break;
-                //         case 'Color':
-                //             break
-                //     }
-                // }
-
                 body.synonyms = _.flatten(body.synonyms)
                 body.synonyms = _.uniq(body.synonyms)
                 body.synonyms.splice(0, 1)
                 body.synonyms = body.synonyms.filter(function(word) {
-                    return (word.toLowerCase().trim().indexOf(body.original.toLowerCase().trim()) == -1)
+                    return (word.toLowerCase().trim().indexOf(body.original.toLowerCase().trim()) == -1 && word.indexOf('ish') == -1)
                 })
                 body.synonyms = body.synonyms.map(function(word) {
                     return (word.charAt(0).toUpperCase() + word.slice(1)).replace(/_/g, '');
                 })
 
-                async.eachSeries(body.synonyms, function iterator(word, cb) {
-                    compareWords(body.original, word).then(function() {
-                        wait(cb, 1000)
-                    })
-                }, function done() {
+                // async.eachSeries(body.synonyms, function iterator(word, cb) {
+                //     compareWords(body.original, word).then(function() {
+                //         wait(cb, 1000)
+                //     })
+                // }, function done() {
 
-                })
+                // })
 
                 // console.log('Wordnet result for ', body.original,' : ',body.synonyms)
                 resolve(body)
@@ -493,300 +482,3 @@ function wait(callback, delay) {
     callback();
 }
 
-
-STOP_WORDS = [
-    'boy',
-    'girl',
-    'boys',
-    'girls',
-    'mens',
-    'womens',
-    'men',
-    'women',
-    'baby',
-    'man',
-    'woman',
-    'toddler',
-    'ladies',
-    'lady',
-    'guys',
-    'top',
-    'shirt',
-    'sweater',
-    'tshirt',
-    't-shirt',
-    'sleeveless',
-    'long-sleeve',
-    'longsleeve',
-    'vest',
-    'jersey',
-    'dress-shirt',
-    'dressshirt',
-    'button-down',
-    'buttondown',
-    'polo',
-    'polo-shirt',
-    'tank',
-    'tanktop',
-    'tank-top',
-    'blouse',
-    'henley',
-    'crop',
-    'croptop',
-    'crop-top',
-    'tube',
-    'tubetop',
-    'tube-top',
-    'jeantop',
-    'jean-top',
-    'halter',
-    'haltertop',
-    'turtle',
-    'turtleneck',
-    'turtle-neck',
-    'dress',
-    'sundress',
-    'wedding',
-    'maxi',
-    'gown',
-    'bubble',
-    'tiered',
-    'corset',
-    'tea',
-    'teadress',
-    'wrap',
-    'wrapdress',
-    'blouson',
-    'halter',
-    'babydoll',
-    'bodycon',
-    'jacket',
-    'coat',
-    'blazer',
-    'hoodie',
-    'suit',
-    'windbreaker',
-    'parka',
-    'leather-jacket',
-    'leatherjacket',
-    'harrington',
-    'harrington-jacket',
-    'harringtonjacket',
-    'poncho',
-    'robe',
-    'shawl',
-    'tuxedo',
-    'overcoat',
-    'over-coat',
-    'sport-coat',
-    'sportcoat',
-    'waistcoat',
-    'waist-coat',
-    'duffle',
-    'fleece',
-    'dufflecoat',
-    'duffle-coat',
-    'peacoat',
-    'pea',
-    'britishwarm',
-    'british-warm',
-    'ulster',
-    'ulster-coat',
-    'winterjacket',
-    'winter-jacket',
-    'puffer',
-    'puffer-jacket',
-    'cagoule',
-    'chesterfield',
-    'cover-coat',
-    'covercoat',
-    'duffle-coat',
-    'bomber',
-    'bomber-jacket',
-    'bomberjacket',
-    'trench',
-    'trenchcoat',
-    'trench-coat',
-    'rain',
-    'raincoat',
-    'guardjacket',
-    'guard-jacket',
-    'mess',
-    'mess-jacket',
-    'messjacket',
-    'opera',
-    'operacoat',
-    'opera-coat',
-    'shrug',
-    'shorts',
-    'pants',
-    'pant',
-    'jeans',
-    'jean',
-    'trousers',
-    'trouser',
-    'chaps',
-    'cargo',
-    'capri',
-    'palazzo',
-    'palazzos',
-    'chinos',
-    'chino',
-    'khaki',
-    'khakis',
-    'overalls',
-    'yoga-pants',
-    'yogapants',
-    'lowrise',
-    'lowrise-pants',
-    'lowrisepants',
-    'sweatpants',
-    'sweat-pants',
-    'parachute',
-    'phat',
-    'pedal-pushers',
-    'pedalpushers',
-    'dresspants',
-    'dress-pants',
-    'bellbottoms',
-    'bell-bottoms',
-    'cycling',
-    'highwater',
-    'high-water',
-    'bermuda',
-    'windpants',
-    'wind-pants',
-    'shoe',
-    'shoes',
-    'sneaker',
-    'sneakers',
-    'boot',
-    'boots',
-    'slipper',
-    'slippers',
-    'sandal',
-    'sandals',
-    'spat',
-    'spats',
-    'croc',
-    'crocs',
-    'dress-shoes',
-    'boot',
-    'boots',
-    'flip-flops',
-    'flip-flop',
-    'sandal',
-    'heels',
-    'high-heels',
-    'highheels',
-    'skirt',
-    'miniskirt',
-    'mini-skirt',
-    'a-line',
-    'aline',
-    'aline-skirt',
-    'ballerina',
-    'ballerina-skirt',
-    'denimskirt',
-    'denim-skirt',
-    'jobskirt',
-    'job-skirt',
-    'job',
-    'microskirt',
-    'micro-skirt',
-    'pencil-skirt',
-    'pencilskirt',
-    'praire',
-    'praire-skirt',
-    'praireskirt',
-    'rah-rah',
-    'rahrah',
-    'tutu',
-    'wrap-skirt',
-    'wrapskirt',
-    'leatherskirt',
-    'leather-skirt',
-    'backpack',
-    'handbag',
-    'hand-bag',
-    'handbags',
-    'chanel',
-    'duffel',
-    'satchel',
-    'tote',
-    'messenger',
-    'saddle',
-    'clutch',
-    'wristlet',
-    'sunglasses',
-    'watch',
-    'wristwatch',
-    'scarf',
-    'sash',
-    'headband',
-    'glasses',
-    'cufflink',
-    'tie',
-    'necktie',
-    'bow',
-    'bowtie',
-    'belt',
-    'bandana',
-    'suspenders',
-    'wallet',
-    'swim',
-    'swimwear',
-    'swim-wear',
-    'swimsuit',
-    'swim-suit',
-    'swim-briefs',
-    'swimbriefs',
-    'wet',
-    'wetsuit',
-    'wet-suit',
-    'surfer',
-    'surf',
-    'trunks',
-    'bikini',
-    'boardshorts',
-    'board',
-    'drysuit',
-    'dry',
-    'one-piece',
-    'onepiece',
-    'rashguard',
-    'rash',
-    'yoga',
-    'sports',
-    'earrings',
-    'earring',
-    'necklace',
-    'ring',
-    'brooch',
-    'brooches',
-    'bracelet',
-    'bracelets',
-    'amethyst',
-    'emerald',
-    'jade',
-    'jasper',
-    'ruby',
-    'sapphire',
-    'diamond',
-    'gold',
-    'brassiere',
-    'underwear',
-    'underpants',
-    'boxers',
-    'briefs',
-    'boxer',
-    'brief',
-    'panties',
-    'slip',
-    'hoisery',
-    'bra',
-    'bras',
-    'tights',
-    'leggings',
-    'legging'
-]

@@ -14,12 +14,35 @@ app = Flask(__name__)
 @app.route('/syn',methods=['GET','POST'])
 def findSyn():
   res = edict({})
-  res.original = str(request.data)
+  request.data = request.get_json(force=True)
+  res.original = str(request.data['word'])
+  category = ''
+  if request.data['category'] is not None:
+    category = str(request.data['category'])
+  print 'Evaluating: ' + res.original
+  print 'Category: ' + category
   syn_set = wordnet.synsets(res.original)
   res.synonyms = []
   for i,j in enumerate(syn_set):
-    # print "Synonyms:", ", ".join(j.lemma_names())
-    res.synonyms.append(j.lemma_names())
+    if category == 'color' and j.lexname() == 'adj.all':
+      print j.name
+      print j.member_holonyms()
+      print j.lexname() 
+      print j.hypernyms()
+      print "Synonyms:", ", ".join(j.lemma_names())
+      res.synonyms.append(j.lemma_names())
+    if category == 'season' and j.lexname() == 'noun.time':
+      print j.name
+      print j.member_holonyms()
+      print j.lexname() 
+      print j.hypernyms() 
+      print "Synonyms:", ", ".join(j.lemma_names())
+      res.synonyms.append(j.lemma_names())
+    if category == 'general':
+      meaning = dictionary.meaning(res.original)
+      for key in meaning:
+        if key == 'Adjective':
+          res.synonyms.append(j.lemma_names())
   # print wordnet.synsets(res.original)
   # res.synonyms =  dictionary.synonym(res.original)
   return jsonify(res)
@@ -38,7 +61,7 @@ def compare():
         # print s2
         # print max(s1.path_similarity(s2))
         data.target = str(s2)
-        if s1.path_similarity(s2) is not None:
+        if s1.shortest_path_distance(s2) is not None:
           data.score = s1.path_similarity(s2)
           res.results.append(data)
   return jsonify(res)
@@ -46,7 +69,7 @@ def compare():
 @app.route('/check',methods=['GET','POST'])
 def wordCheck():
   res = edict({})
-  print request.data
+  # print request.data
   res.original = str(request.data)
   meaning = dictionary.meaning(request.data)
   # print meaning
