@@ -329,8 +329,9 @@ function textSearch(q, page) {
               .select(db.Landmark.frontEndSelect)
               .exec()
               .then(function(items) {
-                console.log(items)
-                return db.Landmarks.itemLocationHack(items, q.loc);
+                return items.map(function(i) {
+                  return db.Landmarks.itemLocationHack(i, q.loc);
+                })
               })
               return items;
           }, kip.err);
