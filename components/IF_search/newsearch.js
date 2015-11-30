@@ -264,6 +264,9 @@ function textSearch(q, page) {
 
       // here's some reading on filtered queries
       // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
+
+      // query sorted by geo
+      // https://www.elastic.co/blog/geo-location-and-search
       var filter = {
           bool: {
               must: [{
@@ -287,6 +290,17 @@ function textSearch(q, page) {
           });
       }
 
+      var geosort = [{
+          "_geo_distance" : {
+              "geolocation" : {
+                lon: q.loc.lon,
+                lat: q.loc.lat
+              },
+              "order" : "asc",
+              "unit" : "mi"
+          }
+      }];
+
       // put it all together in a filtered fuzzy query
       var fuzzyQuery = {
           size: pageSize,
@@ -295,12 +309,8 @@ function textSearch(q, page) {
           type: "items",
           fields: [],
           body: {
-              query: {
-                  filtered: {
-                      query: searchterms.getElasticsearchQuery(q.text),
-                      filter: filter
-                  }
-              }
+              query: searchterms.getElasticsearchQuery(q.text),
+              sort: geosort
           }
       };
       kip.prettyPrint(fuzzyQuery)
@@ -319,8 +329,10 @@ function textSearch(q, page) {
               .select(db.Landmark.frontEndSelect)
               .exec()
               .then(function(items) {
+                console.log(items)
                 return db.Landmarks.itemLocationHack(items, q.loc);
               })
+              return items;
           }, kip.err);
 
   }

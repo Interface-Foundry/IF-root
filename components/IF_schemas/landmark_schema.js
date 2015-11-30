@@ -265,7 +265,7 @@ Landmark.generateIdFromName = function(name) {
  * @returns {*}
  */
 Landmark.itemLocationHack = function(item, loc) {
-    if (item.loc.type === 'MultiPoint') {
+    if (item.loc && item.loc. type && item.loc.type === 'MultiPoint') {
         item.loc.type = 'Point';
 
         // If there is no location to go by, choose a store for them
