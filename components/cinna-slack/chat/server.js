@@ -28,37 +28,112 @@ io.sockets.on('connection', function(socket) {
 
     socket.on("msgToClient", function(data) {
 
-        //FUNCTION WITH CALLBACK TO PYTHON, CALLBACK PASSES DATA TO incomingAction():
-        routeNLP(data.msg); //also send channel ID of slack user
+        //rough banter framework, use flat file DB or redis?
+        switch (data.msg) {
+            case 'hi':
+                data.msg = 'HEY! oops caps';
+                outgoingResponse(data,'txt'); //
+                break;
+            case 'sup':
+                data.msg = 'nm, u?';
+                outgoingResponse(data,'txt'); //
+                break;
+            case 'are you a bot':
+                data.msg = 'yep, are you human?';
+                outgoingResponse(data,'txt');
+                break;
+            case 'what\'s the meaning of life?':
+                data.msg = 'life, the multiverse and whatever';
+                outgoingResponse(data,'txt');
+                break;
+            case 'how do i shot web?':
+                data.msg = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
+                outgoingResponse(data,'image');
+                break;
+            case 'u mad bro?':
+                data.msg = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
+                outgoingResponse(data,'image');
+                break;
+            case 'How Is babby formed?':
+                data.msg = 'girl get pragnent';
+                outgoingResponse(data,'txt');
+                break;
+            case 'help':
+                data.msg = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
+                outgoingResponse(data,'txt');
+                break;
+
+            //* * * * TEMP FOR TESTING * * * *//
+            case 'similar':
+                var res = {};
+                res.bucket = 'search';
+                res.channel = '3EL18A0M';
+                res.action = 'similar';
+                res.searchSelect = [1]
+                res.tokens = data.msg;
+                incomingAction(res);
+                break;
+            case 'focus':
+                var res = {};
+                res.bucket = 'search';
+                res.channel = '3EL18A0M';
+                res.action = 'modify';
+                res.searchSelect = [1]
+                res.tokens = data.msg;
+                incomingAction(res);
+                break;
+            case 'modify':
+                var res = {};
+                res.bucket = 'search';
+                res.channel = '3EL18A0M';
+                res.action = 'focus';
+                res.searchSelect = [1]
+                res.tokens = data.msg;
+                incomingAction(res);
+                break;
+            //* * * * * END TESTING * * * * *//
+
+            default:
+            //FUNCTION WITH CALLBACK TO PYTHON, CALLBACK PASSES DATA TO incomingAction():
+            routeNLP(data.msg); //also send channel ID of slack user
+        }
 
     })
 });
 
-function routeNLP(msg){ //pushing incoming messages to python
+//pushing incoming messages to python
+function routeNLP(msg){ 
 
     nlp.parse(msg, function(e, res) {
+        if (e){console.log('NLP error ',e)};
+
+        //TEMPORARY
+        if(!res){
+            res = {};
+        }
+
         //TODO
-        res.channel = '3EL18A0M'
+        res.channel = '3EL18A0M';
 
         //TEMPORARY TODO
         // nlp doesn't handle these yet
         if (msg == 'similar'){
             res.action = 'similar';
-            res.searchSelect = [1]
+            res.searchSelect = [1];
             res.tokens = msg;
         }
         else if (msg == 'modify'){
             res.action = 'modify';
-            res.searchSelect = [1]
+            res.searchSelect = [1];
             res.tokens = msg;
         }
         else if (msg == 'focus'){
             res.action = 'focus';
-            res.searchSelect = [1]
+            res.searchSelect = [1];
             res.tokens = msg;
         }
 
-        incomingAction(res)
+        incomingAction(res);
     })
 }
 
@@ -357,6 +432,23 @@ function searchBack(data){
     // view cart ---> get all items in cart ---> RETURN CART? or return URL TO amazon?
     // would you like me to get it for you? [kip question flag, wait for response] (PHASE 2)
 
+//Build Amazon Cart
+function createCart(items) {
+    var options = {}
+    for (var i = 0; i < items.length; i++) {
+        var propASIN = 'Item*'+i+'*ASIN';
+        options[propName] = items[i].ASIN;
+        var propQuan = 'Item*'+i+'*Quantity';
+        options[propQuan] = items[i].Quantity
+    }
+    client.createCart(options).then(function(results) {
+        console.log('Results: ', results)
+        var cartUrl = results.PurchaseURL
+        outgoingResponse(cartUrl);
+    }).catch(function(err) {
+        console.log('amazon err ', err[0].Error[0]);
+    });
+}
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
 
@@ -377,7 +469,6 @@ function searchAmazon(data, type, query, flag){
     //* * * * * * * * *  NN CLASSIFICATION NEEDED * * * * * * * * //
     // & & & & & & & & & & & & & & & & & & & & & & & & & & & & & &//
     // * * * * CLASSIFY incoming searches into categories --> search amazon with BrowseNode ---> better results
-    
 
     switch (type) {
         case 'initial':
@@ -427,42 +518,54 @@ function searchAmazon(data, type, query, flag){
 
         case 'similar':
 
-            if (data.amazon){ //we have a previously saved amazon session
-                
-                if (!flag){ //no flag passed in
-                    flag = 'Intersection'; //default 
+            //handle no data error
+            if (!data){
+                console.log('error no amazon item found for similar search');
+                data = {
+                    msg:'Sorry, I don\'t understand, please ask me again'
                 }
-
-                //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
-                var IdArray = [];
-                for (var i = 0; i < query.searchSelect.length; i++) { //match item choices to product IDs
-                    var searchNum = query.searchSelect[i];
-                    IdArray.push(data.amazon[searchNum - 1].ASIN[0]);
-                }
-                var ItemIdString = IdArray.toString();
-                //////////
-
-                //AMAZON SIMILARITY QUERY 
-                // [NOTE: functionality not in default AWS node lib. had to extend it!]
-                client.similarityLookup({
-                  ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
-                  Keywords: data.tokens,
-                  SimilarityType: flag, //other option is "Random" <<< test which is better results
-                  responseGroup: 'ItemAttributes,Offers,Images'
-
-                }).then(function(results){
-                    outgoingResponse(results,'stitch','amazon'); //send msg to user
-                    saveHistory(data,results,'amazon'); //push new state, pass amazon results
-
-                }).catch(function(err){
-                  console.log('amazon err ',err[0].Error[0]);
-                  console.log('SIMILAR FAILED: should we fire random query or mod query');
-                  //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
-                });
+                outgoingResponse(data,'txt');
             }
             else {
-                searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+                if (data.amazon){ //we have a previously saved amazon session
+                    
+                    if (!flag){ //no flag passed in
+                        flag = 'Intersection'; //default 
+                    }
+
+                    //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
+                    var IdArray = [];
+                    for (var i = 0; i < query.searchSelect.length; i++) { //match item choices to product IDs
+                        var searchNum = query.searchSelect[i];
+                        IdArray.push(data.amazon[searchNum - 1].ASIN[0]);
+                    }
+                    var ItemIdString = IdArray.toString();
+                    //////////
+
+                    //AMAZON SIMILARITY QUERY 
+                    // [NOTE: functionality not in default AWS node lib. had to extend it!]
+                    client.similarityLookup({
+                      ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
+                      Keywords: data.tokens,
+                      SimilarityType: flag, //other option is "Random" <<< test which is better results
+                      responseGroup: 'ItemAttributes,Offers,Images'
+
+                    }).then(function(results){
+                        outgoingResponse(results,'stitch','amazon'); //send msg to user
+                        saveHistory(data,results,'amazon'); //push new state, pass amazon results
+
+                    }).catch(function(err){
+                      console.log('amazon err ',err[0].Error[0]);
+                      console.log('SIMILAR FAILED: should we fire random query or mod query');
+                      //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
+                    });
+                }
+                else {
+                    searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+                }             
             }
+
+
 
             break;
 
@@ -505,6 +608,15 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             io.sockets.emit("msgFromSever", {message: url});
         });
     }
+    //single image msg to user
+    else if (action == 'txt'){ 
+        io.sockets.emit("msgFromSever", {message: data.msg});
+    }
+    //single image msg to user
+    else if (action == 'image'){ 
+        io.sockets.emit("msgFromSever", {message: data.msg});
+    }
+    //one default image msg to user
     else {
         io.sockets.emit("msgFromSever", {message: data[0].LargeImage[0].URL[0]});
     }

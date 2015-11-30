@@ -93,6 +93,7 @@ var createClient = function (credentials) {
     similarityLookup: runQuery(credentials, 'SimilarityLookup'),
     itemSearch: runQuery(credentials, 'ItemSearch'),
     itemLookup: runQuery(credentials, 'ItemLookup'),
+    createCart: runQuery(credentials, 'CartCreate'),
     browseNodeLookup: runQuery(credentials, 'BrowseNodeLookup')
   };
 };
