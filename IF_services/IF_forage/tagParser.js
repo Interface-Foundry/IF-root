@@ -1,8 +1,12 @@
-var urlify = require('urlify').create({
-    spaces: "",
-    nonPrintable: "",
-    trim: true
-});
+var request = require('request'),
+    Promise = require('bluebird')
+    async = require('async'),
+    urlify = require('urlify').create({
+        spaces: "",
+        nonPrintable: "",
+        trim: true
+    });
+
 
 
 module.exports = {
@@ -34,7 +38,7 @@ module.exports = {
         return finalTags;
     },
 
-    parseRelevant: function(array) {
+    filter: function(array) {
         var finalTags = [];
         var x;
         var y;
@@ -238,7 +242,7 @@ module.exports = {
             "unavailable",
             "notified",
             "required",
-            "protects",
+            "protect",
             "quicker",
             "transaction",
             "verified",
@@ -265,6 +269,8 @@ module.exports = {
             "using",
             "numbers",
             "emailed",
+            "mail",
+            "broker",
             "processing",
             "posted",
             "purchases",
@@ -3021,3 +3027,4 @@ String.prototype.removeStopWords = function() {
     }
     return cleansed_string.replace(/^\s+|\s+$/g, "");
 }
+

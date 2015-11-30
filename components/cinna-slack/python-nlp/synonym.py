@@ -2,6 +2,8 @@ from easydict import EasyDict as edict
 from PyDictionary import PyDictionary
 from nltk.corpus import wordnet
 from itertools import product
+from difflib import SequenceMatcher
+
 dictionary=PyDictionary()
 from flask import (
     Flask,
@@ -10,6 +12,15 @@ from flask import (
 )
 
 app = Flask(__name__)
+
+@app.route('/match',methods=['GET','POST'])
+def match():
+  res = edict({})
+  request.data = request.get_json(force=True)
+  m = SequenceMatcher(None, str(request.data['first']), str(request.data['second']))
+  res.score = m.ratio()
+  print res.score
+  return jsonify(res)
 
 @app.route('/syn',methods=['GET','POST'])
 def findSyn():
@@ -47,7 +58,7 @@ def findSyn():
   # res.synonyms =  dictionary.synonym(res.original)
   return jsonify(res)
 
-@app.route('/compare',methods=['GET','POST'])
+@app.route('/score',methods=['GET','POST'])
 def compare():
   res = edict({})
   request.data = request.get_json(force=True)
@@ -65,6 +76,7 @@ def compare():
           data.score = s1.path_similarity(s2)
           res.results.append(data)
   return jsonify(res)
+
 
 @app.route('/check',methods=['GET','POST'])
 def wordCheck():

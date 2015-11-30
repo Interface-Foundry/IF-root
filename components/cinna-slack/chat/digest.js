@@ -1,7 +1,20 @@
-// TODO: 
-// // Check EbayScraper data (urgent)
-// Hard code: Seasons, maybe Colors
+//WARNING: 
+//1. Before running please ensure there is a 'temp' folder in home dir 
+//with 2 subdirectories 'test' and 'train'
+//2. Run with args 'test' or 'train'. Defaults to 'test'
 
+// TODO: 
+//Captions: For categoryname field splice out 'wholesale'
+//OUTPUT JSON FORMAT: 
+// TRAINING:
+// [{
+//     file_path: 'path/img.jpg',
+//     captions: ['a caption', ...]
+// }]
+// TESTING: 
+// [{
+//     file_path: 'path/img.jpg'
+// }]
 var mongoose = require('mongoose'),
     db = require('db'),
     async = require('async'),
@@ -16,6 +29,8 @@ var mongoose = require('mongoose'),
     request = require('request'),
     Promise = require('es6-promise').Promise,
     fs = require('fs'),
+    im = require('imagemagick'),
+    osHomedir = require('os-homedir'),
     client = require('../../../redis.js'),
     STOP_STRING = require('./stop_words').list.join(' ')
 
@@ -29,70 +44,158 @@ var mongoStream = db.EbayItems
     .lean()
     .stream();
 
-var data = {
-    images: []
-}
+var data = []
 
-//## Uncomment below and run file to clear redis queue
-//## Careful with this, overdoing it will break the list in redis ::shrug::
-console.log('clearing list..')
-client.ltrim('trainx',1,0)
+//'test' mode has only file paths to each image in json
+//'train' mode has file path and associated captions
+var mode = (process.argv[2] == 'train') ? 'train' : 'test'
+var list = (mode == 'test') ? 'test' : 'trainx'
+//Uncomment below and run file to clear redis queue before running.
+// !!Careful with this, Clearing the list when its emplty will sometimes break the list in redis ::shrug::
+// console.log('clearing list..')
+// client.ltrim(list, 1, 0)
 
 mongoStream.on('data', function(item) {
-    client.rpush('trainx', JSON.stringify(item), function(err, reply) {
+    client.rpush(list, JSON.stringify(item), function(err, reply) {
         if (err) {
             err.niceMessage = 'Could not save item';
             err.devMessage = 'REDIS QUEUE ERR';
             console.log(err)
         }
     });
-
 })
 
 mongoStream.on('end', function() {
-    // console.log('\n\nStream ended.\n\n')
 })
 
 
 var timer = new InvervalTimer(function() {
-    client.lrange('trainx', 0, -1, function(err, items) {
-            if (items && items.length > 0) {
-                console.log('Queue: ' + items.length)
-            }
-            if (items.length > 0) {
-                // console.log('Pausing timer')
-                timer.pause();
-                console.log(items.length + ' item(s) for processing.')
-                async.eachSeries(items, function(item_str, finishedItem) {
-                    item = JSON.parse(item_str)
-                    parseItem(item).then(function() {
-                        console.log('\n ---- next item ----  \n')
-                        client.lrem('train', 1, item_str);
-                        timer.resume()
-                        finishedItem()
-                    })
-                }, function finishedItems(err, results) {
-                    //all snaps are done processing
-                    // console.log('Resuming timer!')
+    client.lrange(list, 0, -1, function(err, items) {
+        if (items && items.length > 0) {
+            console.log('Queue: ' + items.length)
+        }
+        if (items.length > 0) {
+            timer.pause();
+            console.log(items.length + ' item(s) for processing.')
+            async.eachSeries(items, function(item_str, finishedItem) {
+                item = JSON.parse(item_str)
+                processItem(item).then(function() {
+                    console.log('\n ---- next item ----  \n')
+                    client.lrem(list, 1, item_str);
                     timer.resume()
-                });
-            }
-        }) // end of client lrange, callback)
+                    finishedItem()
+                }).catch(function(err) {
+                    if (err) console.log(err)
+                    finishedItem()
+                })
+            }, function finishedItems(err, results) {
+                timer.resume()
+            });
+        }
+    })
 }, 2000);
 
 
-function parseItem(item) {
+function processItem(item) {
     return new Promise(function(resolve, reject) {
-        // console.log('item.name: ', item.images.length);
-        console.log('Starting...', item.details)
-        var obj = {
-            captions: [],
-            file_path: ''
+        console.log('Starting...', item.name, 'in mode: ', mode)
+        var nodes = []
+        async.eachSeries(item.images, function iterator(image, savedImage) {
+            var node = (mode == 'train') ? ({
+                captions: [],
+                file_path: ''
+            }) : ({
+                file_path: ''
+            });
+            var filename = urlify(item.itemId + ' ' + (new Date().toString())) + ".png"
+            // console.log('filename is: ', filename)
+            var path = osHomedir() + '/temp/' + list + '/' + filename;
+            // console.log('path is: ', path)
+            node.file_path = path;
+            node.source = 'ebay';
+            node.type = list
+            nodes.push(node)
+            saveImage(image, path).then(function() {
+                savedImage()
+            })
+        }, function finishedImages(err) {
+            if (err) console.log(err)
+            async.eachSeries(nodes, function iterator(node, savedNode) {
+                if (mode.trim() == 'train') {
+                    getCaptions(item).then(function(captions) {
+                        node.captions = captions
+                        saveNode(node).then(function() {
+                            savedNode()
+                        })
+                    })
+                } else if (mode.trim() == 'test') {
+                    saveNode(node).then(function() {
+                        savedNode()
+                    })
+                }
+            }, function finishedNodes(err) {
+                resolve()
+            })
+        })
+    })
+}
+
+function saveImage(url, path) {
+    return new Promise(function(resolve, reject) {
+        request({
+            url: url,
+            encoding: 'base64'
+        }, function(err, res, body) {
+            if (!err && res.statusCode == 200) {
+                var base64 = body
+                fs.writeFile(path, base64, 'base64', function(err) {
+                    if (err) console.log('\n\n!!!PLEASE MAKE SURE THERE IS A TEMP FOLDER IN HOME DIR WITH SUBFOLDERS: TEST AND TRAIN!!!\n', err);
+                    // im.resize({
+                    //     srcPath: path,
+                    //     dstPath: path,
+                    //     strip: true,
+                    //     quality: 85,
+                    //     width: 400
+                    // }, function(err, stdout, stderr) {
+                    //     if (err) console.log('\n\n!!!PLEASE MAKE SURE THERE IS A TEMP FOLDER IN HOME DIR WITH SUBFOLDERS: TEST AND TRAIN!!!\n\n', err);
+                        console.log('Image saved.')
+                        resolve()
+                    // })
+                })
+            } else {
+                if (err) {
+                    console.log(err)
+                }
+                console.log('body: ', body)
+                reject('Cannot download image.')
+            }
+        });
+    })
+}
+
+function saveNode(node) {
+    return new Promise(function(resolve, reject) {
+        var datum = new db.FeedData(node)
+        datum.save(function(err, res) {
+            if (err) {
+                console.log(err)
+            }
+            console.log('Saved node.')
+            resolve()
+        })
+    })
+}
+
+function getCaptions(item) {
+    return new Promise(function(resolve, reject) {
+        var categoryString = item.category
+        if (categoryString.indexOf('Clothing, Shoes & Accessories:') > -1) {
+            categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '')
+            if (categoryString.indexOf(':') > -1) {
+                categoryString = categoryString.replace(/:/g, ' ')
+            }
         }
-        var filename = urlify(item.itemId + (new Date().toString())) + ".png"
-            // console.log('filename: ',filename)
-        var path = __dirname + "/temp/" + filename;
-        obj.file_path = path;
+        console.log('categoryString: ', categoryString)
         var brand, material, gender, size, color, season, style = {}
         var details = [brand, material, gender, size, color, season, style]
         var variables = [];
@@ -132,14 +235,14 @@ function parseItem(item) {
                         Name: 'Color',
                         Value: detail.Value[0]
                     }
-                    variables.push(color)
+                    absolutes.push(color)
                     break;
                 case 'Season':
                     season = {
                         Name: 'Season',
                         Value: detail.Value[0]
                     }
-                    variables.push(season)
+                    absolutes.push(season)
                     break;
                 case 'Style':
                     style = {
@@ -152,7 +255,12 @@ function parseItem(item) {
         })
 
         console.log('\nVariables: ', variables, '\nAbsolutes: ', absolutes, '\n')
-        var firstIteration = item.name;
+        var firstIteration = item.name.concat(' ' + categoryString);
+        firstIteration = _.uniq(firstIteration.split(' '), function(word) {
+            return word.toLowerCase().trim()
+        }).join(' ');
+
+        console.log('First Iteration: ', firstIteration)
         absolutes.forEach(function(detail) {
             if (item.name.indexOf(detail.Value.trim()) == -1) {
                 // console.log('Adding detail: ', detail.Name, detail.Value[0])
@@ -195,7 +303,7 @@ function parseItem(item) {
                     checkWord(word).then(function(res1) {
                         var bool = res1.isWord
                         if (bool == 'true' && STOP_STRING.indexOf(word.toLowerCase().trim())) {
-                            console.log('Finding synonyms for: ',word)
+                            console.log('Finding synonyms for: ', word)
                             getSynonyms(word, cat).then(function(res2) {
                                 var results = res2
                                 if (results.synonyms && results.synonyms.length > 0) {
@@ -299,10 +407,54 @@ function parseItem(item) {
                         })
                         console.log('\nFirst iteration: ', firstIteration)
                         console.log('\nSecond Iteration: ', secondIteration, '\n')
-                        return resolve()
+                        var captions = [firstIteration, secondIteration]
+                        return resolve(captions)
                     })
             }
         }
+    })
+}
+
+function getSynonyms(word, category) {
+    return new Promise(function(resolve, reject) {
+        var data = {
+            word: word,
+            category: category
+        }
+        var options = {
+            url: 'http://localhost:5000/syn',
+            json: true,
+            body: data
+        }
+
+        request.post(options, function(err, res, body) {
+            if (!err && res.statusCode == 200) {
+                body.synonyms = _.flatten(body.synonyms)
+                body.synonyms = _.uniq(body.synonyms)
+                body.synonyms.splice(0, 1)
+                body.synonyms = body.synonyms.filter(function(word) {
+                    return (word.toLowerCase().trim().indexOf(body.original.toLowerCase().trim()) == -1 && word.indexOf('ish') == -1)
+                })
+                body.synonyms = body.synonyms.map(function(word) {
+                    return (word.charAt(0).toUpperCase() + word.slice(1)).replace(/_/g, '');
+                })
+
+                // async.eachSeries(body.synonyms, function iterator(word, cb) {
+                //     compareWords(body.original, word).then(function() {
+                //         wait(cb, 1000)
+                //     })
+                // }, function done() {
+                // })
+                // console.log('Wordnet result for ', body.original,' : ',body.synonyms)
+
+                resolve(body)
+            } else {
+                if (err) {
+                    console.log('133', err)
+                }
+                resolve(body)
+            }
+        });
     })
 }
 
@@ -334,7 +486,7 @@ function compareWords(word1, word2) {
             second: word2
         }
         var options = {
-            url: 'http://localhost:5000/compare',
+            url: 'http://localhost:5000/score',
             json: true,
             body: data
         }
@@ -369,48 +521,6 @@ function compareWords(word1, word2) {
 }
 
 
-function getSynonyms(word, category) {
-    return new Promise(function(resolve, reject) {
-        var data = {
-            word: word,
-            category: category
-        }
-        var options = {
-            url: 'http://localhost:5000/syn',
-            json: true,
-            body: data
-        }
-        request.post(options, function(err, res, body) {
-            if (!err && res.statusCode == 200) {
-                body.synonyms = _.flatten(body.synonyms)
-                body.synonyms = _.uniq(body.synonyms)
-                body.synonyms.splice(0, 1)
-                body.synonyms = body.synonyms.filter(function(word) {
-                    return (word.toLowerCase().trim().indexOf(body.original.toLowerCase().trim()) == -1 && word.indexOf('ish') == -1)
-                })
-                body.synonyms = body.synonyms.map(function(word) {
-                    return (word.charAt(0).toUpperCase() + word.slice(1)).replace(/_/g, '');
-                })
-
-                // async.eachSeries(body.synonyms, function iterator(word, cb) {
-                //     compareWords(body.original, word).then(function() {
-                //         wait(cb, 1000)
-                //     })
-                // }, function done() {
-
-                // })
-
-                // console.log('Wordnet result for ', body.original,' : ',body.synonyms)
-                resolve(body)
-            } else {
-                if (err) {
-                    console.log('133', err)
-                }
-                resolve(body)
-            }
-        });
-    })
-}
 
 
 function convertBase64(image) {
@@ -481,4 +591,3 @@ function wait(callback, delay) {
     while (new Date().getTime() < startTime + delay);
     callback();
 }
-

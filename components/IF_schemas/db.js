@@ -121,6 +121,10 @@ var schemas = [{
     filename: 'ebayItem_schema',
     single: 'EbayItem',
     plural: 'EbayItems'
+},{
+    filename: 'feed_data_schema',
+    single: 'FeedData',
+    plural: 'FeedData'
 }];
 
 module.exports = {
