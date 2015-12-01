@@ -52,8 +52,8 @@ var mode = (process.argv[2] == 'train') ? 'train' : 'test'
 var list = (mode == 'test') ? 'test' : 'trainx'
 //Uncomment below and run file to clear redis queue before running.
 // !!Careful with this, Clearing the list when its emplty will sometimes break the list in redis ::shrug::
-// console.log('clearing list..')
-// client.ltrim(list, 1, 0)
+console.log('clearing list..')
+client.ltrim(list, 1, 0)
 
 mongoStream.on('data', function(item) {
     client.rpush(list, JSON.stringify(item), function(err, reply) {
