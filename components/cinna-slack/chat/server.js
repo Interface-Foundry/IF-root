@@ -31,7 +31,7 @@ io.sockets.on('connection', function(socket) {
         //rough banter framework, use flat file DB or redis?
         switch (data.msg) {
             case 'hi':
-                data.msg = 'HEY! oops caps';
+                data.msg = 'HELLO! oops caps';
                 outgoingResponse(data,'txt'); //
                 break;
             case 'sup':
@@ -92,6 +92,21 @@ io.sockets.on('connection', function(socket) {
                 outgoingResponse(data,'txt');
                 break;
 
+            case '1':
+                data.msg = 'this will recall history and select focus on N item';
+                outgoingResponse(data,'txt');
+                break;
+
+            case '2':
+                data.msg = 'this will recall history and select focus on N item';
+                outgoingResponse(data,'txt');
+                break;
+
+            case '3':
+                data.msg = 'this will recall history and select focus on N item';
+                outgoingResponse(data,'txt');
+                break;
+
 
             /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 
@@ -126,6 +141,42 @@ io.sockets.on('connection', function(socket) {
                 res.tokens = data.msg;
                 incomingAction(res);
                 break;
+            case 'save':
+                var res = {};
+                res.bucket = 'purchase';
+                res.channel = data.channelId;
+                res.org = data.orgId;
+                res.action = 'save';
+                res.searchSelect = [1];
+                res.tokens = data.msg;
+                incomingAction(res);
+                break;
+
+            case 'checkout':
+                var res = {};
+                res.bucket = 'purchase';
+                res.channel = data.channelId;
+                res.org = data.orgId;
+                res.action = 'checkout';
+                //res.searchSelect = [1];
+                res.tokens = data.msg;
+                incomingAction(res);   
+                break;
+
+            // case 'save':
+            //     saveToCart(data);
+            //     break;
+            // case 'remove':
+            //     removeFromCart(data);
+            //     break;
+            // case 'removeAll':
+            //     removeAllCart(data);
+            //     break;
+            // case 'list':
+            //     listCart(data);
+            //     break;
+            // case 'checkout':
+
             //* * * * * END TESTING * * * * *//
 
             default:
@@ -182,7 +233,7 @@ function incomingAction(data){
 
     //***** SAVE INCOMING STATE ******//
     //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
-    //var chatChannel = data.channel;
+
     if (!data.org || !data.channel){
         console.log('missing channel or org Id 1');
     }
@@ -193,6 +244,7 @@ function incomingAction(data){
         messageHistory[indexHist].banter = []; //search
         messageHistory[indexHist].purchase = []; //finalizing search and purchase
         messageHistory[indexHist].persona = []; //learn about our user
+        messageHistory[indexHist].cart = []; //user shopping cart
     }
     //* * * * * * * * * * * * * * * * //
 
@@ -252,12 +304,27 @@ function banterBucket(data){
 }
 
 function purchaseBucket(data){
-    //sort search action type
+    //sort purchase action
     switch (data.action) {
         case 'save':
+            saveToCart(data);
+            break;
+        case 'remove':
+            removeFromCart(data);
+            break;
+        case 'removeAll':
+            removeAllCart(data);
+            break;
+        case 'list':
+            listCart(data);
+            break;
+        case 'checkout':
+            outputCart(data);
             break;
         default:
+            console.log('error: no purchase bucket action selected');
     }
+
 }
 
 //* * * * * SEARCH ACTIONS * * * * * * * * //
@@ -467,22 +534,76 @@ function searchBack(data){
     // view cart ---> get all items in cart ---> RETURN CART? or return URL TO amazon?
     // would you like me to get it for you? [kip question flag, wait for response] (PHASE 2)
 
-//Build Amazon Cart
-function createCart(items) {
-    var options = {}
-    for (var i = 0; i < items.length; i++) {
-        var propASIN = 'Item*'+i+'*ASIN';
-        options[propName] = items[i].ASIN;
-        var propQuan = 'Item*'+i+'*Quantity';
-        options[propQuan] = items[i].Quantity
-    }
-    client.createCart(options).then(function(results) {
-        console.log('Results: ', results)
-        var cartUrl = results.PurchaseURL
-        outgoingResponse(cartUrl);
-    }).catch(function(err) {
-        console.log('amazon err ', err[0].Error[0]);
+
+//save amazon item to cart
+function saveToCart(data){
+
+    data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
+
+    recallHistory(data, function(item){
+
+        var indexHist = data.org + "_" + data.channel; //chat id
+
+        //async push items to cart
+        async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+            messageHistory[indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+            callback();
+        }, function done(){
+            //only support "add to cart" message for one item. 
+            //static:
+            var sT = data.searchSelect[0];
+            data.msg = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+            outgoingResponse(data,'txt');
+        });
     });
+}
+
+//Build Amazon Cart
+function outputCart(data) {
+    var indexHist = data.org + "_" + data.channel; //chat id
+    
+    var cartItems = [];
+
+    //Input [{ASIN:xxx,Quantity:1},{...}]
+
+    //async push items to cart
+    async.eachSeries(messageHistory[indexHist].cart, function(item, callback) {
+
+        cartItems.push({
+            ASIN: item.ASIN,
+            Quantity: 1
+        });
+
+        callback();
+    }, function done(){
+        //only support "add to cart" message for one item. 
+        //static:
+        buildAmazonCart(cartItems);
+    });
+
+    function buildAmazonCart(items){
+        console.log('items ',items);
+
+        //construct amazon cart format
+        var options = {};
+        for (var i = 0; i < items.length; i++) {
+            var propASIN = 'Item*'+i+'*ASIN';
+            options[propASIN] = items[i].ASIN;
+            var propQuan = 'Item*'+i+'*Quantity';
+            options[propQuan] = items[i].Quantity;
+        }
+        console.log(options);
+
+        client.createCart(options).then(function(results) {
+            console.log('Results: ', results);
+            var cartUrl = results.PurchaseURL;
+            outgoingResponse(cartUrl,'txt');
+        }).catch(function(err) {
+            console.log(err.Error[0]);
+            console.log('amazon err ', err[0].Error[0]);
+        });       
+    }
+
 }
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
@@ -534,9 +655,11 @@ function searchAmazon(data, type, query, flag){
                                 if (data.originalQuery){
                                     //summoning original query obj. loop searchSelect [ ]
                                     async.eachSeries(data.originalQuery.searchSelect, function(searchSelect, callback) {
-                                        newPrice = newPrice + data.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0]; //adding up prices for each item
+                                        //adding up prices for each item
+                                        newPrice = newPrice + data.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0]; 
                                         callback();
                                     }, function done(){
+                                        // calculate average price and decrease by 25%
                                         newPrice = newPrice / data.originalQuery.searchSelect.length; //average the price
                                         var per = newPrice * .25; //get 25% of price
                                         newPrice = newPrice - per; // subtract percentage
@@ -544,8 +667,8 @@ function searchAmazon(data, type, query, flag){
                                         if (newPrice > 1){
                                             newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
                                         }
-                                        //add price param
                                         if (newPrice > 0){
+                                            //add price param
                                             amazonParams.MaximumPrice = newPrice; 
                                         }
                                         else {
@@ -566,21 +689,15 @@ function searchAmazon(data, type, query, flag){
                         case 'less than':
                             console.log('less than');
 
-
                             //check if val is real number
                             if (flag.val && isNumber(flag.val)){ 
 
-                                // ADD SEARCH SELECT CHECKER HERE!!!
-
-                                //loop through search select, 
-
-
                                 //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
+
                                 //user wanted one item at different price
                                 if (data.originalQuery && data.originalQuery.searchSelect.length == 1){
 
                                     var searchSelect = data.originalQuery.searchSelect[0];
-                                    //console.log('GETTING ITEM TO QUERY AT NEW PRICE ', data.amazon[searchSelect - 1].ItemAttributes[0].Title);
                                     
                                     if (data.amazon[searchSelect - 1].ItemAttributes[0].Title){
                                         amazonParams.Keywords = data.amazon[searchSelect - 1].ItemAttributes[0].Title;
@@ -589,21 +706,6 @@ function searchAmazon(data, type, query, flag){
                                     else {
                                         console.log('Error: Title is missing from amazon itemattributes object');
                                     }
-                                    // //SORT WHICH TRAITS TO MODIFY
-                                    // switch (data.amazon[searchSelect - 1].ItemAttributes[0].ProductGroup) {
-                                    //     // CASES: color, size, price, genericDetail 
-                                    //     case 'Music':
-
-                                    //         console.log('music!');
-                                    //         break;
-
-                                    //     default:
-                                    //         console.log('none of those product groups')
-                                    // }          
-                                
-
-                                    //SELECT CONTENTS FROM amazon[searchSelect]
-                                    //search keywords as amazon name query (a la modifier search)
 
                                 }
                                 else {
@@ -790,16 +892,6 @@ function stitchResults(data,source,callback){
 }
 
 
-function addToCart(){
-
-}
-
-function outputCart(){
-
-    //Pass array of ASIN with quanities to Mitsu cart
-
-}
-
 
 function query(){
 
@@ -813,7 +905,6 @@ function focus(){
 
 }
 
-
 function respond(){
 
 }
@@ -821,11 +912,6 @@ function respond(){
 function search(){
 
 }
-
-function addCart(){
-
-}
-
 
 
 ////////////// HISTORY ACTIONS ///////////////

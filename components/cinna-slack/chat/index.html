@@ -26,15 +26,15 @@
          socket.on("msgFromSever", function(data) {
 
             if (checkImgURL(data.message)){ //image URL
-              var msgP = "<img width='1000' style='max-width:100%;' src='" + data.message + "''><br>";
+              var msgP = "<img width='1000' style='max-width:100%;' src='" + data.message + "''><br><br>";
 
             }
             else if (/^(ftp|http|https):\/\/[^ "]+$/.test(data.message)){ //reg url
-              var msgP = "<a target='_blank' href=' " + data.message + "'>"+data.message+"</a><br>";
+              var msgP = "<a target='_blank' href=' " + data.message + "'>"+data.message+"</a><br><br>";
 
             }
             else { //else
-              var msgP = "<p> " + data.message + "</p><br>";
+              var msgP = "<p> " + data.message + "</p><br><br>";
 
             }
 

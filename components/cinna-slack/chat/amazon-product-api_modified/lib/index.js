@@ -6,7 +6,11 @@ var generateQueryString = require('./utils').generateQueryString,
 var runQuery = function (credentials, method) {
 
   return function (query, cb) {
+
+    console.log('incoming query ',query);
     var url = generateQueryString(query, method, credentials);
+
+    console.log('gen url ',url);
 
     if (typeof cb === 'function') {
       request(url, function (err, response, body) {
@@ -89,6 +93,7 @@ var runQuery = function (credentials, method) {
 };
 
 var createClient = function (credentials) {
+  console.log('creds ',credentials);
   return {
     similarityLookup: runQuery(credentials, 'SimilarityLookup'),
     itemSearch: runQuery(credentials, 'ItemSearch'),
