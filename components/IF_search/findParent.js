@@ -55,7 +55,7 @@ module.exports = function(item, loc) {
       })
     };
   }).sort(function(a, b) {
-    return a.distance > b.distance
+    return a.distance - b.distance
   });
 
   // MUTATE OMG IT"S A MUTATION CALL GHOSTBUSTERS
