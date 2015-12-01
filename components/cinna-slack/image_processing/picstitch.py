@@ -15,6 +15,9 @@ import cStringIO
 import time
 import random
 import string
+import os
+
+THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
 app = Flask(__name__)
 
@@ -30,7 +33,7 @@ REGION = 'us-east-1'
 
 NUMBER_IMAGES = []
 for i in [1, 2, 3, 4, 5, 6]:
-    f = 'Numbers-' + `i` + '-Black-icon.png'
+    f = THIS_FOLDER + '/Numbers-' + `i` + '-Black-icon.png'
     NUMBER_IMAGES.append(Image.open(f))
 
 conn = boto.s3.connect_to_region(REGION)
@@ -85,5 +88,5 @@ def download_image(url):
 
 if __name__ == '__main__':
     print 'running app on port 5k'
-    app.debug = True
-    app.run()
+    app.debug = False
+    app.run(host="0.0.0.0")
