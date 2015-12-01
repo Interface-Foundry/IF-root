@@ -4,7 +4,8 @@
       <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
       <script type="text/javascript">
          var socket = io.connect("localhost:8000");
-         
+         var channelId = Math.random().toString(36).substring(7); //generate random user ID for this session
+         var orgId = 'kip';
 
         setTimeout(function(){
             $( "#msg" ).focus();
@@ -13,9 +14,13 @@
          function sendMessage() {
              var message = $("#msg").val();
              $("#msg").val('');
-             socket.emit("msgToClient",  { msg: message });
+             socket.emit("msgToClient",  { msg: message, channelId: channelId, orgId: orgId}); //passing all messages with channel/org Ids attached
              $(".chats").append(message);  
+         }
 
+         //generates new id for user session
+         function makeId(){
+            return Math.random().toString(36).substring(7);
          }
 
          socket.on("msgFromSever", function(data) {
