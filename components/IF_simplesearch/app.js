@@ -7,19 +7,6 @@ var uuid = require('uuid');
 var compression = require('compression');
 var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist';
 var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
-var fs = require('fs')
-
-var fsstat = fs.statSync('../../../IF-Shopify/app.js')
-
-if (fsstat.isFile()) {
-    var kipShopify = require('../../../IF-Shopify/app')
-    console.log('kip shopify loaded..')
-    app.use('/shopify', kipShopify);
-
-} else {
-    console.log('Shopify did not load.')
-}
-
 
 app.use(bodyParser.json());
 app.use(express.static(base));
@@ -48,7 +35,7 @@ app.get('/*', function(req, res, next) {
 //     //get IP by location
 //     request('https://kipapp.co/api/geolocation', function (error, response, body) {
 //       if (!error && response.statusCode == 200) {
-//         console.log(body) // Show the HTML for the Google homepage. 
+//         console.log(body) // Show the HTML for the Google homepage.
 //       }
 //     })
 

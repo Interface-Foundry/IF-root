@@ -1,0 +1,55 @@
+doctype html
+html
+  head
+    title= title
+    meta(name="viewport", content='width=device-width, initial-scale=1')
+    link(href='/favicon.ico', rel='shortcut icon', type='image/x-icon')
+    link(rel='stylesheet', href='/stylesheets/twitter.css')
+    link(rel='stylesheet', href='/stylesheets/imports.css')
+    link(rel='stylesheet', href='/stylesheets/shopify.css')
+    link(rel='stylesheet', href='/stylesheets/shopify_buttons.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+    script(type="text/javascript", src="/javascripts/bootstrap.js")
+    link(rel="stylesheet", href="http://fonts.googleapis.com/css?family=Open+Sans")
+  body
+    div.navbar.navbar-fixed-top
+        div.navbar-inner
+            div.container
+                a(href="http://www.kipsearch.com", class="brand")
+                    img(src="/img/kip_logo_purp.svg", class="kip-logo", style="width:100px;height:100px")
+                a(href="http://www.kipsearch.com", class="brand", style="margin-top:50px") Search for clothes in IRL stores around you
+
+                - if (typeof(current_shop) != 'undefined')
+                    div.nav-collapse
+                        ul.nav.pull-right
+                            li.dropdown
+                                a.shop_name.dropdown-toggle(data-toggle='dropdown', href="#" )= current_shop
+                                ul.dropdown-menu
+                                    li
+                                        a(href="http://#{current_shop}", target = 'blank')
+                                            i.icon-home
+                                            | &nbsp;Storefront  
+                                    li
+                                        a(href="http://#{current_shop}/admin/", target = 'blank')
+                                            i.icon-home 
+                                            | &nbsp;Store Admin
+                                    li.divider
+                                    li
+                                        a(href="/plans")
+                                            i.icon-shopping-cart
+                                            | &nbsp;Plans  
+                                    li
+                                        a(href="/faq")
+                                            i.icon-pencil 
+                                            | &nbsp;FAQ
+                                    li.divider
+                                    li
+                                        a(href="/logout")
+                                            i.icon-off 
+                                            | &nbsp;Logout   
+
+    div.container
+        div.content!= body
+        footer
+            
