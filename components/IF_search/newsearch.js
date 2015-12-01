@@ -278,7 +278,10 @@ function textSearch(q, page) {
               .exec()
               .then(function(items) {
                 return items.map(function(i) {
-                  return findParent(i.toObject(), q.loc);
+                  var i = findParent(i.toObject(), q.loc);
+                  delete i.owner;
+                  delete i.parents;
+                  return i;
                 })
               }, kip.err);
           }, kip.err);
@@ -336,7 +339,10 @@ function filterSearch(q, page) {
         .exec()
         .then(function(items) {
             return items.map(function(item) {
-                return findParent(item, q.loc);
+                var i = findParent(item, q.loc);
+                delete i.parents;
+                delete i.owner;
+                return i;
             });
         });
 }

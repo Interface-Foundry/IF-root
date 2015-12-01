@@ -43,22 +43,23 @@ module.exports = function(item, loc) {
   var sortedParents = item.parents.map(function(p) {
     return cachedParents[p.toString()];
   }).map(function(p) {
-
     // precalculate distance so we only have to do it once for each parent
-    p.distance = geolib.getDistance({
+    return {
+      landmark: p,
+      distance: geolib.getDistance({
         latitude: loc.lat,
         longitude: loc.lon
       }, {
         latitude: p.loc.coordinates[1],
         longitude: p.loc.coordinates[0]
-      });
-    return p;
+      })
+    };
   }).sort(function(a, b) {
-    return a.distance < b.distance
+    return a.distance > b.distance
   });
 
   // MUTATE OMG IT"S A MUTATION CALL GHOSTBUSTERS
-  item.parent = sortedParents[0];
+  item.parent = sortedParents[0].landmark;
   item.loc = item.parent.loc;
   return item;
 }
