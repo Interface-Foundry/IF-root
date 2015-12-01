@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 var app = express();
 var kip = require('kip');
 var geolib = require('geolib');
+var findParent = require('./findParent');
 var searchterms = require('./searchterms');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -80,71 +81,18 @@ app.post(searchItemsUrl, function(req, res, next) {
             }
         })
         .then(function(results) {
-            // first un-mongoose the results
-            results = results.map(function(r) {
-              return r.toObject();
-            })
+            responseBody.results = results;
+            res.send(responseBody);
 
-            // Add the parents here.  fetch them from the db in one query
-            // The goal is to make item.parents a list of landmarks ordered by
-            // distance to the search location.  And make item.parent the
-            // closest one.
-
-            // only make one db call to fetch all the parents in this result set
-            var allParents = results.reduce(function (all, r) {
-              return all.concat(r.parents || []);
-            }, [])
-
-            db.Landmarks.find({
-              _id: {$in: allParents}
-            })
-            .select('-meta -source_generic_item -source_justvisual')
-            .exec(function(e, parents) {
-              if (e) { return next(e); }
-
-              results.map(function(r) {
-                if (r.parents && r.parents.length > 0) {
-                  var strparents = r.parents
-                    .filter(function(_id) { return !!_id })
-                    .map(function(_id) { return _id.toString()});
-                  r.parents = parents.filter(function(p) {
-                    return strparents.indexOf(p._id.toString()) >= 0;
-                  }).sort(function(a, b) {
-                    // sort by location
-                    var a_dist = geolib.getDistance({
-                      longitude: a.loc.coordinates[0],
-                      latitude: a.loc.coordinates[1]
-                    }, {
-                      longitude: req.body.loc.lon,
-                      latitude: req.body.loc.lat
-                    });
-                    var b_dist = geolib.getDistance({
-                      longitude: b.loc.coordinates[0],
-                      latitude: b.loc.coordinates[1]
-                    }, {
-                      longitude: req.body.loc.lon,
-                      latitude: req.body.loc.lat
-                    });
-                    return a_dist > b_dist;
-                  });
-                  r.parent = r.parents[0];
-                  delete r.parents;
-                }
-              })
-
-              responseBody.results = results;
-              res.send(responseBody);
-
-              (new db.Analytics({
-                anonId: req.anonId,
-                userId: req.userId,
-                action: 'search',
-                data: {
-                  query: req.body,
-                  resultCount: results.length
-                }
-              })).save();
-            })
+            (new db.Analytics({
+              anonId: req.anonId,
+              userId: req.userId,
+              action: 'search',
+              data: {
+                query: req.body,
+                resultCount: results.length
+              }
+            })).save();
         }, next)
 });
 
@@ -321,7 +269,7 @@ function textSearch(q, page) {
                   return r._id;
               });
 
-              var items = db.Landmarks.find({
+              return db.Landmarks.find({
                   _id: {
                       $in: ids
                   }
@@ -330,10 +278,9 @@ function textSearch(q, page) {
               .exec()
               .then(function(items) {
                 return items.map(function(i) {
-                  return db.Landmarks.itemLocationHack(i, q.loc);
+                  return findParent(i.toObject(), q.loc);
                 })
-              })
-              return items;
+              }, kip.err);
           }, kip.err);
 
   }
@@ -389,7 +336,7 @@ function filterSearch(q, page) {
         .exec()
         .then(function(items) {
             return items.map(function(item) {
-                return db.Landmark.itemLocationHack(item, q.loc);
+                return findParent(item, q.loc);
             });
         });
 }

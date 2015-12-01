@@ -185,10 +185,6 @@ landmarkSchema.index({
     loc: '2dsphere'
 });
 
-landmarkSchema.virtual('parentName').set(function(name) {
-    return name;
-});
-
 //instance method to get comments
 landmarkSchema.methods.getComments = function(cb) {
     worldchatSchema.find({
