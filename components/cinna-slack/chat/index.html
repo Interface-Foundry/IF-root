@@ -3,19 +3,19 @@
       <script type="text/javascript" src="/socket.io/socket.io.js"></script>
       <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
       <script type="text/javascript">
-         var socket = io.connect("localhost:8000");
+         var socket = io.connect('localhost:8000');
          var channelId = Math.random().toString(36).substring(7); //generate random user ID for this session
          var orgId = 'kip';
 
         setTimeout(function(){
             $( "#msg" ).focus();
         }, 0);
-        
+
          function sendMessage() {
              var message = $("#msg").val();
              $("#msg").val('');
              socket.emit("msgToClient",  { msg: message, channelId: channelId, orgId: orgId}); //passing all messages with channel/org Ids attached
-             $(".chats").append(message);  
+             $(".chats").append(message);
          }
 
          //generates new id for user session
@@ -42,7 +42,7 @@
                 return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
             }
 
-           $(".chats").append(msgP);  
+           $(".chats").append(msgP);
 
            $(".chats").animate({ scrollTop: $(".chats").attr("scrollHeight") }, 3000);
 
