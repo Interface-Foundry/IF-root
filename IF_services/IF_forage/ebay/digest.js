@@ -1,7 +1,10 @@
-//WARNING: 
+//IMPORTANT: 
 //1. Before running please ensure there is a 'temp' folder in home dir 
 //with 2 subdirectories 'test' and 'train'
 //2. Run with args 'test' or 'train'. Defaults to 'test'
+//3. path variable may be hardcode in order to match folder structure
+//of porygon server
+
 
 // TODO: 
 //Captions: For categoryname field splice out 'wholesale'
@@ -110,7 +113,9 @@ function processItem(item) {
                 // console.log('filename is: ', filename)
             var path = osHomedir() + '/temp/' + mode + '/' + filename;
             // console.log('path is: ', path)
-            node.file_path = path;
+            //******Below is hardcoded to match porygon for now
+            //
+            node.file_path = '/home/ubuntu/images';
             node.source = 'ebay';
             node.type = list
             nodes.push(node)
