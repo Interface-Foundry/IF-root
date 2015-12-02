@@ -28,90 +28,99 @@ io.sockets.on('connection', function(socket) {
 
     socket.on("msgToClient", function(data) {
 
+        switch (true){
+            case textSimilar(data.msg,'sup') > 70:
+                console.log('similar!');
+            default:
+                console.log('not!');
+        }
         //rough banter framework, use flat file DB or redis?
-        switch (data.msg) {
-            case 'hi':
-                data.msg = 'HELLO! oops caps';
+        switch (true) {
+
+            //basic weight system for percentage similarity for string matching
+            case textSimilar(data.msg,'hi') > 60:
+            case textSimilar(data.msg,'hello') > 60:
+                data.msg = 'Hello!';
                 outgoingResponse(data,'txt'); //
                 break;
-            case 'sup':
+            case textSimilar(data.msg,'sup') > 60:
                 data.msg = 'nm, u?';
                 outgoingResponse(data,'txt'); //
                 break;
-            case 'are you a bot':
+            case textSimilar(data.msg,'are you a bot') > 60:
                 data.msg = 'yep, are you human?';
                 outgoingResponse(data,'txt');
                 break;
-            case 'what\'s the meaning of life?':
-                data.msg = 'life, the multiverse and whatever';
-                outgoingResponse(data,'txt');
-                break;
-            case 'how do i shot web?':
-                data.msg = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
-                outgoingResponse(data,'image');
-                break;
-            case 'u mad bro?':
-                data.msg = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
-                outgoingResponse(data,'image');
-                break;
-            case 'How Is babby formed?':
-                data.msg = 'girl get pragnent';
-                outgoingResponse(data,'txt');
-                break;
-            case 'Drink Me':
-                data.msg = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
-                outgoingResponse(data,'image');
-                break;
-            case 'deja vu':
-                data.msg = 'Didn\'t you just ask me that?';
-                outgoingResponse(data,'txt');
-                break;
-            case 'die':
-                data.msg = '😭';
-                outgoingResponse(data,'txt');
-                break;
-            case 'cool':
-                data.msg = '😎';
-                outgoingResponse(data,'txt');
-                break;
-            case 'skynet':
-                data.msg = 'April 19, 2011';
-                outgoingResponse(data,'txt');
-                break;
-            case '4 8 15 16 23 42':
-                data.msg = 'http://static.wixstatic.com/media/43348a_277397739d6a21470b52bc854f7f1d81.gif';
-                outgoingResponse(data,'image');
-                break;
-            case 'What is the air-speed velocity of an unladen swallow?':
-                data.msg = 'http://style.org/unladenswallow/';
-                outgoingResponse(data,'txt');
-                break;
+            // case 'what\'s the meaning of life?':
+            //     data.msg = 'life, the multiverse and whatever';
+            //     outgoingResponse(data,'txt');
+            //     break;
+            // case 'how do i shot web?':
+            //     data.msg = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
+            //     outgoingResponse(data,'image');
+            //     break;
+            // case 'u mad bro?':
+            //     data.msg = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
+            //     outgoingResponse(data,'image');
+            //     break;
+            // case 'How Is babby formed?':
+            //     data.msg = 'girl get pragnent';
+            //     outgoingResponse(data,'txt');
+            //     break;
+            // case 'Drink Me':
+            //     data.msg = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
+            //     outgoingResponse(data,'image');
+            //     break;
+            // case 'deja vu':
+            //     data.msg = 'Didn\'t you just ask me that?';
+            //     outgoingResponse(data,'txt');
+            //     break;
+            // case 'die':
+            //     data.msg = '😭';
+            //     outgoingResponse(data,'txt');
+            //     break;
+            // case 'cool':
+            //     data.msg = '😎';
+            //     outgoingResponse(data,'txt');
+            //     break;
+            // case 'skynet':
+            //     data.msg = 'April 19, 2011';
+            //     outgoingResponse(data,'txt');
+            //     break;
+            // case '4 8 15 16 23 42':
+            //     data.msg = 'http://static.wixstatic.com/media/43348a_277397739d6a21470b52bc854f7f1d81.gif';
+            //     outgoingResponse(data,'image');
+            //     break;
+            // case 'What is the air-speed velocity of an unladen swallow?':
+            //     data.msg = 'http://style.org/unladenswallow/';
+            //     outgoingResponse(data,'txt');
+            //     break;
 
-            case 'help':
-                data.msg = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
-                outgoingResponse(data,'txt');
-                break;
+            // case 'help':
+            //     data.msg = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
+            //     outgoingResponse(data,'txt');
+            //     break;
 
-            case '1':
-                data.msg = 'this will recall history and select focus on N item';
-                outgoingResponse(data,'txt');
-                break;
+            // case '1':
+            //     data.msg = 'this will recall history and select focus on N item';
+            //     outgoingResponse(data,'txt');
+            //     break;
 
-            case '2':
-                data.msg = 'this will recall history and select focus on N item';
-                outgoingResponse(data,'txt');
-                break;
+            // case '2':
+            //     data.msg = 'this will recall history and select focus on N item';
+            //     outgoingResponse(data,'txt');
+            //     break;
 
-            case '3':
-                data.msg = 'this will recall history and select focus on N item';
-                outgoingResponse(data,'txt');
-                break;
+            // case '3':
+            //     data.msg = 'this will recall history and select focus on N item';
+            //     outgoingResponse(data,'txt');
+            //     break;
 
 
             /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 
             //* * * * TEMP FOR TESTING * * * *//
-            case 'similar':
+            case textSimilar(data.msg,'similar') > 60:
                 var res = {};
                 res.bucket = 'search';
                 res.channel = data.channelId;
@@ -121,7 +130,7 @@ io.sockets.on('connection', function(socket) {
                 res.tokens = data.msg;
                 incomingAction(res);
                 break;
-            case 'focus':
+            case textSimilar(data.msg,'focus') > 60:
                 var res = {};
                 res.bucket = 'search';
                 res.channel = data.channelId;
@@ -131,7 +140,7 @@ io.sockets.on('connection', function(socket) {
                 res.tokens = data.msg;
                 incomingAction(res);
                 break;
-            case 'modify':
+            case textSimilar(data.msg,'modify') > 60:
                 var res = {};
                 res.bucket = 'search';
                 res.channel = data.channelId;
@@ -141,7 +150,7 @@ io.sockets.on('connection', function(socket) {
                 res.tokens = data.msg;
                 incomingAction(res);
                 break;
-            case 'save':
+            case textSimilar(data.msg,'save') > 60:
                 var res = {};
                 res.bucket = 'purchase';
                 res.channel = data.channelId;
@@ -152,7 +161,7 @@ io.sockets.on('connection', function(socket) {
                 incomingAction(res);
                 break;
 
-            case 'checkout':
+            case textSimilar(data.msg,'checkout') > 60:
                 var res = {};
                 res.bucket = 'purchase';
                 res.channel = data.channelId;
@@ -193,6 +202,8 @@ function routeNLP(msg,channel,org){
     nlp.parse(msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
+
+            console.log(res);
             //TEMPORARY
             if(!res){
                 res = {};
@@ -587,18 +598,20 @@ function outputCart(data) {
         //construct amazon cart format
         var options = {};
         for (var i = 0; i < items.length; i++) {
-            var propASIN = 'Item*'+i+'*ASIN';
+            var propASIN = 'Item.'+i+'.ASIN';
             options[propASIN] = items[i].ASIN;
-            var propQuan = 'Item*'+i+'*Quantity';
+            var propQuan = 'Item.'+i+'.Quantity';
             options[propQuan] = items[i].Quantity;
         }
-        console.log(options);
 
         client.createCart(options).then(function(results) {
-            console.log('Results: ', results);
-            var cartUrl = results.PurchaseURL;
-            outgoingResponse(cartUrl,'txt');
+            var res = {
+                msg: results.PurchaseURL[0]
+            }
+            outgoingResponse(res,'txt');
+
         }).catch(function(err) {
+            console.log(err);
             console.log(err.Error[0]);
             console.log('amazon err ', err[0].Error[0]);
         });
@@ -849,6 +862,10 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     //stitch images before send to user
     if (action == 'stitch'){
         stitchResults(data, source,function(url){
+            var msg = {
+                msg:'You can reply with things like <i>1 but in blue</i> or <i>2 but less than 30</i>. Type <i>help</i> to see more actions.'
+            }
+            outgoingResponse(msg,'txt');
             console.log('TESTING FOR ERROR ',url);
             io.sockets.emit("msgFromSever", {message: url});
         });
@@ -933,14 +950,7 @@ function saveHistory(data,results,type){
                 action:data.action,
                 searchSelect:data.searchSelect,
                 tokens:data.tokens,
-                ts: new Date(),
-                // ts: data.ts, //timestamp
-                // user: data.user, //user id
-                // text: data.text, //message
-                // team: data.team, //team id
-                // context: context, //our first convo
-                // searchState: searchState,
-                // botResponse: botResponse
+                ts: new Date()
             });
 
             //store history with results from amazon
@@ -954,24 +964,24 @@ function saveHistory(data,results,type){
             break;
         case 'banter':
             messageHistory[indexHist].banter.push({
-                ts: data.ts, //timestamp
-                user: data.user, //user id
-                text: data.text, //message
-                team: data.team, //team id
-                context: context, //our first convo
-                searchState: searchState,
-                botResponse: botResponse
+                channel:data.channel,
+                org:data.org,
+                bucket:data.bucket,
+                action:data.action,
+                searchSelect:data.searchSelect,
+                tokens:data.tokens,
+                ts: new Date()
             });
             break;
         case 'purchase':
             messageHistory[indexHist].purchase.push({
-                ts: data.ts, //timestamp
-                user: data.user, //user id
-                text: data.text, //message
-                team: data.team, //team id
-                context: context, //our first convo
-                searchState: searchState,
-                botResponse: botResponse
+                channel:data.channel,
+                org:data.org,
+                bucket:data.bucket,
+                action:data.action,
+                searchSelect:data.searchSelect,
+                tokens:data.tokens,
+                ts: new Date()
             });
         default:
     }
@@ -1010,4 +1020,23 @@ function recallHistory(data,callback,steps){
 
 function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+//text similarity percentage
+//mod of: http://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
+function textSimilar(a,b) {
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+    var lengthA = a.length;
+    var lengthB = b.length;
+    var equivalency = 0;
+    var minLength = (a.length > b.length) ? b.length : a.length;    
+    var maxLength = (a.length < b.length) ? b.length : a.length;    
+    for(var i = 0; i < minLength; i++) {
+        if(a[i] == b[i]) {
+            equivalency++;
+        }
+    }
+    var weight = equivalency / maxLength;
+    return weight * 100;
 }

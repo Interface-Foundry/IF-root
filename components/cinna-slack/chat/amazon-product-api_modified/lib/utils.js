@@ -98,11 +98,8 @@ var generateQueryString = function (query, method, credentials) {
   var domain = query.domain || 'webservices.amazon.com';
   var params = formatQueryParams(query, method, credentials);
 
-  //Added: key = key.replace('*','.') to below code (untested)
-
   // generate query
   unsignedString = Object.keys(params).map(function (key) {
-    key = key.replace('*','.');    //.replace(/*/g,'.')
     return key + "=" + encodeURIComponent(params[key]);
   }).join("&")
 
