@@ -50,8 +50,8 @@ var data = []
 //'train' mode has file path and associated captions
 var mode = (process.argv[2] == 'train') ? 'train' : 'test'
 var list = (mode == 'test') ? 'test' : 'trainx'
-//Uncomment below and run file to clear redis queue before running.
-// !!Careful with this, Clearing the list when its emplty will sometimes break the list in redis ::shrug::
+    //Uncomment below and run file to clear redis queue before running.
+    // !!Careful with this, Clearing the list when its emplty will sometimes break the list in redis ::shrug::
 console.log('clearing list..')
 client.ltrim(list, 1, 0)
 
@@ -65,8 +65,7 @@ mongoStream.on('data', function(item) {
     });
 })
 
-mongoStream.on('end', function() {
-})
+mongoStream.on('end', function() {})
 
 
 var timer = new InvervalTimer(function() {
@@ -108,8 +107,8 @@ function processItem(item) {
                 file_path: ''
             });
             var filename = urlify(item.itemId + ' ' + (new Date().toString())) + ".png"
-            // console.log('filename is: ', filename)
-            var path = osHomedir() + '/temp/' + list + '/' + filename;
+                // console.log('filename is: ', filename)
+            var path = osHomedir() + '/temp/' + mode + '/' + filename;
             // console.log('path is: ', path)
             node.file_path = path;
             node.source = 'ebay';
@@ -122,11 +121,24 @@ function processItem(item) {
             if (err) console.log(err)
             async.eachSeries(nodes, function iterator(node, savedNode) {
                 if (mode.trim() == 'train') {
-                    getCaptions(item).then(function(captions) {
-                        node.captions = captions
-                        saveNode(node).then(function() {
-                            savedNode()
-                        })
+                    //Temporary will create one caption only for now -- may remove later
+                    var categoryString = item.category
+                    if (categoryString.indexOf('Clothing, Shoes & Accessories:') > -1) {
+                        categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '')
+                        if (categoryString.indexOf(':') > -1) {
+                            categoryString = categoryString.replace(/:/g, ' ')
+                        }
+                    }
+                    var firstIteration = item.name.concat(' ' + categoryString);
+                    firstIteration = _.uniq(firstIteration.split(' '), function(word) {
+                        return word.toLowerCase().trim()
+                    }).join(' ');
+                    console.log('Caption: ',firstIteration)
+                    // getCaptions(item).then(function(captions) {
+                    node.captions = [firstIteration]
+                    saveNode(node).then(function() {
+                        savedNode()
+                            // })
                     })
                 } else if (mode.trim() == 'test') {
                     saveNode(node).then(function() {
@@ -158,9 +170,9 @@ function saveImage(url, path) {
                     //     width: 400
                     // }, function(err, stdout, stderr) {
                     //     if (err) console.log('\n\n!!!PLEASE MAKE SURE THERE IS A TEMP FOLDER IN HOME DIR WITH SUBFOLDERS: TEST AND TRAIN!!!\n\n', err);
-                        console.log('Image saved.')
-                        resolve()
-                    // })
+                    console.log('Image saved.')
+                    resolve()
+                        // })
                 })
             } else {
                 if (err) {
@@ -336,7 +348,12 @@ function getCaptions(item) {
                             }
 
                             checkWord(token).then(function(res) {
-                                var bool = res.isWord
+                                try {
+                                    var bool = res.isWord
+                                } catch (err) {
+                                    if (err) console.log('\n\n\nYou must run synonym.py!\n\n\n')
+                                }
+
                                 if (bool == 'true') {
                                     getSynonyms(token, 'general').then(function(results) {
                                         if (results.synonyms && results.synonyms.length > 0) {
