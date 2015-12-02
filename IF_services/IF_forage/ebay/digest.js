@@ -1,3 +1,9 @@
+// TODO: 
+// ***Write images to external AWS Drive (only if you want to run this directly on porygon)
+// 
+//Captions: For categoryname field splice out 'wholesale'
+
+
 //IMPORTANT: 
 //1. Before running please ensure there is a 'temp' folder in home dir 
 //with 2 subdirectories 'test' and 'train'
@@ -5,9 +11,6 @@
 //3. path variable may be hardcode in order to match folder structure
 //of porygon server
 
-
-// TODO: 
-//Captions: For categoryname field splice out 'wholesale'
 //OUTPUT JSON FORMAT: 
 // TRAINING:
 // [{
@@ -61,7 +64,7 @@ client.ltrim(list, 1, 0)
 mongoStream.on('data', function(item) {
     client.rpush(list, JSON.stringify(item), function(err, reply) {
         if (err) {
-            err.niceMessage = 'Could not save item';
+            err.niceMessage = 'Could not connect to redis client.';
             err.devMessage = 'REDIS QUEUE ERR';
             console.log(err)
         }
@@ -115,7 +118,7 @@ function processItem(item) {
             // console.log('path is: ', path)
             //******Below is hardcoded to match porygon for now
             //
-            node.file_path = '/home/ubuntu/images';
+            node.file_path = '/home/ubuntu/images'+'/'+filename;
             node.source = 'ebay';
             node.type = list
             nodes.push(node)
