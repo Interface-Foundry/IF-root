@@ -15,11 +15,12 @@ var PRICE = {
 var ITEM_1, ITEM_2, ITEM_3;
 
 //
-// each message in a conversation has four parts
-// 1. msg: what the user texts
-// 2. features: the features we extract from the message
-// 3. action: how to respond and what to do on the back end
-// 4. state: where we are in the conversation
+// each state in a conversation has some basic parts
+// * msg: what the user texts
+// * features: the features we extract from the message
+// * action: how to respond and what to do on the back end
+// * label: where we are in the conversation
+// * items: duh
 //
 // for every msg, the action and state is determined by the current msg features
 // and the previous state
@@ -34,9 +35,8 @@ var convesation_A = [
     action: {
       message: IMAGE
     },
-    state: {
-      items: [/* three items */]
-    }
+    items: [/* three items */],
+    label: 'search.results'
   },
   {
     msg: 'like the first one but orange',
@@ -48,9 +48,8 @@ var convesation_A = [
     action: {
       message: ["Sure thing, I'll find something orange", IMAGE]
     },
-    state: {
-      items: [/* three new items */]
-    }
+    items: [/* three new items */],
+    label: 'search.results'
   },
   {
     msg: 'does the first one have pockets?',
@@ -62,11 +61,9 @@ var convesation_A = [
     action: {
       message: 'yes it does! Pocket on the left side, 65%nylon, 35%cotton, machine washable in size S/M and M/L. Would you like me to add it to your cart?'
     },
-    state: {
-      question: CONFIRMATION_QUESTION.BUY,
-      focus: 1,
-      items: [/* same items */]
-    }
+    focus: 1,
+    label: 'confirm.buy',
+    items: []
   },
   {
     msg: 'yes, please',
@@ -78,7 +75,8 @@ var convesation_A = [
       add_to_cart: ITEM_1,
       message: 'Okay, it has been added to your cart. Type "view cart" to see all your items.'
     },
-    state: {}
+    label: 'done',
+    clear_history: true
   }
 ];
 
@@ -94,9 +92,7 @@ var conversation_B = [
     action: {
       message: IMAGE
     },
-    state: {
-      items: []
-    }
+    label: 'search.shown'
   },
   {
     msg: 'i like the third one',
@@ -108,28 +104,20 @@ var conversation_B = [
     action: {
       message: 'It has 2 side pockets and zipper front, 100% leather with lining in size L.  Would you like me to add it to your cart?'
     },
-    state: {
-      question: CONFIRMATION_QUESTION.BUY,
-      focus: 3,
-      items: []
-    }
+    focus: 3,
+    label: 'confirm.buy'
   },
   {
     msg: 'is there a size medium?',
     features: {
       type: 'question',
-      focus: 3,
       size: 'medium'
     },
     action: {
       message: 'It comes in Medium at a higher price. Should I look for a similar one in a lower price?'
     },
-    state: {
-      question: CONFIRMATION_QUESTION.MODIFY,
-      focus: 3,
-      price: PRICE.LOWER,
-      items: []
-    }
+    focus: 3,
+    label: 'confirm.search.modify'
   },
   {
     msg: 'yes, please',
@@ -140,8 +128,7 @@ var conversation_B = [
     action: {
       message: IMAGE
     },
-    state: {
-      items: []
-    }
+    items: [],
+    label: 'search.shown'
   }
 ]
