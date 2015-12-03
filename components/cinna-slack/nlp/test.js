@@ -1,12 +1,30 @@
 var request = require('request')
-require('colors')
-
-var PRINT_SUCCESS = true;
+var should = require('should')
+var config = require('config')
+var nlp = require('./api')
 
 var messages = [
   {
+    m: 'more like 1',
+    r: {
+      bucket: 'search',
+      action: 'similar',
+      searchSelect: [1]
+    }
+  },
+  {
+    m: 'more like 2',
+    r: {
+      bucket: 'search',
+      action: 'similar',
+      searchSelect: [2]
+    }
+  },
+  {
     m: 'skinny black jeans',
     r: {
+      action: 'initial',
+      bucket: 'search',
       tokens: ['skinny black jeans']
     }
   },
@@ -15,7 +33,6 @@ var messages = [
     r: {
       tokens: ['skinny black jeans'],
       location: 'New York',
-      brand: 'Levi'
     }
   }
 ];
@@ -23,21 +40,17 @@ var messages = [
 
 // run the module reloader
 request({
-  url: 'http://localhost:8083/reload'
+  url: config.nlp + '/reload'
 })
 
 // test the messages
-messages.map(function(o) {
-  request({
-    url: 'http://localhost:8083/parse',
-    method: 'POST',
-    json: true,
-    body: {
-      text: o.m
-    }
-  }, function(e, r, b) {
-    console.log(b)
-    console.log(b.ss)
-
+describe('test messages on ' + config.nlp, function() {
+  messages.map(function(o) {
+    it(o.m, function(done) {
+      nlp.parse(o.m, function(e, r) {
+        r.should.deepEqual(o.r);
+        done();
+      })
+    })
   })
 })

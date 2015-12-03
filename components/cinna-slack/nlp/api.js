@@ -60,7 +60,7 @@ var parse = module.exports.parse = function(text, callback) {
       return callback(e);
     } else {
       var res = nlpToResult(b);
-      console.log(res)
+      debug(res)
       return callback(null, res);
     }
   })
