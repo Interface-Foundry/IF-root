@@ -113,7 +113,6 @@ var runQuery = function (credentials, method) {
 };
 
 var createClient = function (credentials) {
-  console.log('creds ',credentials);
   return {
     similarityLookup: runQuery(credentials, 'SimilarityLookup'),
     itemSearch: runQuery(credentials, 'ItemSearch'),

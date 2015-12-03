@@ -1,5 +1,6 @@
 var http = require('http');
 var fs = require('fs');
+var Bot = require('slackbots');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
@@ -20,218 +21,239 @@ var createServerSnippet =  function(req, res) {
 var app = http.createServer(createServerSnippet).listen(8000);
 console.log("listening localhost:8000");
 
-var messageHistory = {};
 
+//globals
+var messageHistory = {}; //fake database, stores all users and their chat histories
+
+
+// - - - Slack create bot - - - -//
+var settings = {
+    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+    name: 'cinna-1000'
+};
+var bot = new Bot(settings);
+
+bot.on('start', function() {
+    bot.on('message', function(data) {
+        // all ingoing events https://api.slack.com/rtm 
+        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+        if (data.type == 'message' && data.username !== settings.name){ 
+            console.log('incoming slack data: ',data);
+            preProcess(data);
+        }
+    });
+});
+
+//- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(app);
 io.sockets.on('connection', function(socket) {
     console.log("socket connected");
 
     socket.on("msgToClient", function(data) {
-
-        switch (true){
-            case textSimilar(data.msg,'sup') > 70:
-                console.log('similar!');
-            default:
-                console.log('not!');
-        }
-        //rough banter framework, use flat file DB or redis?
-        switch (true) {
-
-            //basic weight system for percentage similarity for string matching
-            case textSimilar(data.msg,'hi') > 60:
-            case textSimilar(data.msg,'hello') > 60:
-                data.msg = 'Hello!';
-                outgoingResponse(data,'txt'); //
-                break;
-            case textSimilar(data.msg,'sup') > 60:
-                data.msg = 'nm, u?';
-                outgoingResponse(data,'txt'); //
-                break;
-            case textSimilar(data.msg,'are you a bot') > 60:
-                data.msg = 'yep, are you human?';
-                outgoingResponse(data,'txt');
-                break;
-            // case 'what\'s the meaning of life?':
-            //     data.msg = 'life, the multiverse and whatever';
-            //     outgoingResponse(data,'txt');
-            //     break;
-            // case 'how do i shot web?':
-            //     data.msg = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
-            //     outgoingResponse(data,'image');
-            //     break;
-            // case 'u mad bro?':
-            //     data.msg = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
-            //     outgoingResponse(data,'image');
-            //     break;
-            // case 'How Is babby formed?':
-            //     data.msg = 'girl get pragnent';
-            //     outgoingResponse(data,'txt');
-            //     break;
-            // case 'Drink Me':
-            //     data.msg = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
-            //     outgoingResponse(data,'image');
-            //     break;
-            // case 'deja vu':
-            //     data.msg = 'Didn\'t you just ask me that?';
-            //     outgoingResponse(data,'txt');
-            //     break;
-            // case 'die':
-            //     data.msg = '😭';
-            //     outgoingResponse(data,'txt');
-            //     break;
-            // case 'cool':
-            //     data.msg = '😎';
-            //     outgoingResponse(data,'txt');
-            //     break;
-            // case 'skynet':
-            //     data.msg = 'April 19, 2011';
-            //     outgoingResponse(data,'txt');
-            //     break;
-            // case '4 8 15 16 23 42':
-            //     data.msg = 'http://static.wixstatic.com/media/43348a_277397739d6a21470b52bc854f7f1d81.gif';
-            //     outgoingResponse(data,'image');
-            //     break;
-            // case 'What is the air-speed velocity of an unladen swallow?':
-            //     data.msg = 'http://style.org/unladenswallow/';
-            //     outgoingResponse(data,'txt');
-            //     break;
-
-            // case 'help':
-            //     data.msg = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
-            //     outgoingResponse(data,'txt');
-            //     break;
-
-            // case '1':
-            //     data.msg = 'this will recall history and select focus on N item';
-            //     outgoingResponse(data,'txt');
-            //     break;
-
-            // case '2':
-            //     data.msg = 'this will recall history and select focus on N item';
-            //     outgoingResponse(data,'txt');
-            //     break;
-
-            // case '3':
-            //     data.msg = 'this will recall history and select focus on N item';
-            //     outgoingResponse(data,'txt');
-            //     break;
-
-
-            /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
-
-            //* * * * TEMP FOR TESTING * * * *//
-            case textSimilar(data.msg,'similar') > 60:
-                var res = {};
-                res.bucket = 'search';
-                res.channel = data.channelId;
-                res.org = data.orgId;
-                res.action = 'similar';
-                res.searchSelect = [1];
-                res.tokens = data.msg;
-                incomingAction(res);
-                break;
-            case textSimilar(data.msg,'focus') > 60:
-                var res = {};
-                res.bucket = 'search';
-                res.channel = data.channelId;
-                res.org = data.orgId;
-                res.action = 'focus';
-                res.searchSelect = [1];
-                res.tokens = data.msg;
-                incomingAction(res);
-                break;
-            case textSimilar(data.msg,'modify') > 60:
-                var res = {};
-                res.bucket = 'search';
-                res.channel = data.channelId;
-                res.org = data.orgId;
-                res.action = 'modify';
-                res.searchSelect = [1];
-                res.tokens = data.msg;
-                incomingAction(res);
-                break;
-            case textSimilar(data.msg,'save') > 60:
-                var res = {};
-                res.bucket = 'purchase';
-                res.channel = data.channelId;
-                res.org = data.orgId;
-                res.action = 'save';
-                res.searchSelect = [1];
-                res.tokens = data.msg;
-                incomingAction(res);
-                break;
-
-            case textSimilar(data.msg,'checkout') > 60:
-                var res = {};
-                res.bucket = 'purchase';
-                res.channel = data.channelId;
-                res.org = data.orgId;
-                res.action = 'checkout';
-                //res.searchSelect = [1];
-                res.tokens = data.msg;
-                incomingAction(res);
-                break;
-
-            // case 'save':
-            //     saveToCart(data);
-            //     break;
-            // case 'remove':
-            //     removeFromCart(data);
-            //     break;
-            // case 'removeAll':
-            //     removeAllCart(data);
-            //     break;
-            // case 'list':
-            //     listCart(data);
-            //     break;
-            // case 'checkout':
-
-            //* * * * * END TESTING * * * * *//
-
-            default:
-            //FUNCTION WITH CALLBACK TO PYTHON, CALLBACK PASSES DATA TO incomingAction():
-            routeNLP(data.msg,data.channelId,data.orgId); //also send channel ID of slack user
+        
+        data.source = { 
+            'origin':'socket.io',
+            'channel':socket.id,
+            'org':'kip'
         }
 
-    })
+        preProcess(data);
+
+
+        // // When socket disconnects, remove it from the list:
+        // socket.on('disconnect', function() {
+        //     var index = clients.indexOf(socket);
+        //     if (index != -1) {
+        //         clients.splice(index, 1);
+        //         console.info('Client gone (id=' + socket.id + ').');
+        //     }
+        // });
+
+    });
 });
+//- - - - - - //
+
+//pre process incoming messages for canned responses
+function preProcess(data){
+
+    switch (true) {
+        //basic weight system for percentage similarity for string matching
+        case textSimilar(data.msg,'hi') > 60:
+        case textSimilar(data.msg,'hello') > 60:
+            data.msg = 'Hello!';
+            outgoingResponse(data,'txt'); //
+            break;
+        case textSimilar(data.msg,'sup') > 60:
+            data.msg = 'nm, u?';
+            outgoingResponse(data,'txt'); //
+            break;
+        case textSimilar(data.msg,'are you a bot') > 60:
+            data.msg = 'yep, are you human?';
+            outgoingResponse(data,'txt');
+            break;
+        // case 'what\'s the meaning of life?':
+        //     data.msg = 'life, the multiverse and whatever';
+        //     outgoingResponse(data,'txt');
+        //     break;
+        // case 'how do i shot web?':
+        //     data.msg = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
+        //     outgoingResponse(data,'image');
+        //     break;
+        // case 'u mad bro?':
+        //     data.msg = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
+        //     outgoingResponse(data,'image');
+        //     break;
+        // case 'How Is babby formed?':
+        //     data.msg = 'girl get pragnent';
+        //     outgoingResponse(data,'txt');
+        //     break;
+        // case 'Drink Me':
+        //     data.msg = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
+        //     outgoingResponse(data,'image');
+        //     break;
+        // case 'deja vu':
+        //     data.msg = 'Didn\'t you just ask me that?';
+        //     outgoingResponse(data,'txt');
+        //     break;
+        // case 'die':
+        //     data.msg = '😭';
+        //     outgoingResponse(data,'txt');
+        //     break;
+        // case 'cool':
+        //     data.msg = '😎';
+        //     outgoingResponse(data,'txt');
+        //     break;
+        // case 'skynet':
+        //     data.msg = 'April 19, 2011';
+        //     outgoingResponse(data,'txt');
+        //     break;
+        // case '4 8 15 16 23 42':
+        //     data.msg = 'http://static.wixstatic.com/media/43348a_277397739d6a21470b52bc854f7f1d81.gif';
+        //     outgoingResponse(data,'image');
+        //     break;
+        // case 'What is the air-speed velocity of an unladen swallow?':
+        //     data.msg = 'http://style.org/unladenswallow/';
+        //     outgoingResponse(data,'txt');
+        //     break;
+
+        // case 'help':
+        //     data.msg = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
+        //     outgoingResponse(data,'txt');
+        //     break;
+
+        // case '1':
+        //     data.msg = 'this will recall history and select focus on N item';
+        //     outgoingResponse(data,'txt');
+        //     break;
+
+        // case '2':
+        //     data.msg = 'this will recall history and select focus on N item';
+        //     outgoingResponse(data,'txt');
+        //     break;
+
+        // case '3':
+        //     data.msg = 'this will recall history and select focus on N item';
+        //     outgoingResponse(data,'txt');
+        //     break;
+
+
+        /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
+
+        //* * * * TEMP FOR TESTING * * * *//
+        // case textSimilar(data.msg,'similar') > 60:
+        //     var res = {};
+        //     res.bucket = 'search';
+        //     res.channel = data.channelId;
+        //     res.org = data.orgId;
+        //     res.action = 'similar';
+        //     res.searchSelect = [1];
+        //     res.tokens = data.msg;
+        //     incomingAction(res);
+        //     break;
+        // case textSimilar(data.msg,'focus') > 60:
+        //     var res = {};
+        //     res.bucket = 'search';
+        //     res.channel = data.channelId;
+        //     res.org = data.orgId;
+        //     res.action = 'focus';
+        //     res.searchSelect = [1];
+        //     res.tokens = data.msg;
+        //     incomingAction(res);
+        //     break;
+        // case textSimilar(data.msg,'modify') > 60:
+        //     var res = {};
+        //     res.bucket = 'search';
+        //     res.channel = data.channelId;
+        //     res.org = data.orgId;
+        //     res.action = 'modify';
+        //     res.searchSelect = [1];
+        //     res.tokens = data.msg;
+        //     incomingAction(res);
+        //     break;
+        // case textSimilar(data.msg,'save') > 60:
+        //     var res = {};
+        //     res.bucket = 'purchase';
+        //     res.channel = data.channelId;
+        //     res.org = data.orgId;
+        //     res.action = 'save';
+        //     res.searchSelect = [1];
+        //     res.tokens = data.msg;
+        //     incomingAction(res);
+        //     break;
+
+        // case textSimilar(data.msg,'checkout') > 60:
+        //     var res = {};
+        //     res.bucket = 'purchase';
+        //     res.channel = data.channelId;
+        //     res.org = data.orgId;
+        //     res.action = 'checkout';
+        //     //res.searchSelect = [1];
+        //     res.tokens = data.msg;
+        //     incomingAction(res);
+        //     break;
+
+        // case 'save':
+        //     saveToCart(data);
+        //     break;
+        // case 'remove':
+        //     removeFromCart(data);
+        //     break;
+        // case 'removeAll':
+        //     removeAllCart(data);
+        //     break;
+        // case 'list':
+        //     listCart(data);
+        //     break;
+        // case 'checkout':
+
+        //* * * * * END TESTING * * * * *//
+
+        default:
+            routeNLP(data); 
+    }
+
+}
 
 //pushing incoming messages to python
-function routeNLP(msg,channel,org){
+function routeNLP(data){
 
-    nlp.parse(msg, function(e, res) {
+    nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
 
-            console.log(res);
-            //TEMPORARY
-            if(!res){
-                res = {};
+            //- - - temp stuff - - - //
+            if (res.bucket){
+                data.bucket = res.bucket;
             }
+            if (res.action){
+                data.action = res.action;
+            }
+            if (res.tokens){    
+                data.tokens = res.tokens;
+            }   
 
-            //TODO
-            res.channel = channel;
-            res.org = org;
+            incomingAction(data);
 
-            //TEMPORARY TODO
-            // nlp doesn't handle these yet
-            if (msg == 'similar'){
-                res.action = 'similar';
-                res.searchSelect = [1];
-                res.tokens = msg;
-            }
-            else if (msg == 'modify'){
-                res.action = 'modify';
-                res.searchSelect = [1];
-                res.tokens = msg;
-            }
-            else if (msg == 'focus'){
-                res.action = 'focus';
-                res.searchSelect = [1];
-                res.tokens = msg;
-            }
-
-            incomingAction(res);
         }
 
     })
@@ -240,15 +262,13 @@ function routeNLP(msg,channel,org){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
-    console.log(data);
-
     //***** SAVE INCOMING STATE ******//
     //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
 
-    if (!data.org || !data.channel){
+    if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
     }
-    var indexHist = data.org + "_" + data.channel;
+    var indexHist = data.source.org + "_" + data.source.channel;
     if (!messageHistory[indexHist]){ //new user, set up chat states
         messageHistory[indexHist] = {};
         messageHistory[indexHist].search = []; //random chats
@@ -553,7 +573,7 @@ function saveToCart(data){
 
     recallHistory(data, function(item){
 
-        var indexHist = data.org + "_" + data.channel; //chat id
+        var indexHist = data.source.org + "_" + data.source.channel; //chat id
 
         //async push items to cart
         async.eachSeries(data.searchSelect, function(searchSelect, callback) {
@@ -571,7 +591,7 @@ function saveToCart(data){
 
 //Build Amazon Cart
 function outputCart(data) {
-    var indexHist = data.org + "_" + data.channel; //chat id
+    var indexHist = data.source.org + "_" + data.source.channel; //chat id
 
     var cartItems = [];
 
@@ -645,11 +665,11 @@ function searchAmazon(data, type, query, flag){
 
             //add some amazon query params
             var amazonParams = {};
-            amazonParams.Keywords = data.tokens;
+            amazonParams.Keywords = data.tokens; //text search string
             amazonParams.responseGroup = 'ItemAttributes,Offers,Images';
 
-            //check for flag
-            if (flag && flag.modify){
+            //check for flag to modify amazon search params
+            if (flag && flag.modify){ //search modifier
 
                console.log('search flag ',flag);
 
@@ -741,18 +761,13 @@ function searchAmazon(data, type, query, flag){
                     }
                 }
             }
-            console.log('amazonParams ',amazonParams);
-            //IDEAS:
-            //MODIFY searchIndex if persona weight > x\
-            //IDENTIFY BRAND NAME TO SEARCH BY BRAND?
-
 
             //AMAZON BASIC SEARCH
             client.itemSearch(amazonParams).then(function(results){
-              //console.log('checking for amazon server error so we handle',results);
 
-              outgoingResponse(results,'stitch','amazon'); //send back msg to user
-              saveHistory(data,results,'amazon'); //push new state, pass amazon results
+              data.amazon = results;
+
+              outgoingResponse(data,'stitch','amazon'); //send back msg to user
 
             }).catch(function(err){
 
@@ -861,13 +876,19 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
 
     //stitch images before send to user
     if (action == 'stitch'){
-        stitchResults(data, source,function(url){
-            var msg = {
-                msg:'You can reply with things like <i>1 but in blue</i> or <i>2 but less than 30</i>. Type <i>help</i> to see more actions.'
-            }
-            outgoingResponse(msg,'txt');
-            console.log('TESTING FOR ERROR ',url);
-            io.sockets.emit("msgFromSever", {message: url});
+        stitchResults(data,source,function(url){
+
+            console.log(url);
+            data.client_res = url;
+            saveHistory(data); //push new history state after we have stitched URL
+
+            // var msg = {
+            //     msg:'You can reply with things like <i>1 but in blue</i> or <i>2 but less than 30</i>. Type <i>help</i> to see more actions.'
+            // }
+            // outgoingResponse(msg,'txt');
+
+            sendResponse(data);
+
         });
     }
     //single image msg to user
@@ -884,6 +905,16 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     }
 }
 
+function sendResponse(data){
+    console.log(data);
+    if (data.source.origin == 'socket.io'){
+        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
+    }
+    else if (data.source.origin == 'slack'){
+        console.log('slack res');
+    }
+}
+
 //stitch 3 images together into single image
 function stitchResults(data,source,callback){
     //rules to get 3 image urls
@@ -893,8 +924,8 @@ function stitchResults(data,source,callback){
             var toStitch = [];
 
             for (var i = 0; i < 3; i++) {
-                if (data[i].MediumImage && data[i].MediumImage[0].URL[0]){
-                    toStitch.push(data[i].MediumImage[0].URL[0]);
+                if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
+                    toStitch.push(data.amazon[i].MediumImage[0].URL[0]);
                 }
             }
             break;
@@ -909,63 +940,30 @@ function stitchResults(data,source,callback){
 }
 
 
-
-function query(){
-
-}
-
-function modify(){
-
-}
-
-function focus(){
-
-}
-
-function respond(){
-
-}
-
-function search(){
-
-}
-
-
 ////////////// HISTORY ACTIONS ///////////////
 
 //store chat message in history
-function saveHistory(data,results,type){
+function saveHistory(data,type){
 
-    if (!data.org || !data.channel){
+    if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 2');
     }
-    var indexHist = data.org + "_" + data.channel;
+    var indexHist = data.source.org + "_" + data.source.channel; //create id
+
+    data.ts = new Date(); //adding timestamp
 
     switch (data.bucket) {
         case 'search':
-            messageHistory[indexHist].search.push({
-                channel:data.channel,
-                org:data.org,
-                bucket:data.bucket,
-                action:data.action,
-                searchSelect:data.searchSelect,
-                tokens:data.tokens,
-                ts: new Date()
-            });
+            messageHistory[indexHist].search.push(data);
 
-            //store history with results from amazon
-            if (type == 'amazon'){
-                var histLength = messageHistory[indexHist].search.length - 1; //retrieve position of history item in arr
-                messageHistory[indexHist].search[histLength].amazon = [];
-                for (var i = 0; i < results.length; i++) { //adding amazon results to hist
-                     messageHistory[indexHist].search[histLength].amazon.push(results[i]);
-                }
-            }
             break;
         case 'banter':
             messageHistory[indexHist].banter.push({
-                channel:data.channel,
-                org:data.org,
+                source: {
+                    channel: data.source.channel,
+                    org: data.source.org,
+                    origin: data.source.origin
+                },
                 bucket:data.bucket,
                 action:data.action,
                 searchSelect:data.searchSelect,
@@ -975,8 +973,11 @@ function saveHistory(data,results,type){
             break;
         case 'purchase':
             messageHistory[indexHist].purchase.push({
-                channel:data.channel,
-                org:data.org,
+                source: {
+                    channel: data.source.channel,
+                    org: data.source.org,
+                    origin: data.source.origin
+                },
                 bucket:data.bucket,
                 action:data.action,
                 searchSelect:data.searchSelect,
