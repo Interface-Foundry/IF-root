@@ -12,7 +12,10 @@ var analyticsSchema = mongoose.Schema({
                              // because it's tied to user_id
     platform: String, // mobile.ios.7, mobile.android.5.1, web.chrome, web.safari?
     userTimestamp: Date,
-    serverTimestamp: Date,
+    serverTimestamp: {
+      type: Date,
+      default: Date.now
+    },
     sequenceNumber: Number, // starts at zero when a person opens the app, makes sure we know we missed something
     action: String, // allows you to prefix stuff if you want. like location.found or location.lostSignal
     data: {} // free-form data logged by the application

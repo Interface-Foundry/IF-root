@@ -90,6 +90,7 @@ app.post(searchItemsUrl, function(req, res, next) {
               action: 'search',
               data: {
                 query: req.body,
+                url: req.originalUrl,
                 resultCount: results.length
               }
             })).save();
