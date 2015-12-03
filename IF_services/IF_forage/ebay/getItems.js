@@ -165,6 +165,7 @@ function getItemDetails(i) {
                 }
                 newItem.src = item.ViewItemURLForNaturalSearch;
                 newItem.images = item.PictureURL;
+                // console.log('\n\n168*** item.PictureURL', item.PictureURL)
                 newItem.category = item.PrimaryCategoryName;
                 newItem.details = item.ItemSpecifics.NameValueList;
                 newItem.mainTags = [];

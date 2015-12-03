@@ -1,4 +1,7 @@
+//FIRST TIME RUNNING: Create json file with [] in root folder
+
 var mongoose = require('mongoose'),
+ObjectId = require('mongoose').Types.ObjectId
     db = require('db'),
     async = require('async'),
     _ = require('lodash'),
@@ -19,7 +22,7 @@ var mongoose = require('mongoose'),
 var mongoStream = db.FeedData
     .find({})
     .sort({
-        '_id': 1
+        '_id': -1
     })
     // .skip(700)
     // .limit(50)
@@ -30,8 +33,8 @@ var list = 'feed'
 
 //Uncomment below and run file to clear redis queue before running.
 // !!Careful with this, Clearing the list when its emplty will sometimes break the list in redis ::shrug::
-// console.log('clearing list..')
-// client.ltrim(feedList, 1, 0)
+console.log('clearing list..')
+client.ltrim(list, 1, 0)
 
 mongoStream.on('data', function(datum) {
     client.rpush(list, JSON.stringify(datum), function(err, reply) {
@@ -55,13 +58,17 @@ var timer = new InvervalTimer(function() {
             console.log(data.length + ' item(s) for processing.')
             async.eachSeries(data, function(datum_str, finishedDatum) {
                 datum = JSON.parse(datum_str)
-                db.FeedData.findOne({
-                    '_id': datum._id
-                }, function(err, node) {
+                console.log(datum._id)
+                db.FeedData.findById(datum._id.toString(), function(err, node) {
                     if (err) {
                         console.log(err)
                         return finishedDatum()
                     }
+                    if (!node || (node.data && node.data.trained)) {
+                        console.log('Node already trained or not found.')
+                        return finishedDatum()
+                    }
+                    console.log('Found!')
                     node.data = {} 
                     node.data.trained = true;
                     node.save(function(err, saved) {

@@ -43,7 +43,7 @@ var mongoose = require('mongoose'),
 var mongoStream = db.EbayItems
     .find({})
     .sort({
-        '_id': 1
+        '_id': -1
     })
     // .skip(700)
     // .limit(50)
@@ -54,7 +54,7 @@ var data = []
 
 //'test' mode has only file paths to each image in json
 //'train' mode has file path and associated captions
-var mode = (process.argv[2] == 'train') ? 'train' : 'test'
+var mode = (process.argv[2] == 'test') ? 'test' : 'train'
 var list = (mode == 'test') ? 'test' : 'trainx'
     //Uncomment below and run file to clear redis queue before running.
     // !!Careful with this, Clearing the list when its emplty will sometimes break the list in redis ::shrug::
@@ -77,7 +77,7 @@ mongoStream.on('end', function() {})
 var timer = new InvervalTimer(function() {
     client.lrange(list, 0, -1, function(err, items) {
         if (items && items.length > 0) {
-            console.log('Queue: ' + items.length)
+            // console.log('Queue: ' + items.length)
         }
         if (items.length > 0) {
             timer.pause();
@@ -87,8 +87,9 @@ var timer = new InvervalTimer(function() {
                 processItem(item).then(function() {
                     console.log('\n ---- next item ----  \n')
                     client.lrem(list, 1, item_str);
-                    timer.resume()
                     finishedItem()
+                        // timer.resume()
+
                 }).catch(function(err) {
                     if (err) console.log(err)
                     finishedItem()
@@ -103,9 +104,10 @@ var timer = new InvervalTimer(function() {
 
 function processItem(item) {
     return new Promise(function(resolve, reject) {
-        console.log('Starting...', item.name, 'in mode: ', mode)
+        console.log('\n\n\Starting...', item.name)
         var nodes = []
-        async.eachSeries(item.images, function iterator(image, savedImage) {
+        item.images = _.uniq(item.images)
+        async.eachSeries(item.images, function iterator(image, finishedNode) {
             var node = (mode == 'train') ? ({
                 captions: [],
                 file_path: ''
@@ -113,49 +115,65 @@ function processItem(item) {
                 file_path: ''
             });
             var filename = urlify(item.itemId + ' ' + (new Date().toString())) + ".png"
-                // console.log('filename is: ', filename)
-            var path = osHomedir() + '/temp/' + mode + '/' + filename;
-            // console.log('path is: ', path)
-            //******Below is hardcoded to match porygon for now
-            //
-            node.file_path = '/home/ubuntu/images'+'/'+filename;
+                //******Below file_path is hardcoded to match porygon for now
+            node.file_path = '/home/ubuntu/images/train/' + filename;
+            node.local_path = osHomedir() + '/temp/' + mode + '/' + filename;
             node.source = 'ebay';
             node.type = list
-            nodes.push(node)
-            saveImage(image, path).then(function() {
-                savedImage()
-            })
-        }, function finishedImages(err) {
-            if (err) console.log(err)
-            async.eachSeries(nodes, function iterator(node, savedNode) {
-                if (mode.trim() == 'train') {
-                    //Temporary will create one caption only for now -- may remove later
-                    var categoryString = item.category
-                    if (categoryString.indexOf('Clothing, Shoes & Accessories:') > -1) {
-                        categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '')
-                        if (categoryString.indexOf(':') > -1) {
-                            categoryString = categoryString.replace(/:/g, ' ')
-                        }
-                    }
-                    var firstIteration = item.name.concat(' ' + categoryString);
-                    firstIteration = _.uniq(firstIteration.split(' '), function(word) {
-                        return word.toLowerCase().trim()
-                    }).join(' ');
-                    console.log('Caption: ',firstIteration)
-                    // getCaptions(item).then(function(captions) {
-                    node.captions = [firstIteration]
-                    saveNode(node).then(function() {
-                        savedNode()
-                            // })
-                    })
-                } else if (mode.trim() == 'test') {
-                    saveNode(node).then(function() {
-                        savedNode()
-                    })
+            node.imgSrc = image
+            console.log('image: ', node.imgSrc)
+            var categoryString = item.category
+            if (categoryString.indexOf('Clothing, Shoes & Accessories:') > -1) {
+                categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '')
+                if (categoryString.indexOf(':') > -1) {
+                    categoryString = categoryString.replace(/:/g, ' ')
                 }
-            }, function finishedNodes(err) {
-                resolve()
+            }
+            var firstIteration = item.name.concat(' ' + categoryString);
+            firstIteration = _.uniq(firstIteration.split(' '), function(word) {
+                return word.toLowerCase().trim()
+            }).join(' ');
+            // console.log('Caption: ', firstIteration)
+            node.captions = [firstIteration]
+            saveNode(node).then(function(saved) {
+                if (saved) {
+                    saveImage(node.imgSrc, node.local_path).then(function() {
+                        finishedNode()
+                    })
+                } else {
+                    console.log('Image exists.')
+                    finishedNode()
+                }
             })
+        }, function finishedNodes(err) {
+            resolve()
+        })
+
+    })
+}
+
+
+function saveNode(node) {
+    return new Promise(function(resolve, reject) {
+        db.FeedData.findOne({
+            'imgSrc': node.imageSrc
+        }, function(err, node) {
+            if (err) {
+                console.log(err)
+            }
+            if (!node) {
+                var datum = new db.FeedData(node)
+                datum.save(function(err, res) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.log('Saved node.')
+                    resolve(1)
+                })
+            } else if (node) {
+                console.log('\n\n\n213: Node already exists in db.\n\n\n')
+                resolve(0)
+            }
         })
     })
 }
@@ -193,18 +211,6 @@ function saveImage(url, path) {
     })
 }
 
-function saveNode(node) {
-    return new Promise(function(resolve, reject) {
-        var datum = new db.FeedData(node)
-        datum.save(function(err, res) {
-            if (err) {
-                console.log(err)
-            }
-            console.log('Saved node.')
-            resolve()
-        })
-    })
-}
 
 function getCaptions(item) {
     return new Promise(function(resolve, reject) {
