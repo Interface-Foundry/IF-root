@@ -106,7 +106,6 @@ function processItem(item) {
     return new Promise(function(resolve, reject) {
         console.log('\n\n\Starting...', item.name)
         var nodes = []
-        item.images = _.uniq(item.images)
         async.eachSeries(item.images, function iterator(image, finishedNode) {
             var node = (mode == 'train') ? ({
                 captions: [],
@@ -117,31 +116,26 @@ function processItem(item) {
             var filename = urlify(item.itemId + ' ' + (new Date().toString())) + ".png"
                 //******Below file_path is hardcoded to match porygon for now
             node.file_path = '/home/ubuntu/images/train/' + filename;
-            node.local_path = osHomedir() + '/temp/' + mode + '/' + filename;
+            var local_path = osHomedir() + '/temp/' + mode + '/' + filename;
             node.source = 'ebay';
             node.type = list
             node.imgSrc = image
-            console.log('image: ', node.imgSrc)
             var categoryString = item.category
-            if (categoryString.indexOf('Clothing, Shoes & Accessories:') > -1) {
-                categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '')
-                if (categoryString.indexOf(':') > -1) {
-                    categoryString = categoryString.replace(/:/g, ' ')
-                }
-            }
+            categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '').replace('Wholesale', '').replace(/:/g, ' ').replace(/'/g, '')
+            item.name = item.name.replace(/[^\w\s]/gi, '')
             var firstIteration = item.name.concat(' ' + categoryString);
             firstIteration = _.uniq(firstIteration.split(' '), function(word) {
                 return word.toLowerCase().trim()
             }).join(' ');
             // console.log('Caption: ', firstIteration)
             node.captions = [firstIteration]
+
             saveNode(node).then(function(saved) {
                 if (saved) {
-                    saveImage(node.imgSrc, node.local_path).then(function() {
-                        finishedNode()
+                    saveImage(node.imgSrc, local_path).then(function() {
+                        wait(finishedNode,200)
                     })
                 } else {
-                    console.log('Image exists.')
                     finishedNode()
                 }
             })
@@ -156,22 +150,22 @@ function processItem(item) {
 function saveNode(node) {
     return new Promise(function(resolve, reject) {
         db.FeedData.findOne({
-            'imgSrc': node.imageSrc
-        }, function(err, node) {
+            'imgSrc': node.imgSrc
+        }, function(err, res) {
             if (err) {
                 console.log(err)
             }
-            if (!node) {
+            if (!res) {
                 var datum = new db.FeedData(node)
                 datum.save(function(err, res) {
                     if (err) {
                         console.log(err)
                     }
-                    console.log('Saved node.')
+                    // console.log('Saved node.', res)
                     resolve(1)
                 })
-            } else if (node) {
-                console.log('\n\n\n213: Node already exists in db.\n\n\n')
+            } else if (res) {
+                console.log('Image already exists in db.', node.imgSrc)
                 resolve(0)
             }
         })
