@@ -176,11 +176,11 @@ function saveImage(url, path) {
     return new Promise(function(resolve, reject) {
         request({
             url: url,
-            encoding: 'base64'
+            encoding: 'binary'
         }, function(err, res, body) {
             if (!err && res.statusCode == 200) {
                 var base64 = body
-                fs.writeFile(path, base64, 'base64', function(err) {
+                fs.writeFile(path, base64, 'binary', function(err) {
                     if (err) console.log('\n\n!!!PLEASE MAKE SURE THERE IS A TEMP FOLDER IN HOME DIR WITH SUBFOLDERS: TEST AND TRAIN!!!\n', err);
                     // im.resize({
                     //     srcPath: path,
