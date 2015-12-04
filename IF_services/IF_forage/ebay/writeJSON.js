@@ -1,8 +1,8 @@
 //FIRST TIME RUNNING: Create json file with [] in root folder
-
+//TODO: Creast FS DOES IMAGE FILE EXIST CHECK before writing to JSON
 var mongoose = require('mongoose'),
-ObjectId = require('mongoose').Types.ObjectId
-    db = require('db'),
+    ObjectId = require('mongoose').Types.ObjectId
+db = require('db'),
     async = require('async'),
     _ = require('lodash'),
     urlify = require('urlify').create({
@@ -68,8 +68,20 @@ var timer = new InvervalTimer(function() {
                         console.log('Node already trained or not found.')
                         return finishedDatum()
                     }
-                    console.log('Found!')
-                    node.data = {} 
+                    var stats;
+                    try {
+                        stats = fs.lstatSync(node.file_path);
+                        if (stats.isFile()) {
+                            console.log('Found!')
+                        } else {
+                            console.log('Image not found.')
+                            return finishedDatum()
+                        }
+                    } catch (e) {
+                        console.log('Image not found.', e)
+                        return finishedDatum()
+                    }
+                    node.data = {}
                     node.data.trained = true;
                     node.save(function(err, saved) {
                         if (err) {

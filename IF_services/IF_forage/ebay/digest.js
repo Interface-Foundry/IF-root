@@ -104,7 +104,7 @@ var timer = new InvervalTimer(function() {
 
 function processItem(item) {
     return new Promise(function(resolve, reject) {
-        console.log('\n\n\Starting...', item.name)
+        console.log('\n\nStarting...', item.name)
         var nodes = []
         async.eachSeries(item.images, function iterator(image, finishedNode) {
             var node = (mode == 'train') ? ({
