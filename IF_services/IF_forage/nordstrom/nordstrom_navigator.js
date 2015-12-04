@@ -27,9 +27,14 @@ async.whilst(
     },
     function(loop) {
         var query = {
-            'state': currentState
+            'state': currentState,
+            'pop': {
+                $gte: 35000
+            }
         }
-        db.Zipcodes.find(query).sort({'pop':-1}).then(function(zips) {
+        db.Zipcodes.find(query).sort({
+            'density': -1
+        }).then(function(zips) {
             var count = 0;
             console.log('\nCurrent state: ' + currentState)
             async.whilst(
@@ -41,7 +46,7 @@ async.whilst(
                     //For each zipcode
                     async.eachSeries(zips, function(zip, finishedZipcode) {
                             zipcode = zip.zipcode
-                            console.log('Starting in city :',zip.city)
+                            console.log('Starting in city :', zip.city)
                             async.eachSeries(catalogs, function(catalog, callback) {
                                 loadCatalog(catalog, zipcode).then(function(res) {
                                     console.log('Done with catalog.')
