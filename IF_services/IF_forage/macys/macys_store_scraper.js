@@ -22,7 +22,7 @@ async.whilst(
         var query = {
             'state': currentState
         }
-        db.Zipcodes.find(query).then(function(zips) {
+        db.Zipcodes.find(query).sort({'pop':-1}).then(function(zips) {
             var count = 0;
             console.log('\nCurrent state: ' + currentState)
             async.whilst(

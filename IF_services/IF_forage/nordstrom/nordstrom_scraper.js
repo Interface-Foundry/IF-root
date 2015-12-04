@@ -375,7 +375,6 @@
          var Stores = [];
          //bool to increment notFoundCount
          var notFound = true;
-
          async.eachSeries(inventory["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
              // var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
              var url = 'http://shop.nordstrom.com/st/' + item.StoreNumber + '/directions';
@@ -613,7 +612,7 @@
                      }
 
 
-                     // console.log('Updated inventory.', i)
+                     console.log('Updated inventory.', i)
                      return resolve(i)
                  })
              }
