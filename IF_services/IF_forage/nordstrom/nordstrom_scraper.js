@@ -282,7 +282,7 @@
                  //Construct item name from Brand Name + Product Name 
                  var brandName = '';
                  //get brand name
-                 $("section[id='brand-title']").map(function(i, section) {
+                 $("section[class='brand-title']").map(function(i, section) {
                      for (var i = 0; i < section.children.length; i++) {
                          if (section.children[i].name == 'h2') {
                              brandName = section.children[i].children[0].children[0].data;
@@ -290,7 +290,7 @@
                      }
                  });
                  //get product name
-                 $("section[id='product-title']").map(function(i, section) {
+                 $("section[class='product-title']").map(function(i, section) {
                      for (var i = 0; i < section.children.length; i++) {
                          if (section.children[i].name == 'h1') {
                              newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
@@ -299,11 +299,21 @@
                  });
 
                  //get item price
-                 $('td').each(function(i, elem) {
-                     if (elem.attribs.class.indexOf('item-price') > -1) {
-                         newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
-                     }
-                 });
+                 if ($('div.price-display-item') && $('div.price-display-item')['0'] && $('div.price-display-item')['0'].children && $('div.price-display-item')['0'].children['0'].data && $('div.price-display-item')['0'].children['0'].data.indexOf('$') > -1) {
+                     newItem.price = $('div.price-display-item')['0'].children['0'].data.replace(/[^\d.-]/g, '')
+                     console.log('Regular Price: ', newItem.price)
+                 } else if ($('div.price-current') && $('div.price-current')['0'] && $('div.price-current')['0'].children && $('div.price-current')['0'].children['0'].data && $('div.price-current')['0'].children['0'].data.indexOf('$') > -1) {
+                     newItem.price = $('div.price-current')['0'].children['0'].data.replace(/[^\d.-]/g, '')
+                     console.log('Sales Price: ', newItem.price)
+                 } else {
+                    console.log('NO PRICE FOUND ')
+                    return reject('NO PRICE FOUND ')
+                 }
+                 // $('td').each(function(i, elem) {
+                 //     if (elem.attribs.class.indexOf('item-price') > -1) {
+                 //         newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
+                 //     }
+                 // });
 
                  newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];
 
@@ -451,7 +461,7 @@
                                      console.log(err)
                                      setTimeout(function() {
                                          return callback()
-                                     }, 800);
+                                     }, 100);
                                  }
                                  //If store does not exist in db yet, create it.
                                  if (!store) {
@@ -476,7 +486,7 @@
                                              console.log('Saved store.', s.id)
                                              notFound = false;
                                              Stores.push(s)
-                                         } 
+                                         }
                                          setTimeout(function() {
                                              return callback()
                                          }, 800);
@@ -490,7 +500,7 @@
                                      Stores.push(store)
                                      setTimeout(function() {
                                          return callback()
-                                     }, 800);
+                                     }, 100);
                                  }
                              }) //end of findOne
                      }) //end of uniquer

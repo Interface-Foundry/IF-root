@@ -115,7 +115,7 @@ function processItem(item) {
             });
             var filename = urlify(item.itemId + ' ' + (new Date().toString())) + ".png"
                 //******Below file_path is hardcoded to match porygon for now
-            node.file_path = '/home/ubuntu/images/train/' + filename;
+            node.file_path = '/home/ubuntu/images/' + filename;
             var local_path = osHomedir() + '/temp/' + mode + '/' + filename;
             node.source = 'ebay';
             node.type = list
