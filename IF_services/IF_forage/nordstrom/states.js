@@ -1,8 +1,8 @@
 module.exports = [
-    "CA"
+    "CA",
+    "NY",
+    "NJ"
     // ,
-    // "NY",
-    // "NJ",
     // "CT",
     // "PA",
     // "FL",
