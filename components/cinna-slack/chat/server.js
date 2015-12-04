@@ -429,17 +429,88 @@ function searchModify(data, flag){
     //     action: 'modified' 
     // }
 
-    data.tokens = data.msg;
-    data.dataModify = {
-        type: 'size',
-        val: ['extra large','XL']
+
+    //temp!
+    if (data.msg){
+        data.tokens = [];
+        data.tokens.push(data.msg);
     }
+
+    //temp!
+    if (!data.searchSelect){
+        data.searchSelect = [1];
+    }
+
+    //temp!
+    switch (true){
+        case data.tokens[0].indexOf("in blue") !=-1 :
+
+            data.dataModify = {
+                type: 'color',
+                val: ['blue']
+            }     
+            break;
+
+        case data.tokens[0].indexOf("in XL") !=-1 :
+
+            data.dataModify = {
+                type: 'size',
+                val: ['extra large','XL']
+            } 
+            break;   
+
+        case data.tokens[0].indexOf("with collar") !=-1 :
+
+            data.dataModify = {
+                type: 'genericDetail',
+                val: ['collar']
+            }  
+            break;  
+
+        case data.tokens[0].indexOf("in wool") !=-1 :
+
+            data.dataModify = {
+                type: 'material',
+                val: ['wool','cashmere','merino']
+            }   
+            break; 
+
+        case data.tokens[0].indexOf("by Zara") !=-1 :
+
+            data.dataModify = {
+                type: 'brand',
+                val: ['Zara']
+            }   
+            break;
+
+        case data.tokens[0].indexOf("less than") !=-1 :
+
+            data.dataModify = {
+                type: 'price',
+                param: 'less than',
+                val: ['25']
+            } 
+            break;   
+
+        case data.tokens[0].indexOf("cheaper") !=-1 :
+
+            data.dataModify = {
+                type: 'price',
+                param: 'less'
+            }  
+            break;
+    }
+
+
+    console.log('modified ',data);
 
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
 
+        data.recallHistory = item;
+
         // VVVV FIXING
-        item.originalQuery = data; //store original query obj for other stuff
+        //item.originalQuery = data; //store original query obj for other stuff
 
         //mock parsed sentence data from python
         // var dataModify = 'price'; //color,price, etc
@@ -449,26 +520,24 @@ function searchModify(data, flag){
         var cSearch = ''; //construct new search string
 
         //CONSTRUCT QUERY FROM AMAZON OBJECT
-        if (item && item.amazon){
-            //lol
-            if(!dataModify){var dataModify};
-            if(!dataParam){var dataParam};
-            if(!dataVal){var dataVal};
+        if (data.recallHistory.amazon){
+
+            console.log('AMAZON!');
 
             //handle special modifiers that need care, consideration, hard tweaks of amazon search API
-            switch (dataModify) {
+            switch (data.dataModify.type) {
                 case 'price':
                     searchInitial(item,{ // passing special FLAG for search to handle
-                        'modify':dataModify,
-                        'param':dataParam,
-                        'val':dataVal
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':data.dataModify.val
                     });
                     break;
 
                 case 'brand':
                     searchInitial(item,{ // passing special FLAG for search to handle
-                        'modify':dataModify,
-                        'val':dataVal
+                        'type':data.dataModify.type,
+                        'val':data.dataModify.val
                     });
                     break;
 
@@ -478,9 +547,12 @@ function searchModify(data, flag){
 
 
             function constructAmazonQuery(){
+
+                console.log('constructing!');
+
                 async.eachSeries(data.searchSelect, function(searchSelect, callback) {
 
-                    var itemAttrib = item.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+                    var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
 
                     //cSearch = cSearch + itemAttrib[0].Title[0]; //add in full title of item
                     //^ parse above into token, sort priority??
@@ -525,35 +597,35 @@ function searchModify(data, flag){
         function addModifier(){
 
             //SORT WHICH TRAITS TO MODIFY
-            switch (dataModify) {
+            switch (data.dataModify.type) {
                 // CASES: color, size, price, genericDetail
                 case 'color':
 
-                    cSearch = dataVal + ' ' + cSearch; //add new color
-                    data.tokens = cSearch; //replace search string in data obj
+                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
                     break;
 
                 case 'size':
 
-                    cSearch = dataVal + ' ' + cSearch; //add new color
-                    data.tokens = cSearch; //replace search string in data obj
+                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
                     break;
 
                 //texture, fabric, coating, etc
                 case 'material':
 
-                    cSearch = dataVal + ' ' + cSearch; //add new color
-                    data.tokens = cSearch; //replace search string in data obj
+                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
                     break;
 
                 //unsortable modifier
                 case 'genericDetail':
 
-                    cSearch = dataVal + ' ' + cSearch; //add new color
-                    data.tokens = cSearch; //replace search string in data obj
+                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
                     break;
             }
@@ -702,7 +774,7 @@ function searchAmazon(data, type, query, flag){
                console.log('search flag ',flag);
 
                 //parse flags
-                if (flag.modify == 'price'){
+                if (flag.type == 'price'){
 
                     switch (flag.param) {
                         case 'less':
@@ -787,6 +859,9 @@ function searchAmazon(data, type, query, flag){
                         default:
                             console.log('error: no flag.param found with flag.modify == price');
                     }
+                }
+                else if (flag.type == 'brand'){
+                    console.log('BRAND FIRED');
                 }
             }
 

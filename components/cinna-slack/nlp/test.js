@@ -117,6 +117,19 @@ var messages = [
     }
   },
   {
+    m: '1 but cheaper', //1 but cheaper
+    r: {
+      bucket: 'search',
+      action: 'similar',
+      searchSelect: [1],
+      tokens: ['1 but less'],
+      dataModify: {
+        type: 'price',
+        param: 'less' //or 'more'
+      }
+    }
+  },
+  {
     m: '1 but less than $25',
     r: {
       bucket: 'search',
@@ -126,7 +139,7 @@ var messages = [
       dataModify: {
         type: 'price',
         param: 'less than', //or 'more than'
-        val: '25' //in USD
+        val: [25] //in USD
       }
     }
   },
