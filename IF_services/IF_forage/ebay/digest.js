@@ -121,13 +121,13 @@ function processItem(item) {
             node.type = list
             node.imgSrc = image
             var categoryString = item.category
-            categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '').replace('Wholesale', '').replace(/:/g, ' ').replace(/'/g, '')
+            categoryString = categoryString.replace('Clothing, Shoes & Accessories:', '').replace('Wholesale', '').replace(/:/g, ' ').replace(/'/g, '').replace(/[^\w\s]/gi, ' ')
             item.name = item.name.replace(/[^\w\s]/gi, '')
             var firstIteration = item.name.concat(' ' + categoryString);
             firstIteration = _.uniq(firstIteration.split(' '), function(word) {
                 return word.toLowerCase().trim()
-            }).join(' ');
-            // console.log('Caption: ', firstIteration)
+            }).join(' ').replace(/'/g, '').replace(/[^\w\s]/gi, ' ').replace(/\u00a0/g, " ");
+            console.log('Caption: ', firstIteration)
             node.captions = [firstIteration]
 
             saveNode(node).then(function(saved) {
