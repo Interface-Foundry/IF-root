@@ -27,14 +27,8 @@ var messages = [
       bucket: 'search',
       tokens: ['skinny black jeans']
     }
-  },
-  {
-    m: 'Levi skinny black jeans New York',
-    r: {
-      tokens: ['skinny black jeans'],
-      location: 'New York',
-    }
   }
+  /// list of tests to be pasted in tomorrow
 ];
 
 

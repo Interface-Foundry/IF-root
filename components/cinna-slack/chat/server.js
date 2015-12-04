@@ -61,8 +61,6 @@ io.sockets.on('connection', function(socket) {
 
         preProcess(data);
 
-
-        // // When socket disconnects, remove it from the list:
         // socket.on('disconnect', function() {
         //     var index = clients.indexOf(socket);
         //     if (index != -1) {
@@ -74,6 +72,7 @@ io.sockets.on('connection', function(socket) {
     });
 });
 //- - - - - - //
+
 
 //pre process incoming messages for canned responses
 function preProcess(data){
@@ -257,7 +256,8 @@ function routeNLP(data){
             }   
             if (res.searchSelect){    
                 data.searchSelect = res.searchSelect;
-            }   
+            }  
+            //- - - - end temp - - - - // 
 
             incomingAction(data);
 
@@ -268,9 +268,6 @@ function routeNLP(data){
 
 //sentence breakdown incoming from python
 function incomingAction(data){
-
-    //***** SAVE INCOMING STATE ******//
-    //INCOMING DATA FROM SLACK (data obj in SLACK INCOMING MESSAGE)
 
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
@@ -315,6 +312,7 @@ function searchBucket(data){
             searchSimilar(data);
             break;
         case 'modify':
+        case 'modified': //because the nlp json is wack
             searchModify(data);
             break;
         case 'focus':
@@ -417,14 +415,36 @@ function searchSimilar(data){
 
 function searchModify(data, flag){
 
+    //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
+    // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
+
+    // {   
+    //     msg: '1 but in orange',
+    //     source:{ 
+    //         origin: 'socket.io',
+    //         channel: 'dgUgwg_Z6hNp4qJIAAAB',
+    //         org: 'kip' 
+    //     },
+    //     bucket: 'search',
+    //     action: 'modified' 
+    // }
+
+    data.tokens = data.msg;
+    data.dataModify = {
+        type: 'size',
+        val: ['extra large','XL']
+    }
+
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
+
+        // VVVV FIXING
         item.originalQuery = data; //store original query obj for other stuff
 
         //mock parsed sentence data from python
-        var dataModify = 'price'; //color,price, etc
-        var dataParam = 'less than';
-        var dataVal = '30'; //blue,extra large, less, etc
+        // var dataModify = 'price'; //color,price, etc
+        // var dataParam = 'less than';
+        // var dataVal = '30'; //blue,extra large, less, etc
 
         var cSearch = ''; //construct new search string
 
@@ -671,11 +691,190 @@ function searchAmazon(data, type, query, flag){
     switch (type) {
         case 'initial':
 
-            initialSearch(data, type, query, flag);
+            //add some amazon query params
+            var amazonParams = {};
+            amazonParams.Keywords = data.tokens[0]; //text search string
+            amazonParams.responseGroup = 'ItemAttributes,Offers,Images';
+
+            //check for flag to modify amazon search params
+            if (flag && flag.modify){ //search modifier
+
+               console.log('search flag ',flag);
+
+                //parse flags
+                if (flag.modify == 'price'){
+
+                    switch (flag.param) {
+                        case 'less':
+
+                            //there's a price for the item
+                            if (data.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]){
+
+                                var newPrice = 0;
+
+                                //check for original user query
+                                if (data.originalQuery){
+                                    //summoning original query obj. loop searchSelect [ ]
+                                    async.eachSeries(data.originalQuery.searchSelect, function(searchSelect, callback) {
+                                        //adding up prices for each item
+                                        newPrice = newPrice + data.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0];
+                                        callback();
+                                    }, function done(){
+                                        // calculate average price and decrease by 25%
+                                        newPrice = newPrice / data.originalQuery.searchSelect.length; //average the price
+                                        var per = newPrice * .25; //get 25% of price
+                                        newPrice = newPrice - per; // subtract percentage
+                                        newPrice = Math.round(newPrice); //clean price
+                                        if (newPrice > 1){
+                                            newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
+                                        }
+                                        if (newPrice > 0){
+                                            //add price param
+                                            amazonParams.MaximumPrice = newPrice;
+                                        }
+                                        else {
+                                            console.log('Error: not allowing search for max price below 0');
+                                        }
+                                    });
+                                }
+                                else {
+                                    console.log("Error: original user query missing. it was not passed to amazon search correctly");
+                                }
+                            }
+                            else {
+                                console.log('error: amazon price missing');
+                            }
+
+                            break;
+
+                        case 'less than':
+                            console.log('less than');
+
+                            //check if val is real number
+                            if (flag.val && isNumber(flag.val)){
+
+                                //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
+
+                                //user wanted one item at different price
+                                if (data.originalQuery && data.originalQuery.searchSelect.length == 1){
+
+                                    var searchSelect = data.originalQuery.searchSelect[0];
+
+                                    if (data.amazon[searchSelect - 1].ItemAttributes[0].Title){
+                                        amazonParams.Keywords = data.amazon[searchSelect - 1].ItemAttributes[0].Title;
+                                        amazonParams.MaximumPrice = flag.val;
+                                    }
+                                    else {
+                                        console.log('Error: Title is missing from amazon itemattributes object');
+                                    }
+
+                                }
+                                else {
+                                    console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
+                                    amazonParams.MaximumPrice = flag.val;
+                                }
+                            }
+                            else {
+                                console.log(' number not used in flag.val with flag.modify == price');
+                            }
+                            break;
+                        case 'more':
+
+                            break;
+                        case 'more than':
+                            break;
+
+                        default:
+                            console.log('error: no flag.param found with flag.modify == price');
+                    }
+                }
+            }
+
+            //AMAZON BASIC SEARCH
+            client.itemSearch(amazonParams).then(function(results){
+
+              data.amazon = results;
+
+              outgoingResponse(data,'stitch','amazon'); //send back msg to user
+
+            }).catch(function(err){
+
+                //handle err codes. do stuff.
+                if (err[0].Error[0].Code[0]){
+                    switch (err[0].Error[0].Code[0]) {
+
+                        //CASE: No results for search
+                        case 'AWS.ECommerceService.NoExactMatches':
+                            //do a weak search
+                            weakSearch(data,type,query,flag);
+                            break;
+
+                        default:
+                            console.log('amazon err ',err[0].Error[0]);
+                    }
+                }
+            });
             break;
 
+        // * * * * * * * * * * * * * *//
+
         case 'similar':
-            similarSearch(data, type, query, flag);
+            //handle no data error
+            if (!data){
+                console.log('error no amazon item found for similar search');
+                data = {
+                    msg:'Sorry, I don\'t understand, please ask me again'
+                }
+                outgoingResponse(data,'txt');
+            }
+            else {
+
+                if (data.recallHistory.amazon){ //we have a previously saved amazon session
+
+                    if (!flag){ //no flag passed in
+                        flag = 'Intersection'; //default
+                    }
+
+                    //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
+                    var IdArray = [];
+                    for (var i = 0; i < data.searchSelect.length; i++) { //match item choices to product IDs
+                        var searchNum = data.searchSelect[i];
+                        IdArray.push(data.recallHistory.amazon[searchNum - 1].ASIN[0]);
+                    }
+                    var ItemIdString = IdArray.toString();
+                    //////////
+
+                    //AMAZON SIMILARITY QUERY
+                    // [NOTE: functionality not in default AWS node lib. had to extend it!]
+                    client.similarityLookup({
+                      ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
+                      //Keywords: data.recallHistory.tokens,
+                      SimilarityType: flag, //other option is "Random" <<< test which is better results
+                      responseGroup: 'ItemAttributes,Offers,Images'
+
+                    }).then(function(results){
+
+                        //console.log('RESULTS SIMILAR ',results);
+
+                        data.amazon = results;
+
+                        //* * * * * CHANGE TO INITIAL SERACH FORMAT * * * * //
+                        outgoingResponse(data,'stitch','amazon'); //send msg to user
+
+                        //need to put results inside data
+
+                        //saveHistory(data,results,'amazon'); //push new state, pass amazon results
+
+                    }).catch(function(err){
+                      console.log('amazon err ',err[0].Error[0]);
+                      console.log('SIMILAR FAILED: should we fire random query or mod query');
+                      //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
+                    });
+                }
+                else {
+                    searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+                }
+            }
             break;
 
         case 'focus':
@@ -684,193 +883,6 @@ function searchAmazon(data, type, query, flag){
     }
 }
 
-function initialSearch(data, type, query, flag){
-
-    //add some amazon query params
-    var amazonParams = {};
-    amazonParams.Keywords = data.tokens; //text search string
-    amazonParams.responseGroup = 'ItemAttributes,Offers,Images';
-
-    //check for flag to modify amazon search params
-    if (flag && flag.modify){ //search modifier
-
-       console.log('search flag ',flag);
-
-        //parse flags
-        if (flag.modify == 'price'){
-
-            switch (flag.param) {
-                case 'less':
-
-                    //there's a price for the item
-                    if (data.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]){
-
-                        var newPrice = 0;
-
-                        //check for original user query
-                        if (data.originalQuery){
-                            //summoning original query obj. loop searchSelect [ ]
-                            async.eachSeries(data.originalQuery.searchSelect, function(searchSelect, callback) {
-                                //adding up prices for each item
-                                newPrice = newPrice + data.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0];
-                                callback();
-                            }, function done(){
-                                // calculate average price and decrease by 25%
-                                newPrice = newPrice / data.originalQuery.searchSelect.length; //average the price
-                                var per = newPrice * .25; //get 25% of price
-                                newPrice = newPrice - per; // subtract percentage
-                                newPrice = Math.round(newPrice); //clean price
-                                if (newPrice > 1){
-                                    newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
-                                }
-                                if (newPrice > 0){
-                                    //add price param
-                                    amazonParams.MaximumPrice = newPrice;
-                                }
-                                else {
-                                    console.log('Error: not allowing search for max price below 0');
-                                }
-                            });
-                        }
-                        else {
-                            console.log("Error: original user query missing. it was not passed to amazon search correctly");
-                        }
-                    }
-                    else {
-                        console.log('error: amazon price missing');
-                    }
-
-                    break;
-
-                case 'less than':
-                    console.log('less than');
-
-                    //check if val is real number
-                    if (flag.val && isNumber(flag.val)){
-
-                        //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
-
-                        //user wanted one item at different price
-                        if (data.originalQuery && data.originalQuery.searchSelect.length == 1){
-
-                            var searchSelect = data.originalQuery.searchSelect[0];
-
-                            if (data.amazon[searchSelect - 1].ItemAttributes[0].Title){
-                                amazonParams.Keywords = data.amazon[searchSelect - 1].ItemAttributes[0].Title;
-                                amazonParams.MaximumPrice = flag.val;
-                            }
-                            else {
-                                console.log('Error: Title is missing from amazon itemattributes object');
-                            }
-
-                        }
-                        else {
-                            console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
-                            amazonParams.MaximumPrice = flag.val;
-                        }
-                    }
-                    else {
-                        console.log(' number not used in flag.val with flag.modify == price');
-                    }
-                    break;
-                case 'more':
-
-                    break;
-                case 'more than':
-                    break;
-
-                default:
-                    console.log('error: no flag.param found with flag.modify == price');
-            }
-        }
-    }
-
-    //AMAZON BASIC SEARCH
-    client.itemSearch(amazonParams).then(function(results){
-
-      data.amazon = results;
-
-      outgoingResponse(data,'stitch','amazon'); //send back msg to user
-
-    }).catch(function(err){
-
-        //handle err codes. do stuff.
-        if (err[0].Error[0].Code[0]){
-            switch (err[0].Error[0].Code[0]) {
-
-                //CASE: No results for search
-                case 'AWS.ECommerceService.NoExactMatches':
-                    //do a weak search
-                    weakSearch(data,type,query,flag);
-                    break;
-
-                default:
-                    console.log('amazon err ',err[0].Error[0]);
-            }
-        }
-    });
-}
-
-function similarSearch(data, type, query, flag){
-
-
-
-    //handle no data error
-    if (!data){
-        console.log('error no amazon item found for similar search');
-        data = {
-            msg:'Sorry, I don\'t understand, please ask me again'
-        }
-        outgoingResponse(data,'txt');
-    }
-    else {
-
-        console.log(data);
-        if (data.recallHistory.amazon){ //we have a previously saved amazon session
-
-            if (!flag){ //no flag passed in
-                flag = 'Intersection'; //default
-            }
-
-            //GATHER AMAZON IDS FROM USER SEARCH SELECTIONS
-            var IdArray = [];
-            for (var i = 0; i < data.searchSelect.length; i++) { //match item choices to product IDs
-                var searchNum = data.searchSelect[i];
-                IdArray.push(data.recallHistory.amazon[searchNum - 1].ASIN[0]);
-            }
-            var ItemIdString = IdArray.toString();
-            //////////
-
-            //AMAZON SIMILARITY QUERY
-            // [NOTE: functionality not in default AWS node lib. had to extend it!]
-            client.similarityLookup({
-              ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
-              Keywords: data.recallHistory.tokens,
-              SimilarityType: flag, //other option is "Random" <<< test which is better results
-              responseGroup: 'ItemAttributes,Offers,Images'
-
-            }).then(function(results){
-
-                console.log('RESULTS SIMILAR ',results);
-                //* * * * * CHANGE TO INITIAL SERACH FORMAT * * * * //
-                // outgoingResponse(results,'stitch','amazon'); //send msg to user
-
-                //need to put results inside data
-
-                //saveHistory(data,results,'amazon'); //push new state, pass amazon results
-
-            }).catch(function(err){
-              console.log('amazon err ',err[0].Error[0]);
-              console.log('SIMILAR FAILED: should we fire random query or mod query');
-              //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
-            });
-        }
-        else {
-            searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
-        }
-    }
-
-}
 
 //re-search but with less specific terms
 function weakSearch(data,type,query,flag){
@@ -969,42 +981,20 @@ function saveHistory(data,type){
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 2');
     }
+    
     var indexHist = data.source.org + "_" + data.source.channel; //create id
-
+    
     data.ts = new Date(); //adding timestamp
-
+    
     switch (data.bucket) {
         case 'search':
             messageHistory[indexHist].search.push(data);
-
             break;
         case 'banter':
-            messageHistory[indexHist].banter.push({
-                source: {
-                    channel: data.source.channel,
-                    org: data.source.org,
-                    origin: data.source.origin
-                },
-                bucket:data.bucket,
-                action:data.action,
-                searchSelect:data.searchSelect,
-                tokens:data.tokens,
-                ts: new Date()
-            });
+            messageHistory[indexHist].banter.push(data);
             break;
         case 'purchase':
-            messageHistory[indexHist].purchase.push({
-                source: {
-                    channel: data.source.channel,
-                    org: data.source.org,
-                    origin: data.source.origin
-                },
-                bucket:data.bucket,
-                action:data.action,
-                searchSelect:data.searchSelect,
-                tokens:data.tokens,
-                ts: new Date()
-            });
+            messageHistory[indexHist].purchase.push(data);
         default:
     }
 

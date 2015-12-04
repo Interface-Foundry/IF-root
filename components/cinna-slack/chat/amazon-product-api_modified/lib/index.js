@@ -7,7 +7,6 @@ var runQuery = function (credentials, method) {
 
   return function (query, cb) {
 
-    console.log('incoming query ',query);
     var url = generateQueryString(query, method, credentials);
 
     if (typeof cb === 'function') {
