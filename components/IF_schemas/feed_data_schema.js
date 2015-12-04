@@ -4,6 +4,7 @@ var Schema = mongoose.Schema,
 
 var feedDataSchema = mongoose.Schema({
     file_path: String,
+    local_path: String,
     captions: [String],
     source: String,
     imgSrc: String,

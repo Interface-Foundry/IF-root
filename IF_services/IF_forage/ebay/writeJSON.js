@@ -70,7 +70,7 @@ var timer = new InvervalTimer(function() {
                     }
                     var stats;
                     try {
-                        stats = fs.lstatSync(node.file_path);
+                        stats = fs.lstatSync(node.local_path);
                         if (stats.isFile()) {
                             console.log('Found!')
                         } else {
