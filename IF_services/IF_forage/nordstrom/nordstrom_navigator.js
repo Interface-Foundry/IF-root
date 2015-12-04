@@ -26,12 +26,17 @@ async.whilst(
         return states[stateIndex]
     },
     function(loop) {
-        var query = {
+
+        var query = (currentState == 'CA') ? {
+            'state': currentState,
+            'city': 'SAN FRANCISCO'
+        } : {
             'state': currentState,
             'pop': {
-                $gte: 35000
+                $gte: 50000
             }
         }
+        
         db.Zipcodes.find(query).sort({
             'density': -1
         }).then(function(zips) {
@@ -55,6 +60,9 @@ async.whilst(
                                     wait(callback, 10000)
                                 }).catch(function(err) {
                                     if (err) {
+                                        if (err == 510) {
+                                            return finishedZipcode()
+                                        }
                                         var today = new Date().toString()
                                         fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                                     }
@@ -134,6 +142,7 @@ function loadCatalog(catalog, zipcode) {
                         }
                     }
                     pages = _.uniq(pages)
+                    // console.log('PAGES: ', pages)
                     var pageLinks = pages.length > 0 ? [catalog.url, catalog.url.concat(pages[0]), catalog.url.concat(pages[1]), catalog.url.concat(pages[2])] : [catalog.url]
                     if (pageLinks.length > 1) {
                         var linkFormat = pages[0].split('page=')[0].concat('page=')
@@ -146,7 +155,7 @@ function loadCatalog(catalog, zipcode) {
                     }
                 } catch (err) {
                     if (err) {
-                        console.log('There was an error in parsing out page numbers.')
+                        console.log('There was an error in parsing out page numbers.', err)
                         var today = new Date().toString()
                         fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                     }
@@ -216,7 +225,10 @@ function loadPages(links, zipcode, catalog) {
                         item_scraper(detailsUrl, catalog.category, zipcode).then(function(result) {
                             wait(callback2, 4000)
                         }).catch(function(err) {
-                            console.log(err.lineNumber + err)
+                            if (err == 510) {
+                                return reject(err)
+                            }
+                            // console.log(err)
                             wait(callback2, 4000)
                         })
                     }, function(err) {

@@ -70,7 +70,12 @@
                                          getInventory(item, zipcode).then(function(inventory) {
                                              callback(null, item, inventory)
                                          }).catch(function(err) {
-                                             callback(err)
+                                             if (err) {
+                                                 console.log(err)
+                                                 return reject(err)
+                                             } else {
+                                                 callback(err)
+                                             }
                                          })
                                      },
                                      function(item, inventory, callback) {
@@ -204,7 +209,7 @@
                          colorUrls.push(newUrl)
                      }
                  }
-                 console.log('Found ' + colorUrls.length + ' colors for item: ')
+                 console.log('Found ' + colorUrls.length + ' colors for item: ', url)
                  for (var i = 0; i < colors.length; i++) {
                      var object = {
                          color: colors[i],
@@ -305,9 +310,12 @@
                  } else if ($('div.price-current') && $('div.price-current')['0'] && $('div.price-current')['0'].children && $('div.price-current')['0'].children['0'].data && $('div.price-current')['0'].children['0'].data.indexOf('$') > -1) {
                      newItem.price = $('div.price-current')['0'].children['0'].data.replace(/[^\d.-]/g, '')
                      console.log('Sales Price: ', newItem.price)
+                 } else if ($('section.product-title>h1') && $('section.product-title>h1')['0'] && $('section.product-title>h1')['0'].children && $('section.product-title>h1')['0'].children['0'].data && $('section.product-title>h1')['0'].children['0'].data.indexOf('$') > -1) {
+                     newItem.price = $('section.product-title>h1')['0'].children['0'].data.replace(/[^\d.-]/g, '')
+                     console.log('Regular Retail Price: ', newItem.price)
                  } else {
-                    console.log('NO PRICE FOUND ')
-                    return reject('NO PRICE FOUND ')
+                     console.log('NO PRICE FOUND ')
+                     return reject('NO PRICE FOUND ')
                  }
                  // $('td').each(function(i, elem) {
                  //     if (elem.attribs.class.indexOf('item-price') > -1) {
@@ -359,9 +367,9 @@
                      console.log('getinventory error ')
                      reject(error)
                  } else {
-                     console.log('bad response')
+                     console.log('Bad Response: ', response.statusCode, body)
                      wait(function() {
-                         reject('Bad response from inventory request')
+                         reject(response.statusCode)
                      }, 10000)
 
                  }
