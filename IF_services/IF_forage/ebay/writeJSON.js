@@ -49,64 +49,69 @@ mongoStream.on('data', function(datum) {
 mongoStream.on('end', function() {})
 
 var timer = new InvervalTimer(function() {
-    client.lrange(list, 0, -1, function(err, data) {
-        if (data && data.length > 0) {
-            console.log('Queue: ' + data.length)
-        }
-        if (data.length > 0) {
-            timer.pause();
-            console.log(data.length + ' item(s) for processing.')
-            async.eachSeries(data, function(datum_str, finishedDatum) {
-                datum = JSON.parse(datum_str)
-                console.log(datum._id)
-                db.FeedData.findById(datum._id.toString(), function(err, node) {
-                    if (err) {
-                        console.log(err)
-                        return finishedDatum()
-                    }
-                    if (!node || (node.data && node.data.trained)) {
-                        console.log('Node already trained or not found.')
-                        return finishedDatum()
-                    }
-                    var stats;
-                    try {
-                        stats = fs.lstatSync(node.local_path);
-                        if (stats.isFile()) {
-                            console.log('Found!')
-                        } else {
-                            console.log('Image not found.')
-                            return finishedDatum()
-                        }
-                    } catch (e) {
-                        console.log('Image not found.', e)
-                        return finishedDatum()
-                    }
-                    node.data = {}
-                    node.data.trained = true;
-                    node.save(function(err, saved) {
-                        if (err) {
-                            console.log(err)
-                            return finishedDatum()
-                        }
-                        console.log('Updated document: ', node)
-                        var jsonObj = {
-                            file_path: node.file_path,
-                            captions: node.captions
-                        }
-                        feedData.push(jsonObj)
-                        fs.writeFile(osHomedir() + '/feed_data.json', JSON.stringify(feedData), function(err) {
-                            if (err) console.log(err);
-                            console.log('Added to file!')
-                            finishedDatum()
-                        });
-                    })
-                })
-            }, function finishedData(err, results) {
-                timer.resume()
-            });
-        }
-    })
-}, 2000);
+        client.lrange(list, 0, -1, function(err, data) {
+            if (data && data.length > 0) {
+                console.log('Queue: ' + data.length)
+            }
+            if (data.length > 0) {
+                timer.pause();
+                console.log(data.length + ' item(s) for processing.')
+                async.eachSeries(data, function(datum_str, finishedDatum) {
+                        datum = JSON.parse(datum_str)
+                        console.log(datum._id)
+                        db.FeedData.findById(datum._id.toString(), function(err, node) {
+                            if (err) {
+                                console.log(err)
+                                return finishedDatum()
+                            }
+                            if (!node || (node.data && node.data.trained)) {
+                                console.log('Node already trained or not found.')
+                                return finishedDatum()
+                            }
+                            if (!node.local_path) {
+                                console.log('Node is missing local_path')
+                                return finishedDatum()
+                            }
+                            fs.lstat(node.local_path, function(err, stats) {
+                                if (err) {
+                                    console.log('Image not found.', err)
+                                    return finishedDatum()
+                                }
+                                if (!stats.isFile()) {
+                                    console.log('Image not found.')
+                                    return finishedDatum()
+                                } else {
+                                    node.data = {}
+                                    node.data.trained = true;
+                                    node.save(function(err, saved) {
+                                        if (err) {
+                                            console.log(err)
+                                            return finishedDatum()
+                                        }
+                                        console.log('Updated document: ', node)
+                                        var jsonObj = {
+                                            file_path: node.file_path,
+                                            captions: node.captions
+                                        }
+                                        feedData.push(jsonObj)
+                                        fs.writeFile(osHomedir() + '/feed_data.json', JSON.stringify(feedData), function(err) {
+                                            if (err) console.log(err);
+                                            console.log('Added to file!')
+                                            finishedDatum()
+                                        });
+                                    })
+                                }
+                            });
+
+                        })
+                    },
+                    function finishedData(err, results) {
+                        timer.resume()
+                    });
+            }
+        })
+    },
+    2000);
 
 
 function InvervalTimer(callback, interval) {
