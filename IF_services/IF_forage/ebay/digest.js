@@ -131,7 +131,7 @@ function processItem(item) {
 
             saveNode(node).then(function(saved) {
                 if (saved) {
-                    saveImage(node.imgSrc, local_path).then(function() {
+                    saveImage(node.imgSrc, node.local_path).then(function() {
                         wait(finishedNode,200)
                     })
                 } else {
