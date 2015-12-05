@@ -128,15 +128,13 @@ function processItem(item) {
             }).join(' ').replace(/'/g, '').replace(/[^\w\s]|:/gi, ' ').replace(/\u00a0/g, " ");
             // console.log('Caption: ', firstIteration)
             node.captions = [firstIteration]
-
-            saveNode(node).then(function(saved) {
-                if (saved) {
-                    saveImage(node.imgSrc, node.local_path).then(function() {
-                        wait(finishedNode,200)
-                    })
-                } else {
-                    finishedNode()
-                }
+            saveImage(node.imgSrc, node.local_path).then(function() {
+                saveNode(node).then(function() {
+                    wait(finishedNode, 200)
+                })
+            }).catch(function(err) {
+                if (err) console.log(err)
+                return finishedNode()
             })
         }, function finishedNodes(err) {
             resolve()
