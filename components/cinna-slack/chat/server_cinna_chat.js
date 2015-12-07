@@ -399,6 +399,9 @@ function purchaseBucket(data){
 
 function searchInitial(data,flag){
 
+    console.log('search initial!');
+
+
     searchAmazon(data,'initial','none',flag);
 }
 
@@ -488,7 +491,7 @@ function searchModify(data, flag){
             data.dataModify = {
                 type: 'price',
                 param: 'less than',
-                val: ['25']
+                val: [25]
             } 
             break;   
 
@@ -522,27 +525,30 @@ function searchModify(data, flag){
         //CONSTRUCT QUERY FROM AMAZON OBJECT
         if (data.recallHistory.amazon){
 
-            console.log('AMAZON!');
+            if (data.dataModify && data.dataModify.type){
+                //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+                switch (data.dataModify.type) {
+                    case 'price':
+                        searchInitial(data,{ // passing special FLAG for search to handle
+                            'type':data.dataModify.type,
+                            'param':data.dataModify.param,
+                            'val':data.dataModify.val
+                        });
+                        break;
 
-            //handle special modifiers that need care, consideration, hard tweaks of amazon search API
-            switch (data.dataModify.type) {
-                case 'price':
-                    searchInitial(item,{ // passing special FLAG for search to handle
-                        'type':data.dataModify.type,
-                        'param':data.dataModify.param,
-                        'val':data.dataModify.val
-                    });
-                    break;
+                    case 'brand':
+                        searchInitial(data,{ // passing special FLAG for search to handle
+                            'type':data.dataModify.type,
+                            'val':data.dataModify.val
+                        });
+                        break;
 
-                case 'brand':
-                    searchInitial(item,{ // passing special FLAG for search to handle
-                        'type':data.dataModify.type,
-                        'val':data.dataModify.val
-                    });
-                    break;
-
-                default:
-                    constructAmazonQuery(); //nm just construct a new query
+                    default:
+                        constructAmazonQuery(); //nm just construct a new query
+                }               
+            }
+            else {
+                console.log('error: data.dataModify params missing')
             }
 
 
@@ -769,7 +775,7 @@ function searchAmazon(data, type, query, flag){
             amazonParams.responseGroup = 'ItemAttributes,Offers,Images';
 
             //check for flag to modify amazon search params
-            if (flag && flag.modify){ //search modifier
+            if (flag && flag.type){ //search modifier
 
                console.log('search flag ',flag);
 
@@ -780,38 +786,53 @@ function searchAmazon(data, type, query, flag){
                         case 'less':
 
                             //there's a price for the item
-                            if (data.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]){
+                            if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]){
 
                                 var newPrice = 0;
 
-                                //check for original user query
-                                if (data.originalQuery){
-                                    //summoning original query obj. loop searchSelect [ ]
-                                    async.eachSeries(data.originalQuery.searchSelect, function(searchSelect, callback) {
-                                        //adding up prices for each item
-                                        newPrice = newPrice + data.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0];
-                                        callback();
-                                    }, function done(){
-                                        // calculate average price and decrease by 25%
-                                        newPrice = newPrice / data.originalQuery.searchSelect.length; //average the price
-                                        var per = newPrice * .25; //get 25% of price
-                                        newPrice = newPrice - per; // subtract percentage
-                                        newPrice = Math.round(newPrice); //clean price
-                                        if (newPrice > 1){
-                                            newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
-                                        }
-                                        if (newPrice > 0){
-                                            //add price param
-                                            amazonParams.MaximumPrice = newPrice;
+                                //summoning original query obj. loop searchSelect [ ]
+                                async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                                    //adding up prices for each item
+                                    newPrice = newPrice + data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0];
+
+                                    callback();
+                                }, function done(){
+                                    console.log('processing 1 ',newPrice);
+
+                                    // calculate average price and decrease by 25%
+                                    newPrice = newPrice / data.searchSelect.length; //average the price
+                                    var per = newPrice * .35; //get 25% of price
+                                    newPrice = newPrice - per; // subtract percentage
+                                    newPrice = Math.round(newPrice); //clean price
+                                    // if (newPrice > 1){
+                                    //     newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
+                                    // }
+                                    if (newPrice > 0){
+                                        //add price param
+                                        amazonParams.MaximumPrice = newPrice.toString();
+
+                                        console.log('processing ',newPrice);
+
+                                        //now resolving the search term param
+                                        if (data.searchSelect.length == 1){
+                                           var searchSelect = data.searchSelect[0];
+                                           amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
+                                           console.log('USING SELECTED ITEM ',amazonParams.Keywords);
                                         }
                                         else {
-                                            console.log('Error: not allowing search for max price below 0');
+                                            console.log('Warning: no single item selected for less (not supporting multiple), so resorting to less N original query from user')
+                                            var searchSelect = data.searchSelect[0];
+                                            amazonParams.Keywords = data.recallHistory.tokens[0];
+                                            console.log('USING ORIGINAL SEARCH ',amazonParams.Keywords);
+
                                         }
-                                    });
-                                }
-                                else {
-                                    console.log("Error: original user query missing. it was not passed to amazon search correctly");
-                                }
+                                        amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
+                                    }
+                                    else {
+                                        console.log('Error: not allowing search for max price below 0');
+                                    }
+                                });
+ 
                             }
                             else {
                                 console.log('error: amazon price missing');
@@ -823,18 +844,27 @@ function searchAmazon(data, type, query, flag){
                             console.log('less than');
 
                             //check if val is real number
-                            if (flag.val && isNumber(flag.val)){
+                            if (flag.val && isNumber(flag.val[0])){
+
+                                console.log('FIRING less than ',data.searchSelect.length);
 
                                 //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
 
                                 //user wanted one item at different price
-                                if (data.originalQuery && data.originalQuery.searchSelect.length == 1){
 
-                                    var searchSelect = data.originalQuery.searchSelect[0];
+                                if (data.searchSelect.length == 1){
 
-                                    if (data.amazon[searchSelect - 1].ItemAttributes[0].Title){
-                                        amazonParams.Keywords = data.amazon[searchSelect - 1].ItemAttributes[0].Title;
-                                        amazonParams.MaximumPrice = flag.val;
+                                    var searchSelect = data.searchSelect[0];
+
+                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title){
+                                        amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
+
+                                        amazonParams.MaximumPrice = flag.val[0];
+                                        amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
+                                        amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
+
+
+                                        console.log('params ',amazonParams);
                                     }
                                     else {
                                         console.log('Error: Title is missing from amazon itemattributes object');
@@ -843,7 +873,10 @@ function searchAmazon(data, type, query, flag){
                                 }
                                 else {
                                     console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
-                                    amazonParams.MaximumPrice = flag.val;
+                                    amazonParams.MaximumPrice = flag.val[0];
+                                    amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
+                                    amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
+                                    amazonParams.Keywords = data.recallHistory.tokens[0];
                                 }
                             }
                             else {
@@ -1033,7 +1066,11 @@ function stitchResults(data,source,callback){
 
             for (var i = 0; i < 3; i++) {
                 if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
-                    toStitch.push(data.amazon[i].MediumImage[0].URL[0]);
+                    toStitch.push({
+                        url: data.amazon[i].MediumImage[0].URL[0],
+                        price: '$15',
+                        name: 'cool thing' //TRIM NAME HERE
+                    });
                 }
             }
             break;
@@ -1112,18 +1149,20 @@ function isNumber(n) {
 //text similarity percentage
 //mod of: http://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
 function textSimilar(a,b) {
-    a = a.toLowerCase();
-    b = b.toLowerCase();
-    var lengthA = a.length;
-    var lengthB = b.length;
-    var equivalency = 0;
-    var minLength = (a.length > b.length) ? b.length : a.length;    
-    var maxLength = (a.length < b.length) ? b.length : a.length;    
-    for(var i = 0; i < minLength; i++) {
-        if(a[i] == b[i]) {
-            equivalency++;
+    if (a && b){
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        var lengthA = a.length;
+        var lengthB = b.length;
+        var equivalency = 0;
+        var minLength = (a.length > b.length) ? b.length : a.length;    
+        var maxLength = (a.length < b.length) ? b.length : a.length;    
+        for(var i = 0; i < minLength; i++) {
+            if(a[i] == b[i]) {
+                equivalency++;
+            }
         }
+        var weight = equivalency / maxLength;
+        return weight * 100;        
     }
-    var weight = equivalency / maxLength;
-    return weight * 100;
 }
