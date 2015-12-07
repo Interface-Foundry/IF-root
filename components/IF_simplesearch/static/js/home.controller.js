@@ -460,11 +460,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 $scope.noResults = false;
                 for (var i = 0; i < $scope.items.length; i++) {
                     
-                    //remove user objects
-                    if (!$scope.items[i].owner) {
-                        $scope.items.splice(i, 1);
-                    }
-
                     // if num of images is greater than 6, remove imgs from middle of array
                     if ($scope.items[i].itemImageURL.length > 6) {
                         var counter = $scope.items[i].itemImageURL.length - 6;
