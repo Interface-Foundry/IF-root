@@ -81,6 +81,9 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
     description: {
       type: 'string',
       source: function() {
+        if (!this.description) {
+          return '';
+        }
         return searchterms.fashionTokenize(this.description)
       },
       index: 'not_analyzed'
@@ -120,12 +123,12 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
         source: function() {
             return _.uniq(searchterms.fashionTokenize(_.flattenDeep([
                 _.get(this, 'itemTags.text'),
-                _.get(this, 'meta.humanTags.itemType'),
-                _.get(this, 'meta.humanTags.itemStyle'),
-                _.get(this, 'meta.humanTags.itemEvent'),
-                _.get(this, 'meta.humanTags.itemDetail'),
-                _.get(this, 'meta.humanTags.itemFabric'),
-                _.get(this, 'source_justvisual.keywords'),
+                // _.get(this, 'meta.humanTags.itemType'),
+                // _.get(this, 'meta.humanTags.itemStyle'),
+                // _.get(this, 'meta.humanTags.itemEvent'),
+                // _.get(this, 'meta.humanTags.itemDetail'),
+                // _.get(this, 'meta.humanTags.itemFabric'),
+                //_.get(this, 'source_justvisual.keywords'),
                 _.get(this, 'source_cloudsight.categories'),
                 _.get(this, 'meta.classifierNameTags')
             ]).filter(function(a) {

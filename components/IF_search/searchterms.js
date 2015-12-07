@@ -260,10 +260,18 @@ var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (tex
 }
 
 if (!module.parent) {
+  var terms = [
+    'light'
+  ];
+
+  terms.map(function(t) {
+    console.log(fashionTokenize(t))
+  })
   var queries = [
-    "macy's",
-    "blue dress",
-    'black tie women'
+    'dress',
+    // "macy's",
+    // "blue dress",
+    // 'black tie women'
   ];
   queries.map(function(q) {
     console.log(JSON.stringify(getElasticsearchQuery(q), null, 2));
