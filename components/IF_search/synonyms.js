@@ -132,6 +132,7 @@ var test = function() {
 
   strings = [
     'black tie women',
+    'women black tie',
     'formal wear',
     'black gown'
   ].map(function(s) {
