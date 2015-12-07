@@ -262,7 +262,8 @@ var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (tex
 if (!module.parent) {
   var queries = [
     "macy's",
-    "blue dress"
+    "blue dress",
+    'black tie women'
   ];
   queries.map(function(q) {
     console.log(JSON.stringify(getElasticsearchQuery(q), null, 2));

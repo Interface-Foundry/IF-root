@@ -78,6 +78,13 @@ var esItemSchema = _.merge({}, esKipSchemaBase, {
         type: 'string',
         source: 'owner.name'
     },
+    description: {
+      type: 'string',
+      source: function() {
+        return searchterms.fashionTokenize(this.description)
+      },
+      index: 'not_analyzed'
+    },
     name: {
       type: 'string',
       source: function () {
