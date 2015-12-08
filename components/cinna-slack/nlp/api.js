@@ -14,10 +14,14 @@ var BUCKET = {
 var ACTION = {
   initial: 'initial',
   similar: 'similar',
-  modified: 'modified',
+  modify: 'modify',
   focus: 'focus',
   more: 'more',
-  back: 'back'
+  back: 'back',
+  save: 'save',
+  checkout: 'checkout',
+  remove: 'remove',
+  list: 'list'
 }
 
 
