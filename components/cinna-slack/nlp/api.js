@@ -73,7 +73,6 @@ var parse = module.exports.parse = function(text, callback) {
       return callback(e);
     } else {
       var res = nlpToResult(b);
-      res.tokens = [text]
       debug(res)
       return callback(null, res);
     }
@@ -159,16 +158,24 @@ function quickparse(text) {
 function nlpToResult(nlp) {
   debug(nlp)
 
-  // check for more
-  if (nlp.focus.length === 1) {
+  // add tokens
+  var res = {
+    tokens: [nlp.text]
+  };
+
+  // add focus
+  if (nlp.focus && nlp.focus[0]) {
+    res.searchSelect = nlp.focus;
+  }
+
+  // check for "more"
+  if (nlp.focus.length >= 1) {
     for (var i = 0; i < nlp.parts_of_speech.length; i++) {
       if (nlp.parts_of_speech[i][0] === 'more') {
         debug('"more"')
-        return {
-          bucket: BUCKET.search,
-          action: ACTION.similar,
-          searchSelect: nlp.focus,
-        }
+        res.bucket = BUCKET.search;
+        res.action = ACTION.similar;
+        return res;
       }
     }
   }
@@ -177,12 +184,10 @@ function nlpToResult(nlp) {
   if (nlp.ss.length === 1) {
     var s = nlp.ss[0];
     if (!s.isQuestion) {
-      debug('simple case');
-      return {
-        bucket: BUCKET.search,
-        action: ACTION.initial,
-        tokens: [nlp.text]
-      }
+      debug('simple case initial');
+      res.bucket = BUCKET.search;
+      res.action = ACTION.initial;
+      return res;
     }
   }
 
