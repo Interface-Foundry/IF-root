@@ -40,6 +40,15 @@ var question;
   */
 var parse = module.exports.parse = function(text, callback) {
   debug('parsing:' + text)
+
+  // check for exact matches
+  var res = exactMatch(text);
+  if (res) {
+    debug('found exact match')
+    return callback(null, res)
+  }
+
+  // check for easy regex matches
   var simpleResult = quickparse(text);
   if (simpleResult) {
     debug('found simple result')
@@ -64,10 +73,26 @@ var parse = module.exports.parse = function(text, callback) {
       return callback(e);
     } else {
       var res = nlpToResult(b);
+      res.tokens = [text]
       debug(res)
       return callback(null, res);
     }
   })
+}
+
+
+var exactMatches = {
+  more: {bucket: BUCKET.search, action: ACTION.more, tokens: ['more']},
+  get: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['get']},
+  checkout: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['checkout']},
+  cart: {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['cart']},
+  'view cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['view cart']}
+}
+
+function exactMatch(text) {
+  // clean the text
+  text = text.toLowerCase().replace(/[],:;.!?]/, '').trim();
+  return exactMatches[text];
 }
 
 /**
@@ -77,7 +102,8 @@ function quickparse(text) {
   // remove a leading "kip" ("kip find me socks" --> "find me socks")
   text = text.replace(/^kip[,:;.! ]/i, '')
   var res = {
-    bucket: BUCKET.search
+    bucket: BUCKET.search,
+    tokens: text
   }
   regexes = {
     initial: [
@@ -92,6 +118,7 @@ function quickparse(text) {
       /\bbut\b/
     ],
     similar: [
+      // /more like ([\n])/i,
       /like the ([\w]+)\b/i
     ],
     focus: []
@@ -114,6 +141,9 @@ function quickparse(text) {
         case ACTION.initial:
           var q = text.replace(re, '').trim();
           res.tokens = [q];
+          break;
+        case ACTION.more:
+          res.tokens = text;
           break;
       }
     })
