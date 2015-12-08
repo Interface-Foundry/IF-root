@@ -13,7 +13,7 @@ var client = amazon.createClient({
 });
 
 var createServerSnippet =  function(req, res) {
-  fs.readFile("index.html", function(err, data ) {
+  fs.readFile("index.html", function(err, data) {
       res.end(data);
   }) ;
 }
@@ -35,12 +35,20 @@ var bot = new Bot(settings);
 
 bot.on('start', function() {
     bot.on('message', function(data) {
-        // all ingoing events https://api.slack.com/rtm 
+        // all incoming events https://api.slack.com/rtm 
         // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
         if (data.type == 'message' && data.username !== settings.name){ 
-            console.log('incoming slack data: ',data);
-            preProcess(data);
+            var newSl = { 
+                source: {
+                    'origin':'slack',
+                    'channel':data.channel,
+                    'org':data.team              
+                },
+                'msg':data.text
+            }
+            preProcess(newSl);
         }
+
     });
 });
 
@@ -52,23 +60,12 @@ io.sockets.on('connection', function(socket) {
     //SEND A WELCOME TO KIP MESSAGE HERE. how to get started
 
     socket.on("msgToClient", function(data) {
-        
         data.source = { 
             'origin':'socket.io',
             'channel':socket.id,
             'org':'kip'
         }
-
         preProcess(data);
-
-        // socket.on('disconnect', function() {
-        //     var index = clients.indexOf(socket);
-        //     if (index != -1) {
-        //         clients.splice(index, 1);
-        //         console.info('Client gone (id=' + socket.id + ').');
-        //     }
-        // });
-
     });
 });
 //- - - - - - //
@@ -77,20 +74,41 @@ io.sockets.on('connection', function(socket) {
 //pre process incoming messages for canned responses
 function preProcess(data){
 
+    //setting up all the data for this user / org
+    if (!data.source.org || !data.source.channel){
+        console.log('missing channel or org Id 1');
+    }
+    var indexHist = data.source.org + "_" + data.source.channel;
+    if (!messageHistory[indexHist]){ //new user, set up chat states
+        messageHistory[indexHist] = {};
+        messageHistory[indexHist].search = []; //random chats
+        messageHistory[indexHist].banter = []; //search
+        messageHistory[indexHist].purchase = []; //finalizing search and purchase
+        messageHistory[indexHist].persona = []; //learn about our user
+        messageHistory[indexHist].cart = []; //user shopping cart
+        messageHistory[indexHist].allBuckets = []; //all buckets, chronological chat history
+    }
+
+    // checkForCanned(data.msg, function(res){
+        
+
+    // });
+
+    //pre-sort canned banter
     switch (true) {
         //basic weight system for percentage similarity for string matching
         case textSimilar(data.msg,'hi') > 60:
         case textSimilar(data.msg,'hello') > 60:
-            data.msg = 'Hello!';
-            outgoingResponse(data,'txt'); //
+            data.client_res = 'Hello!';
+            cannedBanter(data,data.msg);
             break;
         case textSimilar(data.msg,'sup') > 60:
-            data.msg = 'nm, u?';
-            outgoingResponse(data,'txt'); //
+            data.client_res = 'nm, u?';
+            cannedBanter(data,data.msg);
             break;
         case textSimilar(data.msg,'are you a bot') > 60:
-            data.msg = 'yep, are you human?';
-            outgoingResponse(data,'txt');
+            data.client_res = 'yep, are you human?';
+            cannedBanter(data,data.msg);
             break;
         // case 'what\'s the meaning of life?':
         //     data.msg = 'life, the multiverse and whatever';
@@ -269,19 +287,6 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
-    if (!data.source.org || !data.source.channel){
-        console.log('missing channel or org Id 1');
-    }
-    var indexHist = data.source.org + "_" + data.source.channel;
-    if (!messageHistory[indexHist]){ //new user, set up chat states
-        messageHistory[indexHist] = {};
-        messageHistory[indexHist].search = []; //random chats
-        messageHistory[indexHist].banter = []; //search
-        messageHistory[indexHist].purchase = []; //finalizing search and purchase
-        messageHistory[indexHist].persona = []; //learn about our user
-        messageHistory[indexHist].cart = []; //user shopping cart
-    }
-    //* * * * * * * * * * * * * * * * //
 
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -294,6 +299,34 @@ function incomingAction(data){
         case 'purchase':
             purchaseBucket(data);
             break;
+        case 'supervisor':
+            //route to supervisor chat window
+            //JSON SEND TO SUPERVISOR
+            // { 
+            //   msg: 'more like 2',
+            //   source: { 
+            //     origin: 'socket.io',
+            //     channel: '-lsQ0_8joP-Sp04JAAAA',
+            //     org: 'kip' 
+            //   },
+            //   bucket: 'supervisor',
+            //   searchSelect: [ 2 ],
+            //   recallHistory: [{ 
+            //     msg: 'xx',
+            //     source: { 
+            //       origin: 'socket.io',
+            //       channel: '-lsQ0_8joP-Sp04JAAAA',
+            //       org: 'kip' 
+            //     },
+            //     bucket: 'search',
+            //     action: 'initial',
+            //     tokens: [ 'xx' ],
+            //     amazon:[ 
+            //       ],
+            //       client_res: 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)',
+            //       ts: Tue Dec 08 2015 15:29:15 GMT-0500 (EST) 
+            //     }] 
+            // }
         default:
             searchBucket(data);
     }
@@ -335,6 +368,10 @@ function banterBucket(data){
     switch (data.action) {
         case 'question':
             break;
+        case 'smalltalk':
+            outgoingResponse(data,'txt');
+            saveHistory(data); //random stuff we chat with kip about
+            break;
         default:
     }
 }
@@ -363,38 +400,8 @@ function purchaseBucket(data){
 
 }
 
+
 //* * * * * SEARCH ACTIONS * * * * * * * * //
-
-    //* * * * * * * * *
-    //BUCKET 1: Search
-    //* * * * * * * * *
-
-    //INITIAL QUERY:
-    //kip find me running leggings --> /* CONSULT USER HISTORY OF SEARCH (persona?) ---> SEARCH ---> RETURN ANSWER
-    //kip find me a hat --> /* CONSULT USER HISTORY OF SEARCH (persona?) ---> SEARCH ---> RETURN ANSWER
-    //kip find me hats --> /* CONSULT USER HISTORY OF SEARCH (persona?) ---> SEARCH ---> RETURN ANSWER
-    //looking for a black zara jacket ---> SEARCH ---> RETURN ANSWER
-
-
-    //QUERY SIMILAR to N(+N):
-    //more like 1 (N = 1++) --> similar item search --> RETURN ANSWER
-
-
-    //MODIFY N(+N):
-    //like the first one but orange (N = 1, but orange [physical] ) ---> add orange tag, remove other color tags ---> search ---> RETURN ANSWER
-    //like 2 but with a crown decal (N = 2, but crown-decal [physical] ) ---> add crown decal tags ---> search ---> RETURN ANSWER
-    //a budweiser crown decal (HISTORICAL MODIFY N = 2 (since no new instructions, find logic in past), [+budweiser] crown decal [physical]) ---> search ---> RETURN ANSWER
-    //do you have 2 but in blue (N = 2, but in blue [physical]) ---> add blue tag, remove other color tags ---> search ---> RETURN ANSWER
-    //please show brighter blue i don't like dark colour (N = 1,2,3, but in lighter blues) ---> add blue/baby blue/powder blue/light blue ---> search ---> RETURN ANSWER
-
-
-    //FOCUS N(+N):
-    //does the first one have pockets? (N = 1) [USER QUESTION FLAG] ---> Find item detail FUNCTION, parse sentence area most likely to answer question ----> RETURN ANSWER
-    //1 is perfect, how much is it? (N = 1, price focus) ---> Find item PRICE function ---> RETURN ANSWER
-    //hmm I really like 3 what's the fabric? (N = 3, [physical] texture focus) ---> Find item FABRIC function ----> RETURN ANSWER
-    //I like the third one (N = 3, detail focus. INTERESTED flag) ---> Find item detail snippet ---> ATTACH SALES PUSH (ADD TO CART) ---> RETURN ANSWER
-    // ^ SAME AS: third / 3 ---> SAME ^
-    //is there any size medium? (HISTORICAL FOCUS N = 3 [USER QUESTION FLAG]) ---> Find if Medium of item ---> IF(item == M){return item detail, ASK FOR CART ADD} ELSE {MODIFY N SIMILAR ITEM IN MEDIUM SIZE}
 
 
 function searchInitial(data,flag){
@@ -408,10 +415,8 @@ function searchInitial(data,flag){
 function searchSimilar(data){
 
     //RECALL LAST ITEM IN SEARCH HISTORY
-    recallHistory(data, function(item){
-
+    recallHistory(data, function(item){ 
         data.recallHistory = item; //added recalled history obj to data obj
-        //SIMILAR SEARCH AMAZON API
         searchAmazon(data,'similar');
     });
 }
@@ -512,14 +517,6 @@ function searchModify(data, flag){
 
         data.recallHistory = item;
 
-        // VVVV FIXING
-        //item.originalQuery = data; //store original query obj for other stuff
-
-        //mock parsed sentence data from python
-        // var dataModify = 'price'; //color,price, etc
-        // var dataParam = 'less than';
-        // var dataVal = '30'; //blue,extra large, less, etc
-
         var cSearch = ''; //construct new search string
 
         //CONSTRUCT QUERY FROM AMAZON OBJECT
@@ -551,17 +548,11 @@ function searchModify(data, flag){
                 console.log('error: data.dataModify params missing')
             }
 
-
             function constructAmazonQuery(){
-
-                console.log('constructing!');
 
                 async.eachSeries(data.searchSelect, function(searchSelect, callback) {
 
                     var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
-
-                    //cSearch = cSearch + itemAttrib[0].Title[0]; //add in full title of item
-                    //^ parse above into token, sort priority??
 
                     //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
                     if (flag !== 'weakSearch'){
@@ -614,6 +605,7 @@ function searchModify(data, flag){
 
                 case 'size':
 
+                    //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
@@ -622,6 +614,7 @@ function searchModify(data, flag){
                 //texture, fabric, coating, etc
                 case 'material':
 
+                    //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
@@ -630,6 +623,7 @@ function searchModify(data, flag){
                 //unsortable modifier
                 case 'genericDetail':
 
+                    //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
@@ -690,7 +684,7 @@ function saveToCart(data){
             //only support "add to cart" message for one item.
             //static:
             var sT = data.searchSelect[0];
-            data.msg = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+            data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
             outgoingResponse(data,'txt');
         });
     });
@@ -732,10 +726,8 @@ function outputCart(data) {
         }
 
         client.createCart(options).then(function(results) {
-            var res = {
-                msg: results.PurchaseURL[0]
-            }
-            outgoingResponse(res,'txt');
+            data.client_res = results.PurchaseURL[0];
+            outgoingResponse(data,'txt');
 
         }).catch(function(err) {
             console.log(err);
@@ -930,10 +922,10 @@ function searchAmazon(data, type, query, flag){
             //handle no data error
             if (!data){
                 console.log('error no amazon item found for similar search');
-                data = {
-                    msg:'Sorry, I don\'t understand, please ask me again'
-                }
-                outgoingResponse(data,'txt');
+
+                var msg = 'Sorry, I don\'t understand, please ask me again';
+                cannedBanter(data,msg);
+                //outgoingResponse(data,'txt');
             }
             else {
 
@@ -1015,35 +1007,156 @@ function weakSearch(data,type,query,flag){
     }
 }
 
-function outgoingResponse(data,action,source){ //what we're replying to user with
+/////////// OUTGOING RESPONSES ////////////
 
+
+//process canned message stuff
+//data: kip data object
+//req: incoming message from user
+function cannedBanter(data,req){
+    data.bucket = 'banter';
+    data.action = 'smalltalk';
+    //if this is pre-process chat (before NLP), store incoming chat msg too
+    if(req){
+        data.tokens = [];
+        data.tokens.push(req);       
+    }
+    banterBucket(data);
+}
+
+//Constructing reply to user
+function outgoingResponse(data,action,source){ //what we're replying to user with
+    var numEmoji;
     //stitch images before send to user
     if (action == 'stitch'){
         stitchResults(data,source,function(url){
 
             data.client_res = url;
             saveHistory(data); //push new history state after we have stitched URL
-
-            // var msg = {
-            //     msg:'You can reply with things like <i>1 but in blue</i> or <i>2 but less than 30</i>. Type <i>help</i> to see more actions.'
-            // }
-            // outgoingResponse(msg,'txt');
-
             sendResponse(data);
+
+            //* * * * * * * * * *
+            //which cinna response?
+            //* * * * * * * * * * *
+
+            //convert select num to emoji based on data source
+            if (data.searchSelect){
+                switch(data.searchSelect[0]){
+                    case 1:
+                        if (data.source.origin == 'socket.io'){
+                            numEmoji = '<span style="font-size:32px;">➊</span>';
+                        }
+                        else if (data.source.origin == 'slack'){
+                            numEmoji = ':one:';
+                        }
+                        break;
+                    case 2:
+                        if (data.source.origin == 'socket.io'){
+                            numEmoji = '<span style="font-size:32px;">➋</span>';
+                        }
+                        else if (data.source.origin == 'slack'){
+                            numEmoji = ':two:';
+                        }
+                        break;
+                    case 3:
+                        if (data.source.origin == 'socket.io'){
+                            numEmoji = '<span style="font-size:32px;">➌</span>';
+                        }
+                        else if (data.source.origin == 'slack'){
+                            numEmoji = ':three:';
+                        }
+                        break;
+                }
+            }
+            switch (data.bucket) {
+                case 'search':
+                    switch (data.action) {
+                        case 'initial':
+                            data.client_res = 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)';
+                            outgoingResponse(data,'txt'); 
+                            break;
+                        case 'similar':
+                            data.client_res = 'We found some options similar to '+numEmoji+', would you like to see their product info? Use "info X" or help for more options';
+                            outgoingResponse(data,'txt'); 
+                            break;
+                        case 'modify':
+                        case 'modified': //because the nlp json is wack
+                            switch (data.dataModify.type) {
+                                case 'price':
+                                    if (data.dataModify.param == 'less'){
+                                        data.client_res = 'Here you go! Which do you like best? Use "more like x" to find similar or help for more options';
+                                        outgoingResponse(data,'txt'); 
+                                    }
+                                    else if (data.dataModify.param == 'less than'){
+                                        data.client_res = 'Definitely! Here are some choices less than $'+data.dataModify.val+', would you like to see the product info? Use "info x" or help for more options';
+                                        outgoingResponse(data,'txt'); 
+                                    }
+                                    break;
+                                case 'brand':
+                                    data.client_res = ' Here you go! Which do style you like best? Use "more like x" to find similar or help for more options';
+                                    outgoingResponse(data,'txt'); 
+                                    break;
+                                default:
+                                    console.log('warning: no modifier response selected!');
+                            }     
+                            break;
+                        case 'focus':
+                            //SET 1 MINUTE TIMEOUT HERE
+                            data.client_res = 'focus';
+                            outgoingResponse(data,'txt'); 
+                            break;
+                        case 'back':
+                            data.client_res = 'back';
+                            outgoingResponse(data,'txt'); 
+                            break;
+                        case 'more':
+                            data.client_res = 'more';
+                            outgoingResponse(data,'txt'); 
+                            break;
+                        default:
+                            console.log('warning: no search bucket action selected');
+                    }
+                    break;
+                case 'purchase':
+                        switch (data.action) {
+                            case 'save':
+                                data.client_res = 'I\'ve added this item to your cart :) Use "Get" anytime to checkout or "help" for more options';
+                                outgoingResponse(data,'txt'); 
+                                break;
+                            case 'removeAll':
+                                data.client_res = 'All items removed from your cart. To start a new search type "find (item)"';
+                                outgoingResponse(data,'txt'); 
+                                break;
+                            case 'list':
+                                data.client_res = 'Here\'s everything you have in your cart :) Use Get anytime to checkout or help for more options';
+                                outgoingResponse(data,'txt'); 
+                                break;
+                            case 'checkout':
+                                data.client_res = 'Great! Please click the link to confirm your items and checkout. {{link}} Thank you:)';
+                                outgoingResponse(data,'txt'); 
+                                break;
+                            default:
+                                console.log('warning: no purchase bucket action selected');
+                        }
+                    break;
+
+                default:
+                    console.log('warning: no bucket selected');
+            }
 
         });
     }
     //single image msg to user
     else if (action == 'txt'){
-        io.sockets.emit("msgFromSever", {message: data.msg});
+        sendResponse(data);
     }
     //single image msg to user
     else if (action == 'image'){
-        io.sockets.emit("msgFromSever", {message: data.msg});
+        sendResponse(data);
     }
     //one default image msg to user
     else {
-        io.sockets.emit("msgFromSever", {message: data[0].LargeImage[0].URL[0]});
+        sendResponse(data);
     }
 }
 
@@ -1052,9 +1165,17 @@ function sendResponse(data){
         io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
     }
     else if (data.source.origin == 'slack'){
-        console.log('slack res');
+        //eventually cinna can change emotions in this pic based on response type
+        var params = {
+            icon_url: 'http://kipthis.com/img/kip-icon.png'
+        }
+        bot.postMessage(data.source.channel, data.client_res, params);  
+        
     }
 }
+
+
+////////////// PROCESS IMAGES ///////////////
 
 //stitch 3 images together into single image
 function stitchResults(data,source,callback){
@@ -1088,10 +1209,8 @@ function stitchResults(data,source,callback){
             }, function done(){
                 fireStitch(); 
             });
-
             break;
     }
-
     function fireStitch(){
         //call to stitch service
         stitch(toStitch, function(e, stitched_url){
@@ -1101,9 +1220,7 @@ function stitchResults(data,source,callback){
             callback(stitched_url);
         })        
     }
-
 }
-
 
 
 ////////////// HISTORY ACTIONS ///////////////
@@ -1119,16 +1236,22 @@ function saveHistory(data,type){
     
     data.ts = new Date(); //adding timestamp
     
-    switch (data.bucket) {
-        case 'search':
-            messageHistory[indexHist].search.push(data);
-            break;
-        case 'banter':
-            messageHistory[indexHist].banter.push(data);
-            break;
-        case 'purchase':
-            messageHistory[indexHist].purchase.push(data);
-        default:
+    if (!messageHistory[indexHist]){
+        console.log('error: user doesnt exist in memory storage');
+    }
+    else {
+        switch (data.bucket) {
+            case 'search':
+                messageHistory[indexHist].search.push(data);
+                break;
+            case 'banter':
+                messageHistory[indexHist].banter.push(data);
+                break;
+            case 'purchase':
+                messageHistory[indexHist].purchase.push(data);
+            default:
+        }
+        messageHistory[indexHist].allBuckets.push(data);
     }
 
 }
@@ -1161,7 +1284,13 @@ function recallHistory(data,callback,steps){
     }
 
 }
+
+
+
+
 ///////////////////////////////////////////
+//////////  tools /////////////////
+//////////////////////////////////////////
 
 function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -1188,10 +1317,10 @@ function textSimilar(a,b) {
     }
 }
 
-//trim a string
+//trim a string to char #
 function truncate(string){
-   if (string.length > 40)
-      return string.substring(0,40)+'...';
+   if (string.length > 60)
+      return string.substring(0,60)+'...';
    else
       return string;
 };
