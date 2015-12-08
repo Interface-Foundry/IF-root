@@ -55,9 +55,12 @@ def index():
     biggest_width = 0
     biggest_height = 0
     thumbnails = []
-    for i, url in enumerate(images):
-        print i, url
-        im = download_image(url)
+
+    #add images
+    for i, data in enumerate(images):
+        print i, data[u'url']
+
+        im = download_image(data[u'url'])
         im.thumbnail((max_width, max_height), Image.ANTIALIAS)
         thumbnails.append(im)
         if im.size[0] > biggest_width:
@@ -65,6 +68,7 @@ def index():
         if im.size[1] > biggest_height:
             biggest_height = im.size[1]
 
+    #add select numbers
     img = Image.new('RGB', (DESKTOP_WIDTH, biggest_height + 2 * PADDING), BGCOLOR)
     for i, im in enumerate(thumbnails):
         x = PADDING + (PADDING + max_width) * i
@@ -72,8 +76,31 @@ def index():
         img.paste(im, (x, y))
         img.paste(NUMBER_IMAGES[i], (x + PADDING, 2 * PADDING), mask=NUMBER_IMAGES[i])
 
+    #add white rectangles
+    for i, im in enumerate(images):
+        x = PADDING + (PADDING + max_width) * i
+        y = PADDING + (biggest_height - 30)
+        dr = ImageDraw.Draw(img,'RGBA') #RGBA for shape opacity
+        dr.rectangle(((x,y-30),(x+100,y+50)), fill=(255,255,255,120))
+
+    #add prices
+    font = ImageFont.truetype("HelveticaNeue-Regular.ttf", 14)
+    for i, im in enumerate(images):
+        x = PADDING + (PADDING + max_width) * i
+        y = PADDING + (biggest_height - 30)
+        draw = ImageDraw.Draw(img)
+        draw.text((x, y),im[u'price'],(0,0,0),font=font)
+
+    #add names
+    font = ImageFont.truetype("HelveticaNeue-Regular.ttf", 14)
+    for i, im in enumerate(images):
+        x = PADDING + (PADDING + max_width) * i
+        y = PADDING + (biggest_height - 50)
+        draw = ImageDraw.Draw(img)
+        draw.text((x, y),im[u'name'],(0,0,0),font=font)
+
     cStringImg = cStringIO.StringIO()
-    img.save(cStringImg, 'PNG', quality=95)
+    img.save(cStringImg, 'PNG', quality=90)
     s3filename = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(24)) + '.png'
     k = bucket.new_key(s3filename)
     k.set_contents_from_string(cStringImg.getvalue(), headers={"Content-Type": "image/png"})

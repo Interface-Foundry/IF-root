@@ -1063,26 +1063,47 @@ function stitchResults(data,source,callback){
         case 'amazon':
             //adding images for stiching
             var toStitch = [];
+            var loopLame = [0,1,2];//lol
 
-            for (var i = 0; i < 3; i++) {
+            async.eachSeries(loopLame, function(i, callback) {
                 if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
+                    
+                    var price;
+
+                    if (!data.amazon[i].ItemAttributes[0].ListPrice){
+                        price = ''; //price missing, show blank
+                    }
+                    else{
+                        price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
+                        price = addDecimal(price);
+                    }
+
                     toStitch.push({
                         url: data.amazon[i].MediumImage[0].URL[0],
-                        price: '$15',
-                        name: 'cool thing' //TRIM NAME HERE
+                        price: price,
+                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]) //TRIM NAME HERE 
                     });
                 }
-            }
+                callback();
+            }, function done(){
+                fireStitch(); 
+            });
+
             break;
     }
-    //call to stitch service
-    stitch(toStitch, function(e, stitched_url){
-        if(e){
-            console.log('stitch err ',e);
-        }
-        callback(stitched_url);
-    })
+
+    function fireStitch(){
+        //call to stitch service
+        stitch(toStitch, function(e, stitched_url){
+            if(e){
+                console.log('stitch err ',e);
+            }
+            callback(stitched_url);
+        })        
+    }
+
 }
+
 
 
 ////////////// HISTORY ACTIONS ///////////////
@@ -1165,4 +1186,21 @@ function textSimilar(a,b) {
         var weight = equivalency / maxLength;
         return weight * 100;        
     }
+}
+
+//trim a string
+function truncate(string){
+   if (string.length > 40)
+      return string.substring(0,40)+'...';
+   else
+      return string;
+};
+
+function addDecimal(str) {
+    var output;
+    var num = parseInt(str);
+    num = num * .10 * .10; //move decimal
+    num = Math.round(num * 100) / 100; //remove extra decimal
+    output = "$" + num.toString();
+    return output;
 }
