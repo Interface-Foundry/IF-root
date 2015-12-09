@@ -88,7 +88,10 @@ var exactMatches = {
   get: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['get']},
   checkout: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['checkout']},
   cart: {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['cart']},
-  'view cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['view cart']}
+  'view cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['view cart']},
+  '1': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['1'], searchSelect: [1]},
+  '2': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['2'], searchSelect: [2]},
+  '3': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['3'], searchSelect: [3]}
 }
 
 function exactMatch(text) {

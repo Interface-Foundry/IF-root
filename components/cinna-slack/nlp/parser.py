@@ -93,6 +93,8 @@ def parse(data):
             res.verbs.append(token[0])
         if (token[0] == 'checkout'):  # thinks checkout is a noun...
             res.verbs.append('checkout')
+        if (token[0] == 'info'):
+            res.verbs.append('info')
 
 
     return res

@@ -148,10 +148,27 @@ var messages = [
   },
   {
     m: 'info 1',
-    skip: true,
     r: {
       bucket: 'search',
-      action: 'similar',
+      action: 'focus',
+      searchSelect: [1],
+      tokens: ['info 1']
+    }
+  },
+  {
+    m: '1',
+    r: {
+      bucket: 'search',
+      action: 'focus',
+      searchSelect: [1],
+      tokens: ['1']
+    }
+  },
+  {
+    m: 'more about 1',
+    r: {
+      bucket: 'search',
+      action: 'focus',
       searchSelect: [1],
       tokens: ['info 1']
     }
