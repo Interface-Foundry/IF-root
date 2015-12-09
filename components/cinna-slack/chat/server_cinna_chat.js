@@ -8,6 +8,7 @@ var nlp = require('../nlp/api');
 
 //load kip modules
 var banter = require("./components/banter.js");
+var purchase = require("./components/purchase.js");
 
 
 var client = amazon.createClient({
@@ -46,7 +47,8 @@ bot.on('start', function() {
                 source: {
                     'origin':'slack',
                     'channel':data.channel,
-                    'org':data.team              
+                    'org':data.team,
+                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
                 },
                 'msg':data.text
             }
@@ -67,7 +69,8 @@ io.sockets.on('connection', function(socket) {
         data.source = { 
             'origin':'socket.io',
             'channel':socket.id,
-            'org':'kip'
+            'org':'kip',
+            'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
         }
         preProcess(data);
     });
@@ -82,28 +85,70 @@ function preProcess(data){
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
     }
-    var indexHist = data.source.org + "_" + data.source.channel;
-    if (!messageHistory[indexHist]){ //new user, set up chat states
-        messageHistory[indexHist] = {};
-        messageHistory[indexHist].search = []; //random chats
-        messageHistory[indexHist].banter = []; //search
-        messageHistory[indexHist].purchase = []; //finalizing search and purchase
-        messageHistory[indexHist].persona = []; //learn about our user
-        messageHistory[indexHist].cart = []; //user shopping cart
-        messageHistory[indexHist].allBuckets = []; //all buckets, chronological chat history
+    if (!messageHistory[data.source.indexHist]){ //new user, set up chat states
+        messageHistory[data.source.indexHist] = {};
+        messageHistory[data.source.indexHist].search = []; //random chats
+        messageHistory[data.source.indexHist].banter = []; //search
+        messageHistory[data.source.indexHist].purchase = []; //finalizing search and purchase
+        messageHistory[data.source.indexHist].persona = []; //learn about our user
+        messageHistory[data.source.indexHist].cart = []; //user shopping cart
+        messageHistory[data.source.indexHist].allBuckets = []; //all buckets, chronological chat history
     }
 
-    //check for canned responses before routing to NLP
-    banter.checkForCanned(data.msg,function(res){
-        if(res){
-            data.client_res = res;
-            cannedBanter(data,res);
-        }
-        else {
-            console.log('no');
-            routeNLP(data); 
-        }
-    });
+
+    //TEMP!
+    switch(data.msg){
+        case 'save':
+            var res = {};
+            data.bucket = 'purchase';
+            data.action = 'save';
+            data.searchSelect = [1];
+            data.tokens = [];
+            data.tokens.push(data.msg);
+            incomingAction(data);
+            break;
+
+        case 'checkout':
+            data.bucket = 'purchase';
+            data.action = 'checkout';
+            data.tokens = [];
+            data.tokens.push(data.msg);
+            incomingAction(data);
+            break;
+
+        default:
+
+            //REMOVE FROM SWITCH AFTER TESTING!
+            //check for canned responses before routing to NLP
+            banter.checkForCanned(data.msg,function(res,flag,query){
+                //found canned response
+                if(res){
+                    //send out text / image response
+                    data.client_res = res;
+                    cannedBanter(data,res);
+
+                    //check for flags to do extra stuff with canned response (like auto search items)
+                    if (flag == 'search'){
+                        if (query){
+                            data.msg = query;
+                            routeNLP(data); 
+                        }
+                        else {
+                            console.log('error: flag specified by no query found');
+                        }
+                    }
+                }
+                //proceed to NLP instead
+                else {
+                    console.log('no');
+                    routeNLP(data); 
+                }
+            });       
+    }
+
+
+
+
 }
 
 //pushing incoming messages to python
@@ -245,7 +290,11 @@ function purchaseBucket(data){
             listCart(data);
             break;
         case 'checkout':
-            outputCart(data);
+            //passing in data obj
+            //pass messageHistory obj
+            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+                outgoingResponse(res,'txt');
+            });
             break;
         default:
             console.log('error: no purchase bucket action selected');
@@ -258,9 +307,6 @@ function purchaseBucket(data){
 
 
 function searchInitial(data,flag){
-
-    console.log('search initial!');
-
 
     searchAmazon(data,'initial','none',flag);
 }
@@ -503,21 +549,10 @@ function searchBack(data){
 
 //* * * * * BANTER ACTIONS * * * * * * * * //
 
-    //* * * * * * * * *
-    //BUCKET 2: Banter
-    //* * * * * * * * *
-    //how shall i respond?
+
+
 
 //* * * * * * ORDER ACTIONS * * * * * * * * //
-
-    //* * * * * * * * * *
-    //BUCKET 3: Ordering
-    //* * * * * * * * * *
-    //what order state are we in?
-    // save 1 ---> store item in cart ---> RETURN "SAVED FOR LATER"
-    // save all --->
-    // view cart ---> get all items in cart ---> RETURN CART? or return URL TO amazon?
-    // would you like me to get it for you? [kip question flag, wait for response] (PHASE 2)
 
 
 //save amazon item to cart
@@ -527,11 +562,9 @@ function saveToCart(data){
 
     recallHistory(data, function(item){
 
-        var indexHist = data.source.org + "_" + data.source.channel; //chat id
-
         //async push items to cart
         async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-            messageHistory[indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+            messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
             callback();
         }, function done(){
             //only support "add to cart" message for one item.
@@ -543,57 +576,8 @@ function saveToCart(data){
     });
 }
 
-//Build Amazon Cart
-function outputCart(data) {
-    var indexHist = data.source.org + "_" + data.source.channel; //chat id
-
-    var cartItems = [];
-
-    //Input [{ASIN:xxx,Quantity:1},{...}]
-
-    //async push items to cart
-    async.eachSeries(messageHistory[indexHist].cart, function(item, callback) {
-
-        cartItems.push({
-            ASIN: item.ASIN,
-            Quantity: 1
-        });
-
-        callback();
-    }, function done(){
-        //only support "add to cart" message for one item.
-        //static:
-        buildAmazonCart(cartItems);
-    });
-
-    function buildAmazonCart(items){
-        console.log('items ',items);
-
-        //construct amazon cart format
-        var options = {};
-        for (var i = 0; i < items.length; i++) {
-            var propASIN = 'Item.'+i+'.ASIN';
-            options[propASIN] = items[i].ASIN;
-            var propQuan = 'Item.'+i+'.Quantity';
-            options[propQuan] = items[i].Quantity;
-        }
-
-        client.createCart(options).then(function(results) {
-            data.client_res = results.PurchaseURL[0];
-            outgoingResponse(data,'txt');
-
-        }).catch(function(err) {
-            console.log(err);
-            console.log(err.Error[0]);
-            console.log('amazon err ', err[0].Error[0]);
-        });
-    }
-
-}
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
-
-
 
 //searches Amazon
 //(NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
@@ -883,7 +867,7 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     //stitch images before send to user
     if (action == 'stitch'){
         stitchResults(data,source,function(url){
-
+            //sending out stitched image response
             data.client_res = url;
             saveHistory(data); //push new history state after we have stitched URL
             sendResponse(data);
@@ -891,112 +875,9 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             //* * * * * * * * * *
             //which cinna response?
             //* * * * * * * * * * *
-
-            //convert select num to emoji based on data source
-            if (data.searchSelect){
-                switch(data.searchSelect[0]){
-                    case 1:
-                        if (data.source.origin == 'socket.io'){
-                            numEmoji = '<span style="font-size:32px;">➊</span>';
-                        }
-                        else if (data.source.origin == 'slack'){
-                            numEmoji = ':one:';
-                        }
-                        break;
-                    case 2:
-                        if (data.source.origin == 'socket.io'){
-                            numEmoji = '<span style="font-size:32px;">➋</span>';
-                        }
-                        else if (data.source.origin == 'slack'){
-                            numEmoji = ':two:';
-                        }
-                        break;
-                    case 3:
-                        if (data.source.origin == 'socket.io'){
-                            numEmoji = '<span style="font-size:32px;">➌</span>';
-                        }
-                        else if (data.source.origin == 'slack'){
-                            numEmoji = ':three:';
-                        }
-                        break;
-                }
-            }
-            switch (data.bucket) {
-                case 'search':
-                    switch (data.action) {
-                        case 'initial':
-                            data.client_res = 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)';
-                            outgoingResponse(data,'txt'); 
-                            break;
-                        case 'similar':
-                            data.client_res = 'We found some options similar to '+numEmoji+', would you like to see their product info? Use "info X" or help for more options';
-                            outgoingResponse(data,'txt'); 
-                            break;
-                        case 'modify':
-                        case 'modified': //because the nlp json is wack
-                            switch (data.dataModify.type) {
-                                case 'price':
-                                    if (data.dataModify.param == 'less'){
-                                        data.client_res = 'Here you go! Which do you like best? Use "more like x" to find similar or help for more options';
-                                        outgoingResponse(data,'txt'); 
-                                    }
-                                    else if (data.dataModify.param == 'less than'){
-                                        data.client_res = 'Definitely! Here are some choices less than $'+data.dataModify.val+', would you like to see the product info? Use "info x" or help for more options';
-                                        outgoingResponse(data,'txt'); 
-                                    }
-                                    break;
-                                case 'brand':
-                                    data.client_res = ' Here you go! Which do style you like best? Use "more like x" to find similar or help for more options';
-                                    outgoingResponse(data,'txt'); 
-                                    break;
-                                default:
-                                    console.log('warning: no modifier response selected!');
-                            }     
-                            break;
-                        case 'focus':
-                            //SET 1 MINUTE TIMEOUT HERE
-                            data.client_res = 'focus';
-                            outgoingResponse(data,'txt'); 
-                            break;
-                        case 'back':
-                            data.client_res = 'back';
-                            outgoingResponse(data,'txt'); 
-                            break;
-                        case 'more':
-                            data.client_res = 'more';
-                            outgoingResponse(data,'txt'); 
-                            break;
-                        default:
-                            console.log('warning: no search bucket action selected');
-                    }
-                    break;
-                case 'purchase':
-                        switch (data.action) {
-                            case 'save':
-                                data.client_res = 'I\'ve added this item to your cart :) Use "Get" anytime to checkout or "help" for more options';
-                                outgoingResponse(data,'txt'); 
-                                break;
-                            case 'removeAll':
-                                data.client_res = 'All items removed from your cart. To start a new search type "find (item)"';
-                                outgoingResponse(data,'txt'); 
-                                break;
-                            case 'list':
-                                data.client_res = 'Here\'s everything you have in your cart :) Use Get anytime to checkout or help for more options';
-                                outgoingResponse(data,'txt'); 
-                                break;
-                            case 'checkout':
-                                data.client_res = 'Great! Please click the link to confirm your items and checkout. {{link}} Thank you:)';
-                                outgoingResponse(data,'txt'); 
-                                break;
-                            default:
-                                console.log('warning: no purchase bucket action selected');
-                        }
-                    break;
-
-                default:
-                    console.log('warning: no bucket selected');
-            }
-
+            banter.getCinnaResponse(data,function(res){
+                outgoingResponse(res,'final');
+            });
         });
     }
     //single image msg to user
@@ -1007,12 +888,18 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     else if (action == 'image'){
         sendResponse(data);
     }
-    //one default image msg to user
-    else {
-        sendResponse(data);
+    else if (action == 'final'){
+        banter.getCinnaResponse(data,function(res){
+            sendResponse(res);
+        });
     }
+    // //one default image msg to user
+    // else {
+    //     sendResponse(data);
+    // }
 }
 
+//send back msg to user, based on source.origin
 function sendResponse(data){
     if (data.source.origin == 'socket.io'){
         io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
@@ -1023,7 +910,6 @@ function sendResponse(data){
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
         bot.postMessage(data.source.channel, data.client_res, params);  
-        
     }
 }
 
@@ -1084,27 +970,25 @@ function saveHistory(data,type){
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 2');
     }
-    
-    var indexHist = data.source.org + "_" + data.source.channel; //create id
-    
+        
     data.ts = new Date(); //adding timestamp
     
-    if (!messageHistory[indexHist]){
+    if (!messageHistory[data.source.indexHist]){
         console.log('error: user doesnt exist in memory storage');
     }
     else {
         switch (data.bucket) {
             case 'search':
-                messageHistory[indexHist].search.push(data);
+                messageHistory[data.source.indexHist].search.push(data);
                 break;
             case 'banter':
-                messageHistory[indexHist].banter.push(data);
+                messageHistory[data.source.indexHist].banter.push(data);
                 break;
             case 'purchase':
-                messageHistory[indexHist].purchase.push(data);
+                messageHistory[data.source.indexHist].purchase.push(data);
             default:
         }
-        messageHistory[indexHist].allBuckets.push(data);
+        messageHistory[data.source.indexHist].allBuckets.push(data);
     }
 
 }
@@ -1114,7 +998,6 @@ function recallHistory(data,callback,steps){
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 3');
     }
-    var indexHist = data.source.org + "_" + data.source.channel;
 
     //if # of steps to recall
     if (!steps){
@@ -1123,16 +1006,16 @@ function recallHistory(data,callback,steps){
     //get by bucket type
     switch (data.bucket) {
         case 'search':
-            var arrLength = messageHistory[indexHist].search.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[indexHist].search[arrLength]); //get last item in arr
+            var arrLength = messageHistory[data.source.indexHist].search.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.source.indexHist].search[arrLength]); //get last item in arr
             break;
         case 'banter':
-            var arrLength = messageHistory[indexHist].banter.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[indexHist].banter[arrLength]); //get last item in arr
+            var arrLength = messageHistory[data.source.indexHist].banter.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.source.indexHist].banter[arrLength]); //get last item in arr
             break;
         case 'purchase':
-            var arrLength = messageHistory[indexHist].purchase.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[indexHist].purchase[arrLength]); //get last item in arr
+            var arrLength = messageHistory[data.source.indexHist].purchase.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.source.indexHist].purchase[arrLength]); //get last item in arr
         default:
     }
 

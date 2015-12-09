@@ -2,6 +2,8 @@
 var checkForCanned = function(input,callback) {
    
 	var res;
+	var flag;
+	var query;
 
     //pre-sort canned banter
     switch (true) {
@@ -16,55 +18,45 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'are you a bot') > 60:
             res = 'yep, are you human?';
             break;
-        // case 'what\'s the meaning of life?':
-        //     data.msg = 'life, the multiverse and whatever';
-        //     outgoingResponse(data,'txt');
-        //     break;
-        // case 'how do i shot web?':
-        //     data.msg = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
-        //     outgoingResponse(data,'image');
-        //     break;
-        // case 'u mad bro?':
-        //     data.msg = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
-        //     outgoingResponse(data,'image');
-        //     break;
-        // case 'How Is babby formed?':
-        //     data.msg = 'girl get pragnent';
-        //     outgoingResponse(data,'txt');
-        //     break;
-        // case 'Drink Me':
-        //     data.msg = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
-        //     outgoingResponse(data,'image');
-        //     break;
-        // case 'deja vu':
-        //     data.msg = 'Didn\'t you just ask me that?';
-        //     outgoingResponse(data,'txt');
-        //     break;
-        // case 'die':
-        //     data.msg = '😭';
-        //     outgoingResponse(data,'txt');
-        //     break;
-        // case 'cool':
-        //     data.msg = '😎';
-        //     outgoingResponse(data,'txt');
-        //     break;
-        // case 'skynet':
-        //     data.msg = 'April 19, 2011';
-        //     outgoingResponse(data,'txt');
-        //     break;
-        // case '4 8 15 16 23 42':
-        //     data.msg = 'http://static.wixstatic.com/media/43348a_277397739d6a21470b52bc854f7f1d81.gif';
-        //     outgoingResponse(data,'image');
-        //     break;
-        // case 'What is the air-speed velocity of an unladen swallow?':
-        //     data.msg = 'http://style.org/unladenswallow/';
-        //     outgoingResponse(data,'txt');
-        //     break;
+        case textSimilar(input,'what\'s the meaning of life?') > 60:
+            res = 'life, the multiverse and whatever';
+            break;
+        case textSimilar(input,'how do i shot web?') > 60:
+            res = 'https://memecrunch.com/image/50e9ea9cafa96f557e000030.jpg?w=240';
+            break;
+        case textSimilar(input,'u mad bro?') > 60:
+            res = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
+            break;
+        case textSimilar(input,'How Is babby formed?') > 60:
+            res = 'girl get pragnent';
+            break;
+        case textSimilar(input,'Drink Me') > 60:
+            res = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
+            break;
+        case textSimilar(input,'deja vu') > 60:
+            res = 'Didn\'t you just ask me that?';
+            break;
+        case textSimilar(input,'die') > 60:
+            res = '😭';
+            break;
+        case textSimilar(input,'cool') > 60:
+            res = '😎';
+            break;
+        case textSimilar(input,'skynet') > 60:
+            res = 'April 19, 2011';
+            break;
+        case textSimilar(input,'4 8 15 16 23 42') > 60:
+            res = 'http://static.wixstatic.com/media/43348a_277397739d6a21470b52bc854f7f1d81.gif';
+            flag = 'search';
+            query = 'lost tv show';
+            break;
+        case textSimilar(input,'What is the air-speed velocity of an unladen swallow?') > 60:
+            res = 'http://style.org/unladenswallow/';
+            break;
 
-        // case 'help':
-        //     data.msg = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
-        //     outgoingResponse(data,'txt');
-        //     break;
+        case textSimilar(input,'help') > 60:
+            res = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
+            break;
 
         // case '1':
         //     data.msg = 'this will recall history and select focus on N item';
@@ -115,27 +107,6 @@ var checkForCanned = function(input,callback) {
         //     res.tokens = data.msg;
         //     incomingAction(res);
         //     break;
-        // case textSimilar(data.msg,'save') > 60:
-        //     var res = {};
-        //     res.bucket = 'purchase';
-        //     res.channel = data.channelId;
-        //     res.org = data.orgId;
-        //     res.action = 'save';
-        //     res.searchSelect = [1];
-        //     res.tokens = data.msg;
-        //     incomingAction(res);
-        //     break;
-
-        // case textSimilar(data.msg,'checkout') > 60:
-        //     var res = {};
-        //     res.bucket = 'purchase';
-        //     res.channel = data.channelId;
-        //     res.org = data.orgId;
-        //     res.action = 'checkout';
-        //     //res.searchSelect = [1];
-        //     res.tokens = data.msg;
-        //     incomingAction(res);
-        //     break;
 
         // case 'save':
         //     saveToCart(data);
@@ -154,8 +125,108 @@ var checkForCanned = function(input,callback) {
         //* * * * * END TESTING * * * * *//
     }
 
-  	callback(res);
+  	callback(res,flag,query);
 };
+
+
+var getCinnaResponse = function(data,callback){
+
+	//Emoji Selector, based on data.source.origin (socket vs slack, etc)
+	//convert select num to emoji based on data source
+	if (data.searchSelect){
+	    switch(data.searchSelect[0]){
+	        case 1: //emoji #1
+	            if (data.source.origin == 'socket.io'){
+	                numEmoji = '<span style="font-size:32px;">➊</span>';
+	            }
+	            else if (data.source.origin == 'slack'){
+	                numEmoji = ':one:';
+	            }
+	            break;
+	        case 2: //emoji #2
+	            if (data.source.origin == 'socket.io'){
+	                numEmoji = '<span style="font-size:32px;">➋</span>';
+	            }
+	            else if (data.source.origin == 'slack'){
+	                numEmoji = ':two:';
+	            }
+	            break;
+	        case 3: //emoji #3
+	            if (data.source.origin == 'socket.io'){
+	                numEmoji = '<span style="font-size:32px;">➌</span>';
+	            }
+	            else if (data.source.origin == 'slack'){
+	                numEmoji = ':three:';
+	            }
+	            break;
+	    }
+	}
+	switch (data.bucket) {
+	    case 'search':
+	        switch (data.action) {
+	            case 'initial':
+	                data.client_res = 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)';
+	                break;
+	            case 'similar':
+	                data.client_res = 'We found some options similar to '+numEmoji+', would you like to see their product info? Use "info X" or help for more options';
+	                break;
+	            case 'modify':
+	            case 'modified': //because the nlp json is wack
+	                switch (data.dataModify.type) {
+	                    case 'price':
+	                        if (data.dataModify.param == 'less'){
+	                            data.client_res = 'Here you go! Which do you like best? Use "more like x" to find similar or help for more options';
+	                        }
+	                        else if (data.dataModify.param == 'less than'){
+	                            data.client_res = 'Definitely! Here are some choices less than $'+data.dataModify.val+', would you like to see the product info? Use "info x" or help for more options';
+	                        }
+	                        break;
+	                    case 'brand':
+	                        data.client_res = ' Here you go! Which do style you like best? Use "more like x" to find similar or help for more options';
+	                        break;
+	                    default:
+	                        console.log('warning: no modifier response selected!');
+	                }     
+	                break;
+	            case 'focus':
+	                //SET 1 MINUTE TIMEOUT HERE
+	                data.client_res = 'focus';
+	                break;
+	            case 'back':
+	                data.client_res = 'back';
+	                break;
+	            case 'more':
+	                data.client_res = 'more';
+	                break;
+	            default:
+	                console.log('warning: no search bucket action selected');
+	        }
+	        break;
+	    case 'purchase':
+	            switch (data.action) {
+	                case 'save':
+	                    data.client_res = 'I\'ve added this item to your cart :) Use "Get" anytime to checkout or "help" for more options';
+	                    break;
+	                case 'removeAll':
+	                    data.client_res = 'All items removed from your cart. To start a new search type "find (item)"';
+	                    break;
+	                case 'list':
+	                    data.client_res = 'Here\'s everything you have in your cart :) Use Get anytime to checkout or help for more options';
+	                    break;
+	                case 'checkout':
+	                    data.client_res = 'Great! Please click the link to confirm your items and checkout. {{link}} Thank you:)';
+	                    break;
+	                default:
+	                    console.log('warning: no purchase bucket action selected');
+	            }
+	        break;
+
+	    default:
+	        console.log('warning: no bucket selected');
+	}
+
+	callback(data);
+}
 
 
 /////////// tools /////////////
@@ -183,3 +254,4 @@ function textSimilar(a,b) {
 
 /// exports
 module.exports.checkForCanned = checkForCanned;
+module.exports.getCinnaResponse = getCinnaResponse;
