@@ -5,6 +5,7 @@ var config = require('config')
 var colors = require("./colors")
 var materials = require('./materials')
 var sizes = require('./sizes')
+var brands = require('./brands')
 
 var debug = require('debug')('nlp')
 
@@ -184,6 +185,13 @@ function getModifier(text) {
   if (sizes.isSize(text)) {
     return {
       type: 'size',
+      val: [text]
+    }
+  }
+
+  if (brands.isBrand(text)) {
+    return {
+      type: 'brand',
       val: [text]
     }
   }

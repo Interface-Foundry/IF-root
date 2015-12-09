@@ -99,7 +99,7 @@ var messages = [
       tokens: ['1 by Zara'],
       dataModify: {
         type: 'brand',
-        val: ['Zara']
+        val: ['zara']
       }
     }
   },
