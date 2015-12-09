@@ -73,7 +73,7 @@ var messages = [
       tokens: ['1 in XL'],
       dataModify: {
         type: 'size',
-        val: ['extra large','XL'] //start with spelled out size, then add acronyms (better for amazon)
+        val: ['xl']//, 'extra large','XL'] //start with spelled out size, then add acronyms (better for amazon)
       }
     }
   },

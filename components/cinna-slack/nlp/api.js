@@ -4,6 +4,7 @@ var config = require('config')
 // var qtypes = require('qtypes')
 var colors = require("./colors")
 var materials = require('./materials')
+var sizes = require('./sizes')
 
 var debug = require('debug')('nlp')
 
@@ -178,6 +179,18 @@ function getModifier(text) {
       type: 'material',
       val: [text]
     }
+  }
+
+  if (sizes.isSize(text)) {
+    return {
+      type: 'size',
+      val: [text]
+    }
+  }
+
+  return {
+    type: 'genericDetail',
+    val: [text]
   }
 }
 
