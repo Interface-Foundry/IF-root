@@ -69,6 +69,15 @@ def parse(data):
     for token in data.doc[:]:
         pos.append([token.orth_, token.pos_])
     res.parts_of_speech = pos
-    res.noun_phrases = data.blob.noun_phrases
-    res.noun_chunks = [chunk.orth_ for chunk in data.doc.noun_chunks]
+
+
+    # ALL nouns
+    res.nouns = data.blob.noun_phrases + [chunk.orth_ for chunk in data.doc.noun_chunks]
+
+    # Adjectives
+    res.adjectives = []
+    for token in res.parts_of_speech:
+        if (token[1] == 'ADJ'):
+            res.adjectives.append(token[0])
+
     return res

@@ -3,6 +3,7 @@ var config = require('config')
 // var normalize = require('node-normalizer')
 // var qtypes = require('qtypes')
 var colors = require("./colors")
+var materials = require('./materials')
 
 var debug = require('debug')('nlp')
 
@@ -24,9 +25,6 @@ var ACTION = {
   remove: 'remove',
   list: 'list'
 }
-
-
-var question;
 
 /**
  * Call this with the text from slack
@@ -114,10 +112,11 @@ function quickparse(text) {
       /^search for\b/,
       /^search\b/i
     ],
-    modify: [
-      /\bbut\b/,
-      /\bin (.+)\b/i
-    ],
+    // modify: [
+    //   /\bbut\b/,
+    //   /\bin (.+)\b/i,
+    //   /\bwith (.+)\b/i
+    // ],
     similar: [
       // /more like ([\n])/i,
       /like the ([\w]+)\b/i
@@ -174,8 +173,11 @@ function getModifier(text) {
     }
   }
 
-  if (isMaterial(text)) {
-    // todo
+  if (materials.isMaterial(text)) {
+    return {
+      type: 'material',
+      val: [text]
+    }
   }
 }
 
@@ -210,6 +212,15 @@ function nlpToResult(nlp) {
       res.action = ACTION.initial;
       return res;
     }
+  }
+
+  var modifierWords = nlp.nouns.concat(nlp.adjectives);
+  if (nlp.focus.length === 1 && modifierWords.length === 1) {
+    // assume it's a modifier...
+    res.bucket = BUCKET.search;
+    res.action = ACTION.modify;
+    res.dataModify = getModifier(modifierWords[0]);
+    return res;
   }
 
   // parse out the focused element for each sentence

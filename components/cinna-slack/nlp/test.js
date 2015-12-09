@@ -13,7 +13,7 @@ var messages = [
     }
   },
   {
-    m: 'more', 
+    m: 'more',
     r: {
       bucket: 'search',
       action: 'more',
@@ -47,7 +47,7 @@ var messages = [
       tokens: ['1 in blue'],
       dataModify: {
         type: 'color',
-        val: ['blue','navy','aqua'] //start with root color, include any additional synonyms
+        val: ['blue'] // TODO similar colors ,'navy','aqua'] //start with root color, include any additional synonyms
       }
     }
   },
@@ -60,7 +60,7 @@ var messages = [
       tokens: ['1 in wool'],
       dataModify: {
         type: 'material',
-        val: ['wool','cashmere','merino'] //start with root, include any additional synonyms
+        val: ['wool']// TODO,'cashmere','merino'] //start with root, include any additional synonyms
       }
     }
   },
@@ -73,12 +73,12 @@ var messages = [
       tokens: ['1 in XL'],
       dataModify: {
         type: 'size',
-        val: ['extra large','XL'] //start with spelled out size, then add acronyms (better for amazon)     
+        val: ['extra large','XL'] //start with spelled out size, then add acronyms (better for amazon)
       }
     }
   },
   {
-    m: '1 with collar', 
+    m: '1 with collar',
     r: {
       bucket: 'search',
       action: 'modify',
@@ -86,7 +86,7 @@ var messages = [
       tokens: ['1 with collar'],
       dataModify: {
         type: 'genericDetail', //default for modifiers we dont know how to handle
-        val: ['collar']    
+        val: ['collar']
       }
     }
   },
@@ -99,7 +99,7 @@ var messages = [
       tokens: ['1 by Zara'],
       dataModify: {
         type: 'brand',
-        val: ['Zara']    
+        val: ['Zara']
       }
     }
   },
@@ -144,7 +144,7 @@ var messages = [
     }
   },
   {
-    m: 'info 1', 
+    m: 'info 1',
     r: {
       bucket: 'search',
       action: 'similar',
