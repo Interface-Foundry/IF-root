@@ -1,10 +1,10 @@
-// 🐑 🐑 🐑 🐑 
+// 🐑 🐑 🐑 🐑
 module.exports = function(material) {
   return []
 }
 
 module.exports.isMaterial = function(text) {
-  return !!materials[text]
+  return !!materials[text.toLowerCase()]
 }
 
 var material_names = [

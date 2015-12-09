@@ -72,7 +72,13 @@ def parse(data):
 
 
     # ALL nouns
-    res.nouns = data.blob.noun_phrases + [chunk.orth_ for chunk in data.doc.noun_chunks]
+    res.nouns = set()
+    for n in data.blob.noun_phrases:
+        res.nouns.add(n.lower())
+    for chunk in data.doc.noun_chunks:
+        res.nouns.add(chunk.orth_.lower())
+    res.nouns = list(res.nouns)
+
 
     # Adjectives
     res.adjectives = []
