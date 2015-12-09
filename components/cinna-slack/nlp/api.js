@@ -6,6 +6,7 @@ var colors = require("./colors")
 var materials = require('./materials')
 var sizes = require('./sizes')
 var brands = require('./brands')
+var verbs = require('./verbs')
 
 var debug = require('debug')('nlp')
 
@@ -233,6 +234,11 @@ function nlpToResult(nlp) {
       res.action = ACTION.initial;
       return res;
     }
+  }
+
+  if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
+    res.action = verbs.getAction(nlp.verbs[0])
+    res.bucket = verbs.getBucket(nlp.verbs[0])
   }
 
   var modifierWords = nlp.nouns.concat(nlp.adjectives);

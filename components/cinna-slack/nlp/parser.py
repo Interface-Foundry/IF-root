@@ -79,11 +79,16 @@ def parse(data):
         res.nouns.add(chunk.orth_.lower())
     res.nouns = list(res.nouns)
 
-
-    # Adjectives
+    # Adjectives & verrrrrbs
     res.adjectives = []
+    res.verbs = []
     for token in res.parts_of_speech:
         if (token[1] == 'ADJ'):
             res.adjectives.append(token[0])
+        if (token[1] == 'VERB'):
+            res.verbs.append(token[0])
+        if (token[0] == 'checkout'):  # thinks checkout is a noun...
+            res.verbs.append('checkout')
+
 
     return res

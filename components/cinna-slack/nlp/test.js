@@ -105,6 +105,7 @@ var messages = [
   },
   {
     m: '1 but less', //1 but cheaper
+    skip: true,
     r: {
       bucket: 'search',
       action: 'similar',
@@ -118,6 +119,7 @@ var messages = [
   },
   {
     m: '1 but cheaper', //1 but cheaper
+    skip: true,
     r: {
       bucket: 'search',
       action: 'similar',
@@ -131,6 +133,7 @@ var messages = [
   },
   {
     m: '1 but less than $25',
+    skip: true,
     r: {
       bucket: 'search',
       action: 'similar',
@@ -145,6 +148,7 @@ var messages = [
   },
   {
     m: 'info 1',
+    skip: true,
     r: {
       bucket: 'search',
       action: 'similar',
@@ -222,6 +226,9 @@ request({
 // test the messages
 describe('test messages on ' + config.nlp, function() {
   messages.map(function(o) {
+    if (o.skip) {
+      return console.log('skipping', o.m);
+    }
     it(o.m, function(done) {
       nlp.parse(o.m, function(e, r) {
         r.should.deepEqual(o.r);
