@@ -7,6 +7,7 @@ var materials = require('./materials')
 var sizes = require('./sizes')
 var brands = require('./brands')
 var verbs = require('./verbs')
+var _ = require('lodash')
 
 var debug = require('debug')('nlp')
 
@@ -239,9 +240,10 @@ function nlpToResult(nlp) {
   if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
     res.action = verbs.getAction(nlp.verbs[0])
     res.bucket = verbs.getBucket(nlp.verbs[0])
+    return res;
   }
 
-  var modifierWords = nlp.nouns.concat(nlp.adjectives);
+  var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
   if (nlp.focus.length === 1 && modifierWords.length === 1) {
     // assume it's a modifier...
     res.bucket = BUCKET.search;
@@ -294,6 +296,7 @@ if (!module.parent) {
     process.env.DEBUG = 'nlp';
     parse(process.argv.slice(2).join(' '), function(e, r) {
       if (e) debug(e)
+      console.log(r)
       process.exit(0);
     });
   } else {

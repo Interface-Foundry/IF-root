@@ -77,6 +77,10 @@ def parse(data):
         res.nouns.add(n.lower())
     for chunk in data.doc.noun_chunks:
         res.nouns.add(chunk.orth_.lower())
+    if (len(res.nouns) == 0):
+        for token in res.parts_of_speech:
+            if token[1] == 'NOUN':
+                res.nouns.add(token[0])
     res.nouns = list(res.nouns)
 
     # Adjectives & verrrrrbs
