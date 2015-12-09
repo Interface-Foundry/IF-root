@@ -21,3 +21,7 @@ if (module.parent && module.parent.filename.indexOf('mocha.js') > 0) {
     })
   })
 }
+
+module.exports.isColor = function(text) {
+  return !!ntc.parseName(text);
+}

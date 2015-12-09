@@ -2,6 +2,7 @@ var request = require('request')
 var config = require('config')
 // var normalize = require('node-normalizer')
 // var qtypes = require('qtypes')
+var colors = require("./colors")
 
 var debug = require('debug')('nlp')
 
@@ -113,8 +114,9 @@ function quickparse(text) {
       /^search for\b/,
       /^search\b/i
     ],
-    modified: [
-      /\bbut\b/
+    modify: [
+      /\bbut\b/,
+      /\bin (.+)\b/i
     ],
     similar: [
       // /more like ([\n])/i,
@@ -142,7 +144,15 @@ function quickparse(text) {
           res.tokens = [q];
           break;
         case ACTION.more:
-          res.tokens = text;
+          res.tokens = [text];
+          break;
+        case ACTION.modify:
+          // capture the modifier
+          var match = text.match(re);
+          if (match[1]) {
+            res.dataModify = getModifier(match[1])
+          }
+          res.tokens = [text]
           break;
       }
     })
@@ -152,6 +162,20 @@ function quickparse(text) {
     return false
   } else {
     return res
+  }
+}
+
+function getModifier(text) {
+  debug('getting dataModify object for ' + text)
+  if (colors.isColor(text)) {
+    return {
+      type: 'color',
+      val: [text] // TODO add similar colors
+    }
+  }
+
+  if (isMaterial(text)) {
+    // todo
   }
 }
 
@@ -178,10 +202,7 @@ function nlpToResult(nlp) {
         return res;
       }
     }
-  }
-
-  // simple case
-  if (nlp.ss.length === 1) {
+  } else if (nlp.ss.length === 1) {
     var s = nlp.ss[0];
     if (!s.isQuestion) {
       debug('simple case initial');
@@ -205,11 +226,7 @@ function nlpToResult(nlp) {
   })
 
   debug('returning at the end');
-  return {
-    bucket: BUCKET.search,
-    action: ACTION.initial,
-    tokens: [nlp.text]
-  }
+  return res;
 }
 
 // shit this is hard
@@ -234,6 +251,15 @@ function isQuestion(nlp) {
 
 if (!module.parent) {
   request(config.nlp + '/reload')
+
+  if (process.argv.length > 2) {
+    process.env.DEBUG = 'nlp';
+    parse(process.argv.slice(2).join(' '), function(e, r) {
+      if (e) debug(e)
+      process.exit(0);
+    });
+  } else {
+
   var sentences = [
     'find me a coffee machine',
     'search luxury socks',
@@ -260,5 +286,5 @@ if (!module.parent) {
       }
     })
   })
-} else {
+}
 }

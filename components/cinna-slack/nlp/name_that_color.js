@@ -34,12 +34,14 @@ var ntc = module.exports = {
 
   init: function() {
     var color, rgb, hsl;
+    ntc.names2 = {};
     for(var i = 0; i < ntc.names.length; i++)
     {
       color = "#" + ntc.names[i][0];
       rgb = ntc.rgb(color);
       hsl = ntc.hsl(color);
       ntc.names[i].push(rgb[0], rgb[1], rgb[2], hsl[0], hsl[1], hsl[2]);
+      ntc.names2[ntc.names[i][1].toLowerCase()] = ntc.names[i];
     }
   },
 
@@ -110,6 +112,10 @@ var ntc = module.exports = {
   // http://acko.net/dev/farbtastic
   rgb: function(color) {
     return [parseInt('0x' + color.substring(1, 3)), parseInt('0x' + color.substring(3, 5)),  parseInt('0x' + color.substring(5, 7))];
+  },
+
+  parseName: function(name) {
+    return ntc.names2[name.toLowerCase()];
   },
 
   names: [
