@@ -220,11 +220,21 @@ function nlpToResult(nlp) {
     res.searchSelect = nlp.focus;
   }
 
+  // check for "about"
+  if (nlp.focus.length === 1) {
+    if (nlp.text.indexOf('about') >= 0) {
+      debug('about')
+      res.bucket = BUCKET.search;
+      res.action = ACTION.focus;
+      return res;
+    }
+  }
+
   // check for "more"
   if (nlp.focus.length >= 1) {
     for (var i = 0; i < nlp.parts_of_speech.length; i++) {
       if (nlp.parts_of_speech[i][0] === 'more') {
-        debug('"more"')
+        debug('more')
         res.bucket = BUCKET.search;
         res.action = ACTION.similar;
         return res;
