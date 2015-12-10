@@ -146,7 +146,6 @@ function routeNLP(data){
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
-
             console.log('NLP RES ',res);
 
             //- - - temp stuff to transfer nlp results to data object - - - //
@@ -398,7 +397,7 @@ function searchModify(data, flag){
     }
 
 
-    console.log('modified ',data);
+    //console.log('modified ',data);
 
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
@@ -529,62 +528,67 @@ function searchFocus(data){
         data.recallHistory = item; //added recalled history obj to data obj
 
         if (data.searchSelect && data.searchSelect.length == 1){
-            if(data.recallHistory.amazon){
-                var searchSelect = data.searchSelect[0];
+            if(data.recallHistory && data.recallHistory.amazon){
 
-                //check for image to send back
-                if (data.recallHistory.amazon[searchSelect - 1].MediumImage && data.recallHistory.amazon[searchSelect - 1].LargeImage[0].URL[0]){
+                var searchSelect = data.searchSelect[0] - 1;
+                var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                var cString = ''; //construct text reply
 
-                    data.client_res = data.recallHistory.amazon[searchSelect - 1].LargeImage[0].URL[0];
+                //check for large image to send back
+                if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
+                    data.client_res = data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0];
                     outgoingResponse(data,'final');
-                    //fire image
-                    //fire details
-                    //fire question
                 }
-                //send product title
-                data.client_res = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title[0]; 
+
+                //send product title + price
+                data.client_res = attribs.Title[0]; 
+                //add price to this line, if found
+                if (attribs.ListPrice){
+                    data.client_res = data.client_res + " – " + addDecimal(attribs.ListPrice[0].Amount[0]);
+                }
                 outgoingResponse(data,'final');
 
-                var cString; //construct text reply
-                var attribs = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0];
+                ///// product details string //////
+
+                //get size
+                if (attribs.Size){
+                    cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                }
+
+                //get artist
+                if (attribs.Artist){
+                    cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                }
 
                 //get brand or manfacturer
                 if (attribs.Brand){
-
+                    cString = cString + ' ○ ' +  attribs.Brand[0];
                 }
                 else if (attribs.Manufacturer){
+                    cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                }   
 
+                //get all stuff in details box
+                if (attribs.Feature){   
+                    cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
                 }
 
-                if (attribs.Artist){
-
+                //done collecting details string, now send
+                if (cString){
+                    data.client_res = cString;
+                    outgoingResponse(data,'final');
                 }
 
-                //get product details
-                if (attribs.Size){
+                ///// end product details string /////
 
-                }
-
-
-                if (attribs.ListPrice[0].Amount[0]){
-
-                }
-
-                // //send details
-                // data.client_res = data.recallHistory.amazon[searchSelect - 1].DetailPageURL[0]; 
-                // outgoingResponse(data,'final');
+                if (data.recallHistory.amazon[searchSelect].reviews){
+                    data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews'; 
+                    outgoingResponse(data,'final');
+                }   
 
                 //send product link
-                data.client_res = data.recallHistory.amazon[searchSelect - 1].DetailPageURL[0]; 
+                data.client_res = data.recallHistory.amazon[searchSelect].DetailPageURL[0]; 
                 outgoingResponse(data,'final');
-
-
-
-                //send back details
-                // reviews
-                //
-
-                console.log('GETING ',data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0]);
 
             }
             else {
@@ -672,7 +676,7 @@ function searchAmazon(data, type, query, flag){
             //check for flag to modify amazon search params
             if (flag && flag.type){ //search modifier
 
-               console.log('search flag ',flag);
+               //console.log('search flag ',flag);
 
                 //parse flags
                 if (flag.type == 'price'){
@@ -895,8 +899,47 @@ function searchAmazon(data, type, query, flag){
 
                         data.amazon = results;
 
-                        //* * * * * CHANGE TO INITIAL SERACH FORMAT * * * * //
-                        outgoingResponse(data,'stitch','amazon'); //send msg to user
+                        var loopLame = [0,1,2];//lol
+                        async.eachSeries(loopLame, function(i, callback) {
+
+                            //get reviews in circumvention manner (amazon not allowing anymore officially)
+                            request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
+                              if(err){
+                                console.log(err);
+                                callback();
+                              }
+                              else {
+
+                                $ = cheerio.load(body);
+
+                                //get rating
+                                var rating = ( $('.a-size-base').text()
+                                  .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                                  .map(function (v) {return +v;}).shift();
+
+                                //get reviewCount
+                                var reviewCount = ( $('.a-link-emphasis').text()
+                                  .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                                  .map(function (v) {return +v;}).shift();
+
+                                //adding scraped reviews to amazon objects
+                                data.amazon[i].reviews = {
+                                    rating: rating,
+                                    reviewCount: reviewCount
+                                }
+                                callback();
+                              }
+                            });
+
+                        }, function done(){
+                            outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                        });
+
+
+                        // data.amazon = results;
+
+                        // //* * * * * CHANGE TO INITIAL SERACH FORMAT * * * * //
+                        // outgoingResponse(data,'stitch','amazon'); //send msg to user
 
                         //need to put results inside data
 
@@ -1034,7 +1077,10 @@ function stitchResults(data,source,callback){
 
             async.eachSeries(loopLame, function(i, callback) {
                 if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
-                    
+
+                    console.log(data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0]);
+
+
                     var price;
 
                     if (!data.amazon[i].ItemAttributes[0].ListPrice){
@@ -1048,7 +1094,9 @@ function stitchResults(data,source,callback){
                     toStitch.push({
                         url: data.amazon[i].MediumImage[0].URL[0],
                         price: price,
-                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]) //TRIM NAME HERE 
+                        prime: data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0], //is prime available?
+                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE 
+                        reviews: data.amazon[i].reviews
                     });
                 }
                 callback();
@@ -1096,6 +1144,7 @@ function saveHistory(data,type){
             default:
         }
         messageHistory[data.source.indexHist].allBuckets.push(data);
+        //console.log('😂 ',messageHistory[data.source.indexHist].allBuckets);
     }
 
 }
@@ -1113,8 +1162,24 @@ function recallHistory(data,callback,steps){
     //get by bucket type
     switch (data.bucket) {
         case 'search':
-            var arrLength = messageHistory[data.source.indexHist].search.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.indexHist].search[arrLength]); //get last item in arr
+            //console.log(data);
+
+            switch(data.action){
+                //if action is focus, find lastest 'initial' item
+                case 'focus':
+                    var result = messageHistory[data.source.indexHist].search.filter(function( obj ) {
+                      return obj.action == 'initial';
+                    });
+                    var arrLength = result.length - steps;
+                    callback(result[arrLength]);
+                    break;
+
+                default:
+                    var arrLength = messageHistory[data.source.indexHist].search.length - steps; //# of steps to reverse. default is 1
+                    callback(messageHistory[data.source.indexHist].search[arrLength]); //get last item in arr
+                    break;
+            }
+
             break;
         case 'banter':
             var arrLength = messageHistory[data.source.indexHist].banter.length - steps; //# of steps to reverse. default is 1
@@ -1139,8 +1204,8 @@ function isNumber(n) {
 
 //trim a string to char #
 function truncate(string){
-   if (string.length > 60)
-      return string.substring(0,60)+'...';
+   if (string.length > 80)
+      return string.substring(0,80)+'...';
    else
       return string;
 };
