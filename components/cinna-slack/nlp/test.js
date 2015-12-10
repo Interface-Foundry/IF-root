@@ -174,6 +174,16 @@ var messages = [
     }
   },
   {
+    m: 'more about 1',
+    skip: true,
+    r: {
+      bucket: 'search',
+      action: 'similar',
+      searchSelect: [1],
+      tokens: ['info 1']
+    }
+  },
+  {
     m: 'save 1',
     r: {
       action: 'save',

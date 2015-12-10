@@ -1,15 +1,16 @@
 var http = require('http');
 var fs = require('fs');
 var Bot = require('slackbots');
+var request = require('request');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
+var cheerio = require('cheerio');
 
 //load kip modules
 var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
-
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -95,57 +96,45 @@ function preProcess(data){
         messageHistory[data.source.indexHist].allBuckets = []; //all buckets, chronological chat history
     }
 
+    //check for canned responses/actions before routing to NLP
+    banter.checkForCanned(data.msg,function(res,flag,query){
 
-    //TEMP!
-    switch(data.msg){
-        case 'save':
-            var res = {};
-            data.bucket = 'purchase';
-            data.action = 'save';
-            data.searchSelect = [1];
-            data.tokens = [];
-            data.tokens.push(data.msg);
-            incomingAction(data);
-            break;
-
-        case 'checkout':
-            data.bucket = 'purchase';
-            data.action = 'checkout';
-            data.tokens = [];
-            data.tokens.push(data.msg);
-            incomingAction(data);
-            break;
-
-        default:
-
-            //REMOVE FROM SWITCH AFTER TESTING!
-            //check for canned responses before routing to NLP
-            banter.checkForCanned(data.msg,function(res,flag,query){
-                //found canned response
-                if(res){
-                    //send out text / image response
+        //found canned response
+        if(flag){
+            switch(flag){
+                case 'basic': //just respond, no actions
+                    //send message
                     data.client_res = res;
-                    cannedBanter(data,res);
+                    cannedBanter(data,res);      
+                    break;
+                case 'search.initial':
+                    //send message
+                    data.client_res = res;
+                    cannedBanter(data,res);  
 
-                    //check for flags to do extra stuff with canned response (like auto search items)
-                    if (flag == 'search'){
-                        if (query){
-                            data.msg = query;
-                            routeNLP(data); 
-                        }
-                        else {
-                            console.log('error: flag specified by no query found');
-                        }
-                    }
-                }
-                //proceed to NLP instead
-                else {
-                    console.log('no');
-                    routeNLP(data); 
-                }
-            });       
-    }
-
+                    //now search for item
+                    data.tokens = [];
+                    data.tokens.push(query); //search for this item
+                    data.bucket = 'search';
+                    data.action = 'initial';
+                    incomingAction(data);  
+                    break;
+                case 'search.focus':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'search';
+                    data.action = 'focus';
+                    incomingAction(data); 
+                    break;
+                default:
+                    console.log('error: canned action flag missing');
+            }
+        }
+        //proceed to NLP instead
+        else {
+            routeNLP(data); 
+        }
+    });    
 
 
 
@@ -536,6 +525,78 @@ function searchModify(data, flag){
 
 function searchFocus(data){
 
+    recallHistory(data, function(item){ 
+        data.recallHistory = item; //added recalled history obj to data obj
+
+        if (data.searchSelect && data.searchSelect.length == 1){
+            if(data.recallHistory.amazon){
+                var searchSelect = data.searchSelect[0];
+
+                //check for image to send back
+                if (data.recallHistory.amazon[searchSelect - 1].MediumImage && data.recallHistory.amazon[searchSelect - 1].LargeImage[0].URL[0]){
+
+                    data.client_res = data.recallHistory.amazon[searchSelect - 1].LargeImage[0].URL[0];
+                    outgoingResponse(data,'final');
+                    //fire image
+                    //fire details
+                    //fire question
+                }
+                //send product title
+                data.client_res = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title[0]; 
+                outgoingResponse(data,'final');
+
+                var cString; //construct text reply
+                var attribs = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0];
+
+                //get brand or manfacturer
+                if (attribs.Brand){
+
+                }
+                else if (attribs.Manufacturer){
+
+                }
+
+                if (attribs.Artist){
+
+                }
+
+                //get product details
+                if (attribs.Size){
+
+                }
+
+
+                if (attribs.ListPrice[0].Amount[0]){
+
+                }
+
+                // //send details
+                // data.client_res = data.recallHistory.amazon[searchSelect - 1].DetailPageURL[0]; 
+                // outgoingResponse(data,'final');
+
+                //send product link
+                data.client_res = data.recallHistory.amazon[searchSelect - 1].DetailPageURL[0]; 
+                outgoingResponse(data,'final');
+
+
+
+                //send back details
+                // reviews
+                //
+
+                console.log('GETING ',data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0]);
+
+            }
+            else {
+                console.log('error: amazon search missing from recallHistory obj');
+            }
+        }
+        else {
+            console.log('error: you can only select one item for search focus')
+        }
+
+    });
+
 }
 
 function searchMore(data){
@@ -562,6 +623,8 @@ function saveToCart(data){
 
     recallHistory(data, function(item){
 
+        data.bucket = 'purchase'; //modifying bucket. a hack for now
+
         //async push items to cart
         async.eachSeries(data.searchSelect, function(searchSelect, callback) {
             messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
@@ -576,6 +639,9 @@ function saveToCart(data){
     });
 }
 
+function viewCart(data){
+
+}
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
 
@@ -730,9 +796,43 @@ function searchAmazon(data, type, query, flag){
             //AMAZON BASIC SEARCH
             client.itemSearch(amazonParams).then(function(results){
 
-              data.amazon = results;
+                data.amazon = results;
 
-              outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                var loopLame = [0,1,2];//lol
+                async.eachSeries(loopLame, function(i, callback) {
+
+                    //get reviews in circumvention manner (amazon not allowing anymore officially)
+                    request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
+                      if(err){
+                        console.log(err);
+                        callback();
+                      }
+                      else {
+
+                        $ = cheerio.load(body);
+
+                        //get rating
+                        var rating = ( $('.a-size-base').text()
+                          .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                          .map(function (v) {return +v;}).shift();
+
+                        //get reviewCount
+                        var reviewCount = ( $('.a-link-emphasis').text()
+                          .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                          .map(function (v) {return +v;}).shift();
+
+                        //adding scraped reviews to amazon objects
+                        data.amazon[i].reviews = {
+                            rating: rating,
+                            reviewCount: reviewCount
+                        }
+                        callback();
+                      }
+                    });
+
+                }, function done(){
+                    outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                });
 
             }).catch(function(err){
 
@@ -863,7 +963,6 @@ function cannedBanter(data,req){
 
 //Constructing reply to user
 function outgoingResponse(data,action,source){ //what we're replying to user with
-    var numEmoji;
     //stitch images before send to user
     if (action == 'stitch'){
         stitchResults(data,source,function(url){
@@ -872,44 +971,52 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             saveHistory(data); //push new history state after we have stitched URL
             sendResponse(data);
 
-            //* * * * * * * * * *
-            //which cinna response?
+            //* * * * * * * * * * *
+            //which cinna response to include in message?
             //* * * * * * * * * * *
             banter.getCinnaResponse(data,function(res){
-                outgoingResponse(res,'final');
+                if(res){
+                    data.client_res = res;
+                    sendResponse(data);
+                }
             });
         });
     }
-    //single image msg to user
+    //data.client_res > already added to data for response
+    //text/image msg to user (not image results)
     else if (action == 'txt'){
+
+        saveHistory(data);
         sendResponse(data);
-    }
-    //single image msg to user
-    else if (action == 'image'){
-        sendResponse(data);
-    }
-    else if (action == 'final'){
+
         banter.getCinnaResponse(data,function(res){
-            sendResponse(res);
+            if(res){
+                data.client_res = res;
+                sendResponse(data);
+            }
         });
     }
-    // //one default image msg to user
-    // else {
-    //     sendResponse(data);
-    // }
+    //no cinna response check
+    else if (action == 'final'){
+        saveHistory(data);
+        sendResponse(data);
+    }
 }
 
 //send back msg to user, based on source.origin
 function sendResponse(data){
-    if (data.source.origin == 'socket.io'){
+    if (data.source.channel && data.source.origin == 'socket.io'){
         io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
     }
-    else if (data.source.origin == 'slack'){
+    else if (data.source.channel && data.source.origin == 'slack'){
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
         bot.postMessage(data.source.channel, data.client_res, params);  
+    }
+    else {
+        console.log('error: data.source.channel or source.origin missing')
     }
 }
 
@@ -1020,8 +1127,6 @@ function recallHistory(data,callback,steps){
     }
 
 }
-
-
 
 
 ///////////////////////////////////////////
