@@ -7,7 +7,10 @@ var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
-
+var ioClient = require('socket.io-client').connect("http://localhost:3000");
+ioClient.on('connect', function() {
+    console.log('Connected to support client.')
+})
 //load kip modules
 var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
@@ -132,7 +135,18 @@ function preProcess(data){
         }
         //proceed to NLP instead
         else {
-            routeNLP(data); 
+             //TESTING SUPERVISOR
+            //send message
+            data.client_res = res;
+            //now search for item
+            data.tokens = [];
+            data.tokens.push(query); //search for this item
+            data.bucket = 'supervisor';
+            data.action = 'initial';
+            incomingAction(data);
+
+            //enable after testing supervisor
+            // routeNLP(data);
         }
     });    
 
@@ -186,33 +200,34 @@ function incomingAction(data){
             purchaseBucket(data);
             break;
         case 'supervisor':
-            //route to supervisor chat window
-            //JSON SEND TO SUPERVISOR
-            // { 
-            //   msg: 'more like 2',
-            //   source: { 
-            //     origin: 'socket.io',
-            //     channel: '-lsQ0_8joP-Sp04JAAAA',
-            //     org: 'kip' 
-            //   },
-            //   bucket: 'supervisor',
-            //   searchSelect: [ 2 ],
-            //   recallHistory: [{ 
-            //     msg: 'xx',
-            //     source: { 
-            //       origin: 'socket.io',
-            //       channel: '-lsQ0_8joP-Sp04JAAAA',
-            //       org: 'kip' 
-            //     },
-            //     bucket: 'search',
-            //     action: 'initial',
-            //     tokens: [ 'xx' ],
-            //     amazon:[ 
-            //       ],
-            //       client_res: 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)',
-            //       ts: Tue Dec 08 2015 15:29:15 GMT-0500 (EST) 
-            //     }] 
-            // }
+            if (!ioClient.connected) {
+                ioClient.on('connect', function() {
+                    console.log('Connected to support client.')
+                    ioClient.emit('new channel', {
+                        name: data.source.channel,
+                        id: data.source.indexHist
+                    })
+                    ioClient.emit('new message', {
+                        id: data.source.channel,
+                        channelID: data.source.channel,
+                        text: data.msg,
+                        user: data.source.channel,
+                        time: new Date()
+                    })
+                })
+            } else {
+                ioClient.emit('new channel', {
+                    name: data.source.channel,
+                    id: data.source.indexHist
+                })
+                ioClient.emit('new message', {
+                    id: data.source.channel,
+                    channelID: data.source.channel,
+                    text: data.msg,
+                    user: data.source.channel,
+                    time: new Date()
+                })
+            }
         default:
             searchBucket(data);
     }
