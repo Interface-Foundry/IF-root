@@ -7,3 +7,7 @@ module.exports = function(brand) {
 module.exports.isBrand = function(text) {
   return brands.indexOf(text.toLowerCase()) >= 0;
 }
+
+if (!module.parent) {
+  console.log(module.exports.isBrand(process.argv.slice(2).join(' ')))
+}
