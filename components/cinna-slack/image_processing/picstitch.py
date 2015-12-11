@@ -89,7 +89,7 @@ def index():
         img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
     #add names, text wrapped
-    font = ImageFont.truetype("HelveticaNeue-Regular.ttf", 14)
+    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 14)
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x']
         y = TEXTBOX_COORDS[i][u'y']
