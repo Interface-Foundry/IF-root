@@ -7,6 +7,7 @@ var materials = require('./materials')
 var sizes = require('./sizes')
 var brands = require('./brands')
 var verbs = require('./verbs')
+var price = require('./price')
 var _ = require('lodash')
 
 var debug = require('debug')('nlp')
@@ -253,6 +254,14 @@ function nlpToResult(nlp) {
   if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
     res.action = verbs.getAction(nlp.verbs[0])
     res.bucket = verbs.getBucket(nlp.verbs[0])
+    return res;
+  }
+
+  var priceModifier = price(nlp.text);
+  if (priceModifier) {
+    res.bucket = BUCKET.search;
+    res.action = ACTION.similar;
+    res.dataModify = priceModifier;
     return res;
   }
 

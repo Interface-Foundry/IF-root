@@ -105,7 +105,6 @@ var messages = [
   },
   {
     m: '1 but less', //1 but cheaper
-    skip: true,
     r: {
       bucket: 'search',
       action: 'similar',
@@ -119,12 +118,11 @@ var messages = [
   },
   {
     m: '1 but cheaper', //1 but cheaper
-    skip: true,
     r: {
       bucket: 'search',
       action: 'similar',
       searchSelect: [1],
-      tokens: ['1 but less'],
+      tokens: ['1 but cheaper'],
       dataModify: {
         type: 'price',
         param: 'less' //or 'more'
