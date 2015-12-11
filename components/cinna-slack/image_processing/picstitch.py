@@ -8,6 +8,7 @@ from flask import (
 )
 
 from PIL import Image, ImageFont, ImageDraw
+import textwrap
 import urllib2 as urllib
 import io
 import boto
@@ -21,20 +22,27 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
 app = Flask(__name__)
 
-# Constants bestowed upon us by a higher power
-DESKTOP_WIDTH = 1000
-DESKTOP_HEIGHT = 800
-MOBILE_WIDTH = 0 # TODO
-MOBILE_HEIGHT = 800 # TODO
+# Constants bestowed upon us by a higher power (slack)
+CHAT_WIDTH = 400
+CHAT_HEIGHT = 500
+# MOBILE_WIDTH = 0 # TODO
+# MOBILE_HEIGHT = 800 # TODO
+
 PADDING = 5
 BGCOLOR = 'white'
 BUCKET = 'if-kip-chat-images'
 REGION = 'us-east-1'
 
+#load images
 NUMBER_IMAGES = []
-for i in [1, 2, 3, 4, 5, 6]:
-    f = THIS_FOLDER + '/Numbers-' + `i` + '-Black-icon.png'
+for i in [1, 2, 3]:
+    f = THIS_FOLDER + '/numbers/' + `i` + '.png'
     NUMBER_IMAGES.append(Image.open(f))
+REVIEW_STARS = []
+for i in [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]:
+    f = THIS_FOLDER + '/review_stars/' + `i` + '.png'
+    REVIEW_STARS.append(Image.open(f))
+AMAZON_PRIME = Image.open(THIS_FOLDER + '/amazon/prime.png')
 
 conn = boto.s3.connect_to_region(REGION)
 bucket = conn.get_bucket(BUCKET)
@@ -48,56 +56,88 @@ def index():
 
     # DESKTOP_WIDTH = (length + 1) * padding + length * image_width
     # DESKTOP_HEIGHT = 2 * padding + image_height
-    max_width = ( DESKTOP_WIDTH  - (length + 1) * PADDING ) / length
-    max_height = DESKTOP_HEIGHT - 2 * PADDING
+    # max_width = ( DESKTOP_WIDTH  - (length + 1) * PADDING ) / length
+    # max_height = DESKTOP_HEIGHT - 2 * PADDING
 
+    # print max_height
+    # print max_width
 
     biggest_width = 0
     biggest_height = 0
     thumbnails = []
+    PIC_SIZE = 153, 153
+    PIC_COORDS = [{'x': 24, 'y': 10},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
+    CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
+    TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
     #add images
     for i, data in enumerate(images):
-        print i, data[u'url']
-
         im = download_image(data[u'url'])
-        im.thumbnail((max_width, max_height), Image.ANTIALIAS)
+        im.thumbnail(PIC_SIZE, Image.ANTIALIAS)
         thumbnails.append(im)
-        if im.size[0] > biggest_width:
-            biggest_width = im.size[0]
-        if im.size[1] > biggest_height:
-            biggest_height = im.size[1]
 
     #add select numbers
-    img = Image.new('RGB', (DESKTOP_WIDTH, biggest_height + 2 * PADDING), BGCOLOR)
+    img = Image.new('RGB', (CHAT_WIDTH, CHAT_HEIGHT), BGCOLOR)
     for i, im in enumerate(thumbnails):
-        x = PADDING + (PADDING + max_width) * i
-        y = PADDING + (biggest_height - im.size[1]) / 2
+        #add pics
+        x = PIC_COORDS[i][u'x']
+        y = PIC_COORDS[i][u'y']
         img.paste(im, (x, y))
-        img.paste(NUMBER_IMAGES[i], (x + PADDING, 2 * PADDING), mask=NUMBER_IMAGES[i])
+        #add numbers
+        x = CHOICE_COORDS[i][u'x']
+        y = CHOICE_COORDS[i][u'y']
+        img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
-    #add white rectangles
-    for i, im in enumerate(images):
-        x = PADDING + (PADDING + max_width) * i
-        y = PADDING + (biggest_height - 30)
-        dr = ImageDraw.Draw(img,'RGBA') #RGBA for shape opacity
-        dr.rectangle(((x,y-30),(x+100,y+50)), fill=(255,255,255,120))
-
-    #add prices
+    #add names, text wrapped
     font = ImageFont.truetype("HelveticaNeue-Regular.ttf", 14)
     for i, im in enumerate(images):
-        x = PADDING + (PADDING + max_width) * i
-        y = PADDING + (biggest_height - 30)
+        x = TEXTBOX_COORDS[i][u'x']
+        y = TEXTBOX_COORDS[i][u'y']
         draw = ImageDraw.Draw(img)
-        draw.text((x, y),im[u'price'],(0,0,0),font=font)
 
-    #add names
-    font = ImageFont.truetype("HelveticaNeue-Regular.ttf", 14)
-    for i, im in enumerate(images):
-        x = PADDING + (PADDING + max_width) * i
-        y = PADDING + (biggest_height - 50)
-        draw = ImageDraw.Draw(img)
-        draw.text((x, y),im[u'name'],(0,0,0),font=font)
+        #add product names
+        for line in textwrap.wrap(im[u'name'], width=26):
+            draw.text((x, y), line, font=font, fill="#2d70c1")
+            y += font.getsize(line)[1]
+            last_y = y
+
+        last_y = last_y + 10
+
+        #add price
+        draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
+
+        #add prime logo
+        if im[u'prime'] == '1':
+            img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
+
+        last_y = last_y + 22
+
+        if 'reviews' in im:   
+            #add rating
+            if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
+                selectRating = 0
+            if im[u'reviews'][u'rating'] > 0.5 and im[u'reviews'][u'rating'] <= 1:
+                selectRating = 1
+            if im[u'reviews'][u'rating'] > 1 and im[u'reviews'][u'rating'] <= 1.5:
+                selectRating = 2
+            if im[u'reviews'][u'rating'] > 1.5 and im[u'reviews'][u'rating'] <= 2:
+                selectRating = 3
+            if im[u'reviews'][u'rating'] > 2 and im[u'reviews'][u'rating'] <= 2.5:
+                selectRating = 4
+            if im[u'reviews'][u'rating'] > 2.5 and im[u'reviews'][u'rating'] <= 3:
+                selectRating = 5
+            if im[u'reviews'][u'rating'] > 3 and im[u'reviews'][u'rating'] <= 3.5:
+                selectRating = 6
+            if im[u'reviews'][u'rating'] > 3.5 and im[u'reviews'][u'rating'] <= 4:
+                selectRating = 7
+            if im[u'reviews'][u'rating'] > 4 and im[u'reviews'][u'rating'] <= 4.5:
+                selectRating = 8
+            if im[u'reviews'][u'rating'] > 4.5 and im[u'reviews'][u'rating'] <= 5:
+                selectRating = 9
+            img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
+            #add review count
+            if 'reviewCount' in im[u'reviews']:  
+                draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font,fill="#2d70c1")
 
     cStringImg = cStringIO.StringIO()
     img.save(cStringImg, 'PNG', quality=90)
@@ -115,5 +155,5 @@ def download_image(url):
 
 if __name__ == '__main__':
     print 'running app on port 5k'
-    app.debug = False
+    app.debug = True
     app.run(host="0.0.0.0")

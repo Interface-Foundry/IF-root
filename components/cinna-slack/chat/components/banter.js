@@ -54,7 +54,8 @@ var checkForCanned = function(input,callback) {
             res = '😎';
             break;
         case textSimilar(input,'skynet') > 60:
-            flag = 'basic';
+            query = 'nvidia jetson';
+            flag = 'search.initial'; //do this action
             res = 'April 19, 2011';
             break;
         case textSimilar(input,'4 8 15 16 23 42') > 60:
@@ -71,6 +72,8 @@ var checkForCanned = function(input,callback) {
             flag = 'basic';
             res = 'type things like VVVVXBXVXVX and BBBXBXCBC to search';
             break;
+
+
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 
@@ -124,6 +127,10 @@ var checkForCanned = function(input,callback) {
     }
 
     switch(input){
+        case 'about':
+            console.log('SHOW ABOUT CINNA HERE. Link to kipthis.com');
+            break;
+
         case '1':
             flag = 'search.focus';
             query = 1;
