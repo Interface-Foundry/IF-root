@@ -161,6 +161,9 @@ function routeNLP(data){
             if (res.searchSelect){    
                 data.searchSelect = res.searchSelect;
             }  
+            if (res.dataModify){    
+                data.dataModify = res.dataModify;
+            }  
             //- - - - end temp - - - - // 
 
             incomingAction(data);
@@ -326,75 +329,75 @@ function searchModify(data, flag){
 
 
     //temp!
-    if (data.msg){
-        data.tokens = [];
-        data.tokens.push(data.msg);
-    }
+    // if (data.msg){
+    //     data.tokens = [];
+    //     data.tokens.push(data.msg);
+    // }
 
-    //temp!
-    if (!data.searchSelect){
-        data.searchSelect = [1];
-    }
+    // //temp!
+    // if (!data.searchSelect){
+    //     data.searchSelect = [1];
+    // }
 
-    //temp!
-    switch (true){
-        case data.tokens[0].indexOf("in blue") !=-1 :
+    // //temp!
+    // switch (true){
+    //     case data.tokens[0].indexOf("in blue") !=-1 :
 
-            data.dataModify = {
-                type: 'color',
-                val: ['blue']
-            }     
-            break;
+    //         data.dataModify = {
+    //             type: 'color',
+    //             val: ['blue']
+    //         }     
+    //         break;
 
-        case data.tokens[0].indexOf("in XL") !=-1 :
+    //     case data.tokens[0].indexOf("in XL") !=-1 :
 
-            data.dataModify = {
-                type: 'size',
-                val: ['extra large','XL']
-            } 
-            break;   
+    //         data.dataModify = {
+    //             type: 'size',
+    //             val: ['extra large','XL']
+    //         } 
+    //         break;   
 
-        case data.tokens[0].indexOf("with collar") !=-1 :
+    //     case data.tokens[0].indexOf("with collar") !=-1 :
 
-            data.dataModify = {
-                type: 'genericDetail',
-                val: ['collar']
-            }  
-            break;  
+    //         data.dataModify = {
+    //             type: 'genericDetail',
+    //             val: ['collar']
+    //         }  
+    //         break;  
 
-        case data.tokens[0].indexOf("in wool") !=-1 :
+    //     case data.tokens[0].indexOf("in wool") !=-1 :
 
-            data.dataModify = {
-                type: 'material',
-                val: ['wool','cashmere','merino']
-            }   
-            break; 
+    //         data.dataModify = {
+    //             type: 'material',
+    //             val: ['wool','cashmere','merino']
+    //         }   
+    //         break; 
 
-        case data.tokens[0].indexOf("by Zara") !=-1 :
+    //     case data.tokens[0].indexOf("by Zara") !=-1 :
 
-            data.dataModify = {
-                type: 'brand',
-                val: ['Zara']
-            }   
-            break;
+    //         data.dataModify = {
+    //             type: 'brand',
+    //             val: ['Zara']
+    //         }   
+    //         break;
 
-        case data.tokens[0].indexOf("less than") !=-1 :
+    //     case data.tokens[0].indexOf("less than") !=-1 :
 
-            data.dataModify = {
-                type: 'price',
-                param: 'less than',
-                val: [25]
-            } 
-            break;   
+    //         data.dataModify = {
+    //             type: 'price',
+    //             param: 'less than',
+    //             val: [25]
+    //         } 
+    //         break;   
 
-        case data.tokens[0].indexOf("cheaper") !=-1 :
+    //     case data.tokens[0].indexOf("cheaper") !=-1 :
 
-            data.dataModify = {
-                type: 'price',
-                param: 'less'
-            }  
-            break;
-    }
+    //         data.dataModify = {
+    //             type: 'price',
+    //             param: 'less'
+    //         }  
+    //         break;
+    // }
 
 
     //console.log('modified ',data);
@@ -531,64 +534,78 @@ function searchFocus(data){
             if(data.recallHistory && data.recallHistory.amazon){
 
                 var searchSelect = data.searchSelect[0] - 1;
-                var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                var cString = ''; //construct text reply
 
-                //check for large image to send back
-                if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
-                    data.client_res = data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0];
-                    outgoingResponse(data,'final');
+                if (data.recallHistory.amazon[searchSelect]){
+
+                    var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                    var cString = ''; //construct text reply
+
+                    //check for large image to send back
+                    if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
+                        data.client_res = data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0];
+                        outgoingResponse(data,'final');
+                    }
+
+                    //send product title + price
+                    data.client_res = attribs.Title[0]; 
+                    //add price to this line, if found
+                    if (attribs.ListPrice){
+                        data.client_res =  addDecimal(attribs.ListPrice[0].Amount[0]) + " – " + data.client_res;
+                    }
+                    outgoingResponse(data,'final'); 
+                    // //stall output for slack timing issue
+                    // setTimeout(function(){ 
+                    //     outgoingResponse(data,'final'); 
+                    // }, 700);
+                    
+
+                    ///// product details string //////
+
+                    //get size
+                    if (attribs.Size){
+                        cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                    }
+
+                    //get artist
+                    if (attribs.Artist){
+                        cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                    }
+
+                    //get brand or manfacturer
+                    if (attribs.Brand){
+                        cString = cString + ' ○ ' +  attribs.Brand[0];
+                    }
+                    else if (attribs.Manufacturer){
+                        cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                    }   
+
+                    //get all stuff in details box
+                    if (attribs.Feature){   
+                        cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
+                    }
+
+                    //done collecting details string, now send
+                    if (cString){
+                        data.client_res = cString;
+                        outgoingResponse(data,'final');
+                    }
+
+                    ///// end product details string /////
+
+                    if (data.recallHistory.amazon[searchSelect].reviews){
+                        data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews'; 
+                        outgoingResponse(data,'final');
+                    }   
+                    
+                    getNumEmoji(data,searchSelect+1,function(res){
+                        data.client_res = res + ' ' + data.recallHistory.urlShorten[searchSelect]; 
+                        outgoingResponse(data,'final');
+                    })
+
                 }
-
-                //send product title + price
-                data.client_res = attribs.Title[0]; 
-                //add price to this line, if found
-                if (attribs.ListPrice){
-                    data.client_res = data.client_res + " – " + addDecimal(attribs.ListPrice[0].Amount[0]);
+                else {
+                    console.log('warning: item selection does not exist in amazon array');
                 }
-                outgoingResponse(data,'final');
-
-                ///// product details string //////
-
-                //get size
-                if (attribs.Size){
-                    cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
-                }
-
-                //get artist
-                if (attribs.Artist){
-                    cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
-                }
-
-                //get brand or manfacturer
-                if (attribs.Brand){
-                    cString = cString + ' ○ ' +  attribs.Brand[0];
-                }
-                else if (attribs.Manufacturer){
-                    cString = cString + ' ○ ' +  attribs.Manufacturer[0];
-                }   
-
-                //get all stuff in details box
-                if (attribs.Feature){   
-                    cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
-                }
-
-                //done collecting details string, now send
-                if (cString){
-                    data.client_res = cString;
-                    outgoingResponse(data,'final');
-                }
-
-                ///// end product details string /////
-
-                if (data.recallHistory.amazon[searchSelect].reviews){
-                    data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews'; 
-                    outgoingResponse(data,'final');
-                }   
-
-                //send product link
-                data.client_res = data.recallHistory.amazon[searchSelect].DetailPageURL[0]; 
-                outgoingResponse(data,'final');
 
             }
             else {
@@ -604,6 +621,69 @@ function searchFocus(data){
 }
 
 function searchMore(data){
+
+    recallHistory(data, function(res){
+
+        data = res; //bad
+
+        if (data.amazon.length > 3){ //only trim down in thirds for now
+            data.amazon.splice(0, 3);
+        }
+
+        var loopLame = [0,1,2];//lol
+        async.eachSeries(loopLame, function(i, callback) {
+            if (data.amazon[i]){
+                //get reviews in circumvention manner (amazon not allowing anymore officially)
+                request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
+                  if(err){
+                    console.log(err);
+                    callback();
+                  }
+                  else {
+
+                    $ = cheerio.load(body);
+
+                    //get rating
+                    var rating = ( $('.a-size-base').text()
+                      .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                      .map(function (v) {return +v;}).shift();
+
+                    //get reviewCount
+                    var reviewCount = ( $('.a-link-emphasis').text()
+                      .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                      .map(function (v) {return +v;}).shift();
+
+                    //adding scraped reviews to amazon objects
+                    data.amazon[i].reviews = {
+                        rating: rating,
+                        reviewCount: reviewCount
+                    }
+                    callback();
+                  }
+                });                
+            }
+            else {
+                callback();
+            }
+
+        }, function done(){
+            outgoingResponse(data,'stitch','amazon'); //send back msg to user
+        });
+
+
+        // //async push items to cart
+        // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+        //     messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+        //     callback();
+        // }, function done(){
+        //     //only support "add to cart" message for one item.
+        //     //static:
+        //     var sT = data.searchSelect[0];
+        //     data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+        //     outgoingResponse(data,'txt');
+        // });
+    });
+
     //go to end of search results array (3 at a time). if hit end of search array V
     //use amazon search itemPage to advance to more results
 }
@@ -1009,10 +1089,27 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     //stitch images before send to user
     if (action == 'stitch'){
         stitchResults(data,source,function(url){
+
             //sending out stitched image response
             data.client_res = url;
-            saveHistory(data); //push new history state after we have stitched URL
-            sendResponse(data);
+            sendResponse(data);    
+
+            //send extra item URLs with image responses
+            if (data.action == 'initial' || data.action == 'similar'){
+                urlShorten(data,function(res){       
+                    for (var i = 0; i < res.length; i++) { 
+                        getNumEmoji(data,i+1,function(emoji){
+                            data.client_res = emoji + ' ' + res[i];
+                            sendResponse(data); 
+                        })
+                    }
+                    data.urlShorten = res;
+                    saveHistory(data); //push new history state after we have stitched URL
+                });
+            }
+            else {
+                saveHistory(data); //push new history state after we have stitched URL
+            }
 
             //* * * * * * * * * * *
             //which cinna response to include in message?
@@ -1023,6 +1120,7 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                     sendResponse(data);
                 }
             });
+
         });
     }
     //data.client_res > already added to data for response
@@ -1076,10 +1174,7 @@ function stitchResults(data,source,callback){
             var loopLame = [0,1,2];//lol
 
             async.eachSeries(loopLame, function(i, callback) {
-                if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
-
-                    console.log(data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0]);
-
+                if (data.amazon[i] && data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
 
                     var price;
 
@@ -1087,10 +1182,17 @@ function stitchResults(data,source,callback){
                         price = ''; //price missing, show blank
                     }
                     else{
+                        // add price
                         price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
+                        //convert to $0.00
                         price = addDecimal(price);
                     }
 
+                    var primeAvail = 0;
+                    if (data.amazon[i].Offers && data.amazon[i].Offers[0].Offer && data.amazon[i].Offers[0].Offer[0].OfferListing && data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime){
+                        primeAvail = data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0];
+                    }
+  
                     toStitch.push({
                         url: data.amazon[i].MediumImage[0].URL[0],
                         price: price,
@@ -1218,3 +1320,66 @@ function addDecimal(str) {
     output = "$" + num.toString();
     return output;
 }
+
+//pass in data.amazon , get shorten urls for first 3 things
+function urlShorten(data,callback2){
+
+    var loopLame = [0,1,2];//lol
+    var urlArr = [];
+    async.eachSeries(loopLame, function(i, callback) {      
+        if (data.amazon[i]){
+            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+encodeURI(data.amazon[i].DetailPageURL[0])+'&format=txt', function(err, res, body) {
+              if(err){
+                console.log(err);
+                callback();
+              }
+              else {
+                urlArr.push(body);
+                callback();
+              }
+            });            
+        } 
+        else{
+            callback();
+        }
+
+    }, function done(){
+        callback2(urlArr);
+    });        
+}
+
+function getNumEmoji(data,number,callback){
+    var numEmoji;
+    switch(number){
+        case 1: //emoji #1
+            if (data.source.origin == 'socket.io'){
+                numEmoji = '<span style="font-size:26px;">➊</span>';
+            }
+            else if (data.source.origin == 'slack'){
+                numEmoji = ':one:';
+            }
+            break;
+        case 2: //emoji #2
+            if (data.source.origin == 'socket.io'){
+                numEmoji = '<span style="font-size:26px;">➋</span>';
+            }
+            else if (data.source.origin == 'slack'){
+                numEmoji = ':two:';
+            }
+            break;
+        case 3: //emoji #3
+            if (data.source.origin == 'socket.io'){
+                numEmoji = '<span style="font-size:26px;">➌</span>';
+            }
+            else if (data.source.origin == 'slack'){
+                numEmoji = ':three:';
+            }
+            break;
+    }
+    callback(numEmoji);
+}
+
+
+
+
+

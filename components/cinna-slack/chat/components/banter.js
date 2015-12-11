@@ -162,7 +162,7 @@ var getCinnaResponse = function(data,callback){
 	    switch(data.searchSelect[0]){
 	        case 1: //emoji #1
 	            if (data.source.origin == 'socket.io'){
-	                numEmoji = '<span style="font-size:32px;">➊</span>';
+	                numEmoji = '<span style="font-size:26px;">➊</span>';
 	            }
 	            else if (data.source.origin == 'slack'){
 	                numEmoji = ':one:';
@@ -170,7 +170,7 @@ var getCinnaResponse = function(data,callback){
 	            break;
 	        case 2: //emoji #2
 	            if (data.source.origin == 'socket.io'){
-	                numEmoji = '<span style="font-size:32px;">➋</span>';
+	                numEmoji = '<span style="font-size:26px;">➋</span>';
 	            }
 	            else if (data.source.origin == 'slack'){
 	                numEmoji = ':two:';
@@ -178,7 +178,7 @@ var getCinnaResponse = function(data,callback){
 	            break;
 	        case 3: //emoji #3
 	            if (data.source.origin == 'socket.io'){
-	                numEmoji = '<span style="font-size:32px;">➌</span>';
+	                numEmoji = '<span style="font-size:26px;">➌</span>';
 	            }
 	            else if (data.source.origin == 'slack'){
 	                numEmoji = ':three:';

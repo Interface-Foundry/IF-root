@@ -96,7 +96,7 @@ def index():
         draw = ImageDraw.Draw(img)
 
         #add product names
-        for line in textwrap.wrap(im[u'name'], width=26):
+        for line in textwrap.wrap(im[u'name'], width=31):
             draw.text((x, y), line, font=font, fill="#2d70c1")
             y += font.getsize(line)[1]
             last_y = y
@@ -155,5 +155,5 @@ def download_image(url):
 
 if __name__ == '__main__':
     print 'running app on port 5k'
-    app.debug = True
+    app.debug = False
     app.run(host="0.0.0.0")
