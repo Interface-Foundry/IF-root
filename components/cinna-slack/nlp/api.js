@@ -86,6 +86,7 @@ var parse = module.exports.parse = function(text, callback) {
 
 var exactMatches = {
   more: {bucket: BUCKET.search, action: ACTION.more, tokens: ['more']},
+  'show more': {bucket: BUCKET.search, action: ACTION.more, tokens: ['show more']},
   get: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['get']},
   checkout: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['checkout']},
   cart: {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['cart']},
