@@ -31,7 +31,7 @@ export default class MessageComposer extends Component {
         time: strftime('%H:%M %p', new Date())
       };
       socket.emit('new message', newMessage);
-      UserAPIUtils.createMessage(newMessage);
+      // UserAPIUtils.createMessage(newMessage);
       this.props.onSave(newMessage);
       this.setState({ text: '', typing: false });
       socket.emit('stop typing');

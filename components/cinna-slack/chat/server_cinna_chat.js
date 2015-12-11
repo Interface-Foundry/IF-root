@@ -36,31 +36,31 @@ var messageHistory = {}; //fake database, stores all users and their chat histor
 
 
 // - - - Slack create bot - - - -//
-var settings = {
-    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-    name: 'cinna-1000'
-};
-var bot = new Bot(settings);
+// var settings = {
+//     token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+//     name: 'cinna-1000'
+// };
+// var bot = new Bot(settings);
 
-bot.on('start', function() {
-    bot.on('message', function(data) {
-        // all incoming events https://api.slack.com/rtm 
-        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-        if (data.type == 'message' && data.username !== settings.name){ 
-            var newSl = { 
-                source: {
-                    'origin':'slack',
-                    'channel':data.channel,
-                    'org':data.team,
-                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
-                },
-                'msg':data.text
-            }
-            preProcess(newSl);
-        }
+// bot.on('start', function() {
+//     bot.on('message', function(data) {
+//         // all incoming events https://api.slack.com/rtm 
+//         // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+//         if (data.type == 'message' && data.username !== settings.name){ 
+//             var newSl = { 
+//                 source: {
+//                     'origin':'slack',
+//                     'channel':data.channel,
+//                     'org':data.team,
+//                     'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
+//                 },
+//                 'msg':data.text
+//             }
+//             preProcess(newSl);
+//         }
 
-    });
-});
+//     });
+// });
 
 //- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(app);
@@ -205,10 +205,11 @@ function incomingAction(data){
                     console.log('Connected to support client.')
                     ioClient.emit('new channel', {
                         name: data.source.channel,
-                        id: data.source.indexHist
+                        id: data.source.channel,
+                        resolved: false
                     })
                     ioClient.emit('new message', {
-                        id: data.source.channel,
+                        id: data.source.indexHist.concat(data.msg),
                         channelID: data.source.channel,
                         text: data.msg,
                         user: data.source.channel,
@@ -218,10 +219,11 @@ function incomingAction(data){
             } else {
                 ioClient.emit('new channel', {
                     name: data.source.channel,
-                    id: data.source.indexHist
+                    id: data.source.channel,
+                    resolved: false
                 })
                 ioClient.emit('new message', {
-                    id: data.source.channel,
+                    id: data.source.indexHist.concat(data.msg),
                     channelID: data.source.channel,
                     text: data.msg,
                     user: data.source.channel,

@@ -11,7 +11,7 @@ export default class MessageListItem extends Component {
     this.state = { isImage: null}
   }
 
-  componentWillReceiveProps() {
+  componentDidMount() {
     const { message } = this.props 
 
      function checkImgURL (msg) {
@@ -19,16 +19,15 @@ export default class MessageListItem extends Component {
     }
 
    if (checkImgURL(this.props.message.text)) {
-     console.log(0)
+     // console.log(0)
       this.setState({ isImage : 'true'  })
     } else {
-      console.log(1)
+    // console.log(1)
       this.setState({ isImage : 'false'  })
     }
   }
 
- 
-  
+
   renderImage() {
      const {message} = this.props
      switch (this.state.isImage){

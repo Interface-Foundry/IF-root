@@ -2,7 +2,7 @@ exports = module.exports = function(io) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
-            console.log('new message!!', msg)
+            // console.log('new message!!', msg)
             socket.broadcast.emit('new bc message', msg);
         });
         socket.on('new channel', function(channel) {

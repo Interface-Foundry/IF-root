@@ -21,6 +21,12 @@ export default class Channels extends Component {
       moreChannelsModal: false
     };
   }
+
+ componentWillUpdate() {
+  const { channels } = this.props
+  // console.log('CHANNELLZZZ', channels)
+ }  
+
   handleChangeChannel(channel) {
     this.props.onClick(channel);
   }
