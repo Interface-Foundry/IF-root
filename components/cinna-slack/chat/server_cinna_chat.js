@@ -32,7 +32,7 @@ console.log("listening localhost:8000");
 var messageHistory = {}; //fake database, stores all users and their chat histories
 
 
-- - - Slack create bot - - - -//
+// - - - Slack create bot - - - -//
 var settings = {
     token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
     name: 'cinna-1000'
