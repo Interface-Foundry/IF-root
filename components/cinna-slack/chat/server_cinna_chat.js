@@ -33,31 +33,30 @@ var messageHistory = {}; //fake database, stores all users and their chat histor
 
 
 // - - - Slack create bot - - - -//
-var settings = {
-    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-    name: 'cinna-1000'
-};
-var bot = new Bot(settings);
+// var settings = {
+//     token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+//     name: 'cinna-1000'
+// };
+// var bot = new Bot(settings);
 
-bot.on('start', function() {
-    bot.on('message', function(data) {
-        // all incoming events https://api.slack.com/rtm 
-        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-        if (data.type == 'message' && data.username !== settings.name){ 
-            var newSl = { 
-                source: {
-                    'origin':'slack',
-                    'channel':data.channel,
-                    'org':data.team,
-                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
-                },
-                'msg':data.text
-            }
-            preProcess(newSl);
-        }
-
-    });
-});
+// bot.on('start', function() {
+//     bot.on('message', function(data) {
+//         // all incoming events https://api.slack.com/rtm 
+//         // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+//         if (data.type == 'message' && data.username !== settings.name){ 
+//             var newSl = { 
+//                 source: {
+//                     'origin':'slack',
+//                     'channel':data.channel,
+//                     'org':data.team,
+//                     'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
+//                 },
+//                 'msg':data.text
+//             }
+//             preProcess(newSl);
+//         }
+//     });
+// });
 
 //- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(app);
@@ -717,8 +716,12 @@ function saveToCart(data){
             //only support "add to cart" message for one item.
             //static:
             var sT = data.searchSelect[0];
-            data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
-            outgoingResponse(data,'txt');
+            // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+            
+            // outgoingResponse(data,'txt');
+            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+                outgoingResponse(res,'txt');
+            });
         });
     });
 }
@@ -885,34 +888,40 @@ function searchAmazon(data, type, query, flag){
                 var loopLame = [0,1,2];//lol
                 async.eachSeries(loopLame, function(i, callback) {
 
-                    //get reviews in circumvention manner (amazon not allowing anymore officially)
-                    request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
-                      if(err){
-                        console.log(err);
+                    if (data.amazon[i]){
+                        //get reviews in circumvention manner (amazon not allowing anymore officially)
+                        request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
+                          if(err){
+                            console.log(err);
+                            callback();
+                          }
+                          else {
+
+                            $ = cheerio.load(body);
+
+                            //get rating
+                            var rating = ( $('.a-size-base').text()
+                              .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                              .map(function (v) {return +v;}).shift();
+
+                            //get reviewCount
+                            var reviewCount = ( $('.a-link-emphasis').text()
+                              .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
+                              .map(function (v) {return +v;}).shift();
+
+                            //adding scraped reviews to amazon objects
+                            data.amazon[i].reviews = {
+                                rating: rating,
+                                reviewCount: reviewCount
+                            }
+                            callback();
+                          }
+                        });                        
+                    }
+                    else {
                         callback();
-                      }
-                      else {
+                    }
 
-                        $ = cheerio.load(body);
-
-                        //get rating
-                        var rating = ( $('.a-size-base').text()
-                          .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                          .map(function (v) {return +v;}).shift();
-
-                        //get reviewCount
-                        var reviewCount = ( $('.a-link-emphasis').text()
-                          .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                          .map(function (v) {return +v;}).shift();
-
-                        //adding scraped reviews to amazon objects
-                        data.amazon[i].reviews = {
-                            rating: rating,
-                            reviewCount: reviewCount
-                        }
-                        callback();
-                      }
-                    });
 
                 }, function done(){
                     outgoingResponse(data,'stitch','amazon'); //send back msg to user
@@ -969,7 +978,7 @@ function searchAmazon(data, type, query, flag){
                     // [NOTE: functionality not in default AWS node lib. had to extend it!]
                     client.similarityLookup({
                       ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
-                      //Keywords: data.recallHistory.tokens,
+                      // Keywords: data.recallHistory.tokens,
                       SimilarityType: flag, //other option is "Random" <<< test which is better results
                       responseGroup: 'ItemAttributes,Offers,Images'
 
@@ -1012,23 +1021,38 @@ function searchAmazon(data, type, query, flag){
                             });
 
                         }, function done(){
+                            data.action = 'initial';
                             outgoingResponse(data,'stitch','amazon'); //send back msg to user
                         });
 
-
-                        // data.amazon = results;
-
-                        // //* * * * * CHANGE TO INITIAL SERACH FORMAT * * * * //
-                        // outgoingResponse(data,'stitch','amazon'); //send msg to user
-
-                        //need to put results inside data
-
-                        //saveHistory(data,results,'amazon'); //push new state, pass amazon results
-
                     }).catch(function(err){
-                      console.log('amazon err ',err[0].Error[0]);
-                      console.log('SIMILAR FAILED: should we fire random query or mod query');
-                      //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
+                        console.log('amazon err ',err[0].Error[0]);
+                        console.log('SIMILAR FAILED: should we fire random query or mod query');
+
+                        var cSearch = '';
+                        var itemAttrib = data.recallHistory.amazon[data.searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                        if (itemAttrib[0].Brand){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                        }
+                        if (itemAttrib[0].Department){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                        }
+                        if (itemAttrib[0].ProductGroup){
+                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                        }
+                        if (itemAttrib[0].Binding){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                        }
+
+                        console.log('BS string ugh ',cSearch);
+
+                        data = data.recallHistory; //HACK!!!!!!
+                        data.tokens = [];
+                        data.tokens.push(cSearch);
+                        searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+                        //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
+
                     });
                 }
                 else {
@@ -1097,14 +1121,19 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             //send extra item URLs with image responses
             if (data.action == 'initial' || data.action == 'similar'){
                 urlShorten(data,function(res){       
-                    for (var i = 0; i < res.length; i++) { 
-                        getNumEmoji(data,i+1,function(emoji){
-                            data.client_res = emoji + ' ' + res[i];
+                    var count = 0;
+                    async.eachSeries(res, function(i, callback) {
+                        getNumEmoji(data,count+1,function(emoji){
+                            data.client_res = emoji + ' ' + res[count];
                             sendResponse(data); 
-                        })
-                    }
-                    data.urlShorten = res;
-                    saveHistory(data); //push new history state after we have stitched URL
+                            count++;
+                            callback();
+                        });
+                    }, function done(){
+                        data.urlShorten = res;
+                        saveHistory(data); //push new history state after we have stitched URL
+                    });
+
                 });
             }
             else {
@@ -1174,7 +1203,7 @@ function stitchResults(data,source,callback){
             var loopLame = [0,1,2];//lol
 
             async.eachSeries(loopLame, function(i, callback) {
-                if (data.amazon[i] && data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
+                if (data.amazon[i]){
 
                     var price;
 
@@ -1182,24 +1211,40 @@ function stitchResults(data,source,callback){
                         price = ''; //price missing, show blank
                     }
                     else{
-                        // add price
-                        price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
-                        //convert to $0.00
-                        price = addDecimal(price);
+                        if (data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
+                            price = '';
+                        }
+                        else {
+                            // add price
+                            price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
+                            //convert to $0.00
+                            price = addDecimal(price);                            
+                        }
                     }
 
                     var primeAvail = 0;
                     if (data.amazon[i].Offers && data.amazon[i].Offers[0].Offer && data.amazon[i].Offers[0].Offer[0].OfferListing && data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime){
                         primeAvail = data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0];
                     }
+
+                    var imageURL;
+                    if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
+                        imageURL = data.amazon[i].MediumImage[0].URL[0];
+                    }
+                    else {
+                        imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
+                    }
   
                     toStitch.push({
-                        url: data.amazon[i].MediumImage[0].URL[0],
+                        url: imageURL,
                         price: price,
-                        prime: data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0], //is prime available?
+                        prime: primeAvail, //is prime available?
                         name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE 
                         reviews: data.amazon[i].reviews
                     });
+                }
+                else {
+                    console.log('IMAGE MISSING!',data.amazon[i]);
                 }
                 callback();
             }, function done(){
