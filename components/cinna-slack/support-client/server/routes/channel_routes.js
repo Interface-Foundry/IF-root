@@ -27,7 +27,7 @@ module.exports = function(router) {
     })
   })
 
-  // post a new user to channel list db
+  // create a new channel
   router.post('/channels/new_channel', function(req, res) {
     Channel.findOne({id: req.body.id}, function(err, data) {
         if(err) {
@@ -51,4 +51,26 @@ module.exports = function(router) {
         }
       })
   });
+
+  // resolve channel issue
+  router.post('/channels/resolve_channel', function(req, res) {
+    Channel.findOne({id: req.body.id}, function(err, data) {
+        if(err) {
+          console.log(err);
+          return res.status(500).json({msg: 'internal server error'});
+        }
+        if (data) {
+          data.resolved = true;
+          data.save(function(err, res) {
+            if (err) console.log(err)
+            console.log('Resolved channel: ',res)
+            return res.json(data)
+          })
+          } else {
+             console.log('Channel Routes: Channel does not exist. ')
+            res.json({});
+           }
+      })
+  });
+
 }

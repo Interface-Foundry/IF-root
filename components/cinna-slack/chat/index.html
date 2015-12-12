@@ -25,7 +25,7 @@
          }
 
          socket.on("msgFromSever", function(data) {
-
+          console.log('YOLOOO', data)
             if (checkImgURL(data.message)){ //image URL
               var msgP = "<img width='1000' style='max-width:400px;' src='" + data.message + "''><br><br>";
 

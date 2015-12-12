@@ -69,6 +69,11 @@ io.sockets.on('connection', function(socket) {
 
     //SEND A WELCOME TO KIP MESSAGE HERE. how to get started
 
+
+     socket.on("msgFromSever", function(data) {
+            console.log('YOLOOO', data)
+   })
+
     socket.on("msgToClient", function(data) {
         data.source = { 
             'origin':'socket.io',

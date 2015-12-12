@@ -96,6 +96,21 @@ export function createChannel(channel) {
     });
   });
 }
+export function resolveChannel(channel) {
+  console.log('in action resolvechannel(): ',channel)
+  return new Promise((resolve, reject) => {
+    superagent
+    .post('/api/channels/resolve_channel')
+    .send(channel)
+    .end((err, res) => {
+      if (err) {
+        reject(res.body || err);
+      } else {
+        resolve(res.body);
+      }
+    });
+  });
+}
 export function loadInitialMessages() {
   return new Promise((resolve, reject) => {
     superagent

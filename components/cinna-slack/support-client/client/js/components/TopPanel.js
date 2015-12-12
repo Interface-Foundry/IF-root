@@ -17,7 +17,6 @@ export default class TopPanel extends Component {
     }
 
     handleChangeControl(control) {
-        console.log('inner clicked', control)
         this.props.onClick(control);
     }
 

@@ -116,7 +116,7 @@ export default class Chat extends Component {
             </div>
 
             <div style= {{ padding: 0}} >
-              <ControlPanel activeControl={activeControl} />
+              <ControlPanel activeControl={activeControl} activeChannel={activeChannel}/>
             </div>
 
           </div>

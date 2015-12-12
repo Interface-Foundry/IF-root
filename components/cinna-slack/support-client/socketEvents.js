@@ -1,8 +1,13 @@
-exports = module.exports = function(io) {
+var ioClient = require('socket.io-client').connect("http://localhost:8000", {'force new connection': true});
+ioClient.on('connect', function() {
+    console.log('Connected to cinna-slack client.')
+})
+exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
-            // console.log('new message!!', msg)
+            console.log('new message!!', msg)
+            ioClient.emit("msgFromSever",{message: msg.text});
             socket.broadcast.emit('new bc message', msg);
         });
         socket.on('new channel', function(channel) {
@@ -16,3 +21,5 @@ exports = module.exports = function(io) {
         });
     });
 }
+// var io = require('socket.io').listen(app);
+// io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
