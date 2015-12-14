@@ -1,0 +1,11 @@
+
+   .chats {
+     border: 1px solid #ccc;
+     height: 85%;
+     overflow-y: scroll;
+     width: 100%;
+     margin-bottom: 30px;
+     background-color:white;
+     padding-left:36px;
+   }
+   #msg {  width: 85%; height:35px; font-size:16px;}

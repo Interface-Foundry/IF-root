@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Kip is an AI-powered personal shopper that finds what you're looking for">
+
+    <!-- twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kipsearch" />
+    <meta name="twitter:title" content="Kip" />
+    <meta name="twitter:description" content="Kip is an AI-powered personal shopper that finds what you're looking for." />
+    <meta name="twitter:image" content="https://farm6.staticflickr.com/5510/14338202952_93595258ff_z.jpg" />
+
+    <link rel="stylesheet" href="/normalize.css" />
+    <link rel="stylesheet" href="/skeleton.css" />
+    <link rel="stylesheet" href="/chat.css" />
+  </head>
+
+  <body>
+    <div>
+      <center>
+        <img width="60" src="http://kipthis.com/img/kip_logo_new.svg">
+      </center>
+      <div id="chatwindow" class="chats"></div>
+      <input type="text" id="msg" onkeydown="if (event.keyCode == 13) document.getElementById('sendbutton').click()"/>
+      <button id="sendbutton" onclick="sendMessage()" >Send</button>
+    </div>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/chat.js"></script>
+  </body>
+</html>
