@@ -13,7 +13,7 @@
        socket.emit("msgToClient",  { msg: message }); //passing all messages with channel/org Ids attached
 
         var anon = '<img style="float:left; padding-right:5px;" width="45" src="https://eatout.ug/assets/img/default-icon-user.png">';
-        message = anon + '<p>' + message + '</p><br>';
+        message = anon + '<p>' + message + '</p>';
 
        $(".chats").append(message);
    }
@@ -62,7 +62,7 @@
 
       }
       else { //else
-        var msgP = "<p> " + data.message + "</p><br>";
+        var msgP = "<p> " + data.message + "</p>";
 
       }
 

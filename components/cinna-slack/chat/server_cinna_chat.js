@@ -69,6 +69,17 @@ io.sockets.on('connection', function(socket) {
     console.log("socket connected");
 
     //SEND A WELCOME TO KIP MESSAGE HERE. how to get started
+    // simulate a "Hi"
+    var helloMessage = {
+      msg: 'Hi'
+    };
+    helloMessage.source = {
+        'origin':'socket.io',
+        'channel':socket.id,
+        'org':'kip',
+        'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
+    }
+    preProcess(helloMessage);
 
     socket.on("msgToClient", function(data) {
         data.source = {

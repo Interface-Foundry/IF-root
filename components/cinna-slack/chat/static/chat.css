@@ -1,11 +1,35 @@
 
-   .chats {
-     border: 1px solid #ccc;
-     height: 85%;
-     overflow-y: scroll;
-     width: 100%;
-     margin-bottom: 30px;
-     background-color:white;
-     padding-left:36px;
-   }
-   #msg {  width: 85%; height:35px; font-size:16px;}
+.chats {
+   border: 1px solid #ccc;
+   overflow-y: scroll;
+   margin-bottom: 30px;
+   background-color:white;
+   padding-left:36px;
+   flex: 1;
+}
+#msg {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+#sendbutton {
+  background-color: #47a2fc;
+  color: white;
+  border: none;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#sendbutton:hover {
+  background-color: #4fa6fc;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
