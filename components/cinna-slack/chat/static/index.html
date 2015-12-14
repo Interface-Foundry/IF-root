@@ -8,7 +8,7 @@
     <!-- twitter -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@kipsearch" />
-    <meta name="twitter:title" content="Kip" />
+    <meta name="twitter:title" content="Kip Personal Shopper" />
     <meta name="twitter:description" content="Kip is an AI-powered personal shopper that finds what you're looking for." />
     <meta name="twitter:image" content="https://s3.amazonaws.com/if-server-avatars/twitter.png" />
 
@@ -35,10 +35,12 @@
 
   <body>
     <div class="container">
-      <center>
-        <img width="60" src="http://kipthis.com/img/kip_logo_new.svg">
-      </center>
-      <div id="chatwindow" class="chats"></div>
+      <div id="chatwindow" class="chats">
+        <img style="float:left; padding-right:5px;" width="45" src="http://kipthis.com/img/kip-icon.png">
+        <p>
+          <img width="60" src="http://kipthis.com/img/kip_logo_new.svg">
+        </p>
+      </div>
       <div style="display: flex;">
         <input type="text" id="msg" onkeydown="if (event.keyCode == 13) document.getElementById('sendbutton').click()"/>
         <button id="sendbutton" onclick="sendMessage()" >Send</button>
