@@ -4,6 +4,7 @@
  // var orgId = 'kip';
 
 var $chats = $('.chats')
+var $chatMessages = $('.chat-messages')
 var chats_el = $chats[0];
 
 
@@ -11,28 +12,48 @@ setTimeout(function(){
     $( "#msg" ).focus();
 }, 0);
 
- function sendMessage() {
-     var message = $("#msg").val();
-     $("#msg").val('');
-     socket.emit("msgToClient",  { msg: message }); //passing all messages with channel/org Ids attached
+function sendMessage() {
+  var message = $("#msg").val();
+  $("#msg").val('');
+  socket.emit("msgToClient",  { msg: message }); //passing all messages with channel/org Ids attached
 
-      var anon = '<img style="float:left; padding-right:5px;" width="45" src="https://eatout.ug/assets/img/default-icon-user.png">';
-      message = anon + '<p>' + message + '</p>';
+  printMessage(message, true)
+}
 
-     $(".chats").append(message);
-     scrollChat()
- }
+//generates new id for user session
+function makeId(){
+  return Math.random().toString(36).substring(7);
+}
 
- //generates new id for user session
- function makeId(){
-    return Math.random().toString(36).substring(7);
- }
+//
+// Print messages to screen
+//
+var IMAGES = {
+  me: '<img style="padding-right:5px;" width="45" src="https://eatout.ug/assets/img/default-icon-user.png">',
+  cinna: '<img style="padding-right:5px;" width="45" src="http://kipthis.com/img/kip-icon.png">'
+};
+var userIsTalking = true;
+// prints a message on the screen with the appropriate icon
+function printMessage(msg, isUser) {
+  if (isUser && !userIsTalking) {
+    msg = IMAGES.me + msg;
+  } else if (!isUser && userIsTalking) {
+    msg = IMAGES.cinna + msg;
+  }
+  userIsTalking = isUser;
+  $chatMessages.append('<li>' + msg + '</li>');
+  scrollChat();
+}
 
- socket.on("msgFromSever", function(data) {
+//
+// Data in, convert to message
+//
+socket.on("msgFromSever", function(data) {
+   console.log('data')
+   console.log(data);
 
    // var res = str.replace(/blue/g, "red");
     //var b = url.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
-    var cinna = '<img style="float:left; padding-right:5px;" width="45" src="http://kipthis.com/img/kip-icon.png">';
     var urlIcon;
     urlIcon = data.message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
 
@@ -76,25 +97,15 @@ setTimeout(function(){
         return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
     }
 
-    if (!onlyUrl){
-      msgP = cinna + msgP;
-    }
-
-
-   $(".chats").append(msgP);
-
-   scrollChat()
-
-
-
-
-    // $(".chats").scrollTop($(document).height());
-    // var wtf = $('.chats');
-    // var height = wtf[0].scrollHeight;
-    // wtf.scrollTop(height);
+    printMessage(msgP)
 
  })
 
  function scrollChat() {
       $chats.animate({scrollTop: chats_el.scrollHeight})
  }
+
+ //
+ // Initialize
+ //
+ printMessage('<img width="60" style="margin-bottom: -15px;" src="http://kipthis.com/img/kip_logo_new.svg">')
