@@ -17,6 +17,7 @@
 }
 .picstitch {
   max-width: 100%;
+  display: block;
 }
 .number {
   display: inline-block;
