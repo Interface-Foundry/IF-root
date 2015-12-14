@@ -34,14 +34,18 @@ var client = amazon.createClient({
   awsTag: "kipsearch-20"
 });
 
-var createServerSnippet =  function(req, res) {
-  fs.readFile("index.html", function(err, data) {
-      res.end(data);
-  }) ;
-}
-
-var app = http.createServer(createServerSnippet).listen(8000);
-console.log("listening localhost:8000");
+// website 🌏
+var express = require('express');
+var app = express();
+var server = require('http').createServer(app);
+app.use(express.static(__dirname + '/static'))
+app.get('/healthcheck', function () {
+  res.send('💬 🌏')
+})
+server.listen(8000, function(e) {
+  if (e) { console.error(e) }
+  console.log('chat app listening on port 8000 🌏 💬')
+})
 
 
 //globals
@@ -49,40 +53,51 @@ var messageHistory = {}; //fake database, stores all users and their chat histor
 
 
 // - - - Slack create bot - - - -//
-// var settings = {
-//     token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-//     name: 'cinna-1000'
-// };
-// var bot = new Bot(settings);
+var settings = {
+    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+    name: 'cinna-1000'
+};
+var bot = new Bot(settings);
 
-// bot.on('start', function() {
-//     bot.on('message', function(data) {
-//         // all incoming events https://api.slack.com/rtm 
-//         // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-//         if (data.type == 'message' && data.username !== settings.name){ 
-//             var newSl = { 
-//                 source: {
-//                     'origin':'slack',
-//                     'channel':data.channel,
-//                     'org':data.team,
-//                     'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
-//                 },
-//                 'msg':data.text
-//             }
-//             preProcess(newSl);
-//         }
-//     });
-// });
+bot.on('start', function() {
+    bot.on('message', function(data) {
+        // all incoming events https://api.slack.com/rtm
+        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+        if (data.type == 'message' && data.username !== settings.name){
+            var newSl = {
+                source: {
+                    'origin':'slack',
+                    'channel':data.channel,
+                    'org':data.team,
+                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory
+                },
+                'msg':data.text
+            }
+            preProcess(newSl);
+        }
+    });
+});
 
 //- - - - Socket.io handling - - - -//
-var io = require('socket.io').listen(app);
+var io = require('socket.io').listen(server);
 io.sockets.on('connection', function(socket) {
     console.log("socket connected");
 
     //SEND A WELCOME TO KIP MESSAGE HERE. how to get started
+    // simulate a "Hi"
+    var helloMessage = {
+      msg: 'Hi'
+    };
+    helloMessage.source = {
+        'origin':'socket.io',
+        'channel':socket.id,
+        'org':'kip',
+        'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
+    }
+    preProcess(helloMessage);
 
     socket.on("msgToClient", function(data) {
-        data.source = { 
+        data.source = {
             'origin':'socket.io',
             'channel':socket.id,
             'org':'kip',
@@ -120,26 +135,26 @@ function preProcess(data){
                 case 'basic': //just respond, no actions
                     //send message
                     data.client_res = res;
-                    cannedBanter(data,res);      
+                    cannedBanter(data,res);
                     break;
                 case 'search.initial':
                     //send message
                     data.client_res = res;
-                    cannedBanter(data,res);  
+                    cannedBanter(data,res);
 
                     //now search for item
                     data.tokens = [];
                     data.tokens.push(query); //search for this item
                     data.bucket = 'search';
                     data.action = 'initial';
-                    incomingAction(data);  
+                    incomingAction(data);
                     break;
                 case 'search.focus':
                     data.searchSelect = [];
                     data.searchSelect.push(query);
                     data.bucket = 'search';
                     data.action = 'focus';
-                    incomingAction(data); 
+                    incomingAction(data);
                     break;
                 default:
                     console.log('error: canned action flag missing');
@@ -147,9 +162,9 @@ function preProcess(data){
         }
         //proceed to NLP instead
         else {
-            routeNLP(data); 
+            routeNLP(data);
         }
-    });    
+    });
 
 
 
@@ -170,16 +185,16 @@ function routeNLP(data){
             if (res.action){
                 data.action = res.action;
             }
-            if (res.tokens){    
+            if (res.tokens){
                 data.tokens = res.tokens;
-            }   
-            if (res.searchSelect){    
+            }
+            if (res.searchSelect){
                 data.searchSelect = res.searchSelect;
-            }  
-            if (res.dataModify){    
+            }
+            if (res.dataModify){
                 data.dataModify = res.dataModify;
-            }  
-            //- - - - end temp - - - - // 
+            }
+            //- - - - end temp - - - - //
 
             incomingAction(data);
 
@@ -206,30 +221,30 @@ function incomingAction(data){
         case 'supervisor':
             //route to supervisor chat window
             //JSON SEND TO SUPERVISOR
-            // { 
+            // {
             //   msg: 'more like 2',
-            //   source: { 
+            //   source: {
             //     origin: 'socket.io',
             //     channel: '-lsQ0_8joP-Sp04JAAAA',
-            //     org: 'kip' 
+            //     org: 'kip'
             //   },
             //   bucket: 'supervisor',
             //   searchSelect: [ 2 ],
-            //   recallHistory: [{ 
+            //   recallHistory: [{
             //     msg: 'xx',
-            //     source: { 
+            //     source: {
             //       origin: 'socket.io',
             //       channel: '-lsQ0_8joP-Sp04JAAAA',
-            //       org: 'kip' 
+            //       org: 'kip'
             //     },
             //     bucket: 'search',
             //     action: 'initial',
             //     tokens: [ 'xx' ],
-            //     amazon:[ 
+            //     amazon:[
             //       ],
             //       client_res: 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)',
-            //       ts: Tue Dec 08 2015 15:29:15 GMT-0500 (EST) 
-            //     }] 
+            //       ts: Tue Dec 08 2015 15:29:15 GMT-0500 (EST)
+            //     }]
             // }
         default:
             searchBucket(data);
@@ -320,7 +335,7 @@ function searchInitial(data,flag){
 function searchSimilar(data){
 
     //RECALL LAST ITEM IN SEARCH HISTORY
-    recallHistory(data, function(item){ 
+    recallHistory(data, function(item){
         data.recallHistory = item; //added recalled history obj to data obj
         searchAmazon(data,'similar');
     });
@@ -331,15 +346,15 @@ function searchModify(data, flag){
     //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
 
-    // {   
+    // {
     //     msg: '1 but in orange',
-    //     source:{ 
+    //     source:{
     //         origin: 'socket.io',
     //         channel: 'dgUgwg_Z6hNp4qJIAAAB',
-    //         org: 'kip' 
+    //         org: 'kip'
     //     },
     //     bucket: 'search',
-    //     action: 'modified' 
+    //     action: 'modified'
     // }
 
 
@@ -361,7 +376,7 @@ function searchModify(data, flag){
     //         data.dataModify = {
     //             type: 'color',
     //             val: ['blue']
-    //         }     
+    //         }
     //         break;
 
     //     case data.tokens[0].indexOf("in XL") !=-1 :
@@ -369,31 +384,31 @@ function searchModify(data, flag){
     //         data.dataModify = {
     //             type: 'size',
     //             val: ['extra large','XL']
-    //         } 
-    //         break;   
+    //         }
+    //         break;
 
     //     case data.tokens[0].indexOf("with collar") !=-1 :
 
     //         data.dataModify = {
     //             type: 'genericDetail',
     //             val: ['collar']
-    //         }  
-    //         break;  
+    //         }
+    //         break;
 
     //     case data.tokens[0].indexOf("in wool") !=-1 :
 
     //         data.dataModify = {
     //             type: 'material',
     //             val: ['wool','cashmere','merino']
-    //         }   
-    //         break; 
+    //         }
+    //         break;
 
     //     case data.tokens[0].indexOf("by Zara") !=-1 :
 
     //         data.dataModify = {
     //             type: 'brand',
     //             val: ['Zara']
-    //         }   
+    //         }
     //         break;
 
     //     case data.tokens[0].indexOf("less than") !=-1 :
@@ -402,15 +417,15 @@ function searchModify(data, flag){
     //             type: 'price',
     //             param: 'less than',
     //             val: [25]
-    //         } 
-    //         break;   
+    //         }
+    //         break;
 
     //     case data.tokens[0].indexOf("cheaper") !=-1 :
 
     //         data.dataModify = {
     //             type: 'price',
     //             param: 'less'
-    //         }  
+    //         }
     //         break;
     // }
 
@@ -447,7 +462,7 @@ function searchModify(data, flag){
 
                     default:
                         constructAmazonQuery(); //nm just construct a new query
-                }               
+                }
             }
             else {
                 console.log('error: data.dataModify params missing')
@@ -542,7 +557,7 @@ function searchModify(data, flag){
 
 function searchFocus(data){
 
-    recallHistory(data, function(item){ 
+    recallHistory(data, function(item){
         data.recallHistory = item; //added recalled history obj to data obj
 
         if (data.searchSelect && data.searchSelect.length == 1){
@@ -562,17 +577,17 @@ function searchFocus(data){
                     }
 
                     //send product title + price
-                    data.client_res = attribs.Title[0]; 
+                    data.client_res = attribs.Title[0];
                     //add price to this line, if found
                     if (attribs.ListPrice){
                         data.client_res =  addDecimal(attribs.ListPrice[0].Amount[0]) + " – " + data.client_res;
                     }
-                    outgoingResponse(data,'final'); 
+                    outgoingResponse(data,'final');
                     // //stall output for slack timing issue
-                    // setTimeout(function(){ 
-                    //     outgoingResponse(data,'final'); 
+                    // setTimeout(function(){
+                    //     outgoingResponse(data,'final');
                     // }, 700);
-                    
+
 
                     ///// product details string //////
 
@@ -592,10 +607,10 @@ function searchFocus(data){
                     }
                     else if (attribs.Manufacturer){
                         cString = cString + ' ○ ' +  attribs.Manufacturer[0];
-                    }   
+                    }
 
                     //get all stuff in details box
-                    if (attribs.Feature){   
+                    if (attribs.Feature){
                         cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
                     }
 
@@ -608,12 +623,12 @@ function searchFocus(data){
                     ///// end product details string /////
 
                     if (data.recallHistory.amazon[searchSelect].reviews){
-                        data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews'; 
+                        data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews';
                         outgoingResponse(data,'final');
-                    }   
-                    
+                    }
+
                     getNumEmoji(data,searchSelect+1,function(res){
-                        data.client_res = res + ' ' + data.recallHistory.urlShorten[searchSelect]; 
+                        data.client_res = res + ' ' + data.recallHistory.urlShorten[searchSelect];
                         outgoingResponse(data,'final');
                     })
 
@@ -675,7 +690,7 @@ function searchMore(data){
                     }
                     callback();
                   }
-                });                
+                });
             }
             else {
                 callback();
@@ -733,7 +748,7 @@ function saveToCart(data){
             //static:
             var sT = data.searchSelect[0];
             // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
-            
+
             // outgoingResponse(data,'txt');
             purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
                 outgoingResponse(res,'txt');
@@ -830,7 +845,7 @@ function searchAmazon(data, type, query, flag){
                                         console.log('Error: not allowing search for max price below 0');
                                     }
                                 });
- 
+
                             }
                             else {
                                 console.log('error: amazon price missing');
@@ -932,7 +947,7 @@ function searchAmazon(data, type, query, flag){
                             }
                             callback();
                           }
-                        });                        
+                        });
                     }
                     else {
                         callback();
@@ -1119,7 +1134,7 @@ function cannedBanter(data,req){
     //if this is pre-process chat (before NLP), store incoming chat msg too
     if(req){
         data.tokens = [];
-        data.tokens.push(req);       
+        data.tokens.push(req);
     }
     banterBucket(data);
 }
@@ -1132,16 +1147,16 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
 
             //sending out stitched image response
             data.client_res = url;
-            sendResponse(data);    
+            sendResponse(data);
 
             //send extra item URLs with image responses
             if (data.action == 'initial' || data.action == 'similar'){
-                urlShorten(data,function(res){       
+                urlShorten(data,function(res){
                     var count = 0;
                     async.eachSeries(res, function(i, callback) {
                         getNumEmoji(data,count+1,function(emoji){
                             data.client_res = emoji + ' ' + res[count];
-                            sendResponse(data); 
+                            sendResponse(data);
                             count++;
                             callback();
                         });
@@ -1199,7 +1214,7 @@ function sendResponse(data){
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
-        bot.postMessage(data.source.channel, data.client_res, params);  
+        bot.postMessage(data.source.channel, data.client_res, params);
     }
     else {
         console.log('error: data.source.channel or source.origin missing')
@@ -1234,7 +1249,7 @@ function stitchResults(data,source,callback){
                             // add price
                             price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
                             //convert to $0.00
-                            price = addDecimal(price);                            
+                            price = addDecimal(price);
                         }
                     }
 
@@ -1250,12 +1265,12 @@ function stitchResults(data,source,callback){
                     else {
                         imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
                     }
-  
+
                     toStitch.push({
                         url: imageURL,
                         price: price,
                         prime: primeAvail, //is prime available?
-                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE 
+                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE
                         reviews: data.amazon[i].reviews
                     });
                 }
@@ -1264,7 +1279,7 @@ function stitchResults(data,source,callback){
                 }
                 callback();
             }, function done(){
-                fireStitch(); 
+                fireStitch();
             });
             break;
     }
@@ -1275,7 +1290,7 @@ function stitchResults(data,source,callback){
                 console.log('stitch err ',e);
             }
             callback(stitched_url);
-        })        
+        })
     }
 }
 
@@ -1288,9 +1303,9 @@ function saveHistory(data,type){
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 2');
     }
-        
+
     data.ts = new Date(); //adding timestamp
-    
+
     if (!messageHistory[data.source.indexHist]){
         console.log('error: user doesnt exist in memory storage');
     }
@@ -1430,7 +1445,7 @@ function urlShorten(data,callback2){
 
     var loopLame = [0,1,2];//lol
     var urlArr = [];
-    async.eachSeries(loopLame, function(i, callback) {      
+    async.eachSeries(loopLame, function(i, callback) {
         if (data.amazon[i]){
             request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+encodeURI(data.amazon[i].DetailPageURL[0])+'&format=txt', function(err, res, body) {
               if(err){
@@ -1441,15 +1456,15 @@ function urlShorten(data,callback2){
                 urlArr.push(body);
                 callback();
               }
-            });            
-        } 
+            });
+        }
         else{
             callback();
         }
 
     }, function done(){
         callback2(urlArr);
-    });        
+    });
 }
 
 function getNumEmoji(data,number,callback){
@@ -1457,7 +1472,7 @@ function getNumEmoji(data,number,callback){
     switch(number){
         case 1: //emoji #1
             if (data.source.origin == 'socket.io'){
-                numEmoji = '<span style="font-size:26px;">➊</span>';
+                numEmoji = '<div class="number">➊</div>';
             }
             else if (data.source.origin == 'slack'){
                 numEmoji = ':one:';
@@ -1465,7 +1480,7 @@ function getNumEmoji(data,number,callback){
             break;
         case 2: //emoji #2
             if (data.source.origin == 'socket.io'){
-                numEmoji = '<span style="font-size:26px;">➋</span>';
+                numEmoji = '<div class="number">➋</div>';
             }
             else if (data.source.origin == 'slack'){
                 numEmoji = ':two:';
@@ -1473,7 +1488,7 @@ function getNumEmoji(data,number,callback){
             break;
         case 3: //emoji #3
             if (data.source.origin == 'socket.io'){
-                numEmoji = '<span style="font-size:26px;">➌</span>';
+                numEmoji = '<div class="number">➌</div>';
             }
             else if (data.source.origin == 'slack'){
                 numEmoji = ':three:';
@@ -1482,8 +1497,3 @@ function getNumEmoji(data,number,callback){
     }
     callback(numEmoji);
 }
-
-
-
-
-
