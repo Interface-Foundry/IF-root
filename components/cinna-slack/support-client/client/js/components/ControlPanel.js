@@ -15,8 +15,17 @@ export default class ControlPanel extends Component {
         activeChannel: PropTypes.object.isRequire
     }
 
+    constructor (props) {
+      super(props)
+    }
+
     resolveIssue(channel) {
      UserAPIUtils.resolveChannel(channel)
+    }
+
+    renderJSON() {
+      const {filteredMessages} = this.props
+        return (<div><pre>{JSON.stringify(filteredMessages[filteredMessages.length-1],null, 2) }</pre></div>)
     }
 
     renderControl(){
@@ -109,11 +118,12 @@ export default class ControlPanel extends Component {
     }
 
     render() {
-       const { activeControl } = this.props;
+       const { activeControl, messages } = this.props;
         var self = this;
         return ( 
         <section className='rightnav'>
-          <h1>Control Panel</h1> 
+          <h1>Control</h1> 
+          {self.renderJSON()}
         <div >
         {self.renderControl()}
         </div>

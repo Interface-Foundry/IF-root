@@ -76,7 +76,7 @@ export default class Chat extends Component {
   }
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl} = this.props;
-    const filteredMessages = messages.filter(message => message.channelID === activeChannel.name);
+    const filteredMessages = messages.filter(message => message.source.channel === activeChannel.name);
     const username = this.props.user.username;
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
@@ -116,7 +116,7 @@ export default class Chat extends Component {
             </div>
 
             <div style= {{ padding: 0}} >
-              <ControlPanel activeControl={activeControl} activeChannel={activeChannel}/>
+              <ControlPanel activeControl={activeControl} activeChannel={activeChannel} filteredMessages={filteredMessages} />
             </div>
 
           </div>

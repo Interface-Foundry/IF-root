@@ -9,22 +9,22 @@ var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
 var ioClient = require('socket.io-client').connect("http://localhost:3000");
 ioClient.on('connect', function() {
-    console.log('Connected to support client.')
-})
-//load kip modules
+        console.log('Connected to support client.')
+    })
+    //load kip modules
 var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
 
 var client = amazon.createClient({
-  awsId: "AKIAILD2WZTCJPBMK66A",
-  awsSecret: "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",
-  awsTag: "kipsearch-20"
+    awsId: "AKIAILD2WZTCJPBMK66A",
+    awsSecret: "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",
+    awsTag: "kipsearch-20"
 });
 
-var createServerSnippet =  function(req, res) {
-  fs.readFile("index.html", function(err, data) {
-      res.end(data);
-  }) ;
+var createServerSnippet = function(req, res) {
+    fs.readFile("index.html", function(err, data) {
+        res.end(data);
+    });
 }
 
 var app = http.createServer(createServerSnippet).listen(8000);
@@ -70,16 +70,16 @@ io.sockets.on('connection', function(socket) {
     //SEND A WELCOME TO KIP MESSAGE HERE. how to get started
 
 
-     socket.on("msgFromSever", function(data) {
-            console.log('YOLOOO', data)
-   })
+    socket.on("msgFromSever", function(data) {
+        console.log('Received message from supervisor', data)
+    })
 
     socket.on("msgToClient", function(data) {
-        data.source = { 
-            'origin':'socket.io',
-            'channel':socket.id,
-            'org':'kip',
-            'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
+        data.source = {
+            'origin': 'socket.io',
+            'channel': socket.id,
+            'org': 'kip',
+            'indexHist': 'kip' + "_" + socket.id //for retrieving chat history in node memory
         }
         preProcess(data);
     });
@@ -88,13 +88,13 @@ io.sockets.on('connection', function(socket) {
 
 
 //pre process incoming messages for canned responses
-function preProcess(data){
+function preProcess(data) {
 
     //setting up all the data for this user / org
-    if (!data.source.org || !data.source.channel){
+    if (!data.source.org || !data.source.channel) {
         console.log('missing channel or org Id 1');
     }
-    if (!messageHistory[data.source.indexHist]){ //new user, set up chat states
+    if (!messageHistory[data.source.indexHist]) { //new user, set up chat states
         messageHistory[data.source.indexHist] = {};
         messageHistory[data.source.indexHist].search = []; //random chats
         messageHistory[data.source.indexHist].banter = []; //search
@@ -105,34 +105,34 @@ function preProcess(data){
     }
 
     //check for canned responses/actions before routing to NLP
-    banter.checkForCanned(data.msg,function(res,flag,query){
+    banter.checkForCanned(data.msg, function(res, flag, query) {
 
         //found canned response
-        if(flag){
-            switch(flag){
+        if (flag) {
+            switch (flag) {
                 case 'basic': //just respond, no actions
                     //send message
                     data.client_res = res;
-                    cannedBanter(data,res);      
+                    cannedBanter(data, res);
                     break;
                 case 'search.initial':
                     //send message
                     data.client_res = res;
-                    cannedBanter(data,res);  
+                    cannedBanter(data, res);
 
                     //now search for item
                     data.tokens = [];
                     data.tokens.push(query); //search for this item
                     data.bucket = 'search';
                     data.action = 'initial';
-                    incomingAction(data);  
+                    incomingAction(data);
                     break;
                 case 'search.focus':
                     data.searchSelect = [];
                     data.searchSelect.push(query);
                     data.bucket = 'search';
                     data.action = 'focus';
-                    incomingAction(data); 
+                    incomingAction(data);
                     break;
                 default:
                     console.log('error: canned action flag missing');
@@ -140,7 +140,7 @@ function preProcess(data){
         }
         //proceed to NLP instead
         else {
-             //TESTING SUPERVISOR
+            //TESTING SUPERVISOR
             //send message
             data.client_res = res;
             //now search for item
@@ -153,33 +153,34 @@ function preProcess(data){
             //enable after testing supervisor
             // routeNLP(data);
         }
-    });    
+    });
 
 
 
 }
 
 //pushing incoming messages to python
-function routeNLP(data){
+function routeNLP(data) {
 
     nlp.parse(data.msg, function(e, res) {
-        if (e){console.log('NLP error ',e)}
-        else {
-            console.log('NLP RES ',res);
+        if (e) {
+            console.log('NLP error ', e)
+        } else {
+            console.log('NLP RES ', res);
 
             //- - - temp stuff to transfer nlp results to data object - - - //
-            if (res.bucket){
+            if (res.bucket) {
                 data.bucket = res.bucket;
             }
-            if (res.action){
+            if (res.action) {
                 data.action = res.action;
             }
-            if (res.tokens){    
+            if (res.tokens) {
                 data.tokens = res.tokens;
-            }   
-            if (res.searchSelect){    
+            }
+            if (res.searchSelect) {
                 data.searchSelect = res.searchSelect;
-            }  
+            }
             //- - - - end temp - - - - // 
 
             incomingAction(data);
@@ -190,7 +191,7 @@ function routeNLP(data){
 }
 
 //sentence breakdown incoming from python
-function incomingAction(data){
+function incomingAction(data) {
 
 
     //sort context bucket (search vs. banter vs. purchase)
@@ -214,11 +215,29 @@ function incomingAction(data){
                         resolved: false
                     })
                     ioClient.emit('new message', {
-                        id: data.source.indexHist.concat(data.msg),
-                        channelID: data.source.channel,
-                        text: data.msg,
-                        user: data.source.channel,
-                        time: new Date()
+                        incoming: true,
+                        msg: data.msg,
+                        tokens: [data.msg.split(' ')],
+                        bucket: 'supervisor',
+                        action: '',
+                        amazon: [],
+                        dataModify: {
+                            type: '',
+                            val: [],
+                            param: ''
+                        },
+                        source: {
+                            origin: 'socket.io',
+                            channel: data.source.channel,
+                            org: 'kip',
+                            id: data.source.indexHist
+                        },
+                        client_res: {
+                            msg: ''
+                        },
+                        ts: Date.now,
+                        resolved: false,
+                        parent: Math.random().toString(36).slice(2)
                     })
                 })
             } else {
@@ -228,11 +247,29 @@ function incomingAction(data){
                     resolved: false
                 })
                 ioClient.emit('new message', {
-                    id: data.source.indexHist.concat(data.msg),
-                    channelID: data.source.channel,
-                    text: data.msg,
-                    user: data.source.channel,
-                    time: new Date()
+                    incoming: true,
+                    msg: data.msg,
+                    tokens: [data.msg.split(' ')],
+                    bucket: 'supervisor',
+                    action: '',
+                    amazon: [],
+                    dataModify: {
+                        type: '',
+                        val: [],
+                        param: ''
+                    },
+                    source: {
+                        origin: 'socket.io',
+                        channel: data.source.channel,
+                        org: 'kip',
+                        id: data.source.indexHist
+                    },
+                    client_res: {
+                        msg: ''
+                    },
+                    ts: Date.now,
+                    resolved: false,
+                    parent: Math.random().toString(36).slice(2)
                 })
             }
         default:
@@ -242,7 +279,7 @@ function incomingAction(data){
 
 //* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
 
-function searchBucket(data){
+function searchBucket(data) {
 
     //sort search action type
     switch (data.action) {
@@ -271,20 +308,20 @@ function searchBucket(data){
 
 }
 
-function banterBucket(data){
+function banterBucket(data) {
     //sort search action type
     switch (data.action) {
         case 'question':
             break;
         case 'smalltalk':
-            outgoingResponse(data,'txt');
+            outgoingResponse(data, 'txt');
             saveHistory(data); //random stuff we chat with kip about
             break;
         default:
     }
 }
 
-function purchaseBucket(data){
+function purchaseBucket(data) {
     //sort purchase action
     switch (data.action) {
         case 'save':
@@ -302,8 +339,8 @@ function purchaseBucket(data){
         case 'checkout':
             //passing in data obj
             //pass messageHistory obj
-            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
-                outgoingResponse(res,'txt');
+            purchase.outputCart(data, messageHistory[data.source.indexHist], function(res) {
+                outgoingResponse(res, 'txt');
             });
             break;
         default:
@@ -316,21 +353,21 @@ function purchaseBucket(data){
 //* * * * * SEARCH ACTIONS * * * * * * * * //
 
 
-function searchInitial(data,flag){
+function searchInitial(data, flag) {
 
-    searchAmazon(data,'initial','none',flag);
+    searchAmazon(data, 'initial', 'none', flag);
 }
 
-function searchSimilar(data){
+function searchSimilar(data) {
 
     //RECALL LAST ITEM IN SEARCH HISTORY
-    recallHistory(data, function(item){ 
+    recallHistory(data, function(item) {
         data.recallHistory = item; //added recalled history obj to data obj
-        searchAmazon(data,'similar');
+        searchAmazon(data, 'similar');
     });
 }
 
-function searchModify(data, flag){
+function searchModify(data, flag) {
 
     //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
@@ -348,73 +385,73 @@ function searchModify(data, flag){
 
 
     //temp!
-    if (data.msg){
+    if (data.msg) {
         data.tokens = [];
         data.tokens.push(data.msg);
     }
 
     //temp!
-    if (!data.searchSelect){
+    if (!data.searchSelect) {
         data.searchSelect = [1];
     }
 
     //temp!
-    switch (true){
-        case data.tokens[0].indexOf("in blue") !=-1 :
+    switch (true) {
+        case data.tokens[0].indexOf("in blue") != -1:
 
             data.dataModify = {
                 type: 'color',
                 val: ['blue']
-            }     
+            }
             break;
 
-        case data.tokens[0].indexOf("in XL") !=-1 :
+        case data.tokens[0].indexOf("in XL") != -1:
 
             data.dataModify = {
                 type: 'size',
-                val: ['extra large','XL']
-            } 
-            break;   
+                val: ['extra large', 'XL']
+            }
+            break;
 
-        case data.tokens[0].indexOf("with collar") !=-1 :
+        case data.tokens[0].indexOf("with collar") != -1:
 
             data.dataModify = {
                 type: 'genericDetail',
                 val: ['collar']
-            }  
-            break;  
+            }
+            break;
 
-        case data.tokens[0].indexOf("in wool") !=-1 :
+        case data.tokens[0].indexOf("in wool") != -1:
 
             data.dataModify = {
                 type: 'material',
-                val: ['wool','cashmere','merino']
-            }   
-            break; 
+                val: ['wool', 'cashmere', 'merino']
+            }
+            break;
 
-        case data.tokens[0].indexOf("by Zara") !=-1 :
+        case data.tokens[0].indexOf("by Zara") != -1:
 
             data.dataModify = {
                 type: 'brand',
                 val: ['Zara']
-            }   
+            }
             break;
 
-        case data.tokens[0].indexOf("less than") !=-1 :
+        case data.tokens[0].indexOf("less than") != -1:
 
             data.dataModify = {
                 type: 'price',
                 param: 'less than',
                 val: [25]
-            } 
-            break;   
+            }
+            break;
 
-        case data.tokens[0].indexOf("cheaper") !=-1 :
+        case data.tokens[0].indexOf("cheaper") != -1:
 
             data.dataModify = {
                 type: 'price',
                 param: 'less'
-            }  
+            }
             break;
     }
 
@@ -422,85 +459,82 @@ function searchModify(data, flag){
     //console.log('modified ',data);
 
     //RECALL LAST ITEM IN SEARCH HISTORY
-    recallHistory(data, function(item){
+    recallHistory(data, function(item) {
 
         data.recallHistory = item;
 
         var cSearch = ''; //construct new search string
 
         //CONSTRUCT QUERY FROM AMAZON OBJECT
-        if (data.recallHistory.amazon){
+        if (data.recallHistory.amazon) {
 
-            if (data.dataModify && data.dataModify.type){
+            if (data.dataModify && data.dataModify.type) {
                 //handle special modifiers that need care, consideration, hard tweaks of amazon search API
                 switch (data.dataModify.type) {
                     case 'price':
-                        searchInitial(data,{ // passing special FLAG for search to handle
-                            'type':data.dataModify.type,
-                            'param':data.dataModify.param,
-                            'val':data.dataModify.val
+                        searchInitial(data, { // passing special FLAG for search to handle
+                            'type': data.dataModify.type,
+                            'param': data.dataModify.param,
+                            'val': data.dataModify.val
                         });
                         break;
 
                     case 'brand':
-                        searchInitial(data,{ // passing special FLAG for search to handle
-                            'type':data.dataModify.type,
-                            'val':data.dataModify.val
+                        searchInitial(data, { // passing special FLAG for search to handle
+                            'type': data.dataModify.type,
+                            'val': data.dataModify.val
                         });
                         break;
 
                     default:
                         constructAmazonQuery(); //nm just construct a new query
-                }               
-            }
-            else {
+                }
+            } else {
                 console.log('error: data.dataModify params missing')
             }
 
-            function constructAmazonQuery(){
+            function constructAmazonQuery() {
 
                 async.eachSeries(data.searchSelect, function(searchSelect, callback) {
 
                     var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
 
                     //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                    if (flag !== 'weakSearch'){
+                    if (flag !== 'weakSearch') {
                         console.log('weakSearch FALSE');
                         //add brand
-                        if (itemAttrib[0].Brand){
+                        if (itemAttrib[0].Brand) {
                             cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
                         }
                         //add clothing size
-                        if (itemAttrib[0].ClothingSize){
+                        if (itemAttrib[0].ClothingSize) {
                             cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
                         }
-                    }
-                    else {
+                    } else {
                         console.log('weakSearch TRUE');
                     }
-                    if (itemAttrib[0].Department){
+                    if (itemAttrib[0].Department) {
                         cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
                     }
-                    if (itemAttrib[0].ProductGroup){
+                    if (itemAttrib[0].ProductGroup) {
                         cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
                     }
-                    if (itemAttrib[0].Binding){
+                    if (itemAttrib[0].Binding) {
                         cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
                     }
 
                     callback();
-                }, function done(){
+                }, function done() {
                     addModifier(); //done processing constructing new search, add modifier and run query
                 });
             }
-        }
-        else {
+        } else {
             console.log('no Amazon data found in last history item. can not modify search');
             searchInitial(data); //do a search anyway
         }
 
         //after query construction, add modifier and fire search
-        function addModifier(){
+        function addModifier() {
 
             //SORT WHICH TRAITS TO MODIFY
             switch (data.dataModify.type) {
@@ -509,7 +543,7 @@ function searchModify(data, flag){
 
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    searchInitial(data, flag); //do a new search
                     break;
 
                 case 'size':
@@ -517,25 +551,25 @@ function searchModify(data, flag){
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    searchInitial(data, flag); //do a new search
                     break;
 
-                //texture, fabric, coating, etc
+                    //texture, fabric, coating, etc
                 case 'material':
 
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    searchInitial(data, flag); //do a new search
                     break;
 
-                //unsortable modifier
+                    //unsortable modifier
                 case 'genericDetail':
 
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    searchInitial(data, flag); //do a new search
                     break;
             }
         }
@@ -544,80 +578,77 @@ function searchModify(data, flag){
 
 }
 
-function searchFocus(data){
+function searchFocus(data) {
 
-    recallHistory(data, function(item){ 
+    recallHistory(data, function(item) {
         data.recallHistory = item; //added recalled history obj to data obj
 
-        if (data.searchSelect && data.searchSelect.length == 1){
-            if(data.recallHistory && data.recallHistory.amazon){
+        if (data.searchSelect && data.searchSelect.length == 1) {
+            if (data.recallHistory && data.recallHistory.amazon) {
 
                 var searchSelect = data.searchSelect[0] - 1;
                 var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
                 var cString = ''; //construct text reply
 
                 //check for large image to send back
-                if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
+                if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]) {
                     data.client_res = data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0];
-                    outgoingResponse(data,'final');
+                    outgoingResponse(data, 'final');
                 }
 
                 //send product title + price
-                data.client_res = attribs.Title[0]; 
+                data.client_res = attribs.Title[0];
                 //add price to this line, if found
-                if (attribs.ListPrice){
+                if (attribs.ListPrice) {
                     data.client_res = data.client_res + " – " + addDecimal(attribs.ListPrice[0].Amount[0]);
                 }
-                outgoingResponse(data,'final');
+                outgoingResponse(data, 'final');
 
                 ///// product details string //////
 
                 //get size
-                if (attribs.Size){
-                    cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                if (attribs.Size) {
+                    cString = cString + ' ○ ' + "Size: " + attribs.Size[0];
                 }
 
                 //get artist
-                if (attribs.Artist){
-                    cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                if (attribs.Artist) {
+                    cString = cString + ' ○ ' + "Artist: " + attribs.Artist[0];
                 }
 
                 //get brand or manfacturer
-                if (attribs.Brand){
-                    cString = cString + ' ○ ' +  attribs.Brand[0];
+                if (attribs.Brand) {
+                    cString = cString + ' ○ ' + attribs.Brand[0];
+                } else if (attribs.Manufacturer) {
+                    cString = cString + ' ○ ' + attribs.Manufacturer[0];
                 }
-                else if (attribs.Manufacturer){
-                    cString = cString + ' ○ ' +  attribs.Manufacturer[0];
-                }   
 
                 //get all stuff in details box
-                if (attribs.Feature){   
+                if (attribs.Feature) {
                     cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
                 }
 
                 //done collecting details string, now send
-                if (cString){
+                if (cString) {
                     data.client_res = cString;
-                    outgoingResponse(data,'final');
+                    outgoingResponse(data, 'final');
                 }
 
                 ///// end product details string /////
 
-                if (data.recallHistory.amazon[searchSelect].reviews){
-                    data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews'; 
-                    outgoingResponse(data,'final');
-                }   
+                if (data.recallHistory.amazon[searchSelect].reviews) {
+                    data.client_res = '⭐️ ' + data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews';
+                    outgoingResponse(data, 'final');
+                }
 
                 //send product link
-                data.client_res = data.recallHistory.amazon[searchSelect].DetailPageURL[0]; 
-                outgoingResponse(data,'final');
+                data.client_res = data.recallHistory.amazon[searchSelect].DetailPageURL[0];
+                outgoingResponse(data, 'final');
 
-            }
-            else {
+            } else {
                 console.log('error: amazon search missing from recallHistory obj');
             }
-        }
-        else {
+        } else {
             console.log('error: you can only select one item for search focus')
         }
 
@@ -625,12 +656,12 @@ function searchFocus(data){
 
 }
 
-function searchMore(data){
+function searchMore(data) {
     //go to end of search results array (3 at a time). if hit end of search array V
     //use amazon search itemPage to advance to more results
 }
 
-function searchBack(data){
+function searchBack(data) {
     //SKIP BACK to history items (use recallHistory w. # of steps == 2)
 }
 
@@ -643,11 +674,11 @@ function searchBack(data){
 
 
 //save amazon item to cart
-function saveToCart(data){
+function saveToCart(data) {
 
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
 
-    recallHistory(data, function(item){
+    recallHistory(data, function(item) {
 
         data.bucket = 'purchase'; //modifying bucket. a hack for now
 
@@ -655,17 +686,17 @@ function saveToCart(data){
         async.eachSeries(data.searchSelect, function(searchSelect, callback) {
             messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
             callback();
-        }, function done(){
+        }, function done() {
             //only support "add to cart" message for one item.
             //static:
             var sT = data.searchSelect[0];
             data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
-            outgoingResponse(data,'txt');
+            outgoingResponse(data, 'txt');
         });
     });
 }
 
-function viewCart(data){
+function viewCart(data) {
 
 }
 
@@ -673,7 +704,7 @@ function viewCart(data){
 
 //searches Amazon
 //(NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
-function searchAmazon(data, type, query, flag){
+function searchAmazon(data, type, query, flag) {
 
     //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
     //browsenode
@@ -696,18 +727,18 @@ function searchAmazon(data, type, query, flag){
             amazonParams.responseGroup = 'ItemAttributes,Offers,Images';
 
             //check for flag to modify amazon search params
-            if (flag && flag.type){ //search modifier
+            if (flag && flag.type) { //search modifier
 
-               //console.log('search flag ',flag);
+                //console.log('search flag ',flag);
 
                 //parse flags
-                if (flag.type == 'price'){
+                if (flag.type == 'price') {
 
                     switch (flag.param) {
                         case 'less':
 
                             //there's a price for the item
-                            if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]){
+                            if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]) {
 
                                 var newPrice = 0;
 
@@ -717,8 +748,8 @@ function searchAmazon(data, type, query, flag){
                                     newPrice = newPrice + data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0];
 
                                     callback();
-                                }, function done(){
-                                    console.log('processing 1 ',newPrice);
+                                }, function done() {
+                                    console.log('processing 1 ', newPrice);
 
                                     // calculate average price and decrease by 25%
                                     newPrice = newPrice / data.searchSelect.length; //average the price
@@ -728,34 +759,31 @@ function searchAmazon(data, type, query, flag){
                                     // if (newPrice > 1){
                                     //     newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
                                     // }
-                                    if (newPrice > 0){
+                                    if (newPrice > 0) {
                                         //add price param
                                         amazonParams.MaximumPrice = newPrice.toString();
 
-                                        console.log('processing ',newPrice);
+                                        console.log('processing ', newPrice);
 
                                         //now resolving the search term param
-                                        if (data.searchSelect.length == 1){
-                                           var searchSelect = data.searchSelect[0];
-                                           amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
-                                           console.log('USING SELECTED ITEM ',amazonParams.Keywords);
-                                        }
-                                        else {
+                                        if (data.searchSelect.length == 1) {
+                                            var searchSelect = data.searchSelect[0];
+                                            amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
+                                            console.log('USING SELECTED ITEM ', amazonParams.Keywords);
+                                        } else {
                                             console.log('Warning: no single item selected for less (not supporting multiple), so resorting to less N original query from user')
                                             var searchSelect = data.searchSelect[0];
                                             amazonParams.Keywords = data.recallHistory.tokens[0];
-                                            console.log('USING ORIGINAL SEARCH ',amazonParams.Keywords);
+                                            console.log('USING ORIGINAL SEARCH ', amazonParams.Keywords);
 
                                         }
                                         amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
-                                    }
-                                    else {
+                                    } else {
                                         console.log('Error: not allowing search for max price below 0');
                                     }
                                 });
- 
-                            }
-                            else {
+
+                            } else {
                                 console.log('error: amazon price missing');
                             }
 
@@ -765,19 +793,19 @@ function searchAmazon(data, type, query, flag){
                             console.log('less than');
 
                             //check if val is real number
-                            if (flag.val && isNumber(flag.val[0])){
+                            if (flag.val && isNumber(flag.val[0])) {
 
-                                console.log('FIRING less than ',data.searchSelect.length);
+                                console.log('FIRING less than ', data.searchSelect.length);
 
                                 //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
 
                                 //user wanted one item at different price
 
-                                if (data.searchSelect.length == 1){
+                                if (data.searchSelect.length == 1) {
 
                                     var searchSelect = data.searchSelect[0];
 
-                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title){
+                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title) {
                                         amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
 
                                         amazonParams.MaximumPrice = flag.val[0];
@@ -785,22 +813,19 @@ function searchAmazon(data, type, query, flag){
                                         amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
 
 
-                                        console.log('params ',amazonParams);
-                                    }
-                                    else {
+                                        console.log('params ', amazonParams);
+                                    } else {
                                         console.log('Error: Title is missing from amazon itemattributes object');
                                     }
 
-                                }
-                                else {
+                                } else {
                                     console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
                                     amazonParams.MaximumPrice = flag.val[0];
                                     amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
                                     amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
                                     amazonParams.Keywords = data.recallHistory.tokens[0];
                                 }
-                            }
-                            else {
+                            } else {
                                 console.log(' number not used in flag.val with flag.modify == price');
                             }
                             break;
@@ -813,88 +838,89 @@ function searchAmazon(data, type, query, flag){
                         default:
                             console.log('error: no flag.param found with flag.modify == price');
                     }
-                }
-                else if (flag.type == 'brand'){
+                } else if (flag.type == 'brand') {
                     console.log('BRAND FIRED');
                 }
             }
 
             //AMAZON BASIC SEARCH
-            client.itemSearch(amazonParams).then(function(results){
+            client.itemSearch(amazonParams).then(function(results) {
 
                 data.amazon = results;
 
-                var loopLame = [0,1,2];//lol
+                var loopLame = [0, 1, 2]; //lol
                 async.eachSeries(loopLame, function(i, callback) {
 
                     //get reviews in circumvention manner (amazon not allowing anymore officially)
-                    request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
-                      if(err){
-                        console.log(err);
-                        callback();
-                      }
-                      else {
+                    request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin=' + data.amazon[i].ASIN[0] + '', function(err, res, body) {
+                        if (err) {
+                            console.log(err);
+                            callback();
+                        } else {
 
-                        $ = cheerio.load(body);
+                            $ = cheerio.load(body);
 
-                        //get rating
-                        var rating = ( $('.a-size-base').text()
-                          .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                          .map(function (v) {return +v;}).shift();
+                            //get rating
+                            var rating = ($('.a-size-base').text()
+                                    .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [])
+                                .map(function(v) {
+                                    return +v;
+                                }).shift();
 
-                        //get reviewCount
-                        var reviewCount = ( $('.a-link-emphasis').text()
-                          .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                          .map(function (v) {return +v;}).shift();
+                            //get reviewCount
+                            var reviewCount = ($('.a-link-emphasis').text()
+                                    .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [])
+                                .map(function(v) {
+                                    return +v;
+                                }).shift();
 
-                        //adding scraped reviews to amazon objects
-                        data.amazon[i].reviews = {
-                            rating: rating,
-                            reviewCount: reviewCount
+                            //adding scraped reviews to amazon objects
+                            data.amazon[i].reviews = {
+                                rating: rating,
+                                reviewCount: reviewCount
+                            }
+                            callback();
                         }
-                        callback();
-                      }
                     });
 
-                }, function done(){
-                    outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                }, function done() {
+                    outgoingResponse(data, 'stitch', 'amazon'); //send back msg to user
                 });
 
-            }).catch(function(err){
+            }).catch(function(err) {
 
                 //handle err codes. do stuff.
-                if (err[0].Error[0].Code[0]){
+                if (err[0].Error[0].Code[0]) {
                     switch (err[0].Error[0].Code[0]) {
 
                         //CASE: No results for search
                         case 'AWS.ECommerceService.NoExactMatches':
                             //do a weak search
-                            weakSearch(data,type,query,flag);
+                            weakSearch(data, type, query, flag);
                             break;
 
                         default:
-                            console.log('amazon err ',err[0].Error[0]);
+                            console.log('amazon err ', err[0].Error[0]);
                     }
                 }
             });
             break;
 
-        // * * * * * * * * * * * * * *//
+            // * * * * * * * * * * * * * *//
 
         case 'similar':
             //handle no data error
-            if (!data){
+            if (!data) {
                 console.log('error no amazon item found for similar search');
 
                 var msg = 'Sorry, I don\'t understand, please ask me again';
-                cannedBanter(data,msg);
+                cannedBanter(data, msg);
                 //outgoingResponse(data,'txt');
-            }
-            else {
+            } else {
 
-                if (data.recallHistory.amazon){ //we have a previously saved amazon session
+                if (data.recallHistory.amazon) { //we have a previously saved amazon session
 
-                    if (!flag){ //no flag passed in
+                    if (!flag) { //no flag passed in
                         flag = 'Intersection'; //default
                     }
 
@@ -910,51 +936,54 @@ function searchAmazon(data, type, query, flag){
                     //AMAZON SIMILARITY QUERY
                     // [NOTE: functionality not in default AWS node lib. had to extend it!]
                     client.similarityLookup({
-                      ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
-                      //Keywords: data.recallHistory.tokens,
-                      SimilarityType: flag, //other option is "Random" <<< test which is better results
-                      responseGroup: 'ItemAttributes,Offers,Images'
+                        ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
+                        //Keywords: data.recallHistory.tokens,
+                        SimilarityType: flag, //other option is "Random" <<< test which is better results
+                        responseGroup: 'ItemAttributes,Offers,Images'
 
-                    }).then(function(results){
+                    }).then(function(results) {
 
                         //console.log('RESULTS SIMILAR ',results);
 
                         data.amazon = results;
 
-                        var loopLame = [0,1,2];//lol
+                        var loopLame = [0, 1, 2]; //lol
                         async.eachSeries(loopLame, function(i, callback) {
 
                             //get reviews in circumvention manner (amazon not allowing anymore officially)
-                            request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
-                              if(err){
-                                console.log(err);
-                                callback();
-                              }
-                              else {
+                            request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin=' + data.amazon[i].ASIN[0] + '', function(err, res, body) {
+                                if (err) {
+                                    console.log(err);
+                                    callback();
+                                } else {
 
-                                $ = cheerio.load(body);
+                                    $ = cheerio.load(body);
 
-                                //get rating
-                                var rating = ( $('.a-size-base').text()
-                                  .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                                  .map(function (v) {return +v;}).shift();
+                                    //get rating
+                                    var rating = ($('.a-size-base').text()
+                                            .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [])
+                                        .map(function(v) {
+                                            return +v;
+                                        }).shift();
 
-                                //get reviewCount
-                                var reviewCount = ( $('.a-link-emphasis').text()
-                                  .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                                  .map(function (v) {return +v;}).shift();
+                                    //get reviewCount
+                                    var reviewCount = ($('.a-link-emphasis').text()
+                                            .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [])
+                                        .map(function(v) {
+                                            return +v;
+                                        }).shift();
 
-                                //adding scraped reviews to amazon objects
-                                data.amazon[i].reviews = {
-                                    rating: rating,
-                                    reviewCount: reviewCount
+                                    //adding scraped reviews to amazon objects
+                                    data.amazon[i].reviews = {
+                                        rating: rating,
+                                        reviewCount: reviewCount
+                                    }
+                                    callback();
                                 }
-                                callback();
-                              }
                             });
 
-                        }, function done(){
-                            outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                        }, function done() {
+                            outgoingResponse(data, 'stitch', 'amazon'); //send back msg to user
                         });
 
 
@@ -967,14 +996,13 @@ function searchAmazon(data, type, query, flag){
 
                         //saveHistory(data,results,'amazon'); //push new state, pass amazon results
 
-                    }).catch(function(err){
-                      console.log('amazon err ',err[0].Error[0]);
-                      console.log('SIMILAR FAILED: should we fire random query or mod query');
-                      //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
+                    }).catch(function(err) {
+                        console.log('amazon err ', err[0].Error[0]);
+                        console.log('SIMILAR FAILED: should we fire random query or mod query');
+                        //searchAmazon(data, type, query, 'Random'); //if no results, retry search with random
                     });
-                }
-                else {
-                    searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
+                } else {
+                    searchAmazon(data, 'initial'); //if amazon id doesn't exist, do init search instead
                 }
             }
             break;
@@ -987,7 +1015,7 @@ function searchAmazon(data, type, query, flag){
 
 
 //re-search but with less specific terms
-function weakSearch(data,type,query,flag){
+function weakSearch(data, type, query, flag) {
     //sort incoming flags for redundant searches
     switch (flag) {
         case 'weakSearch': //we already did weakSearch
@@ -1004,7 +1032,7 @@ function weakSearch(data,type,query,flag){
                     searchModify(data, 'weakSearch');
                     break;
                 default:
-                    console.log('weak search not enabled for '+ data.action);
+                    console.log('weak search not enabled for ' + data.action);
             }
     }
 }
@@ -1015,22 +1043,22 @@ function weakSearch(data,type,query,flag){
 //process canned message stuff
 //data: kip data object
 //req: incoming message from user
-function cannedBanter(data,req){
+function cannedBanter(data, req) {
     data.bucket = 'banter';
     data.action = 'smalltalk';
     //if this is pre-process chat (before NLP), store incoming chat msg too
-    if(req){
+    if (req) {
         data.tokens = [];
-        data.tokens.push(req);       
+        data.tokens.push(req);
     }
     banterBucket(data);
 }
 
 //Constructing reply to user
-function outgoingResponse(data,action,source){ //what we're replying to user with
+function outgoingResponse(data, action, source) { //what we're replying to user with
     //stitch images before send to user
-    if (action == 'stitch'){
-        stitchResults(data,source,function(url){
+    if (action == 'stitch') {
+        stitchResults(data, source, function(url) {
             //sending out stitched image response
             data.client_res = url;
             saveHistory(data); //push new history state after we have stitched URL
@@ -1039,8 +1067,8 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             //* * * * * * * * * * *
             //which cinna response to include in message?
             //* * * * * * * * * * *
-            banter.getCinnaResponse(data,function(res){
-                if(res){
+            banter.getCinnaResponse(data, function(res) {
+                if (res) {
                     data.client_res = res;
                     sendResponse(data);
                 }
@@ -1049,38 +1077,38 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     }
     //data.client_res > already added to data for response
     //text/image msg to user (not image results)
-    else if (action == 'txt'){
+    else if (action == 'txt') {
 
         saveHistory(data);
         sendResponse(data);
 
-        banter.getCinnaResponse(data,function(res){
-            if(res){
+        banter.getCinnaResponse(data, function(res) {
+            if (res) {
                 data.client_res = res;
                 sendResponse(data);
             }
         });
     }
     //no cinna response check
-    else if (action == 'final'){
+    else if (action == 'final') {
         saveHistory(data);
         sendResponse(data);
     }
 }
 
 //send back msg to user, based on source.origin
-function sendResponse(data){
-    if (data.source.channel && data.source.origin == 'socket.io'){
-        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
-    }
-    else if (data.source.channel && data.source.origin == 'slack'){
+function sendResponse(data) {
+    if (data.source.channel && data.source.origin == 'socket.io') {
+        io.sockets.connected[data.source.channel].emit("msgFromSever", {
+            message: data.client_res
+        });
+    } else if (data.source.channel && data.source.origin == 'slack') {
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
-        bot.postMessage(data.source.channel, data.client_res, params);  
-    }
-    else {
+        bot.postMessage(data.source.channel, data.client_res, params);
+    } else {
         console.log('error: data.source.channel or source.origin missing')
     }
 }
@@ -1089,26 +1117,25 @@ function sendResponse(data){
 ////////////// PROCESS IMAGES ///////////////
 
 //stitch 3 images together into single image
-function stitchResults(data,source,callback){
+function stitchResults(data, source, callback) {
     //rules to get 3 image urls
     switch (source) {
         case 'amazon':
             //adding images for stiching
             var toStitch = [];
-            var loopLame = [0,1,2];//lol
+            var loopLame = [0, 1, 2]; //lol
 
             async.eachSeries(loopLame, function(i, callback) {
-                if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
+                if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]) {
 
                     console.log(data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0]);
 
 
                     var price;
 
-                    if (!data.amazon[i].ItemAttributes[0].ListPrice){
+                    if (!data.amazon[i].ItemAttributes[0].ListPrice) {
                         price = ''; //price missing, show blank
-                    }
-                    else{
+                    } else {
                         price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
                         price = addDecimal(price);
                     }
@@ -1122,19 +1149,20 @@ function stitchResults(data,source,callback){
                     });
                 }
                 callback();
-            }, function done(){
-                fireStitch(); 
+            }, function done() {
+                fireStitch();
             });
             break;
     }
-    function fireStitch(){
+
+    function fireStitch() {
         //call to stitch service
-        stitch(toStitch, function(e, stitched_url){
-            if(e){
-                console.log('stitch err ',e);
+        stitch(toStitch, function(e, stitched_url) {
+            if (e) {
+                console.log('stitch err ', e);
             }
             callback(stitched_url);
-        })        
+        })
     }
 }
 
@@ -1142,18 +1170,17 @@ function stitchResults(data,source,callback){
 ////////////// HISTORY ACTIONS ///////////////
 
 //store chat message in history
-function saveHistory(data,type){
+function saveHistory(data, type) {
 
-    if (!data.source.org || !data.source.channel){
+    if (!data.source.org || !data.source.channel) {
         console.log('missing channel or org Id 2');
     }
-        
+
     data.ts = new Date(); //adding timestamp
-    
-    if (!messageHistory[data.source.indexHist]){
+
+    if (!messageHistory[data.source.indexHist]) {
         console.log('error: user doesnt exist in memory storage');
-    }
-    else {
+    } else {
         switch (data.bucket) {
             case 'search':
                 messageHistory[data.source.indexHist].search.push(data);
@@ -1166,19 +1193,19 @@ function saveHistory(data,type){
             default:
         }
         messageHistory[data.source.indexHist].allBuckets.push(data);
-        //console.log('😂 ',messageHistory[data.source.indexHist].allBuckets);
+        //console.log(' ',messageHistory[data.source.indexHist].allBuckets);
     }
 
 }
 
 //get user history
-function recallHistory(data,callback,steps){
-    if (!data.source.org || !data.source.channel){
+function recallHistory(data, callback, steps) {
+    if (!data.source.org || !data.source.channel) {
         console.log('missing channel or org Id 3');
     }
 
     //if # of steps to recall
-    if (!steps){
+    if (!steps) {
         var steps = 1;
     }
     //get by bucket type
@@ -1186,11 +1213,11 @@ function recallHistory(data,callback,steps){
         case 'search':
             //console.log(data);
 
-            switch(data.action){
+            switch (data.action) {
                 //if action is focus, find lastest 'initial' item
                 case 'focus':
-                    var result = messageHistory[data.source.indexHist].search.filter(function( obj ) {
-                      return obj.action == 'initial';
+                    var result = messageHistory[data.source.indexHist].search.filter(function(obj) {
+                        return obj.action == 'initial';
                     });
                     var arrLength = result.length - steps;
                     callback(result[arrLength]);
@@ -1221,15 +1248,15 @@ function recallHistory(data,callback,steps){
 //////////////////////////////////////////
 
 function isNumber(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 //trim a string to char #
-function truncate(string){
-   if (string.length > 80)
-      return string.substring(0,80)+'...';
-   else
-      return string;
+function truncate(string) {
+    if (string.length > 80)
+        return string.substring(0, 80) + '...';
+    else
+        return string;
 };
 
 function addDecimal(str) {

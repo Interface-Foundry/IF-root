@@ -18,25 +18,22 @@ export default class MessageListItem extends Component {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
     }
 
-   if (checkImgURL(this.props.message.text)) {
-     // console.log(0)
+   if (checkImgURL(this.props.message.msg)) {
       this.setState({ isImage : 'true'  })
     } else {
-    // console.log(1)
       this.setState({ isImage : 'false'  })
     }
   }
 
-
-  renderImage() {
+  renderMsg() {
      const {message} = this.props
      switch (this.state.isImage){
       case 'true' : 
         return (
-          <img width='200' src={message.text} />
+          <img width='200' src={message.msg} />
           )
       default:
-        return message.text
+        return message.msg
      }
   }
 
@@ -46,10 +43,10 @@ export default class MessageListItem extends Component {
     return (
       <li>
         <span>
-          <b style={{color: '#66c'}}>{message.user} </b>
-          <i style={{color: '#aad', opacity: '0.8'}}>{message.time}</i>
+          <b style={{color: '#66c'}}>{message.source.id} </b>
+          <i style={{color: '#aad', opacity: '0.8'}}>{message.ts}</i>
         </span>
-        <div style={{clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}}> {self.renderImage()} </div>
+        <div style={{clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}}> {self.renderMsg()} </div>
       </li>
     );
   }

@@ -6,7 +6,7 @@ module.exports = function(router) {
 
   //query db for messages
   router.get('/messages', function(req, res) {
-    Message.find({}, {id: 1, channelID: 1, text: 1, user: 1, time: 1, _id: 0}, function(err, data) {
+    Message.find({}, function(err, data) {
       if(err) {
         console.log(err);
         return res.status(500).json({msg: 'internal server error'});
@@ -17,6 +17,7 @@ module.exports = function(router) {
 
   //post a new message to db
   router.post('/newmessage', function(req, res) {
+    console.log('REQ.BPDU:',req.body)
     var newMessage = new Message(req.body);
     newMessage.save(function (err, data) {
       if(err) {
