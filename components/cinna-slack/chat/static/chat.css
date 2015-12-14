@@ -8,6 +8,10 @@
    margin-bottom: 10px;
    flex: 1;
 }
+/*.chatscroll {
+  overflow-y: auto;
+  width: calc(100% + 15px);
+}*/
 .chats p {
   margin-bottom: 0;
 }

@@ -73,7 +73,7 @@ socket.on("msgFromSever", function(data) {
     console.log(onlyUrl);
 
     if (checkImgURL(data.message)){ //image URL
-      var msgP = '<img class="picstitch" width="1000" src="' + data.message + '"><br>';
+      var msgP = '<img class="picstitch" src="' + data.message + '"><br>';
 
     }
     else if (onlyUrl){ //reg url
