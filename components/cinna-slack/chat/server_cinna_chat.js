@@ -7,7 +7,6 @@ var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
-var koa = require('koa');
 
 //load kip modules
 var banter = require("./components/banter.js");
