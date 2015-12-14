@@ -1,12 +1,28 @@
 var http = require('http');
 var fs = require('fs');
-var Bot = require('slackbots');
+var Bot = require('slackbots'); //load slack api
 var request = require('request');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
+var mongoose = require('mongoose');
+
+//load mongoose models
+var Message = require('./models/Message');
+
+//set env vars
+var config = require('config');
+// process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
+// process.env.PORT = process.env.PORT || 3000;
+
+// connect our DB
+mongoose.connect(config.mongodb.url);
+process.on('uncaughtException', function (err) {
+  console.log(err);
+});
+
 
 //load kip modules
 var banter = require("./components/banter.js");
@@ -33,30 +49,30 @@ var messageHistory = {}; //fake database, stores all users and their chat histor
 
 
 // - - - Slack create bot - - - -//
-var settings = {
-    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-    name: 'cinna-1000'
-};
-var bot = new Bot(settings);
+// var settings = {
+//     token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+//     name: 'cinna-1000'
+// };
+// var bot = new Bot(settings);
 
-bot.on('start', function() {
-    bot.on('message', function(data) {
-        // all incoming events https://api.slack.com/rtm 
-        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-        if (data.type == 'message' && data.username !== settings.name){ 
-            var newSl = { 
-                source: {
-                    'origin':'slack',
-                    'channel':data.channel,
-                    'org':data.team,
-                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
-                },
-                'msg':data.text
-            }
-            preProcess(newSl);
-        }
-    });
-});
+// bot.on('start', function() {
+//     bot.on('message', function(data) {
+//         // all incoming events https://api.slack.com/rtm 
+//         // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+//         if (data.type == 'message' && data.username !== settings.name){ 
+//             var newSl = { 
+//                 source: {
+//                     'origin':'slack',
+//                     'channel':data.channel,
+//                     'org':data.team,
+//                     'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory             
+//                 },
+//                 'msg':data.text
+//             }
+//             preProcess(newSl);
+//         }
+//     });
+// });
 
 //- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(app);
@@ -1293,6 +1309,49 @@ function saveHistory(data,type){
         messageHistory[data.source.indexHist].allBuckets.push(data);
         //console.log('😂 ',messageHistory[data.source.indexHist].allBuckets);
     }
+
+    //save object to mongo
+    var save_data = {
+        msg: data.msg, 
+        tokens: [], 
+        bucket: data.bucket,
+        action: data.action,
+        source: {
+            origin: data.source.origin,
+            channel: data.source.channel,
+            org: data.source.org,
+            id: data.source.indexHist
+        }
+    };
+    if (data.tokens){
+        save_data.tokens.push(data.tokens[0]);
+    }
+    if (data.dataModify){
+        if (!data.dataModify.param){
+            data.dataModify.param = 'null';
+        }
+        save_data.dataModify = {
+            val:[],
+            type: data.dataModify.type,
+            param: data.dataModify.param
+        };
+        if (data.dataModify.val && data.dataModify.val[0]){
+            save_data.dataModify.val.push(data.dataModify.val[0]);
+        }
+    }
+    if (data.client_res){
+        save_data.client_res = { };
+        save_data.client_res.msg = data.client_res;
+    }
+    var msgObj = new Message(save_data);
+    msgObj.save( function(err, data){
+        if(err){
+            console.log('Mongo err ',err);
+        }
+        else{
+            console.log('mongo res ',data);
+        }
+    });
 
 }
 
