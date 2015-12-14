@@ -1,10 +1,11 @@
 
 .chats {
    border: 1px solid #ccc;
-   overflow-y: scroll;
+   overflow-y: auto;
    margin-bottom: 30px;
    background-color:white;
    padding-left:36px;
+   margin-bottom: 10px;
    flex: 1;
 }
 #msg {
