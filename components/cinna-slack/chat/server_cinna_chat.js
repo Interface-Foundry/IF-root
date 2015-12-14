@@ -1414,7 +1414,7 @@ function getNumEmoji(data,number,callback){
     switch(number){
         case 1: //emoji #1
             if (data.source.origin == 'socket.io'){
-                numEmoji = '<span style="font-size:26px;">➊</span>';
+                numEmoji = '<div class="number">➊</div>';
             }
             else if (data.source.origin == 'slack'){
                 numEmoji = ':one:';
@@ -1422,7 +1422,7 @@ function getNumEmoji(data,number,callback){
             break;
         case 2: //emoji #2
             if (data.source.origin == 'socket.io'){
-                numEmoji = '<span style="font-size:26px;">➋</span>';
+                numEmoji = '<div class="number">➋</div>';
             }
             else if (data.source.origin == 'slack'){
                 numEmoji = ':two:';
@@ -1430,7 +1430,7 @@ function getNumEmoji(data,number,callback){
             break;
         case 3: //emoji #3
             if (data.source.origin == 'socket.io'){
-                numEmoji = '<span style="font-size:26px;">➌</span>';
+                numEmoji = '<div class="number">➌</div>';
             }
             else if (data.source.origin == 'slack'){
                 numEmoji = ':three:';

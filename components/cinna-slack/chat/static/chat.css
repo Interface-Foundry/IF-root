@@ -8,9 +8,22 @@
    margin-bottom: 10px;
    flex: 1;
 }
+.chats p {
+  margin-bottom: 0;
+}
+.picstitch {
+  max-width: 100%;
+}
+.number {
+  display: inline-block;
+  margin-top: -5px;
+  margin-bottom: -5px;
+  font-size: 26px;
+}
 #msg {
   flex-grow: 1;
   margin-right: 10px;
+  margin-bottom: 0;
 }
 #sendbutton {
   background-color: #47a2fc;
