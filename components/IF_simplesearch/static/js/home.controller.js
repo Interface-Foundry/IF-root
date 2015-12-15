@@ -6,17 +6,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
     //popup little menu after search with miles adjuster & button to get GPS results
     //* * * * * * * * * * * * * * * * * * *
 
-    // testing
-    function causeError() {
-      bloop();
-    }
-
-    function bloop() {
-      fsdasfafsaf();
-    }
-
-    causeError();
-
     var userLat;
     var userLng;
     var historyCity;
@@ -335,9 +324,9 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
 
         if ($scope.query.indexOf('/') > -1) {
 =======
-        
+
         if (!$scope.query){ //no query added
-            $scope.query = 'winter';  
+            $scope.query = 'winter';
         }
 
         if ($scope.query && $scope.query.indexOf('/') > -1) {
@@ -491,7 +480,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                     }
 
 =======
-                    
+
 >>>>>>> Kip
                     // if num of images is greater than 6, remove imgs from middle of array
                     if ($scope.items[i].itemImageURL.length > 6) {
