@@ -11,7 +11,7 @@ module.exports = function(router) {
         console.log(err);
         return res.status(500).json({msg: 'internal server error'});
       }
-      console.log('RETURNED MESSAGES: ',data)
+      // console.log('RETURNED MESSAGES: ',data)
       res.json(data);
     });
   });

@@ -59,20 +59,20 @@ export default class Chat extends Component {
     this.context.router.transitionTo('/welcome');
   }
   changeActiveChannel(channel) {
-    const { actions, messages} = this.props;
+    const { actions } = this.props;
     actions.changeChannel(channel);
-    this.changeActiveMessage()
+    // this.changeActiveMessage()
   }
   changeActiveControl(control) {
     const { actions } = this.props;
     actions.changeControl(control);
   }
-  changeActiveMessage(channel) {
-    const { actions, messages} = this.props;
-    const filteredMessages = messages.filter(message => message.source.channel === channel.name);
-    const firstMsg = filteredMessages[0]
-    actions.changeMessage(firstMsg);
-  }
+  // changeActiveMessage(channel) {
+  //   const { actions, messages} = this.props;
+  //   const filteredMessages = messages.filter(message => message.source.channel === channel.name);
+  //   const firstMsg = filteredMessages[0]
+  //   actions.changeMessage(firstMsg);
+  // }
   openMoreUsersModal() {
     event.preventDefault();
     this.setState({moreUsersModal: true});
@@ -81,9 +81,10 @@ export default class Chat extends Component {
     event.preventDefault();
     this.setState({moreUsersModal: false});
   }
+  // message => message.source.channel === activeChannel.name
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => message.source.channel === activeChannel.name);
+    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const username = this.props.user.username;
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>

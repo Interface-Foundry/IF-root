@@ -1,4 +1,4 @@
-var ioClient = require('socket.io-client').connect("http://localhost:8000", {'force new connection': true});
+var ioClient = require('socket.io-client').connect("http://localhost:8000");
 ioClient.on('connect', function() {
     console.log('Connected to cinna-slack client.')
 })
@@ -6,7 +6,7 @@ exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
-            console.log('new message!!', msg)
+            console.log('socketEvents: new message from cinna received.', msg)
 
             //Emit outgoing message to cinna-slack
             ioClient.emit("msgFromSever",{message: msg.text});

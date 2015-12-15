@@ -8,7 +8,7 @@ import {
 from 'react-bootstrap';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
-import Form from './Form';
+// import Form from './Form';
 
 export default class ControlPanel extends Component {
     static propTypes = {
@@ -148,8 +148,7 @@ export default class ControlPanel extends Component {
           <h1>Control</h1> 
      
           {self.renderJSON()}
-        <Form {...activeMessage} />
-        <div >
+              <div >
         {self.renderControl()}
         </div>
       </section>

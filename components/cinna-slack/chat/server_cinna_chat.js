@@ -206,6 +206,7 @@ function incomingAction(data) {
             purchaseBucket(data);
             break;
         case 'supervisor':
+            var rand = Math.random().toString(36).slice(2)
             if (!ioClient.connected) {
                 ioClient.on('connect', function() {
                     console.log('Connected to support client.')
@@ -221,23 +222,23 @@ function incomingAction(data) {
                         bucket: 'supervisor',
                         action: '',
                         amazon: [],
-                        dataModify: {
-                            type: '',
-                            val: [],
-                            param: ''
-                        },
+                        // dataModify: {
+                        //     type: '',
+                        //     val: [],
+                        //     param: ''
+                        // },
                         source: {
                             origin: 'socket.io',
                             channel: data.source.channel,
                             org: 'kip',
-                            id: data.source.indexHist
+                            id: data.source.channel
                         },
                         client_res: {
                             msg: ''
                         },
                         ts: Date.now,
                         resolved: false,
-                        parent: Math.random().toString(36).slice(2)
+                        parent: rand
                     })
                 })
             } else {
@@ -253,23 +254,23 @@ function incomingAction(data) {
                     bucket: 'supervisor',
                     action: '',
                     amazon: [],
-                    dataModify: {
-                        type: '',
-                        val: [],
-                        param: ''
-                    },
+                    // dataModify: {
+                    //     type: '',
+                    //     val: [],
+                    //     param: ''
+                    // },
                     source: {
                         origin: 'socket.io',
                         channel: data.source.channel,
                         org: 'kip',
-                        id: data.source.indexHist
+                        id: data.source.channel
                     },
                     client_res: {
                         msg: ''
                     },
                     ts: Date.now,
                     resolved: false,
-                    parent: Math.random().toString(36).slice(2)
+                    parent: rand
                 })
             }
         default:
