@@ -45,7 +45,9 @@ var check_servers = module.exports.list = function(hosts, callback) {
 
 if (!module.parent) {
   check_server('localhost', function(json) {
-    if (json.err) {
+    if (!json) {
+      console.log('no json returned from localhost');
+    } else if (json.err) {
       console.log(json);
     } else {
       console.log(json.host);
