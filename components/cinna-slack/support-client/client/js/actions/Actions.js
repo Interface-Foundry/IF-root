@@ -64,12 +64,12 @@ export function loadInitialControl(control) {
     };
 }
 
-// export function loadInitialMessage(message) {
-//     return {
-//         type: types.LOAD_MESSAGE,
-//         message
-//     };
-// }
+export function loadInitialMessage(message) {
+    return {
+        type: types.LOAD_MESSAGE,
+        message
+    };
+}
 
 
 export function changeControl(control) {
@@ -79,12 +79,12 @@ export function changeControl(control) {
     };
 }
 
-// export function changeMessage(message) {
-//     return {
-//         type: 'CHANGE_MESSAGE',
-//         message
-//     };
-// }
+export function changeMessage(message) {
+    return {
+        type: 'CHANGE_MESSAGE',
+        message
+    };
+}
 
 // NOTE:Auth actions
 

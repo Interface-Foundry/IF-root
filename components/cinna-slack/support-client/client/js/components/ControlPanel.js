@@ -8,7 +8,7 @@ import {
 from 'react-bootstrap';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
-// import Form from './Form';
+import Form from './Form';
 
 export default class ControlPanel extends Component {
     static propTypes = {
@@ -26,12 +26,12 @@ export default class ControlPanel extends Component {
     }
 
     renderJSON() {
-        const {message} = this.props
-        return (<div><pre>{JSON.stringify(message,null, 2) }</pre></div>)
+        const {activeMessage} = this.props
+        return (<div><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
     }
 
     renderForm() {
-      const {message} = this.props
+      const {activeMessage} = this.props
       return (
        <div className="data-message">
        <div className="header">
@@ -146,7 +146,8 @@ export default class ControlPanel extends Component {
         return ( 
         <section className='rightnav'>
           <h1>Control</h1> 
-     
+            <Form {...activeMessage} />
+
           {self.renderJSON()}
               <div >
         {self.renderControl()}

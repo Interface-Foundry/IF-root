@@ -3,9 +3,9 @@ import promiseMiddleware from '../middleware/promiseMiddleware';
 import { devTools, persistState } from 'redux-devtools';
 import thunk from 'redux-thunk';
 import * as reducers from '../reducers';
-// import {reducer as formReducer} from 'redux-form';
-// const allReducers = Object.assign({}, reducers, {form: formReducer});
-const rootReducer = combineReducers(reducers);
+import {reducer as formReducer} from 'redux-form';
+const allReducers = Object.assign({}, reducers, {form: formReducer});
+const rootReducer = combineReducers(allReducers);
 const createStoreWithMiddleware = compose(
   applyMiddleware(thunk, promiseMiddleware),
   devTools(),
