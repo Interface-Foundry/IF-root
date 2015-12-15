@@ -1,39 +1,39 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import {reduxForm} from 'redux-form';
-export const fields = ['msg', 'bucket'];
+export const labels = {
+  msg: 'Message',
+  bucket: 'Bucket',
+  action: 'Action'
+};
 
-class Form extends Component {
-  constructor (props) {
-      super(props)
-    }
-
-
+class DynamicForm extends Component {
+  static propTypes = {
+    fields: PropTypes.object.isRequired,
+    handleSubmit: PropTypes.func.isRequired,
+    submitting: PropTypes.bool.isRequired
+  };
 
   render() {
-    var self = this
-    const {fields: {msg, bucket },handleSubmit} = this.props;
+    const { fields, handleSubmit, submitting } = this.props;
     return (
       <form onSubmit={handleSubmit}>
+        {Object.keys(fields).map(name => {
+          const field = fields[name];
+          return (<div key={name}>
+            <label>{labels[name]}</label>
+            <div>
+              <input type="text" placeholder={labels[name]} {...field}/>
+            </div>
+          </div>);
+        })}
         <div>
-          <label>Message</label>
-          <input type="text" placeholder='message' {...msg}/>
+          <button disabled={submitting} onClick={handleSubmit}>
+            {submitting ? <i/> : <i/>} Submit
+          </button>
         </div>
-        <div>
-          <label>Bucket</label>
-          <input type="text" placeholder='bucket' {...msg}/>
-        </div>
-        <div>
- 
-        </div>
-        <button onClick={handleSubmit}>Submit</button>
       </form>
     );
   }
 }
 
-Form = reduxForm({ // <----- THIS IS THE IMPORTANT PART!
-  form: 'contact',                           // a unique name for this form
-  fields, // all the fields in your form
-})(Form);
-
-export default Form;
+export default reduxForm({form: 'dynamic'})(DynamicForm);

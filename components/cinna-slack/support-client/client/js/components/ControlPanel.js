@@ -8,13 +8,14 @@ import {
 from 'react-bootstrap';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
-import Form from './Form';
+import DynamicForm,{labels} from './Form';
 
 export default class ControlPanel extends Component {
     static propTypes = {
         activeControl: PropTypes.object.isRequire,
         activeChannel: PropTypes.object.isRequire,
-        activeMessage: PropTypes.object.isRequire
+        activeMessage: PropTypes.object.isRequire,
+        onSubmit: PropTypes.func.isRequired 
     }
 
     constructor (props) {
@@ -41,7 +42,7 @@ export default class ControlPanel extends Component {
          </div>
          <div className="input-group">
            <label for="text">Text</label>
-           <input ref="text" defaultValue= 'default text' />
+           <input ref="text" defaultValue= { JSON.stringify(activeMessage.msg)} />
          </div>
        </div>
        <div className="footer">
@@ -139,14 +140,43 @@ export default class ControlPanel extends Component {
         }
     }
 
+  state = {
+    msg: true,
+    bucket: true,
+    action: true
+  }
+
+
     render() {
        const { activeControl, activeMessage} = this.props;
+       
+       const fields = {
+        msg : '',
+        bucket: '',
+        action: ''
+       }
 
         var self = this;
         return ( 
         <section className='rightnav'>
           <h1>Control</h1> 
-            <Form {...activeMessage} />
+            <div>
+        <div>
+          {Object.keys(this.state).map(field =>
+            <label key={field}>
+              <input type="checkbox"
+                     checked={this.state[field]}
+                     onChange={event => this.setState({[field]: event.target.checked})}/> {labels[field]}
+            </label>
+          )}
+        </div>
+        <DynamicForm
+          onSubmit={this.props.onSubmit}
+          fields={Object
+            .keys(this.state)
+            .reduce((accumulator, field) =>
+              this.state[field] ? accumulator.concat(field) : accumulator, [])}/>
+      </div>
 
           {self.renderJSON()}
               <div >

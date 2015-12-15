@@ -58,6 +58,10 @@ export default class Chat extends Component {
     dispatch(Actions.signOut());
     this.context.router.transitionTo('/welcome');
   }
+  handleSubmit(state) {
+    const { actions } = this.props;
+      console.log('Clicked!', state)
+  }
   changeActiveChannel(channel) {
     const { actions } = this.props;
     actions.changeChannel(channel);
@@ -124,7 +128,7 @@ export default class Chat extends Component {
             </div>
 
             <div style= {{ padding: 0}} >
-              <ControlPanel activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} />
+              <ControlPanel activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} onSubmit={::this.handleSubmit} />
             </div>
 
           </div>

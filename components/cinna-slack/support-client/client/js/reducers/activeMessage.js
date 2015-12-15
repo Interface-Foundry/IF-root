@@ -1,5 +1,5 @@
 import {
-    CHANGE_MESSAGE
+    CHANGE_MESSAGE, LOAD_MESSAGE
 }
 from '../constants/ActionTypes';
 
@@ -57,6 +57,10 @@ export default function activeMessage(state = initialState, action) {
                 ts: action.message.ts,
                 resolved: action.message.resolved,
                 parent: action.message.parent
+            };
+        case LOAD_MESSAGE:
+            return {...state,
+                data: state.data
             };
         default:
             return state;
