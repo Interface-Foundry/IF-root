@@ -1,21 +1,21 @@
 <!doctype html>
 <html lang="en" data-ng-app="simpleSearchApp">
-<!-- 
-   _  __                ____   
+<!--
+   _  __                ____
   |"|/ /       ___    U|  _"\ u
   | ' /       |_"_|   \| |_) |/
-U/| . \\u      | |     |  __/  
-  |_|\_\     U/| |\u   |_|     
-,-,>> \\,-.-,_|___|_,-.||>>_   
- \.)   (_/ \_)-' '-(_/(__)__) 
+U/| . \\u      | |     |  __/
+  |_|\_\     U/| |\u   |_|
+,-,>> \\,-.-,_|___|_,-.||>>_
+ \.)   (_/ \_)-' '-(_/(__)__)
 
 ~ Kip Search ~
-~ v0.2 Beta ~ 
+~ v0.1 Beta ~
 -->
 
 <head>
   <meta charset="utf-8" />
-  <span ng-if="!searchTitle"><title>Kip - Search for things in stores around you</title></span>
+  <span ng-if="!searchTitle"><title>Kip - Search for things in IRL stores around you</title></span>
   <span ng-if="searchTitle"><title>{{searchTitle}}</title></span>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="fragment" content="!">
@@ -58,18 +58,12 @@ U/| . \\u      | |     |  __/
     <meta name="msapplication-TileImage" content="/favicon/mstile-144x144.png">
     <meta name="theme-color" content="#ffffff">
     <base href="/">
-    
+
     <!-- build:venderCss(./static/) ./css/vendor.css -->
     <link href="css/fonts.css" rel="stylesheet" type="text/css" />
     <link href="css/normalize.min.css" rel="stylesheet" type="text/css" />
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="css/skeleton.min.css" rel="stylesheet" type="text/css" />
-<!-- 
-    <link href="css/twitter.css" rel="stylesheet" type="text/css" />
-    <link href="css/imports.css" rel="stylesheet" type="text/css" />
-    <link href="css/shopify.css" rel="stylesheet" type="text/css" />
-    <link href="css/shopify_buttons.css" rel="stylesheet" type="text/css" />
-    <link href="css/style.css" rel="stylesheet" type="text/css" /> -->
     <!-- endbuild -->
 
     <!-- build:css(./static/) ./css/kip.css -->
@@ -95,7 +89,7 @@ U/| . \\u      | |     |  __/
     ga('create', 'UA-51752546-7', 'auto');
     ga('send', 'pageview');
     </script>
-    
+
     <script src="https://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
 
     <!-- build:vendor(./static/) js/vendor.js -->
@@ -115,6 +109,7 @@ U/| . \\u      | |     |  __/
     <script src="js/vendor/moment.min.js"></script>
     <script src="js/vendor/angular-moment.js"></script>
     <script src="js/vendor/ng-holder-directive.js"></script>
+    <script src="js/vendor/stacktrace.min.js"></script>
     <!-- endbuild -->
 
     <!-- build:js(./static/) js/kip.js -->
@@ -123,6 +118,7 @@ U/| . \\u      | |     |  __/
     <script src="js/routes.js"></script>
     <script src="js/store.factory.js"></script>
     <script src="js/search-query.service.js"></script>
+    <script src="js/components/stacktrace.service.js"></script>
     <script src="js/components/de-caps-lock.filter.js"></script>
     <script src="js/components/after-results.directive.js"></script>
     <script src="js/components/autofocus.directive.js"></script>

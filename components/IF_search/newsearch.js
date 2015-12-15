@@ -6,7 +6,6 @@ var Promise = require('bluebird');
 var app = express();
 var kip = require('kip');
 var geolib = require('geolib');
-var findParent = require('./findParent');
 var searchterms = require('./searchterms');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -30,6 +29,11 @@ var es = new elasticsearch.Client({
     log: ESLogger
 });
 
+
+// parse user if we're running this on it's own server
+if (!module.parent) {
+  //app.use(require('../IF_auth/new_auth.js'));
+}
 app.use(cookieParser());
 app.use(bodyParser.json());
 
@@ -81,19 +85,71 @@ app.post(searchItemsUrl, function(req, res, next) {
             }
         })
         .then(function(results) {
-            responseBody.results = results;
-            res.send(responseBody);
+            // first un-mongoose the results
+            results = results.map(function(r) {
+              return r.toObject();
+            })
 
-            (new db.Analytics({
-              anonId: req.anonId,
-              userId: req.userId,
-              action: 'search',
-              data: {
-                query: req.body,
-                url: req.originalUrl,
-                resultCount: results.length
-              }
-            })).save();
+            // Add the parents here.  fetch them from the db in one query
+            // The goal is to make item.parents a list of landmarks ordered by
+            // distance to the search location.  And make item.parent the
+            // closest one.
+
+            // only make one db call to fetch all the parents in this result set
+            var allParents = results.reduce(function (all, r) {
+              return all.concat(r.parents || []);
+            }, [])
+
+            db.Landmarks.find({
+              _id: {$in: allParents}
+            })
+            .select('-meta -source_generic_item -source_justvisual')
+            .exec(function(e, parents) {
+              if (e) { return next(e); }
+
+              results.map(function(r) {
+                if (r.parents && r.parents.length > 0) {
+                  var strparents = r.parents
+                    .filter(function(_id) { return !!_id })
+                    .map(function(_id) { return _id.toString()});
+                  r.parents = parents.filter(function(p) {
+                    return strparents.indexOf(p._id.toString()) >= 0;
+                  }).sort(function(a, b) {
+                    // sort by location
+                    var a_dist = geolib.getDistance({
+                      longitude: a.loc.coordinates[0],
+                      latitude: a.loc.coordinates[1]
+                    }, {
+                      longitude: req.body.loc.lon,
+                      latitude: req.body.loc.lat
+                    });
+                    var b_dist = geolib.getDistance({
+                      longitude: b.loc.coordinates[0],
+                      latitude: b.loc.coordinates[1]
+                    }, {
+                      longitude: req.body.loc.lon,
+                      latitude: req.body.loc.lat
+                    });
+                    return a_dist - b_dist;
+                  });
+                  r.parent = r.parents[0];
+                  delete r.parents;
+                }
+              })
+
+              responseBody.results = results;
+              res.send(responseBody);
+
+              (new db.Analytics({
+                anonId: req.anonId,
+                userId: req.userId,
+                action: 'search',
+                data: {
+                  query: req.body,
+                  resultCount: results.length
+                }
+              })).save();
+            })
         }, next)
 });
 
@@ -174,7 +230,7 @@ function search(q, page) {
             });
         }
         q.loc.lon = parseFloat(q.loc.lon);
-        if (q.loc.lon > 180) {
+        if (q.loc.lon > 180 && q.loc.lon <= 360) {
           q.loc.lon = q.loc.lon - 360;
         }
         if (q.loc.lon > 180 || q.loc.lon < -180) {
@@ -201,67 +257,7 @@ function search(q, page) {
 function textSearch(q, page) {
 
       console.log('text search', q);
-
-      // elasticsearch impl
-      // update fuzziness of query based on search term length
-      var fuzziness = 0;
-      if (q.text.length >= 4) {
-          fuzziness = 1;
-      } else if (q.text.length >= 6) {
-          fuzziness = 2;
-      }
-
-      // here's some reading on filtered queries
-      // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
-
-      // query sorted by geo
-      // https://www.elastic.co/blog/geo-location-and-search
-      var filter = {
-          bool: {
-              must: [{
-                  geo_distance: {
-                      distance: (q.radius || defaultRadius) + "mi",
-                      "geolocation": {
-                          lat: q.loc.lat,
-                          lon: q.loc.lon
-                      }
-                  }
-              }]
-          }
-      };
-
-      // if the price is specified, add a price filter
-      if (q.priceRange) {
-          filter.bool.must.push({
-              term: {
-                  priceRange: q.priceRange
-              }
-          });
-      }
-
-      var geosort = [{
-          "_geo_distance" : {
-              "geolocation" : {
-                lon: q.loc.lon,
-                lat: q.loc.lat
-              },
-              "order" : "asc",
-              "unit" : "mi"
-          }
-      }];
-
-      // put it all together in a filtered fuzzy query
-      var fuzzyQuery = {
-          size: pageSize,
-          from: page * pageSize,
-          index: "kip",
-          type: "items",
-          fields: [],
-          body: {
-              query: searchterms.getElasticsearchQuery(q.text),
-              sort: geosort
-          }
-      };
+      fuzzyQuery = elasticsearchQuery(q, page);
       kip.prettyPrint(fuzzyQuery)
 
       return es.search(fuzzyQuery)
@@ -270,24 +266,104 @@ function textSearch(q, page) {
                   return r._id;
               });
 
-              return db.Landmarks.find({
+              var users = db.Users.find({
+                  $or: [{
+                      'profileID': q.text
+                  }, {
+                      'local.email': q.text
+                  }, {
+                      'facebook.email': q.text
+                  }, {
+                      'name': q.text
+                  }]
+              }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
+
+              var items = db.Landmarks.find({
                   _id: {
                       $in: ids
                   }
               })
               .select(db.Landmark.frontEndSelect)
-              .exec()
-              .then(function(items) {
-                return items.map(function(i) {
-                  var i = findParent(i.toObject(), q.loc);
-                  delete i.owner;
-                  delete i.parents;
-                  return i;
-                })
-              }, kip.err);
+              .exec();
+
+              return Promise.settle([users, items]).then(function(arry) {
+                  var u = arry[0];
+                  var i = arry[1];
+
+                  if (u.isFulfilled() && i.isFulfilled()) {
+                      var results = u.value().concat(i.value().map(function(i) {
+                          return db.Landmark.itemLocationHack(i, q.loc);
+                      }));
+                      return results
+                  } else if (i.isFulfilled() && !u.isFulfilled()) {
+                      return i.value().map(function(i) {
+                          return db.Landmark.itemLocationHack(i, q.loc);
+                      });
+                  } else if (u.isFulfilled() && !i.isFulfilled()) {
+                      return u.value()
+                  }
+              })
+
           }, kip.err);
 
   }
+
+function elasticsearchQuery(q, page) {
+
+  // elasticsearch impl
+  // update fuzziness of query based on search term length
+  var fuzziness = 0;
+  if (q.text.length >= 4) {
+      fuzziness = 1;
+  } else if (q.text.length >= 6) {
+      fuzziness = 2;
+  }
+
+  // here's some reading on filtered queries
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
+  var filter = {
+      bool: {
+          must: [{
+              geo_distance: {
+                  distance: (q.radius || defaultRadius) + "mi",
+                  "geolocation": {
+                      lat: q.loc.lat,
+                      lon: q.loc.lon
+                  }
+              }
+          }]
+      }
+  };
+
+  // if the price is specified, add a price filter
+  if (q.priceRange) {
+      filter.bool.must.push({
+          term: {
+              priceRange: q.priceRange
+          }
+      });
+  }
+
+  // put it all together in a filtered fuzzy query
+  var fuzzyQuery = {
+      size: pageSize,
+      from: page * pageSize,
+      index: "kip",
+      type: "items",
+      fields: [],
+      body: {
+          query: {
+              filtered: {
+                  query: searchterms.getElasticsearchQuery(q.text),
+                  filter: filter
+              }
+          }
+      }
+  };
+
+  return fuzzyQuery;
+
+}
 
 /**
  * Search implementation for a query that does not have text
@@ -340,10 +416,7 @@ function filterSearch(q, page) {
         .exec()
         .then(function(items) {
             return items.map(function(item) {
-                var i = findParent(item, q.loc);
-                delete i.parents;
-                delete i.owner;
-                return i;
+                return db.Landmark.itemLocationHack(item, q.loc);
             });
         });
 }
@@ -614,4 +687,5 @@ if (!module.parent) {
   })
 } else {
   module.exports = app;
+  module.exports.getQuery = elasticsearchQuery;
 }

@@ -8,6 +8,7 @@
     "async": "~0.9.0",
     "aws-sdk": "^2.1.41",
     "axios": "^0.5.4",
+    "basic-auth-connect": "^1.0.0",
     "bcrypt": "^0.8.3",
     "bcrypt-nodejs": "latest",
     "bluebird": "^2.9.30",

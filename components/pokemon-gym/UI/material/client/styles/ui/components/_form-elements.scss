@@ -1,0 +1,96 @@
+// dependency: http://angular-ui.github.io/bootstrap/ 
+
+// Datepicker
+.ui-datepicker {
+    table {
+        margin: 0 5px;
+        th,
+        td {
+            padding: 1px;
+
+            .active span {
+                color: $reverse;
+            }
+        }
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .btn-group .btn,
+    li > .btn {
+        @extend .btn-flat;
+    }
+}
+
+
+// Timepicker, the class is added by angular-bootstrap
+.ui-timepicker {
+    td {
+        padding: 1px;
+    }
+    a.btn-link {
+        color: $text-color;
+    }
+    .btn {
+        &:focus {
+            outline: 0;
+        }
+    }
+}
+
+//
+.ui-typeahead {
+    > .dropdown-menu {
+        right: ($grid-gutter-width/2);
+    }
+}
+
+
+// Rating
+.ui-rating {
+    &:hover {
+        cursor: pointer;
+    }
+    &:focus {
+        outline: none;
+    }
+
+    .glyphicon {
+        margin-right: 2px;
+    }
+
+    // when active
+    .glyphicon-star {
+        color: $brand-primary;
+    }
+    &.ui-rating-success {
+        .glyphicon-star {
+            color: $brand-success;
+        }        
+    }
+    &.ui-rating-info {
+        .glyphicon-star {
+            color: $brand-info;
+        }        
+    }
+    &.ui-rating-warning {
+        .glyphicon-star {
+            color: $brand-warning;
+        }        
+    }
+    &.ui-rating-danger {
+        .glyphicon-star {
+            color: $brand-danger;
+        }        
+    }
+}
+
+// 
+.ui-wizard-form {
+    .steps {
+        .done > a {
+            box-shadow: none;
+        }
+    }
+}
