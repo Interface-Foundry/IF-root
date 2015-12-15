@@ -8,6 +8,7 @@ stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
 var mongoose = require('mongoose');
+var querystring = require('querystring');
 
 //load mongoose models
 var Message = require('./models/Message');
@@ -1447,7 +1448,10 @@ function urlShorten(data,callback2){
     var urlArr = [];
     async.eachSeries(loopLame, function(i, callback) {
         if (data.amazon[i]){
-            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+encodeURI(data.amazon[i].DetailPageURL[0])+'&format=txt', function(err, res, body) {
+
+           var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
+
+            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('https://kipsearch.com/cinna/'+escapeAmazon)+'&format=txt', function(err, res, body) {
               if(err){
                 console.log(err);
                 callback();
