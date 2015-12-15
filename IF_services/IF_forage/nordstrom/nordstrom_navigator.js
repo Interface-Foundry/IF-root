@@ -26,10 +26,20 @@ async.whilst(
         return states[stateIndex]
     },
     function(loop) {
-        var query = {
-            'state': currentState
+
+        var query = (currentState == 'CA') ? {
+            'state': currentState,
+            'city': 'SAN FRANCISCO'
+        } : {
+            'state': currentState,
+            'pop': {
+                $gte: 50000
+            }
         }
-        db.Zipcodes.find(query).then(function(zips) {
+        
+        db.Zipcodes.find(query).sort({
+            'density': -1
+        }).then(function(zips) {
             var count = 0;
             console.log('\nCurrent state: ' + currentState)
             async.whilst(
@@ -41,6 +51,7 @@ async.whilst(
                     //For each zipcode
                     async.eachSeries(zips, function(zip, finishedZipcode) {
                             zipcode = zip.zipcode
+                            console.log('Starting in city :', zip.city)
                             async.eachSeries(catalogs, function(catalog, callback) {
                                 loadCatalog(catalog, zipcode).then(function(res) {
                                     console.log('Done with catalog.')
@@ -49,6 +60,9 @@ async.whilst(
                                     wait(callback, 10000)
                                 }).catch(function(err) {
                                     if (err) {
+                                        if (err == 510) {
+                                            return finishedZipcode()
+                                        }
                                         var today = new Date().toString()
                                         fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                                     }
@@ -128,6 +142,7 @@ function loadCatalog(catalog, zipcode) {
                         }
                     }
                     pages = _.uniq(pages)
+                    // console.log('PAGES: ', pages)
                     var pageLinks = pages.length > 0 ? [catalog.url, catalog.url.concat(pages[0]), catalog.url.concat(pages[1]), catalog.url.concat(pages[2])] : [catalog.url]
                     if (pageLinks.length > 1) {
                         var linkFormat = pages[0].split('page=')[0].concat('page=')
@@ -140,7 +155,7 @@ function loadCatalog(catalog, zipcode) {
                     }
                 } catch (err) {
                     if (err) {
-                        console.log('There was an error in parsing out page numbers.')
+                        console.log('There was an error in parsing out page numbers.', err)
                         var today = new Date().toString()
                         fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + catalog.category + '\n' + err);
                     }
@@ -210,7 +225,10 @@ function loadPages(links, zipcode, catalog) {
                         item_scraper(detailsUrl, catalog.category, zipcode).then(function(result) {
                             wait(callback2, 4000)
                         }).catch(function(err) {
-                            console.log(err.lineNumber + err)
+                            if (err == 510) {
+                                return reject(err)
+                            }
+                            // console.log(err)
                             wait(callback2, 4000)
                         })
                     }, function(err) {
