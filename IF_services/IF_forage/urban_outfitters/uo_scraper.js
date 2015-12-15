@@ -42,12 +42,11 @@ module.exports = function(url, category, stores) {
                     if (results[1].isFulfilled()) {
                         notfoundstore = results[1].value()
                     }
-                
+
                     callback(null)
                 }).catch(function(err) {
                     if (err) {
-                        var today = new Date().toString()
-                            fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
+                        if (err) console.log('49: ', err)
                     }
                     callback(null)
                 })
@@ -86,22 +85,19 @@ module.exports = function(url, category, stores) {
                 })
             },
             function(items, callback) {
-                 // console.log(4)
+                // console.log(4)
                 saveItems(items, stores).then(function(items) {
                     // console.log(5)
                     callback(null, items)
                 }).catch(function(err) {
-                       console.log(err)
+                    console.log(err)
                     callback(err)
                 })
             }
         ], function(err, items) {
             if (err) {
-                var today = new Date().toString()
-                fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + cat + '\n' + err, function(err) {
-                    console.log('Error 62: ', err)
-                    return reject(err)
-                });
+                console.log('99: ', err)
+                return reject(err)
             }
             if (items) {
                 console.log('finished scraping. saved item count: ', items.length)
@@ -110,7 +106,6 @@ module.exports = function(url, category, stores) {
                 console.log('No items saved.', items)
                 reject()
             }
-
 
         });
 
@@ -411,7 +406,7 @@ function saveItems(items, stores) {
                         delete i.source_generic_item.physicalStores;
                         i.price = parseFloat(item.price);
                         i.itemImageURL = item.hostedImages;
-                        i.name = item.name;
+                        i.name = item.name.replace(/[^\w\s]/gi, '');
                         i.owner = owner;
                         i.linkback = item.src;
                         i.linkbackname = 'urbanoutfitters.com';

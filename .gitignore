@@ -14,6 +14,8 @@ node_modules/*
 !node_modules/job.js
 !node_modules/kip.js
 
+node-v*/
+
 # Compiled source #
 ###################
 *.com

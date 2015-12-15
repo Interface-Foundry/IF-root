@@ -59,7 +59,6 @@ async.whilst(
                         // fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
                 }
                 console.log('Finished scraping all catalogs for Urban Outfitters.');
-
             })
         }).catch(function(err) {
             if (err) {
@@ -133,7 +132,7 @@ function loadCatalog(category, stores) {
                                                 finishedItem()
                                             }, 3000)
                                         })
-                                        .timeout(1800000)
+                                        .timeout(3600000)
                                         .catch(function(err) {
                                             if (err) console.log('Item scraper error: ', err)
                                             var today = new Date().toString()
@@ -158,7 +157,7 @@ function loadCatalog(category, stores) {
                             }, 1000);
                         }
                     })
-                    .timeout(3600000)
+                    .timeout(6000000)
                     .catch(function(err) {
                         if (err) console.log('99', err);
                         var today = new Date().toString()

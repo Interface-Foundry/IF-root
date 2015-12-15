@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 var app = express();
 var kip = require('kip');
 var geolib = require('geolib');
+var findParent = require('./findParent');
 var searchterms = require('./searchterms');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -29,11 +30,6 @@ var es = new elasticsearch.Client({
     log: ESLogger
 });
 
-
-// parse user if we're running this on it's own server
-if (!module.parent) {
-  //app.use(require('../IF_auth/new_auth.js'));
-}
 app.use(cookieParser());
 app.use(bodyParser.json());
 
@@ -85,68 +81,19 @@ app.post(searchItemsUrl, function(req, res, next) {
             }
         })
         .then(function(results) {
-            // first un-mongoose the results
-            results = results.map(function(r) {
-              return r.toObject();
-            })
+            responseBody.results = results;
+            res.send(responseBody);
 
-            // Add the parents here.  fetch them from the db in one query
-            // The goal is to make item.parents a list of landmarks ordered by
-            // distance to the search location.  And make item.parent the
-            // closest one.
-
-            // only make one db call to fetch all the parents in this result set
-            var allParents = results.reduce(function (all, r) {
-              return all.concat(r.parents || []);
-            }, [])
-
-            db.Landmarks.find({
-              _id: {$in: allParents}
-            }, function(e, parents) {
-              if (e) { return next(e); }
-
-              results.map(function(r) {
-                if (r.parents && r.parents.length > 0) {
-                  var strparents = r.parents
-                    .filter(function(_id) { return !!_id })
-                    .map(function(_id) { return _id.toString()});
-                  r.parents = parents.filter(function(p) {
-                    return strparents.indexOf(p._id.toString()) >= 0;
-                  }).sort(function(a, b) {
-                    // sort by location
-                    var a_dist = geolib.getDistance({
-                      longitude: a.loc.coordinates[0],
-                      latitude: a.loc.coordinates[1]
-                    }, {
-                      longitude: req.body.loc.lon,
-                      latitude: req.body.loc.lat
-                    });
-                    var b_dist = geolib.getDistance({
-                      longitude: b.loc.coordinates[0],
-                      latitude: b.loc.coordinates[1]
-                    }, {
-                      longitude: req.body.loc.lon,
-                      latitude: req.body.loc.lat
-                    });
-                    return a_dist > b_dist;
-                  });
-                  r.parent = r.parents[0];
-                }
-              })
-
-              responseBody.results = results;
-              res.send(responseBody);
-
-              (new db.Analytics({
-                anonId: req.anonId,
-                userId: req.userId,
-                action: 'search',
-                data: {
-                  query: req.body,
-                  resultCount: results.length
-                }
-              })).save();
-            })
+            (new db.Analytics({
+              anonId: req.anonId,
+              userId: req.userId,
+              action: 'search',
+              data: {
+                query: req.body,
+                url: req.originalUrl,
+                resultCount: results.length
+              }
+            })).save();
         }, next)
 });
 
@@ -227,6 +174,9 @@ function search(q, page) {
             });
         }
         q.loc.lon = parseFloat(q.loc.lon);
+        if (q.loc.lon > 180) {
+          q.loc.lon = q.loc.lon - 360;
+        }
         if (q.loc.lon > 180 || q.loc.lon < -180) {
             return Promise.reject({
                 niceMessage: 'Could not complete search',
@@ -263,6 +213,9 @@ function textSearch(q, page) {
 
       // here's some reading on filtered queries
       // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
+
+      // query sorted by geo
+      // https://www.elastic.co/blog/geo-location-and-search
       var filter = {
           bool: {
               must: [{
@@ -286,6 +239,17 @@ function textSearch(q, page) {
           });
       }
 
+      var geosort = [{
+          "_geo_distance" : {
+              "geolocation" : {
+                lon: q.loc.lon,
+                lat: q.loc.lat
+              },
+              "order" : "asc",
+              "unit" : "mi"
+          }
+      }];
+
       // put it all together in a filtered fuzzy query
       var fuzzyQuery = {
           size: pageSize,
@@ -294,15 +258,11 @@ function textSearch(q, page) {
           type: "items",
           fields: [],
           body: {
-              query: {
-                  filtered: {
-                      query: searchterms.getElasticsearchQuery(q.text),
-                      filter: filter
-                  }
-              }
+              query: searchterms.getElasticsearchQuery(q.text),
+              sort: geosort
           }
       };
-      //kip.prettyPrint(fuzzyQuery)
+      kip.prettyPrint(fuzzyQuery)
 
       return es.search(fuzzyQuery)
           .then(function(results) {
@@ -310,42 +270,21 @@ function textSearch(q, page) {
                   return r._id;
               });
 
-              var users = db.Users.find({
-                  $or: [{
-                      'profileID': q.text
-                  }, {
-                      'local.email': q.text
-                  }, {
-                      'facebook.email': q.text
-                  }, {
-                      'name': q.text
-                  }]
-              }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
-
-              var items = db.Landmarks.find({
+              return db.Landmarks.find({
                   _id: {
                       $in: ids
                   }
-              }).exec();
-
-              return Promise.settle([users, items]).then(function(arry) {
-                  var u = arry[0];
-                  var i = arry[1];
-
-                  if (u.isFulfilled() && i.isFulfilled()) {
-                      var results = u.value().concat(i.value().map(function(i) {
-                          return db.Landmark.itemLocationHack(i, q.loc);
-                      }));
-                      return results
-                  } else if (i.isFulfilled() && !u.isFulfilled()) {
-                      return i.value().map(function(i) {
-                          return db.Landmark.itemLocationHack(i, q.loc);
-                      });
-                  } else if (u.isFulfilled() && !i.isFulfilled()) {
-                      return u.value()
-                  }
               })
-
+              .select(db.Landmark.frontEndSelect)
+              .exec()
+              .then(function(items) {
+                return items.map(function(i) {
+                  var i = findParent(i.toObject(), q.loc);
+                  delete i.owner;
+                  delete i.parents;
+                  return i;
+                })
+              }, kip.err);
           }, kip.err);
 
   }
@@ -401,7 +340,10 @@ function filterSearch(q, page) {
         .exec()
         .then(function(items) {
             return items.map(function(item) {
-                return db.Landmark.itemLocationHack(item, q.loc);
+                var i = findParent(item, q.loc);
+                delete i.parents;
+                delete i.owner;
+                return i;
             });
         });
 }
@@ -663,12 +605,12 @@ function eliminateDuplicates(res, q, pageSize) {
 
 
 if (!module.parent) {
-  app.listen(8080, function(e) {
+  app.listen(9090, function(e) {
     if(e) {
       console.log(e);
       process.exit(1);
     }
-    console.log("kip style search listening on 8080")
+    console.log("kip style search listening on 9090")
   })
 } else {
   module.exports = app;

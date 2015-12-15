@@ -1,4 +1,28 @@
 var catalogs = [{
+    category: 'Womens Activewear',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-activewear?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1'
+}, {
+    category: 'Womens Dress',
+    url: 'http://www1.macys.com/shop/womens-clothing/dresses?id=5449&edge=hybrid&cm_sp=us_hdr-_-women-_-5449_dresses_COL1'
+}, {
+    category: 'Womens Coats',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-coats?id=269&edge=hybrid&cm_sp=us_hdr-_-women-_-269_coats_COL1'
+}, {
+    category: 'Womens Tops',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-tops?id=255&edge=hybrid&cm_sp=us_hdr-_-women-_-255_tops_COL1'
+}, {
+    category: 'Womens Jacket Blazer',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-jackets?id=120&edge=hybrid&cm_sp=us_hdr-_-women-_-120_jackets-%26-blazers_COL1'
+}, {
+    category: 'Womens Sweater',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-sweaters?id=260&edge=hybrid&cm_sp=us_hdr-_-women-_-260_sweaters_COL1'
+}, {
+    category: 'Womens Jeans',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-jeans?id=3111&edge=hybrid&cm_sp=us_hdr-_-women-_-3111_jeans_COL1'
+}, {
+    category: 'Womens Pants',
+    url: 'http://www1.macys.com/shop/womens-clothing/womens-pants?id=157&edge=hybrid&cm_sp=us_hdr-_-women-_-157_pants_COL1'
+}, {
     category: 'Mens Blazer Coat',
     url: 'http://www1.macys.com/shop/mens-clothing/mens-blazers-sports-coats?id=16499&edge=hybrid&cm_sp=us_hdr-_-men-_-16499_blazers-%26-sport-coats_COL1'
 }, {
@@ -37,30 +61,6 @@ var catalogs = [{
 }, {
     category: 'Mens Big Tall',
     url: 'http://www1.macys.com/shop/mens-clothing/big-and-tall?id=45758&edge=hybrid&cm_sp=us_hdr-_-men-_-45758_big-%26-tall_COL1'
-}, {
-    category: 'Womens Dress',
-    url: 'http://www1.macys.com/shop/womens-clothing/dresses?id=5449&edge=hybrid&cm_sp=us_hdr-_-women-_-5449_dresses_COL1'
-}, {
-    category: 'Womens Coats',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-coats?id=269&edge=hybrid&cm_sp=us_hdr-_-women-_-269_coats_COL1'
-}, {
-    category: 'Womens Tops',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-tops?id=255&edge=hybrid&cm_sp=us_hdr-_-women-_-255_tops_COL1'
-}, {
-    category: 'Womens Jacket Blazer',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-jackets?id=120&edge=hybrid&cm_sp=us_hdr-_-women-_-120_jackets-%26-blazers_COL1'
-}, {
-    category: 'Womens Sweater',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-sweaters?id=260&edge=hybrid&cm_sp=us_hdr-_-women-_-260_sweaters_COL1'
-}, {
-    category: 'Womens Jeans',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-jeans?id=3111&edge=hybrid&cm_sp=us_hdr-_-women-_-3111_jeans_COL1'
-}, {
-    category: 'Womens Pants',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-pants?id=157&edge=hybrid&cm_sp=us_hdr-_-women-_-157_pants_COL1'
-}, {
-    category: 'Womens Activewear',
-    url: 'http://www1.macys.com/shop/womens-clothing/womens-activewear?id=29891&edge=hybrid&cm_sp=us_hdr-_-women-_-29891_activewear_COL1'
 }, {
     category: 'Womens Skirt',
     url: 'http://www1.macys.com/shop/womens-clothing/womens-skirts?id=131&edge=hybrid&cm_sp=us_hdr-_-women-_-131_skirts_COL1'

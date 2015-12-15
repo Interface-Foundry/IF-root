@@ -4,6 +4,7 @@ var fs = require('fs');
 var _ = require('lodash');
 
 var testQueries = [
+  'black tie women',
   'black light jacket',
   'fall overcoat',
   'purple dress',

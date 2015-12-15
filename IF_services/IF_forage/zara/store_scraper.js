@@ -5,7 +5,7 @@ var Promise = require('bluebird')
 var async = require('async');
 var q = require('q');
 var uniquer = require('../../uniquer');
-
+var fs = require('fs');
 var states = require('./states')
 var stateIndex = 0;
 var currentState = states[stateIndex]
@@ -181,6 +181,8 @@ function scrapeStores(coords) {
                 // console.log('Body: ',body)
                 $ = cheerio.load(body); //load HTML
 
+                fs.appendFile('./logs/lolcakes.log', JSON.stringify(body))
+
                 if ($('html').attr('id') == 'GenericErrorPage') {
                     console.log('Uh oh, Blocked!')
                     return reject('GenericErrorPage')
@@ -259,7 +261,7 @@ function saveStores(stores) {
             db.Landmarks
                 .findOne({
                     'source_generic_store.storeId': store.storeId,
-                     'linkbackname': 'zara.com'
+                    'linkbackname': 'zara.com'
                 })
                 .exec(function(e, s) {
                     if (e) {
@@ -276,16 +278,15 @@ function saveStores(stores) {
                         n.linkback = 'http://www.zara.com';
                         n.linkbackname = 'zara.com'
                         n.loc.type = 'Point'
-                        n.loc.coordinates = [parseFloat(store.lng),parseFloat(store.lat)] 
+                        n.loc.coordinates = [parseFloat(store.lng), parseFloat(store.lat)]
                         n.name = 'Zara ' + store.storeAddress
                         uniquer.uniqueId('zara ' + store.storeAddress, 'Landmark').then(function(output) {
                             n.id = output;
                             n.save(function(e, newStore) {
                                 if (e) {
-                                    console.log('ERROR MOFO',e)
+                                    console.log('ERROR MOFO', e)
                                     return callback()
                                 }
-
                                 console.log('new store: ', newStore.source_generic_store.storeId)
                                 Stores.push(newStore)
                                 callback()

@@ -22,28 +22,21 @@ async.whilst(
 
             async.eachSeries(catalogs, function(catalog, callback) {
                 loadCatalog(catalog, stores).then(function(res) {
-                    var today = new Date().toString()
-                    fs.appendFile('./logs/progress.log', '\n' + today + 'Finished scraping  category: ', catalog.category)
                     console.log('Done with catalog.')
                     wait(callback, 10000)
                 }).catch(function(err) {
                     if (err) {
-                        var today = new Date().toString()
-                        fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                        console.log('29: ', err)
                     }
                     console.log('Error with catalog: ', catalog.category)
                     wait(callback, 10000)
                 })
             }, function(err) {
                 if (err) {
-                    var today = new Date().toString()
-                    fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + catalog.category + '\n' + err, function(err) {});
+                    console.log('36: ', err)
                 } else {
-                    var today = new Date().toString()
-                    fs.appendFile('./logs/progress.log', '\n' + today + '***Finished scraping all catalogs***')
+                    console.log('Finished scraping all catalogs for Urban Outfitters.');
                 }
-                console.log('Finished scraping all catalogs for Urban Outfitters.');
-
             })
         }).catch(function(err) {
             if (err) {
@@ -100,7 +93,7 @@ function loadCatalog(category, stores) {
                 }
                 console.log('Scraping: ', options.url)
 
-                loadPage(options,nextPage,category,stores).then(function(startVal) {
+                loadPage(options, nextPage, category, stores).then(function(startVal) {
                     if (!startVal) {
                         nextPage = ''
                     }
@@ -123,12 +116,12 @@ function loadCatalog(category, stores) {
     })
 }
 
-function loadPage(options, nextPage,category,stores) {
+function loadPage(options, nextPage, category, stores) {
     return new Promise(function(resolve, reject) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
-                
+
                 var startVal = ''
                 try {
                     startVal = $('.pagination a')['0'].attribs.href.split('&startValue=')[1]

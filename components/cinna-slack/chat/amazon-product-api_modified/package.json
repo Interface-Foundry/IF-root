@@ -1,0 +1,93 @@
+{
+  "_args": [
+    [
+      "amazon-product-api",
+      "/Users/jrbaldwin/Documents/Interface_Foundry/repo/IF-root/components/cinna-slack/chat"
+    ]
+  ],
+  "_from": "amazon-product-api@*",
+  "_id": "amazon-product-api@0.3.5",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/amazon-product-api",
+  "_nodeVersion": "4.1.0",
+  "_npmUser": {
+    "email": "simonthiboutot.qc@gmail.com",
+    "name": "mastert"
+  },
+  "_npmVersion": "2.14.4",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "amazon-product-api",
+    "raw": "amazon-product-api",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "*",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/amazon-product-api/-/amazon-product-api-0.3.5.tgz",
+  "_shasum": "adacb2e304bf0f1d3cc8a505bcbf3ae07596ed62",
+  "_shrinkwrap": null,
+  "_spec": "amazon-product-api",
+  "_where": "/Users/jrbaldwin/Documents/Interface_Foundry/repo/IF-root/components/cinna-slack/chat",
+  "author": {
+    "email": "dmitry.mazuro@icloud.com",
+    "name": "Dmitry Mazuro"
+  },
+  "bugs": {
+    "url": "https://github.com/t3chnoboy/amazon-product-api/issues"
+  },
+  "dependencies": {
+    "es6-promise": "^2.0.1",
+    "request": "^2.53.0",
+    "xml2js": "^0.4.5"
+  },
+  "description": "Amazon Product Advertising API client",
+  "devDependencies": {
+    "coffee-script": "^1.7.1",
+    "mocha": "^1.20.1",
+    "should": "^4.0.4"
+  },
+  "directories": {
+    "lib": "./lib/"
+  },
+  "dist": {
+    "shasum": "adacb2e304bf0f1d3cc8a505bcbf3ae07596ed62",
+    "tarball": "http://registry.npmjs.org/amazon-product-api/-/amazon-product-api-0.3.5.tgz"
+  },
+  "gitHead": "96e1f8b395bfcef655562470ecbb4cf88db81368",
+  "homepage": "https://github.com/t3chnoboy/amazon-product-api",
+  "keywords": [
+    "ads",
+    "advertising",
+    "amazon",
+    "aws",
+    "product"
+  ],
+  "license": "BSD-2-Clause",
+  "main": "./lib/index.js",
+  "maintainers": [
+    {
+      "name": "t3chnoboy",
+      "email": "dmitry.mazuro@icloud.com"
+    },
+    {
+      "name": "mastert",
+      "email": "simonthiboutot.qc@gmail.com"
+    }
+  ],
+  "name": "amazon-product-api",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/t3chnoboy/amazon-product-api.git"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "version": "0.3.5"
+}

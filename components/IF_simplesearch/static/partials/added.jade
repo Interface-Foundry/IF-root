@@ -1,0 +1,20 @@
+header.jumbotron
+-homelink = JSON.stringify(homelink)
+-searchquery = JSON.stringify(searchquery)
+-coords = JSON.stringify(coords)
+-loc = JSON.stringify(loc)
+div.row
+div.span3
+    h2(style="margin-top:-100px;position:fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);").
+        Added Products!
+    a(href='http://www.kipsearch.com/q/'+searchquery+'/'+coords[1]+'/'+coords[0]+'/'+encodeURIComponent(loc),class='header-kip', style='margin-top:-50px; position:fixed;top:50%;left:50%;transform: translate(-50%, -50%);').
+        See your results on Kip!
+    div(style="position:fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);")
+        button(class="link-button",onclick="shopify()").
+            Return to Shopify
+        script.
+            function shopify() {
+            var url = !{homelink};
+            window.location.href = url;
+            } 
+     

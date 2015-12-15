@@ -17,24 +17,25 @@ async.whilst(
         async.eachSeries(catalogs, function(catalog, callback) {
             loadCatalog(catalog).then(function(res) {
                 console.log('Done with catalog.')
-                var today = new Date().toString()
-                fs.appendFile('./logs/progress.log', '\n' + today + 'Finished category: ', catalog)
+                    // var today = new Date().toString()
+                    // fs.appendFile('./logs/progress.log', '\n' + today + 'Finished category: ', catalog)
                 wait(callback, 10000)
             }).catch(function(err) {
                 if (err) {
-                    var today = new Date().toString()
-                        // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {});
+                    // var today = new Date().toString()
+                    // fs.appendFile('errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err, function(err) {});
                     console.log('Error with catalog: ', catalog, err)
                 }
                 wait(callback, 10000)
             })
         }, function(err) {
             if (err) {
-                var today = new Date().toString()
-                fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err)
+                console.log('33: ', err)
+                    // var today = new Date().toString()
+                    // fs.appendFile('./logs/errors.log', '\n' + today + ' Category: ' + categoryName + '\n' + err)
             } else {
-                var today = new Date().toString()
-                fs.appendFile('./logs/progress.log', '\n' + today + '*Finished scraping all catalogs. ')
+                // var today = new Date().toString()
+                // fs.appendFile('./logs/progress.log', '\n' + today + '*Finished scraping all catalogs. ')
             }
             console.log('Finished scraping all catalogs. Restarting in 2000 seconds.')
             wait(loop, 2000000)
@@ -42,7 +43,8 @@ async.whilst(
     },
     function(err) {
         if (err) {
-            var today = new Date().toString()
+            console.log('46: ',err)
+            // var today = new Date().toString()
                 // fs.appendFile('errors.log', '\n' + today + err, function(err) {});
         }
     })
@@ -60,17 +62,14 @@ function loadCatalog(url) {
                 $ = cheerio.load(body); //load HTML
                 async.eachSeries($('li.product.grid-element>a'), function(item, callback) {
                     var detailsUrl = item.attribs.href;
-
                     if (detailsUrl.toString().indexOf('/us/en/-c') > -1) {
-
                         console.log('Invalid url, skipping: ', detailsUrl)
                         return callback()
                     }
-
                     console.log('Scraping>>>', detailsUrl)
                     item_scraper(detailsUrl).then(function(result) {
                         // console.log('Done.')
-                        callback()
+                        wait(callback,2000)
                     }).catch(function(err) {
                         callback()
                     })
@@ -78,11 +77,10 @@ function loadCatalog(url) {
                     console.log('Done scraping catalog!')
                     resolve()
                 })
-
             } else {
                 if (error) {
-                    var today = new Date().toString()
-                    fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + categoryName + '\n' + error, function(err) {});
+                    // var today = new Date().toString()
+                    // fs.appendFile('./logs/errors.log', '\n' + today + 'Category: ' + categoryName + '\n' + error, function(err) {});
                     reject(error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode)

@@ -44,7 +44,7 @@ module.exports = function(url, category, stores) {
                     }).catch(function(err) {
                         if (err) {
                             console.log('48: ', err)
-                            // var today = new Date().toString()
+                                // var today = new Date().toString()
                                 // fs.appendFile('./logs/errors.log', '\n' + today + cat + err, function(err) {});
                         }
                         callback(null)
@@ -172,7 +172,20 @@ function scrapeItem(url) {
                                             prices.push(price)
                                         } catch (err) {
                                             if (err) console.log(err)
-                                            return reject('Could not find prices for this item.')
+
+                                            for (var key in $('span.priceSale')) {
+                                                if ($('span.priceSale').hasOwnProperty(key) && $('span.priceSale')[key].children && $('span.priceSale')[key].children[0] && $('span.priceSale')[key].children[0].data) {
+                                                    console.log('*****', $('span.priceSale')[key].children[0].data)
+                                                    try {
+                                                        var price = parseFloat($('span.priceSale')[key].children[0].data.split('$')[1])
+                                                        prices.push(price)
+                                                    } catch (err) {
+                                                        if (err) console.log(err)
+                                                        return reject('Could not find prices for this item.')
+                                                    }
+                                                }
+                                            }
+
                                         }
                                     }
                                 }
@@ -181,8 +194,8 @@ function scrapeItem(url) {
                 }
 
                 if (prices == null || prices.length < 1 || !prices) {
-                    console.log('Could not find prices for this item: ', url)
-                    return reject('Could not find prices for this item.')
+                    console.log('Could not find prices for this item: ', url);
+                    return reject('Could not find prices for this item.');
                 }
                 var price = prices.reduce(function(a, b, i, arr) {
                     return Math.min(a, b)
@@ -224,14 +237,12 @@ function scrapeItem(url) {
                         }
                         var inventory = [];
                         var upcNumbers = [];
-
                         totalInventory.forEach(function(itemType) {
                             if (itemType.color.trim() == key.trim()) {
                                 inventory.push(itemType);
                                 upcNumbers.push(itemType.upc);
                             }
                         })
-
                         item.inventory = inventory
                         item.upcNumbers = upcNumbers
                         itemObjects.push(item)
@@ -305,7 +316,9 @@ function getInventory(items, Stores) {
                             'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                         }
                     };
+
                     // console.log('Url: ',url)
+                    
                     request(options, function(error, response, body) {
                         if ((!error) && (response.statusCode == 200)) {
                             body = JSON.parse(body);
@@ -315,13 +328,13 @@ function getInventory(items, Stores) {
                             }
 
                             body.stores.store.forEach(function(store) {
-                                    if (store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory && store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory.storeAvailability == "AVAILABLE") {
-                                        item.storeIds.push(store.address.id.toString().trim());
-                                    }
-                                })
+                                if (store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory && store.inventories && store.inventories.inventory && store.inventories.inventory[0] && store.inventories.inventory[0].storeInventory.storeAvailability == "AVAILABLE") {
+                                    item.storeIds.push(store.address.id.toString().trim());
+                                }
+                            })
                             console.log('.')
                                 // console.log(upcNumber, ' found in : ', body.stores.store.length, ' stores...')
-                            // console.log('Found: ',body.stores.store.length,'\n');
+                                // console.log('Found: ',body.stores.store.length,'\n');
                             wait(function() {
                                 finishedSku();
                             }, 800);
@@ -379,8 +392,6 @@ function saveItems(items, stores, notfoundstore, url) {
                     updatedInv[1] = [notfoundstore.loc.coordinates]
                 }
 
-                // console.log('Saving item: ', item.name);
-
                 //Check if this item exists
                 db.Landmarks.findOne({
                     'name': item.name,
@@ -402,7 +413,7 @@ function saveItems(items, stores, notfoundstore, url) {
                         delete i.source_generic_item.storeIds;
                         i.price = parseFloat(item.price);
                         i.itemImageURL = item.hostedImages;
-                        i.name = item.name;
+                        i.name = item.name.replace(/[^\w\s]/gi, '');
                         i.owner = owner;
                         i.linkback = item.src;
                         i.linkbackname = 'macys.com';
@@ -435,7 +446,7 @@ function saveItems(items, stores, notfoundstore, url) {
                                         console.log('Saved: ', item.id)
                                     }
 
-                                    callback();
+                                    wait(callback, 1000);
                                 })
                             }) //end of uniquer
 
@@ -454,9 +465,8 @@ function saveItems(items, stores, notfoundstore, url) {
                                 console.log('Inventory update error: ', e)
                             }
                             // console.log('Updated inventory for item:', match.id)
-                            callback()
+                            wait(callback, 1000);
                         })
-
                     }
                 })
 

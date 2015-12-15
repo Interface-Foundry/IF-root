@@ -70,7 +70,12 @@
                                          getInventory(item, zipcode).then(function(inventory) {
                                              callback(null, item, inventory)
                                          }).catch(function(err) {
-                                             callback(err)
+                                             if (err) {
+                                                 console.log(err)
+                                                 return reject(err)
+                                             } else {
+                                                 callback(err)
+                                             }
                                          })
                                      },
                                      function(item, inventory, callback) {
@@ -204,7 +209,7 @@
                          colorUrls.push(newUrl)
                      }
                  }
-                 console.log('Found ' + colorUrls.length + ' colors for item: ')
+                 console.log('Found ' + colorUrls.length + ' colors for item: ', url)
                  for (var i = 0; i < colors.length; i++) {
                      var object = {
                          color: colors[i],
@@ -282,7 +287,7 @@
                  //Construct item name from Brand Name + Product Name 
                  var brandName = '';
                  //get brand name
-                 $("section[id='brand-title']").map(function(i, section) {
+                 $("section[class='brand-title']").map(function(i, section) {
                      for (var i = 0; i < section.children.length; i++) {
                          if (section.children[i].name == 'h2') {
                              brandName = section.children[i].children[0].children[0].data;
@@ -290,7 +295,7 @@
                      }
                  });
                  //get product name
-                 $("section[id='product-title']").map(function(i, section) {
+                 $("section[class='product-title']").map(function(i, section) {
                      for (var i = 0; i < section.children.length; i++) {
                          if (section.children[i].name == 'h1') {
                              newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
@@ -299,11 +304,24 @@
                  });
 
                  //get item price
-                 $('td').each(function(i, elem) {
-                     if (elem.attribs.class.indexOf('item-price') > -1) {
-                         newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
-                     }
-                 });
+                 if ($('div.price-display-item') && $('div.price-display-item')['0'] && $('div.price-display-item')['0'].children && $('div.price-display-item')['0'].children['0'].data && $('div.price-display-item')['0'].children['0'].data.indexOf('$') > -1) {
+                     newItem.price = $('div.price-display-item')['0'].children['0'].data.replace(/[^\d.-]/g, '')
+                     console.log('Regular Price: ', newItem.price)
+                 } else if ($('div.price-current') && $('div.price-current')['0'] && $('div.price-current')['0'].children && $('div.price-current')['0'].children['0'].data && $('div.price-current')['0'].children['0'].data.indexOf('$') > -1) {
+                     newItem.price = $('div.price-current')['0'].children['0'].data.replace(/[^\d.-]/g, '')
+                     console.log('Sales Price: ', newItem.price)
+                 } else if ($('section.product-title>h1') && $('section.product-title>h1')['0'] && $('section.product-title>h1')['0'].children && $('section.product-title>h1')['0'].children['0'].data && $('section.product-title>h1')['0'].children['0'].data.indexOf('$') > -1) {
+                     newItem.price = $('section.product-title>h1')['0'].children['0'].data.replace(/[^\d.-]/g, '')
+                     console.log('Regular Retail Price: ', newItem.price)
+                 } else {
+                     console.log('NO PRICE FOUND ')
+                     return reject('NO PRICE FOUND ')
+                 }
+                 // $('td').each(function(i, elem) {
+                 //     if (elem.attribs.class.indexOf('item-price') > -1) {
+                 //         newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
+                 //     }
+                 // });
 
                  newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];
 
@@ -349,9 +367,9 @@
                      console.log('getinventory error ')
                      reject(error)
                  } else {
-                     console.log('bad response')
+                     console.log('Bad Response: ', response.statusCode, body)
                      wait(function() {
-                         reject('Bad response from inventory request')
+                         reject(response.statusCode)
                      }, 10000)
 
                  }
@@ -365,7 +383,6 @@
          var Stores = [];
          //bool to increment notFoundCount
          var notFound = true;
-
          async.eachSeries(inventory["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
              // var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
              var url = 'http://shop.nordstrom.com/st/' + item.StoreNumber + '/directions';
@@ -451,7 +468,7 @@
                                      console.log(err)
                                      setTimeout(function() {
                                          return callback()
-                                     }, 800);
+                                     }, 100);
                                  }
                                  //If store does not exist in db yet, create it.
                                  if (!store) {
@@ -476,7 +493,7 @@
                                              console.log('Saved store.', s.id)
                                              notFound = false;
                                              Stores.push(s)
-                                         } 
+                                         }
                                          setTimeout(function() {
                                              return callback()
                                          }, 800);
@@ -490,7 +507,7 @@
                                      Stores.push(store)
                                      setTimeout(function() {
                                          return callback()
-                                     }, 800);
+                                     }, 100);
                                  }
                              }) //end of findOne
                      }) //end of uniquer
@@ -542,7 +559,7 @@
                      return reject('Price was not a number..')
                  }
                  item.owner = owner;
-                 item.name = item.source_generic_item.name;
+                 item.name = item.source_generic_item.name.replace(/[^\w\s]/gi, '');
                  item.linkback = item.source_generic_item.src;
                  item.linkbackname = 'nordstrom.com';
                  item.itemImageURL = newItem.hostedImages;
@@ -603,7 +620,7 @@
                      }
 
 
-                     // console.log('Updated inventory.', i)
+                     console.log('Updated inventory.', i)
                      return resolve(i)
                  })
              }
