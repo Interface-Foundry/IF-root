@@ -185,10 +185,6 @@ landmarkSchema.index({
     loc: '2dsphere'
 });
 
-landmarkSchema.virtual('parentName').set(function(name) {
-    return name;
-});
-
 //instance method to get comments
 landmarkSchema.methods.getComments = function(cb) {
     worldchatSchema.find({
@@ -265,7 +261,7 @@ Landmark.generateIdFromName = function(name) {
  * @returns {*}
  */
 Landmark.itemLocationHack = function(item, loc) {
-    if (item.loc.type === 'MultiPoint') {
+    if (item.loc && item.loc. type && item.loc.type === 'MultiPoint') {
         item.loc.type = 'Point';
 
         // If there is no location to go by, choose a store for them

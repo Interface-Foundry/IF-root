@@ -20,9 +20,14 @@ async.whilst(
     function(loop) {
         currentState = states[stateIndex];
         var query = {
-            'state': currentState
+            'state': currentState,
+            'pop': {
+                $gte: 35000
+            }
         }
-        db.Zipcodes.find(query).then(function(zips) {
+        db.Zipcodes.find(query).sort({
+            'density': -1
+        }).then(function(zips) {
             var count = 0;
             console.log('\nCurrent state: ' + currentState)
             async.whilst(
@@ -104,7 +109,7 @@ async.whilst(
     },
     function(err) {
         if (err) {
-           console.log(err)
+            console.log(err)
         }
     });
 
