@@ -11,13 +11,13 @@ module.exports = function(router) {
         console.log(err);
         return res.status(500).json({msg: 'internal server error'});
       }
+      console.log('RETURNED MESSAGES: ',data)
       res.json(data);
     });
   });
 
   //post a new message to db
   router.post('/newmessage', function(req, res) {
-    console.log('REQ.BPDU:',req.body)
     var newMessage = new Message(req.body);
     newMessage.save(function (err, data) {
       if(err) {

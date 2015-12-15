@@ -64,10 +64,25 @@ export function loadInitialControl(control) {
     };
 }
 
+export function loadInitialMessage(message) {
+    return {
+        type: types.LOAD_MESSAGE,
+        message
+    };
+}
+
+
 export function changeControl(control) {
     return {
         type: types.CHANGE_CONTROL,
         control
+    };
+}
+
+export function changeMessage(message) {
+    return {
+        type: 'CHANGE_MESSAGE',
+        message
     };
 }
 

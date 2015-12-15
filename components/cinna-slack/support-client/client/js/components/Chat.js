@@ -19,7 +19,8 @@ export default class Chat extends Component {
     channels: PropTypes.array.isRequired,
     activeChannel: PropTypes.object.isRequired,
     typers: PropTypes.array.isRequired,
-    activeControl: PropTypes.object.isRequired
+    activeControl: PropTypes.object.isRequired,
+    activeMessage: PropTypes.object.isRequired
   }
   static contextTypes = {
     router: PropTypes.object.isRequired
@@ -58,13 +59,19 @@ export default class Chat extends Component {
     this.context.router.transitionTo('/welcome');
   }
   changeActiveChannel(channel) {
-    const { actions } = this.props;
+    const { actions, messages} = this.props;
     actions.changeChannel(channel);
+    this.changeActiveMessage()
   }
   changeActiveControl(control) {
     const { actions } = this.props;
     actions.changeControl(control);
-
+  }
+  changeActiveMessage(channel) {
+    const { actions, messages} = this.props;
+    const filteredMessages = messages.filter(message => message.source.channel === channel.name);
+    const firstMsg = filteredMessages[0]
+    actions.changeMessage(firstMsg);
   }
   openMoreUsersModal() {
     event.preventDefault();
@@ -75,7 +82,7 @@ export default class Chat extends Component {
     this.setState({moreUsersModal: false});
   }
   render() {
-    const { messages, channels, actions, activeChannel, typers, activeControl} = this.props;
+    const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => message.source.channel === activeChannel.name);
     const username = this.props.user.username;
     const dropDownMenu = (
@@ -109,14 +116,14 @@ export default class Chat extends Component {
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
                 {filteredMessages.map(message =>
-                  <MessageListItem message={message} key={message.id} />
+                  <MessageListItem message={message} key={message.ts} />
                 )}
               </ul>
               <MessageComposer activeChannel={activeChannel} user={username} onSave={::this.handleSave} />
             </div>
 
             <div style= {{ padding: 0}} >
-              <ControlPanel activeControl={activeControl} activeChannel={activeChannel} filteredMessages={filteredMessages} />
+              <ControlPanel activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} />
             </div>
 
           </div>

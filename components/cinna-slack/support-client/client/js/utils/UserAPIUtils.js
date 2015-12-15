@@ -77,6 +77,7 @@ export function createMessage(message) {
       if (err) {
         reject(res.body || err);
       } else {
+        console.log('Successfully saved new msg: ',res.body)
         resolve(res.body);
       }
     });

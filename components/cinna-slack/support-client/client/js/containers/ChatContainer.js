@@ -32,7 +32,8 @@ ChatContainer.propTypes = {
   channels: PropTypes.array.isRequired,
   activeChannel: PropTypes.object.isRequired,
   typers: PropTypes.array.isRequired,
-  activeControl: PropTypes.object.isRequired
+  activeControl: PropTypes.object.isRequired,
+  activeMessage: PropTypes.object.isRequired
 }
 console.log(connect);
 function mapStateToProps(state) {
@@ -42,7 +43,8 @@ function mapStateToProps(state) {
       activeChannel: state.activeChannel,
       user: {username: 'Kip'},
       typers: state.typers,
-      activeControl: state.activeControl
+      activeControl: state.activeControl,
+      activeMessage: state.activeMessage
   }
 }
 export default connect(mapStateToProps)(ChatContainer)

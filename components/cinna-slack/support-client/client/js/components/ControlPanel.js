@@ -8,11 +8,13 @@ import {
 from 'react-bootstrap';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
+import Form from './Form';
 
 export default class ControlPanel extends Component {
     static propTypes = {
         activeControl: PropTypes.object.isRequire,
-        activeChannel: PropTypes.object.isRequire
+        activeChannel: PropTypes.object.isRequire,
+        activeMessage: PropTypes.object.isRequire
     }
 
     constructor (props) {
@@ -24,8 +26,28 @@ export default class ControlPanel extends Component {
     }
 
     renderJSON() {
-      const {filteredMessages} = this.props
-        return (<div><pre>{JSON.stringify(filteredMessages[filteredMessages.length-1],null, 2) }</pre></div>)
+        const {message} = this.props
+        return (<div><pre>{JSON.stringify(message,null, 2) }</pre></div>)
+    }
+
+    renderForm() {
+      const {message} = this.props
+      return (
+       <div className="data-message">
+       <div className="header">
+       </div>
+       <div className="content">
+         <div className="input-group">
+         </div>
+         <div className="input-group">
+           <label for="text">Text</label>
+           <input ref="text" defaultValue= 'default text' />
+         </div>
+       </div>
+       <div className="footer">
+       </div>
+     </div>
+      )
     }
 
     renderControl(){
@@ -118,12 +140,15 @@ export default class ControlPanel extends Component {
     }
 
     render() {
-       const { activeControl, messages } = this.props;
+       const { activeControl, activeMessage} = this.props;
+
         var self = this;
         return ( 
         <section className='rightnav'>
           <h1>Control</h1> 
+     
           {self.renderJSON()}
+        <Form {...activeMessage} />
         <div >
         {self.renderControl()}
         </div>
