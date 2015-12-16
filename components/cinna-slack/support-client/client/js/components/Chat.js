@@ -49,9 +49,7 @@ export default class Chat extends Component {
   }
   handleSave(newMessage) {
     const { actions } = this.props;
-    if (newMessage.text.length !== 0) {
       actions.addMessage(newMessage);
-    }
   }
   handleSignOut() {
     const { dispatch } = this.props;
@@ -69,6 +67,7 @@ export default class Chat extends Component {
     });
        // console.log('new state: ',copy)
     this.setActiveMessage(copy)
+
   }
   setActiveMessage(message){
     const { actions } = this.props;
@@ -97,7 +96,7 @@ export default class Chat extends Component {
     event.preventDefault();
     this.setState({moreUsersModal: false});
   }
-  // message => message.source.channel === activeChannel.name
+  // <TopPanel activeControl={activeControl} onClick={::this.changeActiveControl} />
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
@@ -119,33 +118,27 @@ export default class Chat extends Component {
         </div>
         <div className="main">
           <header style={{background: '#FFFFFF', color: 'black', flexGrow: '0', order: '0', fontSize: '2.3em', paddingLeft: '0.2em'}}>
-            <TopPanel activeControl={activeControl} onClick={::this.changeActiveControl} />
-            
             <div>
-            
             <span style={{fontSize: '0.5em', marginLeft: '2em'}}>
             Message Count: {filteredMessages.length}
             </span>
             </div>
           </header>
           <div className="flexbox-container">
-
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
                 {filteredMessages.map(message =>
                   <MessageListItem message={message} key={message.ts} />
                 )}
               </ul>
-              <MessageComposer activeChannel={activeChannel} user={username} onSave={::this.handleSave} />
             </div>
-
             <div style= {{ padding: 0}} >
-              <ControlPanel activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} onSubmit={::this.handleSubmit} />
+              <ControlPanel actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} onSubmit={::this.handleSubmit} />
             </div>
-
           </div>
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
+        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} user={username} onSave={::this.handleSave} msgIndex={filteredMessages.length}/>
           {typers.length === 1 &&
             <div>
               <span>

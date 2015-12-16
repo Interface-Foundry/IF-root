@@ -1,5 +1,5 @@
 import {
-    ADD_CHANNEL, RECEIVE_CHANNEL, LOAD_CHANNELS, LOAD_CHANNELS_SUCCESS, LOAD_CHANNELS_FAIL
+    ADD_CHANNEL, RECEIVE_CHANNEL, LOAD_CHANNELS, LOAD_CHANNELS_SUCCESS, LOAD_CHANNELS_FAIL, REMOVE_CHANNEL
 }
 from '../constants/ActionTypes';
 
@@ -46,6 +46,10 @@ export default function channels(state = initialState, action) {
                     loaded: false,
                     error: action.error,
                     data: [...state.data]
+            };
+        case REMOVE_CHANNEL:
+            return {...state,
+                data: [...(state.data.filter(channel => channel.name !== action.channel.name))]
             };
         default:
             return state;

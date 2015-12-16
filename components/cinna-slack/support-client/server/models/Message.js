@@ -35,9 +35,7 @@ var messageSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    parent: {
-        id: String
-    }
+    parent: String
 });
 
 module.exports = mongoose.model('Message', messageSchema);

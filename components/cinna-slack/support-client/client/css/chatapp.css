@@ -72,6 +72,10 @@ span[class*="glyphicon-one-fine"] {
     padding-right: 0.4em;
 }
 
+.jsonBox {
+  font-size: 0.4em;
+}
+ 
 .glyphicon-one-fine-green-dot:before {
     content:"\25cf";
     font-size: 0.7em;

@@ -27,8 +27,9 @@ class DynamicForm extends Component {
           </div>);
         })}
         <div>
+
           <button disabled={submitting} onClick={handleSubmit}>
-            {submitting ? <i/> : <i/>} Submit
+            {submitting ? <i/> : <i/>} Update State
           </button>
         </div>
       </form>

@@ -9,7 +9,7 @@ exports = module.exports = function(io, cinnaio) {
             console.log('socketEvents: new message from cinna received.', msg)
 
             //Emit outgoing message to cinna-slack
-            ioClient.emit("msgFromSever",{message: msg.text});
+            ioClient.emit("msgFromSever", msg);
 
             //Emit throughout supervisor client
             socket.broadcast.emit('new bc message', msg);

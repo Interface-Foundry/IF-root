@@ -9,6 +9,7 @@ from 'react-bootstrap';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 import DynamicForm,{labels} from './Form';
+const socket = io();
 
 export default class ControlPanel extends Component {
     static propTypes = {
@@ -22,13 +23,16 @@ export default class ControlPanel extends Component {
       super(props)
     }
 
-    resolveIssue(channel) {
-     UserAPIUtils.resolveChannel(channel)
+    sendCommand(newMessage) {
+      const { activeChannel, actions } = this.props
+      socket.emit('new message', newMessage);
+      UserAPIUtils.createMessage(newMessage);
     }
 
     renderJSON() {
         const {activeMessage} = this.props
-        return (<div><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
+
+        return (<div style={{fontSize: '0.2em'}}><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
     }
 
     renderForm() {
@@ -145,17 +149,13 @@ export default class ControlPanel extends Component {
     bucket: true,
     action: true
   }
-
-
     render() {
        const { activeControl, activeMessage} = this.props;
-       
        const fields = {
         msg : '',
         bucket: '',
         action: ''
        }
-
         var self = this;
         return ( 
         <section className='rightnav'>
@@ -176,14 +176,14 @@ export default class ControlPanel extends Component {
             .keys(this.state)
             .reduce((accumulator, field) =>
               this.state[field] ? accumulator.concat(field) : accumulator, [])}/>
+        < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+            Send Command
+          < /Button> 
+      </div>   
+      <div className="jsonBox">
+        {self.renderJSON()}
       </div>
-
-          {self.renderJSON()}
-              <div >
-        {self.renderControl()}
-        </div>
       </section>
         );
     }
-
 }

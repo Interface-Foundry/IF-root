@@ -5,6 +5,7 @@ import fetch from 'isomorphic-fetch';
 // NOTE:Chat actions
 
 export function addMessage(message) {
+    console.log('new message: ', message)
     return {
         type: types.ADD_MESSAGE,
         message
@@ -13,6 +14,7 @@ export function addMessage(message) {
 
 export function receiveRawMessage(message) {
     console.log('Raw message in Actions: ', message)
+
     UserAPIUtils.createMessage(message);
     return {
         type: types.RECEIVE_MESSAGE,
@@ -32,6 +34,13 @@ export function receiveRawChannel(channel) {
 export function addChannel(channel) {
     return {
         type: types.ADD_CHANNEL,
+        channel
+    };
+}
+
+export function removeChannel(channel) {
+    return {
+        type: types.REMOVE_CHANNEL,
         channel
     };
 }
@@ -81,7 +90,7 @@ export function changeControl(control) {
 
 export function changeMessage(message) {
     return {
-        type: 'CHANGE_MESSAGE',
+        type: types.CHANGE_MESSAGE,
         message
     };
 }

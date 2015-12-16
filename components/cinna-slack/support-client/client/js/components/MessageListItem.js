@@ -8,17 +8,20 @@ export default class MessageListItem extends Component {
   
    constructor (props) {
     super(props)
-    this.state = { isImage: null}
+    this.state = { 
+      isImage: null,
+      displayMsg: ''
+    }
   }
 
   componentDidMount() {
     const { message } = this.props 
-
-     function checkImgURL (msg) {
+    const messageToDisplay = message.msg ? message.msg : message.client_res.msg
+    this.setState({ displayMsg: messageToDisplay })
+    function checkImgURL (msg) {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
     }
-
-   if (checkImgURL(this.props.message.msg)) {
+    if (checkImgURL(this.state.displayMsg)) {
       this.setState({ isImage : 'true'  })
     } else {
       this.setState({ isImage : 'false'  })
@@ -30,10 +33,10 @@ export default class MessageListItem extends Component {
      switch (this.state.isImage){
       case 'true' : 
         return (
-          <img width='200' src={message.msg} />
+          <img width='200' src={this.state.displayMsg} />
           )
       default:
-        return message.msg
+        return this.state.displayMsg
      }
   }
 

@@ -8,8 +8,10 @@ export default class MessageComposer extends Component {
 
   static propTypes = {
     activeChannel: PropTypes.object.isRequired,
+    activeMessage: PropTypes.object.isRequired,
     onSave: PropTypes.func.isRequired,
-    user: PropTypes.string.isRequired
+    user: PropTypes.string.isRequired,
+    msgIndex: PropTypes.number.isRequired
   }
   constructor(props, context) {
     super(props, context);
@@ -19,24 +21,66 @@ export default class MessageComposer extends Component {
     };
   }
   handleSubmit(event) {
-    const { user } = this.props;
+    const {
+        user, activeChannel, activeMessage, msgIndex
+    } = this.props;
     const text = event.target.value.trim();
     if (event.which === 13) {
-      event.preventDefault();
-      var newMessage = {
-        id: Date.now(),
-        channelID: this.props.activeChannel.name,
-        text: text,
-        user: user,
-        time: strftime('%H:%M %p', new Date())
-      };
-      socket.emit('new message', newMessage);
-      // UserAPIUtils.createMessage(newMessage);
-      this.props.onSave(newMessage);
-      this.setState({ text: '', typing: false });
-      socket.emit('stop typing');
+        event.preventDefault();
+        // {
+        //   id: (state.data.length === 0) ? 0 : parseInt(state.data[state.data.length - 1].id + 1),
+        //   incoming: true,
+        //   msg: action.message.msg,
+        //   tokens: action.message.tokens,
+        //   bucket: action.message.bucket,
+        //   action: action.message.action,
+        //   amazon: action.message.amazon,
+        //   dataModify: {
+        //     type: (action.message.dataModify && action.message.dataModify.type) ? action.message.dataModify.type : '' ,
+        //     val: (action.message.dataModify && action.message.dataModify.val) ? action.message.dataModify.val : [],
+        //     param: (action.message.dataModify && action.message.dataModify.param) ? action.message.dataModify.param : ''
+        //   },
+        //   source: {
+        //       origin: (action.message.source && action.message.source.origin) ? action.message.source.origin : 'socketio', 
+        //       channel: (action.message.source && action.message.source.channel) ? action.message.source.channel : '',
+        //       org: (action.message.source && action.message.source.org) ? action.message.source.org : 'kip',
+        //       id: (action.message.source && action.message.source.id) ? action.message.source.id : ''
+        //   },
+        //   client_res: {
+        //     msg: action.message.client_res
+        //   },
+        //   ts: action.message.ts,
+        //   resolved: action.message.resolved,
+        //   parent: action.message.parent
+        //   }
+        var newMessage = {
+            id: msgIndex,
+            msg: text,
+            incoming: false,
+            client_res: {
+                msg: text
+            },
+            source: {
+                origin: 'socket.io',
+                channel: activeChannel.name,
+                org: 'kip',
+                id: 'Cinna'
+            },
+            ts: new Date().toISOString(),
+            parent: activeMessage.source.id.toString()
+        };
+        socket.emit('new message', newMessage);
+        var copy = Object.assign({}, newMessage);
+        delete copy.msg
+        UserAPIUtils.createMessage(copy);
+        this.props.onSave(newMessage);
+        this.setState({
+            text: '',
+            typing: false
+        });
+        socket.emit('stop typing');
     }
-  }
+}
   handleChange(event) {
     this.setState({ text: event.target.value });
     if (event.target.value.length > 0 && !this.state.typing) {
