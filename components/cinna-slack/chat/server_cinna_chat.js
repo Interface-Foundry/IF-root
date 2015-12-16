@@ -52,32 +52,92 @@ server.listen(8000, function(e) {
 //globals
 var messageHistory = {}; //fake database, stores all users and their chat histories
 
+var slackUsers = {};
 
-// - - - Slack create bot - - - -//
-var settings = {
-    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-    name: 'cinna-1000'
-};
-var bot = new Bot(settings);
 
-bot.on('start', function() {
-    bot.on('message', function(data) {
-        // all incoming events https://api.slack.com/rtm
-        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-        if (data.type == 'message' && data.username !== settings.name){
-            var newSl = {
-                source: {
-                    'origin':'slack',
-                    'channel':data.channel,
-                    'org':data.team,
-                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory
-                },
-                'msg':data.text
-            }
-            preProcess(newSl);
-        }
+//ON SERVER START, RESTORE ALL BOT CONNECTIONS
+
+//get stored slack users from mongo
+function initSlackUsers(){
+
+    db.Slackbots.find({});
+
+    //team id
+    // var team_id = 'yoyoyoyo';
+
+    // //bot id
+    // var token = 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU';
+    // var user_id = 'kip';
+
+    //mongo db query, (res){}
+    //loadSlackUsers(res); 
+
+    var users = [];
+
+    users.push({
+        team_id: 'yoyoyoyo',
+        bot_token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+        bot_id: 'kip'
     });
+
+    loadSlackUsers(users);
+}
+
+//load slack users into memory, adds them as slack bots
+function loadSlackUsers(users){
+
+    async.eachSeries(users, function(user, callback) {
+
+        slackUsers[user.team_id] = {
+            bot_token: user.bot_token,
+            bot_id: user.bot_id
+        };
+
+
+        // - - - Slack create bot - - - -//
+        var settings = {
+            token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
+            name: 'cinna-1000'
+        };
+        var bot = new Bot(settings);
+
+        bot.on('start', function() {
+            bot.on('message', function(data) {
+                // all incoming events https://api.slack.com/rtm
+                // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+                if (data.type == 'message' && data.username !== settings.name){
+                    var newSl = {
+                        source: {
+                            'origin':'slack',
+                            'channel':data.channel,
+                            'org':data.team,
+                            'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory,
+                            'team_id':
+                        },
+                        'msg':data.text
+                    }
+                    preProcess(newSl);
+                }
+            });
+        });
+
+
+        callback();
+    }, function done(){
+
+    });
+
+}
+
+//slack "sockets"
+app.get('/newslack', function(req, res) {
+
+    //db.Slackbots.find({'meta.initialized': false})
+
+    res.send('slack id added');
 });
+
+
 
 //- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(server);
