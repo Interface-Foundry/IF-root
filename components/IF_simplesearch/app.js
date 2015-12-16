@@ -51,19 +51,19 @@ app.get('/newslack', function(req, res) {
       form: body
     }, function(e, r, b) {
         if (e) {
+          console.log('error connecting to slack api');
           console.log(e);
         }
-        console.log(b);
-        if (typeof b === 'String') {
+        if (typeof b === 'string') {
             b = JSON.parse(b);
         }
         if (!b.ok) {
-            console.error('error connecting with slack')
+            console.error('error connecting with slack, ok = false')
             console.error('body was', body)
             console.error('response was', b)
             return;
         } else if (!b.access_token || !b.scope) {
-            console.error('error connecting with slack')
+            console.error('error connecting with slack, missing prop')
             console.error('body was', body)
             console.error('response was', b)
             return;
