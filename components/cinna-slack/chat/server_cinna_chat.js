@@ -7,27 +7,12 @@ var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
-var mongoose = require('mongoose');
 var querystring = require('querystring');
-
-//load mongoose models
-var Message = require('./models/Message');
-
-//set env vars
-var config = require('config');
-// process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
-// process.env.PORT = process.env.PORT || 3000;
-
-// connect our DB
-mongoose.connect(config.mongodb.url);
-process.on('uncaughtException', function (err) {
-  console.log(err);
-});
-
 
 //load kip modules
 var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
+var history = require("./components/history.js");
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -70,7 +55,7 @@ bot.on('start', function() {
                     'origin':'slack',
                     'channel':data.channel,
                     'org':data.team,
-                    'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory
+                    'id':data.team + "_" + data.channel //for retrieving chat history in node memory
                 },
                 'msg':data.text
             }
@@ -93,16 +78,18 @@ io.sockets.on('connection', function(socket) {
         'origin':'socket.io',
         'channel':socket.id,
         'org':'kip',
-        'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
+        'id':'kip' + "_" + socket.id //for retrieving chat history in node memory
     }
     preProcess(helloMessage);
 
     socket.on("msgToClient", function(data) {
         data.source = {
+
             'origin':'socket.io',
             'channel':socket.id,
             'org':'kip',
-            'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
+            'id':'kip' + "_" + socket.id //for retrieving chat history in node memory
+            
         }
         preProcess(data);
     });
@@ -113,61 +100,67 @@ io.sockets.on('connection', function(socket) {
 //pre process incoming messages for canned responses
 function preProcess(data){
 
+
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
     }
-    if (!messageHistory[data.source.indexHist]){ //new user, set up chat states
-        messageHistory[data.source.indexHist] = {};
-        messageHistory[data.source.indexHist].search = []; //random chats
-        messageHistory[data.source.indexHist].banter = []; //search
-        messageHistory[data.source.indexHist].purchase = []; //finalizing search and purchase
-        messageHistory[data.source.indexHist].persona = []; //learn about our user
-        messageHistory[data.source.indexHist].cart = []; //user shopping cart
-        messageHistory[data.source.indexHist].allBuckets = []; //all buckets, chronological chat history
+    if (!messageHistory[data.source.id]){ //new user, set up chat states
+        messageHistory[data.source.id] = {};
+        messageHistory[data.source.id].search = []; //random chats
+        messageHistory[data.source.id].banter = []; //search
+        messageHistory[data.source.id].purchase = []; //finalizing search and purchase
+        messageHistory[data.source.id].persona = []; //learn about our user
+        messageHistory[data.source.id].cart = []; //user shopping cart
+        messageHistory[data.source.id].allBuckets = []; //all buckets, chronological chat history
     }
 
-    //check for canned responses/actions before routing to NLP
-    banter.checkForCanned(data.msg,function(res,flag,query){
+    //data = new Message(data);
 
-        //found canned response
-        if(flag){
-            switch(flag){
-                case 'basic': //just respond, no actions
-                    //send message
-                    data.client_res = res;
-                    cannedBanter(data,res);
-                    break;
-                case 'search.initial':
-                    //send message
-                    data.client_res = res;
-                    cannedBanter(data,res);
+    //create new mongo user obj
+    history.newMessage(data, function(newMsg){
 
-                    //now search for item
-                    data.tokens = [];
-                    data.tokens.push(query); //search for this item
-                    data.bucket = 'search';
-                    data.action = 'initial';
-                    incomingAction(data);
-                    break;
-                case 'search.focus':
-                    data.searchSelect = [];
-                    data.searchSelect.push(query);
-                    data.bucket = 'search';
-                    data.action = 'focus';
-                    incomingAction(data);
-                    break;
-                default:
-                    console.log('error: canned action flag missing');
+        //check for canned responses/actions before routing to NLP
+        banter.checkForCanned(newMsg.msg,function(res,flag,query){
+
+            //found canned response
+            if(flag){
+                switch(flag){
+                    case 'basic': //just respond, no actions
+                        //send message
+                        newMsg.client_res.msg.push(res);
+                        cannedBanter(newMsg,res);
+                        break;
+                    case 'search.initial':
+                        //send message
+                        newMsg.client_res.msg.push(res);
+                        cannedBanter(newMsg,res);
+
+                        //now search for item
+                        newMsg.tokens = [];
+                        newMsg.tokens.push(query); //search for this item
+                        newMsg.bucket = 'search';
+                        newMsg.action = 'initial';
+                        incomingAction(newMsg);
+                        break;
+                    case 'search.focus':
+                        newMsg.searchSelect = [];
+                        newMsg.searchSelect.push(query);
+                        newMsg.bucket = 'search';
+                        newMsg.action = 'focus';
+                        incomingAction(newMsg);
+                        break;
+                    default:
+                        console.log('error: canned action flag missing');
+                }
             }
-        }
-        //proceed to NLP instead
-        else {
-            routeNLP(data);
-        }
+            //proceed to NLP instead
+            else {
+                routeNLP(newMsg);
+            }
+        });
+
     });
-
-
 
 }
 
@@ -290,7 +283,6 @@ function banterBucket(data){
             break;
         case 'smalltalk':
             outgoingResponse(data,'txt');
-            saveHistory(data); //random stuff we chat with kip about
             break;
         default:
     }
@@ -314,7 +306,7 @@ function purchaseBucket(data){
         case 'checkout':
             //passing in data obj
             //pass messageHistory obj
-            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+            purchase.outputCart(data,messageHistory[data.source.id],function(res){
                 outgoingResponse(res,'txt');
             });
             break;
@@ -742,7 +734,7 @@ function saveToCart(data){
 
         //async push items to cart
         async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-            messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+            messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
             callback();
         }, function done(){
             //only support "add to cart" message for one item.
@@ -751,7 +743,7 @@ function saveToCart(data){
             // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
 
             // outgoingResponse(data,'txt');
-            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+            purchase.outputCart(data,messageHistory[data.source.id],function(res){
                 outgoingResponse(res,'txt');
             });
         });
@@ -1188,8 +1180,9 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     //text/image msg to user (not image results)
     else if (action == 'txt'){
 
-        saveHistory(data);
         sendResponse(data);
+                
+        history.saveHistory(data,1); 
 
         banter.getCinnaResponse(data,function(res){
             if(res){
@@ -1197,6 +1190,9 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                 sendResponse(data);
             }
         });
+
+        history.saveHistory(data,0); 
+
     }
     //no cinna response check
     else if (action == 'final'){
@@ -1208,14 +1204,14 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
 //send back msg to user, based on source.origin
 function sendResponse(data){
     if (data.source.channel && data.source.origin == 'socket.io'){
-        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});
+        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[0]});
     }
     else if (data.source.channel && data.source.origin == 'slack'){
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
-        bot.postMessage(data.source.channel, data.client_res, params);
+        bot.postMessage(data.source.channel, data.client_res[0], params);
     }
     else {
         console.log('error: data.source.channel or source.origin missing')
@@ -1301,73 +1297,68 @@ function stitchResults(data,source,callback){
 //store chat message in history
 function saveHistory(data,type){
 
-    if (!data.source.org || !data.source.channel){
-        console.log('missing channel or org Id 2');
-    }
 
-    data.ts = new Date(); //adding timestamp
 
-    if (!messageHistory[data.source.indexHist]){
-        console.log('error: user doesnt exist in memory storage');
-    }
-    else {
-        switch (data.bucket) {
-            case 'search':
-                messageHistory[data.source.indexHist].search.push(data);
-                break;
-            case 'banter':
-                messageHistory[data.source.indexHist].banter.push(data);
-                break;
-            case 'purchase':
-                messageHistory[data.source.indexHist].purchase.push(data);
-            default:
-        }
-        messageHistory[data.source.indexHist].allBuckets.push(data);
-        //console.log('😂 ',messageHistory[data.source.indexHist].allBuckets);
-    }
+    //data.ts = new Date(); //adding timestamp
 
-    //save object to mongo
-    var save_data = {
-        msg: data.msg, 
-        tokens: [], 
-        bucket: data.bucket,
-        action: data.action,
-        source: {
-            origin: data.source.origin,
-            channel: data.source.channel,
-            org: data.source.org,
-            id: data.source.indexHist
-        }
-    };
-    if (data.tokens){
-        save_data.tokens.push(data.tokens[0]);
-    }
-    if (data.dataModify){
-        if (!data.dataModify.param){
-            data.dataModify.param = 'null';
-        }
-        save_data.dataModify = {
-            val:[],
-            type: data.dataModify.type,
-            param: data.dataModify.param
-        };
-        if (data.dataModify.val && data.dataModify.val[0]){
-            save_data.dataModify.val.push(data.dataModify.val[0]);
-        }
-    }
-    if (data.client_res){
-        save_data.client_res = { };
-        save_data.client_res.msg = data.client_res;
-    }
-    var msgObj = new Message(save_data);
-    msgObj.save( function(err, data){
-        if(err){
-            console.log('Mongo err ',err);
-        }
-        else{
-            console.log('mongo res ',data);
-        }
-    });
+    // if (!messageHistory[data.source.indexHist]){
+    //     console.log('error: user doesnt exist in memory storage');
+    // }
+    // else {
+    //     switch (data.bucket) {
+    //         case 'search':
+    //             messageHistory[data.source.indexHist].search.push(data);
+    //             break;
+    //         case 'banter':
+    //             messageHistory[data.source.indexHist].banter.push(data);
+    //             break;
+    //         case 'purchase':
+    //             messageHistory[data.source.indexHist].purchase.push(data);
+    //         default:
+    //     }
+    //     messageHistory[data.source.indexHist].allBuckets.push(data);
+    //     //console.log('😂 ',messageHistory[data.source.indexHist].allBuckets);
+    // }
+
+    //console.log('😂 ',data);
+
+    
+
+
+    // //save object to mongo
+    // var save_data = {
+    //     msg: data.msg, 
+    //     tokens: [], 
+    //     bucket: data.bucket,
+    //     action: data.action,
+    //     source: {
+    //         origin: data.source.origin,
+    //         channel: data.source.channel,
+    //         org: data.source.org,
+    //         id: data.source.indexHist
+    //     }
+    // };
+    // if (data.tokens){
+    //     save_data.tokens.push(data.tokens[0]);
+    // }
+    // if (data.dataModify){
+    //     if (!data.dataModify.param){
+    //         data.dataModify.param = 'null';
+    //     }
+    //     save_data.dataModify = {
+    //         val:[],
+    //         type: data.dataModify.type,
+    //         param: data.dataModify.param
+    //     };
+    //     if (data.dataModify.val && data.dataModify.val[0]){
+    //         save_data.dataModify.val.push(data.dataModify.val[0]);
+    //     }
+    // }
+    // if (data.client_res){
+    //     save_data.client_res = { };
+    //     save_data.client_res.msg = data.client_res;
+    // }
+
 
 }
 
@@ -1389,7 +1380,7 @@ function recallHistory(data,callback,steps){
             switch(data.action){
                 //if action is focus, find lastest 'initial' item
                 case 'focus':
-                    var result = messageHistory[data.source.indexHist].search.filter(function( obj ) {
+                    var result = messageHistory[data.source.id].search.filter(function( obj ) {
                       return obj.action == 'initial';
                     });
                     var arrLength = result.length - steps;
@@ -1397,19 +1388,19 @@ function recallHistory(data,callback,steps){
                     break;
 
                 default:
-                    var arrLength = messageHistory[data.source.indexHist].search.length - steps; //# of steps to reverse. default is 1
-                    callback(messageHistory[data.source.indexHist].search[arrLength]); //get last item in arr
+                    var arrLength = messageHistory[data.source.id].search.length - steps; //# of steps to reverse. default is 1
+                    callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
                     break;
             }
 
             break;
         case 'banter':
-            var arrLength = messageHistory[data.source.indexHist].banter.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.indexHist].banter[arrLength]); //get last item in arr
+            var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.source.id].banter[arrLength]); //get last item in arr
             break;
         case 'purchase':
-            var arrLength = messageHistory[data.source.indexHist].purchase.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.indexHist].purchase[arrLength]); //get last item in arr
+            var arrLength = messageHistory[data.source.id].purchase.length - steps; //# of steps to reverse. default is 1
+            callback(messageHistory[data.source.id].purchase[arrLength]); //get last item in arr
         default:
     }
 

@@ -6,8 +6,8 @@ var messageSchema = mongoose.Schema({
     incoming: Boolean, //if true, incoming message, if false, outgoing message
     msg: String, //raw incoming message (if applicable)
     tokens: [String], //broken up incoming message (if applicable)
-    bucket: String,
-    action: String,
+    bucket: { type: String, index: true},
+    action: { type: String, index: true},
     amazon: [Schema.Types.Mixed], //amazon search results
     dataModify: {
         type: {type: String},
@@ -18,10 +18,10 @@ var messageSchema = mongoose.Schema({
         origin: String,
         channel: String,
         org: String,
-        id: String
+        id: { type: String, index: true }
     },
     client_res: {
-        msg: String //outgoing message, if applicable
+        msg: [String] //outgoing messages, if applicable
     },
     ts: {
         type: Date,
@@ -32,7 +32,7 @@ var messageSchema = mongoose.Schema({
         default: false
     },
     parent:{
-    	id: String
+        id: String
     }
 });
 
