@@ -51,9 +51,7 @@ app.get('/newslack', function(req, res) {
       url: 'https://slack.com/api/oauth.access',
       json: true,
       method: 'POST',
-      data: {
-
-      }
+      body: body
     }, function(e, r, b) {
         if (!b.ok) {
             console.error('error connecting with slack')
