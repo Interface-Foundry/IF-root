@@ -82,6 +82,10 @@ var schemas = [{
     single: 'ServerWidget',
     plural: 'ServerWidgets'
 }, {
+    filename: 'slackbot_schema',
+    single: 'Slackbot',
+    plural: 'Slackbots'
+}, {
     filename: 'sticker_schema',
     single: 'Sticker',
     plural: 'Stickers'
