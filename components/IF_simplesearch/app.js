@@ -8,6 +8,9 @@ var compression = require('compression');
 var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist';
 var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
 var querystring = require('querystring');
+var request = require('request');
+var db = require('db');
+var kip = require('kip')
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -24,6 +27,62 @@ app.use(require('prerender-node').set('protocol', 'https'));
 //     maxAge: oneDay
 // }));
 
+app.get('/newslack', function(req, res) {
+    console.log('new slack integration request');
+    // TODO post in our slack #dev channel
+    res.send('thanks for integrating with us 😘')
+    // TODO check that "state" property matches
+
+    if (!req.query.code) {
+        console.error(new Date())
+        console.error('no code in the callback url, cannot proceed with new slack integration')
+        // TODO post error in slack channel
+        return;
+    }
+
+    var body = {
+      client_id: '2804113073.14708197459',
+      client_secret: 'd4c324bf9caa887a66870abacb3d7cb5',
+      code: req.query.code,
+      redirect_uri: 'https://kipsearch.com/newslack'
+    }
+
+    request({
+      url: 'https://slack.com/api/oauth.access',
+      json: true,
+      method: 'POST',
+      data: {
+
+      }
+    }, function(e, r, b) {
+        if (!b.ok) {
+            console.error('error connecting with slack')
+            console.error('body was', body)
+            console.error('response was', b)
+            return;
+        } else if (!b.access_token || !b.scope) {
+            console.error('error connecting with slack')
+            console.error('body was', body)
+            console.error('response was', b)
+            return;
+        }
+
+        console.log('got positive response from slack')
+        console.log('body was', body)
+        console.log('response was', b)
+        var bot = new db.Slackbot(b)
+        bot.save(function(e) {
+            kip.err(e);
+            request('http://chat.kipapp.co/newslack', function(e, r, b) {
+                if (e) {
+                    console.error('error triggering chat server slackbot update')
+                }
+            })
+        })
+    })
+
+
+})
 
 app.get('/cinna/*', function(req, res, next) {
    res.redirect(querystring.unescape(req.url.replace('/cinna/',''))); //magic cinna moment
