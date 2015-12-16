@@ -30,8 +30,8 @@ app.use(require('prerender-node').set('protocol', 'https'));
 app.get('/newslack', function(req, res) {
     console.log('new slack integration request');
     // TODO post in our slack #dev channel
-    res.send('thanks for integrating with us 😘')
     // TODO check that "state" property matches
+    res.send('thanks for integrating with us 😘')
 
     if (!req.query.code) {
         console.error(new Date())
@@ -41,18 +41,22 @@ app.get('/newslack', function(req, res) {
     }
 
     var body = {
-      client_id: '2804113073.14708197459',
-      client_secret: 'd4c324bf9caa887a66870abacb3d7cb5',
       code: req.query.code,
       redirect_uri: 'https://kipsearch.com/newslack'
     }
 
     request({
-      url: 'https://slack.com/api/oauth.access',
-      json: true,
+      url: 'https://2804113073.14708197459:d4c324bf9caa887a66870abacb3d7cb5@slack.com/api/oauth.access',
       method: 'POST',
-      body: body
+      form: body
     }, function(e, r, b) {
+        if (e) {
+          console.log(e);
+        }
+        console.log(b);
+        if (typeof b === 'String') {
+            b = JSON.parse(b);
+        }
         if (!b.ok) {
             console.error('error connecting with slack')
             console.error('body was', body)
