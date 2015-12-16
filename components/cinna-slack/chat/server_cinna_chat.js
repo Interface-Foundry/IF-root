@@ -128,6 +128,7 @@ function loadSlackUsers(users){
 
     async.eachSeries(users, function(user, callback) {
 
+        console.log('adding bot with token: ',user.bot.bot_access_token);
         var settings = {
             token: user.bot.bot_access_token,
             name: 'Kip'
