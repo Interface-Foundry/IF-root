@@ -59,8 +59,20 @@ export default class Chat extends Component {
     this.context.router.transitionTo('/welcome');
   }
   handleSubmit(state) {
+    const { actions, activeMessage, activeChannel } = this.props;
+    var copy = Object.assign({}, activeMessage);
+      // console.log('original state: ', state)
+       Object.keys(state).forEach(function(key) {
+         if (state[key]) {
+          copy[key] = state[key]
+         }
+    });
+       // console.log('new state: ',copy)
+    this.setActiveMessage(copy)
+  }
+  setActiveMessage(message){
     const { actions } = this.props;
-      console.log('Clicked!', state)
+    actions.changeMessage(message)
   }
   changeActiveChannel(channel) {
     const { actions } = this.props;
@@ -72,7 +84,7 @@ export default class Chat extends Component {
     actions.changeControl(control);
   }
   changeActiveMessage(channel) {
-    const { actions, messages} = this.props;
+    const { actions, messages, activeChannel} = this.props;
     const activeMessages = messages.filter(message => message.source.channel === channel.name);
     const firstMsg = activeMessages[0]
     actions.changeMessage(firstMsg);
