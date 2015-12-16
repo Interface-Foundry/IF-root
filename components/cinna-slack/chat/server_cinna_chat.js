@@ -13,6 +13,9 @@ var querystring = require('querystring');
 //load mongoose models
 var Message = require('./models/Message');
 
+
+var Slackbots = require('../../IF_schemas/slackbot_schema.js');
+
 //set env vars
 var config = require('config');
 // process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
@@ -53,66 +56,97 @@ server.listen(8000, function(e) {
 var messageHistory = {}; //fake database, stores all users and their chat histories
 
 var slackUsers = {};
+    
+    // var savething = {
+    //     team_id : 'T0GR8K29X',
+    //     bot: {
+    //         bot_user_id: 'U0GR9LJN4',
+    //         bot_access_token: 'xoxb-16859698752-ZyJr8nyuWS3hswP372WOdV5q'
+    //     },
+    // }
 
+    // var msgg = new Slackbots(savething);
+    // msgg.save( function(err, data){
+    //     if(err){
+    //         console.log('Mongo err ',err);
+    //     }
+    //     else{
+    //         console.log('mongo res ',data);
+    //     }
+    // });
 
-//ON SERVER START, RESTORE ALL BOT CONNECTIONS
+initSlackUsers();
 
 //get stored slack users from mongo
 function initSlackUsers(){
+    Slackbots.find().exec(function(err, users) {  
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+        }
+    });
+}
 
-    db.Slackbots.find({});
 
-    //team id
-    // var team_id = 'yoyoyoyo';
+//incoming new slack user
+app.get('/newslack', function(req, res) {
 
-    // //bot id
-    // var token = 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU';
-    // var user_id = 'kip';
+    //find all bots not added to our system yet
+    Slackbots.find({'meta.initialized': false}).exec(function(err, users) {  
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+            res.send('slack user added');
 
-    //mongo db query, (res){}
-    //loadSlackUsers(res); 
-
-    var users = [];
-
-    users.push({
-        team_id: 'yoyoyoyo',
-        bot_token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-        bot_id: 'kip'
+            //update all to initialized 
+            async.eachSeries(users, function(user, callback) {
+                user.meta.initialized = true;
+                user.save( function(err, data){
+                    if(err){
+                        console.log('Mongo err ',err);
+                    }
+                    else{
+                        console.log('mongo res ',data);
+                    }
+                    callback();
+                });
+            }, function done(){
+                console.log('initialized all new bots');
+            });
+        }
     });
 
-    loadSlackUsers(users);
-}
+});
+
 
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
 
     async.eachSeries(users, function(user, callback) {
 
-        slackUsers[user.team_id] = {
-            bot_token: user.bot_token,
-            bot_id: user.bot_id
-        };
-
-
-        // - - - Slack create bot - - - -//
         var settings = {
-            token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-            name: 'cinna-1000'
+            token: user.bot.bot_access_token,
+            name: 'Kip'
         };
-        var bot = new Bot(settings);
+        //create new bot from user settings
+        slackUsers[user.team_id] = new Bot(settings);
 
-        bot.on('start', function() {
-            bot.on('message', function(data) {
+        //init new bot
+        slackUsers[user.team_id].on('start', function() {
+            slackUsers[user.team_id].on('message', function(data) { //on bot message
                 // all incoming events https://api.slack.com/rtm
                 // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-                if (data.type == 'message' && data.username !== settings.name){
+                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true ){
                     var newSl = {
                         source: {
                             'origin':'slack',
                             'channel':data.channel,
                             'org':data.team,
-                            'indexHist':data.team + "_" + data.channel //for retrieving chat history in node memory,
-                            'team_id':
+                            'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
                         },
                         'msg':data.text
                     }
@@ -121,23 +155,12 @@ function loadSlackUsers(users){
             });
         });
 
-
         callback();
     }, function done(){
-
+        console.log('done loading slack users');
     });
 
 }
-
-//slack "sockets"
-app.get('/newslack', function(req, res) {
-
-    //db.Slackbots.find({'meta.initialized': false})
-
-    res.send('slack id added');
-});
-
-
 
 //- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(server);
@@ -171,7 +194,9 @@ io.sockets.on('connection', function(socket) {
 
 
 //pre process incoming messages for canned responses
-function preProcess(data){
+function preProcess(data){  
+
+    //console.log('chimi ',data.source);
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -1275,7 +1300,8 @@ function sendResponse(data){
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
-        bot.postMessage(data.source.channel, data.client_res, params);
+
+        slackUsers[data.source.org].postMessage(data.source.channel, data.client_res, params);
     }
     else {
         console.log('error: data.source.channel or source.origin missing')
@@ -1425,7 +1451,7 @@ function saveHistory(data,type){
             console.log('Mongo err ',err);
         }
         else{
-            console.log('mongo res ',data);
+            //console.log('mongo res ',data);
         }
     });
 
