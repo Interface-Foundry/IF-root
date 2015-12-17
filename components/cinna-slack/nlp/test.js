@@ -47,7 +47,22 @@ var messages = [
       tokens: ['1 in blue'],
       dataModify: {
         type: 'color',
-        val: ['blue'] // TODO similar colors ,'navy','aqua'] //start with root color, include any additional synonyms
+        val: [ { hex: '#0000FF',
+          name: 'Blue',
+          rgb: [ 0, 0, 255 ],
+          hsl: [ 170, 255, 127 ] },
+        { hex: '#0066FF',
+          name: 'Blue Ribbon',
+          rgb: [ 0, 102, 255 ],
+          hsl: [ 153, 255, 127 ] },
+        { hex: '#007FFF',
+          name: 'Azure Radiance',
+          rgb: [ 0, 127, 255 ],
+          hsl: [ 148, 255, 127 ] },
+        { hex: '#8B00FF',
+          name: 'Electric Violet',
+          rgb: [ 139, 0, 255 ],
+          hsl: [ 193, 255, 127 ] } ]
       }
     }
   },
