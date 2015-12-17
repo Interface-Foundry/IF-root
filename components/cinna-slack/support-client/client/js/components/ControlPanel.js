@@ -23,6 +23,7 @@ export default class ControlPanel extends Component {
       super(props)
     }
 
+
     sendCommand(newMessage) {
       const { activeChannel, activeMessage,actions } = this.props
       newMessage.parent = activeMessage.source.id
@@ -32,132 +33,20 @@ export default class ControlPanel extends Component {
     }
 
     renderJSON() {
-        const {activeMessage} = this.props
-
+        const {activeMessage, actions} = this.props
         return (<div style={{fontSize: '0.2em'}}><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
     }
 
-    renderForm() {
-      const {activeMessage} = this.props
-      return (
-       <div className="data-message">
-       <div className="header">
-       </div>
-       <div className="content">
-         <div className="input-group">
-         </div>
-         <div className="input-group">
-           <label for="text">Text</label>
-           <input ref="text" defaultValue= { JSON.stringify(activeMessage.msg)} />
-         </div>
-       </div>
-       <div className="footer">
-       </div>
-     </div>
-      )
+    state = {
+        msg : true,
+        bucket: true,
+        action: true
     }
 
-    renderControl(){
-       const {activeControl,activeChannel} = this.props
-        switch (activeControl.name) {
-          case 'initial':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                    <h3>INITIAL CONTROL PANEL</h3>
-                  < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'similar':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                    <h3>SIMILAR CONTROL PANEL</h3>
-                  < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'modify':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                    <h3>MODIFY CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'focus':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                    <h3>FOCUS CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'more':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                    <h3>MORE CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'save':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                   <h3> SAVE CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'removeall':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                   <h3> REMOVEALL CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'list':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                   <h3> LIST CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          case 'checkout':
-            return (
-                <div className='col-sm-12 itemcontent'>
-                    <h3>CHECKOUT CONTROL PANEL</h3>
-                     < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.resolveIssue(activeChannel)} >
-                    Resolve 
-                  < /Button>  
-                </div> 
-            );
-          default:
-            return 
-        }
-    }
-
-  state = {
-    msg: true,
-    bucket: true,
-    action: true
-  }
     render() {
        const { activeControl, activeMessage} = this.props;
-       const fields = {
-        msg : '',
-        bucket: '',
-        action: ''
-       }
+       const fields  = ['msg','bucket','action']
+
         var self = this;
         return ( 
         <section className='rightnav'>
@@ -174,10 +63,7 @@ export default class ControlPanel extends Component {
         </div>
         <DynamicForm
           onSubmit={this.props.onSubmit}
-          fields={Object
-            .keys(this.state)
-            .reduce((accumulator, field) =>
-              this.state[field] ? accumulator.concat(field) : accumulator, [])}/>
+          fields={fields}/>
         < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
             Send Command
           < /Button> 

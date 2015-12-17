@@ -14,13 +14,14 @@ export default class ChannelListItem extends Component {
   }
 
   closeChannel() {
-    const { channel, channels,actions } = this.props;
+    const { channel, channels,actions, onClick } = this.props;
     UserAPIUtils.resolveChannel(channel)
     actions.removeChannel(channel)
+    onClick(channels[0])
   }
 
   render() {
-    const { channel, actions } = this.props;
+    const { channel, actions, channels } = this.props;
     const { channel: selectedChannel, onClick } = this.props;
     return (
     <div className="flexbox-container">
@@ -33,7 +34,7 @@ export default class ChannelListItem extends Component {
           </li>
         </a>
       </Button>
-      <Button type="button" className="close" style={{ padding: 0}} onClick={() => (this.closeChannel() &&  onClick(channels[0]))}>&times;</Button>
+      <Button type="button" className="close" style={{ padding: 0}} onClick={() => this.closeChannel()}>&times;</Button>
     </div>
     );
   }
