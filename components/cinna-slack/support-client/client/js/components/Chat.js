@@ -26,10 +26,10 @@ export default class Chat extends Component {
     router: PropTypes.object.isRequired
   }
   componentDidMount() {
-    const { actions } = this.props;
-    socket.on('new bc message', msg =>
-      actions.receiveRawMessage(msg)
-    );
+    const { actions, messages } = this.props;
+    socket.on('new bc message', function(msg) {      
+      actions.receiveRawMessage(msg) 
+    });
     socket.on('typing bc', username =>
       actions.typing(username)
     );
@@ -67,7 +67,6 @@ export default class Chat extends Component {
     });
        // console.log('new state: ',copy)
     this.setActiveMessage(copy)
-
   }
   setActiveMessage(message){
     const { actions } = this.props;
@@ -99,7 +98,7 @@ export default class Chat extends Component {
   // <TopPanel activeControl={activeControl} onClick={::this.changeActiveControl} />
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
+     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const username = this.props.user.username;
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
@@ -113,7 +112,7 @@ export default class Chat extends Component {
         <div className="nav">
           {dropDownMenu}
           <section style={{order: '2', marginTop: '1.5em'}}>
-            <Channels onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions} />
+            <Channels onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
           </section>
         </div>
         <div className="main">
@@ -128,7 +127,7 @@ export default class Chat extends Component {
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
                 {filteredMessages.map(message =>
-                  <MessageListItem message={message} key={message.ts} />
+                  <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                 )}
               </ul>
             </div>
@@ -138,7 +137,7 @@ export default class Chat extends Component {
           </div>
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
-        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} user={username} onSave={::this.handleSave} msgIndex={filteredMessages.length}/>
+        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} user={username} onSave={::this.handleSave} messages={messages}/>
           {typers.length === 1 &&
             <div>
               <span>

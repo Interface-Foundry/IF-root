@@ -216,6 +216,7 @@ function incomingAction(data) {
                         resolved: false
                     })
                     ioClient.emit('new message', {
+                        id: null,
                         incoming: true,
                         msg: data.msg,
                         tokens: [data.msg.split(' ')],
@@ -248,6 +249,7 @@ function incomingAction(data) {
                     resolved: false
                 })
                 ioClient.emit('new message', {
+                    id: null,
                     incoming: true,
                     msg: data.msg,
                     tokens: [data.msg.split(' ')],

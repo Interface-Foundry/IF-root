@@ -106,7 +106,7 @@ export function resolveChannel(channel) {
       if (err) {
         reject(res.body || err);
       } else {
-        resolve(res.body);
+        resolve();
       }
     });
   });

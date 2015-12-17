@@ -11,7 +11,7 @@ export default class MessageComposer extends Component {
     activeMessage: PropTypes.object.isRequired,
     onSave: PropTypes.func.isRequired,
     user: PropTypes.string.isRequired,
-    msgIndex: PropTypes.number.isRequired
+    messages:  PropTypes.array.isRequired
   }
   constructor(props, context) {
     super(props, context);
@@ -22,39 +22,13 @@ export default class MessageComposer extends Component {
   }
   handleSubmit(event) {
     const {
-        user, activeChannel, activeMessage, msgIndex
+        user, activeChannel, activeMessage, messages
     } = this.props;
     const text = event.target.value.trim();
     if (event.which === 13) {
         event.preventDefault();
-        // {
-        //   id: (state.data.length === 0) ? 0 : parseInt(state.data[state.data.length - 1].id + 1),
-        //   incoming: true,
-        //   msg: action.message.msg,
-        //   tokens: action.message.tokens,
-        //   bucket: action.message.bucket,
-        //   action: action.message.action,
-        //   amazon: action.message.amazon,
-        //   dataModify: {
-        //     type: (action.message.dataModify && action.message.dataModify.type) ? action.message.dataModify.type : '' ,
-        //     val: (action.message.dataModify && action.message.dataModify.val) ? action.message.dataModify.val : [],
-        //     param: (action.message.dataModify && action.message.dataModify.param) ? action.message.dataModify.param : ''
-        //   },
-        //   source: {
-        //       origin: (action.message.source && action.message.source.origin) ? action.message.source.origin : 'socketio', 
-        //       channel: (action.message.source && action.message.source.channel) ? action.message.source.channel : '',
-        //       org: (action.message.source && action.message.source.org) ? action.message.source.org : 'kip',
-        //       id: (action.message.source && action.message.source.id) ? action.message.source.id : ''
-        //   },
-        //   client_res: {
-        //     msg: action.message.client_res
-        //   },
-        //   ts: action.message.ts,
-        //   resolved: action.message.resolved,
-        //   parent: action.message.parent
-        //   }
         var newMessage = {
-            id: msgIndex,
+            id: messages.length,
             msg: text,
             incoming: false,
             client_res: {

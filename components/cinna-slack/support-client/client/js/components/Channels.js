@@ -11,7 +11,8 @@ export default class Channels extends Component {
     channels: PropTypes.array.isRequired,
     actions: PropTypes.object.isRequired,
     onClick: PropTypes.func.isRequired,
-    messages: PropTypes.array.isRequired
+    messages: PropTypes.array.isRequired,
+    chanIndex: PropTypes.number.isRequired,
   }
   constructor(props, context) {
     super(props, context);
@@ -24,7 +25,6 @@ export default class Channels extends Component {
 
  componentWillUpdate() {
   const { channels } = this.props
-  // console.log('CHANNELLZZZ', channels)
  }  
 
   handleChangeChannel(channel) {
@@ -88,7 +88,7 @@ export default class Channels extends Component {
     this.handleChangeChannel(channel);
   }
   render() {
-    const { channels, actions, messages } = this.props;
+    const { channels, actions, messages, chanIndex } = this.props;
     const filteredChannels = channels.slice(0, 8);
     const moreChannelsBoolean = channels.length > 8;
     const restOfTheChannels = channels.slice(8);
@@ -159,7 +159,7 @@ export default class Channels extends Component {
         <div>
           <ul style={{display: 'flex', flexDirection: 'column', listStyle: 'none', margin: '0', overflowY: 'auto', padding: '0'}}>
             {filteredChannels.map(channel =>
-              <ChannelListItem  style={{paddingLeft: '0.8em', background: '#2E6DA4', height: '0.7em'}} messageCount={messages.filter(msg => {
+              <ChannelListItem  chanIndex={chanIndex} actions={actions} channels={channels} style={{paddingLeft: '0.8em', background: '#2E6DA4', height: '0.7em'}} messageCount={messages.filter(msg => {
                 return msg.channelID === channel.name;
               }).length} channel={channel} key={channel.id} {...actions} onClick={::this.handleChangeChannel} />
               )}

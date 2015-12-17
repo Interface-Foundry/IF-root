@@ -7,12 +7,14 @@ exports = module.exports = function(io, cinnaio) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
             console.log('socketEvents: new message from cinna received.', msg)
-
+            msg.ts = new Date().toISOString()
             //Emit outgoing message to cinna-slack
             ioClient.emit("msgFromSever", msg);
 
             //Emit throughout supervisor client
-            socket.broadcast.emit('new bc message', msg);
+            if(msg.bucket === 'supervisor') {
+                socket.broadcast.emit('new bc message', msg);
+            }
         });
         socket.on('new channel', function(channel) {
             socket.broadcast.emit('new channel', channel)

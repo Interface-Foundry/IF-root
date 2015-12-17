@@ -33,7 +33,7 @@ export default function activeMessage(state = initialState, action) {
     switch (action.type) {
         case CHANGE_MESSAGE:
             return {
-                id: 0,
+                id: action.message.id,
                 incoming: true,
                 msg: action.message.msg,
                 tokens: action.message.tokens,

@@ -24,7 +24,9 @@ export default class ControlPanel extends Component {
     }
 
     sendCommand(newMessage) {
-      const { activeChannel, actions } = this.props
+      const { activeChannel, activeMessage,actions } = this.props
+      newMessage.parent = activeMessage.source.id
+      newMessage.resolved = true
       socket.emit('new message', newMessage);
       UserAPIUtils.createMessage(newMessage);
     }
