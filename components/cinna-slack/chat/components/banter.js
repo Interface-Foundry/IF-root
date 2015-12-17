@@ -125,8 +125,11 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'lol') > 90:
         case textSimilar(input,'haha') > 90:
         case textSimilar(input,'lmao') > 90:
+        case textSimilar(input,':)') > 90:
+        case textSimilar(input,':D') > 90:
+        case textSimilar(input,'(:') > 90:
             flag = 'basic';
-            res = ':D';
+            res = '😄';
             break;
 
         case textSimilar(input,'girl or boy?') > 60:
@@ -176,9 +179,9 @@ var checkForCanned = function(input,callback) {
             res = '😎';
             break;
         case textSimilar(input,'skynet') > 60:
-            query = 'nvidia jetson';
+            query = 'nvidia jetson'; //do this search 
             flag = 'search.initial'; //do this action
-            res = 'April 19, 2011';
+            res = 'April 19, 2011'; //send this text
             break;
         case textSimilar(input,'4 8 15 16 23 42') > 60:
             flag = 'search.initial'; //do this action
@@ -193,6 +196,18 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'asdf') > 60:
             flag = 'basic';
             res = 'qwerty';
+            break;
+
+        case textSimilar(input,'ok') > 80:
+            flag = 'basic';
+            res = 'yep ';
+            break;
+
+        case textSimilar(input,'feedback') > 60:
+        case textSimilar(input,'report') > 60:
+        case textSimilar(input,'contact') > 90:
+            flag = 'basic';
+            res = 'Say hi at hello@kipthis.com! Thanks for your feedback! We appreciate any thoughts you have to improve our service :)';
             break;
 
         case textSimilar(input,'help') > 60:
@@ -279,20 +294,42 @@ var checkForCanned = function(input,callback) {
 
     switch(input){
         case 'about':
-            console.log('SHOW ABOUT CINNA HERE. Link to kipthis.com');
+            flag = 'basic';
+            res = 'More info about Kip at http://kipthis.com';
             break;
 
+        case '🌲':
+            flag = 'search.initial'; //do this action
+            res = 'https://cr2014studyabroad.files.wordpress.com/2014/12/pineapple-2.png';
+            query = '420'; //what we're going to search for
+            break;
+
+        case '🐈':
+            flag = 'search.initial'; //do this action
+            res = 'meow :3';
+            query = 'neko atsume'; //what we're going to search for
+            break;
+
+        case '🌞':
+            flag = 'search.initial'; //do this action
+            res = 'Need some sunscreen?';
+            query = 'sunscreen'; //what we're going to search for
+            break;
+            
         case '1':
+        case '1️⃣':
             flag = 'search.focus';
             query = 1;
             break;
 
         case '2':
+        case '2️⃣':
             flag = 'search.focus';
             query = 2;
             break;
 
         case '3':
+        case '3️⃣':
             flag = 'search.focus';
             query = 3;
             break;
@@ -381,7 +418,7 @@ var getCinnaResponse = function(data,callback){
 	    case 'purchase':
 	            switch (data.action) {
 	                case 'save':
-	                    res = 'I\'ve added this item to your cart :) Use "Get" anytime to checkout or "help" for more options';
+	                    res = 'I\'ve added this item to your cart :) Click the link to purchase the items in your cart';
 	                    break;
 	                case 'removeAll':
 	                    res = 'All items removed from your cart. To start a new search type "find (item)"';
@@ -390,7 +427,7 @@ var getCinnaResponse = function(data,callback){
 	                    res = 'Here\'s everything you have in your cart :) Use Get anytime to checkout or help for more options';
 	                    break;
 	                case 'checkout':
-	                    res = 'Great! Please click the link to confirm your items and checkout. {{link}} Thank you:)';
+	                    res = 'Great! Please click the link to confirm your items and checkout. {{link}} Thank you :)';
 	                    break;
 	                default:
 	                    console.log('warning: no purchase bucket action selected');

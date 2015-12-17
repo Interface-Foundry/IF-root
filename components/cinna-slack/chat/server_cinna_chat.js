@@ -54,27 +54,9 @@ server.listen(8000, function(e) {
 
 //globals
 var messageHistory = {}; //fake database, stores all users and their chat histories
-
 var slackUsers = {};
     
-    // var savething = {
-    //     team_id : 'T0GR8K29X',
-    //     bot: {
-    //         bot_user_id: 'U0GR9LJN4',
-    //         bot_access_token: 'xoxb-16859698752-ZyJr8nyuWS3hswP372WOdV5q'
-    //     },
-    // }
-
-    // var msgg = new Slackbots(savething);
-    // msgg.save( function(err, data){
-    //     if(err){
-    //         console.log('Mongo err ',err);
-    //     }
-    //     else{
-    //         console.log('mongo res ',data);
-    //     }
-    // });
-
+//- - - - Slack handling - - - -//
 initSlackUsers();
 
 //get stored slack users from mongo
@@ -88,7 +70,6 @@ function initSlackUsers(){
         }
     });
 }
-
 
 //incoming new slack user
 app.get('/newslack', function(req, res) {
@@ -128,7 +109,6 @@ function loadSlackUsers(users){
 
     async.eachSeries(users, function(user, callback) {
 
-        console.log('adding bot with token: ',user.bot.bot_access_token);
         var settings = {
             token: user.bot.bot_access_token,
             name: 'Kip'
@@ -160,7 +140,6 @@ function loadSlackUsers(users){
     }, function done(){
         console.log('done loading slack users');
     });
-
 }
 
 //- - - - Socket.io handling - - - -//
@@ -398,10 +377,14 @@ function purchaseBucket(data){
             listCart(data);
             break;
         case 'checkout':
-            //passing in data obj
-            //pass messageHistory obj
-            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
-                outgoingResponse(res,'txt');
+            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res,flag){
+                if (flag == 'none'){
+                    res.action = 'purchase';
+                    saveToCart(res);
+                }
+                else {
+                    outgoingResponse(res,'txt');
+                }
             });
             break;
         default:
@@ -630,10 +613,29 @@ function searchModify(data, flag){
                 //unsortable modifier
                 case 'genericDetail':
 
-                    //SORT THROUGH RESULTS OF SIZES, FILTER
-                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                    data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
+                    if (data.dataModify.val == 'buy'){
+                        console.log('GENERIC DETAIL');
+                        data.bucket = 'purchase';
+                        data.action = 'save';
+                        saveToCart(data);
+                        // //async push items to cart
+                        // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                        //     messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                        //     callback();
+                        // }, function done(){
+                        //     purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+                        //         outgoingResponse(res,'txt');
+                        //     });
+                        // });
+                    }
+                    //normal action here
+                    else {
+                        //SORT THROUGH RESULTS OF SIZES, FILTER
+                        cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        searchInitial(data,flag); //do a new search                        
+                    }
                     break;
             }
         }
@@ -826,21 +828,31 @@ function saveToCart(data){
 
         data.bucket = 'purchase'; //modifying bucket. a hack for now
 
-        //async push items to cart
-        async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-            messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-            callback();
-        }, function done(){
-            //only support "add to cart" message for one item.
-            //static:
-            var sT = data.searchSelect[0];
-            // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
-
+        if (!item){
+            console.log('ERROR: NO ITEM TO SAVE TO CART');
+            // data.client_res = [];
+            // data.client_res.push('Oops sorry, I\'m not sure which item you\'re talking about');
             // outgoingResponse(data,'txt');
-            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
-                outgoingResponse(res,'txt');
-            });
-        });
+        }
+        else {
+            //async push items to cart
+            async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                callback();
+            }, function done(){
+                //only support "add to cart" message for one item.
+                //static:
+                var sT = data.searchSelect[0];
+                // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+
+                // outgoingResponse(data,'txt');
+                purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+                    outgoingResponse(res,'txt');
+                });
+            });            
+        }
+
+
     });
 }
 
