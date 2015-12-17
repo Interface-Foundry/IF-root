@@ -3,7 +3,7 @@ var kdtree = require('static-kdtree')
 
 //Create the tree
 var tree = kdtree(ntc.docs.map(function(c) {
-  return c.hsl;
+  return c.rgb.concat(c.hsl);
 }))
 
 
@@ -15,7 +15,7 @@ module.exports = function(color) {
   if (!ntc.names2[color]) {
     return []
   }
-  var hsl = ntc.names2[color].slice(5);
+  var hsl = ntc.names2[color].slice(2);
 
   // return the 3 closest docs from the tree
   return tree.knn(hsl, 4).map(function(i) {

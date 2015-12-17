@@ -51,18 +51,18 @@ var messages = [
           name: 'Blue',
           rgb: [ 0, 0, 255 ],
           hsl: [ 170, 255, 127 ] },
+        { hex: '#0000C8',
+          name: 'Dark Blue',
+          rgb: [ 0, 0, 200 ],
+          hsl: [ 170, 255, 100 ] },
         { hex: '#0066FF',
           name: 'Blue Ribbon',
           rgb: [ 0, 102, 255 ],
           hsl: [ 153, 255, 127 ] },
-        { hex: '#007FFF',
-          name: 'Azure Radiance',
-          rgb: [ 0, 127, 255 ],
-          hsl: [ 148, 255, 127 ] },
-        { hex: '#8B00FF',
-          name: 'Electric Violet',
-          rgb: [ 139, 0, 255 ],
-          hsl: [ 193, 255, 127 ] } ]
+        { hex: '#002FA7',
+          name: 'International Klein Blue',
+          rgb: [ 0, 47, 167 ],
+          hsl: [ 158, 255, 83 ] } ]
       }
     }
   },
