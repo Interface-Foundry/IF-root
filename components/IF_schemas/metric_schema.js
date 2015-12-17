@@ -22,6 +22,10 @@ var metricsSchema = mongoose.Schema({
 // create the model for users and expose it to our app
 module.exports = mongoose.model('Metrics', metricsSchema);
 
-module.exports.log = function(obj) {
+module.exports.log = function(metric, data) {
+  var obj = {
+    metric: metric,
+    data: data
+  };
   (new module.exports(obj)).save();
 }

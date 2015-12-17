@@ -20,7 +20,7 @@ var config = require('config');
 
 process.on('uncaughtException', function (err) {
   console.error('uncaught exception', new Date())
-  console.error(err);
+  console.error(err.stack);
 });
 
 
@@ -815,6 +815,7 @@ function searchBack(data){
 
 //save amazon item to cart
 function saveToCart(data){
+    db.Metrics.log('cart.save', data);
 
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
 
@@ -841,7 +842,7 @@ function saveToCart(data){
 }
 
 function viewCart(data){
-
+    db.Metrics.log('cart.view', data);
 }
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
