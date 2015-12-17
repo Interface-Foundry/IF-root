@@ -1,8 +1,8 @@
 env: production
 isProduction: true
 mongodb:
-  url: mongodb://flareon.internal.kipapp.co/foundry,jankeon.internal.kipapp.co/foundry,vaporeon.internal.kipapp.co/foundry?&connectTimeoutMS=600000&socketTimeoutMS=600000
-  backuphost: jankeon.internal.kipapp.co
+  url: mongodb://jolteon.internal.kipapp.co/foundry?&connectTimeoutMS=600000&socketTimeoutMS=600000
+  backuphost: jolteon.internal.kipapp.co
   options:
     replset:
       rs_name: foundry
