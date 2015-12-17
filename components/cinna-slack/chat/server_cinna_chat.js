@@ -11,20 +11,16 @@ var mongoose = require('mongoose');
 var querystring = require('querystring');
 
 //load mongoose models
-var Message = require('./models/Message');
-
-
-var Slackbots = require('../../IF_schemas/slackbot_schema.js');
+var db = require('db');
+var Message = db.Message;
+var Slackbots = db.Slackbots;
 
 //set env vars
 var config = require('config');
-// process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
-// process.env.PORT = process.env.PORT || 3000;
 
-// connect our DB
-mongoose.connect(config.mongodb.url);
 process.on('uncaughtException', function (err) {
-  console.log(err);
+  console.error('uncaught exception', new Date())
+  console.error(err);
 });
 
 
@@ -56,7 +52,7 @@ server.listen(8000, function(e) {
 var messageHistory = {}; //fake database, stores all users and their chat histories
 
 var slackUsers = {};
-    
+
     // var savething = {
     //     team_id : 'T0GR8K29X',
     //     bot: {
@@ -79,7 +75,7 @@ initSlackUsers();
 
 //get stored slack users from mongo
 function initSlackUsers(){
-    Slackbots.find().exec(function(err, users) {  
+    Slackbots.find().exec(function(err, users) {
         if(err){
             console.log('saved slack bot retrieval error');
         }
@@ -94,7 +90,7 @@ function initSlackUsers(){
 app.get('/newslack', function(req, res) {
 
     //find all bots not added to our system yet
-    Slackbots.find({'meta.initialized': false}).exec(function(err, users) {  
+    Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
         if(err){
             console.log('saved slack bot retrieval error');
         }
@@ -102,7 +98,7 @@ app.get('/newslack', function(req, res) {
             loadSlackUsers(users);
             res.send('slack user added');
 
-            //update all to initialized 
+            //update all to initialized
             async.eachSeries(users, function(user, callback) {
                 user.meta.initialized = true;
                 user.save( function(err, data){
@@ -195,7 +191,7 @@ io.sockets.on('connection', function(socket) {
 
 
 //pre process incoming messages for canned responses
-function preProcess(data){  
+function preProcess(data){
 
     //console.log('chimi ',data.source);
 
@@ -1415,8 +1411,8 @@ function saveHistory(data,type){
 
     //save object to mongo
     var save_data = {
-        msg: data.msg, 
-        tokens: [], 
+        msg: data.msg,
+        tokens: [],
         bucket: data.bucket,
         action: data.action,
         source: {

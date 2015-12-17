@@ -1,19 +1,12 @@
-var mongoose = require('mongoose');
-var Message = require('./Message');
 var kip = require('kip');
 var _ = require('lodash');
 require('colors');
+var db = require('db');
 
 //set env vars
 var config = require('config');
-// connect our DB
-console.log('connecting to mongodb', config.mongodb.url)
-mongoose.connect(config.mongodb.url);
-process.on('uncaughtException', function (err) {
-  console.log(err);
-});
 
-Message.aggregate([{
+db.Message.aggregate([{
   $group: {
     _id: '$source.id',
     count: {$sum: 1},
