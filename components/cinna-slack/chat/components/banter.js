@@ -298,6 +298,21 @@ var checkForCanned = function(input,callback) {
             res = 'More info about Kip at http://kipthis.com';
             break;
 
+        case 'buy':
+            flag = 'basic';
+            res = 'Sorry, which item are you interested in buying?';
+            break;
+
+        case 'get':
+            flag = 'basic';
+            res = 'Sorry, which item are you interested in getting?';
+            break;
+
+        case 'save':
+            flag = 'basic';
+            res = 'Sorry, which item are you interested in saving?';
+            break;
+
         case '🌲':
             flag = 'search.initial'; //do this action
             res = 'https://cr2014studyabroad.files.wordpress.com/2014/12/pineapple-2.png';
@@ -315,21 +330,28 @@ var checkForCanned = function(input,callback) {
             res = 'Need some sunscreen?';
             query = 'sunscreen'; //what we're going to search for
             break;
-            
+
+
         case '1':
         case '1️⃣':
+        case 'one':
+        case ':one:':
             flag = 'search.focus';
             query = 1;
             break;
 
         case '2':
         case '2️⃣':
+        case 'two':
+        case ':two:':
             flag = 'search.focus';
             query = 2;
             break;
 
         case '3':
         case '3️⃣':
+        case 'three':
+        case ':three:':
             flag = 'search.focus';
             query = 3;
             break;
@@ -427,7 +449,7 @@ var getCinnaResponse = function(data,callback){
 	                    res = 'Here\'s everything you have in your cart :) Use Get anytime to checkout or help for more options';
 	                    break;
 	                case 'checkout':
-	                    res = 'Great! Please click the link to confirm your items and checkout. {{link}} Thank you :)';
+	                    res = 'Great! Please click the link to confirm your items and checkout. Thank you :)';
 	                    break;
 	                default:
 	                    console.log('warning: no purchase bucket action selected');

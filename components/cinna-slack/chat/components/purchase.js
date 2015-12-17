@@ -3,7 +3,7 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
   awsSecret: "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",
-  awsTag: "kipsearch-20"
+  awsTag: "bubboorev-20"
 });
 
 //pass in data, user chat history
@@ -29,7 +29,6 @@ var outputCart = function(data,cartHistory,callback) {
         });
 
         function buildAmazonCart(items){
-            console.log('items ',items);
 
             //construct amazon cart format
             var options = {};
@@ -40,6 +39,7 @@ var outputCart = function(data,cartHistory,callback) {
                 options[propQuan] = items[i].Quantity;
             }
             client.createCart(options).then(function(results) {
+                // console.log('CREATE CART ',results);
                 data.client_res = results.PurchaseURL[0];
                 callback(data);
 

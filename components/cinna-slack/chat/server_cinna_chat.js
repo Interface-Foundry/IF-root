@@ -35,7 +35,7 @@ var purchase = require("./components/purchase.js");
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
   awsSecret: "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",
-  awsTag: "kipsearch-20"
+  awsTag: "bubboorev-20"
 });
 
 // website 🌏
@@ -377,16 +377,7 @@ function purchaseBucket(data){
             listCart(data);
             break;
         case 'checkout':
-            purchase.outputCart(data,messageHistory[data.source.indexHist],function(res,flag){
-                if (flag == 'none'){
-                    res.action = 'purchase';
-                    saveToCart(res);
-                }
-                else {
-                    outgoingResponse(res,'txt');
-                }
-            });
-            break;
+            saveToCart(data);
         default:
             console.log('error: no purchase bucket action selected');
     }
@@ -505,78 +496,87 @@ function searchModify(data, flag){
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
 
-        data.recallHistory = item;
+        if (item){//history item found
 
-        var cSearch = ''; //construct new search string
+            data.recallHistory = item;
 
-        //CONSTRUCT QUERY FROM AMAZON OBJECT
-        if (data.recallHistory.amazon){
+            var cSearch = ''; //construct new search string
 
-            if (data.dataModify && data.dataModify.type){
-                //handle special modifiers that need care, consideration, hard tweaks of amazon search API
-                switch (data.dataModify.type) {
-                    case 'price':
-                        searchInitial(data,{ // passing special FLAG for search to handle
-                            'type':data.dataModify.type,
-                            'param':data.dataModify.param,
-                            'val':data.dataModify.val
-                        });
-                        break;
+            //CONSTRUCT QUERY FROM AMAZON OBJECT
+            if (data.recallHistory.amazon){
 
-                    case 'brand':
-                        searchInitial(data,{ // passing special FLAG for search to handle
-                            'type':data.dataModify.type,
-                            'val':data.dataModify.val
-                        });
-                        break;
+                if (data.dataModify && data.dataModify.type){
+                    //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+                    switch (data.dataModify.type) {
+                        case 'price':
+                            searchInitial(data,{ // passing special FLAG for search to handle
+                                'type':data.dataModify.type,
+                                'param':data.dataModify.param,
+                                'val':data.dataModify.val
+                            });
+                            break;
 
-                    default:
-                        constructAmazonQuery(); //nm just construct a new query
+                        case 'brand':
+                            searchInitial(data,{ // passing special FLAG for search to handle
+                                'type':data.dataModify.type,
+                                'val':data.dataModify.val
+                            });
+                            break;
+
+                        default:
+                            constructAmazonQuery(); //nm just construct a new query
+                    }
+                }
+                else {
+                    console.log('error: data.dataModify params missing')
+                }
+
+                function constructAmazonQuery(){
+
+                    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+
+                        var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                        //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                        if (flag !== 'weakSearch'){
+                            console.log('weakSearch FALSE');
+                            //add brand
+                            if (itemAttrib[0].Brand){
+                                cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                            }
+                            //add clothing size
+                            if (itemAttrib[0].ClothingSize){
+                                cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                            }
+                        }
+                        else {
+                            console.log('weakSearch TRUE');
+                        }
+                        if (itemAttrib[0].Department){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                        }
+                        if (itemAttrib[0].ProductGroup){
+                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                        }
+                        if (itemAttrib[0].Binding){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                        }
+
+                        callback();
+                    }, function done(){
+                        addModifier(); //done processing constructing new search, add modifier and run query
+                    });
                 }
             }
             else {
-                console.log('error: data.dataModify params missing')
-            }
-
-            function constructAmazonQuery(){
-
-                async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-
-                    var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
-
-                    //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                    if (flag !== 'weakSearch'){
-                        console.log('weakSearch FALSE');
-                        //add brand
-                        if (itemAttrib[0].Brand){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
-                        }
-                        //add clothing size
-                        if (itemAttrib[0].ClothingSize){
-                            cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
-                        }
-                    }
-                    else {
-                        console.log('weakSearch TRUE');
-                    }
-                    if (itemAttrib[0].Department){
-                        cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
-                    }
-                    if (itemAttrib[0].ProductGroup){
-                        cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                    }
-                    if (itemAttrib[0].Binding){
-                        cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
-                    }
-
-                    callback();
-                }, function done(){
-                    addModifier(); //done processing constructing new search, add modifier and run query
-                });
+                console.log('no Amazon data found in last history item. can not modify search');
+                data.action = 'initial';
+                searchInitial(data); //do a search anyway
             }
         }
-        else {
-            console.log('no Amazon data found in last history item. can not modify search');
+        else { //no item history found 
+            console.log('warning: no history item found for modification query');
+            data.action = 'initial';
             searchInitial(data); //do a search anyway
         }
 
@@ -587,6 +587,30 @@ function searchModify(data, flag){
             switch (data.dataModify.type) {
                 // CASES: color, size, price, genericDetail
                 case 'color':
+
+                        // bucket: 'search',
+                        //  action: 'modify',
+                        //  searchSelect: [1],
+                        //  tokens: ['1 in blue'],
+                        //  dataModify: {
+                        //    type: 'color',
+                        //    val: [ { hex: '#0000FF ',
+                        //      name: 'Blue',
+                        //      rgb: [ 0, 0, 255 ],
+                        //      hsl: [ 170, 255, 127 ] },
+                        //    { hex: '#0066FF ',
+                        //      name: 'Blue Ribbon',
+                        //      rgb: [ 0, 102, 255 ],
+                        //      hsl: [ 153, 255, 127 ] },
+                        //    { hex: '#007FFF ',
+                        //      name: 'Azure Radiance',
+                        //      rgb: [ 0, 127, 255 ],
+                        //      hsl: [ 148, 255, 127 ] },
+                        //    { hex: '#8B00FF ',
+                        //      name: 'Electric Violet',
+                        //      rgb: [ 139, 0, 255 ],
+                        //      hsl: [ 193, 255, 127 ] } ]
+                        //  }
 
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
@@ -612,28 +636,18 @@ function searchModify(data, flag){
 
                 //unsortable modifier
                 case 'genericDetail':
-
                     //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
                     if (data.dataModify.val == 'buy'){
-                        console.log('GENERIC DETAIL');
                         data.bucket = 'purchase';
                         data.action = 'save';
                         saveToCart(data);
-                        // //async push items to cart
-                        // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-                        //     messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                        //     callback();
-                        // }, function done(){
-                        //     purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
-                        //         outgoingResponse(res,'txt');
-                        //     });
-                        // });
                     }
                     //normal action here
                     else {
                         //SORT THROUGH RESULTS OF SIZES, FILTER
                         cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                         data.tokens[0] = cSearch; //replace search string in data obj
+                        console.log(data.tokens[0]);
                         searchInitial(data,flag); //do a new search                        
                     }
                     break;
@@ -828,26 +842,35 @@ function saveToCart(data){
 
         data.bucket = 'purchase'; //modifying bucket. a hack for now
 
+        //no saved history search object
         if (!item){
-            console.log('ERROR: NO ITEM TO SAVE TO CART');
-            // data.client_res = [];
-            // data.client_res.push('Oops sorry, I\'m not sure which item you\'re talking about');
-            // outgoingResponse(data,'txt');
+            console.log('warning: NO ITEMS TO SAVE TO CART from data.amazon');
+            //cannedBanter(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+            sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
         else {
+            data.action = 'save';
             //async push items to cart
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-                messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                if (item.recallHistory && item.recallHistory.amazon){
+                    messageHistory[data.source.indexHist].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
+                }else {
+                    messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                }
                 callback();
             }, function done(){
                 //only support "add to cart" message for one item.
                 //static:
-                var sT = data.searchSelect[0];
-                // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
 
+                //var sT = data.searchSelect[0];
+                // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
                 // outgoingResponse(data,'txt');
                 purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
-                    outgoingResponse(res,'txt');
+                    res.action = 'save';
+                    urlShorten(res, function(res2){
+                        res.client_res = res2;
+                        outgoingResponse(res,'txt');
+                    });
                 });
             });            
         }
@@ -1071,6 +1094,9 @@ function searchAmazon(data, type, query, flag){
 
                         default:
                             console.log('amazon err ',err[0].Error[0]);
+                            //no results after weaksearch, now do:
+                            sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
+
                     }
                 }
             });
@@ -1204,7 +1230,18 @@ function weakSearch(data,type,query,flag){
     switch (flag) {
         case 'weakSearch': //we already did weakSearch
             console.log('ALREADY TRIED weakSearch FLAG!');
-            console.log('HANDLE weaker Search here');
+            if (data.dataModify){
+                if (data.dataModify.param){
+                    var modDetail = data.dataModify.param;
+                }else {
+                    var modDetail = data.dataModify.val;
+                }
+                sendTxtResponse(data,'Sorry, it looks like we don\'t have X in/with '+data.dataModify.type+ ' ' + modDetail + ' . Would you like to do another search? Use "find (item)" to start a new search or help for more options');
+            }
+            else {
+                //no results after weaksearch, now do:
+                sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
+            }
             break;
         default:
             //no results, trying weak search
@@ -1236,6 +1273,12 @@ function cannedBanter(data,req){
         data.tokens.push(req);
     }
     banterBucket(data);
+}
+
+function sendTxtResponse(data,msg){
+    data.action = 'smallTalk';
+    data.client_res = msg;
+    sendResponse(data);
 }
 
 //Constructing reply to user
@@ -1542,32 +1585,52 @@ function addDecimal(str) {
 
 //pass in data.amazon , get shorten urls for first 3 things
 function urlShorten(data,callback2){
-
-    var loopLame = [0,1,2];//lol
-    var urlArr = [];
-    async.eachSeries(loopLame, function(i, callback) {
-        if (data.amazon[i]){
-
-           var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
-
-            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('https://kipsearch.com/cinna/'+escapeAmazon)+'&format=txt', function(err, res, body) {
+    //single url for checkouts
+    if (data.bucket == 'purchase' && data.action == 'checkout' || data.bucket == 'purchase' && data.action == 'save'){
+        if (data.client_res){
+           //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
+           var escapeAmazon = querystring.escape(data.client_res);
+            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
               if(err){
-                console.log(err);
-                callback();
+                console.log('URL SHORTEN ',err);
               }
               else {
-                urlArr.push(body);
-                callback();
+                callback2(body);
               }
             });
         }
-        else{
-            callback();
+        else {
+            console.log('error: client_res missing from urlShorten')
         }
 
-    }, function done(){
-        callback2(urlArr);
-    });
+    }
+    //get all urls for new search
+    else {
+        var loopLame = [0,1,2];//lol
+        var urlArr = [];
+        async.eachSeries(loopLame, function(i, callback) {
+            if (data.amazon[i]){
+               //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
+               var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
+                request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
+                  if(err){
+                    console.log(err);
+                    callback();
+                  }
+                  else {
+                    urlArr.push(body);
+                    callback();
+                  }
+                });
+            }
+            else{
+                callback();
+            }
+        }, function done(){
+            callback2(urlArr);
+        });
+    }
+
 }
 
 function getNumEmoji(data,number,callback){
