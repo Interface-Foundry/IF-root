@@ -320,17 +320,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             var reg = /[^\w\s]/ig;
             $scope.userCity = $scope.userCity.replace(reg, '');
         }
-<<<<<<< HEAD
-
-        if ($scope.query.indexOf('/') > -1) {
-=======
 
         if (!$scope.query){ //no query added
             $scope.query = 'winter';
         }
 
         if ($scope.query && $scope.query.indexOf('/') > -1) {
->>>>>>> Kip
             var reg = /[^\w\s]/ig;
             $scope.query = $scope.query.replace(reg, '');
         }
