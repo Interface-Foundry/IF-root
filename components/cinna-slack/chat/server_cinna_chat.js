@@ -115,18 +115,21 @@ function loadSlackUsers(users){
         //init new bot
         slackUsers[user.team_id].on('start', function() {
 
-            //////////////SEND HELLO MSG
-            var helloMessage = {
-              msg: 'Hi'
-            };
-            helloMessage.source = {
-                'origin':'slack',
-                'channel':data.channel,
-                'org':data.team,
-                'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+            //dont spam all slack people on node reboot
+            if (!user.meta.initialized){
+                //////////////SEND HELLO MSG
+                var helloMessage = {
+                  msg: 'Hi'
+                };
+                helloMessage.source = {
+                    'origin':'slack',
+                    'channel':data.channel,
+                    'org':data.team,
+                    'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                }
+                sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
+                //////////////                
             }
-            sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
-            //////////////
 
             slackUsers[user.team_id].on('message', function(data) { //on bot message
                 // all incoming events https://api.slack.com/rtm
