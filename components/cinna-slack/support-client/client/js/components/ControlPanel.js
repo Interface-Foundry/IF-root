@@ -16,7 +16,8 @@ export default class ControlPanel extends Component {
         activeControl: PropTypes.object.isRequire,
         activeChannel: PropTypes.object.isRequire,
         activeMessage: PropTypes.object.isRequire,
-        onSubmit: PropTypes.func.isRequired 
+        onSubmit: PropTypes.func.isRequired ,
+        actions: PropTypes.object.isRequired
     }
 
     constructor (props) {
@@ -44,7 +45,7 @@ export default class ControlPanel extends Component {
     }
 
     render() {
-       const { activeControl, activeMessage} = this.props;
+       const { activeControl, activeMessage, actions} = this.props;
        const fields  = ['msg','bucket','action']
 
         var self = this;
@@ -63,7 +64,7 @@ export default class ControlPanel extends Component {
         </div>
         <DynamicForm
           onSubmit={this.props.onSubmit}
-          fields={fields}/>
+          fields={fields} activeMessage={activeMessage} actions={actions} />
         < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
             Send Command
           < /Button> 

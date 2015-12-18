@@ -65,13 +65,9 @@ export default class Chat extends Component {
           copy[key] = state[key]
          }
     });
-       // console.log('new state: ',copy)
-    this.setActiveMessage(copy)
+    actions.changeMessage(copy)
   }
-  setActiveMessage(message){
-    const { actions } = this.props;
-    actions.changeMessage(message)
-  }
+
   changeActiveChannel(channel) {
     const { actions } = this.props;
     actions.changeChannel(channel);
