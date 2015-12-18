@@ -114,6 +114,20 @@ function loadSlackUsers(users){
 
         //init new bot
         slackUsers[user.team_id].on('start', function() {
+
+            //////////////SEND HELLO MSG
+            var helloMessage = {
+              msg: 'Hi'
+            };
+            helloMessage.source = {
+                'origin':'slack',
+                'channel':data.channel,
+                'org':data.team,
+                'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+            }
+            sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
+            //////////////
+
             slackUsers[user.team_id].on('message', function(data) { //on bot message
                 // all incoming events https://api.slack.com/rtm
                 // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
@@ -154,7 +168,8 @@ io.sockets.on('connection', function(socket) {
         'org':'kip',
         'indexHist':'kip' + "_" + socket.id //for retrieving chat history in node memory
     }
-    preProcess(helloMessage);
+    sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
+    //preProcess(helloMessage);
 
     socket.on("msgToClient", function(data) {
         data.source = {
@@ -734,15 +749,19 @@ function searchFocus(data){
                 }
                 else {
                     console.log('warning: item selection does not exist in amazon array');
+                    sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
                 }
 
             }
             else {
                 console.log('error: amazon search missing from recallHistory obj');
+                sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+
             }
         }
         else {
-            console.log('error: you can only select one item for search focus')
+            console.log('error: you can only select one item for search focus');
+            sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
         }
 
     });
@@ -1250,7 +1269,8 @@ function weakSearch(data,type,query,flag){
                     searchModify(data, 'weakSearch');
                     break;
                 default:
-                    console.log('weak search not enabled for '+ data.action);
+                    console.log('warning: weak search not enabled for '+ data.action);
+                    sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
             }
     }
 }
@@ -1297,7 +1317,10 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                             data.client_res = emoji + ' ' + res[count];
                             sendResponse(data);
                             count++;
-                            callback();
+                            setTimeout(function(){
+                                callback();
+                            }, 50);
+                            
                         });
                     }, function done(){
                         data.urlShorten = res;

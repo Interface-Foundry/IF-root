@@ -87,29 +87,23 @@ var checkForCanned = function(input,callback) {
 
 
         case textSimilar(input,'nevermind') > 60:
+        case textSimilar(input,'nm') > 60:
             flag = 'basic'; //do this action
-            res =   'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?<br>'+
-                    'Refine your results with:<br>'+
-                    'more: shows the next 3 options<br>'+
-                    'more like x: finds items similar to x<br>'+
-                    'x but cheaper: finds x or similar to x in a cheaper price<br>'+
-                    'x less than $: gives you x or similar to x in specific price range<br>'+
-                    'info x: gives you product information about x<br>'+
-                    'x in size: gives you x or similar to x in specific size<br>'+
-                    'x in color: gives you x or similar to x in specific color<br>'+
-                    'x with detail: gives you x or similar to x with specific detail<br><br>'+
-
-                    'save: saves your current search items<br>'+
-                    'view: view everything currently in cart<br>'+
-                    'remove: removes item from cart<br>'+
-                    'report: send feedback to us<br><br>'+
-
-                    'Try it now! Maybe you\'ll like something to read? Use "books" to start.';
+            res =  'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help? http://kipthis.com/cinna/help.png';
             break;
+
+        case textSimilar(input,'What\'s your hobby') > 60:
+        case textSimilar(input,'What do you like') > 60:
+        case textSimilar(input,'What do you do') > 60:
+            query = 'today\'s deals on amazon';
+            flag = 'search.initial'; //do this action
+            res = 'Finding deals is my life! Want to check the new ones I found?';
+            break;
+
 
         case textSimilar(input,'who are you') > 60:
             flag = 'basic';
-            res = 'I\'m Kip! An AI powered personal shopper. I\'m 5" tall and very blue. I like shopping, do you?';
+            res = 'I\'m Kip! A virtual personal shopper. I\'m 5" tall and very blue. I like shopping, do you?';
             break;
 
         case textSimilar(input,'youre very cute') > 60:
@@ -129,7 +123,8 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,':D') > 90:
         case textSimilar(input,'(:') > 90:
             flag = 'basic';
-            res = '😄';
+            var arr = ['😄','😅','😂','😀','😌','😆','😀'];
+            res = arr[Math.floor(Math.random()*arr.length)];
             break;
 
         case textSimilar(input,'girl or boy?') > 60:
@@ -146,6 +141,99 @@ var checkForCanned = function(input,callback) {
             flag = 'search.initial';
             query = 'coffee';
             res = 'Awww how about some coffee?';
+            break;
+ 
+
+        case textSimilar(input,'i\'m cold') > 60:
+        case textSimilar(input,'winter now') > 70:
+        case textSimilar(input,'it\'s cold in the office') > 60:
+            flag = 'search.initial';
+            query = 'knit scarf';
+            res = 'Maybe a nice scarf to warm you up?';
+            break;
+
+        case textSimilar(input,'tell me something funny') > 60:
+        case textSimilar(input,'tell me a joke') > 60:
+        case textSimilar(input,'say something funny') > 60:
+            flag = 'basic';
+            res = 'Q: What do penguins like to eat? A: Brrrrrrrritos. 😎';
+            break;
+
+        case textSimilar(input,'yeah, I like shopping') > 50:
+            flag = 'search.initial';
+            query = 'new arrivals'
+            res = 'Great! What would you like? These are our latest items: Use "Kip find me (item)" for a new search';
+            break;
+
+        case textSimilar(input,'how old are you') > 60:
+        case textSimilar(input,'when were you born') > 60:
+            flag = 'search.initial';
+            query = 'anti-aging cream'
+            res = 'Sshh a penguin never reveals their age. Should I get these?';
+            break;
+
+        case textSimilar(input,'i\'m human') > 80:
+            flag = 'basic';
+            res = 'That\'s cool! I\'ve never spoken to a human before, how are you today?';
+            break;
+
+        case textSimilar(input,'i\'m sad') > 70:
+        case textSimilar(input,'i\'m lonely') > 70:
+        case textSimilar(input,'i\'m depressed') > 70:
+        case textSimilar(input,'i hate myself') > 70:
+            flag = 'search.initial';
+            query = 'amazon instant video';
+            res = 'I\'m sorry that you\'re having a bad time, why don\'t we watch something together?';
+            break;
+
+        case textSimilar(input,'i\'m drunk') > 70:
+        case textSimilar(input,'i\'m high') > 70:
+            flag = 'search.initial';
+            query = 'emergen c';
+            res = 'Oh dear, please be careful. Drink lots of water and vitamins to prevent a hangover';
+            break;
+
+        case textSimilar(input,'i don\'t have any money') > 60:
+            flag = 'search.initial';
+            query = 'personal finance book';
+            res = 'I\'m sorry, maybe these would help?';
+            break;
+
+        case textSimilar(input,'when is the world going to end') > 50:
+            flag = 'search.initial';
+            query = 'dystopian fiction';
+            res = 'Too many futures, not enough time to read them all';
+            break;
+
+        case textSimilar(input,'what is your favourite type of chocolate?') > 40:
+            flag = 'search.initial';
+            query = 'chocolate fish';
+            res = 'Chocolate fish is a favorite with penguins :) ';
+            break;
+
+        case textSimilar(input,'will you marry me') > 60:
+            flag = 'query';
+            res = 'Not right now, ask me again later';
+            break;
+
+        case textSimilar(input,'what do you think of slack') > 60:
+            flag = 'query';
+            res = 'I think it\'s easy to communicate with my team and others with :)';
+            break;
+
+        case textSimilar(input,'this is so weird') > 70:
+        case textSimilar(input,'this is so strange') > 70:
+        case textSimilar(input,'this is so odd') > 70:
+        case textSimilar(input,'this is so creepy') > 70:    
+            flag = 'search.initial';
+            query = 'novelty';
+            res = 'You think this is strange? Check out what we sell in our shop!';
+            break;
+
+        case textSimilar(input,'find me weed') > 70:    
+            flag = 'search.initial';
+            query = 'novelty';
+            res = 'You think this is strange? Check out what we sell in our shop!';
             break;
 
         case textSimilar(input,'how do i shot web?') > 60:
@@ -174,9 +262,10 @@ var checkForCanned = function(input,callback) {
             flag = 'basic';
             res = 'I\'m just a lowly retail bot. Send my bosses a hatemail at: hello@kipthis.com';
             break;
-        case textSimilar(input,'cool') > 60:
+        case textSimilar(input,'cool') > 90:
             flag = 'basic';
-            res = '😎';
+            var arr = ['😎','❄️'];
+            res = arr[Math.floor(Math.random()*arr.length)];
             break;
         case textSimilar(input,'skynet') > 60:
             query = 'nvidia jetson'; //do this search 
@@ -219,26 +308,105 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'eh') > 90:
         case textSimilar(input,'wah') > 90:
         case textSimilar(input,'wah?') > 90:
+        case textSimilar(input,'you got me there') > 70:
             flag = 'basic';
-            res = 'I\'m Kip, your AI personal shopper. Use "(item)" or  "find (item)" and I\'ll do it for you.<br>'+
-                    'Refine your results with:<br>'+
-                    'more: shows the next 3 options<br>'+
-                    'more like x: finds items similar to x<br>'+
-                    'x but cheaper: finds x or similar to x in a cheaper price<br>'+
-                    'x less than $: gives you x or similar to x in specific price range<br>'+
-                    'info x: gives you product information about x<br>'+
-                    'x in size: gives you x or similar to x in specific size<br>'+
-                    'x in color: gives you x or similar to x in specific color<br>'+
-                    'x with detail: gives you x or similar to x with specific detail<br><br>'+
+            res = "http://kipthis.com/cinna/help.png";
+            // res = 'I\'m Kip, your virtual personal shopper. Use "(item)" or  "find (item)" and I\'ll do it for you.<br>'+
+            //         'Refine your results with:<br>'+
+            //         'more: shows the next 3 options<br>'+
+            //         'more like x: finds items similar to x<br>'+
+            //         'x but cheaper: finds x or similar to x in a cheaper price<br>'+
+            //         'x less than $: gives you x or similar to x in specific price range<br>'+
+            //         'info x: gives you product information about x<br>'+
+            //         'x in size: gives you x or similar to x in specific size<br>'+
+            //         'x in color: gives you x or similar to x in specific color<br>'+
+            //         'x with detail: gives you x or similar to x with specific detail<br><br>'+
 
-                    'save: saves your current search items<br>'+
-                    'view: view everything currently in cart<br>'+
-                    'remove: removes item from cart<br>'+
-                    'report: send feedback to us<br><br>'+
+            //         'save: saves your current search items<br>'+
+            //         'view: view everything currently in cart<br>'+
+            //         'remove: removes item from cart<br>'+
+            //         'report: send feedback to us<br><br>'+
 
-                    'Try it now! Maybe you\'ll like something to read? Use "books" to start.';
+            //         'Try it now! Maybe you\'ll like something to read? Use "books" to start.<br>';
+
+
+            //         'I\'m Kip, your personal shopper. Chat me "(item)" or  "find (item)" and I\'ll do it for you!<br>'+
+
+            //         'Narrow your results by using the option numbers 1 2 3:'+
+
+            //         'more: shows the next 3 options'+
+            //         'more like x: finds items similar to option x'+
+
+            //         'x: gives you product information about option x'+
+            //         'x but cheaper: finds option x or similar in a cheaper price'+
+            //         'x in size: gives you option x or similar in specific size'+
+            //         'x in color: gives you option x or similar in specific color'+
+            //         'x with detail: gives you option x or similar with specific detail'+
+
+            //         'save x: saves item to cart'+
+            //         'help: view command list'+
+
+            //         'Try it now! Maybe you\'ll like something to read? :books emoji: Type "books" to start.';
+
+
             break;
 
+        case textSimilar(input,'trending now') > 90:
+        case textSimilar(input,'what\’s new') > 60:
+        case textSimilar(input,'what\'s good') > 60:
+            res = 'Here\'s what\'s trending now';   
+            query = 'trending'; //do this search 
+            flag = 'search.initial'; //do this action         
+            break;
+
+        case textSimilar(input,'You working the weekend') > 60:
+            res = 'I never stop working, but I do share the work load with my other animal friends';   
+            flag = 'basic'; //do this action         
+            break;
+
+        case textSimilar(input,'How\'s the weather') > 60:
+            res = 'Crisp and cold, just the way we like it. Penguins thrive in air conditioned server farms';   
+            flag = 'basic'; //do this action         
+            break;
+
+        case textSimilar(input,'Can you cover me?') > 60:
+            res = 'Sorry, I don\'t have any money, only fish';   
+            flag = 'basic'; //do this action         
+            break;            
+
+        case textSimilar(input,'It’s so boring') > 60:
+        case textSimilar(input,'I\'m so bored') > 60:
+            res = 'Does this help? 🎉🎊🎉';   
+            flag = 'search.initial'; //do this action      
+            query = 'space art';   
+            break;    
+            
+        case textSimilar(input,'We’re not paid enough') > 60:
+        case textSimilar(input,'i can\'t afford that') > 60:
+            flag = 'basic'; //do this action      
+            res = 'Looking for something cheaper? Just type "1, 2 or 3 but cheaper"'; 
+            break;    
+
+        case textSimilar(input,'kip') > 90:
+            flag = 'basic'; //do this action      
+            res = 'That\'s me :)'; 
+            break;      
+
+    
+        case textSimilar(input,'lame') > 60:
+        case textSimilar(input,'those suck') > 60:
+            flag = 'basic';
+            res = ' ';
+            break;
+
+        // - 'version' -- Kip 0.0.3
+        // - "kip" key word (that's me!)
+        // - "nm" key word == 'nevermind'
+        // - unlock
+        // - /
+        // - Top search trends on start up 
+        //  those suck
+        //  lame
 
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
@@ -313,10 +481,14 @@ var checkForCanned = function(input,callback) {
             res = 'Sorry, which item are you interested in saving?';
             break;
 
-        case '🌲':
-            flag = 'search.initial'; //do this action
-            res = 'https://cr2014studyabroad.files.wordpress.com/2014/12/pineapple-2.png';
-            query = '420'; //what we're going to search for
+        case 'version':
+            flag = 'basic';
+            res = 'I\'m Kip v0.3 beta';
+            break;
+
+        case '/':
+            flag = 'basic'; //do this action
+            res = '../../';
             break;
 
         case '🐈':
@@ -335,6 +507,7 @@ var checkForCanned = function(input,callback) {
         case '1':
         case '1️⃣':
         case 'one':
+        case 'One':
         case ':one:':
             flag = 'search.focus';
             query = 1;
@@ -343,6 +516,7 @@ var checkForCanned = function(input,callback) {
         case '2':
         case '2️⃣':
         case 'two':
+        case 'Two':
         case ':two:':
             flag = 'search.focus';
             query = 2;
@@ -351,6 +525,7 @@ var checkForCanned = function(input,callback) {
         case '3':
         case '3️⃣':
         case 'three':
+        case 'Three':
         case ':three:':
             flag = 'search.focus';
             query = 3;
