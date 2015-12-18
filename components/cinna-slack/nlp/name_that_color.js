@@ -35,6 +35,7 @@ var ntc = module.exports = {
   init: function() {
     var color, rgb, hsl;
     ntc.names2 = {};
+    ntc.docs = [];
     for(var i = 0; i < ntc.names.length; i++)
     {
       color = "#" + ntc.names[i][0];
@@ -42,6 +43,12 @@ var ntc = module.exports = {
       hsl = ntc.hsl(color);
       ntc.names[i].push(rgb[0], rgb[1], rgb[2], hsl[0], hsl[1], hsl[2]);
       ntc.names2[ntc.names[i][1].toLowerCase()] = ntc.names[i];
+      ntc.docs.push({
+        hex: color,
+        name: ntc.names[i][1],
+        rgb: rgb,
+        hsl: hsl
+      })
     }
   },
 

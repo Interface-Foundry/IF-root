@@ -177,6 +177,8 @@ var fashionTokenize = module.exports.fashionTokenize = function(query) {
  * }
  */
 var parse = module.exports.parse = function(query) {
+  query = query.replace('black tie women', 'formal')
+  query = query.replace('women black tie', 'formal')
   var tokens = fashionTokenize(query).join(' '); // better as a single string
   bucketTerms = buckets.reduce(function(bucketTerms, bucket) {
     if (bucket.name == 'boost') {

@@ -11,6 +11,7 @@ var querystring = require('querystring');
 var request = require('request');
 var db = require('db');
 var kip = require('kip')
+var fs = require('fs')
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -31,7 +32,7 @@ app.get('/newslack', function(req, res) {
     console.log('new slack integration request');
     // TODO post in our slack #dev channel
     // TODO check that "state" property matches
-    res.send('thanks for integrating with us 😘')
+    res.redirect('/thanks')
 
     if (!req.query.code) {
         console.error(new Date())
@@ -84,6 +85,12 @@ app.get('/newslack', function(req, res) {
     })
 
 
+})
+
+// var thanks = fs.readFileSync(__dirname + '/thanks.html', 'utf8');
+app.get('/thanks', function(req, res) {
+  var thanks = fs.readFileSync(__dirname + '/thanks.html', 'utf8');
+  res.send(thanks);
 })
 
 app.get('/cinna/*', function(req, res, next) {
