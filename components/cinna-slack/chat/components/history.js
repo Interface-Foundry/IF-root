@@ -1,15 +1,17 @@
 var mongoose = require('mongoose');
-var Message = require('../models/Message'); //message model
+// connect our DB
+var db = require('db');
+var Message = db.Message;
 var config = require('config');
 
-// connect our DB
-mongoose.connect(config.mongodb.url);
 process.on('uncaughtException', function (err) {
   console.log(err);
 });
 
 
 var saveHistory = function(data,incoming) { //incoming == 1 or 0
+
+    //console.log('incoming ',incoming);
 
     // / / / / / / / /
     //CHECK FOR "recallhistory" property, remove
@@ -18,9 +20,27 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
     if (!data.source.id){
         console.log('error: missing source.id');
     }
-    else {
+    else {  
+        //check for incoming val
+        if (typeof incoming !== 'undefined') {
+            data.incoming = incoming;
+        }else {
+            console.log('warning: messaged saved without incoming val');
+        }
+        console.log('PRE SAVE ',data);
+        
+        data.save( function(err, data){
+            if(err){
+                console.log('Mongo err ',err);
+            }
+            else{
+                //console.log('INCOMING ',incoming);
 
-        //data.amazon = ['ad','asdfasdf'];
+                console.log('mongo res ',data);
+                //callback('d'); //eventually send back _id for parent id??        
+            }
+        });
+    
 
         //pre-process data for saving
 
@@ -49,23 +69,6 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
 
         // }
 
-
-
-        console.log('SAVING OBJ ',data);
-
-
-        //console.log(';) ',msgObj);
-
-    
-        data.save( function(err, data){
-            if(err){
-                console.log('Mongo err ',err);
-            }
-            else{
-                console.log('mongo res ',data);
-            }
-        });
-        //callback('d'); //eventually send back _id for parent id??        
     }
 };
 
@@ -118,9 +121,6 @@ var recallHistory = function(data,callback){
 //create new mongo Message obj
 var newMessage = function(data,callback){
     data = new Message(data);
-
-    console.log('CREATING OBJ ',data);
-
     callback(data);
 };
 

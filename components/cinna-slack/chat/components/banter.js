@@ -177,10 +177,18 @@ var checkForCanned = function(input,callback) {
             res = 'That\'s cool! I\'ve never spoken to a human before, how are you today?';
             break;
 
+        case textSimilar(input,'good') > 80:
+        case textSimilar(input,'aight') > 80:
+        case textSimilar(input,'alright') > 80:
+            flag = 'basic';
+            res = '😎';
+            break;
+
         case textSimilar(input,'i\'m sad') > 70:
         case textSimilar(input,'i\'m lonely') > 70:
         case textSimilar(input,'i\'m depressed') > 70:
         case textSimilar(input,'i hate myself') > 70:
+        case textSimilar(input,'bad') > 90:
             flag = 'search.initial';
             query = 'amazon instant video';
             res = 'I\'m sorry that you\'re having a bad time, why don\'t we watch something together?';

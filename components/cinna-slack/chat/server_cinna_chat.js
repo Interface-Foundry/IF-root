@@ -205,52 +205,47 @@ function preProcess(data){
         messageHistory[data.source.id].allBuckets = []; //all buckets, chronological chat history
     }
 
-    //data = new Message(data);
+    //check for canned responses/actions before routing to NLP
+    banter.checkForCanned(data.msg,function(res,flag,query){
+        //found canned response
+        if(flag){
+            data.client_res = [];
+            switch(flag){
+                case 'basic': //just respond, no actions
+                    //send message
+                    data.client_res.push(res);
+                    cannedBanter(data,res);
+                    break;
+                case 'search.initial':
+                    //send message
+                    data.client_res.push(res);
+                    cannedBanter(data,res);
 
-    //create new mongo user obj
-    history.newMessage(data, function(newMsg){
-
-        //check for canned responses/actions before routing to NLP
-        banter.checkForCanned(newMsg.msg,function(res,flag,query){
-
-            //found canned response
-            if(flag){
-                switch(flag){
-                    case 'basic': //just respond, no actions
-                        //send message
-                        newMsg.client_res.msg.push(res);
-                        cannedBanter(newMsg,res);
-                        break;
-                    case 'search.initial':
-                        //send message
-                        newMsg.client_res.msg.push(res);
-                        cannedBanter(newMsg,res);
-
-                        //now search for item
-                        newMsg.tokens = [];
-                        newMsg.tokens.push(query); //search for this item
-                        newMsg.bucket = 'search';
-                        newMsg.action = 'initial';
-                        incomingAction(newMsg);
-                        break;
-                    case 'search.focus':
-                        newMsg.searchSelect = [];
-                        newMsg.searchSelect.push(query);
-                        newMsg.bucket = 'search';
-                        newMsg.action = 'focus';
-                        incomingAction(newMsg);
-                        break;
-                    default:
-                        console.log('error: canned action flag missing');
-                }
+                    //now search for item
+                    data.tokens = [];
+                    data.tokens.push(query); //search for this item
+                    data.bucket = 'search';
+                    data.action = 'initial';
+                    incomingAction(data);
+                    break;
+                case 'search.focus':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'search';
+                    data.action = 'focus';
+                    incomingAction(data);
+                    break;
+                default:
+                    console.log('error: canned action flag missing');
             }
-            //proceed to NLP instead
-            else {
-                routeNLP(newMsg);
-            }
-        });
-
+        }
+        //proceed to NLP instead
+        else {
+            routeNLP(data);
+        }
     });
+
+  //  });
 
 }
 
@@ -290,6 +285,12 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
+    //save a new message obj
+    history.newMessage(data, function(newMsg){
+        history.saveHistory(newMsg,true); //saving incoming message
+    });
+
+    data.client_res = [];
 
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -1284,21 +1285,20 @@ function weakSearch(data,type,query,flag){
 
 //process canned message stuff
 //data: kip data object
-//req: incoming message from user
-function cannedBanter(data,req){
+function cannedBanter(data){
     data.bucket = 'banter';
     data.action = 'smalltalk';
-    //if this is pre-process chat (before NLP), store incoming chat msg too
-    if(req){
-        data.tokens = [];
-        data.tokens.push(req);
-    }
-    banterBucket(data);
+    incomingAction(data);
 }
 
 function sendTxtResponse(data,msg){
     data.action = 'smallTalk';
-    data.client_res = msg;
+    if (!msg){
+        console.log('error: no message sent with sendTxtResponse(), using default');
+        msg = 'Sorry, I didn\'t understand';
+    }
+    data.client_res = [];
+    data.client_res.push(msg);
     sendResponse(data);
 }
 
@@ -1309,16 +1309,21 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
         stitchResults(data,source,function(url){
 
             //sending out stitched image response
-            data.client_res = url;
+            data.client_res = [];
+            data.client_res.push(url);
             sendResponse(data);
 
             //send extra item URLs with image responses
             if (data.action == 'initial' || data.action == 'similar'){
                 urlShorten(data,function(res){
                     var count = 0;
+
+                    console.log('LINKS ',res);
+                    data.client_res = []; //gather url responses
+                    //PUSH THESE INTO ONE
                     async.eachSeries(res, function(i, callback) {
                         getNumEmoji(data,count+1,function(emoji){
-                            data.client_res = emoji + ' ' + res[count];
+                            data.client_res.push(emoji + ' ' + res[count]);
                             sendResponse(data);
                             count++;
                             setTimeout(function(){
@@ -1342,7 +1347,8 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             //* * * * * * * * * * *
             banter.getCinnaResponse(data,function(res){
                 if(res){
-                    data.client_res = res;
+                    data.client_res = [];
+                    data.client_res.push(res);
                     sendResponse(data);
                 }
             });
@@ -1351,20 +1357,27 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     }
     //data.client_res > already added to data for response
     //text/image msg to user (not image results)
-    else if (action == 'txt'){
+    else if (action == 'txt'){  
 
         sendResponse(data);
                 
-        history.saveHistory(data,1); 
-
         banter.getCinnaResponse(data,function(res){
             if(res){
-                data.client_res = res;
+                data.client_res = [];
+                data.client_res.push(res);
                 sendResponse(data);
+                //save a new message obj
+                history.newMessage(data, function(newMsg){
+                    history.saveHistory(newMsg,false); //saving outgoing message
+                });
+            }
+            else {
+                //save a new message obj
+                history.newMessage(data, function(newMsg){
+                    history.saveHistory(newMsg,false); //saving outgoing message
+                });
             }
         });
-
-        history.saveHistory(data,0); 
 
     }
     //no cinna response check
@@ -1376,8 +1389,14 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
 
 //send back msg to user, based on source.origin
 function sendResponse(data){
+
     if (data.source.channel && data.source.origin == 'socket.io'){
-        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[0]});
+
+        //loop through responses in order
+        for (var i = 0; i < data.client_res.length; i++) { 
+            io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+        }
+ 
     }
     else if (data.source.channel && data.source.origin == 'slack'){
         //eventually cinna can change emotions in this pic based on response type
@@ -1385,7 +1404,10 @@ function sendResponse(data){
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
 
-        slackUsers[data.source.org].postMessage(data.source.channel, data.client_res, params);
+        //loop through responses in order
+        for (var i = 0; i < data.client_res.length; i++) { 
+            slackUsers[data.source.org].postMessage(data.source.channel, data.client_res[i], params);
+        }
 
     }
     else {
@@ -1653,6 +1675,7 @@ function addDecimal(str) {
 
 //pass in data.amazon , get shorten urls for first 3 things
 function urlShorten(data,callback2){
+
     //single url for checkouts
     if (data.bucket == 'purchase' && data.action == 'checkout' || data.bucket == 'purchase' && data.action == 'save'){
         if (data.client_res){
