@@ -178,7 +178,7 @@ function getModifier(text) {
   if (colors.isColor(text)) {
     return {
       type: 'color',
-      val: [text] // TODO add similar colors
+      val: colors(text)
     }
   }
 

@@ -10,6 +10,8 @@ mongodb:
         keepAlive: 1
 elasticsearch:
   url: http://pikachu.kipapp.co:9200
+elasticsearchElk:
+  url: http://pikachu.kipapp.co:9200
 redis:
   port: 6379
   url: localhost

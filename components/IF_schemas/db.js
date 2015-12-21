@@ -74,6 +74,14 @@ var schemas = [{
     single: 'Look',
     plural: 'Looks'
 }, {
+    filename: 'message_schema',
+    single: 'Message',
+    plural: 'Messages'
+}, {
+    filename: 'metric_schema',
+    single: 'Metric',
+    plural: 'Metrics'
+}, {
     filename: 'project_schema',
     single: 'Project',
     plural: 'Projects'
@@ -81,6 +89,10 @@ var schemas = [{
     filename: 'serverwidgets_schema',
     single: 'ServerWidget',
     plural: 'ServerWidgets'
+}, {
+    filename: 'slackbot_schema',
+    single: 'Slackbot',
+    plural: 'Slackbots'
 }, {
     filename: 'sticker_schema',
     single: 'Sticker',

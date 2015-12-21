@@ -9,6 +9,21 @@ var nlp = require('../nlp/api');
 var cheerio = require('cheerio');
 var querystring = require('querystring');
 
+
+//load mongoose models
+var db = require('db');
+var Message = db.Message;
+var Slackbots = db.Slackbots;
+
+//set env vars
+var config = require('config');
+
+process.on('uncaughtException', function (err) {
+  console.error('uncaught exception', new Date())
+  console.error(err.stack);
+});
+
+
 //load kip modules
 var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
@@ -17,7 +32,7 @@ var history = require("./components/history.js");
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
   awsSecret: "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",
-  awsTag: "kipsearch-20"
+  awsTag: "bubboorev-20"
 });
 
 // website 🌏
@@ -36,33 +51,108 @@ server.listen(8000, function(e) {
 
 //globals
 var messageHistory = {}; //fake database, stores all users and their chat histories
+var slackUsers = {};
+    
+//- - - - Slack handling - - - -//
+initSlackUsers();
 
+//get stored slack users from mongo
+function initSlackUsers(){
+    Slackbots.find().exec(function(err, users) {
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+        }
+    });
+}
 
-// - - - Slack create bot - - - -//
-var settings = {
-    token: 'xoxb-14750837121-mNbBQlJeJiONal2GAhk5scdU',
-    name: 'cinna-1000'
-};
-var bot = new Bot(settings);
+//incoming new slack user
+app.get('/newslack', function(req, res) {
 
-bot.on('start', function() {
-    bot.on('message', function(data) {
-        // all incoming events https://api.slack.com/rtm
-        // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-        if (data.type == 'message' && data.username !== settings.name){
-            var newSl = {
-                source: {
-                    'origin':'slack',
-                    'channel':data.channel,
-                    'org':data.team,
-                    'id':data.team + "_" + data.channel //for retrieving chat history in node memory
-                },
-                'msg':data.text
-            }
-            preProcess(newSl);
+    //find all bots not added to our system yet
+    Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+            res.send('slack user added');
+
+            //update all to initialized
+            async.eachSeries(users, function(user, callback) {
+                user.meta.initialized = true;
+                user.save( function(err, data){
+                    if(err){
+                        console.log('Mongo err ',err);
+                    }
+                    else{
+                        console.log('mongo res ',data);
+                    }
+                    callback();
+                });
+            }, function done(){
+                console.log('initialized all new bots');
+            });
         }
     });
 });
+
+//load slack users into memory, adds them as slack bots
+function loadSlackUsers(users){
+
+    async.eachSeries(users, function(user, callback) {
+
+        var settings = {
+            token: user.bot.bot_access_token,
+            name: 'Kip'
+        };
+        //create new bot from user settings
+        slackUsers[user.team_id] = new Bot(settings);
+
+        //init new bot
+        slackUsers[user.team_id].on('start', function() {
+
+            // //dont spam all slack people on node reboot
+            // if (!user.meta.initialized){
+            //     //////////////SEND HELLO MSG
+            //     var helloMessage = {
+            //       msg: 'Hi'
+            //     };
+            //     helloMessage.source = {
+            //         'origin':'slack',
+            //         'channel':data.channel,
+            //         'org':data.team,
+            //         'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+            //     }
+            //     sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
+            //     //////////////                
+            // }
+
+            slackUsers[user.team_id].on('message', function(data) { //on bot message
+                // all incoming events https://api.slack.com/rtm
+                // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
+                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true ){
+                    var newSl = {
+                        source: {
+                            'origin':'slack',
+                            'channel':data.channel,
+                            'org':data.team,
+                            'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                        },
+                        'msg':data.text
+                    }
+                    preProcess(newSl);
+                }
+            });
+        });
+
+        callback();
+    }, function done(){
+        console.log('done loading slack users');
+    });
+}
 
 //- - - - Socket.io handling - - - -//
 var io = require('socket.io').listen(server);
@@ -80,7 +170,8 @@ io.sockets.on('connection', function(socket) {
         'org':'kip',
         'id':'kip' + "_" + socket.id //for retrieving chat history in node memory
     }
-    preProcess(helloMessage);
+    sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
+    //preProcess(helloMessage);
 
     socket.on("msgToClient", function(data) {
         data.source = {
@@ -99,7 +190,6 @@ io.sockets.on('connection', function(socket) {
 
 //pre process incoming messages for canned responses
 function preProcess(data){
-
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -304,12 +394,7 @@ function purchaseBucket(data){
             listCart(data);
             break;
         case 'checkout':
-            //passing in data obj
-            //pass messageHistory obj
-            purchase.outputCart(data,messageHistory[data.source.id],function(res){
-                outgoingResponse(res,'txt');
-            });
-            break;
+            saveToCart(data);
         default:
             console.log('error: no purchase bucket action selected');
     }
@@ -428,78 +513,87 @@ function searchModify(data, flag){
     //RECALL LAST ITEM IN SEARCH HISTORY
     recallHistory(data, function(item){
 
-        data.recallHistory = item;
+        if (item){//history item found
 
-        var cSearch = ''; //construct new search string
+            data.recallHistory = item;
 
-        //CONSTRUCT QUERY FROM AMAZON OBJECT
-        if (data.recallHistory.amazon){
+            var cSearch = ''; //construct new search string
 
-            if (data.dataModify && data.dataModify.type){
-                //handle special modifiers that need care, consideration, hard tweaks of amazon search API
-                switch (data.dataModify.type) {
-                    case 'price':
-                        searchInitial(data,{ // passing special FLAG for search to handle
-                            'type':data.dataModify.type,
-                            'param':data.dataModify.param,
-                            'val':data.dataModify.val
-                        });
-                        break;
+            //CONSTRUCT QUERY FROM AMAZON OBJECT
+            if (data.recallHistory.amazon){
 
-                    case 'brand':
-                        searchInitial(data,{ // passing special FLAG for search to handle
-                            'type':data.dataModify.type,
-                            'val':data.dataModify.val
-                        });
-                        break;
+                if (data.dataModify && data.dataModify.type){
+                    //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+                    switch (data.dataModify.type) {
+                        case 'price':
+                            searchInitial(data,{ // passing special FLAG for search to handle
+                                'type':data.dataModify.type,
+                                'param':data.dataModify.param,
+                                'val':data.dataModify.val
+                            });
+                            break;
 
-                    default:
-                        constructAmazonQuery(); //nm just construct a new query
+                        case 'brand':
+                            searchInitial(data,{ // passing special FLAG for search to handle
+                                'type':data.dataModify.type,
+                                'val':data.dataModify.val
+                            });
+                            break;
+
+                        default:
+                            constructAmazonQuery(); //nm just construct a new query
+                    }
+                }
+                else {
+                    console.log('error: data.dataModify params missing')
+                }
+
+                function constructAmazonQuery(){
+
+                    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+
+                        var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                        //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                        if (flag !== 'weakSearch'){
+                            console.log('weakSearch FALSE');
+                            //add brand
+                            if (itemAttrib[0].Brand){
+                                cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                            }
+                            //add clothing size
+                            if (itemAttrib[0].ClothingSize){
+                                cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                            }
+                        }
+                        else {
+                            console.log('weakSearch TRUE');
+                        }
+                        if (itemAttrib[0].Department){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                        }
+                        if (itemAttrib[0].ProductGroup){
+                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                        }
+                        if (itemAttrib[0].Binding){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                        }
+
+                        callback();
+                    }, function done(){
+                        addModifier(); //done processing constructing new search, add modifier and run query
+                    });
                 }
             }
             else {
-                console.log('error: data.dataModify params missing')
-            }
-
-            function constructAmazonQuery(){
-
-                async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-
-                    var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
-
-                    //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                    if (flag !== 'weakSearch'){
-                        console.log('weakSearch FALSE');
-                        //add brand
-                        if (itemAttrib[0].Brand){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
-                        }
-                        //add clothing size
-                        if (itemAttrib[0].ClothingSize){
-                            cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
-                        }
-                    }
-                    else {
-                        console.log('weakSearch TRUE');
-                    }
-                    if (itemAttrib[0].Department){
-                        cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
-                    }
-                    if (itemAttrib[0].ProductGroup){
-                        cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                    }
-                    if (itemAttrib[0].Binding){
-                        cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
-                    }
-
-                    callback();
-                }, function done(){
-                    addModifier(); //done processing constructing new search, add modifier and run query
-                });
+                console.log('no Amazon data found in last history item. can not modify search');
+                data.action = 'initial';
+                searchInitial(data); //do a search anyway
             }
         }
-        else {
-            console.log('no Amazon data found in last history item. can not modify search');
+        else { //no item history found 
+            console.log('warning: no history item found for modification query');
+            data.action = 'initial';
             searchInitial(data); //do a search anyway
         }
 
@@ -510,6 +604,30 @@ function searchModify(data, flag){
             switch (data.dataModify.type) {
                 // CASES: color, size, price, genericDetail
                 case 'color':
+
+                        // bucket: 'search',
+                        //  action: 'modify',
+                        //  searchSelect: [1],
+                        //  tokens: ['1 in blue'],
+                        //  dataModify: {
+                        //    type: 'color',
+                        //    val: [ { hex: '#0000FF ',
+                        //      name: 'Blue',
+                        //      rgb: [ 0, 0, 255 ],
+                        //      hsl: [ 170, 255, 127 ] },
+                        //    { hex: '#0066FF ',
+                        //      name: 'Blue Ribbon',
+                        //      rgb: [ 0, 102, 255 ],
+                        //      hsl: [ 153, 255, 127 ] },
+                        //    { hex: '#007FFF ',
+                        //      name: 'Azure Radiance',
+                        //      rgb: [ 0, 127, 255 ],
+                        //      hsl: [ 148, 255, 127 ] },
+                        //    { hex: '#8B00FF ',
+                        //      name: 'Electric Violet',
+                        //      rgb: [ 139, 0, 255 ],
+                        //      hsl: [ 193, 255, 127 ] } ]
+                        //  }
 
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
@@ -535,11 +653,20 @@ function searchModify(data, flag){
 
                 //unsortable modifier
                 case 'genericDetail':
-
-                    //SORT THROUGH RESULTS OF SIZES, FILTER
-                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                    data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
+                    if (data.dataModify.val == 'buy'){
+                        data.bucket = 'purchase';
+                        data.action = 'save';
+                        saveToCart(data);
+                    }
+                    //normal action here
+                    else {
+                        //SORT THROUGH RESULTS OF SIZES, FILTER
+                        cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        console.log(data.tokens[0]);
+                        searchInitial(data,flag); //do a new search                        
+                    }
                     break;
             }
         }
@@ -628,15 +755,19 @@ function searchFocus(data){
                 }
                 else {
                     console.log('warning: item selection does not exist in amazon array');
+                    sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
                 }
 
             }
             else {
                 console.log('error: amazon search missing from recallHistory obj');
+                sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+
             }
         }
         else {
-            console.log('error: you can only select one item for search focus')
+            console.log('error: you can only select one item for search focus');
+            sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
         }
 
     });
@@ -732,26 +863,44 @@ function saveToCart(data){
 
         data.bucket = 'purchase'; //modifying bucket. a hack for now
 
-        //async push items to cart
-        async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-            messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-            callback();
-        }, function done(){
-            //only support "add to cart" message for one item.
-            //static:
-            var sT = data.searchSelect[0];
-            // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+        //no saved history search object
+        if (!item){
+            console.log('warning: NO ITEMS TO SAVE TO CART from data.amazon');
+            //cannedBanter(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+            sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+        }
+        else {
+            data.action = 'save';
+            //async push items to cart
+            async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                if (item.recallHistory && item.recallHistory.amazon){
+                    messageHistory[data.source.indexHist].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
+                }else {
+                    messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                }
+                callback();
+            }, function done(){
+                //only support "add to cart" message for one item.
+                //static:
 
-            // outgoingResponse(data,'txt');
-            purchase.outputCart(data,messageHistory[data.source.id],function(res){
-                outgoingResponse(res,'txt');
-            });
-        });
+                //var sT = data.searchSelect[0];
+                // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
+                // outgoingResponse(data,'txt');
+                purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
+                    res.action = 'save';
+                    urlShorten(res, function(res2){
+                        res.client_res = res2;
+                        outgoingResponse(res,'txt');
+                    });
+                });
+            });            
+        }
+
     });
 }
 
 function viewCart(data){
-
+    db.Metrics.log('cart.view', data);
 }
 
 //* * * * * * PROCESS ACTIONS * * * * * * * //
@@ -965,6 +1114,9 @@ function searchAmazon(data, type, query, flag){
 
                         default:
                             console.log('amazon err ',err[0].Error[0]);
+                            //no results after weaksearch, now do:
+                            sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
+
                     }
                 }
             });
@@ -1098,7 +1250,18 @@ function weakSearch(data,type,query,flag){
     switch (flag) {
         case 'weakSearch': //we already did weakSearch
             console.log('ALREADY TRIED weakSearch FLAG!');
-            console.log('HANDLE weaker Search here');
+            if (data.dataModify){
+                if (data.dataModify.param){
+                    var modDetail = data.dataModify.param;
+                }else {
+                    var modDetail = data.dataModify.val;
+                }
+                sendTxtResponse(data,'Sorry, it looks like we don\'t have X in/with '+data.dataModify.type+ ' ' + modDetail + ' . Would you like to do another search? Use "find (item)" to start a new search or help for more options');
+            }
+            else {
+                //no results after weaksearch, now do:
+                sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
+            }
             break;
         default:
             //no results, trying weak search
@@ -1110,7 +1273,8 @@ function weakSearch(data,type,query,flag){
                     searchModify(data, 'weakSearch');
                     break;
                 default:
-                    console.log('weak search not enabled for '+ data.action);
+                    console.log('warning: weak search not enabled for '+ data.action);
+                    sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
             }
     }
 }
@@ -1132,6 +1296,12 @@ function cannedBanter(data,req){
     banterBucket(data);
 }
 
+function sendTxtResponse(data,msg){
+    data.action = 'smallTalk';
+    data.client_res = msg;
+    sendResponse(data);
+}
+
 //Constructing reply to user
 function outgoingResponse(data,action,source){ //what we're replying to user with
     //stitch images before send to user
@@ -1151,7 +1321,10 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                             data.client_res = emoji + ' ' + res[count];
                             sendResponse(data);
                             count++;
-                            callback();
+                            setTimeout(function(){
+                                callback();
+                            }, 50);
+                            
                         });
                     }, function done(){
                         data.urlShorten = res;
@@ -1211,7 +1384,9 @@ function sendResponse(data){
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
         }
-        bot.postMessage(data.source.channel, data.client_res[0], params);
+
+        slackUsers[data.source.org].postMessage(data.source.channel, data.client_res, params);
+
     }
     else {
         console.log('error: data.source.channel or source.origin missing')
@@ -1360,6 +1535,50 @@ function saveHistory(data,type){
     // }
 
 
+    // //save object to mongo
+    // var save_data = {
+    //     msg: data.msg,
+    //     tokens: [],
+    //     bucket: data.bucket,
+    //     action: data.action,
+    //     source: {
+    //         origin: data.source.origin,
+    //         channel: data.source.channel,
+    //         org: data.source.org,
+    //         id: data.source.indexHist
+    //     }
+    // };
+    // if (data.tokens){
+    //     save_data.tokens.push(data.tokens[0]);
+    // }
+    // if (data.dataModify){
+    //     if (!data.dataModify.param){
+    //         data.dataModify.param = 'null';
+    //     }
+    //     save_data.dataModify = {
+    //         val:[],
+    //         type: data.dataModify.type,
+    //         param: data.dataModify.param
+    //     };
+    //     if (data.dataModify.val && data.dataModify.val[0]){
+    //         save_data.dataModify.val.push(data.dataModify.val[0]);
+    //     }
+    // }
+    // if (data.client_res){
+    //     save_data.client_res = { };
+    //     save_data.client_res.msg = data.client_res;
+    // }
+    // var msgObj = new Message(save_data);
+    // msgObj.save( function(err, data){
+    //     if(err){
+    //         console.log('Mongo err ',err);
+    //     }
+    //     else{
+    //         //console.log('mongo res ',data);
+    //     }
+    // });
+
+
 }
 
 //get user history
@@ -1434,32 +1653,52 @@ function addDecimal(str) {
 
 //pass in data.amazon , get shorten urls for first 3 things
 function urlShorten(data,callback2){
-
-    var loopLame = [0,1,2];//lol
-    var urlArr = [];
-    async.eachSeries(loopLame, function(i, callback) {
-        if (data.amazon[i]){
-
-           var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
-
-            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('https://kipsearch.com/cinna/'+escapeAmazon)+'&format=txt', function(err, res, body) {
+    //single url for checkouts
+    if (data.bucket == 'purchase' && data.action == 'checkout' || data.bucket == 'purchase' && data.action == 'save'){
+        if (data.client_res){
+           //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
+           var escapeAmazon = querystring.escape(data.client_res);
+            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
               if(err){
-                console.log(err);
-                callback();
+                console.log('URL SHORTEN ',err);
               }
               else {
-                urlArr.push(body);
-                callback();
+                callback2(body);
               }
             });
         }
-        else{
-            callback();
+        else {
+            console.log('error: client_res missing from urlShorten')
         }
 
-    }, function done(){
-        callback2(urlArr);
-    });
+    }
+    //get all urls for new search
+    else {
+        var loopLame = [0,1,2];//lol
+        var urlArr = [];
+        async.eachSeries(loopLame, function(i, callback) {
+            if (data.amazon[i]){
+               //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
+               var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
+                request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
+                  if(err){
+                    console.log(err);
+                    callback();
+                  }
+                  else {
+                    urlArr.push(body);
+                    callback();
+                  }
+                });
+            }
+            else{
+                callback();
+            }
+        }, function done(){
+            callback2(urlArr);
+        });
+    }
+
 }
 
 function getNumEmoji(data,number,callback){

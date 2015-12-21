@@ -320,17 +320,12 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             var reg = /[^\w\s]/ig;
             $scope.userCity = $scope.userCity.replace(reg, '');
         }
-<<<<<<< HEAD
-
-        if ($scope.query.indexOf('/') > -1) {
-=======
 
         if (!$scope.query){ //no query added
             $scope.query = 'winter';
         }
 
         if ($scope.query && $scope.query.indexOf('/') > -1) {
->>>>>>> Kip
             var reg = /[^\w\s]/ig;
             $scope.query = $scope.query.replace(reg, '');
         }
@@ -413,9 +408,7 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                 //* * * * * * * * * * * * *
 
                 if ($scope.newQuery === true) {
-<<<<<<< HEAD
-                    $scope.items = $scope.items.concat(response.data.results);
-=======
+
                      var newQueryIds = [];
                         $scope.items.forEach(function(item){
                             newQueryIds.push(item.id);
@@ -426,7 +419,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                                 $scope.items.push(item);
                             }
                         });
->>>>>>> Kip
                     ResCache.put('user', $scope.items);
                     ResCache.put('query', encodeQuery);
                     $scope.newQuery = false;
@@ -439,9 +431,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                         ResCache.put('query', encodeQuery);
                         $scope.newQuery = false;
                     } else if ($scope.infBool) {
-<<<<<<< HEAD
-                        $scope.items = $scope.items.concat(response.data.results);
-=======
                         var scrollQueryIds = [];
                         $scope.items.forEach(function(item){
                             scrollQueryIds.push(item.id);
@@ -452,7 +441,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
                                 $scope.items.push(item);
                             }
                         });
->>>>>>> Kip
                         ResCache.put('user', $scope.items);
                         ResCache.put('query', encodeQuery);
                         $scope.newQuery = false;
@@ -472,16 +460,6 @@ simpleSearchApp.controller('HomeCtrl',['$scope', '$http', '$location', '$documen
             if ($scope.items && $scope.items.length) {
                 $scope.noResults = false;
                 for (var i = 0; i < $scope.items.length; i++) {
-<<<<<<< HEAD
-
-                    //remove user objects
-                    if (!$scope.items[i].owner) {
-                        $scope.items.splice(i, 1);
-                    }
-
-=======
-
->>>>>>> Kip
                     // if num of images is greater than 6, remove imgs from middle of array
                     if ($scope.items[i].itemImageURL.length > 6) {
                         var counter = $scope.items[i].itemImageURL.length - 6;
