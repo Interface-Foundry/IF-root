@@ -5,3 +5,4 @@ elasticsearch:
   url: http://localhost:9200
 app:
   publicAPI: http://localhost:2997/api
+# picstitch: http://localhost:5000

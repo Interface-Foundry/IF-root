@@ -113,32 +113,32 @@ def index():
         last_y = last_y + 22
 
         if 'reviews' in im and 'rating' in im[u'reviews']:   
-            if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
-                #add rating
-                if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
-                    selectRating = 0
-                if im[u'reviews'][u'rating'] > 0.5 and im[u'reviews'][u'rating'] <= 1:
-                    selectRating = 1
-                if im[u'reviews'][u'rating'] > 1 and im[u'reviews'][u'rating'] <= 1.5:
-                    selectRating = 2
-                if im[u'reviews'][u'rating'] > 1.5 and im[u'reviews'][u'rating'] <= 2:
-                    selectRating = 3
-                if im[u'reviews'][u'rating'] > 2 and im[u'reviews'][u'rating'] <= 2.5:
-                    selectRating = 4
-                if im[u'reviews'][u'rating'] > 2.5 and im[u'reviews'][u'rating'] <= 3:
-                    selectRating = 5
-                if im[u'reviews'][u'rating'] > 3 and im[u'reviews'][u'rating'] <= 3.5:
-                    selectRating = 6
-                if im[u'reviews'][u'rating'] > 3.5 and im[u'reviews'][u'rating'] <= 4:
-                    selectRating = 7
-                if im[u'reviews'][u'rating'] > 4 and im[u'reviews'][u'rating'] <= 4.5:
-                    selectRating = 8
-                if im[u'reviews'][u'rating'] > 4.5 and im[u'reviews'][u'rating'] <= 5:
-                    selectRating = 9
-                img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
-                #add review count
-                if 'reviewCount' in im[u'reviews']:  
-                    draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font,fill="#2d70c1")
+            # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
+            #add rating
+            if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
+                selectRating = 0
+            if im[u'reviews'][u'rating'] > 0.5 and im[u'reviews'][u'rating'] <= 1:
+                selectRating = 1
+            if im[u'reviews'][u'rating'] > 1 and im[u'reviews'][u'rating'] <= 1.5:
+                selectRating = 2
+            if im[u'reviews'][u'rating'] > 1.5 and im[u'reviews'][u'rating'] <= 2:
+                selectRating = 3
+            if im[u'reviews'][u'rating'] > 2 and im[u'reviews'][u'rating'] <= 2.5:
+                selectRating = 4
+            if im[u'reviews'][u'rating'] > 2.5 and im[u'reviews'][u'rating'] <= 3:
+                selectRating = 5
+            if im[u'reviews'][u'rating'] > 3 and im[u'reviews'][u'rating'] <= 3.5:
+                selectRating = 6
+            if im[u'reviews'][u'rating'] > 3.5 and im[u'reviews'][u'rating'] <= 4:
+                selectRating = 7
+            if im[u'reviews'][u'rating'] > 4 and im[u'reviews'][u'rating'] <= 4.5:
+                selectRating = 8
+            if im[u'reviews'][u'rating'] > 4.5 and im[u'reviews'][u'rating'] <= 5:
+                selectRating = 9
+            img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
+            #add review count
+            if 'reviewCount' in im[u'reviews']:  
+                draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font,fill="#2d70c1")
 
     cStringImg = cStringIO.StringIO()
     img.save(cStringImg, 'PNG', quality=90)
