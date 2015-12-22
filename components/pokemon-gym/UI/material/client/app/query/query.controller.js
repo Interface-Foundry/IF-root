@@ -50,7 +50,7 @@
           $scope.radius = 5;
         }
 
-        $http.post('http://pikachu.kipapp.co:9999/query', {
+        $http.post('http://admin.kipapp.co/query', {
             text: $scope.query,
             loc: {
                 lat: $scope.userLat,
@@ -63,10 +63,10 @@
 
           console.log(res.data)
 
-        }); 
+        });
     }
         // $http.post('/query',data).
-        // then(function(res) {        
+        // then(function(res) {
         //     console.log(res);
 
         //     // for (var i = 0; i < res.data.length; i++) {
@@ -114,7 +114,7 @@
         $scope.drives = [{
           "mount_point": "/",
           "total": "120G",
-          "free": "23G"    
+          "free": "23G"
         }];
         $scope.cpu = [
             {
@@ -365,4 +365,4 @@
         init();
     }
 
-})(); 
+})();

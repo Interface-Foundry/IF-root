@@ -24,13 +24,13 @@
 
           $scope.tester = 'asdfasdfd';
 
-          $http.get('http://pikachu.kipapp.co:9999/errors/'+type).
-          then(function(res) {        
+          $http.get('http://admin.kipapp.co/errors/'+type).
+          then(function(res) {
               console.log(res.data);
 
               $scope.errors = res.data;
 
-          });        
+          });
 
         }
 
@@ -39,4 +39,4 @@
 
     }
 
-})(); 
+})();
