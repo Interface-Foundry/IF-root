@@ -308,7 +308,7 @@ var checkForCanned = function(input,callback) {
             break;
 
         case textSimilar(input,'help') > 60:
-        case textSimilar(input,'?') > 70:
+        case textSimilar(input,'?') > 50:
         case textSimilar(input,'what?') > 90:
         case textSimilar(input,'what') > 90:
         case textSimilar(input,'huh?') > 90:
@@ -642,7 +642,9 @@ var getCinnaResponse = function(data,callback){
 	    default:
 	        console.log('warning: no bucket selected for cinna response');
 	}
-
+    if (!res){
+        res = 'null';
+    }
 	callback(res);
 }
 

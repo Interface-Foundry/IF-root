@@ -3,6 +3,8 @@ var mongoose = require('mongoose');
 var db = require('db');
 var Message = db.Message;
 var config = require('config');
+var async = require('async');
+var _ = require('underscore');
 
 process.on('uncaughtException', function (err) {
   console.log(err);
@@ -27,19 +29,51 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
         }else {
             console.log('warning: messaged saved without incoming val');
         }
-        console.log('PRE SAVE ',data);
-        
-        data.save( function(err, data){
-            if(err){
-                console.log('Mongo err ',err);
-            }
-            else{
-                //console.log('INCOMING ',incoming);
+        console.log('TO SAVE ',data);
 
-                console.log('mongo res ',data);
-                //callback('d'); //eventually send back _id for parent id??        
+        //new message mongo obj
+        newMessage(data, function(msg){
+                
+            if (msg.amazon){
+                msg.amazon = [];
+                async.eachSeries(data.amazon, function(item, callback) {
+                    //fuck amazon '$' keys littering their object results. go stringify and die.
+                    msg.amazon.push(JSON.stringify(item));
+                    callback();
+
+                }, function done(){
+                    msg.markModified('amazon'); //lmao don't ask ;__; 
+                    msg.save(function(err, data){
+                        if(err){
+                            console.log('Mongo err ',err);
+                        }
+                        else{
+                            //console.log('INCOMING ',incoming);
+                            console.log('STATUS ',incoming);
+                            console.log('mongo res ',data);
+                            //callback('d'); //eventually send back _id for parent id??        
+                        }
+                    });   
+                });
             }
+
+            else {
+                msg.save(function(err, data){
+                    if(err){
+                        console.log('Mongo err ',err);
+                    }
+                    else{
+                        //console.log('INCOMING ',incoming);
+                        console.log('STATUS ',incoming);
+                        console.log('mongo res ',data);
+                        //callback('d'); //eventually send back _id for parent id??        
+                    }
+                });               
+            }
+
         });
+
+
     
 
         //pre-process data for saving
@@ -82,25 +116,56 @@ var recallHistory = function(data,callback){
         switch (data.bucket) {
             case 'search':
                 switch(data.action){
-                    //if action is focus, find lastest 'initial' item
-                    case 'focus':
-                        //find last initial query to do focus on
-                        Message.findOne({'bucket':'initial'}).sort({'_id': -1}).exec(function(err, msg) {  
+
+                    default: 
+                        Message.findOne({'bucket':'search','action':'initial','incoming':false}).sort({'_id': -1}).exec(function(err, msg) {  
                             if(err){
-                                console.log('Cannot find initial bucket for action:focus recallHistory');
-                            }
+                                console.log('Error: Cannot find initial search for recallHistory');
+                            }   
                             else {
-                                console.log('stuff stuff ', msg);
-                                //callback(msg);
+                                if (msg.amazon){
+                                    var tempArr = msg.amazon; //lmao amazon 
+                                    msg.amazon = [];
+                                    async.eachSeries(tempArr, function(item, callback2) {
+                                        msg.amazon.push(JSON.parse(item)); //ughhhh
+                                        callback2();
+                                    }, function done(){
+                                        callback(msg); 
+                                    });
+                                }
+                                else {
+                                    callback(msg);
+                                }
                             }
                         });
-                        break;
 
-                    default:
-                        //
-                        // var arrLength = messageHistory[data.source.id].search.length - steps; //# of steps to reverse. default is 1
-                        // callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
-                        break;
+                    // //if action is focus, find lastest 'initial' item
+                    // case 'focus':
+                    //     //find last initial query to do focus on
+                    //     Message.findOne({'bucket':'initial','incoming':false}).sort({'_id': -1}).exec(function(err, msg) {  
+                    //         if(err){
+                    //             console.log('Cannot find initial bucket for action:focus recallHistory');
+                    //         }
+                    //         else {
+                    //             console.log('stuff stuff ', msg);
+                    //         }
+                    //     });
+                    //     break;
+                    // case 'similar':
+                    //     Message.findOne({'bucket':'initial','incoming':false}).sort({'_id': -1}).exec(function(err, msg) {  
+                    //         if(err){
+                    //             console.log('Cannot find initial bucket for action:focus recallHistory');
+                    //         }
+                    //         else {
+                    //             console.log('stuff stuff ', msg);
+                    //         }
+                    //     });
+
+                    // default:
+                    //     console.log('warning: no action selected for recallhistory');
+                    //     // GET DEFAULT MONGO SIMILAR QUERY HERE
+                        
+                    //     break;
                 }
 
                 break;

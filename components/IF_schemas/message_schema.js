@@ -1,17 +1,18 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var amazonResult = mongoose.Schema;
+var modifyVal = mongoose.Schema;
 var messageSchema = mongoose.Schema({
     incoming: Boolean, //if true, incoming message, if false, outgoing message
     msg: String, //raw incoming message (if applicable)
     tokens: [String], //broken up incoming message (if applicable)
     bucket: { type: String, index: true},
     action: { type: String, index: true},
-    amazon: [Schema.Types.Mixed], //amazon search results
+    amazon: [mongoose.Schema.Types.Mixed], //amazon search results
     dataModify: {
         type: {type: String},
-        val: [Schema.Types.Mixed],
+        val: [mongoose.Schema.Types.Mixed],
         param: String
     },
     source: {
@@ -35,3 +36,4 @@ var messageSchema = mongoose.Schema({
 });
 
 module.exports = mongoose.model('Message', messageSchema);
+

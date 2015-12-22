@@ -6,7 +6,6 @@ var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
-var cheerio = require('cheerio');
 var querystring = require('querystring');
 
 
@@ -28,6 +27,7 @@ process.on('uncaughtException', function (err) {
 var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
 var history = require("./components/history.js");
+var search = require("./components/search.js");
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -213,13 +213,15 @@ function preProcess(data){
             switch(flag){
                 case 'basic': //just respond, no actions
                     //send message
+                    data.client_res = [];
                     data.client_res.push(res);
-                    cannedBanter(data,res);
+                    cannedBanter(data);
                     break;
                 case 'search.initial':
                     //send message
+                    data.client_res = [];
                     data.client_res.push(res);
-                    cannedBanter(data,res);
+                    cannedBanter(data);
 
                     //now search for item
                     data.tokens = [];
@@ -286,11 +288,8 @@ function routeNLP(data){
 function incomingAction(data){
 
     //save a new message obj
-    history.newMessage(data, function(newMsg){
-        history.saveHistory(newMsg,true); //saving incoming message
-    });
-
-    data.client_res = [];
+    history.saveHistory(data,true); //saving incoming message
+    
 
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -414,7 +413,8 @@ function searchInitial(data,flag){
 function searchSimilar(data){
 
     //RECALL LAST ITEM IN SEARCH HISTORY
-    recallHistory(data, function(item){
+    history.recallHistory(data, function(item){
+        console.log('SIMILAR ',item);
         data.recallHistory = item; //added recalled history obj to data obj
         searchAmazon(data,'similar');
     });
@@ -788,33 +788,14 @@ function searchMore(data){
         var loopLame = [0,1,2];//lol
         async.eachSeries(loopLame, function(i, callback) {
             if (data.amazon[i]){
-                //get reviews in circumvention manner (amazon not allowing anymore officially)
-                request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
-                  if(err){
-                    console.log(err);
-                    callback();
-                  }
-                  else {
-
-                    $ = cheerio.load(body);
-
-                    //get rating
-                    var rating = ( $('.a-size-base').text()
-                      .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                      .map(function (v) {return +v;}).shift();
-
-                    //get reviewCount
-                    var reviewCount = ( $('.a-link-emphasis').text()
-                      .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                      .map(function (v) {return +v;}).shift();
-
+                //get reviews by ASIN 
+                search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                     //adding scraped reviews to amazon objects
                     data.amazon[i].reviews = {
                         rating: rating,
                         reviewCount: reviewCount
                     }
                     callback();
-                  }
                 });
             }
             else {
@@ -1061,42 +1042,20 @@ function searchAmazon(data, type, query, flag){
 
                 var loopLame = [0,1,2];//lol
                 async.eachSeries(loopLame, function(i, callback) {
-
                     if (data.amazon[i]){
-                        //get reviews in circumvention manner (amazon not allowing anymore officially)
-                        request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
-                          if(err){
-                            console.log(err);
-                            callback();
-                          }
-                          else {
-
-                            $ = cheerio.load(body);
-
-                            //get rating
-                            var rating = ( $('.a-size-base').text()
-                              .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                              .map(function (v) {return +v;}).shift();
-
-                            //get reviewCount
-                            var reviewCount = ( $('.a-link-emphasis').text()
-                              .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                              .map(function (v) {return +v;}).shift();
-
+                        //get reviews by ASIN 
+                        search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                             //adding scraped reviews to amazon objects
                             data.amazon[i].reviews = {
                                 rating: rating,
                                 reviewCount: reviewCount
                             }
                             callback();
-                          }
                         });
                     }
                     else {
                         callback();
                     }
-
-
                 }, function done(){
                     outgoingResponse(data,'stitch','amazon'); //send back msg to user
                 });
@@ -1136,7 +1095,7 @@ function searchAmazon(data, type, query, flag){
             }
             else {
 
-                if (data.recallHistory.amazon){ //we have a previously saved amazon session
+                if (data.recallHistory && data.recallHistory.amazon){ //we have a previously saved amazon session
 
                     if (!flag){ //no flag passed in
                         flag = 'Intersection'; //default
@@ -1168,34 +1127,17 @@ function searchAmazon(data, type, query, flag){
                         var loopLame = [0,1,2];//lol
                         async.eachSeries(loopLame, function(i, callback) {
 
-                            //get reviews in circumvention manner (amazon not allowing anymore officially)
-                            request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+data.amazon[i].ASIN[0]+'', function(err, res, body) {
-                              if(err){
-                                console.log(err);
-                                callback();
-                              }
-                              else {
-
-                                $ = cheerio.load(body);
-
-                                //get rating
-                                var rating = ( $('.a-size-base').text()
-                                  .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                                  .map(function (v) {return +v;}).shift();
-
-                                //get reviewCount
-                                var reviewCount = ( $('.a-link-emphasis').text()
-                                  .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
-                                  .map(function (v) {return +v;}).shift();
-
-                                //adding scraped reviews to amazon objects
-                                data.amazon[i].reviews = {
-                                    rating: rating,
-                                    reviewCount: reviewCount
-                                }
-                                callback();
-                              }
-                            });
+                            if (data.amazon[i]){
+                                //get reviews by ASIN 
+                                search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                                    //adding scraped reviews to amazon objects
+                                    data.amazon[i].reviews = {
+                                        rating: rating,
+                                        reviewCount: reviewCount
+                                    }
+                                    callback();
+                                });
+                            }
 
                         }, function done(){
                             data.action = 'initial';
@@ -1233,6 +1175,7 @@ function searchAmazon(data, type, query, flag){
                     });
                 }
                 else {
+                    console.log('warning: there was a data error resolving to basic search');
                     searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
                 }
             }
@@ -1310,48 +1253,40 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
 
             //sending out stitched image response
             data.client_res = [];
-            data.client_res.push(url);
-            sendResponse(data);
+            data.client_res.push(url); //add image results to response
+            //sendResponse(data);
 
             //send extra item URLs with image responses
             if (data.action == 'initial' || data.action == 'similar'){
                 urlShorten(data,function(res){
                     var count = 0;
-
-                    console.log('LINKS ',res);
-                    data.client_res = []; //gather url responses
-                    //PUSH THESE INTO ONE
+                    //put all result URLs into arr
                     async.eachSeries(res, function(i, callback) {
                         getNumEmoji(data,count+1,function(emoji){
                             data.client_res.push(emoji + ' ' + res[count]);
-                            sendResponse(data);
-                            count++;
-                            setTimeout(function(){
-                                callback();
-                            }, 50);
-                            
+                            count++;                           
+                            callback();
                         });
                     }, function done(){
-                        data.urlShorten = res;
+                        //console.log('TO SEND ',data.client_res);
+                       // sendResponse(data);
+                        checkOutgoingBanter(data);
+                        //data.urlShorten = res;
                         saveHistory(data); //push new history state after we have stitched URL
                     });
 
                 });
             }
             else {
+                checkOutgoingBanter(data);
+                //sendResponse(data);
                 saveHistory(data); //push new history state after we have stitched URL
             }
 
             //* * * * * * * * * * *
             //which cinna response to include in message?
             //* * * * * * * * * * *
-            banter.getCinnaResponse(data,function(res){
-                if(res){
-                    data.client_res = [];
-                    data.client_res.push(res);
-                    sendResponse(data);
-                }
-            });
+
 
         });
     }
@@ -1361,23 +1296,23 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
 
         sendResponse(data);
                 
-        banter.getCinnaResponse(data,function(res){
-            if(res){
-                data.client_res = [];
-                data.client_res.push(res);
-                sendResponse(data);
-                //save a new message obj
-                history.newMessage(data, function(newMsg){
-                    history.saveHistory(newMsg,false); //saving outgoing message
-                });
-            }
-            else {
-                //save a new message obj
-                history.newMessage(data, function(newMsg){
-                    history.saveHistory(newMsg,false); //saving outgoing message
-                });
-            }
-        });
+        // banter.getCinnaResponse(data,function(res){
+        //     if(res){
+        //         data.client_res = [];
+        //         data.client_res.push(res);
+        //         sendResponse(data);
+        //         //save a new message obj
+        //         history.newMessage(data, function(newMsg){
+        //             history.saveHistory(newMsg,false); //saving outgoing message
+        //         });
+        //     }
+        //     else {
+        //         //save a new message obj
+        //         history.newMessage(data, function(newMsg){
+        //             history.saveHistory(newMsg,false); //saving outgoing message
+        //         });
+        //     }
+        // });
 
     }
     //no cinna response check
@@ -1385,6 +1320,19 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
         saveHistory(data);
         sendResponse(data);
     }
+}
+
+//check for extra banter to send with message. 
+function checkOutgoingBanter(data){
+    banter.getCinnaResponse(data,function(res){
+        if(res && res !== 'null'){
+            data.client_res.unshift(res); // add to beginning of message
+            sendResponse(data);
+        }
+        else {
+            sendResponse(data);
+        }
+    });            
 }
 
 //send back msg to user, based on source.origin
@@ -1396,7 +1344,6 @@ function sendResponse(data){
         for (var i = 0; i < data.client_res.length; i++) { 
             io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
         }
- 
     }
     else if (data.source.channel && data.source.origin == 'slack'){
         //eventually cinna can change emotions in this pic based on response type
@@ -1408,11 +1355,22 @@ function sendResponse(data){
         for (var i = 0; i < data.client_res.length; i++) { 
             slackUsers[data.source.org].postMessage(data.source.channel, data.client_res[i], params);
         }
-
     }
     else {
         console.log('error: data.source.channel or source.origin missing')
     }
+
+//    SAVE OUTGOING MESSAGES HERE
+    if (data.bucket && data.action){
+        console.log('SAVING OUTGOING RESPONSE');
+        //history.newMessage(data, function(newMsg){
+        history.saveHistory(data,false); //saving outgoing message
+        //});        
+    }
+    else {
+        console.log('error: cant save outgoing response, missing bucket or action');
+    }
+
 }
 
 
