@@ -7,6 +7,7 @@ import Channels from './Channels';
 import * as Actions from '../actions/Actions';
 import TypingListItem from './TypingListItem';
 const socket = io();
+// const emitter = io.connect();
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 
 export default class Chat extends Component {
@@ -27,6 +28,13 @@ export default class Chat extends Component {
   }
   componentDidMount() {
     const { actions, messages } = this.props;
+     socket.on('change channel bc', function () {
+       // actions.setMessageProperty({_id: this.state.filteredMessages[0], key: 'msg', value: 'LELELELELWOPRKINGGGGG' }) 
+       console.log('change channel event received',this.state)
+       // this.handleSaveState
+        actions.setMessageProperty({_id: filtered[0], key: 'msg', value: 'LELELELELWOPRKINGGGGG' }) 
+    })   
+   
     socket.on('new bc message', function(msg) {      
       actions.receiveRawMessage(msg) 
     });
@@ -68,8 +76,17 @@ export default class Chat extends Component {
     actions.changeMessage(copy)
   }
 
+  saveState(state) {
+    // const { actions, activeMessage, activeChannel } = this.props;
+    // console.log('firing saveState',this.refs)
+    // this.refs.form1.props.onChannel()
+    // actions.setMessageProperty({_id: this.refs.form1.updateGlobalState})
+  }
+
   changeActiveChannel(channel) {
     const { actions } = this.props;
+    // console.log('firing lel')
+    // socket.emit('change channel',{msg:'lol'});
     actions.changeChannel(channel);
     this.changeActiveMessage(channel)
   }
@@ -128,12 +145,12 @@ export default class Chat extends Component {
               </ul>
             </div>
             <div style= {{ padding: 0}} >
-              <ControlPanel actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} onSubmit={::this.handleSubmit} />
+              <ControlPanel ref='form1' actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} onSubmit={::this.handleSubmit} tempState={::this.saveState} />
             </div>
           </div>
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
-        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} user={username} onSave={::this.handleSave} messages={messages}/>
+        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages}/>
           {typers.length === 1 &&
             <div>
               <span>

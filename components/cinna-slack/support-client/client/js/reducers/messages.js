@@ -1,7 +1,10 @@
 import {
-    ADD_MESSAGE, RECEIVE_MESSAGE, LOAD_MESSAGES, LOAD_MESSAGES_SUCCESS, LOAD_MESSAGES_FAIL
+    ADD_MESSAGE, RECEIVE_MESSAGE, LOAD_MESSAGES, LOAD_MESSAGES_SUCCESS, LOAD_MESSAGES_FAIL, SET_MESSAGE_PROPERTY
 }
 from '../constants/ActionTypes';
+
+import indexOf from 'lodash/array/indexOf'
+import find from 'lodash/collection/find'
 
 const initialState = {
     loaded: false,
@@ -84,6 +87,13 @@ export default function messages(state = initialState, action) {
                     loaded: false,
                     error: action.error,
                     data: [...state.data]
+            };
+         case SET_MESSAGE_PROPERTY:
+            var index = indexOf([...state.data], find([...state.data], {_id: action.identifier._id}));
+            var copy = Object.assign({}, [...state.data][index]);
+            copy[action.identifier.key] = action.identifier.value
+           return {...state,
+                    data: [...state.data].splice(index, 1, copy)
             };
         default:
             return state;

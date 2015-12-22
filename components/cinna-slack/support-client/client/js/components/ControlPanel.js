@@ -17,6 +17,7 @@ export default class ControlPanel extends Component {
         activeChannel: PropTypes.object.isRequire,
         activeMessage: PropTypes.object.isRequire,
         onSubmit: PropTypes.func.isRequired ,
+        tempState: PropTypes.object.isRequired ,
         actions: PropTypes.object.isRequired
     }
 
@@ -38,6 +39,11 @@ export default class ControlPanel extends Component {
         return (<div style={{fontSize: '0.2em'}}><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
     }
 
+  changeMessageProperties() {
+    const { actions } = this.props;
+    // console.log('YO: ', this.refs.form1)
+  }
+
     state = {
         msg : true,
         bucket: true,
@@ -45,13 +51,14 @@ export default class ControlPanel extends Component {
     }
 
     render() {
-       const { activeControl, activeMessage, actions} = this.props;
+       const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
        const fields  = ['msg','bucket','action']
-
+       const ref = this.refs.form1
         var self = this;
         return ( 
         <section className='rightnav'>
           <h1>Control</h1> 
+          <h1>{this.ref}</h1>
             <div>
         <div>
           {Object.keys(this.state).map(field =>
@@ -63,8 +70,8 @@ export default class ControlPanel extends Component {
           )}
         </div>
         <DynamicForm
-          onSubmit={this.props.onSubmit}
-          fields={fields} activeMessage={activeMessage} actions={actions} />
+          tempState={this.props.tempState} onSubmit={this.props.onSubmit} ref="form1"
+          fields={fields} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
         < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
             Send Command
           < /Button> 

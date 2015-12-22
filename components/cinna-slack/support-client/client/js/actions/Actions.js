@@ -94,6 +94,13 @@ export function changeMessage(message) {
     };
 }
 
+export function setMessageProperty(identifier) {
+    return {
+        type: types.SET_MESSAGE_PROPERTY,
+        identifier
+    };
+}
+
 // NOTE:Auth actions
 
 export function loadAuth() {
