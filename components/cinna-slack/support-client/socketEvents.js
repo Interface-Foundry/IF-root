@@ -27,8 +27,12 @@ exports = module.exports = function(io, cinnaio) {
             socket.broadcast.emit('stop typing bc', socket.username);
         });
 
-        socket.on('change channel', function(msg) {
-            socket.emit('change channel bc', msg);
+        socket.on('change state', function(state) {
+            socket.emit('change state bc', state);
+        });
+
+        socket.on('change channel', function(channel) {
+            socket.emit('change channel bc', channel);
         });
     });
 }

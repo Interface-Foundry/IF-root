@@ -95,10 +95,11 @@ export function changeMessage(message) {
 }
 
 export function setMessageProperty(identifier) {
+    console.log('Actions: ',identifier)
     return {
         type: types.SET_MESSAGE_PROPERTY,
         identifier
-    };
+    }
 }
 
 // NOTE:Auth actions

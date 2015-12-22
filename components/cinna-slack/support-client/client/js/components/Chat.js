@@ -26,15 +26,25 @@ export default class Chat extends Component {
   static contextTypes = {
     router: PropTypes.object.isRequired
   }
+
   componentDidMount() {
     const { actions, messages } = this.props;
-     socket.on('change channel bc', function () {
-       // actions.setMessageProperty({_id: this.state.filteredMessages[0], key: 'msg', value: 'LELELELELWOPRKINGGGGG' }) 
-       console.log('change channel event received',this.state)
-       // this.handleSaveState
-        actions.setMessageProperty({_id: filtered[0], key: 'msg', value: 'LELELELELWOPRKINGGGGG' }) 
+     socket.on('change state bc', function (state) {
+      // console.log('change state event received', state)
+       var identifier = {_id: state._id, properties: []}
+      for (var key in state) {
+        if ((key === 'msg' || key === 'bucket' || key === 'action') && state[key] !== '' ) {
+          identifier.properties.push({ [key] : state[key]})
+        }
+      }  
+      // console.log('identifier: ', identifier)
+      //if no fields were updated on form take no action
+      if (identifier.properties.length === 0 ) {
+        return
+      } else {
+        actions.setMessageProperty(identifier)
+      }
     })   
-   
     socket.on('new bc message', function(msg) {      
       actions.receiveRawMessage(msg) 
     });
@@ -51,9 +61,32 @@ export default class Chat extends Component {
       actions.loadAuth();
     }
   }
+  changeActiveChannel(channel) {
+    const { actions, activeChannel } = this.props;
+    console.log('firing changeactivechannel');
+    var channels = { prev: {}, next:{}}
+    channels.prev =  Object.assign({}, activeChannel);
+    channels.next = Object.assign({}, channel)
+    socket.emit('change channel', channels);
+    // var currentChannel =  Object.assign({}, activeChannel);
+    actions.changeChannel(channel);
+    this.changeActiveMessage(channel)
+  }
+   changeActiveMessage(channel) {
+    const { actions, messages, activeChannel} = this.props;
+    const activeMessages = messages.filter(message => message.source.channel === channel.name);
+    const firstMsg = activeMessages[0]
+    // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
+    // console.log('Chat.js:108-->',firstMsg)
+    actions.changeMessage(firstMsg);
+  }
+
   componentDidUpdate() {
     const messageList = this.refs.messageList;
     messageList.scrollTop = messageList.scrollHeight;
+  }
+  storeTemp(msg) {
+    this.setState({identifier: msg});
   }
   handleSave(newMessage) {
     const { actions } = this.props;
@@ -75,31 +108,11 @@ export default class Chat extends Component {
     });
     actions.changeMessage(copy)
   }
-
-  saveState(state) {
-    // const { actions, activeMessage, activeChannel } = this.props;
-    // console.log('firing saveState',this.refs)
-    // this.refs.form1.props.onChannel()
-    // actions.setMessageProperty({_id: this.refs.form1.updateGlobalState})
-  }
-
-  changeActiveChannel(channel) {
-    const { actions } = this.props;
-    // console.log('firing lel')
-    // socket.emit('change channel',{msg:'lol'});
-    actions.changeChannel(channel);
-    this.changeActiveMessage(channel)
-  }
   changeActiveControl(control) {
     const { actions } = this.props;
     actions.changeControl(control);
   }
-  changeActiveMessage(channel) {
-    const { actions, messages, activeChannel} = this.props;
-    const activeMessages = messages.filter(message => message.source.channel === channel.name);
-    const firstMsg = activeMessages[0]
-    actions.changeMessage(firstMsg);
-  }
+
   openMoreUsersModal() {
     event.preventDefault();
     this.setState({moreUsersModal: true});
@@ -111,7 +124,7 @@ export default class Chat extends Component {
   // <TopPanel activeControl={activeControl} onClick={::this.changeActiveControl} />
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
+    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const username = this.props.user.username;
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
@@ -145,7 +158,7 @@ export default class Chat extends Component {
               </ul>
             </div>
             <div style= {{ padding: 0}} >
-              <ControlPanel ref='form1' actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} onSubmit={::this.handleSubmit} tempState={::this.saveState} />
+              <ControlPanel ref='form1' actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} onSubmit={::this.handleSubmit} />
             </div>
           </div>
         </div>

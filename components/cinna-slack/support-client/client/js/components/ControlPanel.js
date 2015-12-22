@@ -13,11 +13,11 @@ const socket = io();
 
 export default class ControlPanel extends Component {
     static propTypes = {
-        activeControl: PropTypes.object.isRequire,
-        activeChannel: PropTypes.object.isRequire,
-        activeMessage: PropTypes.object.isRequire,
+        activeControl: PropTypes.object.isRequired,
+        activeChannel: PropTypes.object.isRequired,
+        activeMessage: PropTypes.object.isRequired,
+        messages: PropTypes.array.isRequired,
         onSubmit: PropTypes.func.isRequired ,
-        tempState: PropTypes.object.isRequired ,
         actions: PropTypes.object.isRequired
     }
 
@@ -70,7 +70,7 @@ export default class ControlPanel extends Component {
           )}
         </div>
         <DynamicForm
-          tempState={this.props.tempState} onSubmit={this.props.onSubmit} ref="form1"
+          onSubmit={this.props.onSubmit} ref="form1" changed=""
           fields={fields} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
         < Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
             Send Command
