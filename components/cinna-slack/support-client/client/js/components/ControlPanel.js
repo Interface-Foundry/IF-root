@@ -36,7 +36,7 @@ export default class ControlPanel extends Component {
 
     renderJSON() {
         const {activeMessage, actions} = this.props
-        return (<div style={{fontSize: '0.2em'}}><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
+        // return (<div style={{fontSize: '0.2em'}}><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
     }
 
   changeMessageProperties() {
@@ -76,9 +76,6 @@ export default class ControlPanel extends Component {
             Send Command
           < /Button> 
       </div>   
-      <div className="jsonBox">
-        {self.renderJSON()}
-      </div>
       </section>
         );
     }

@@ -1,5 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import {reduxForm} from 'redux-form';
+import RadioApp from './Radio';
+import { Button } from 'react-bootstrap';
 export const labels = {
   msg: "Message",
   bucket: "Bucket",
@@ -11,8 +13,6 @@ const socket = io();
 class DynamicForm extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
-    handleSubmit: PropTypes.func.isRequired,
-    submitting: PropTypes.bool.isRequired,
     actions: PropTypes.object.isRequired
   };
 
@@ -22,7 +22,9 @@ class DynamicForm extends Component {
        filteredMessages: null,
        msg: '',
        bucket: '',
-       action: ''
+       action: '',
+       bucketOptions: { initial: false, purchase: false, banter: false },
+       searchParam: ''
       };
     }
 
@@ -62,10 +64,6 @@ class DynamicForm extends Component {
       }
     } 
   }
-  componentDidUpdate(prevProps, prevState) {
-    const {actions} = this.props
-   
-  }
 
   renderJSON(filtered) {
       const {activeMessage, actions, messages, activeChannel} = this.props    
@@ -86,32 +84,59 @@ class DynamicForm extends Component {
         )
   }
 
-  render() {
-    const { fields, handleSubmit, saveState,submitting, messages, activeChannel} = this.props;
-    const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
-    return (
-      <form ref='form1' onSubmit={handleSubmit}>
-        {Object.keys(fields).map(name => {
-          const field = fields[name];
-          return (<div key={name}>
-            <label>{labels[name]}</label>
-            <div>
-              <input type="text" placeholder={labels[name]} {...field}/>
-            </div>
-          </div>);
-        })}
-        <div>
-          <button disabled={submitting} onClick={handleSubmit}>
-            {submitting ? <i/> : <i/>} Update State
-          </button>
-        </div>
+  onChange(e) {
+    const val = e.target.value;
+    this.setState({searchParam: val})
+  }
 
-      <div className="jsonBox">
-        {this.renderJSON(filtered)}
-      </div>
-      </form>
+  render() {
+    const { fields, saveState,messages, activeChannel} = this.props;
+    const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
+    const showSearchBox =  this.state.bucket === 'initial' ? {} : {display: 'none'};
+    var self = this
+    return (
+       <div>
+          <form ref='form1' onSubmit={null}>
+           <div className="jsonBox">
+            {self.renderJSON(filtered)}
+           </div>
+            {Object.keys(fields).map(name => {
+              const field = fields[name];
+              if (name === 'bucket' || name === 'action') return
+              return (<div key={name}>
+                <label>{labels[name]}</label>
+                <div>
+                  <input type="text" placeholder={labels[name]} {...field}/>
+                </div>
+              </div>);
+            })}
+            <div className="flexbox-container">
+              <label>Bucket:</label>
+                    <input type="radio" id="bucket-initial" {...fields['bucket']} value="initial" checked={fields['bucket'].value === 'initial'}/>
+                    <label>INITIAL </label>
+                    <input type="radio" id="bucket-purchase" {...fields['bucket']} value="purchase" checked={fields['bucket'].value === 'purchase'}/>
+                    <label> PURCHASE </label>
+                    <input type="radio" id="bucket-banter" {...fields['bucket']} value="banter" checked={fields['bucket'].value === 'banter'}/>
+                    <label> BANTER </label>
+            </div>
+
+           
+          </form>
+
+              <div id="search-box" style={showSearchBox}>
+                 <label>Search</label>
+                 <input type="text" id="seach-input" {...fields['action']} onChange={this.handleChange} />
+                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.searchAmazon(activeMessage)} >
+                  Search
+                </Button>
+              </div>
+
+       </div>
     );
   }
 }
+
+
+
 
 export default reduxForm({form: 'dynamic'})(DynamicForm);
