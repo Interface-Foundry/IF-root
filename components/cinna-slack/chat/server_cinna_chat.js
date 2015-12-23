@@ -1,3 +1,40 @@
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙⚪💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💙⚪⚪⚪❤🎀⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💙💙💙💙🌚❤🎀🎀🎀🎀⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💙💙💙💙💙💙💙💙💙🎀🎀🎀👕🎀💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙🎀🎀💙💙👕💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙👕💙💙💙💙💙💙💙💙💙⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙⚪⚪⚪⚪
+// ⚪⚪⚪⚪💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙⚪⚪⚪
+// ⚪⚪⚪💙💙💙💙💙💙💙💙💙💭💭💙💭💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙💙⚪⚪
+// ⚪⚪⚪💙💙💙💙💙💙💙⚪🌚⚪⚪⚪⚪⚪💭💭💙💙💙💙💙💙⚪⚪💭💭💭⚪⚪💙💙💙💙💙💙⚪⚪
+// ⚪⚪💙💙💙💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💭⚪⚪⚪⚪⚪⚪⚪💭💙💙💙💙💙💙⚪
+// ⚪⚪💙💙💙💙💙💙🌚⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💭💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙💙⚪
+// ⚪💙💙💙💙💙💙💭⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙🌚⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💭💙💙💙💙💙
+// ⚪💙💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪💙💙💙💙💙⚪⚪⚪⚪⚫⚫⚫⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚫⚫⚫⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪💙💙💙💙💙⚪⚪⚪🌚⚫⚫⚫⚪⚪⚪⚪⚪⚪⚪🌚🌚⚪⚪⚪⚪⚪⚫⚫⚫⚫⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪💙💙💙💙💙⚪⚪⚪🌕⚫⚫⚫⚪⚪⚪⚪🍊🍊🍊🍊🍊🍊🍊⚪⚪⚪🌚⚫⚫⚫⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪💙💙💙💙💙⚪⚪⚪⚪🌕⚫🐘⚪⚪⚪🍊🍊🍊🍊🍊🍊🍊🍊🍊⚪⚪⚪🌕⚫⚪⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪💙💙💙💙💙🐙⚪⚪⚪⚪🌚⚪⚪⚪⚪💰🍊🍊🍊🍊🍊🍊🍊⚪⚪⚪⚪⚪🌚⚪⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪⚪💙💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💛⚪💛⚪🍊⚪💰⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪⚪💙💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙
+// ⚪⚪⚪💙💙💙💙🐙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙⚪
+// ⚪⚪⚪💙💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙💙⚪
+// ⚪⚪⚪⚪💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙💙💙⚪⚪
+// ⚪⚪⚪⚪⚪💙💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪🐙💙💙⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪💙💙💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪💙⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪🌚💙⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+// ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
 //Cinna 0.4 (Pepper)
 
 var http = require('http');
@@ -7,7 +44,6 @@ var request = require('request');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 var nlp = require('../nlp/api');
-var querystring = require('querystring');
 
 
 //load mongoose models
@@ -30,6 +66,7 @@ var purchase = require("./components/purchase.js");
 var history = require("./components/history.js");
 var search = require("./components/search.js");
 var picstitch = require("./components/picstitch.js");
+var processData = require("./components/process.js");
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -331,7 +368,6 @@ function incomingAction(data){
     //save a new message obj
     history.saveHistory(data,true); //saving incoming message
     
-
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
         case 'search':
@@ -345,32 +381,6 @@ function incomingAction(data){
             break;
         case 'supervisor':
             //route to supervisor chat window
-            //JSON SEND TO SUPERVISOR
-            // {
-            //   msg: 'more like 2',
-            //   source: {
-            //     origin: 'socket.io',
-            //     channel: '-lsQ0_8joP-Sp04JAAAA',
-            //     org: 'kip'
-            //   },
-            //   bucket: 'supervisor',
-            //   searchSelect: [ 2 ],
-            //   recallHistory: [{
-            //     msg: 'xx',
-            //     source: {
-            //       origin: 'socket.io',
-            //       channel: '-lsQ0_8joP-Sp04JAAAA',
-            //       org: 'kip'
-            //     },
-            //     bucket: 'search',
-            //     action: 'initial',
-            //     tokens: [ 'xx' ],
-            //     amazon:[
-            //       ],
-            //       client_res: 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)',
-            //       ts: Tue Dec 08 2015 15:29:15 GMT-0500 (EST)
-            //     }]
-            // }
         default:
             searchBucket(data);
     }
@@ -379,7 +389,6 @@ function incomingAction(data){
 //* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
 
 function searchBucket(data){
-
     //sort search action type
     switch (data.action) {
         case 'initial':
@@ -404,7 +413,6 @@ function searchBucket(data){
         default:
             searchInitial(data);
     }
-
 }
 
 function banterBucket(data){
@@ -439,20 +447,15 @@ function purchaseBucket(data){
         default:
             console.log('error: no purchase bucket action selected');
     }
-
 }
-
 
 //* * * * * SEARCH ACTIONS * * * * * * * * //
 
-
 function searchInitial(data,flag){
-
     searchAmazon(data,'initial','none',flag);
 }
 
 function searchSimilar(data){
-
     //RECALL LAST ITEM IN SEARCH HISTORY
     history.recallHistory(data, function(item){
         data.recallHistory = item; //added recalled history obj to data obj
@@ -464,92 +467,6 @@ function searchModify(data, flag){
 
     //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
-
-    // {
-    //     msg: '1 but in orange',
-    //     source:{
-    //         origin: 'socket.io',
-    //         channel: 'dgUgwg_Z6hNp4qJIAAAB',
-    //         org: 'kip'
-    //     },
-    //     bucket: 'search',
-    //     action: 'modified'
-    // }
-
-
-    //temp!
-    // if (data.msg){
-    //     data.tokens = [];
-    //     data.tokens.push(data.msg);
-    // }
-
-    // //temp!
-    // if (!data.searchSelect){
-    //     data.searchSelect = [1];
-    // }
-
-    // //temp!
-    // switch (true){
-    //     case data.tokens[0].indexOf("in blue") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'color',
-    //             val: ['blue']
-    //         }
-    //         break;
-
-    //     case data.tokens[0].indexOf("in XL") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'size',
-    //             val: ['extra large','XL']
-    //         }
-    //         break;
-
-    //     case data.tokens[0].indexOf("with collar") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'genericDetail',
-    //             val: ['collar']
-    //         }
-    //         break;
-
-    //     case data.tokens[0].indexOf("in wool") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'material',
-    //             val: ['wool','cashmere','merino']
-    //         }
-    //         break;
-
-    //     case data.tokens[0].indexOf("by Zara") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'brand',
-    //             val: ['Zara']
-    //         }
-    //         break;
-
-    //     case data.tokens[0].indexOf("less than") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'price',
-    //             param: 'less than',
-    //             val: [25]
-    //         }
-    //         break;
-
-    //     case data.tokens[0].indexOf("cheaper") !=-1 :
-
-    //         data.dataModify = {
-    //             type: 'price',
-    //             param: 'less'
-    //         }
-    //         break;
-    // }
-
-
-    //console.log('modified ',data);
 
     //RECALL LAST ITEM IN SEARCH HISTORY
     history.recallHistory(data, function(item){
@@ -711,7 +628,6 @@ function searchModify(data, flag){
                     break;
             }
         }
-
     });
 
 }
@@ -747,14 +663,8 @@ function searchFocus(data){
                     }
                     data.client_res.push(topStr);
 
-                    //outgoingResponse(data,'final');
-                    // //stall output for slack timing issue
-                    // setTimeout(function(){
-                    //     outgoingResponse(data,'final');
-                    // }, 700);
 
-
-                    ///// product details string //////
+                    ///// build product details string //////
 
                     //get size
                     if (attribs.Size){
@@ -792,46 +702,31 @@ function searchFocus(data){
                        // outgoingResponse(data,'final');
                     }
 
-                    getNumEmoji(data,searchSelect+1,function(res){
+                    processData.getNumEmoji(data,searchSelect+1,function(res){
                         data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
                     })
                     
                     outgoingResponse(data,'final');
-
-                }
-                else {
+                }else {
                     console.log('warning: item selection does not exist in amazon array');
                     sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
                 }
-
-            }
-            else {
+            }else {
                 console.log('error: amazon search missing from recallHistory obj');
                 sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
-
             }
-        }
-        else {
+        }else {
             console.log('error: you can only select one item for search focus');
             sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
         }
-
     });
-
 }
 
 function searchMore(data){
 
     history.recallHistory(data, function(res){
 
-        // data = res; //bad
-        // delete data._id; //prevent mongo duplicates
-        // delete data.__v; //prevent mongo duplicates
-        // delete data.ts; //prevent mongo duplicates
-        // data.client_res = [];
-        // data.urlShorten = [];   
-        // console.log('incoming ',data);
-
+        //build new data obj so there's no mongo duplicate
         data = {};
         data.amazon = res.amazon;
         data.source = res.source;
@@ -866,18 +761,6 @@ function searchMore(data){
             outgoingResponse(data,'stitch','amazon'); //send back msg to user
         });
 
-
-        // //async push items to cart
-        // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-        //     messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-        //     callback();
-        // }, function done(){
-        //     //only support "add to cart" message for one item.
-        //     //static:
-        //     var sT = data.searchSelect[0];
-        //     data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
-        //     outgoingResponse(data,'txt');
-        // });
     });
 
     //go to end of search results array (3 at a time). if hit end of search array V
@@ -895,13 +778,12 @@ function searchBack(data){
 
 //* * * * * * ORDER ACTIONS * * * * * * * * //
 
-
 //save amazon item to cart
 function saveToCart(data){
 
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
 
-    recallHistory(data, function(item){
+    history.recallHistory(data, function(item){
 
         data.bucket = 'purchase'; //modifying bucket. a hack for now
 
@@ -912,26 +794,20 @@ function saveToCart(data){
             sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
         else {
-            data.action = 'save';
+            
             //async push items to cart
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
                 if (item.recallHistory && item.recallHistory.amazon){
-                    messageHistory[data.source.indexHist].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
+                    messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
                 }else {
-                    messageHistory[data.source.indexHist].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                    messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
                 }
                 callback();
             }, function done(){
-                //only support "add to cart" message for one item.
-                //static:
-
-                //var sT = data.searchSelect[0];
-                // data.client_res = item.amazon[sT - 1].ItemAttributes[0].Title + ' added to your cart. Type <i>remove item</i> to undo.';
-                // outgoingResponse(data,'txt');
-                purchase.outputCart(data,messageHistory[data.source.indexHist],function(res){
-                    res.action = 'save';
-                    urlShorten(res, function(res2){
-                        res.client_res = res2;
+                purchase.outputCart(data,messageHistory[data.source.id],function(res){
+                    processData.urlShorten(res, function(res2){
+                        res.client_res = [];
+                        res.client_res.push(res2);
                         outgoingResponse(res,'txt');
                     });
                 });
@@ -950,13 +826,6 @@ function viewCart(data){
 //searches Amazon
 //(NEED TO MODIFY TO BE SEARCH PLATFORM AGNOSTIC -> modify search function per platform type, i.e. Kip search vs. Amazon search)
 function searchAmazon(data, type, query, flag){
-
-    //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
-    //browsenode
-    //keywords
-    //maximum price
-    //minimum price
-    //related item page
 
     //* * * * * * * * *  NN CLASSIFICATION NEEDED * * * * * * * * //
     // & & & & & & & & & & & & & & & & & & & & & & & & & & & & & &//
@@ -1066,7 +935,6 @@ function searchAmazon(data, type, query, flag){
                                     else {
                                         console.log('Error: Title is missing from amazon itemattributes object');
                                     }
-
                                 }
                                 else {
                                     console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
@@ -1136,7 +1004,6 @@ function searchAmazon(data, type, query, flag){
                             console.log('amazon err ',err[0].Error[0]);
                             //no results after weaksearch, now do:
                             sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
-
                     }
                 }
             });
@@ -1315,16 +1182,15 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             data.client_res = [];
             data.urlShorten = [];
             data.client_res.push(url); //add image results to response
-            //sendResponse(data);
 
             //send extra item URLs with image responses
             if (data.action == 'initial' || data.action == 'similar'){
-                urlShorten(data,function(res){
+                processData.urlShorten(data,function(res){
                     var count = 0;
                     //put all result URLs into arr
                     async.eachSeries(res, function(i, callback) {
                         data.urlShorten.push(i);//save shortened URLs
-                        getNumEmoji(data,count+1,function(emoji){
+                        processData.getNumEmoji(data,count+1,function(emoji){
                             data.client_res.push(emoji + ' ' + res[count]);
                             count++;                           
                             callback();
@@ -1336,46 +1202,24 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                         //data.urlShorten = res;
                         saveHistory(data); //push new history state after we have stitched URL
                     });
-
                 });
             }
             else {
                 checkOutgoingBanter(data);
-                //sendResponse(data);
                 saveHistory(data); //push new history state after we have stitched URL
             }
-
-            //* * * * * * * * * * *
-            //which cinna response to include in message?
-            //* * * * * * * * * * *
-
-
         });
     }
-    //data.client_res > already added to data for response
-    //text/image msg to user (not image results)
+
     else if (action == 'txt'){  
-
         sendResponse(data);
-                
-        // banter.getCinnaResponse(data,function(res){
-        //     if(res){
-        //         data.client_res = [];
-        //         data.client_res.push(res);
-        //         sendResponse(data);
-        //         //save a new message obj
-        //         history.newMessage(data, function(newMsg){
-        //             history.saveHistory(newMsg,false); //saving outgoing message
-        //         });
-        //     }
-        //     else {
-        //         //save a new message obj
-        //         history.newMessage(data, function(newMsg){
-        //             history.saveHistory(newMsg,false); //saving outgoing message
-        //         });
-        //     }
-        // });
-
+        banter.getCinnaResponse(data,function(res){
+            if(res && res !== 'null'){
+                data.client_res = [];
+                data.client_res.push(res);
+                sendResponse(data);
+            }
+        });
     }
     //no cinna response check
     else if (action == 'final'){
@@ -1435,7 +1279,7 @@ function sendResponse(data){
         console.log('error: data.source.channel or source.origin missing')
     }
 
-    //SAVE OUTGOING MESSAGES HERE
+    //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
@@ -1445,131 +1289,10 @@ function sendResponse(data){
     else {
         console.log('error: cant save outgoing response, missing bucket or action');
     }
-
-}
-
-
-////////////// PROCESS IMAGES ///////////////
-
-//stitch 3 images together into single image
-function stitchResults(data,source,callback){
-
 }
 
 
 ////////////// HISTORY ACTIONS ///////////////
-
-//store chat message in history
-function saveHistory(data,type){
-
-
-
-    //data.ts = new Date(); //adding timestamp
-
-    // if (!messageHistory[data.source.indexHist]){
-    //     console.log('error: user doesnt exist in memory storage');
-    // }
-    // else {
-    //     switch (data.bucket) {
-    //         case 'search':
-    //             messageHistory[data.source.indexHist].search.push(data);
-    //             break;
-    //         case 'banter':
-    //             messageHistory[data.source.indexHist].banter.push(data);
-    //             break;
-    //         case 'purchase':
-    //             messageHistory[data.source.indexHist].purchase.push(data);
-    //         default:
-    //     }
-    //     messageHistory[data.source.indexHist].allBuckets.push(data);
-    //     //console.log('😂 ',messageHistory[data.source.indexHist].allBuckets);
-    // }
-
-    //console.log('😂 ',data);
-
-    
-
-
-    // //save object to mongo
-    // var save_data = {
-    //     msg: data.msg, 
-    //     tokens: [], 
-    //     bucket: data.bucket,
-    //     action: data.action,
-    //     source: {
-    //         origin: data.source.origin,
-    //         channel: data.source.channel,
-    //         org: data.source.org,
-    //         id: data.source.indexHist
-    //     }
-    // };
-    // if (data.tokens){
-    //     save_data.tokens.push(data.tokens[0]);
-    // }
-    // if (data.dataModify){
-    //     if (!data.dataModify.param){
-    //         data.dataModify.param = 'null';
-    //     }
-    //     save_data.dataModify = {
-    //         val:[],
-    //         type: data.dataModify.type,
-    //         param: data.dataModify.param
-    //     };
-    //     if (data.dataModify.val && data.dataModify.val[0]){
-    //         save_data.dataModify.val.push(data.dataModify.val[0]);
-    //     }
-    // }
-    // if (data.client_res){
-    //     save_data.client_res = { };
-    //     save_data.client_res.msg = data.client_res;
-    // }
-
-
-    // //save object to mongo
-    // var save_data = {
-    //     msg: data.msg,
-    //     tokens: [],
-    //     bucket: data.bucket,
-    //     action: data.action,
-    //     source: {
-    //         origin: data.source.origin,
-    //         channel: data.source.channel,
-    //         org: data.source.org,
-    //         id: data.source.indexHist
-    //     }
-    // };
-    // if (data.tokens){
-    //     save_data.tokens.push(data.tokens[0]);
-    // }
-    // if (data.dataModify){
-    //     if (!data.dataModify.param){
-    //         data.dataModify.param = 'null';
-    //     }
-    //     save_data.dataModify = {
-    //         val:[],
-    //         type: data.dataModify.type,
-    //         param: data.dataModify.param
-    //     };
-    //     if (data.dataModify.val && data.dataModify.val[0]){
-    //         save_data.dataModify.val.push(data.dataModify.val[0]);
-    //     }
-    // }
-    // if (data.client_res){
-    //     save_data.client_res = { };
-    //     save_data.client_res.msg = data.client_res;
-    // }
-    // var msgObj = new Message(save_data);
-    // msgObj.save( function(err, data){
-    //     if(err){
-    //         console.log('Mongo err ',err);
-    //     }
-    //     else{
-    //         //console.log('mongo res ',data);
-    //     }
-    // });
-
-
-}
 
 //get user history
 function recallHistory(data,callback,steps){
@@ -1631,86 +1354,4 @@ function addDecimal(str) {
     num = Math.round(num * 100) / 100; //remove extra decimal
     output = "$" + num.toString();
     return output;
-}
-
-//pass in data.amazon , get shorten urls for first 3 things
-function urlShorten(data,callback2){
-
-    //single url for checkouts
-    if (data.bucket == 'purchase' && data.action == 'checkout' || data.bucket == 'purchase' && data.action == 'save'){
-        if (data.client_res){
-           //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
-           var escapeAmazon = querystring.escape(data.client_res);
-            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
-              if(err){
-                console.log('URL SHORTEN ',err);
-              }
-              else {
-                callback2(body);
-              }
-            });
-        }
-        else {
-            console.log('error: client_res missing from urlShorten')
-        }
-
-    }
-    //get all urls for new search
-    else {
-        var loopLame = [0,1,2];//lol
-        var urlArr = [];
-        async.eachSeries(loopLame, function(i, callback) {
-            if (data.amazon[i]){
-               //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
-               var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
-                request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
-                  if(err){
-                    console.log(err);
-                    callback();
-                  }
-                  else {
-                    urlArr.push(body);
-                    callback();
-                  }
-                });
-            }
-            else{
-                callback();
-            }
-        }, function done(){
-            callback2(urlArr);
-        });
-    }
-
-}
-
-function getNumEmoji(data,number,callback){
-    var numEmoji;
-    switch(number){
-        case 1: //emoji #1
-            if (data.source.origin == 'socket.io'){
-                numEmoji = '<div class="number">➊</div>';
-            }
-            else if (data.source.origin == 'slack'){
-                numEmoji = ':one:';
-            }
-            break;
-        case 2: //emoji #2
-            if (data.source.origin == 'socket.io'){
-                numEmoji = '<div class="number">➋</div>';
-            }
-            else if (data.source.origin == 'slack'){
-                numEmoji = ':two:';
-            }
-            break;
-        case 3: //emoji #3
-            if (data.source.origin == 'socket.io'){
-                numEmoji = '<div class="number">➌</div>';
-            }
-            else if (data.source.origin == 'slack'){
-                numEmoji = ':three:';
-            }
-            break;
-    }
-    callback(numEmoji);
 }

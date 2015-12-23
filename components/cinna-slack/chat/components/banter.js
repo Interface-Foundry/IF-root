@@ -512,7 +512,7 @@ var checkForCanned = function(input,callback) {
 
         case 'version':
             flag = 'basic';
-            res = 'I\'m Kip v0.3 beta';
+            res = 'I\'m a penguin running on Kip Cinna v0.4 Pepper BETA';
             break;
 
         case '/':
