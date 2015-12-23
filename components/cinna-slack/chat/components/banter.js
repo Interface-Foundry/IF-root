@@ -15,6 +15,8 @@ var checkForCanned = function(input,callback) {
             flag = 'basic';
             res = input + ', how are you? Can I help you find something?';
             break;
+        case textSimilar(input,'what you up to') > 60:
+        case textSimilar(input,'whats up') > 60:
         case textSimilar(input,'sup') > 60:
             flag = 'basic';
             res = 'Busy at work, how about you?';
@@ -114,6 +116,20 @@ var checkForCanned = function(input,callback) {
             res = 'Thanks! You\'re not bad yourself ;) How about giving yourself a treat with new headphones?';
             break;
 
+        case textSimilar(input,':confused:') > 90:
+        case textSimilar(input,':slightly_frowning_face:') > 90:
+        case textSimilar(input,':disappointed:') > 90:
+        case textSimilar(input,':worried:') > 90:
+        case textSimilar(input,':white_frowning_face:') > 90:
+        case textSimilar(input,':persevere:') > 90:
+        case textSimilar(input,':confounded:') > 90:
+            flag = 'basic';
+            var arr = [':upside_down_face:','Are you ok?','How are you?'];
+            console.log(Math.floor(Math.random()*arr.length));
+            res = arr[Math.floor(Math.random()*arr.length)];
+            break;
+
+
         case textSimilar(input,'hehe') > 90:
         case textSimilar(input,'haha') > 90:
         case textSimilar(input,'lol') > 90:
@@ -122,6 +138,11 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,':)') > 90:
         case textSimilar(input,':D') > 90:
         case textSimilar(input,'(:') > 90:
+        case textSimilar(input,':grinning:') > 90:
+        case textSimilar(input,':simple_smile:') > 90:
+        case textSimilar(input,':smile:') > 90:
+        case textSimilar(input,':smiley:') > 90:
+        case textSimilar(input,':100:') > 90:
             flag = 'basic';
             var arr = ['😄','😅','😂','😀','😌','😆','😀'];
             res = arr[Math.floor(Math.random()*arr.length)];
@@ -181,7 +202,7 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'aight') > 80:
         case textSimilar(input,'alright') > 80:
             flag = 'basic';
-            res = '😎';
+            res = 'cool';
             break;
 
         case textSimilar(input,'i\'m sad') > 70:
@@ -398,13 +419,13 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'kip') > 90:
             flag = 'basic'; //do this action      
             res = 'That\'s me :)'; 
-            break;      
-
+            break;             
     
         case textSimilar(input,'lame') > 60:
+        case textSimilar(input,'ugh') > 90:
         case textSimilar(input,'those suck') > 60:
             flag = 'basic';
-            res = ' ';
+            res = 'Sorry, I\'ll try to help better next time';
             break;
 
         // - 'version' -- Kip 0.0.3

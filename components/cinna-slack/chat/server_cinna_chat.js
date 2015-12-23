@@ -1,10 +1,11 @@
+//Cinna 0.4 (Pepper)
+
 var http = require('http');
 var fs = require('fs');
 var Bot = require('slackbots'); //load slack api
 var request = require('request');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
-stitch = require('../image_processing/api.js')
 var nlp = require('../nlp/api');
 var querystring = require('querystring');
 
@@ -28,6 +29,7 @@ var banter = require("./components/banter.js");
 var purchase = require("./components/purchase.js");
 var history = require("./components/history.js");
 var search = require("./components/search.js");
+var picstitch = require("./components/picstitch.js");
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -58,14 +60,27 @@ initSlackUsers();
 
 //get stored slack users from mongo
 function initSlackUsers(){
-    Slackbots.find().exec(function(err, users) {
-        if(err){
-            console.log('saved slack bot retrieval error');
-        }
-        else {
-            loadSlackUsers(users);
-        }
-    });
+    console.log(app.get('env'));
+    //load kip-pepper for testing
+    if ( app.get('env') === 'development' ) {
+        var testUser = [{
+            team_id:'T0H72FMNK',
+            bot: {
+                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+            }
+        }];
+        loadSlackUsers(testUser);
+    }else {
+        console.log('retrieving slackbots from mongo');
+        Slackbots.find().exec(function(err, users) {
+            if(err){
+                console.log('saved slack bot retrieval error');
+            }
+            else {
+                loadSlackUsers(users);
+            }
+        });        
+    }
 }
 
 //incoming new slack user
@@ -101,18 +116,19 @@ app.get('/newslack', function(req, res) {
 
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
+    console.log('loading '+users.length+' Slack users');
 
     async.eachSeries(users, function(user, callback) {
-
         var settings = {
             token: user.bot.bot_access_token,
             name: 'Kip'
         };
+
         //create new bot from user settings
         slackUsers[user.team_id] = new Bot(settings);
 
         //init new bot
-        slackUsers[user.team_id].on('start', function() {
+        slackUsers[user.team_id].on('start', function(biz) {
 
             // //dont spam all slack people on node reboot
             // if (!user.meta.initialized){
@@ -130,20 +146,45 @@ function loadSlackUsers(users){
             //     //////////////                
             // }
 
+            //USE SLACKBOTS sendToUser method
+            //https://slack.com/api/users.list <<<< method to get all users, cycle through, send welcome
+
             slackUsers[user.team_id].on('message', function(data) { //on bot message
                 // all incoming events https://api.slack.com/rtm
-                // checks if type is a message & not the bot talking to itself (data.username !== settings.name)
-                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true ){
-                    var newSl = {
-                        source: {
-                            'origin':'slack',
-                            'channel':data.channel,
-                            'org':data.team,
-                            'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
-                        },
-                        'msg':data.text
+                if (data.type == 'presence_change'){
+                    slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
+                }
+                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){
+                    //public channel
+                    if (data.channel && data.channel.charAt(0) == 'C'){
+                        //if contains bot user id (U0H6YHBNZ)
+                        if (data.text && data.text.indexOf(slackUsers[user.team_id].botId) > -1){
+                            data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+                            if (data.text.charAt(0) == ':'){
+                                data.text = data.text.substr(1); //remove : from beginning of string
+                            }
+                            data.text = data.text.trim(); //remove extra spaces on edges of string
+                            incomingSlack(data);
+                        }
                     }
-                    preProcess(newSl);
+                    //direct message
+                    else if (data.channel && data.channel.charAt(0) == 'D'){
+                        incomingSlack(data);
+                    }    
+                }
+                function incomingSlack(data){
+                    if (data.type == 'message' && data.username !== settings.name && data.hidden !== true ){
+                        var newSl = {
+                            source: {
+                                'origin':'slack',
+                                'channel':data.channel,
+                                'org':data.team,
+                                'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                            },
+                            'msg':data.text
+                        }
+                        preProcess(newSl);
+                    }                    
                 }
             });
         });
@@ -414,7 +455,6 @@ function searchSimilar(data){
 
     //RECALL LAST ITEM IN SEARCH HISTORY
     history.recallHistory(data, function(item){
-        console.log('SIMILAR ',item);
         data.recallHistory = item; //added recalled history obj to data obj
         searchAmazon(data,'similar');
     });
@@ -512,7 +552,7 @@ function searchModify(data, flag){
     //console.log('modified ',data);
 
     //RECALL LAST ITEM IN SEARCH HISTORY
-    recallHistory(data, function(item){
+    history.recallHistory(data, function(item){
 
         if (item){//history item found
 
@@ -678,10 +718,10 @@ function searchModify(data, flag){
 
 function searchFocus(data){
 
-    recallHistory(data, function(item){
+    history.recallHistory(data, function(item){
         data.recallHistory = item; //added recalled history obj to data obj
 
-        if (data.searchSelect && data.searchSelect.length == 1){
+        if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
             if(data.recallHistory && data.recallHistory.amazon){
 
                 var searchSelect = data.searchSelect[0] - 1;
@@ -691,19 +731,23 @@ function searchFocus(data){
                     var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
                     var cString = ''; //construct text reply
 
+                    data.client_res = [];
+
                     //check for large image to send back
                     if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
-                        data.client_res = data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0];
-                        outgoingResponse(data,'final');
+                        data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
+                        //outgoingResponse(data,'final');
                     }
 
                     //send product title + price
-                    data.client_res = attribs.Title[0];
+                    var topStr = attribs.Title[0];
                     //add price to this line, if found
                     if (attribs.ListPrice){
-                        data.client_res =  addDecimal(attribs.ListPrice[0].Amount[0]) + " – " + data.client_res;
+                        topStr = attribs.ListPrice[0].FormattedPrice[0] + " – " + topStr;
                     }
-                    outgoingResponse(data,'final');
+                    data.client_res.push(topStr);
+
+                    //outgoingResponse(data,'final');
                     // //stall output for slack timing issue
                     // setTimeout(function(){
                     //     outgoingResponse(data,'final');
@@ -737,21 +781,22 @@ function searchFocus(data){
 
                     //done collecting details string, now send
                     if (cString){
-                        data.client_res = cString;
-                        outgoingResponse(data,'final');
+                        data.client_res.push(cString);
+                        //outgoingResponse(data,'final');
                     }
 
                     ///// end product details string /////
 
-                    if (data.recallHistory.amazon[searchSelect].reviews){
-                        data.client_res = '⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews';
-                        outgoingResponse(data,'final');
+                    if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
+                        data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
+                       // outgoingResponse(data,'final');
                     }
 
                     getNumEmoji(data,searchSelect+1,function(res){
-                        data.client_res = res + ' ' + data.recallHistory.urlShorten[searchSelect];
-                        outgoingResponse(data,'final');
+                        data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
                     })
+                    
+                    outgoingResponse(data,'final');
 
                 }
                 else {
@@ -777,9 +822,23 @@ function searchFocus(data){
 
 function searchMore(data){
 
-    recallHistory(data, function(res){
+    history.recallHistory(data, function(res){
 
-        data = res; //bad
+        // data = res; //bad
+        // delete data._id; //prevent mongo duplicates
+        // delete data.__v; //prevent mongo duplicates
+        // delete data.ts; //prevent mongo duplicates
+        // data.client_res = [];
+        // data.urlShorten = [];   
+        // console.log('incoming ',data);
+
+        data = {};
+        data.amazon = res.amazon;
+        data.source = res.source;
+        data.bucket = res.bucket;
+        data.action = res.action;
+        data.msg = res.msg;
+        data.tokens = res.tokens;
 
         if (data.amazon.length > 3){ //only trim down in thirds for now
             data.amazon.splice(0, 3);
@@ -795,6 +854,7 @@ function searchMore(data){
                         rating: rating,
                         reviewCount: reviewCount
                     }
+                    //SHORTEN URLS HERE, UPDATE URL
                     callback();
                 });
             }
@@ -1249,10 +1309,11 @@ function sendTxtResponse(data,msg){
 function outgoingResponse(data,action,source){ //what we're replying to user with
     //stitch images before send to user
     if (action == 'stitch'){
-        stitchResults(data,source,function(url){
+        picstitch.stitchResults(data,source,function(url){
 
             //sending out stitched image response
             data.client_res = [];
+            data.urlShorten = [];
             data.client_res.push(url); //add image results to response
             //sendResponse(data);
 
@@ -1262,6 +1323,7 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                     var count = 0;
                     //put all result URLs into arr
                     async.eachSeries(res, function(i, callback) {
+                        data.urlShorten.push(i);//save shortened URLs
                         getNumEmoji(data,count+1,function(emoji){
                             data.client_res.push(emoji + ' ' + res[count]);
                             count++;                           
@@ -1339,28 +1401,41 @@ function checkOutgoingBanter(data){
 function sendResponse(data){
 
     if (data.source.channel && data.source.origin == 'socket.io'){
-
-        //loop through responses in order
-        for (var i = 0; i < data.client_res.length; i++) { 
-            io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+        //check if socket user exists
+        if (io.sockets.connected[data.source.channel]){
+            //loop through responses in order
+            for (var i = 0; i < data.client_res.length; i++) { 
+                io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+            }            
+        }else {
+            console.log('error: socket io channel missing');
         }
+
     }
     else if (data.source.channel && data.source.origin == 'slack'){
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
-        }
+        }   
+        //check if slackuser exists
+        if (slackUsers[data.source.org]){
+            //loop through responses in order
+            async.eachSeries(data.client_res, function(message, callback) {
+                slackUsers[data.source.org].postMessage(data.source.channel, message, params).then(function(res) {
+                    callback();
+                });
+            }, function done(){
+            });
 
-        //loop through responses in order
-        for (var i = 0; i < data.client_res.length; i++) { 
-            slackUsers[data.source.org].postMessage(data.source.channel, data.client_res[i], params);
+        }else {
+            console.log('error: slackUsers channel missing');
         }
     }
     else {
         console.log('error: data.source.channel or source.origin missing')
     }
 
-//    SAVE OUTGOING MESSAGES HERE
+    //SAVE OUTGOING MESSAGES HERE
     if (data.bucket && data.action){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
@@ -1378,72 +1453,7 @@ function sendResponse(data){
 
 //stitch 3 images together into single image
 function stitchResults(data,source,callback){
-    //rules to get 3 image urls
-    switch (source) {
-        case 'amazon':
-            //adding images for stiching
-            var toStitch = [];
-            var loopLame = [0,1,2];//lol
 
-            async.eachSeries(loopLame, function(i, callback) {
-                if (data.amazon[i]){
-
-                    var price;
-
-                    if (!data.amazon[i].ItemAttributes[0].ListPrice){
-                        price = ''; //price missing, show blank
-                    }
-                    else{
-                        if (data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
-                            price = '';
-                        }
-                        else {
-                            // add price
-                            price = data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0];
-                            //convert to $0.00
-                            price = addDecimal(price);
-                        }
-                    }
-
-                    var primeAvail = 0;
-                    if (data.amazon[i].Offers && data.amazon[i].Offers[0].Offer && data.amazon[i].Offers[0].Offer[0].OfferListing && data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime){
-                        primeAvail = data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0];
-                    }
-
-                    var imageURL;
-                    if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
-                        imageURL = data.amazon[i].MediumImage[0].URL[0];
-                    }
-                    else {
-                        imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
-                    }
-
-                    toStitch.push({
-                        url: imageURL,
-                        price: price,
-                        prime: primeAvail, //is prime available?
-                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE
-                        reviews: data.amazon[i].reviews
-                    });
-                }
-                else {
-                    console.log('IMAGE MISSING!',data.amazon[i]);
-                }
-                callback();
-            }, function done(){
-                fireStitch();
-            });
-            break;
-    }
-    function fireStitch(){
-        //call to stitch service
-        stitch(toStitch, function(e, stitched_url){
-            if(e){
-                console.log('stitch err ',e);
-            }
-            callback(stitched_url);
-        })
-    }
 }
 
 
@@ -1613,14 +1623,6 @@ function recallHistory(data,callback,steps){
 function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
-
-//trim a string to char #
-function truncate(string){
-   if (string.length > 80)
-      return string.substring(0,80)+'...';
-   else
-      return string;
-};
 
 function addDecimal(str) {
     var output;

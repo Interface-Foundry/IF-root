@@ -32,7 +32,8 @@ var messageSchema = mongoose.Schema({
     },
     parent:{
         id: String
-    }
+    },
+    urlShorten:[String]
 });
 
 module.exports = mongoose.model('Message', messageSchema);

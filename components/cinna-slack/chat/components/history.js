@@ -13,8 +13,6 @@ process.on('uncaughtException', function (err) {
 
 var saveHistory = function(data,incoming) { //incoming == 1 or 0
 
-    //console.log('incoming ',incoming);
-
     // / / / / / / / /
     //CHECK FOR "recallhistory" property, remove
     // / / / / / / / / 
@@ -29,7 +27,6 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
         }else {
             console.log('warning: messaged saved without incoming val');
         }
-        console.log('TO SAVE ',data);
 
         //new message mongo obj
         newMessage(data, function(msg){
@@ -49,8 +46,8 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                         }
                         else{
                             //console.log('INCOMING ',incoming);
-                            console.log('STATUS ',incoming);
-                            console.log('mongo res ',data);
+                            //console.log('STATUS ',incoming);
+                            //console.log('mongo res ',data);
                             //callback('d'); //eventually send back _id for parent id??        
                         }
                     });   
@@ -64,8 +61,8 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                     }
                     else{
                         //console.log('INCOMING ',incoming);
-                        console.log('STATUS ',incoming);
-                        console.log('mongo res ',data);
+                        //console.log('STATUS ',incoming);
+                        //console.log('mongo res ',data);
                         //callback('d'); //eventually send back _id for parent id??        
                     }
                 });               
