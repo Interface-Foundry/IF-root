@@ -323,7 +323,7 @@ function preProcess(data){
         else {
             routeNLP(data);
         }
-    });
+    },data.source.origin);
 
   //  });
 
@@ -1200,13 +1200,13 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                        // sendResponse(data);
                         checkOutgoingBanter(data);
                         //data.urlShorten = res;
-                        saveHistory(data); //push new history state after we have stitched URL
+                        //saveHistory(data); //push new history state after we have stitched URL
                     });
                 });
             }
             else {
                 checkOutgoingBanter(data);
-                saveHistory(data); //push new history state after we have stitched URL
+                //saveHistory(data); //push new history state after we have stitched URL
             }
         });
     }
@@ -1263,6 +1263,8 @@ function sendResponse(data){
         }   
         //check if slackuser exists
         if (slackUsers[data.source.org]){
+
+
             //loop through responses in order
             async.eachSeries(data.client_res, function(message, callback) {
                 slackUsers[data.source.org].postMessage(data.source.channel, message, params).then(function(res) {
@@ -1290,7 +1292,6 @@ function sendResponse(data){
         console.log('error: cant save outgoing response, missing bucket or action');
     }
 }
-
 
 ////////////// HISTORY ACTIONS ///////////////
 

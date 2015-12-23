@@ -1,5 +1,5 @@
 
-var checkForCanned = function(input,callback) {
+var checkForCanned = function(input,callback,origin) {
    
 	var res;
 	var flag;
@@ -336,46 +336,35 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'huh') > 90:
         case textSimilar(input,'eh') > 90:
         case textSimilar(input,'wah') > 90:
+        case textSimilar(input,'i dont understand') > 70:
+        case textSimilar(input,'i dont get it') > 70:
+        case textSimilar(input,'this doesnt make sense') > 60:
         case textSimilar(input,'wah?') > 90:
         case textSimilar(input,'you got me there') > 70:
             flag = 'basic';
-            res = "http://kipthis.com/cinna/help.png";
-            // res = 'I\'m Kip, your virtual personal shopper. Use "(item)" or  "find (item)" and I\'ll do it for you.<br>'+
-            //         'Refine your results with:<br>'+
-            //         'more: shows the next 3 options<br>'+
-            //         'more like x: finds items similar to x<br>'+
-            //         'x but cheaper: finds x or similar to x in a cheaper price<br>'+
-            //         'x less than $: gives you x or similar to x in specific price range<br>'+
-            //         'info x: gives you product information about x<br>'+
-            //         'x in size: gives you x or similar to x in specific size<br>'+
-            //         'x in color: gives you x or similar to x in specific color<br>'+
-            //         'x with detail: gives you x or similar to x with specific detail<br><br>'+
+            if (origin == 'slack'){
+                res = 'I\'m Kip, your personal shopper.\n'+
 
-            //         'save: saves your current search items<br>'+
-            //         'view: view everything currently in cart<br>'+
-            //         'remove: removes item from cart<br>'+
-            //         'report: send feedback to us<br><br>'+
+                'Chat me the item you\'re looking for, and I\'ll offer you 3 options:  :one:  :two:  :three:\n'+
+                'Use the option numbers to refine your item results!\n'+
 
-            //         'Try it now! Maybe you\'ll like something to read? Use "books" to start.<br>';
+                'more: shows the next 3 options\n'+
+                'more like option#: finds similar items to option#\n'+
 
+                'option#: gives you product information about that item\n'+
+                'option# but cheaper: finds option x or similar in a cheaper price\n'+
+                'option# in size: gives you option x or similar in specific size\n'+
+                'option# in color: gives you option x or similar in specific color\n'+
+                'option# with detail: gives you option x or similar with specific detail\n'+
 
-            //         'I\'m Kip, your personal shopper. Chat me "(item)" or  "find (item)" and I\'ll do it for you!<br>'+
+                'save option# : saves item to cart\n'+
+                'help: view command list\n'+
 
-            //         'Narrow your results by using the option numbers 1 2 3:'+
-
-            //         'more: shows the next 3 options'+
-            //         'more like x: finds items similar to option x'+
-
-            //         'x: gives you product information about option x'+
-            //         'x but cheaper: finds option x or similar in a cheaper price'+
-            //         'x in size: gives you option x or similar in specific size'+
-            //         'x in color: gives you option x or similar in specific color'+
-            //         'x with detail: gives you option x or similar with specific detail'+
-
-            //         'save x: saves item to cart'+
-            //         'help: view command list'+
-
-            //         'Try it now! Maybe you\'ll like something to read? :books emoji: Type "books" to start.';
+                'Try it now! Maybe you\'ll like something to read? :books emoji: Type "books" to start.\n';
+            }
+            else if (origin == 'socket.io'){
+                res = 'help socket';
+            }
 
 
             break;
@@ -676,8 +665,9 @@ var getCinnaResponse = function(data,callback){
 //mod of: http://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
 function textSimilar(a,b) {
     if (a && b){
-        a = a.toLowerCase();
-        b = b.toLowerCase();
+        a = a.toLowerCase().trim();
+        b = b.toLowerCase().trim();
+
         var lengthA = a.length;
         var lengthB = b.length;
         var equivalency = 0;
