@@ -25,10 +25,13 @@ export default class Root extends Component {
             <Route path="/chat" component={ChatContainer} />
           </Router>
         </Provider>
-        {processENV === 'development' && <DebugPanel top right bottom >
-          <DevTools store={store} monitor={LogMonitor} />
-        </DebugPanel>}
+       
       </div>
     );
   }
 }
+
+
+ // {processENV === 'development' && <DebugPanel top right bottom >
+ //          <DevTools store={store} monitor={LogMonitor} />
+ //        </DebugPanel>}

@@ -30,6 +30,18 @@ body {
   margin-right: 20px;
 }
 
+.product-box {
+  box-sizing: border-box;
+      background: #fff;
+      border: 1px solid #999;
+      border-radius: 3px;
+      width: 100px;
+      height: 100px;
+      margin: 10px;
+      padding: 10px;
+      float: left;
+}
+
 .nav {
   margin: 0;
   color: white;
