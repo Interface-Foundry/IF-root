@@ -17,7 +17,8 @@ import update from 'react/lib/update';
 import Card from './Card';
 
 const style = {
-  width: 400
+  width: 400,
+  marginBottom: '2em'
 };
 const socket = io();
 
@@ -141,28 +142,16 @@ export default class ControlPanel extends Component {
          <div className="flexbox-container">
           <div id="second-column">
             <section className='rightnav'>
-              <h1>Control</h1> 
-            <div>
-              <div>
-                {Object.keys(this.state).map(field =>
-                <label key={field}>
-                  <input type="checkbox"
-                         checked={this.state[field]}
-                         onChange={event => this.setState({[field]: event.target.checked})}/> {labels[field]}
-                </label>
-                )}
-            </div>
+          <div>   
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
               fields={fields} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
-            <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
-                Send Command
-              </Button> 
+         
             </div>   
           </section>
           </div>
           <div id="third-column" style= {{ padding: 0}}>
-             <h1>Results Preview:</h1>
+          
 
               <div style={style}>
                 {items.map((item, i) => {
@@ -174,13 +163,27 @@ export default class ControlPanel extends Component {
                           moveCard={this.moveCard} />
                   );
                 })}
+             
               </div>
-
+                 <Button bsSize = "medium" style={{ textAlign: 'center' }}bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+                  Send Command
+                </Button> 
           </div>
          </div>
       );
   }
 }
+
+
+ // <div>
+ //                {Object.keys(this.state).map(field =>
+ //                <label key={field}>
+ //                  <input type="checkbox"
+ //                         checked={this.state[field]}
+ //                         onChange={event => this.setState({[field]: event.target.checked})}/> {labels[field]}
+ //                </label>
+ //                )}
+ //            </div>
 
 // <div className="box" style={{display: "flex", "flexFlow": "column wrap", height: '500px', width: '500px', position: 'relative'}}>
 //    <Draggable  axis="y" onDrag={::this.handleDrag} ref="product-0" grid={[125, 125]} bounds="parent" {...drags}>

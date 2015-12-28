@@ -1,6 +1,5 @@
 import React, {Component, PropTypes} from 'react';
 import {reduxForm} from 'redux-form';
-import RadioApp from './Radio';
 import { Button } from 'react-bootstrap';
 export const labels = {
   msg: "Message",
@@ -41,12 +40,13 @@ class DynamicForm extends Component {
       // console.log('messages: ', self.props.messages, ' channel: ',channel)
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const firstMsg = filtered[0]
-      console.log('first: ', firstMsg)
+      // console.log('first: ', firstMsg)
       self.state = {
        filteredMessages: filtered,
        msg: firstMsg.msg,
        bucket: firstMsg.bucket,
        action: firstMsg.action,
+       channel: channels.next.name,
        _id: firstMsg._id
       };
       //reset form
@@ -70,8 +70,11 @@ class DynamicForm extends Component {
   renderJSON(filtered) {
       const {activeMessage, actions, messages, activeChannel} = this.props    
       return (
-        <div style={{fontSize: '0.2em'}}>
+        <div style={{fontSize: '0.2em', marginTop: '5em'}}>
         <pre>
+        <div>
+          <label>channel: </label>{ this.state.channel } 
+          </div>
           <div>
           <label>msg: </label>{ this.state.msg } 
           </div>
@@ -108,35 +111,25 @@ class DynamicForm extends Component {
            <div className="jsonBox">
             {self.renderJSON(filtered)}
            </div>
-            {Object.keys(fields).map(name => {
-              const field = fields[name];
-              if (name === 'bucket' || name === 'action') return
-              return (<div key={name}>
-                <label>{labels[name]}</label>
-                <div>
-                  <input type="text" placeholder={labels[name]} {...field}/>
-                </div>
-              </div>);
-            })}
-            <div className="flexbox-container">
-              <h4>Bucket: <br/></h4>
-                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.setField('initial')} >
+            
+            <div className="flexbox-container" style={{ marginTop: '3em' }}>
+
+                <Button bsSize = "large" style={{ margin: '0.3em' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
                   Initial
                 </Button>
-                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.setField('purchase')} >
+                <Button bsSize = "large" style={{ margin: '0.3em' }} bsStyle = "primary" onClick = { () => this.setField('purchase')} >
                   Purchase
                 </Button>
-                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.setField('banter')} >
+                <Button bsSize = "large" style={{ margin: '0.3em' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
                   Banter
                 </Button>
             </div>
           </form>
 
               <div id="search-box" style={showSearchBox}>
-                 <label>Search</label>
                  <input type="text" id="seach-input" {...fields['action']} onChange={this.handleChange} />
-                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.searchAmazon(activeMessage)} >
-                  Search
+                <Button bsSize = "medium" style={{ margin: '1em' }} bsStyle = "primary" onClick = { () => this.searchAmazon(activeMessage)} >
+                  Search Amazon
                 </Button>
               </div>
 
@@ -145,7 +138,16 @@ class DynamicForm extends Component {
   }
 }
 
-
+// {Object.keys(fields).map(name => {
+//               const field = fields[name];
+//               if (name === 'bucket' || name === 'action' || name === '') return
+//               return (<div key={name}>
+//                 <label>{labels[name]}</label>
+//                 <div>
+//                   <input type="text" placeholder={labels[name]} {...field}/>
+//                 </div>
+//               </div>);
+//             })}
 
 
 export default reduxForm({form: 'dynamic'})(DynamicForm);

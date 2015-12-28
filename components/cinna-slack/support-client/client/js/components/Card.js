@@ -6,9 +6,11 @@ import { DragSource, DropTarget } from 'react-dnd';
 const style = {
   border: '1px dashed gray',
   padding: '0.5rem 1rem',
-  marginBottom: '.5rem',
+  marginBottom: '1rem',
   backgroundColor: 'white',
-  cursor: 'move'
+  cursor: 'move',
+  width: '7em',
+  height: '7em'
 };
 
 const cardSource = {
