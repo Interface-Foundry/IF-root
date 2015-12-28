@@ -44,6 +44,7 @@ export default function messages(state = initialState, action) {
         case RECEIVE_MESSAGE:
             return {...state,
                data: [...state.data, {
+                    _id: action.message._id,
                     id: (state.data.length === 0) ? 0 : parseInt(state.data[state.data.length - 1].id + 1),
                     incoming: true,
                     msg: action.message.msg,
@@ -89,7 +90,7 @@ export default function messages(state = initialState, action) {
                     data: [...state.data]
             };
          case SET_MESSAGE_PROPERTY:
-            var index = indexOf([...state.data], find([...state.data], {_id: action.identifier._id}));
+            var index = indexOf([...state.data], find([...state.data], {source: { channel : action.identifier.channel} }));
             console.log('In messages: original array->', [...state.data])
             // var copy = Object.assign({}, [...state.data][index]);
             action.identifier.properties.forEach(function(propertyObj) {

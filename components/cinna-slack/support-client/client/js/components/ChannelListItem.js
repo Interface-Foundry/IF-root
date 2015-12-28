@@ -7,6 +7,7 @@ export default class ChannelListItem extends Component {
 
   static propTypes = {
     channel: PropTypes.object.isRequired,
+    messages: PropTypes.array.isRequired,
     onClick: PropTypes.func.isRequired,
     actions: PropTypes.object.isRequired,
     channels: PropTypes.array.isRequired,
@@ -14,8 +15,26 @@ export default class ChannelListItem extends Component {
   }
 
   closeChannel() {
-    const { channel, channels,actions, onClick } = this.props;
+    const { channel, channels,actions, messages, onClick } = this.props;
+    const filtered = messages.filter(message => message.source).filter(message => message.source.channel === channel.name)
+    const firstMsg = filtered[0]
     UserAPIUtils.resolveChannel(channel)
+    const resolveMessageInState = function(msg) {
+        return new Promise(function(resolve, reject) {
+              var identifier = {_id: msg._id, properties: []} 
+              identifier.properties.push({ resolved : true})
+                actions.setMessageProperty(identifier)
+                msg.resolved = true
+            return resolve(msg);
+        });
+     };
+    filtered.reduce(function(sequence, msg) {
+      return sequence.then(function() {
+        return resolveMessageInState(msg);
+      }).then(function(chapter) {
+        UserAPIUtils.resolveMessage(msg)
+      });
+    }, Promise.resolve());
     actions.removeChannel(channel)
     onClick(channels[0])
   }

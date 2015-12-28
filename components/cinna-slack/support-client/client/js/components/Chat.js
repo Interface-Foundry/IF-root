@@ -31,13 +31,13 @@ export default class Chat extends Component {
     const { actions, messages } = this.props;
      socket.on('change state bc', function (state) {
       // console.log('change state event received', state)
-       var identifier = {_id: state._id, properties: []}
+       var identifier = {channel: state.channel, properties: []}
       for (var key in state) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action') && state[key] !== '' ) {
+        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved') && state[key] !== '' ) {
           identifier.properties.push({ [key] : state[key]})
         }
       }  
-      // console.log('identifier: ', identifier)
+      console.log('identifier: ', identifier)
       //if no fields were updated on form take no action
       if (identifier.properties.length === 0 ) {
         return
@@ -72,6 +72,7 @@ export default class Chat extends Component {
     actions.changeChannel(channel);
     this.changeActiveMessage(channel)
   }
+
    changeActiveMessage(channel) {
     const { actions, messages, activeChannel} = this.props;
     const activeMessages = messages.filter(message => message.source.channel === channel.name);
@@ -84,9 +85,6 @@ export default class Chat extends Component {
   componentDidUpdate() {
     const messageList = this.refs.messageList;
     messageList.scrollTop = messageList.scrollHeight;
-  }
-  storeTemp(msg) {
-    this.setState({identifier: msg});
   }
   handleSave(newMessage) {
     const { actions } = this.props;

@@ -20,6 +20,7 @@ class DynamicForm extends Component {
       super(props, context)
       this.state = {
        filteredMessages: null,
+       channel: '',
        msg: '',
        bucket: '',
        action: '',
@@ -33,13 +34,14 @@ class DynamicForm extends Component {
    var self = this
    socket.on('change channel bc', function(channels) {
       if (self.props.dirty) {
+        self.state.channel = channels.prev.name
         socket.emit('change state',self.state);
       }
       //reset local state
       // console.log('messages: ', self.props.messages, ' channel: ',channel)
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const firstMsg = filtered[0]
-      // console.log('first: ',firstMsg)
+      console.log('first: ', firstMsg)
       self.state = {
        filteredMessages: filtered,
        msg: firstMsg.msg,
@@ -89,6 +91,12 @@ class DynamicForm extends Component {
     this.setState({searchParam: val})
   }
 
+  setField(choice) {
+    const { fields } = this.props;
+    this.setState({ bucket : choice})
+    // fields['bucket'].value = choice;
+  }
+
   render() {
     const { fields, saveState,messages, activeChannel} = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
@@ -111,16 +119,17 @@ class DynamicForm extends Component {
               </div>);
             })}
             <div className="flexbox-container">
-              <label>Bucket:</label>
-                    <input type="radio" id="bucket-initial" {...fields['bucket']} value="initial" checked={fields['bucket'].value === 'initial'}/>
-                    <label>INITIAL </label>
-                    <input type="radio" id="bucket-purchase" {...fields['bucket']} value="purchase" checked={fields['bucket'].value === 'purchase'}/>
-                    <label> PURCHASE </label>
-                    <input type="radio" id="bucket-banter" {...fields['bucket']} value="banter" checked={fields['bucket'].value === 'banter'}/>
-                    <label> BANTER </label>
+              <h4>Bucket: <br/></h4>
+                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.setField('initial')} >
+                  Initial
+                </Button>
+                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.setField('purchase')} >
+                  Purchase
+                </Button>
+                <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.setField('banter')} >
+                  Banter
+                </Button>
             </div>
-
-           
           </form>
 
               <div id="search-box" style={showSearchBox}>

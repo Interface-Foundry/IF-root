@@ -82,6 +82,20 @@ export function createMessage(message) {
     });
   });
 }
+export function resolveMessage(message) {
+  return new Promise((resolve, reject) => {
+    superagent
+    .post('/api/resolve')
+    .send(message)
+    .end((err, res) => {
+      if (err) {
+        reject(res.body || err);
+      } else {
+        resolve(res.body);
+      }
+    });
+  });
+}
 export function createChannel(channel) {
   return new Promise((resolve, reject) => {
     superagent
