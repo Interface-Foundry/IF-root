@@ -77,9 +77,15 @@ export default class Chat extends Component {
     const { actions, messages, activeChannel} = this.props;
     const activeMessages = messages.filter(message => message.source.channel === channel.name);
     const firstMsg = activeMessages[0]
+    console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
     // console.log('Chat.js:108-->',firstMsg)
-    actions.changeMessage(firstMsg);
+    if (firstMsg) {
+      actions.changeMessage(firstMsg);
+    } else {
+      console.log('There is no previous channel: ',channel, activeMessages)
+    }
+    
   }
 
   componentDidUpdate() {

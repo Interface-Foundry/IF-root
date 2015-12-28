@@ -15,13 +15,13 @@ export default class ChannelListItem extends Component {
   }
 
   closeChannel() {
-    const { channel, channels,actions, messages, onClick } = this.props;
+    const { chanIndex, channel, channels,actions, messages, onClick } = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === channel.name)
     const firstMsg = filtered[0]
     UserAPIUtils.resolveChannel(channel)
     const resolveMessageInState = function(msg) {
         return new Promise(function(resolve, reject) {
-              var identifier = {_id: msg._id, properties: []} 
+              var identifier = {channel: channel.name, properties: []} 
               identifier.properties.push({ resolved : true})
                 actions.setMessageProperty(identifier)
                 msg.resolved = true
@@ -36,6 +36,9 @@ export default class ChannelListItem extends Component {
       });
     }, Promise.resolve());
     actions.removeChannel(channel)
+    // console.log('ChannelListItem.js 39: channels: ',channels)
+    // const index = (channels[chanIndex-1]) ? (chanIndex-1) : channels.length-1
+    // console.log('ChannelListItem.js 40: switching to channel: ',channels[index])
     onClick(channels[0])
   }
 

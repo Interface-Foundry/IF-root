@@ -24,7 +24,8 @@ class DynamicForm extends Component {
        bucket: '',
        action: '',
        bucketOptions: { initial: false, purchase: false, banter: false },
-       searchParam: ''
+       searchParam: '',
+       dirty: false
       };
     }
 
@@ -32,8 +33,9 @@ class DynamicForm extends Component {
    const {activeMessage, actions, messages, activeChannel, resetForm, dirty} = this.props; 
    var self = this
    socket.on('change channel bc', function(channels) {
-      if (self.props.dirty) {
+      if (self.state.dirty) {
         self.state.channel = channels.prev.name
+        console.log('saving state: ',self.state)
         socket.emit('change state',self.state);
       }
       //reset local state
@@ -47,7 +49,8 @@ class DynamicForm extends Component {
        bucket: firstMsg.bucket,
        action: firstMsg.action,
        channel: channels.next.name,
-       _id: firstMsg._id
+       _id: firstMsg._id,
+       dirty: false
       };
       //reset form
       resetForm()
@@ -95,8 +98,8 @@ class DynamicForm extends Component {
   }
 
   setField(choice) {
-    const { fields } = this.props;
-    this.setState({ bucket : choice})
+    const { fields, dirty } = this.props;
+    this.setState({ bucket : choice, dirty: true})
     // fields['bucket'].value = choice;
   }
 
