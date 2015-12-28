@@ -11,9 +11,17 @@ import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 import DynamicForm,{labels} from './Form';
 import Draggable from 'react-draggable';
-// import React.addons from 'react-addons';
+import { DragDropContext  } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import update from 'react/lib/update';
+import Card from './Card';
+
+const style = {
+  width: 400
+};
 const socket = io();
 
+@DragDropContext(HTML5Backend)
 export default class ControlPanel extends Component {
     static propTypes = {
         activeControl: PropTypes.object.isRequired,
@@ -26,66 +34,29 @@ export default class ControlPanel extends Component {
 
     constructor (props, context) {
       super(props, context)
+      this.moveCard = this.moveCard.bind(this);
       this.state = {
         items: [{
         id: 'product-0',
-        deltaPosition: {
-          top: 0
-        }
+        name: 'Product 0',
+        index: 0
       },{
         id: 'product-1',
-        deltaPosition: {
-          top: 0
-        }
+        name: 'Product 1',
+        index: 1
       },{
         id: 'product-2',
-        deltaPosition: {
-          top: 0
-        }
+        name: 'Product 2',
+        index: 2
+      },{
+        id: 'product-3',
+        name: 'Product 3',
+        index: 3
+      },{
+        id: 'product-4',
+        name: 'Product 4',
+        index: 4
       }
-      // ,{
-      //   id: 'product-3',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top: 0
-      //   }
-      // },{
-      //   id: 'product-4',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top: 0
-      //   }
-      // },{
-      //   id: 'product-5',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top: 0
-      //   }
-      // },{
-      //   id: 'product-6',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top: 0
-      //   }
-      // },{
-      //   id: 'product-7',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top: 0
-      //   }
-      // },{
-      //   id: 'product-8',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top: 0
-      //   }
-      // },{
-      //   id: 'product-9',
-      //   deltaPosition: {
-      //     left: 0,
-      //     top:0
-      //   }
-      // }
       ],
         msg : true,
         bucket: true,
@@ -105,49 +76,72 @@ export default class ControlPanel extends Component {
     UserAPIUtils.createMessage(newMessage);
   }
 
-  renderJSON() {
-      const {activeMessage, actions} = this.props
-      // return (<div style={{fontSize: '0.2em'}}><pre>{JSON.stringify(activeMessage,null, 2) }</pre></div>)
-  }
+  // handleDrag(e, ui) { 
+  //   console.log('e: ',e,' ui: ',ui)
+  //    const index = this.state.items.getIndexBy("id", ui.node.id)
+  //    var currentY = this.state.items[index].y;
+  //    // console.log('id: ',ui.node.id, this.state, index)
+  //    console.log('original state: ', this.state.items)
+  //    var y = currentY + ui.deltaY
+  //    var newDeltaY
+  //    switch (true) {
+  //     case ( y >= 0 && y < 125):
+  //       newDeltaY = 0;
+  //       break;
+  //     case ( y >= 125 && y < 250):
+  //       newDeltaY = 125;
+  //       break;
+  //     case ( y >= 250 && y < 375):
+  //       newDeltaY = 250;
+  //       break;
+  //     default: 
+  //       newDeltaY = top;
+  //    }
+  //    var newPosition = {
+  //     id: ui.node.id,
+  //     deltaPosition: {
+  //         top: newDeltaY,
+  //     }
+  //   }
+  //   // console.log('new position: ', newPosition))
+  //      var newItems = React.addons.update(this.state.items, {[index]: {$set: newPosition}});
+  //   // console.log('new items: ', newItems)
+  //     this.setState({
+  //       items: newItems
+  //     })
+  //   console.log('next state: ', this.state.items)
+  //  }
 
-  changeMessageProperties() {
-    const { actions } = this.props;
-    // console.log('YO: ', this.refs.form1)
-  }
-
-  handleDrag(e, ui) { 
-     const index = this.state.items.getIndexBy("id", ui.node.id)
-     var top = this.state.items[index].deltaPosition["top"];
-     // console.log('id: ',ui.node.id, this.state, index)
-     console.log('original state: ', this.state.items)
-     var newPosition = {
-      id: ui.node.id,
-      deltaPosition: {
-          top: top + ui.deltaY,
+   moveCard(dragIndex, hoverIndex) {
+    const { items } = this.state;
+    const dragCard = items[dragIndex];
+    
+    this.setState(update(this.state, {
+      items: {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragCard]
+        ]
       }
-    }
-  // console.log('new position: ', newPosition))
-     var newItems = React.addons.update(this.state.items, {[index]: {$set: newPosition}});
-  // console.log('new items: ', newItems)
-    this.setState({
-      items: newItems
-    })
-  console.log('next state: ', this.state.items)
-   }
+    }));
+    this.setState(update(this.state, {
+        items: {[hoverIndex]: {$merge: {index: hoverIndex}}}
+     }));
+  }
+    // const {top, left} = this.state.items[0].deltaPosition;
 
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
      const fields  = ['msg','bucket','action']
-     const ref = this.refs.form1
-      const self = this;
-      const drags = {onStart: this.onStart, onStop: this.onStop};
-      const {top, left} = this.state.items[0].deltaPosition;
+     const self = this;
+     // const drags = {onStart: this.onStart, onStop: this.onStop};
+     const { items } = this.state;
+
       return ( 
          <div className="flexbox-container">
           <div id="second-column">
             <section className='rightnav'>
               <h1>Control</h1> 
-              <h1>{this.ref}</h1>
             <div>
               <div>
                 {Object.keys(this.state).map(field =>
@@ -159,7 +153,7 @@ export default class ControlPanel extends Component {
                 )}
             </div>
             <DynamicForm
-              onSubmit={this.props.onSubmit} ref="form1" changed=""
+              onSubmit={this.props.onSubmit} changed=""
               fields={fields} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
             <Button bsSize = "medium" bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
                 Send Command
@@ -169,22 +163,38 @@ export default class ControlPanel extends Component {
           </div>
           <div id="third-column" style= {{ padding: 0}}>
              <h1>Results Preview:</h1>
-              <div className="box" style={{display: "flex", "flexFlow": "column wrap", height: '500px', width: '500px', position: 'relative'}}>
-               <Draggable  axis="y" onDrag={::this.handleDrag} ref="product-0" grid={[100, 100]} bounds="parent" {...drags}>
-                  <div id="product-0" className="box cursor-y product-box">First Product </div>
-               </Draggable>
-               <Draggable  axis="y" onDrag={::this.handleDrag} grid={[100, 100]} bounds="parent" {...drags}>
-                  <div id="product-1" className="box cursor-y product-box">Second Product </div>
-               </Draggable>
-               <Draggable axis="y" onDrag={::this.handleDrag} grid={[100, 100]} bounds="parent" {...drags}>
-                  <div id="product-2" className="box cursor-y product-box">Third Product </div>
-               </Draggable>
+
+              <div style={style}>
+                {items.map((item, i) => {
+                  return (
+                    <Card key={item.id}
+                          index={i}
+                          id={item.id}
+                          text={item.name}
+                          moveCard={this.moveCard} />
+                  );
+                })}
               </div>
+
           </div>
          </div>
       );
   }
 }
+
+// <div className="box" style={{display: "flex", "flexFlow": "column wrap", height: '500px', width: '500px', position: 'relative'}}>
+//    <Draggable  axis="y" onDrag={::this.handleDrag} ref="product-0" grid={[125, 125]} bounds="parent" {...drags}>
+//       <div id="product-0" className="box cursor-y product-box">First Product </div>
+//    </Draggable>
+//    <Draggable  axis="y" onDrag={::this.handleDrag} grid={[125, 125]} bounds="parent" {...drags}>
+//       <div id="product-1" className="box cursor-y product-box">Second Product </div>
+//    </Draggable>
+//    <Draggable axis="y" onDrag={::this.handleDrag} grid={[125, 125]} bounds="parent" {...drags}>
+//       <div id="product-2" className="box cursor-y product-box">Third Product </div>
+//    </Draggable>
+// </div>
+
+
 
 Array.prototype.getIndexBy = function (name, value) {
     for (var i = 0; i < this.length; i++) {

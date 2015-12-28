@@ -1,10 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { Redirect, Router, Route } from 'react-router';
 import { Provider } from 'react-redux';
-import SignIn from '../components/SignIn';
 import ChatContainer from './ChatContainer';
-import SignUp from '../components/SignUp';
-import WelcomePage from '../components/WelcomePage';
 import configureStore from '../store/configureStore';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 const store = configureStore();
