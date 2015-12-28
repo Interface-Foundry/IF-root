@@ -114,6 +114,8 @@ function quickparse(text) {
   }
   regexes = {
     initial: [
+      /^can you find me a\b/i,
+      /^can you find me\b/i,
       /^find me a\b/i,
       /^find me\b/i,
       /^find\b/i,
