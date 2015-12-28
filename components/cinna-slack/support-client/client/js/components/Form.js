@@ -106,7 +106,7 @@ class DynamicForm extends Component {
   render() {
     const { fields, saveState,messages, activeChannel} = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
-    const showSearchBox =  this.state.bucket === 'initial' ? {} : {display: 'none'};
+    const showSearchBox =  this.state.bucket === 'initial' ? {textAlign: 'center', marginTop: '3em'} : {textAlign: 'center', marginTop: '3em', display: 'none'};
     var self = this
     return (
        <div>
@@ -131,7 +131,7 @@ class DynamicForm extends Component {
 
               <div id="search-box" style={showSearchBox}>
                  <input type="text" id="seach-input" {...fields['action']} onChange={this.handleChange} />
-                <Button bsSize = "medium" style={{ margin: '1em' }} bsStyle = "primary" onClick = { () => this.searchAmazon(activeMessage)} >
+                <Button bsSize = "medium" style={{ margin: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon(activeMessage)} >
                   Search Amazon
                 </Button>
               </div>

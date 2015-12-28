@@ -7,6 +7,7 @@ const style = {
   border: '1px dashed gray',
   padding: '0.5rem 1rem',
   marginBottom: '1rem',
+  marginLeft: '2em',
   backgroundColor: 'white',
   cursor: 'move',
   width: '7em',

@@ -18,7 +18,8 @@ import Card from './Card';
 
 const style = {
   width: 400,
-  marginBottom: '2em'
+  marginBottom: '2em',
+  textAlign: 'center'
 };
 const socket = io();
 
@@ -77,42 +78,6 @@ export default class ControlPanel extends Component {
     UserAPIUtils.createMessage(newMessage);
   }
 
-  // handleDrag(e, ui) { 
-  //   console.log('e: ',e,' ui: ',ui)
-  //    const index = this.state.items.getIndexBy("id", ui.node.id)
-  //    var currentY = this.state.items[index].y;
-  //    // console.log('id: ',ui.node.id, this.state, index)
-  //    console.log('original state: ', this.state.items)
-  //    var y = currentY + ui.deltaY
-  //    var newDeltaY
-  //    switch (true) {
-  //     case ( y >= 0 && y < 125):
-  //       newDeltaY = 0;
-  //       break;
-  //     case ( y >= 125 && y < 250):
-  //       newDeltaY = 125;
-  //       break;
-  //     case ( y >= 250 && y < 375):
-  //       newDeltaY = 250;
-  //       break;
-  //     default: 
-  //       newDeltaY = top;
-  //    }
-  //    var newPosition = {
-  //     id: ui.node.id,
-  //     deltaPosition: {
-  //         top: newDeltaY,
-  //     }
-  //   }
-  //   // console.log('new position: ', newPosition))
-  //      var newItems = React.addons.update(this.state.items, {[index]: {$set: newPosition}});
-  //   // console.log('new items: ', newItems)
-  //     this.setState({
-  //       items: newItems
-  //     })
-  //   console.log('next state: ', this.state.items)
-  //  }
-
    moveCard(dragIndex, hoverIndex) {
     const { items } = this.state;
     const dragCard = items[dragIndex];
@@ -165,7 +130,7 @@ export default class ControlPanel extends Component {
                 })}
              
               </div>
-                 <Button bsSize = "medium" style={{ textAlign: 'center' }}bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+                 <Button bsSize = "large" style={{ textAlign: 'center', backgroundColor: 'purple' }}bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
                   Send Command
                 </Button> 
           </div>
