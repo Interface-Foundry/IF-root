@@ -34,6 +34,11 @@ exports = module.exports = function(io, cinnaio) {
         socket.on('change channel', function(channel) {
             socket.emit('change channel bc', channel);
         });
+
+        socket.on('disconnect', function(socket) {
+            socket.emit('disconnect bc', socket);
+        });
+
     });
 }
 // var io = require('socket.io').listen(app);

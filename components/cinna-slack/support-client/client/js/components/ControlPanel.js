@@ -130,7 +130,7 @@ export default class ControlPanel extends Component {
                 })}
              
               </div>
-                 <Button bsSize = "large" style={{ textAlign: 'center', backgroundColor: 'purple' }}bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+                 <Button bsSize = "large" style={{ textAlign: 'center', backgroundColor: '#45a5f4' }}bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
                   Send Command
                 </Button> 
           </div>

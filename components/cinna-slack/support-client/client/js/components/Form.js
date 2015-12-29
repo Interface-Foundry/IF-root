@@ -117,13 +117,13 @@ class DynamicForm extends Component {
             
             <div className="flexbox-container" style={{ marginTop: '3em' }}>
 
-                <Button bsSize = "large" style={{ margin: '0.3em' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
+                <Button bsSize = "large" style={{ margin: '0.3em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
                   Initial
                 </Button>
-                <Button bsSize = "large" style={{ margin: '0.3em' }} bsStyle = "primary" onClick = { () => this.setField('purchase')} >
+                <Button bsSize = "large" style={{ margin: '0.3em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('purchase')} >
                   Purchase
                 </Button>
-                <Button bsSize = "large" style={{ margin: '0.3em' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
+                <Button bsSize = "large" style={{ margin: '0.3em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
                   Banter
                 </Button>
             </div>

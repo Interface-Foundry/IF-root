@@ -46,10 +46,10 @@ export default class ChannelListItem extends Component {
     const { channel, actions, channels } = this.props;
     const { channel: selectedChannel, onClick } = this.props;
     return (
-    <div className="flexbox-container">
-      <Button bsSize="xsmall" bsStyle="primary" >
+    <div className="flexbox-container" style={{backgroundColor: '#45a5f4'}}>
+      <Button bsSize="xsmall" bsStyle="primary" style={{backgroundColor: '#45a5f4'}}>
         <a className={classnames({ selected: channel === selectedChannel })}
-           style={{ cursor: 'hand', color: 'white'}}
+           style={{ cursor: 'hand', color: 'white', backgroundColor: '#45a5f4'}}
            onClick={() => onClick(channel)}>
           <li style={{textAlign: 'left', cursor: 'pointer', marginRight: '0.5em'}}>
             <h5>{channel.name}</h5>

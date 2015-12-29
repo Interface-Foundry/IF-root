@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component, PropTypes, Image } from 'react';
 import TopPanel from './TopPanel';
 import ControlPanel from './ControlPanel';
 import MessageComposer from './MessageComposer';
@@ -56,6 +56,9 @@ export default class Chat extends Component {
     );
     socket.on('new channel', channel =>
       actions.receiveRawChannel(channel)
+    );
+     socket.on('disconnect bc', socket =>
+      console.log('user disconnected! ',socket)
     );
     if (!this.props.user.username) {
       actions.loadAuth();
@@ -125,22 +128,24 @@ export default class Chat extends Component {
     event.preventDefault();
     this.setState({moreUsersModal: false});
   }
-  // <TopPanel activeControl={activeControl} onClick={::this.changeActiveControl} />
+            // <Image source={{uri: '/static/kip-icon.png'}} />
+
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const username = this.props.user.username;
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
-        <DropdownButton key={95} style={{'width': '21rem'}} id="user-menu"  bsSize="large" bsStyle="primary" title={username}>
+        <DropdownButton key={95} style={{'width': '21rem', backgroundColor: '#45a5f4'}} id="user-menu"  bsSize="large" bsStyle="primary" title={username}>
           <MenuItem style={{'width': '21rem'}} eventKey="4" onSelect={::this.handleSignOut}>Sign out</MenuItem>
         </DropdownButton>
       </div>
     );
+
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
-        <div className="nav">
-          {dropDownMenu}
+        <div className="nav" style={{backgroundColor: '#45a5f4'}}>
+
           <section style={{order: '2', marginTop: '1.5em'}}>
             <Channels onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
           </section>
