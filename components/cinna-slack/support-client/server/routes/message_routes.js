@@ -22,21 +22,40 @@ module.exports = function(router) {
 
     //post a new message to db
     router.post('/newmessage', function(req, res) {
-        var newMessage = new Message(req.body);
-        newMessage.save(function(err, data) {
+        Message.findOne({
+            'source.channel': req.body.source.channel,
+            'msg': req.body.msg,
+            'resolved': false
+        }, function(err, data) {
             if (err) {
                 console.log(err);
                 return res.status(500).json({
                     msg: 'internal server error'
                 });
             }
-            res.json(data);
-        });
-    });
+            if (!data) {
+                var newMessage = new Message(req.body);
+                newMessage.save(function(err, saved) {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).json({
+                            msg: 'internal server error'
+                        });
+                    }
+                    res.json(saved);
+                })
+            }
+
+            if (data) {
+                console.log('Message doubled up!')
+                res.json(data)
+            }
+        })
+    })
 
     //resolve existing message in db
     router.post('/resolve', function(req, res) {
-      console.log('req.body', req.body)
+        console.log('req.body', req.body)
         Message.findOne({
             'source.channel': req.body.source.channel
         }, function(err, data) {
@@ -62,7 +81,7 @@ module.exports = function(router) {
                         });
                     }
                     console.log('Message resolved.')
-                    res.json(result);
+                    res.json({});
                 })
             }
         });

@@ -67,13 +67,26 @@ export default class Chat extends Component {
   changeActiveChannel(channel) {
     const { actions, activeChannel } = this.props;
     console.log('firing changeactivechannel');
-    var channels = { prev: {}, next:{}}
-    channels.prev =  Object.assign({}, activeChannel);
-    channels.next = Object.assign({}, channel)
-    socket.emit('change channel', channels);
-    // var currentChannel =  Object.assign({}, activeChannel);
-    actions.changeChannel(channel);
-    this.changeActiveMessage(channel)
+    if (channel) {
+      var channels = { prev: {}, next:{}}
+      channels.prev =  Object.assign({}, activeChannel);
+      channels.next = Object.assign({}, channel)
+      socket.emit('change channel', channels);
+      // var currentChannel =  Object.assign({}, activeChannel);
+      actions.changeChannel(channel);
+      this.changeActiveMessage(channel)
+    } else if(channel === null){
+      var emptyChannel = { name: 'Kip',id: 'Kip',resolved: false}
+      actions.changeChannel(emptyChannel);
+      actions.changeMessage({
+                _id: '',
+                id: '',
+                incoming: true,
+                msg: 'No channels left',
+                ts: '',
+                resolved: false
+                });
+    }
   }
 
    changeActiveMessage(channel) {

@@ -31,7 +31,7 @@ export default class ChannelListItem extends Component {
     filtered.reduce(function(sequence, msg) {
       return sequence.then(function() {
         return resolveMessageInState(msg);
-      }).then(function(chapter) {
+      }).then(function(msg) {
         UserAPIUtils.resolveMessage(msg)
       });
     }, Promise.resolve());
@@ -39,7 +39,16 @@ export default class ChannelListItem extends Component {
     // console.log('ChannelListItem.js 39: channels: ',channels)
     // const index = (channels[chanIndex-1]) ? (chanIndex-1) : channels.length-1
     // console.log('ChannelListItem.js 40: switching to channel: ',channels[index])
-    onClick(channels[0])
+    if (channel.name === channels[0].name && channels.length > 1) {
+      // console.log('situation: first channel closed but more channels')
+      onClick(channels[1])
+    } else if (channel.name === channels[0].name && channels.length === 1){ 
+      // console.log('situation: first channel closed and last channel')
+      onClick(null)
+    } else {
+      // console.log('situation: non-first channel closed and more channels left')
+      onClick(channels[0])
+    }
   }
 
   render() {

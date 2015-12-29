@@ -15,7 +15,7 @@ export default class Channels extends Component {
     actions: PropTypes.object.isRequired,
     onClick: PropTypes.func.isRequired,
     messages: PropTypes.array.isRequired,
-    chanIndex: PropTypes.number.isRequired,
+    chanIndex: PropTypes.number.isRequired
   }
   constructor(props, context) {
     super(props, context);

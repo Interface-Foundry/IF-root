@@ -37,9 +37,9 @@ module.exports = function(router) {
         if (data) {
           console.log('Channel exists: ',data)
           return res.json(data)
-        } else {
+        } else if (!data){
               var newChannel = new Channel(req.body);
-              newChannel.save(function(err, data) {
+              newChannel.save(function(err, saved) {
                  if (err) {
                      console.log(err);
                       return res.status(500).json({
@@ -64,7 +64,7 @@ module.exports = function(router) {
           data.save(function(err, res) {
             if (err) console.log(err)
             console.log('Resolved channel: ',res)
-            return res.json(data)
+            return res.json(res)
           })
           } else {
              console.log('Channel Routes: Channel does not exist. ')

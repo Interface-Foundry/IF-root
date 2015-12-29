@@ -22,7 +22,7 @@ export function receiveRawMessage(message) {
 }
 
 export function receiveRawChannel(channel) {
-    // console.log('Raw channel in Actions: ', channel)
+    console.log('Raw channel in Actions: ', channel)
     UserAPIUtils.createChannel(channel)
         return {
             type: types.RECEIVE_CHANNEL,
