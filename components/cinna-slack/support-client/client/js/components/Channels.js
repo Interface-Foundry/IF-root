@@ -4,6 +4,9 @@ import ChannelListModalItem from './ChannelListModalItem';
 import { Modal, Glyphicon, Input, Button } from 'react-bootstrap';
 const socket = io();
 import * as UserAPIUtils from '../utils/UserAPIUtils';
+// const img = document.createElement('img');
+// img.src = require('./kip-icon.png');
+
 
 export default class Channels extends Component {
 

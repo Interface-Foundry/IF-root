@@ -145,7 +145,7 @@ export default class Chat extends Component {
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
-
+        <div className="kipicon"></div>
           <section style={{order: '2', marginTop: '1.5em'}}>
             <Channels onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
           </section>

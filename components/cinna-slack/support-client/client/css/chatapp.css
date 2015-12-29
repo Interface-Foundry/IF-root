@@ -30,6 +30,13 @@ body {
   margin-right: 20px;
 }
 
+.kipicon {
+  content: url("/static/kip-icon.png");
+  width: 3.5em;
+  height: 3.5em;
+  margin: 0 auto;
+}
+
 .product-box {
   box-sizing: border-box;
       background: #fff;
