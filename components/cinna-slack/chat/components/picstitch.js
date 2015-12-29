@@ -15,20 +15,32 @@ var stitchResults = function(data,source,callback) {
 
                     var price;
 
-                    if (!data.amazon[i].ItemAttributes[0].ListPrice){
-                        price = ''; //price missing, show blank
+                    //if we successfully scraped real price from amazon.com
+                    if (data.amazon[i].realPrice){
+                      price = data.amazon[i].realPrice;
                     }
-                    else{
-                        if (data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
-                            price = '';
-                        }
-                        else {
-                            // add price
-                            price = data.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0];
-                            //convert to $0.00
-                            //price = addDecimal(price);
-                        }
+                    //resort to api price here
+                    else{ 
+
+                      //USE OFFER FIRST, then fallback to listprice
+
+                      if (!data.amazon[i].ItemAttributes[0].ListPrice){
+                          price = ''; //price missing, show blank
+                      }
+                      else{
+                          if (data.amazon[i].ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
+                              price = '';
+                          }
+                          else {
+                              // add price
+                              price = data.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0];
+                              //convert to $0.00
+                              //price = addDecimal(price);
+                          }
+                      }                     
                     }
+
+
 
                     var primeAvail = 0;
                     if (data.amazon[i].Offers && data.amazon[i].Offers[0].Offer && data.amazon[i].Offers[0].Offer[0].OfferListing && data.amazon[i].Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime){

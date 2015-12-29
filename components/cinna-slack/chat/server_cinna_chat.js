@@ -103,7 +103,11 @@ function initSlackUsers(){
         var testUser = [{
             team_id:'T0H72FMNK',
             bot: {
+                bot_user_id: 'U0H6YHBNZ',
                 bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+            },
+            meta: {
+                initialized: false
             }
         }];
         loadSlackUsers(testUser);
@@ -156,6 +160,11 @@ function loadSlackUsers(users){
     console.log('loading '+users.length+' Slack users');
 
     async.eachSeries(users, function(user, callback) {
+
+        if (user.bot && !user.bot.bot_access_token && !user.bot.bot_user_id){
+            console.log('ERROR: bot token and id missing from DB for ',user);
+        }
+
         var settings = {
             token: user.bot.bot_access_token,
             name: 'Kip'
@@ -163,34 +172,60 @@ function loadSlackUsers(users){
 
         //create new bot from user settings
         slackUsers[user.team_id] = new Bot(settings);
+        slackUsers[user.team_id].botId = user.bot.bot_user_id;
 
         //init new bot
-        slackUsers[user.team_id].on('start', function(biz) {
+        slackUsers[user.team_id].on('start', function() {
 
-            // //dont spam all slack people on node reboot
-            // if (!user.meta.initialized){
-            //     //////////////SEND HELLO MSG
-            //     var helloMessage = {
-            //       msg: 'Hi'
-            //     };
-            //     helloMessage.source = {
-            //         'origin':'slack',
-            //         'channel':data.channel,
-            //         'org':data.team,
-            //         'indexHist':data.team + "_" + data.channel, //for retrieving chat history in node memory,
-            //     }
-            //     sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
-            //     //////////////                
-            // }
+            //* * * * Welcome message * * * //
+            //send welcome to new teams – dont spam all slack people on node reboot
+            if (user.meta && user.meta.initialized == false){
+                //* * * * send welcome message
+                //get list of users in team
+                request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
+                  if(err){
+                    console.log('requesting new team user list error: ',err);
+                  }
+                  else {
+                    body = JSON.parse(body);
 
-            //USE SLACKBOTS sendToUser method
-            //https://slack.com/api/users.list <<<< method to get all users, cycle through, send welcome
+                    if (body.ok && body.ims.length > 0){
+                        //loop through members, commence welcome!
+                        async.eachSeries(body.ims, function(member, callback) {
+                            if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
+                                var hello = {
+                                    msg: 'welcome'
+                                }
+                                hello.source = {
+                                    'origin':'slack',
+                                    'channel':member.id,
+                                    'org':user.team_id,
+                                    'id':user.team_id + "_" + member.id //for retrieving chat history in node memory
+                                }
+                                banter.welcomeMessage(hello,function(res){
+                                    sendTxtResponse(hello,res);
+                                });
+                            }
+                            callback();
+                        }, function done(){
+                            console.log('finished sending out welcome messages to new team');
+                        });
+                    }
+                    else {
+                        console.log('error: something happened, a ghost slack team emerged');
+                    }
+                  }
+                });
+            }
+            // * * * * * * * * * * //
 
+            //on message from slack user
             slackUsers[user.team_id].on('message', function(data) { //on bot message
                 // all incoming events https://api.slack.com/rtm
-                if (data.type == 'presence_change'){
-                    slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
-                }
+                // if (data.type == 'presence_change'){
+                //     console.log('CHANGEGEE ',data);
+                //     slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
+                // }
                 if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){
                     //public channel
                     if (data.channel && data.channel.charAt(0) == 'C'){
@@ -237,28 +272,27 @@ var io = require('socket.io').listen(server);
 io.sockets.on('connection', function(socket) {
     console.log("socket connected");
 
-    //SEND A WELCOME TO KIP MESSAGE HERE. how to get started
-    // simulate a "Hi"
-    var helloMessage = {
-      msg: 'Hi'
-    };
-    helloMessage.source = {
+    //* * * * send welcome message
+    var hello = {
+        msg: 'welcome'
+    }
+    hello.source = {
         'origin':'socket.io',
         'channel':socket.id,
         'org':'kip',
         'id':'kip' + "_" + socket.id //for retrieving chat history in node memory
     }
-    sendTxtResponse(helloMessage,'http://kipthis.com/cinna/help.png');
-    //preProcess(helloMessage);
-
+    banter.welcomeMessage(hello,function(res){
+        sendTxtResponse(hello,res);
+    });
+   // * * * * * * * * * * //
+    
     socket.on("msgToClient", function(data) {
         data.source = {
-
             'origin':'socket.io',
             'channel':socket.id,
             'org':'kip',
             'id':'kip' + "_" + socket.id //for retrieving chat history in node memory
-            
         }
         preProcess(data);
     });
@@ -645,6 +679,8 @@ function searchFocus(data){
                 if (data.recallHistory.amazon[searchSelect]){
 
                     var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                    var offers = data.recallHistory.amazon[searchSelect].Offers[0];
+
                     var cString = ''; //construct text reply
 
                     data.client_res = [];
@@ -657,10 +693,41 @@ function searchFocus(data){
 
                     //send product title + price
                     var topStr = attribs.Title[0];
+
+                    console.log('ZZZZZZ!!!!!! ',data.recallHistory.amazon[searchSelect]);
+
+                    //get price from first offer
+                    if (offers.Offer && offers.Offer[0].OfferListing && offers.Offer[0].OfferListing[0].Price && offers.Offer[0].OfferListing[0].Price[0].FormattedPrice){
+
+
+                        console.log('ZZZZZ ', data.recallHistory.amazon[searchSelect].Offers.length);
+
+                        console.log('XXXXXX ', offers.Offer.length);
+
+                        console.log('222ZZ ', JSON.stringify(data.recallHistory.amazon[searchSelect].Offers));
+
+                        console.log('222XXX ', JSON.stringify(offers.Offer));
+
+
+
+                        // for (var i = 0; i < offers.Offer.length; i++) { 
+                        //     console.log('OFFERS LOOP ',offers.Offer[i]);
+                        // }
+
+                        // for (var i = 0; i < offers.Offer[0].OfferListing.length; i++) { 
+                        //     console.log('OFFERLISTING LOOP ',offers.Offer[0].OfferListing[i]);
+                        // }
+
+                        topStr = offers.Offer[0].OfferListing[0].Price[0].FormattedPrice[0] + " – " + topStr;
+                    }
                     //add price to this line, if found
-                    if (attribs.ListPrice){
+                    else if (attribs.ListPrice){
                         topStr = attribs.ListPrice[0].FormattedPrice[0] + " – " + topStr;
                     }
+                    else {
+                        console.log('NO PRICE!!');
+                    }
+
                     data.client_res.push(topStr);
 
 
@@ -838,7 +905,7 @@ function searchAmazon(data, type, query, flag){
             //add some amazon query params
             var amazonParams = {};
             amazonParams.Keywords = data.tokens[0]; //text search string
-            amazonParams.responseGroup = 'ItemAttributes,Offers,Images';
+            amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull';
 
             //check for flag to modify amazon search params
             if (flag && flag.type){ //search modifier
@@ -978,7 +1045,23 @@ function searchAmazon(data, type, query, flag){
                                 rating: rating,
                                 reviewCount: reviewCount
                             }
-                            callback();
+
+                            //GET PRICE
+                            search.getPrices(data.amazon[i].DetailPageURL[0],function(realPrice){
+
+                                console.log('REAL PRICE ',realPrice);
+                                if (realPrice){
+                                    data.amazon[i].realPrice = realPrice.trim();
+                                }
+                                else {
+                                    console.log('/!/!!! warning: no real price found for amazon item');
+                                }
+
+                                callback();
+                                //IF SERACH BAD, RETURN OFFER PRICE
+                            });
+
+                            
                         });
                     }
                     else {
@@ -1043,7 +1126,7 @@ function searchAmazon(data, type, query, flag){
                       ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
                       // Keywords: data.recallHistory.tokens,
                       SimilarityType: flag, //other option is "Random" <<< test which is better results
-                      responseGroup: 'ItemAttributes,Offers,Images'
+                      responseGroup: 'ItemAttributes,Images,OfferFull'
 
                     }).then(function(results){
 
@@ -1196,17 +1279,12 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
                             callback();
                         });
                     }, function done(){
-                        //console.log('TO SEND ',data.client_res);
-                       // sendResponse(data);
                         checkOutgoingBanter(data);
-                        //data.urlShorten = res;
-                        //saveHistory(data); //push new history state after we have stitched URL
                     });
                 });
             }
             else {
                 checkOutgoingBanter(data);
-                //saveHistory(data); //push new history state after we have stitched URL
             }
         });
     }
@@ -1223,7 +1301,6 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
     }
     //no cinna response check
     else if (action == 'final'){
-        saveHistory(data);
         sendResponse(data);
     }
 }
