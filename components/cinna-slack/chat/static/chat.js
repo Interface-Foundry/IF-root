@@ -7,9 +7,9 @@ var $chatMessages = $('.chat-messages')
 var chats_el = $chats[0];
 
 
-setTimeout(function() {
-  $("#msg").focus();
-}, 0);
+// setTimeout(function() {
+//   $("#msg").focus();
+// }, 0);
 
 function sendMessage() {
   var message = $("#msg").val();

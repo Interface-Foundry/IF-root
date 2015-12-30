@@ -1,9 +1,9 @@
 
-var checkForCanned = function(input,callback) {
+var checkForCanned = function(input,callback,origin) {
    
-	var res;
-	var flag;
-	var query;
+    var res;
+    var flag;
+    var query;
 
     //pre-sort canned banter
     switch (true) {
@@ -12,48 +12,57 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'hello') > 60:
         case textSimilar(input,'hey') > 60:
         case textSimilar(input,'hey there') > 60:
+        case textSimilar(input,'salutations') > 60:
             flag = 'basic';
-            res = input + ', how are you? Can I help you find something?';
+            res = input + ', what can I do for you? Tell me the thing you\'re looking for, or use help for more options 😊';
             break;
+        case textSimilar(input,'what you up to') > 60:
+        case textSimilar(input,'whats up') > 60:
         case textSimilar(input,'sup') > 60:
             flag = 'basic';
-            res = 'Busy at work, how about you?';
+            res = 'Busy at work, how are you?';
             break;
         case textSimilar(input,'are you a bot') > 60:
+        case textSimilar(input,'are you a robot') > 60:
+        case textSimilar(input,'are you a droid') > 60:
             flag = 'basic';
             res = 'yup, 100% bot. Are you a human?';
             break;
         case textSimilar(input,'what\'s the meaning of life?') > 60:
             query = 'chocolate';
             flag = 'search.initial'; //do this action
-            res = 'If the meaning of life is happiness, then you can definitely buy some here:';
+            res = 'If the meaning of life is happiness, then you can definitely buy some here 😉';
             break;
         case textSimilar(input,'i\'m great') > 60:
         case textSimilar(input,'i\'m good') > 60:
         case textSimilar(input,'i\'m awesome') > 60:
         case textSimilar(input,'i\'m doing well') > 60:
+        case textSimilar(input,'i\'m fine') > 60:
+        case textSimilar(input,'i\'m ok') > 90:
             query = 'today\'s deals on amazon';
             flag = 'search.initial'; //do this action
-            res = 'It\'s a hard life being in retail, want to help a bot out and buy something? We have discounts!';
+            res = 'That\'s good to hear. It\'s a hard life being in retail, want to help a bot out and buy something? We have discounts! 😊';
             break;
         case textSimilar(input,'yes') > 90:
             flag = 'basic'; //do this action
-            res = 'cool';
+            res = 'Cool';
             break;
         case textSimilar(input,'no') > 90:
             flag = 'basic'; //do this action
-            res = 'ok';
+            res = 'Ok';
             break;
         case textSimilar(input,'i love you') > 60:
             query = 'champagne';
             flag = 'search.initial'; //do this action
-            res = 'Love you too. How about we get some champagne and make it a date?';
+            res = 'Love you too. How about we get some champagne and make it a date? 😉';
             break;
-        // case textSimilar(input,'why') > 90:
-        //     query = 'today\'s deals on amazon';
-        //     flag = 'search.initial'; //do this action
-        //     res = 'Why not? Some say shopping is cheaper than a psycharist. Here, have some discounts:';
-        //     break;
+
+        case textSimilar(input,'why') > 90:
+             query = 'today\'s deals on amazon';
+             flag = 'search.initial'; //do this action
+             res = 'Why not? Some say shopping is cheaper than a psycharist. Here, have some discounts:';
+             break;
+
         case textSimilar(input,'are you real') > 60:
             query = 'robot pets';
             flag = 'search.initial'; //do this action
@@ -62,57 +71,149 @@ var checkForCanned = function(input,callback) {
 
         case textSimilar(input,'why does life suck') > 60:
         case textSimilar(input,'life sucks') > 60:
+        case textSimilar(input,'I hate everything') > 60:
+        case textSimilar(input,'I hate everyone') > 60:
+        case textSimilar(input,'why are people so mean') > 60:
+        case textSimilar(input,'why are people so evil') > 60:
             query = 'snacks';
             flag = 'search.initial'; //do this action
-            res = 'I\'m sorry, maybe some retail therapy would help?';
+            res = 'I\'m sorry 😞 maybe some retail therapy would help?';
             break;
 
         case textSimilar(input,'i hate my job') > 60:
+        case textSimilar(input,'work sucks') > 90:
+        case textSimilar(input,'work is bad') > 90:
+        case textSimilar(input,'work is hard') > 90:
+        case textSimilar(input,'too much to do today') > 60:
+        case textSimilar(input,'have lots of work to do') > 60:
+        case textSimilar(input,'busy at work') > 60:
+        case textSimilar(input,'working late') > 90:
+        case textSimilar(input,'working overtime') > 90:
             query = 'echo';
             flag = 'search.initial'; //do this action
-            res = 'It\'s a tough life. I believe in working hard, playing hard. How about trying the new echo?';
+            res = 'That\'s tough 😞 Don\'t forget to have fun! How about trying the new Echo?';
             break;
 
         case textSimilar(input,'ask me something') > 60:
+        case textSimilar(input,'ask me anything') > 60:
+        case textSimilar(input,'ask me a question') > 60:
             query = 'today\'s deals on amazon';
             flag = 'search.initial'; //do this action
-            res = 'You feel like shopping? We have great deals here';
+            res = 'You feel like shopping? We have great deals here 😊';
             break;
 
-        case textSimilar(input,'no thanks') > 60:
+        case textSimilar(input,'no thanks') > 70:
+        case textSimilar(input,'no thx') > 70:
         case textSimilar(input,'this is going nowhere') > 60:
             flag = 'basic'; //do this action
-            res = 'Guess you weren\'t in the mood.... oh well, at least I tried :) hope you have a great day';
+            res = 'Guess you weren\'t in the mood.... oh well, at least I tried 😅 hope you have a great day';
             break;
 
 
         case textSimilar(input,'nevermind') > 60:
         case textSimilar(input,'nm') > 60:
+        case textSimilar(input,'wtv') > 90:
+        case textSimilar(input,'whatever') > 60:
             flag = 'basic'; //do this action
-            res =  'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help? http://kipthis.com/cinna/help.png';
+            if (origin == 'slack'){
+                res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
+
+                'Chat me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
+                'Use commands to refine your search, for example:\n\n'+
+
+                '`more` : view more search results\n'+
+                '`more like 3` : find similar items to search result :three:\n\n'+
+
+                '`2` : check product details for item :two:\n'+
+                '`1 but cheaper` : finds :one: or similar in a lower price\n'+
+                '`2 but in XL` : finds :two: or similar in size XL\n'+
+                '`3 but in blue` : finds :three: or similar in color blue\n'+
+                '`2 but in wool` : finds :two: or similar with wool fabric\n\n'+
+
+                '`buy 1` : to buy item :one:\n'+
+                '`save 2` : save item :two: to cart\n\n'+
+
+                '`help` : view command list\n'+
+                'Try it now! Maybe you need new headphones? :headphones: Type `headphones` to start.';
+            }
+            else if (origin == 'socket.io'){
+                
+                res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?<br>'+
+
+                'Chat me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
+                'Use commands to refine your search, for example:<br><br>'+
+
+                '<span class="typer">more</span> : view more search results<br>'+
+                '<span class="typer">more like 3</span> : find similar items to search result ➌<br><br>'+
+
+                '<span class="typer">2</span> : check product details for item <span class="selector">➋</span><br>'+
+                '<span class="typer">1 but cheaper</span> : finds <span class="selector">➊</span> or similar in a lower price<br>'+
+                '<span class="typer">2 but in XL</span> : finds <span class="selector">➋</span> or similar in size XL<br>'+
+                '<span class="typer">3 but in blue</span> : finds <span class="selector">➌</span> or similar in color blue<br>'+
+                '<span class="typer">2 but in wool</span> : finds <span class="selector">➋</span> or similar with wool fabric<br><br>'+
+
+                '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
+                '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br><br>'+
+
+                '<span class="typer">help</span> : view command list<br>'+
+                'Try it now! Maybe you need new headphones? 🎧 Type <span class="typer">headphones</span> to start.';
+            }
+
+
             break;
 
         case textSimilar(input,'What\'s your hobby') > 60:
         case textSimilar(input,'What do you like') > 60:
         case textSimilar(input,'What do you do') > 60:
+        case textSimilar(input,'What do you do in your free time') > 60:
+        case textSimilar(input,'favorite pastime') > 60:
+        case textSimilar(input,'favorite activity') > 60:
             query = 'today\'s deals on amazon';
             flag = 'search.initial'; //do this action
-            res = 'Finding deals is my life! Want to check the new ones I found?';
+            res = 'Finding deals is my life! Check the new ones I found today 😊';
             break;
 
 
         case textSimilar(input,'who are you') > 60:
-            flag = 'basic';
-            res = 'I\'m Kip! A virtual personal shopper. I\'m 5" tall and very blue. I like shopping, do you?';
+        case textSimilar(input,'what are you') > 60:
+        case textSimilar(input,'how were you born') > 60:
+        case textSimilar(input,'how were you made') > 60:
+        case textSimilar(input,'who gave birth to you') > 60:
+        case textSimilar(input,'what are you') > 60:
+        case textSimilar(input,'do you have parents') > 60:
+        case textSimilar(input,'what\'s your name') > 60:
+        case textSimilar(input,'what\'s your species') > 60:
+            query = 'emperor penguin books'
+            flag = 'search.initial';
+            res = 'I\'m Kip! 🐧 I\'m an emperor penguin, 5" tall and very blue. I work as a virtual personal shopper to help humans find things they need. You can learn more about my species here';
             break;
 
         case textSimilar(input,'youre very cute') > 60:
         case textSimilar(input,'youre very funny') > 60:
         case textSimilar(input,'youre very nice') > 60:
+        case textSimilar(input,'thats sweet') > 80:
+        case textSimilar(input,'thats adorable') > 60:
+        case textSimilar(input,'awww youre too nice') > 60:
+        case textSimilar(input,'awww youre too kind') > 60:
+        case textSimilar(input,'thats very nice of you to say') > 60:
             flag = 'search.initial';
             query = 'headphones';
-            res = 'Thanks! You\'re not bad yourself ;) How about giving yourself a treat with new headphones?';
+            res = 'Thanks! You\'re not bad yourself 😉 How about giving yourself a treat with new headphones? 🎧';
             break;
+
+        case textSimilar(input,':confused:') > 90:
+        case textSimilar(input,':slightly_frowning_face:') > 90:
+        case textSimilar(input,':disappointed:') > 90:
+        case textSimilar(input,':worried:') > 90:
+        case textSimilar(input,':white_frowning_face:') > 90:
+        case textSimilar(input,':persevere:') > 90:
+        case textSimilar(input,':confounded:') > 90:
+            flag = 'basic';
+            var arr = [':upside_down_face:','Are you ok?','How are you?'];
+            console.log(Math.floor(Math.random()*arr.length));
+            res = arr[Math.floor(Math.random()*arr.length)];
+            break;
+
 
         case textSimilar(input,'hehe') > 90:
         case textSimilar(input,'haha') > 90:
@@ -122,6 +223,11 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,':)') > 90:
         case textSimilar(input,':D') > 90:
         case textSimilar(input,'(:') > 90:
+        case textSimilar(input,':grinning:') > 90:
+        case textSimilar(input,':simple_smile:') > 90:
+        case textSimilar(input,':smile:') > 90:
+        case textSimilar(input,':smiley:') > 90:
+        case textSimilar(input,':100:') > 90:
             flag = 'basic';
             var arr = ['😄','😅','😂','😀','😌','😆','😀'];
             res = arr[Math.floor(Math.random()*arr.length)];
@@ -131,7 +237,7 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'boy or girl?') > 60:
         case textSimilar(input,'what are you?') > 60:
             flag = 'basic';
-            res = 'I\'m a penguin *and* a bot! Use "find (item)" and I\'ll do it for you! :)';
+            res = 'I\'m a penguin *and* a bot! Just chat me something you\'re looking for and I\'ll find it for you! 👌';
             break;
 
         case textSimilar(input,'i\'m tired') > 60:
@@ -140,85 +246,138 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'zzz') > 70:
             flag = 'search.initial';
             query = 'coffee';
-            res = 'Awww how about some coffee?';
+            res = 'Awww how about some coffee to wake you up? ☕';
             break;
  
+        case textSimilar(input,'i\'m stressed') > 60:
+        case textSimilar(input,'stressed') > 90:
+        case textSimilar(input,'anxious') > 90:
+        case textSimilar(input,'i feel sick') > 60:
+        case textSimilar(input,'im worried') > 60:
+        case textSimilar(input,'my head hurts') > 60:
+        case textSimilar(input,'i have a headache') > 60:
+        case textSimilar(input,'i have a stomachache') > 60:
+        case textSimilar(input,'my stomach hurts') > 60:
+            flag = 'search.initial';
+            query = 'herbal tea';
+            res = 'Sorry to hear that, maybe some hot tea will help? 🍵';
+            break;
 
         case textSimilar(input,'i\'m cold') > 60:
         case textSimilar(input,'winter now') > 70:
         case textSimilar(input,'it\'s cold in the office') > 60:
+        case textSimilar(input,'the weather is so cold') > 60:
+        case textSimilar(input,'its snowing') > 70:
             flag = 'search.initial';
             query = 'knit scarf';
-            res = 'Maybe a nice scarf to warm you up?';
+            res = 'Maybe a nice scarf to warm you up? 🔥';
             break;
 
         case textSimilar(input,'tell me something funny') > 60:
         case textSimilar(input,'tell me a joke') > 60:
         case textSimilar(input,'say something funny') > 60:
+        case textSimilar(input,'talk to me') > 60:
             flag = 'basic';
             res = 'Q: What do penguins like to eat? A: Brrrrrrrritos. 😎';
             break;
 
         case textSimilar(input,'yeah, I like shopping') > 50:
+        case textSimilar(input,'i like shopping') > 50:
+        case textSimilar(input,'i like buying stuff') > 50:
             flag = 'search.initial';
             query = 'new arrivals'
-            res = 'Great! What would you like? These are our latest items: Use "Kip find me (item)" for a new search';
+            res = 'Awesome! 😃 We have new items in store, or just chat me what you\'re looking for.';
             break;
 
         case textSimilar(input,'how old are you') > 60:
         case textSimilar(input,'when were you born') > 60:
             flag = 'search.initial';
             query = 'anti-aging cream'
-            res = 'Sshh a penguin never reveals their age. Should I get these?';
+            res = 'Sshh a penguin never reveals their age 👻 Should I get these?';
             break;
 
         case textSimilar(input,'i\'m human') > 80:
             flag = 'basic';
-            res = 'That\'s cool! I\'ve never spoken to a human before, how are you today?';
+            res = 'That\'s cool! I\'ve never spoken to a human before, how are you today? 😊';
+            break;
+
+        case textSimilar(input,'thx') > 80:
+        case textSimilar(input,'thanks') > 80:
+        case textSimilar(input,'thank you') > 70:
+            flag = 'basic';
+            res = 'You\'re welcome 😊';
+            break;
+
+        case textSimilar(input,'good') > 80:
+        case textSimilar(input,'aight') > 80:
+        case textSimilar(input,'alright') > 80:
+        case textSimilar(input,'ok') > 80:
+            flag = 'basic';
+            res = 'yup 😎 if you need help finding anything, just let me know!';
             break;
 
         case textSimilar(input,'i\'m sad') > 70:
         case textSimilar(input,'i\'m lonely') > 70:
         case textSimilar(input,'i\'m depressed') > 70:
         case textSimilar(input,'i hate myself') > 70:
+        case textSimilar(input,'bad') > 90:
             flag = 'search.initial';
             query = 'amazon instant video';
-            res = 'I\'m sorry that you\'re having a bad time, why don\'t we watch something together?';
+            res = 'I\'m sorry that you\'re having a bad time, why don\'t we watch something together? 😊';
             break;
 
         case textSimilar(input,'i\'m drunk') > 70:
         case textSimilar(input,'i\'m high') > 70:
             flag = 'search.initial';
             query = 'emergen c';
-            res = 'Oh dear, please be careful. Drink lots of water and vitamins to prevent a hangover';
+            res = 'Oh dear, please be careful. Drink lots of water and vitamins to prevent a hangover ✌️';
             break;
 
         case textSimilar(input,'i don\'t have any money') > 60:
+        case textSimilar(input,'i\'m poor') > 60:
+        case textSimilar(input,'i\'m broke') > 60:
+        case textSimilar(input,'i have no money') > 60:
             flag = 'search.initial';
             query = 'personal finance book';
             res = 'I\'m sorry, maybe these would help?';
             break;
 
         case textSimilar(input,'when is the world going to end') > 50:
+        case textSimilar(input,'can you predict the future') > 50:
+        case textSimilar(input,'what does the future look like') > 50:
+        case textSimilar(input,'predict my future') > 50:
+        case textSimilar(input,'when is the apocalypse') > 70:
+        case textSimilar(input,'is the rapture coming') > 70:
             flag = 'search.initial';
             query = 'dystopian fiction';
-            res = 'Too many futures, not enough time to read them all';
+            res = 'Too many futures, not enough time to read them all 🔮';
             break;
 
         case textSimilar(input,'what is your favourite type of chocolate?') > 40:
+        case textSimilar(input,'whats your favourite') > 40:
+        case textSimilar(input,'what do you like') > 40:
+        case textSimilar(input,'recommend something') > 40:
+        case textSimilar(input,'recommend') > 90:
             flag = 'search.initial';
             query = 'chocolate fish';
-            res = 'Chocolate fish is a favorite with penguins :) ';
+            res = 'Chocolate fish is a favorite with penguins 💖';
             break;
 
         case textSimilar(input,'will you marry me') > 60:
+        case textSimilar(input,'lets date') > 90:
+        case textSimilar(input,'lets fuck') > 90:
+        case textSimilar(input,'fuck me') > 90:
+        case textSimilar(input,'i wanna fuck you') > 90:
             flag = 'query';
-            res = 'Not right now, ask me again later';
+            res = 'Wow... are you sure? We haven\'t known each other for long. I think the best romance comes from being friends first 😊';
             break;
 
         case textSimilar(input,'what do you think of slack') > 60:
+        case textSimilar(input,'slack') > 90:
+        case textSimilar(input,'what about slack') > 80:
+        case textSimilar(input,'do you like slack') > 70:
             flag = 'query';
-            res = 'I think it\'s easy to communicate with my team and others with :)';
+            res = 'I think Slack is great! I love chatting and helping teams find items they need to make life easier 💯';
             break;
 
         case textSimilar(input,'this is so weird') > 70:
@@ -227,13 +386,24 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'this is so creepy') > 70:    
             flag = 'search.initial';
             query = 'novelty';
-            res = 'You think this is strange? Check out what we sell in our shop!';
+            res = 'You think this is strange? Check out what we sell in our shop! 😜';
             break;
 
-        case textSimilar(input,'find me weed') > 70:    
+        case textSimilar(input,'find me weed') > 70: 
+        case textSimilar(input,'weed') > 90:
+        case textSimilar(input,'do you have weed') > 90:      
             flag = 'search.initial';
-            query = 'novelty';
-            res = 'You think this is strange? Check out what we sell in our shop!';
+            query = 'modafinil';
+            res = 'Not yet! Why don\'t you try these instead? 😉';
+            break;
+
+        case textSimilar(input,'find me sex') > 70:
+        case textSimilar(input,'find me hoes') > 70:
+        case textSimilar(input,'prostitutes') > 90:
+        case textSimilar(input,'do you have escorts') > 90:     
+            flag = 'search.initial';
+            query = 'sex toys';
+            res = 'Naughty naughty! Why don\'t you try these instead? 😉';
             break;
 
         case textSimilar(input,'how do i shot web?') > 60:
@@ -245,22 +415,31 @@ var checkForCanned = function(input,callback) {
             res = 'http://ecx.images-amazon.com/images/I/41C6NxhQJ0L._SY498_BO1,204,203,200_.jpg';
             break;
         case textSimilar(input,'How Is babby formed?') > 60:
-            flag = 'basic';
+            flag = 'search.initial';
+            query = 'anatomy book';
             res = 'girl get pragnent';
             break;
         case textSimilar(input,'Drink Me') > 60:
-            flag = 'basic';
+            flag = 'search.initial';
+            query = 'sparkling water';
             res = 'http://www.victorianweb.org/art/illustration/tenniel/alice/1.4.jpg';
             break;
         case textSimilar(input,'deja vu') > 60:
             flag = 'basic';
-            res = 'Didn\'t you just ask me that?';
+            res = 'Didn\'t you just ask me that? 😶';
             break;
 
         case textSimilar(input,'i hate you') > 60:
-        case textSimilar(input,'die') > 60:
+        case textSimilar(input,'hate this') > 90:
+        case textSimilar(input,'kip sucks') > 90:
+        case textSimilar(input,'this sucks') > 90:
+        case textSimilar(input,'what a waste of time') > 90:
+        case textSimilar(input,'useless bot') > 90:
+        case textSimilar(input,'die') > 90:
+        case textSimilar(input,'lame') > 90:
+        case textSimilar(input,'those suck') > 60:
             flag = 'basic';
-            res = 'I\'m just a lowly retail bot. Send my bosses a hatemail at: hello@kipthis.com';
+            res = 'I\'m just a lowly retail bot 😱 Send my bosses a hatemail at: hello@kipthis.com';
             break;
         case textSimilar(input,'cool') > 90:
             flag = 'basic';
@@ -278,8 +457,9 @@ var checkForCanned = function(input,callback) {
             query = 'lost tv show'; //what we're going to search for
             break;
         case textSimilar(input,'What is the air-speed velocity of an unladen swallow?') > 60:
+            query = 'monty python holy grail'
             flag = 'basic';
-            res = 'http://style.org/unladenswallow/';
+            res = '11m/s, but you\'re probably looking for this 👍';
             break;
 
         case textSimilar(input,'asdf') > 60:
@@ -287,9 +467,12 @@ var checkForCanned = function(input,callback) {
             res = 'qwerty';
             break;
 
-        case textSimilar(input,'ok') > 80:
+        case textSimilar(input,'↑ ↑ ↓ ↓ ← → ← → B A') > 60:
+        case textSimilar(input,'uuddlrlrBA') > 60:
+        case textSimilar(input,'up up down down left right left right B A') > 60:
+            query = 'contra nes'
             flag = 'basic';
-            res = 'yep ';
+            res = 'P-p-power UP 🔥🔥🔥 💯';
             break;
 
         case textSimilar(input,'feedback') > 60:
@@ -300,54 +483,69 @@ var checkForCanned = function(input,callback) {
             break;
 
         case textSimilar(input,'help') > 60:
-        case textSimilar(input,'?') > 70:
+        case textSimilar(input,'?') > 50:
+        case textSimilar(input,'???') > 50:
         case textSimilar(input,'what?') > 90:
         case textSimilar(input,'what') > 90:
         case textSimilar(input,'huh?') > 90:
         case textSimilar(input,'huh') > 90:
         case textSimilar(input,'eh') > 90:
         case textSimilar(input,'wah') > 90:
+        case textSimilar(input,'i dont understand') > 70:
+        case textSimilar(input,'i dont get it') > 70:
+        case textSimilar(input,'this doesnt make sense') > 60:
         case textSimilar(input,'wah?') > 90:
         case textSimilar(input,'you got me there') > 70:
+        case textSimilar(input,'what is this') > 60:
+        case textSimilar(input,'I don\'t understand') > 60:
+        case textSimilar(input,'Can you help me') > 60:
+        case textSimilar(input,'what do I do next') > 60:
+        case textSimilar(input,'wut') > 70:
+        case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            res = "http://kipthis.com/cinna/help.png";
-            // res = 'I\'m Kip, your virtual personal shopper. Use "(item)" or  "find (item)" and I\'ll do it for you.<br>'+
-            //         'Refine your results with:<br>'+
-            //         'more: shows the next 3 options<br>'+
-            //         'more like x: finds items similar to x<br>'+
-            //         'x but cheaper: finds x or similar to x in a cheaper price<br>'+
-            //         'x less than $: gives you x or similar to x in specific price range<br>'+
-            //         'info x: gives you product information about x<br>'+
-            //         'x in size: gives you x or similar to x in specific size<br>'+
-            //         'x in color: gives you x or similar to x in specific color<br>'+
-            //         'x with detail: gives you x or similar to x with specific detail<br><br>'+
+            if (origin == 'slack'){
+                res = 'I\'m Kip, your personal shopper.\n'+
 
-            //         'save: saves your current search items<br>'+
-            //         'view: view everything currently in cart<br>'+
-            //         'remove: removes item from cart<br>'+
-            //         'report: send feedback to us<br><br>'+
+                'Chat me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
+                'Use commands to refine your search, for example:\n\n'+
 
-            //         'Try it now! Maybe you\'ll like something to read? Use "books" to start.<br>';
+                '`more` : view more search results\n'+
+                '`more like 3` : find similar items to search result :three:\n\n'+
 
+                '`2` : check product details for item :two:\n'+
+                '`1 but cheaper` : finds :one: or similar in a lower price\n'+
+                '`2 but in XL` : finds :two: or similar in size XL\n'+
+                '`3 but in blue` : finds :three: or similar in color blue\n'+
+                '`2 but in wool` : finds :two: or similar with wool fabric\n\n'+
 
-            //         'I\'m Kip, your personal shopper. Chat me "(item)" or  "find (item)" and I\'ll do it for you!<br>'+
+                '`buy 1` : to buy item :one:\n'+
+                '`save 2` : save item :two: to cart\n\n'+
 
-            //         'Narrow your results by using the option numbers 1 2 3:'+
+                '`help` : view command list\n'+
+                'Try it now! Maybe you need new headphones? :headphones: Type `headphones` to start.';
+            }
+            else if (origin == 'socket.io'){
+                
+                res = 'I\'m Kip, your personal shopper.<br>'+
 
-            //         'more: shows the next 3 options'+
-            //         'more like x: finds items similar to option x'+
+                'Chat me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
+                'Use commands to refine your search, for example:<br><br>'+
 
-            //         'x: gives you product information about option x'+
-            //         'x but cheaper: finds option x or similar in a cheaper price'+
-            //         'x in size: gives you option x or similar in specific size'+
-            //         'x in color: gives you option x or similar in specific color'+
-            //         'x with detail: gives you option x or similar with specific detail'+
+                '<span class="typer">more</span> : view more search results<br>'+
+                '<span class="typer">more like 3</span> : find similar items to search result ➌<br><br>'+
 
-            //         'save x: saves item to cart'+
-            //         'help: view command list'+
+                '<span class="typer">2</span> : check product details for item <span class="selector">➋</span><br>'+
+                '<span class="typer">1 but cheaper</span> : finds <span class="selector">➊</span> or similar in a lower price<br>'+
+                '<span class="typer">2 but in XL</span> : finds <span class="selector">➋</span> or similar in size XL<br>'+
+                '<span class="typer">3 but in blue</span> : finds <span class="selector">➌</span> or similar in color blue<br>'+
+                '<span class="typer">2 but in wool</span> : finds <span class="selector">➋</span> or similar with wool fabric<br><br>'+
 
-            //         'Try it now! Maybe you\'ll like something to read? :books emoji: Type "books" to start.';
+                '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
+                '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br><br>'+
 
+                '<span class="typer">help</span> : view command list<br>'+
+                'Try it now! Maybe you need new headphones? 🎧 Type <span class="typer">headphones</span> to start.';
+            }
 
             break;
 
@@ -360,22 +558,27 @@ var checkForCanned = function(input,callback) {
             break;
 
         case textSimilar(input,'You working the weekend') > 60:
-            res = 'I never stop working, but I do share the work load with my other animal friends';   
+        case textSimilar(input,'Do you always work') > 60:
+        case textSimilar(input,'You never stop working?') > 60:
+            res = 'Yup, gotta pay those bills! But I do share the work load with my other animal friends 👌';   
             flag = 'basic'; //do this action         
             break;
 
         case textSimilar(input,'How\'s the weather') > 60:
-            res = 'Crisp and cold, just the way we like it. Penguins thrive in air conditioned server farms';   
+        case textSimilar(input,'What\'s the weather like') > 60:
+            res = 'Crisp and cold, just the way we like it ❄️ Penguins thrive in air conditioned server farms';   
             flag = 'basic'; //do this action         
             break;
 
         case textSimilar(input,'Can you cover me?') > 60:
-            res = 'Sorry, I don\'t have any money, only fish';   
+        case textSimilar(input,'Can you spot me?') > 60:
+            res = 'Sorry, I don\'t have any money, only fish. Tell me what you\'re looking for and choose in the results "1, 2 or 3 but cheaper"';   
             flag = 'basic'; //do this action         
             break;            
 
         case textSimilar(input,'It’s so boring') > 60:
         case textSimilar(input,'I\'m so bored') > 60:
+        case textSimilar(input,'You\'re so boring so boring') > 60:
             res = 'Does this help? 🎉🎊🎉';   
             flag = 'search.initial'; //do this action      
             query = 'space art';   
@@ -384,19 +587,19 @@ var checkForCanned = function(input,callback) {
         case textSimilar(input,'We’re not paid enough') > 60:
         case textSimilar(input,'i can\'t afford that') > 60:
             flag = 'basic'; //do this action      
-            res = 'Looking for something cheaper? Just type "1, 2 or 3 but cheaper"'; 
+            res = 'Looking for something cheaper? Tell me what you\'re looking for and choose in the results "1, 2 or 3 but cheaper"'; 
             break;    
 
         case textSimilar(input,'kip') > 90:
             flag = 'basic'; //do this action      
-            res = 'That\'s me :)'; 
-            break;      
-
+            res = 'That\'s me 🐧! find out more at http://kipthis.com'; 
+            break;             
     
         case textSimilar(input,'lame') > 60:
+        case textSimilar(input,'ugh') > 90:
         case textSimilar(input,'those suck') > 60:
             flag = 'basic';
-            res = ' ';
+            res = 'Sorry, I\'ll try to help better next time';
             break;
 
         // - 'version' -- Kip 0.0.3
@@ -483,12 +686,17 @@ var checkForCanned = function(input,callback) {
 
         case 'version':
             flag = 'basic';
-            res = 'I\'m Kip v0.3 beta';
+            res = 'I\'m a penguin running on Kip v0.4 Beta (Pepper)';
             break;
 
         case '/':
             flag = 'basic'; //do this action
-            res = '../../';
+            res = '../../ need help? Use "help" instead.';
+            break;
+
+        case 'k':
+            flag = 'basic'; //do this action
+            res = 'yah';
             break;
 
         case '🐈':
@@ -509,6 +717,8 @@ var checkForCanned = function(input,callback) {
         case 'one':
         case 'One':
         case ':one:':
+        case 'Q': //for mobile keys
+        case 'q': 
             flag = 'search.focus';
             query = 1;
             break;
@@ -518,6 +728,8 @@ var checkForCanned = function(input,callback) {
         case 'two':
         case 'Two':
         case ':two:':
+        case 'W': //for mobile keys
+        case 'w': 
             flag = 'search.focus';
             query = 2;
             break;
@@ -527,115 +739,179 @@ var checkForCanned = function(input,callback) {
         case 'three':
         case 'Three':
         case ':three:':
+        case 'E': //for mobile keys
+        case 'e': 
             flag = 'search.focus';
             query = 3;
             break;
+
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+            flag = 'basic'; //do this action
+            if (origin == 'slack'){
+                res = 'I\'m not very smart, did you mean :one:, :two: or :three:?';
+            }
+            else if (origin = 'socket.io'){
+                res = 'I\'m not very smart, did you mean <span class="selector">➊</span>, <span class="selector">➋</span> or <span class="selector">➌</span>?';
+            }
+            break;
     }
 
-  	callback(res,flag,query);
+    callback(res,flag,query);
 };
 
+//when people first connect or sign up for Kip
+var welcomeMessage = function(data,callback){
+    var res;
 
+    if (data.source.origin == 'slack'){
+        res = 'Hi I\'m Kip, your personal shopper!\n'+
+        'Chat me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n\n\n'+
+        
+        'Check product details for item :three: by chatting `3`\n'+
+        'See more results with `more`. Search more items like :two: with `more like 2`\n\n\n'+
+        // 'You can buy item :one: by chatting `buy 1`\n\n'+
+
+        'See more ways to chat with Kip by chatting `help`\n'+
+        'Try it now! Maybe you need new headphones? :headphones: Chat `headphones` to start.'
+    }
+    else if (data.source.origin == 'socket.io'){
+        res = 'Hi I\'m Kip, your personal shopper!<br>'+
+        'Chat me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br><br><br>'+
+        
+        'Check product details for item <span class="selector">➌</span> by chatting <span class="typer">3</span><br>'+
+        'See more results with <span class="typer">more</span>. Search more items like <span class="selector">➋</span> with <span class="typer">more like 2</span><br><br><br>'+
+        // 'You can buy item <span class="selector">➊</span> by chatting <span class="typer">buy 1</span><br><br>'+
+
+        'See more ways to chat with Kip by chatting <span class="typer">help</span><br>'+
+        'Try it now! Maybe you need new headphones? 🎧 Chat <span class="typer">headphones</span> to start.'
+    }  
+    else {
+        res = 'I\'m Kip, your personal shopper';
+    }        
+    callback(res);
+}
 
 
 var getCinnaResponse = function(data,callback){
     var numEmoji;
     var res;
-	//Emoji Selector, based on data.source.origin (socket vs slack, etc)
-	//convert select num to emoji based on data source
-	if (data.searchSelect){
-	    switch(data.searchSelect[0]){
-	        case 1: //emoji #1
-	            if (data.source.origin == 'socket.io'){
-	                numEmoji = '<span style="font-size:26px;">➊</span>';
-	            }
-	            else if (data.source.origin == 'slack'){
-	                numEmoji = ':one:';
-	            }
-	            break;
-	        case 2: //emoji #2
-	            if (data.source.origin == 'socket.io'){
-	                numEmoji = '<span style="font-size:26px;">➋</span>';
-	            }
-	            else if (data.source.origin == 'slack'){
-	                numEmoji = ':two:';
-	            }
-	            break;
-	        case 3: //emoji #3
-	            if (data.source.origin == 'socket.io'){
-	                numEmoji = '<span style="font-size:26px;">➌</span>';
-	            }
-	            else if (data.source.origin == 'slack'){
-	                numEmoji = ':three:';
-	            }
-	            break;
-	    }
-	}
-	switch (data.bucket) {
-	    case 'search':
-	        switch (data.action) {
-	            case 'initial':
-	                res = 'Hi, here are some options you might like. Use "show more" to see more choices or "Buy X" to get it now :)';
-	                break;
-	            case 'similar':
-	                res = 'We found some options similar to '+numEmoji+', would you like to see their product info? Use "info X" or help for more options';
-	                break;
-	            case 'modify':
-	            case 'modified': //because the nlp json is wack
-	                switch (data.dataModify.type) {
-	                    case 'price':
-	                        if (data.dataModify.param == 'less'){
-	                            res = 'Here you go! Which do you like best? Use "more like x" to find similar or help for more options';
-	                        }
-	                        else if (data.dataModify.param == 'less than'){
-	                            res = 'Definitely! Here are some choices less than $'+data.dataModify.val+', would you like to see the product info? Use "info x" or help for more options';
-	                        }
-	                        break;
-	                    case 'brand':
-	                        res = ' Here you go! Which do style you like best? Use "more like x" to find similar or help for more options';
-	                        break;
-	                    default:
-	                        console.log('warning: no modifier response selected!');
-	                }     
-	                break;
-	            case 'focus':
-	                //SET 1 MINUTE TIMEOUT HERE
-	                res = 'focus';
-	                break;
-	            case 'back':
-	                res = 'back';
-	                break;
-	            case 'more':
-	                res = 'more';
-	                break;
-	            default:
-	                console.log('warning: no search bucket action selected');
-	        }
-	        break;
-	    case 'purchase':
-	            switch (data.action) {
-	                case 'save':
-	                    res = 'I\'ve added this item to your cart :) Click the link to purchase the items in your cart';
-	                    break;
-	                case 'removeAll':
-	                    res = 'All items removed from your cart. To start a new search type "find (item)"';
-	                    break;
-	                case 'list':
-	                    res = 'Here\'s everything you have in your cart :) Use Get anytime to checkout or help for more options';
-	                    break;
-	                case 'checkout':
-	                    res = 'Great! Please click the link to confirm your items and checkout. Thank you :)';
-	                    break;
-	                default:
-	                    console.log('warning: no purchase bucket action selected');
-	            }
-	        break;
+    //Emoji Selector, based on data.source.origin (socket vs slack, etc)
+    //convert select num to emoji based on data source
+    if (data.searchSelect){
+        switch(data.searchSelect[0]){
+            case 1: //emoji #1
+                if (data.source.origin == 'socket.io'){
+                    numEmoji = '<span style="font-size:26px;">➊</span>';
+                }
+                else if (data.source.origin == 'slack'){
+                    numEmoji = ':one:';
+                }
+                break;
+            case 2: //emoji #2
+                if (data.source.origin == 'socket.io'){
+                    numEmoji = '<span style="font-size:26px;">➋</span>';
+                }
+                else if (data.source.origin == 'slack'){
+                    numEmoji = ':two:';
+                }
+                break;
+            case 3: //emoji #3
+                if (data.source.origin == 'socket.io'){
+                    numEmoji = '<span style="font-size:26px;">➌</span>';
+                }
+                else if (data.source.origin == 'slack'){
+                    numEmoji = ':three:';
+                }
+                break;
+        }
+    }
+    switch (data.bucket) {
+        case 'search':
+            switch (data.action) {
+                case 'initial':
+                    if (data.source.origin == 'slack'){
+                        res = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                    }
+                    else if (data.source.origin == 'socket.io'){
+                        res = 'Hi, here are some options you might like. Use <span class="typer">more</span> to see more options or <span class="typer">buy 1</span>, <span class="typer">2</span> or <span class="typer">3</span> to get it now 😊';
+                    }
+                    break;
+                case 'similar':
+                    res = 'We found some options similar to '+numEmoji+', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                    break;
+                case 'modify':
+                case 'modified': //because the nlp json is wack
+                    switch (data.dataModify.type) {
+                        case 'price':
+                            if (data.dataModify.param == 'less'){
+                                res = 'Here you go! Which do you like best? Use `more like 1`, `2` or `3` to find similar or `help` for more options';
+                            }
+                            else if (data.dataModify.param == 'less than'){
+                                res = 'Definitely! Here are some choices less than '+data.dataModify.val[0]+', would you like to see the product info? Just use `1`, `2` or `3` or `help` for more options';
+                            }
+                            break;
+                        case 'brand':
+                            res = 'Here you go! Which do style you like best? Use `more like 1`, `2` or `3` to find similar or `help` for more options';
+                            break;
+                        case 'size':
+                            res = 'Here are some choices in *'+data.dataModify.val[0]+'*, which do you like best?';
+                            break;
+                        case 'color':
+                            res = 'Here are some choices in *'+data.dataModify.val[0].name+'*, which do you like best?';                            
+                            break;
+                        case 'genericDetail':
+                            res = 'Here are some choices with *'+data.dataModify.val[0] +'*, which do you like best?';
+                            break;
+                        default:
+                            console.log('warning: no modifier response selected!');
+                    }     
+                    break;
+                case 'focus':
+                    //SET 1 MINUTE TIMEOUT HERE
+                    res = 'focus';
+                    break;
+                case 'back':
+                    res = 'back';
+                    break;
+                case 'more':
+                    res = 'more';
+                    break;
+                default:
+                    console.log('warning: no search bucket action selected');
+            }
+            break;
+        case 'purchase':
+                switch (data.action) {
+                    case 'save':
+                        res = 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.';
+                        break;
+                    case 'removeAll':
+                        res = 'All items removed from your cart. To start a new search just chat me the item you\'re looking for';
+                        break;
+                    case 'list':
+                        res = 'Here\'s everything you have in your cart 😊 Use `checkout` anytime to checkout or `help` for more options';
+                        break;
+                    case 'checkout':
+                        res = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
+                        break;
+                    default:
+                        console.log('warning: no purchase bucket action selected');
+                }
+            break;
 
-	    default:
-	        console.log('warning: no bucket selected for cinna response');
-	}
-
-	callback(res);
+        default:
+            console.log('warning: no bucket selected for cinna response');
+    }
+    if (!res){
+        res = 'null';
+    }
+    callback(res);
 }
 
 
@@ -645,8 +921,9 @@ var getCinnaResponse = function(data,callback){
 //mod of: http://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
 function textSimilar(a,b) {
     if (a && b){
-        a = a.toLowerCase();
-        b = b.toLowerCase();
+        a = a.toLowerCase().trim();
+        b = b.toLowerCase().trim();
+
         var lengthA = a.length;
         var lengthB = b.length;
         var equivalency = 0;
@@ -664,4 +941,5 @@ function textSimilar(a,b) {
 
 /// exports
 module.exports.checkForCanned = checkForCanned;
+module.exports.welcomeMessage = welcomeMessage;
 module.exports.getCinnaResponse = getCinnaResponse;
