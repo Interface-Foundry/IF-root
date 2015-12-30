@@ -34,11 +34,11 @@ def parse(data):
 
         # item focus
         s.focus = []
-        if (sent.find('first') >= 0) or (sent.find('1') >= 0) or (sent.find('one') >= 0):
+        if (sent.find('first') >= 0) or (sent.find('1') >= 0) or (sent.words.count('one') > 0):
             s.focus.append(1)
-        if (sent.find('second') >= 0) or (sent.find('2') >= 0) or (sent.find('two') >= 0):
+        if (sent.find('second') >= 0) or (sent.find('2') >= 0) or (sent.words.count('two') > 0):
             s.focus.append(2)
-        if (sent.find('third') >= 0) or (sent.find('3') >= 0) or (sent.find('three') >= 0):
+        if (sent.find('third') >= 0) or (sent.find('3') >= 0) or (sent.words.count('three') > 0):
             s.focus.append(3)
 
     for i, sent in enumerate(data.doc.sents):

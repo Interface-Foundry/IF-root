@@ -112,7 +112,8 @@ def index():
 
         last_y = last_y + 22
 
-        if 'reviews' in im:   
+        if 'reviews' in im and 'rating' in im[u'reviews']:   
+            # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
             #add rating
             if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
                 selectRating = 0
