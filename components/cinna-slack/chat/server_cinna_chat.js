@@ -136,22 +136,6 @@ app.get('/newslack', function(req, res) {
             loadSlackUsers(users);
             console.log('DEBUG: new slack team added with this data: ',users);
             res.send('slack user added');
-
-            //update all to initialized
-            async.eachSeries(users, function(user, callback) {
-                user.meta.initialized = true;
-                user.save( function(err, data){
-                    if(err){
-                        console.log('Mongo err ',err);
-                    }
-                    else{
-                        console.log('mongo res ',data);
-                    }
-                    callback();
-                });
-            }, function done(){
-                console.log('initialized all new bots');
-            });
         }
     });
 });
