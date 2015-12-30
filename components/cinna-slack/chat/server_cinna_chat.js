@@ -183,8 +183,6 @@ function loadSlackUsers(users){
             //send welcome to new teams – dont spam all slack people on node reboot
             if (user.meta && user.meta.initialized == false){
 
-                console.log('DEBUG: success, will send welcome message to new team');
-
                 //* * * * send welcome message
                 //get list of users in team
                 request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
@@ -198,8 +196,6 @@ function loadSlackUsers(users){
                         //loop through members, commence welcome!
                         async.eachSeries(body.ims, function(member, callback) {
 
-                            console.log('DEBUG: member checker for new hello messages ',member);
-                            
                             if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
                                 var hello = {
                                     msg: 'welcome'
@@ -224,6 +220,31 @@ function loadSlackUsers(users){
                     }
                   }
                 });
+
+                //find all bots not added to our system yet
+                Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
+                    if(err){
+                        console.log('saved slack bot retrieval error');
+                    }
+                    else {
+                        //update all to initialized
+                        async.eachSeries(users, function(user, callback) {
+                            user.meta.initialized = true;
+                            user.save( function(err, data){
+                                if(err){
+                                    console.log('Mongo err ',err);
+                                }
+                                else{
+                                    console.log('mongo res, updated meta initialized ',data);
+                                }
+                                callback();
+                            });
+                        }, function done(){
+                            console.log('initialized all new bots');
+                        });
+                    }
+                });
+
             }
             // * * * * * * * * * * //
 
