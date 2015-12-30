@@ -134,6 +134,7 @@ app.get('/newslack', function(req, res) {
         }
         else {
             loadSlackUsers(users);
+            console.log('DEBUG: new slack team added with this data: ',users);
             res.send('slack user added');
 
             //update all to initialized
@@ -177,9 +178,13 @@ function loadSlackUsers(users){
         //init new bot
         slackUsers[user.team_id].on('start', function() {
 
+            console.log('DEBUG: checking for meta initialized false', user.meta);
             //* * * * Welcome message * * * //
             //send welcome to new teams – dont spam all slack people on node reboot
             if (user.meta && user.meta.initialized == false){
+
+                console.log('DEBUG: success, will send welcome message to new team');
+
                 //* * * * send welcome message
                 //get list of users in team
                 request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
@@ -192,6 +197,9 @@ function loadSlackUsers(users){
                     if (body.ok && body.ims.length > 0){
                         //loop through members, commence welcome!
                         async.eachSeries(body.ims, function(member, callback) {
+
+                            console.log('DEBUG: member checker for new hello messages ',member);
+                            
                             if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
                                 var hello = {
                                     msg: 'welcome'

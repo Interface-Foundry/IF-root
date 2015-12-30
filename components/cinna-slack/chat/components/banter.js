@@ -389,7 +389,7 @@ var checkForCanned = function(input,callback,origin) {
             res = 'You think this is strange? Check out what we sell in our shop! 😜';
             break;
 
-        case textSimilar(input,'find me weed') > 70: 
+        case textSimilar(input,'find me weed') > 90: 
         case textSimilar(input,'weed') > 90:
         case textSimilar(input,'do you have weed') > 90:      
             flag = 'search.initial';
@@ -397,8 +397,8 @@ var checkForCanned = function(input,callback,origin) {
             res = 'Not yet! Why don\'t you try these instead? 😉';
             break;
 
-        case textSimilar(input,'find me sex') > 70:
-        case textSimilar(input,'find me hoes') > 70:
+        case textSimilar(input,'find me sex') > 95:
+        case textSimilar(input,'find me hoes') > 95:
         case textSimilar(input,'prostitutes') > 90:
         case textSimilar(input,'do you have escorts') > 90:     
             flag = 'search.initial';
