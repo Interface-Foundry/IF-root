@@ -694,6 +694,11 @@ var checkForCanned = function(input,callback,origin) {
             res = '../../ need help? Use "help" instead.';
             break;
 
+        case 'k':
+            flag = 'basic'; //do this action
+            res = 'yah';
+            break;
+
         case '🐈':
             flag = 'search.initial'; //do this action
             res = 'meow :3';
@@ -739,6 +744,22 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.focus';
             query = 3;
             break;
+
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+            flag = 'basic'; //do this action
+            if (origin == 'slack'){
+                res = 'I\'m not very smart, did you mean :one:, :two: or :three:?';
+            }
+            else if (origin = 'socket.io'){
+                res = 'I\'m not very smart, did you mean <span class="selector">➊</span>, <span class="selector">➋</span> or <span class="selector">➌</span>?';
+            }
+            break;
     }
 
     callback(res,flag,query);
@@ -756,7 +777,7 @@ var welcomeMessage = function(data,callback){
         'See more results with `more`. Search more items like :two: with `more like 2`\n\n\n'+
         // 'You can buy item :one: by chatting `buy 1`\n\n'+
 
-        'See a full list of commands by chatting `help`\n'+
+        'See more ways to chat with Kip by chatting `help`\n'+
         'Try it now! Maybe you need new headphones? :headphones: Chat `headphones` to start.'
     }
     else if (data.source.origin == 'socket.io'){
@@ -767,7 +788,7 @@ var welcomeMessage = function(data,callback){
         'See more results with <span class="typer">more</span>. Search more items like <span class="selector">➋</span> with <span class="typer">more like 2</span><br><br><br>'+
         // 'You can buy item <span class="selector">➊</span> by chatting <span class="typer">buy 1</span><br><br>'+
 
-        'See a full list of commands by chatting <span class="typer">help</span><br>'+
+        'See more ways to chat with Kip by chatting <span class="typer">help</span><br>'+
         'Try it now! Maybe you need new headphones? 🎧 Chat <span class="typer">headphones</span> to start.'
     }  
     else {
@@ -832,11 +853,20 @@ var getCinnaResponse = function(data,callback){
                                 res = 'Here you go! Which do you like best? Use `more like 1`, `2` or `3` to find similar or `help` for more options';
                             }
                             else if (data.dataModify.param == 'less than'){
-                                res = 'Definitely! Here are some choices less than '+data.dataModify.val+', would you like to see the product info? Just use `1`, `2` or `3` or `help` for more options';
+                                res = 'Definitely! Here are some choices less than '+data.dataModify.val[0]+', would you like to see the product info? Just use `1`, `2` or `3` or `help` for more options';
                             }
                             break;
                         case 'brand':
                             res = 'Here you go! Which do style you like best? Use `more like 1`, `2` or `3` to find similar or `help` for more options';
+                            break;
+                        case 'size':
+                            res = 'Here are some choices in *'+data.dataModify.val[0]+'*, which do you like best?';
+                            break;
+                        case 'color':
+                            res = 'Here are some choices in *'+data.dataModify.val[0].name+'*, which do you like best?';                            
+                            break;
+                        case 'genericDetail':
+                            res = 'Here are some choices with *'+data.dataModify.val[0] +'*, which do you like best?';
                             break;
                         default:
                             console.log('warning: no modifier response selected!');

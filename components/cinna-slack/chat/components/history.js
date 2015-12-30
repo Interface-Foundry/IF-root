@@ -28,29 +28,6 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
             console.log('warning: messaged saved without incoming val');
         }
 
-        // if (data.amazon){
-        //     //use lowest new price
-        //     if (data.amazon[0]){
-
-        //         //console.log(data.amazon[0].Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0]);
-
-        //         // console.log('USE list price ', data.amazon[0].ItemAttributes[0].ListPrice);
-
-        //         //console.log('DETAIL  ', data.amazon[0]);
-
-        //         //console.log('USE LowestNewPrice ', data.amazon[0].OfferSummary[0]);
-
-        //         //console.log('USING OFFER ARRAY ', JSON.stringify(data.amazon[0]))';
-
-        //     }
-        //     else if (data.amazon[0].Offers[0].Offer > 0){
-        //         console.log('USING OFFER ARRAY ', data.amazon[0].Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0]);
-        //     }   
-        //     else {
-        //         console.log('not sure which price to use D:')
-        //     }
-        // }
-
         //new message mongo obj
         newMessage(data, function(msg){
             
@@ -62,7 +39,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                     callback();
 
                 }, function done(){
-                    msg.markModified('amazon'); //lmao don't ask ;__; 
+                    msg.markModified('amazon'); //lmao don't ask ;__; (tell mongo to update array)
                     msg.save(function(err, data){
                         if(err){
                             console.log('Mongo err ',err);

@@ -371,6 +371,13 @@ function routeNLP(data){
         else {
             console.log('NLP RES ',res);
 
+            if(!res.bucket){
+                res.bucket = 'search';
+            }
+            if(!res.action){
+                res.action = 'initial';
+            }
+
             //- - - temp stuff to transfer nlp results to data object - - - //
             if (res.bucket){
                 data.bucket = res.bucket;
@@ -490,11 +497,20 @@ function searchInitial(data,flag){
 }
 
 function searchSimilar(data){
-    //RECALL LAST ITEM IN SEARCH HISTORY
-    history.recallHistory(data, function(item){
-        data.recallHistory = item; //added recalled history obj to data obj
-        searchAmazon(data,'similar');
-    });
+
+    if (data.dataModify){
+        data.action = 'modify'; //because NLP changed randomly =_=;
+        searchModify(data);  
+    }
+    else {
+        //RECALL LAST ITEM IN SEARCH HISTORY
+        history.recallHistory(data, function(item){
+            data.recallHistory = item; //added recalled history obj to data obj
+            searchAmazon(data,'similar');
+        });       
+    }
+
+
 }
 
 function searchModify(data, flag){
@@ -516,19 +532,28 @@ function searchModify(data, flag){
 
                 if (data.dataModify && data.dataModify.type){
                     //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+
+                    //ugh dead
+                    if (data.dataModify.val){
+                        var dumbVar = data.dataModify.val[0];
+                    }
+                    else {
+                        var dumbVar = '';
+                    }
+                     
                     switch (data.dataModify.type) {
                         case 'price':
                             searchInitial(data,{ // passing special FLAG for search to handle
                                 'type':data.dataModify.type,
                                 'param':data.dataModify.param,
-                                'val':data.dataModify.val
+                                'val':dumbVar
                             });
                             break;
 
                         case 'brand':
                             searchInitial(data,{ // passing special FLAG for search to handle
                                 'type':data.dataModify.type,
-                                'val':data.dataModify.val
+                                'val':dumbVar
                             });
                             break;
 
@@ -592,53 +617,43 @@ function searchModify(data, flag){
         //after query construction, add modifier and fire search
         function addModifier(){
 
+            cSearch = cSearch.toLowerCase();
+
             //SORT WHICH TRAITS TO MODIFY
             switch (data.dataModify.type) {
                 // CASES: color, size, price, genericDetail
                 case 'color':
 
-                        // bucket: 'search',
-                        //  action: 'modify',
-                        //  searchSelect: [1],
-                        //  tokens: ['1 in blue'],
-                        //  dataModify: {
-                        //    type: 'color',
-                        //    val: [ { hex: '#0000FF ',
-                        //      name: 'Blue',
-                        //      rgb: [ 0, 0, 255 ],
-                        //      hsl: [ 170, 255, 127 ] },
-                        //    { hex: '#0066FF ',
-                        //      name: 'Blue Ribbon',
-                        //      rgb: [ 0, 102, 255 ],
-                        //      hsl: [ 153, 255, 127 ] },
-                        //    { hex: '#007FFF ',
-                        //      name: 'Azure Radiance',
-                        //      rgb: [ 0, 127, 255 ],
-                        //      hsl: [ 148, 255, 127 ] },
-                        //    { hex: '#8B00FF ',
-                        //      name: 'Electric Violet',
-                        //      rgb: [ 139, 0, 255 ],
-                        //      hsl: [ 193, 255, 127 ] } ]
-                        //  }
+                    //remove colors from item name for new search with new color
+                    var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
+                    async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
+                        cSearch = cSearch.replace(i,'');
+                        callback();
+                    }, function done(){
+                        cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        searchInitial(data,flag); //do a new search
+                    });
 
-                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                    data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
                     break;
 
                 case 'size':
 
-                    //SORT THROUGH RESULTS OF SIZES, FILTER
-                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                    data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
+                    var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
+                    async.eachSeries(SIZES, function(i, callback) {
+                        cSearch = cSearch.replace(i,'');
+                        callback();
+                    }, function done(){
+                        cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        searchInitial(data,flag); //do a new search
+                    });
                     break;
 
                 //texture, fabric, coating, etc
                 case 'material':
 
-                    //SORT THROUGH RESULTS OF SIZES, FILTER
-                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
                     break;
@@ -656,7 +671,6 @@ function searchModify(data, flag){
                         //SORT THROUGH RESULTS OF SIZES, FILTER
                         cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                         data.tokens[0] = cSearch; //replace search string in data obj
-                        console.log(data.tokens[0]);
                         searchInitial(data,flag); //do a new search                        
                     }
                     break;
@@ -679,101 +693,81 @@ function searchFocus(data){
                 if (data.recallHistory.amazon[searchSelect]){
 
                     var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                    var offers = data.recallHistory.amazon[searchSelect].Offers[0];
-
                     var cString = ''; //construct text reply
+                    data.client_res = []; //building order of msg delivery to user
 
-                    data.client_res = [];
-
+                    // * * * * * Building response message array * * * * * //
                     //check for large image to send back
                     if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
                         data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
-                        //outgoingResponse(data,'final');
                     }
-
-                    //send product title + price
-                    var topStr = attribs.Title[0];
-
-                    console.log('ZZZZZZ!!!!!! ',data.recallHistory.amazon[searchSelect]);
-
-                    //get price from first offer
-                    if (offers.Offer && offers.Offer[0].OfferListing && offers.Offer[0].OfferListing[0].Price && offers.Offer[0].OfferListing[0].Price[0].FormattedPrice){
-
-
-                        console.log('ZZZZZ ', data.recallHistory.amazon[searchSelect].Offers.length);
-
-                        console.log('XXXXXX ', offers.Offer.length);
-
-                        console.log('222ZZ ', JSON.stringify(data.recallHistory.amazon[searchSelect].Offers));
-
-                        console.log('222XXX ', JSON.stringify(offers.Offer));
-
-
-
-                        // for (var i = 0; i < offers.Offer.length; i++) { 
-                        //     console.log('OFFERS LOOP ',offers.Offer[i]);
-                        // }
-
-                        // for (var i = 0; i < offers.Offer[0].OfferListing.length; i++) { 
-                        //     console.log('OFFERLISTING LOOP ',offers.Offer[0].OfferListing[i]);
-                        // }
-
-                        topStr = offers.Offer[0].OfferListing[0].Price[0].FormattedPrice[0] + " – " + topStr;
-                    }
-                    //add price to this line, if found
-                    else if (attribs.ListPrice){
-                        topStr = attribs.ListPrice[0].FormattedPrice[0] + " – " + topStr;
-                    }
-                    else {
-                        console.log('NO PRICE!!');
-                    }
-
-                    data.client_res.push(topStr);
-
-
-                    ///// build product details string //////
-
-                    //get size
-                    if (attribs.Size){
-                        cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
-                    }
-
-                    //get artist
-                    if (attribs.Artist){
-                        cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
-                    }
-
-                    //get brand or manfacturer
-                    if (attribs.Brand){
-                        cString = cString + ' ○ ' +  attribs.Brand[0];
-                    }
-                    else if (attribs.Manufacturer){
-                        cString = cString + ' ○ ' +  attribs.Manufacturer[0];
-                    }
-
-                    //get all stuff in details box
-                    if (attribs.Feature){
-                        cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
-                    }
-
-                    //done collecting details string, now send
-                    if (cString){
-                        data.client_res.push(cString);
-                        //outgoingResponse(data,'final');
-                    }
-
-                    ///// end product details string /////
-
-                    if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
-                        data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
-                       // outgoingResponse(data,'final');
-                    }
-
+                    //push number emoji + item URL
                     processData.getNumEmoji(data,searchSelect+1,function(res){
                         data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
+                        dumbFunction(); //fire after get 
                     })
-                    
-                    outgoingResponse(data,'final');
+
+                    //pointless ¯\_(ツ)_/¯ ... just makes sure the emoji number + product URL go first in msg order
+                    function dumbFunction(){
+                        //send product title + price
+                        var topStr = attribs.Title[0];
+
+                        //if realprice exists, add it to title
+                        if (data.recallHistory.amazon[searchSelect].realPrice){
+                            topStr = data.recallHistory.amazon[searchSelect].realPrice + " – " + topStr;
+                        }
+
+                        //Make top line bold
+                        if (data.source.origin == 'slack'){ 
+                            topStr = '*'+topStr+'*';
+                        }else if (data.source.origin == 'socket.io'){
+                            topStr = '<b>'+topStr+'</b>';
+                        }
+
+                        data.client_res.push(topStr);
+
+                        ///// build product details string //////
+
+                        //get size
+                        if (attribs.Size){
+                            cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                        }
+
+                        //get artist
+                        if (attribs.Artist){
+                            cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                        }
+
+                        //get brand or manfacturer
+                        if (attribs.Brand){
+                            cString = cString + ' ○ ' +  attribs.Brand[0];
+                        }
+                        else if (attribs.Manufacturer){
+                            cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                        }
+
+                        //get all stuff in details box
+                        if (attribs.Feature){
+                            cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
+                        }
+
+                        //done collecting details string, now send
+                        if (cString){
+                            data.client_res.push(cString);
+                            //outgoingResponse(data,'final');
+                        }
+                        ///// end product details string /////
+
+                        //get review
+                        if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
+                            data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
+                        }
+                        
+                        outgoingResponse(data,'final');
+
+                    }
+
+
                 }else {
                     console.log('warning: item selection does not exist in amazon array');
                     sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
@@ -811,13 +805,21 @@ function searchMore(data){
             if (data.amazon[i]){
                 //get reviews by ASIN 
                 search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+
                     //adding scraped reviews to amazon objects
                     data.amazon[i].reviews = {
                         rating: rating,
                         reviewCount: reviewCount
                     }
-                    //SHORTEN URLS HERE, UPDATE URL
-                    callback();
+
+                    //GET PRICE
+                    search.getPrices(data.amazon[i],function(realPrice){
+                        data.amazon[i].realPrice = realPrice;
+                        callback();
+                    });
+
+                    //shorten URLS here
+
                 });
             }
             else {
@@ -910,186 +912,196 @@ function searchAmazon(data, type, query, flag){
             //check for flag to modify amazon search params
             if (flag && flag.type){ //search modifier
 
-               //console.log('search flag ',flag);
-
                 //parse flags
                 if (flag.type == 'price'){
+
+                    //TEMPORARY
+                    if (flag.param == 'less than'){
+                        flag.param = 'less';
+                    }
 
                     switch (flag.param) {
                         case 'less':
 
+                            var searchSelect = data.searchSelect[0] - 1;
+
                             //there's a price for the item
-                            if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[0].ItemAttributes[0].ListPrice[0].Amount[0]){
+                            if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect].realPrice){
 
-                                var newPrice = 0;
+                                var modPrice = data.recallHistory.amazon[searchSelect].realPrice;
 
-                                //summoning original query obj. loop searchSelect [ ]
-                                async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-                                    //adding up prices for each item
-                                    newPrice = newPrice + data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].ListPrice[0].Amount[0];
+                                modPrice = modPrice.replace('$','');
+                                modPrice = modPrice.replace('.','');
 
-                                    callback();
-                                }, function done(){
-                                    console.log('processing 1 ',newPrice);
+                                modPrice = parseInt(modPrice);
+                                
+                                var per = modPrice * .35; //get 35% of price
+                                modPrice = modPrice - per; // subtract percentage
+                                modPrice = Math.round(modPrice); //clean price
 
-                                    // calculate average price and decrease by 25%
-                                    newPrice = newPrice / data.searchSelect.length; //average the price
-                                    var per = newPrice * .35; //get 25% of price
-                                    newPrice = newPrice - per; // subtract percentage
-                                    newPrice = Math.round(newPrice); //clean price
-                                    // if (newPrice > 1){
-                                    //     newPrice = Math.floor(newPrice / 1e11); //remove ¢, keep $
-                                    // }
-                                    if (newPrice > 0){
-                                        //add price param
-                                        amazonParams.MaximumPrice = newPrice.toString();
+                                if (modPrice > 0){
 
-                                        console.log('processing ',newPrice);
+                                    //add price param
+                                    amazonParams.MaximumPrice = modPrice.toString();
 
-                                        //now resolving the search term param
-                                        if (data.searchSelect.length == 1){
-                                           var searchSelect = data.searchSelect[0];
-                                           amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
-                                           console.log('USING SELECTED ITEM ',amazonParams.Keywords);
-                                        }
-                                        else {
-                                            console.log('Warning: no single item selected for less (not supporting multiple), so resorting to less N original query from user')
-                                            var searchSelect = data.searchSelect[0];
-                                            amazonParams.Keywords = data.recallHistory.tokens[0];
-                                            console.log('USING ORIGINAL SEARCH ',amazonParams.Keywords);
+                                    //now resolving the search term param
+                                    var itemAttrib = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                                    var cSearch = '';
 
-                                        }
-                                        amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
+                                    if (itemAttrib.Department){
+                                        cSearch = cSearch + ' ' + itemAttrib.Department[0];
                                     }
-                                    else {
-                                        console.log('Error: not allowing search for max price below 0');
+                                    if (itemAttrib.ProductGroup){
+                                        cSearch = cSearch + ' ' + itemAttrib.ProductGroup[0];
                                     }
-                                });
+                                    if (itemAttrib.Binding){
+                                        cSearch = cSearch + ' ' + itemAttrib.Binding[0];
+                                    }
+                                    if (itemAttrib.Color){
+                                        cSearch = cSearch + ' ' + itemAttrib.Color[0];
+                                    }
+                                    if (itemAttrib.ClothingSize){
+                                        cSearch = cSearch + ' ' + itemAttrib.ClothingSize[0];
+                                    }
+
+                                    amazonParams.Keywords = cSearch;
+                
+                                    doSearch();
+                                }
+                                else {
+                                    doSearch();
+                                    console.log('Error: not allowing search for max price below 0');
+                                }
 
                             }
                             else {
+                                doSearch();
                                 console.log('error: amazon price missing');
                             }
 
                             break;
 
-                        case 'less than':
-                            console.log('less than');
+                        // case 'less than':
+                        //     console.log('less than');
 
-                            //check if val is real number
-                            if (flag.val && isNumber(flag.val[0])){
+                        //     //check if val is real number
+                        //     if (flag.val && isNumber(flag.val[0])){
 
-                                console.log('FIRING less than ',data.searchSelect.length);
+                        //         console.log('FIRING less than ',data.searchSelect.length);
 
-                                //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
+                        //         //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
 
-                                //user wanted one item at different price
+                        //         //user wanted one item at different price
 
-                                if (data.searchSelect.length == 1){
+                        //         if (data.searchSelect.length == 1){
 
-                                    var searchSelect = data.searchSelect[0];
+                        //             var searchSelect = data.searchSelect[0];
 
-                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title){
-                                        amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
+                        //             if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title){
+                        //                 amazonParams.Keywords = data.recallHistory.amazon[searchSelect - 1].ItemAttributes[0].Title;
 
-                                        amazonParams.MaximumPrice = flag.val[0];
-                                        amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
-                                        amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
+                        //                 amazonParams.MaximumPrice = flag.val[0];
+                        //                 amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
+                        //                 amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
 
 
-                                        console.log('params ',amazonParams);
-                                    }
-                                    else {
-                                        console.log('Error: Title is missing from amazon itemattributes object');
-                                    }
-                                }
-                                else {
-                                    console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
-                                    amazonParams.MaximumPrice = flag.val[0];
-                                    amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
-                                    amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
-                                    amazonParams.Keywords = data.recallHistory.tokens[0];
-                                }
-                            }
-                            else {
-                                console.log(' number not used in flag.val with flag.modify == price');
-                            }
-                            break;
+                        //                 console.log('params ',amazonParams);
+                        //             }
+                        //             else {
+                        //                 console.log('Error: Title is missing from amazon itemattributes object');
+                        //             }
+                        //         }
+                        //         else {
+                        //             console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
+                        //             amazonParams.MaximumPrice = flag.val[0];
+                        //             amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
+                        //             amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
+                        //             amazonParams.Keywords = data.recallHistory.tokens[0];
+                        //         }
+                        //     }
+                        //     else {
+                        //         console.log(' number not used in flag.val with flag.modify == price');
+                        //     }
+                        //     break;
                         case 'more':
+                            doSearch();
 
                             break;
                         case 'more than':
+                            doSearch();
                             break;
 
                         default:
                             console.log('error: no flag.param found with flag.modify == price');
+                            doSearch();
                     }
                 }
                 else if (flag.type == 'brand'){
                     console.log('BRAND FIRED');
+                    doSearch();
+                }
+                else {
+                    doSearch();
                 }
             }
+            else {
+                doSearch();
+            }
 
-            //AMAZON BASIC SEARCH
-            client.itemSearch(amazonParams).then(function(results){
+            //console.log('amazonParams ',amazonParams);
 
-                data.amazon = results;
+            function doSearch(){
+                //AMAZON BASIC SEARCH
+                client.itemSearch(amazonParams).then(function(results,err){
+                    data.amazon = results;
 
-                var loopLame = [0,1,2];//lol
-                async.eachSeries(loopLame, function(i, callback) {
-                    if (data.amazon[i]){
-                        //get reviews by ASIN 
-                        search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                            //adding scraped reviews to amazon objects
-                            data.amazon[i].reviews = {
-                                rating: rating,
-                                reviewCount: reviewCount
-                            }
-
-                            //GET PRICE
-                            search.getPrices(data.amazon[i].DetailPageURL[0],function(realPrice){
-
-                                console.log('REAL PRICE ',realPrice);
-                                if (realPrice){
-                                    data.amazon[i].realPrice = realPrice.trim();
-                                }
-                                else {
-                                    console.log('/!/!!! warning: no real price found for amazon item');
+                    var loopLame = [0,1,2];//lol
+                    async.eachSeries(loopLame, function(i, callback) {
+                        if (data.amazon[i]){
+                            //get reviews by ASIN 
+                            search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                                //adding scraped reviews to amazon objects
+                                data.amazon[i].reviews = {
+                                    rating: rating,
+                                    reviewCount: reviewCount
                                 }
 
-                                callback();
-                                //IF SERACH BAD, RETURN OFFER PRICE
+                                //GET PRICE
+                                search.getPrices(data.amazon[i],function(realPrice){
+                                    data.amazon[i].realPrice = realPrice;
+                                    callback();
+                                });
+
                             });
+                        }
+                        else {
+                            callback();
+                        }
+                    }, function done(){
+                        outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                    });
 
-                            
-                        });
+                }).catch(function(err){
+
+                    //handle err codes. do stuff.
+                    if (err[0].Error[0].Code[0]){
+                        switch (err[0].Error[0].Code[0]) {
+
+                            //CASE: No results for search
+                            case 'AWS.ECommerceService.NoExactMatches':
+                                //do a weak search
+                                weakSearch(data,type,query,flag);
+                                break;
+
+                            default:
+                                console.log('amazon err ',err[0].Error[0]);
+                                //no results after weaksearch, now do:
+                                sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
+                        }
                     }
-                    else {
-                        callback();
-                    }
-                }, function done(){
-                    outgoingResponse(data,'stitch','amazon'); //send back msg to user
                 });
+            }
 
-            }).catch(function(err){
-
-                //handle err codes. do stuff.
-                if (err[0].Error[0].Code[0]){
-                    switch (err[0].Error[0].Code[0]) {
-
-                        //CASE: No results for search
-                        case 'AWS.ECommerceService.NoExactMatches':
-                            //do a weak search
-                            weakSearch(data,type,query,flag);
-                            break;
-
-                        default:
-                            console.log('amazon err ',err[0].Error[0]);
-                            //no results after weaksearch, now do:
-                            sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
-                    }
-                }
-            });
             break;
 
         // * * * * * * * * * * * * * *//
@@ -1145,7 +1157,12 @@ function searchAmazon(data, type, query, flag){
                                         rating: rating,
                                         reviewCount: reviewCount
                                     }
-                                    callback();
+
+                                    //GET PRICE
+                                    search.getPrices(data.amazon[i],function(realPrice){
+                                        data.amazon[i].realPrice = realPrice;
+                                        callback();
+                                    });
                                 });
                             }
 
@@ -1210,7 +1227,7 @@ function weakSearch(data,type,query,flag){
                 }else {
                     var modDetail = data.dataModify.val;
                 }
-                sendTxtResponse(data,'Sorry, it looks like we don\'t have X in/with '+data.dataModify.type+ ' ' + modDetail + ' . Would you like to do another search? Use "find (item)" to start a new search or help for more options');
+                sendTxtResponse(data,'Sorry, it looks like we don\'t have that with' + modDetail + '. Would you like to do another search? Need help? Chat `help`.');
             }
             else {
                 //no results after weaksearch, now do:
@@ -1224,7 +1241,13 @@ function weakSearch(data,type,query,flag){
             //select weakSearch action (initial, modify, etc)
             switch (data.action) {
                 case 'modify':
-                    searchModify(data, 'weakSearch');
+                    if (data.dataModify && data.dataModify.type == 'price'){
+                        console.log('cant find lower price item, preventing infinite loop');
+                        sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
+                    }
+                    else {
+                        searchModify(data, 'weakSearch');
+                    }
                     break;
                 default:
                     console.log('warning: weak search not enabled for '+ data.action);
@@ -1267,7 +1290,7 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             data.client_res.push(url); //add image results to response
 
             //send extra item URLs with image responses
-            if (data.action == 'initial' || data.action == 'similar'){
+            if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify'){
                 processData.urlShorten(data,function(res){
                     var count = 0;
                     //put all result URLs into arr
