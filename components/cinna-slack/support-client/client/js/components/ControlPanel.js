@@ -81,7 +81,6 @@ export default class ControlPanel extends Component {
    moveCard(dragIndex, hoverIndex) {
     const { items } = this.state;
     const dragCard = items[dragIndex];
-    
     this.setState(update(this.state, {
       items: {
         $splice: [
@@ -94,13 +93,11 @@ export default class ControlPanel extends Component {
         items: {[hoverIndex]: {$merge: {index: hoverIndex}}}
      }));
   }
-    // const {top, left} = this.state.items[0].deltaPosition;
-
+ 
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
      const fields  = ['msg','bucket','action']
      const self = this;
-     // const drags = {onStart: this.onStart, onStop: this.onStop};
      const { items } = this.state;
 
       return ( 
@@ -130,7 +127,7 @@ export default class ControlPanel extends Component {
                 })}
              
               </div>
-                 <Button bsSize = "large" style={{ textAlign: 'center', backgroundColor: '#45a5f4' }}bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+                 <Button bsSize = "large" style={{ textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
                   Send Command
                 </Button> 
           </div>

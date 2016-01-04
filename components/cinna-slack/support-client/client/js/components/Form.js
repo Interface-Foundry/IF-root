@@ -115,15 +115,14 @@ class DynamicForm extends Component {
             {self.renderJSON(filtered)}
            </div>
             
-            <div className="flexbox-container" style={{ marginTop: '3em' }}>
-
-                <Button bsSize = "large" style={{ margin: '0.3em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
+            <div style={{ display: 'flexbox', marginTop: '3em' }}>
+                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
                   Initial
                 </Button>
-                <Button bsSize = "large" style={{ margin: '0.3em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('purchase')} >
+                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('purchase')} >
                   Purchase
                 </Button>
-                <Button bsSize = "large" style={{ margin: '0.3em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
+                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
                   Banter
                 </Button>
             </div>

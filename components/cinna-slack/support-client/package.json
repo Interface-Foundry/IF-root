@@ -80,6 +80,7 @@
     "cors": "^2.7.1",
     "express": "^4.12.4",
     "express-session": "^1.11.3",
+    "flexboxgrid": "^6.3.0",
     "isomorphic-fetch": "^2.2.0",
     "lodash": "^3.9.3",
     "mongoose": "^4.0.5",

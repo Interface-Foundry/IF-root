@@ -109,3 +109,11 @@ span[class*="glyphicon-one-fine"] {
 .btn-primary {
   border: none;
 }
+
+@media screen and (min-width: 750px) {
+  .form-button { 
+    -ms-flex-direction: vertical;
+    -webkit-box-orient: column;
+    flex-direction: vertical; 
+  }
+}
