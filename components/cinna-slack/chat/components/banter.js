@@ -686,7 +686,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running on Kip v0.4 Beta (Pepper)';
+            res = 'I\'m a penguin running Kip v0.4 Beta (Pepper)';
             break;
 
         case '/':
@@ -694,12 +694,32 @@ var checkForCanned = function(input,callback,origin) {
             res = '../../ need help? Use "help" instead.';
             break;
 
+        case 'top kek':
+            flag = 'basic'; //do this action
+            if (origin == 'slack'){
+                res = 'T O P\nK\nE\nK\n';
+            }
+            else if (origin = 'socket.io'){
+                res = 'T O P<br>K<br>E<br>K<br>';
+            }
+            break;
+
         case 'k':
             flag = 'basic'; //do this action
             res = 'yah';
             break;
 
+        case 'hello world':
+        case 'Hello world':
+        case 'Hello World':
+            flag = 'search.initial'; //do this action
+            res = 'Developers, developers, developers, developers 👌';
+            query = 'introduction to computer programming'; //what we're going to search for
+            break;
+
         case '🐈':
+        case 'meow':
+        case ':3':
             flag = 'search.initial'; //do this action
             res = 'meow :3';
             query = 'neko atsume'; //what we're going to search for

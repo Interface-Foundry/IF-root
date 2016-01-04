@@ -1,5 +1,6 @@
 var cheerio = require('cheerio');
 var request = require('request');
+var async = require('async');
 
 
 var getReviews = function(ASIN,callback) {
@@ -123,6 +124,112 @@ var getPrices = function(item,callback){
 
 }
 
+
+var getAmazonStuff = function(data,results,callback3){
+
+    //!\\ //!\\ NOTE!!! Add timeout here, fire callback if parallel doesnt fire callback!!
+
+    async.parallel([
+        //* * item 1 * * *//
+        //get review
+        function(callback){
+            var id = results[0].ASIN[0];
+            getReviews(id,function(rating,count){
+                var obj = {
+                    rating:rating,
+                    reviewCount:count
+                }
+                callback(null,obj);
+            });
+        },
+        //get real price
+        function(callback){
+            //GET PRICE
+            getPrices(results[0],function(realPrice){
+                var obj = {
+                    realPrice:realPrice
+                }
+                callback(null,obj);
+            });
+        },
+
+        //* * item 2 * * *//
+        //get review
+        function(callback){
+            var id = results[1].ASIN[0];
+            getReviews(id,function(rating,count){
+                var obj = {
+                    rating:rating,
+                    reviewCount:count
+                }
+                callback(null,obj);
+            });
+        },
+        //get real price
+        function(callback){
+            getPrices(results[1],function(realPrice){
+                var obj = {
+                    realPrice:realPrice
+                }
+                callback(null,obj);
+            });
+        },
+
+        //* * item 3 * * *//
+        //get review
+        function(callback){
+            var id = results[2].ASIN[0];
+            getReviews(id,function(rating,count){
+                var obj = {
+                    rating:rating,
+                    reviewCount:count
+                }
+                callback(null,obj);
+            });
+        },
+        //get real price
+        function(callback){
+            getPrices(results[2],function(realPrice){
+                var obj = {
+                    realPrice:realPrice
+                }
+                callback(null,obj);
+            });
+        }
+    ],
+    function(err, rez){
+        if (err){
+            console.log('Error: parallel getAmazonStuff in search.js ',err);
+        }
+        var count = 0;
+        var loopLame = [0,0,1,1,2,2];
+        async.eachSeries(loopLame, function(i, callback) {
+            if (data.amazon[i]){
+
+                //TEST SCRAPE RESULTS NULL BEORE PROCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (rez[count].rating){
+                    console.log('add rating');
+                    data.amazon[i].reviews = rez[count];
+                }
+                else if(rez[count].realPrice){
+                    console.log('add real price');
+                    data.amazon[i].realPrice = rez[count].realPrice;
+                }
+                else {
+                    console.log('/!/ Warning: no reviews or real prices found for current item: ',data);
+                }
+                count++;
+                callback();
+            }
+            else {
+                callback();
+            }
+        }, function done(){
+            callback3(data);
+        });
+    });   
+}
+
 /////////// tools /////////////
 
 
@@ -130,3 +237,4 @@ var getPrices = function(item,callback){
 /// exports
 module.exports.getReviews = getReviews;
 module.exports.getPrices = getPrices;
+module.exports.getAmazonStuff = getAmazonStuff;
