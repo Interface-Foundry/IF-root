@@ -39,7 +39,7 @@
 
 var http = require('http');
 var fs = require('fs');
-var Bot = require('slackbots'); //load slack api
+var Bot = require('./slackbots_modified'); //load slack api
 var request = require('request');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
@@ -443,6 +443,59 @@ function incomingAction(data){
 //* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
 
 function searchBucket(data){
+
+    // Typing indicators
+
+    // Clients can send a typing indicator to indicate that the user is currently writing a message to send to a channel:
+
+    // {
+    //     "id": 1,
+    //     "type": "typing",
+    //     "channel": "C024BE91L"
+    // }
+    // This can be sent on every key press in the chat input unless one has been sent in the last three seconds. Unless there is an error the server will not send a reply, but it will send a "user_typing" event to all team members in the channel.
+
+    
+    if (data.source.origin == 'slack'){
+        //* * * * send welcome message
+        //get list of users in team
+        request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
+          if(err){
+            console.log('requesting new team user list error: ',err);
+          }
+          else {
+            // body = JSON.parse(body);
+
+            // if (body.ok && body.ims.length > 0){
+            //     //loop through members, commence welcome!
+            //     async.eachSeries(body.ims, function(member, callback) {
+
+            //         if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
+            //             var hello = {
+            //                 msg: 'welcome'
+            //             }
+            //             hello.source = {
+            //                 'origin':'slack',
+            //                 'channel':member.id,
+            //                 'org':user.team_id,
+            //                 'id':user.team_id + "_" + member.id //for retrieving chat history in node memory
+            //             }
+            //             banter.welcomeMessage(hello,function(res){
+            //                 sendTxtResponse(hello,res);
+            //             });
+            //         }
+            //         callback();
+            //     }, function done(){
+            //         console.log('finished sending out welcome messages to new team');
+            //     });
+            // }
+            // else {
+            //     console.log('error: something happened, a ghost slack team emerged');
+            // }
+          }
+        });
+    }
+
     //sort search action type
     switch (data.action) {
         case 'initial':
@@ -813,39 +866,12 @@ function searchMore(data){
             data.amazon.splice(0, 3);
         }
 
-        var loopLame = [0,1,2];//lol
-        async.eachSeries(loopLame, function(i, callback) {
-            if (data.amazon[i]){
-                //get reviews by ASIN 
-                search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-
-                    //adding scraped reviews to amazon objects
-                    data.amazon[i].reviews = {
-                        rating: rating,
-                        reviewCount: reviewCount
-                    }
-
-                    //GET PRICE
-                    search.getPrices(data.amazon[i],function(realPrice){
-                        data.amazon[i].realPrice = realPrice;
-                        callback();
-                    });
-
-                    //shorten URLS here
-
-                });
-            }
-            else {
-                callback();
-            }
-
-        }, function done(){
-            outgoingResponse(data,'stitch','amazon'); //send back msg to user
-        });
+        search.getAmazonStuff(data,data.amazon,function(res){
+            outgoingResponse(res,'stitch','amazon'); //send back msg to user
+        });   
 
     });
 
-    //go to end of search results array (3 at a time). if hit end of search array V
     //use amazon search itemPage to advance to more results
 }
 
@@ -1068,31 +1094,42 @@ function searchAmazon(data, type, query, flag){
                 client.itemSearch(amazonParams).then(function(results,err){
                     data.amazon = results;
 
-                    var loopLame = [0,1,2];//lol
-                    async.eachSeries(loopLame, function(i, callback) {
-                        if (data.amazon[i]){
-                            //get reviews by ASIN 
-                            search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                                //adding scraped reviews to amazon objects
-                                data.amazon[i].reviews = {
-                                    rating: rating,
-                                    reviewCount: reviewCount
-                                }
+                    //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
+                    if (results.length >= 3){   
 
-                                //GET PRICE
-                                search.getPrices(data.amazon[i],function(realPrice){
-                                    data.amazon[i].realPrice = realPrice;
-                                    callback();
+                        //get reviews and real prices
+                        search.getAmazonStuff(data,results,function(res){
+                            outgoingResponse(res,'stitch','amazon'); //send back msg to user
+                        });            
+                    }
+                    //TEMP PATCH, FOR RESULTS UNDER 3 items
+                    else {
+                        var loopLame = [0,1,2];//lol
+                        async.eachSeries(loopLame, function(i, callback) {
+                            if (data.amazon[i]){
+                                //get reviews by ASIN 
+                                search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                                    //adding scraped reviews to amazon objects
+                                    data.amazon[i].reviews = {
+                                        rating: rating,
+                                        reviewCount: reviewCount
+                                    }
+                                    //GET PRICE
+                                    search.getPrices(data.amazon[i],function(realPrice){
+                                        data.amazon[i].realPrice = realPrice;
+                                        callback();
+                                    });
                                 });
+                            }
+                            else {
+                                callback();
+                            }
+                        }, function done(){
+                            outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                        });
+                    }
 
-                            });
-                        }
-                        else {
-                            callback();
-                        }
-                    }, function done(){
-                        outgoingResponse(data,'stitch','amazon'); //send back msg to user
-                    });
+
 
                 }).catch(function(err){
 
@@ -1155,34 +1192,42 @@ function searchAmazon(data, type, query, flag){
 
                     }).then(function(results){
 
-                        //console.log('RESULTS SIMILAR ',results);
-
                         data.amazon = results;
 
-                        var loopLame = [0,1,2];//lol
-                        async.eachSeries(loopLame, function(i, callback) {
+                        //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
+                        if (results.length >= 3){   
 
-                            if (data.amazon[i]){
-                                //get reviews by ASIN 
-                                search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                                    //adding scraped reviews to amazon objects
-                                    data.amazon[i].reviews = {
-                                        rating: rating,
-                                        reviewCount: reviewCount
-                                    }
-
-                                    //GET PRICE
-                                    search.getPrices(data.amazon[i],function(realPrice){
-                                        data.amazon[i].realPrice = realPrice;
-                                        callback();
+                            //get reviews and real prices
+                            search.getAmazonStuff(data,results,function(res){
+                                outgoingResponse(res,'stitch','amazon'); //send back msg to user
+                            });            
+                        }
+                        //TEMP PATCH, FOR RESULTS UNDER 3 items
+                        else {
+                            var loopLame = [0,1,2];//lol
+                            async.eachSeries(loopLame, function(i, callback) {
+                                if (data.amazon[i]){
+                                    //get reviews by ASIN 
+                                    search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                                        //adding scraped reviews to amazon objects
+                                        data.amazon[i].reviews = {
+                                            rating: rating,
+                                            reviewCount: reviewCount
+                                        }
+                                        //GET PRICE
+                                        search.getPrices(data.amazon[i],function(realPrice){
+                                            data.amazon[i].realPrice = realPrice;
+                                            callback();
+                                        });
                                     });
-                                });
-                            }
-
-                        }, function done(){
-                            data.action = 'initial';
-                            outgoingResponse(data,'stitch','amazon'); //send back msg to user
-                        });
+                                }
+                                else {
+                                    callback();
+                                }
+                            }, function done(){
+                                outgoingResponse(data,'stitch','amazon'); //send back msg to user
+                            });
+                        }
 
                     }).catch(function(err){
                         console.log('amazon err ',err[0].Error[0]);
@@ -1303,7 +1348,7 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
             data.client_res.push(url); //add image results to response
 
             //send extra item URLs with image responses
-            if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify'){
+            if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
                 processData.urlShorten(data,function(res){
                     var count = 0;
                     //put all result URLs into arr
@@ -1370,6 +1415,8 @@ function sendResponse(data){
 
     }
     else if (data.source.channel && data.source.origin == 'slack'){
+
+
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
@@ -1377,14 +1424,60 @@ function sendResponse(data){
         //check if slackuser exists
         if (slackUsers[data.source.org]){
 
+            if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
 
-            //loop through responses in order
-            async.eachSeries(data.client_res, function(message, callback) {
-                slackUsers[data.source.org].postMessage(data.source.channel, message, params).then(function(res) {
+                var message = data.client_res[0]; //use first item in client_res array as text message
+                var attachments = [
+                    {
+                        "color": "#45a5f4"
+                    },
+                    {
+                        "color": "#45a5f4", 
+                        "fields":[]  
+                    }
+                ];
+
+                //remove first message from res arr
+                var attachThis = data.client_res;
+                attachThis.shift(); 
+
+                attachments[0].image_url = attachThis[0]; //add image search results to attachment 
+                attachments[0].fallback = 'Here are some options you might like'; //fallback for search result
+
+                attachThis.shift(); //remove image from array
+
+                attachments[1].fallback = 'Here are some options you might like';
+                //put in attachment fields
+                async.eachSeries(attachThis, function(attach, callback) {
+                    //attach = attach.replace('\\n','');
+                    var field = {
+                        "value": attach,
+                        "short":false
+                    }
+                    attachments[1].fields.push(field);
                     callback();
+
+                }, function done(){
+
+                    attachments = JSON.stringify(attachments);
+
+                    slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
+                        callback();
+                    });
                 });
-            }, function done(){
-            });
+                
+
+            }
+            else {
+                //loop through responses in order
+                async.eachSeries(data.client_res, function(message, callback) {
+                    slackUsers[data.source.org].postMessage(data.source.channel, message, params).then(function(res) {
+                        callback();
+                    });
+                }, function done(){
+                });
+            }
+
 
         }else {
             console.log('error: slackUsers channel missing');

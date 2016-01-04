@@ -11,7 +11,7 @@ var stitchResults = function(data,source,callback) {
             var loopLame = [0,1,2];//lol
 
             async.eachSeries(loopLame, function(i, callback) {
-                if (data.amazon[i]){
+                if (data.amazon && data.amazon[i]){
 
                     var price;
 
@@ -55,13 +55,26 @@ var stitchResults = function(data,source,callback) {
                         imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
                     }
 
-                    toStitch.push({
-                        url: imageURL,
-                        price: price,
-                        prime: primeAvail, //is prime available?
-                        name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE
-                        reviews: data.amazon[i].reviews
-                    });
+                    //if title exists in amazon result
+                    if (data.amazon[i] && data.amazon[i].ItemAttributes && data.amazon[i].ItemAttributes[0].Title){
+                      toStitch.push({
+                          url: imageURL,
+                          price: price,
+                          prime: primeAvail, //is prime available?
+                          name: truncate(data.amazon[i].ItemAttributes[0].Title[0]), //TRIM NAME HERE
+                          reviews: data.amazon[i].reviews
+                      });                      
+                    }
+                    else {
+                      toStitch.push({
+                          url: imageURL,
+                          price: price,
+                          prime: primeAvail, //is prime available?
+                          name: '',
+                          reviews: data.amazon[i].reviews
+                      });                       
+                    }
+
                 }
                 else {
                     console.log('IMAGE MISSING!',data.amazon[i]);

@@ -686,12 +686,22 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running on Kip v0.4 Beta (Pepper)';
+            res = 'I\'m a penguin running Kip v0.4 Beta (Pepper)';
             break;
 
         case '/':
             flag = 'basic'; //do this action
             res = '../../ need help? Use "help" instead.';
+            break;
+
+        case 'top kek':
+            flag = 'basic'; //do this action
+            if (origin == 'slack'){
+                res = 'T O P\nK\nE\nK\n';
+            }
+            else if (origin = 'socket.io'){
+                res = 'T O P<br>K<br>E<br>K<br>';
+            }
             break;
 
         case 'k':
