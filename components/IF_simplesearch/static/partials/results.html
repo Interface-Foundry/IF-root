@@ -25,7 +25,6 @@
         <div class="scrollTop" ng-click="scrollTop()" ng-show="items.length > 0"><i style="padding:5px; color:#ccc; visibility:visible; font-size:21px; padding-left:11px; padding-top:15px; cursor:pointer;" class="glyphicon glyphicon-chevron-up"></i></div>
 
         <div ng-show="noResults" class="flexBody Top noitem" ng-cloak>
-            
             <center>
                 <img src="img/404kip.png">
                 <br>
@@ -34,8 +33,7 @@
             </center>
         </div>
 
-        <div class="kip-card contentRow row{{$index}}" in-view="sayBye($index, $inview, $event, $inviewpart)" ng-show="items" ng-repeat="item in items track by $index">
-
+        <div class="kip-card contentRow row{{$index}}" in-view="sayBye($index, $inview, $event, $inviewpart)" ng-show="items" ng-repeat="item in items track by item.id">
             <div class="collapsedContent" ng-if="!hideItem[$index]">
                 <any ng-if="$index >= items.length - 10" in-view="$inview&&sayHello()"></any>
                 <div style="max-width:241px;" class="col-md-4 imageWrapper content{{$index}}">
@@ -49,7 +47,7 @@
                 <div class="col-md-8 descripWrapper">
 <!--                    FIX GOES HERE-->
                     <a ng-click="returnHome(item);"><span class="item-description updated-time has-cursor" am-time-ago="item.updated_time"></span></a>
-                    <h3 scroll-to="anchor{{$index}}" duration="250" easing="easeOut" class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price | number : 0}} - </span> {{::item.name | deCapslock}}</a></h3>
+                    <h3 scroll-to="anchor{{$index}}" duration="250" easing="easeOut" class="card-title" style="margin-bottom:0rem !important; font-size:18px;"><a ng-show="item.name" style="color:#251998;" scroll-to="anchor{{$index}}" ng-click="expandContent($index, $event)"><span ng-show="item.price" style="color:#251998;">${{::item.price | number : 0}} - </span> {{::item.name | deCapslock}}</a></h3>
                     <p style="margin-bottom:1rem !important; font-size:14px; color:#006621;" class="card-text">{{::item.parent.name}} - {{::item.distanceMI}} miles <!-- <span style="font-size:12px;">({{item.distanceKM}}km)</span> --></p>
 
         <!--             <p class="item-description">{{item.description | limitTo: 150}}<span ng-show="item.description.length > 150">...</span></p>

@@ -230,6 +230,9 @@ function search(q, page) {
             });
         }
         q.loc.lon = parseFloat(q.loc.lon);
+        if (q.loc.lon > 180 && q.loc.lon <= 360) {
+          q.loc.lon = q.loc.lon - 360;
+        }
         if (q.loc.lon > 180 || q.loc.lon < -180) {
             return Promise.reject({
                 niceMessage: 'Could not complete search',
@@ -254,57 +257,7 @@ function search(q, page) {
 function textSearch(q, page) {
 
       console.log('text search', q);
-
-      // elasticsearch impl
-      // update fuzziness of query based on search term length
-      var fuzziness = 0;
-      if (q.text.length >= 4) {
-          fuzziness = 1;
-      } else if (q.text.length >= 6) {
-          fuzziness = 2;
-      }
-
-      // here's some reading on filtered queries
-      // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
-      var filter = {
-          bool: {
-              must: [{
-                  geo_distance: {
-                      distance: (q.radius || defaultRadius) + "mi",
-                      "geolocation": {
-                          lat: q.loc.lat,
-                          lon: q.loc.lon
-                      }
-                  }
-              }]
-          }
-      };
-
-      // if the price is specified, add a price filter
-      if (q.priceRange) {
-          filter.bool.must.push({
-              term: {
-                  priceRange: q.priceRange
-              }
-          });
-      }
-
-      // put it all together in a filtered fuzzy query
-      var fuzzyQuery = {
-          size: pageSize,
-          from: page * pageSize,
-          index: "kip",
-          type: "items",
-          fields: [],
-          body: {
-              query: {
-                  filtered: {
-                      query: searchterms.getElasticsearchQuery(q.text),
-                      filter: filter
-                  }
-              }
-          }
-      };
+      fuzzyQuery = elasticsearchQuery(q, page);
       kip.prettyPrint(fuzzyQuery)
 
       return es.search(fuzzyQuery)
@@ -354,6 +307,63 @@ function textSearch(q, page) {
           }, kip.err);
 
   }
+
+function elasticsearchQuery(q, page) {
+
+  // elasticsearch impl
+  // update fuzziness of query based on search term length
+  var fuzziness = 0;
+  if (q.text.length >= 4) {
+      fuzziness = 1;
+  } else if (q.text.length >= 6) {
+      fuzziness = 2;
+  }
+
+  // here's some reading on filtered queries
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
+  var filter = {
+      bool: {
+          must: [{
+              geo_distance: {
+                  distance: (q.radius || defaultRadius) + "mi",
+                  "geolocation": {
+                      lat: q.loc.lat,
+                      lon: q.loc.lon
+                  }
+              }
+          }]
+      }
+  };
+
+  // if the price is specified, add a price filter
+  if (q.priceRange) {
+      filter.bool.must.push({
+          term: {
+              priceRange: q.priceRange
+          }
+      });
+  }
+
+  // put it all together in a filtered fuzzy query
+  var fuzzyQuery = {
+      size: pageSize,
+      from: page * pageSize,
+      index: "kip",
+      type: "items",
+      fields: [],
+      body: {
+          query: {
+              filtered: {
+                  query: searchterms.getElasticsearchQuery(q.text),
+                  filter: filter
+              }
+          }
+      }
+  };
+
+  return fuzzyQuery;
+
+}
 
 /**
  * Search implementation for a query that does not have text
@@ -677,4 +687,5 @@ if (!module.parent) {
   })
 } else {
   module.exports = app;
+  module.exports.getQuery = elasticsearchQuery;
 }

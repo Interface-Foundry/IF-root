@@ -89,14 +89,14 @@ def index():
         img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
     #add names, text wrapped
-    font = ImageFont.truetype("HelveticaNeue-Regular.ttf", 14)
+    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 14)
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x']
         y = TEXTBOX_COORDS[i][u'y']
         draw = ImageDraw.Draw(img)
 
         #add product names
-        for line in textwrap.wrap(im[u'name'], width=26):
+        for line in textwrap.wrap(im[u'name'], width=31):
             draw.text((x, y), line, font=font, fill="#2d70c1")
             y += font.getsize(line)[1]
             last_y = y
@@ -112,7 +112,8 @@ def index():
 
         last_y = last_y + 22
 
-        if 'reviews' in im:   
+        if 'reviews' in im and 'rating' in im[u'reviews']:   
+            # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
             #add rating
             if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
                 selectRating = 0
@@ -155,5 +156,5 @@ def download_image(url):
 
 if __name__ == '__main__':
     print 'running app on port 5k'
-    app.debug = True
+    app.debug = False
     app.run(host="0.0.0.0")

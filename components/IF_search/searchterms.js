@@ -177,6 +177,8 @@ var fashionTokenize = module.exports.fashionTokenize = function(query) {
  * }
  */
 var parse = module.exports.parse = function(query) {
+  query = query.replace('black tie women', 'formal')
+  query = query.replace('women black tie', 'formal')
   var tokens = fashionTokenize(query).join(' '); // better as a single string
   bucketTerms = buckets.reduce(function(bucketTerms, bucket) {
     if (bucket.name == 'boost') {
@@ -244,7 +246,7 @@ var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (tex
     return {
       multi_match: {
           query: terms.join(' '),
-          fields: ['brand^5', 'tags^4', 'name^3', 'descriptionTags^2', 'description'],
+          fields: ['brand^5', 'tags^4', 'name^3'], //, 'descriptionTags^2', 'description'],
           boost: bucketTerms[bucketName].boost
       }
     }
@@ -260,9 +262,18 @@ var getElasticsearchQuery = module.exports.getElasticsearchQuery = function (tex
 }
 
 if (!module.parent) {
+  var terms = [
+    'light'
+  ];
+
+  terms.map(function(t) {
+    console.log(fashionTokenize(t))
+  })
   var queries = [
-    "macy's",
-    "blue dress"
+    'dress',
+    // "macy's",
+    // "blue dress",
+    // 'black tie women'
   ];
   queries.map(function(q) {
     console.log(JSON.stringify(getElasticsearchQuery(q), null, 2));

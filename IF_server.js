@@ -39,7 +39,8 @@ var urlify = require('urlify').create({
 });
 var request = require('request');
 var morgan = require('morgan');
-var logger = require('./components/IF_logging/if_logger');
+var Log = require('./components/IF_logging/if_logger');
+var log = Log();
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
@@ -220,7 +221,7 @@ app.post('/feedback', function(req, res) {
     });
 
     // log it to our aggregation server
-    logger.log({
+    log({
         message: 'feedback',
         feedback: req.body,
         user: req.user && req.user._id
@@ -269,7 +270,6 @@ app.post('/email/confirm', isLoggedIn, function(req, res, next) {
     crypto.randomBytes(20, function(err, buf) {
         var token = buf.toString('hex');
         var email = req.user.local.email;
-
         User.findOne({
             'local.email': email
         }, function(err, user) {
@@ -591,6 +591,17 @@ app.post('/api/analytics/:action', function(req, res) {
   })).save();
   res.send('📬')
 });
+
+/* Logging front end errors */
+var frontendLog = Log('kipsearch.com');
+app.post('/api/logging/error', function(req, res) {
+  frontendLog.error(req.body);
+  res.send('📬')
+})
+app.post('/api/logging/log', function(req, res) {
+  frontendLog(req.body);
+  res.send('📬')
+})
 
 
 // Save world visitor anonymously
@@ -3639,11 +3650,8 @@ app.use(function error_handler(err, req, res, next) {
     }
 
     // send the error to our aggregation server
-    logger.log({
-        message: 'error',
-        req: logger.reqProperties(req),
-        err: err
-    });
+    err.req = Log.reqProperties(req)
+    log.error(err);
 });
 
 
@@ -3718,6 +3726,6 @@ if (module.parent) {
 } else {
     server.listen(config.app.port, function () {
         console.log("Illya casting magic on " + config.app.port + " ~ ~ ♡");
-        logger.log('started server');
+        log.log('started server');
     });
 }

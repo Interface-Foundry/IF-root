@@ -7,6 +7,7 @@ var materials = require('./materials')
 var sizes = require('./sizes')
 var brands = require('./brands')
 var verbs = require('./verbs')
+var price = require('./price')
 var _ = require('lodash')
 
 var debug = require('debug')('nlp')
@@ -85,6 +86,7 @@ var parse = module.exports.parse = function(text, callback) {
 
 var exactMatches = {
   more: {bucket: BUCKET.search, action: ACTION.more, tokens: ['more']},
+  'show more': {bucket: BUCKET.search, action: ACTION.more, tokens: ['show more']},
   get: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['get']},
   checkout: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['checkout']},
   cart: {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['cart']},
@@ -112,6 +114,8 @@ function quickparse(text) {
   }
   regexes = {
     initial: [
+      /^can you find me a\b/i,
+      /^can you find me\b/i,
       /^find me a\b/i,
       /^find me\b/i,
       /^find\b/i,
@@ -176,7 +180,7 @@ function getModifier(text) {
   if (colors.isColor(text)) {
     return {
       type: 'color',
-      val: [text] // TODO add similar colors
+      val: colors(text)
     }
   }
 
@@ -253,6 +257,14 @@ function nlpToResult(nlp) {
   if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
     res.action = verbs.getAction(nlp.verbs[0])
     res.bucket = verbs.getBucket(nlp.verbs[0])
+    return res;
+  }
+
+  var priceModifier = price(nlp.text);
+  if (priceModifier) {
+    res.bucket = BUCKET.search;
+    res.action = ACTION.similar;
+    res.dataModify = priceModifier;
     return res;
   }
 

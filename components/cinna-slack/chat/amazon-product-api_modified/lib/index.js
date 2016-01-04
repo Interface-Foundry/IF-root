@@ -18,7 +18,6 @@ var runQuery = function (credentials, method) {
           cb("No response (check internet connection)");
         } else if (response.statusCode !== 200) {
           parseXML(body, function (err, resp) {
-
             if (err) {
               cb(err);
             } else {
@@ -27,7 +26,6 @@ var runQuery = function (credentials, method) {
           });
         } else {
           parseXML(body, function (err, resp) {
-
             if (err) {
               cb(err);
             } else {
@@ -62,12 +60,13 @@ var runQuery = function (credentials, method) {
       request(url, function (err, response, body) {
 
         if (err) {
+          console.log('!!!!!!err norm ',err);
           reject(err);
         } else if (!response) {
           reject("No response (check internet connection)");
         } else if (response.statusCode !== 200) {
           parseXML(body, function (err, resp) {
-
+            console.log('AMAZON QUERY ERROR! in /amazon-product-api_modified/lib/index.js ',JSON.stringify(resp));
             if (err) {
               reject(err);
             } else {
@@ -76,7 +75,6 @@ var runQuery = function (credentials, method) {
           });
         } else {
           parseXML(body, function (err, resp) {
-
             if (err) {
               reject(err);
             } else {
@@ -113,6 +111,10 @@ var runQuery = function (credentials, method) {
 
 var createClient = function (credentials) {
   return {
+    createCart: runQuery(credentials, 'CartCreate'),
+    addCart: runQuery(credentials, 'CartAdd'),
+    getCart: runQuery(credentials, 'CartGet'),
+    clearCart: runQuery(credentials,'CartClear'),
     similarityLookup: runQuery(credentials, 'SimilarityLookup'),
     itemSearch: runQuery(credentials, 'ItemSearch'),
     itemLookup: runQuery(credentials, 'ItemLookup'),

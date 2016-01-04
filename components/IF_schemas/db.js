@@ -2,13 +2,13 @@ var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
 var ensureIndexes = require('mongoose-hook-ensure-indexes')
 var config = require('config');
-var logger = require('../IF_logging/if_logger');
+var log = require('../IF_logging/if_logger')();
 
 if (mongoose.connection.readyState == 0) {
     mongoose.connect(config.mongodb.url, config.mongodb.options);
     var db_conn = mongoose.connection;
     db_conn.on('error', function(err) {
-        logger.log({
+        log.error({
             message: 'error connecting to mongodb',
             err: err,
             config: config.mongodb
@@ -74,6 +74,14 @@ var schemas = [{
     single: 'Look',
     plural: 'Looks'
 }, {
+    filename: 'message_schema',
+    single: 'Message',
+    plural: 'Messages'
+}, {
+    filename: 'metric_schema',
+    single: 'Metric',
+    plural: 'Metrics'
+}, {
     filename: 'project_schema',
     single: 'Project',
     plural: 'Projects'
@@ -81,6 +89,10 @@ var schemas = [{
     filename: 'serverwidgets_schema',
     single: 'ServerWidget',
     plural: 'ServerWidgets'
+}, {
+    filename: 'slackbot_schema',
+    single: 'Slackbot',
+    plural: 'Slackbots'
 }, {
     filename: 'sticker_schema',
     single: 'Sticker',
@@ -121,6 +133,14 @@ var schemas = [{
     filename: 'ebayItem_schema',
     single: 'EbayItem',
     plural: 'EbayItems'
+}, {
+    filename: 'feed_data_schema',
+    single: 'FeedData',
+    plural: 'FeedData'
+}, {
+    filename: 'credentials_schema',
+    single: 'Credential',
+    plural: 'Credentials'
 }];
 
 module.exports = {
