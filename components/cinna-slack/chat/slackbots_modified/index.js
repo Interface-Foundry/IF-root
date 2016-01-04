@@ -216,6 +216,38 @@ Bot.prototype.postAttachment = function(id, message, attachments, params) {
     return this._api('chat.postMessage', params);
 };
 
+
+/**
+ * Posts a message to a channel by ID
+ * @param {string} id - channel ID
+ * @param {string} text
+ * @param {object} params
+ * @returns {vow.Promise}
+ */
+// Bot.prototype.postTyping = function(id, params) {
+//     params = extend({
+//         type: 'typing',
+//         channel: id,
+//         username: this.name
+//     }, params || {});
+
+//     return this._api('chat.postMessage', params);
+// };
+
+Bot.prototype.postTyping = function(id) {
+    var zzz = {
+        type:'typing',
+        channel:id,
+        id:1
+    }
+
+    zzz = JSON.stringify(zzz);
+
+    this.ws.send(zzz, function(data) {
+    }.bind(this));
+};
+
+
 /**
  * Posts a message to user by name
  * @param {string} name

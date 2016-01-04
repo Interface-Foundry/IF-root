@@ -444,56 +444,11 @@ function incomingAction(data){
 
 function searchBucket(data){
 
-    // Typing indicators
-
-    // Clients can send a typing indicator to indicate that the user is currently writing a message to send to a channel:
-
-    // {
-    //     "id": 1,
-    //     "type": "typing",
-    //     "channel": "C024BE91L"
-    // }
-    // This can be sent on every key press in the chat input unless one has been sent in the last three seconds. Unless there is an error the server will not send a reply, but it will send a "user_typing" event to all team members in the channel.
-
-    
-    if (data.source.origin == 'slack'){
-        //* * * * send welcome message
-        //get list of users in team
-        request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
-          if(err){
-            console.log('requesting new team user list error: ',err);
-          }
-          else {
-            // body = JSON.parse(body);
-
-            // if (body.ok && body.ims.length > 0){
-            //     //loop through members, commence welcome!
-            //     async.eachSeries(body.ims, function(member, callback) {
-
-            //         if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
-            //             var hello = {
-            //                 msg: 'welcome'
-            //             }
-            //             hello.source = {
-            //                 'origin':'slack',
-            //                 'channel':member.id,
-            //                 'org':user.team_id,
-            //                 'id':user.team_id + "_" + member.id //for retrieving chat history in node memory
-            //             }
-            //             banter.welcomeMessage(hello,function(res){
-            //                 sendTxtResponse(hello,res);
-            //             });
-            //         }
-            //         callback();
-            //     }, function done(){
-            //         console.log('finished sending out welcome messages to new team');
-            //     });
-            // }
-            // else {
-            //     console.log('error: something happened, a ghost slack team emerged');
-            // }
-          }
-        });
+    //* * * * typing event
+    if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
+        if (data.source.origin == 'slack'){
+            slackUsers[data.source.org].postTyping(data.source.channel);
+        }
     }
 
     //sort search action type
@@ -866,9 +821,40 @@ function searchMore(data){
             data.amazon.splice(0, 3);
         }
 
-        search.getAmazonStuff(data,data.amazon,function(res){
-            outgoingResponse(res,'stitch','amazon'); //send back msg to user
-        });   
+        //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
+        if (data.amazon.length >= 3){   
+            search.getAmazonStuff(data,data.amazon,function(res){
+                outgoingResponse(res,'stitch','amazon'); //send back msg to user
+            });              
+        }
+        //TEMP PATCH, FOR RESULTS UNDER 3 items
+        else {
+            var loopLame = [0,1,2];//lol
+            async.eachSeries(loopLame, function(i, callback) {
+                if (data.amazon[i]){
+                    //get reviews by ASIN 
+                    search.getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                        //adding scraped reviews to amazon objects
+                        data.amazon[i].reviews = {
+                            rating: rating,
+                            reviewCount: reviewCount
+                        }
+                        //GET PRICE
+                        search.getPrices(data.amazon[i],function(realPrice){
+                            data.amazon[i].realPrice = realPrice;
+                            callback();
+                        });
+                    });
+                }
+                else {
+                    callback();
+                }
+            }, function done(){
+                outgoingResponse(data,'stitch','amazon'); //send back msg to user
+            });
+        }
+
+
 
     });
 
@@ -1465,8 +1451,45 @@ function sendResponse(data){
                         callback();
                     });
                 });
-                
+            }
+            else if (data.action == 'focus'){
+                var attachments = [
+                    {
+                        "color": "#45a5f4"
+                    },
+                    {
+                        "color": "#45a5f4", 
+                        "fields":[]  
+                    }
+                ];
 
+                //remove first message from res arr
+                var attachThis = data.client_res;
+   
+                attachments[0].image_url = attachThis[0]; //add image search results to attachment 
+                attachments[0].fallback = 'More information'; //fallback for search result
+
+                attachThis.shift(); //remove image from array
+
+                attachments[1].fallback = 'More information';
+                //put in attachment fields
+                async.eachSeries(attachThis, function(attach, callback) {
+                    //attach = attach.replace('\\n','');
+                    var field = {
+                        "value": attach,
+                        "short":false
+                    }
+                    attachments[1].fields.push(field);
+                    callback();
+
+                }, function done(){
+
+                    attachments = JSON.stringify(attachments);
+
+                    slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
+                        callback();
+                    });
+                });         
             }
             else {
                 //loop through responses in order

@@ -709,7 +709,17 @@ var checkForCanned = function(input,callback,origin) {
             res = 'yah';
             break;
 
+        case 'hello world':
+        case 'Hello world':
+        case 'Hello World':
+            flag = 'search.initial'; //do this action
+            res = 'Developers, developers, developers, developers 👌';
+            query = 'introduction to computer programming'; //what we're going to search for
+            break;
+
         case '🐈':
+        case 'meow':
+        case ':3':
             flag = 'search.initial'; //do this action
             res = 'meow :3';
             query = 'neko atsume'; //what we're going to search for
