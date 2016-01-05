@@ -82,7 +82,6 @@ export default function messages(state = initialState, action) {
                     data: [...action.json]
             };
         case LOAD_MESSAGES_FAIL:
-            console.log('Messages failed to load wtf bubble cakes: ', state, action.error)
             return {...state,
                 loading: false,
                     loaded: false,

@@ -10,7 +10,7 @@ exports = module.exports = function(io, cinnaio) {
             msg.ts = new Date().toISOString()
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
-                console.log('socketEvents: new message from cinna received.', msg)
+                console.log('socketEvents: new message from cinna received.')
                 socket.broadcast.emit('new bc message', msg);
             }
             else if (msg.client_res.msg && msg.client_res.msg.length) {
@@ -18,7 +18,7 @@ exports = module.exports = function(io, cinnaio) {
                 //Emit outgoing message to cinna-slack
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){
-                console.log('Received results', msg)
+                console.log('Received results from cinna')
                 socket.broadcast.emit('results', msg)
             }
         });

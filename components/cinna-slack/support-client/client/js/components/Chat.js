@@ -28,12 +28,12 @@ export default class Chat extends Component {
   }
 
   componentDidMount() {
-    const { actions, messages } = this.props;
+    const { actions, messages, activeChannel } = this.props;
      socket.on('change state bc', function (state) {
       // console.log('change state event received', state)
        var identifier = {channel: state.channel, properties: []}
       for (var key in state) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved') && state[key] !== '' ) {
+        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved' || key == 'amazon') && state[key] !== '' ) {
           identifier.properties.push({ [key] : state[key]})
         }
       }  
@@ -60,7 +60,10 @@ export default class Chat extends Component {
      socket.on('disconnect bc', socket =>
       console.log('user disconnected! ',socket)
     );
-   
+    // socket.on('results', function (msg) {
+    //   actions.changeMessage(msg);
+    //   actions.changeChannel(msg.source.channel);
+    // })
     if (!this.props.user.username) {
       actions.loadAuth();
     }
@@ -102,7 +105,6 @@ export default class Chat extends Component {
     } else {
       console.log('There is no previous channel: ',channel, activeMessages)
     }
-    
   }
 
   componentDidUpdate() {

@@ -108,6 +108,7 @@ class DynamicForm extends Component {
      const newQuery = activeMessage;
      if (!this.state.searchParam) {
       console.log('search input is empty: ',this.state.searchParam)
+      return
      }
      newQuery.msg = this.state.searchParam
      newQuery.bucket = 'search'
@@ -121,16 +122,16 @@ class DynamicForm extends Component {
   render() {
     const { fields, saveState,messages, activeChannel} = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
-    const showSearchBox =  this.state.bucket === 'initial' ? {textAlign: 'center', marginTop: '3em'} : {textAlign: 'center', marginTop: '3em', display: 'none'};
+    const showSearchBox =  this.state.bucket === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
     var self = this
     return (
-       <div>
+       <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
           <form ref='form1' onSubmit={null}>
-           <div className="jsonBox">
+           <div className="jsonBox" style={{width: '50em'}}>
             {self.renderJSON(filtered)}
            </div>
             
-            <div style={{ display: 'flexbox', marginTop: '3em' }}>
+            <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
                 <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
                   Initial
                 </Button>
@@ -140,16 +141,15 @@ class DynamicForm extends Component {
                 <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
                   Banter
                 </Button>
-            </div>
-          </form>
-
-              <div id="search-box" style={showSearchBox}>
+                <div id="search-box" style={showSearchBox}>
                  <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
-                <Button bsSize = "medium" style={{ margin: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
+                <Button bsSize = "large" style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                   Search Amazon
                 </Button>
               </div>
-
+            </div>
+            
+          </form>
        </div>
     );
   }
