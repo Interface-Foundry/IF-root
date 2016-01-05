@@ -44,7 +44,10 @@ var request = require('request');
 var async = require('async');
 var amazon = require('./amazon-product-api_modified'); //npm amazon-product-api
 var nlp = require('../nlp/api');
-
+var ioClient = require('socket.io-client').connect("http://localhost:3000");
+ioClient.on('connect', function() {
+        console.log('Connected to support client.')
+    })
 
 //load mongoose models
 var db = require('db');
@@ -103,8 +106,8 @@ function initSlackUsers(){
         var testUser = [{
             team_id:'T0H72FMNK',
             bot: {
-                bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+                bot_user_id: 'cinnatest',
+                bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
             meta: {
                 initialized: false
@@ -309,6 +312,12 @@ io.sockets.on('connection', function(socket) {
         }
         preProcess(data);
     });
+
+     socket.on("msgFromSever", function(data) {
+        console.log('Received message from supervisor', data)
+        incomingAction(data);
+    })
+
 });
 //- - - - - - //
 
@@ -333,43 +342,57 @@ function preProcess(data){
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
         //found canned response
-        if(flag){
-            data.client_res = [];
-            switch(flag){
-                case 'basic': //just respond, no actions
-                    //send message
-                    data.client_res = [];
-                    data.client_res.push(res);
-                    cannedBanter(data);
-                    break;
-                case 'search.initial':
-                    //send message
-                    data.client_res = [];
-                    data.client_res.push(res);
-                    cannedBanter(data);
+        // if(flag){
+        //     data.client_res = [];
+        //     switch(flag){
+        //         case 'basic': //just respond, no actions
+        //             //send message
+        //             data.client_res = [];
+        //             data.client_res.push(res);
+        //             cannedBanter(data);
+        //             break;
+        //         case 'search.initial':
+        //             //send message
+        //             data.client_res = [];
+        //             data.client_res.push(res);
+        //             cannedBanter(data);
 
-                    //now search for item
-                    data.tokens = [];
-                    data.tokens.push(query); //search for this item
-                    data.bucket = 'search';
-                    data.action = 'initial';
-                    incomingAction(data);
-                    break;
-                case 'search.focus':
-                    data.searchSelect = [];
-                    data.searchSelect.push(query);
-                    data.bucket = 'search';
-                    data.action = 'focus';
-                    incomingAction(data);
-                    break;
-                default:
-                    console.log('error: canned action flag missing');
-            }
-        }
-        //proceed to NLP instead
-        else {
-            routeNLP(data);
-        }
+        //             //now search for item
+        //             data.tokens = [];
+        //             data.tokens.push(query); //search for this item
+        //             data.bucket = 'search';
+        //             data.action = 'initial';
+        //             incomingAction(data);
+        //             break;
+        //         case 'search.focus':
+        //             data.searchSelect = [];
+        //             data.searchSelect.push(query);
+        //             data.bucket = 'search';
+        //             data.action = 'focus';
+        //             incomingAction(data);
+        //             break;
+        //         default:
+        //             console.log('error: canned action flag missing');
+        //     }
+        // }
+        // //proceed to NLP instead
+        // else {
+            // console.log('Line 383: ',data)
+             //TESTING SUPERVISOR
+            //now search for item
+            // console.log('Line 376: ',data)
+            data.client_res = [];
+            data.client_res.push(res);
+            data.tokens = [];
+            data.tokens.push(query); //search for this item
+            data.bucket = 'supervisor';
+            data.action = 'initial';
+
+            incomingAction(data);
+
+            //enable after testing supervisor
+            // routeNLP(data);
+        // }
     },data.source.origin);
 
   //  });
@@ -382,33 +405,41 @@ function routeNLP(data){
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
-            console.log('NLP RES ',res);
+            // console.log('NLP RES ',res);
 
-            if(!res.bucket){
-                res.bucket = 'search';
-            }
-            if(!res.action){
-                res.action = 'initial';
-            }
+            // if(!res.bucket){
+            //     res.bucket = 'search';
+            // }
+            // if(!res.action){
+            //     res.action = 'initial';
+            // }
 
-            //- - - temp stuff to transfer nlp results to data object - - - //
-            if (res.bucket){
-                data.bucket = res.bucket;
-            }
-            if (res.action){
-                data.action = res.action;
-            }
-            if (res.tokens){
-                data.tokens = res.tokens;
-            }
-            if (res.searchSelect){
-                data.searchSelect = res.searchSelect;
-            }
-            if (res.dataModify){
-                data.dataModify = res.dataModify;
-            }
+            // //- - - temp stuff to transfer nlp results to data object - - - //
+            // if (res.bucket){
+            //     data.bucket = res.bucket;
+            // }
+            // if (res.action){
+            //     data.action = res.action;
+            // }
+            // if (res.tokens){
+            //     data.tokens = res.tokens;
+            // }
+            // if (res.searchSelect){
+            //     data.searchSelect = res.searchSelect;
+            // }
+            // if (res.dataModify){
+            //     data.dataModify = res.dataModify;
+            // }
             //- - - - end temp - - - - //
 
+               //TESTING SUPERVISOR
+            //send message
+            data.client_res = res
+            //now search for item
+            data.tokens = [];
+            data.tokens.push(query); //search for this item
+            data.bucket = 'supervisor';
+            data.action = 'initial';
             incomingAction(data);
 
         }
@@ -420,7 +451,8 @@ function routeNLP(data){
 function incomingAction(data){
 
     //save a new message obj
-    history.saveHistory(data,true); //saving incoming message
+    //TESTING: commenting out for testing supervisor
+    // history.saveHistory(data,true); //saving incoming message
     
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -434,7 +466,76 @@ function incomingAction(data){
             purchaseBucket(data);
             break;
         case 'supervisor':
-            //route to supervisor chat window
+        // console.log('line 452: hitting supervisor bucket')
+            var rand = Math.random().toString(36).slice(2)
+            if (!ioClient.connected) {
+                ioClient.on('connect', function() {
+                    console.log('Connected to support client.')
+                    ioClient.emit('new channel', {
+                        name: data.source.channel,
+                        id: data.source.channel,
+                        resolved: false
+                    })
+                    ioClient.emit('new message', {
+                        id: null,
+                        incoming: true,
+                        msg: data.msg,
+                        tokens: [data.msg.split(' ')],
+                        bucket: 'supervisor',
+                        action: '',
+                        amazon: [],
+                        // dataModify: {
+                        //     type: '',
+                        //     val: [],
+                        //     param: ''
+                        // },
+                        source: {
+                            origin: 'socket.io',
+                            channel: data.source.channel,
+                            org: 'kip',
+                            id: data.source.channel
+                        },
+                        client_res: {
+                            msg: ''
+                        },
+                        ts: Date.now,
+                        resolved: false,
+                        parent: rand
+                    })
+                })
+            } else {
+                ioClient.emit('new channel', {
+                    name: data.source.channel,
+                    id: data.source.channel,
+                    resolved: false
+                })
+                ioClient.emit('new message', {
+                    id: null,
+                    incoming: true,
+                    msg: data.msg,
+                    tokens: [data.msg.split(' ')],
+                    bucket: 'supervisor',
+                    action: '',
+                    amazon: [],
+                    // dataModify: {
+                    //     type: '',
+                    //     val: [],
+                    //     param: ''
+                    // },
+                    source: {
+                        origin: 'socket.io',
+                        channel: data.source.channel,
+                        org: 'kip',
+                        id: data.source.channel
+                    },
+                    client_res: {
+                        msg: ''
+                    },
+                    ts: Date.now,
+                    resolved: false,
+                    parent: rand
+                })
+            }
         default:
             searchBucket(data);
     }
@@ -1061,7 +1162,7 @@ function searchAmazon(data, type, query, flag){
                 doSearch();
             }
 
-            //console.log('amazonParams ',amazonParams);
+            // console.log('amazonParams ',amazonParams);
 
             function doSearch(){
                 //AMAZON BASIC SEARCH
@@ -1325,7 +1426,9 @@ function outgoingResponse(data,action,source){ //what we're replying to user wit
         });
     }
 
-    else if (action == 'txt'){  
+    else if (action == 'txt'){
+    //TESTING  
+        console.log('Line 1413: data:',data )
         sendResponse(data);
         banter.getCinnaResponse(data,function(res){
             if(res && res !== 'null'){
@@ -1363,9 +1466,19 @@ function sendResponse(data){
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) { 
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
-            }            
-        }else {
-            console.log('error: socket io channel missing');
+            }  
+            //TESTING          
+        } else if (data.source.channel && data.source.origin == 'supervisor') {
+               data.bucket = 'results'
+               if (!ioClient.connected) {
+                ioClient.on('connect', function() {
+                     ioClient.emit('new message', data)
+                })
+            } else {
+                    ioClient.emit('new message', data)
+            }
+        } else {
+            console.log('error: socket io channel missing', data);
         }
 
     }
@@ -1390,6 +1503,11 @@ function sendResponse(data){
             console.log('error: slackUsers channel missing');
         }
     }
+    else if (data.source.channel && data.source.origin == 'supervisor'){
+        console.log('Line 1501: Sending results back to supervisor')
+        data.bucket = 'results'
+        ioClient.emit('new message', data)
+    }
     else {
         console.log('error: data.source.channel or source.origin missing')
     }
@@ -1398,7 +1516,7 @@ function sendResponse(data){
     if (data.bucket && data.action){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
-        history.saveHistory(data,false); //saving outgoing message
+        // history.saveHistory(data,false); //saving outgoing message
         //});        
     }
     else {

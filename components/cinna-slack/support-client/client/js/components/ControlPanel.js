@@ -16,6 +16,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
 import Card from './Card';
 
+
 const style = {
   width: 400,
   marginBottom: '2em',
@@ -41,23 +42,54 @@ export default class ControlPanel extends Component {
         items: [{
         id: 'product-0',
         name: 'Product 0',
-        index: 0
+        index: 0,
+        img: ''
       },{
         id: 'product-1',
         name: 'Product 1',
-        index: 1
+        index: 1,
+        img: ''
       },{
         id: 'product-2',
         name: 'Product 2',
-        index: 2
+        index: 2,
+        img: ''
       },{
         id: 'product-3',
         name: 'Product 3',
-        index: 3
+        index: 3,
+        img: ''
       },{
         id: 'product-4',
         name: 'Product 4',
-        index: 4
+        index: 4,
+        img: ''
+      },
+      {
+        id: 'product-5',
+        name: 'Product 5',
+        index: 5,
+        img: ''
+      },{
+        id: 'product-6',
+        name: 'Product 6',
+        index: 6,
+        img: ''
+      },{
+        id: 'product-7',
+        name: 'Product 7',
+        index: 7,
+        img: ''
+      },{
+        id: 'product-8',
+        name: 'Product 8',
+        index: 8,
+        img: ''
+      },{
+        id: 'product-9',
+        name: 'Product 9',
+        index: 9,
+        img: ''
       }
       ],
         msg : true,
@@ -67,7 +99,20 @@ export default class ControlPanel extends Component {
   }
 
   componentDidMount() {
+    const {actions} = this.props;
     const self = this
+     socket.on('results', function (msg) {
+      console.log('ControlPanel: Received results',msg)
+       for (var i = 0; i < msg.amazon.length; i++) {
+        self.state.items[i].index = i
+        self.state.items[i].id = msg.amazon[i].ASIN[0]
+        self.state.items[i].name = msg.amazon[i].ItemAttributes[0].Title[0]
+        self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].SmallImage[0].URL[0]
+      }
+      actions.changeMessage(msg);
+      // console.log('New self.state: ',self.state.items)
+      // self.state.items = msg.amazon;
+    })
   }
 
   sendCommand(newMessage) {
@@ -96,7 +141,7 @@ export default class ControlPanel extends Component {
  
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
-     const fields  = ['msg','bucket','action']
+     const fields  = ['msg','bucket','action','searchParam']
      const self = this;
      const { items } = this.state;
 
@@ -122,6 +167,7 @@ export default class ControlPanel extends Component {
                           index={i}
                           id={item.id}
                           text={item.name}
+                          img = {item.img}
                           moveCard={this.moveCard} />
                   );
                 })}

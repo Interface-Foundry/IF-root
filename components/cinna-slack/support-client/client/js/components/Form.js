@@ -103,6 +103,21 @@ class DynamicForm extends Component {
     // fields['bucket'].value = choice;
   }
 
+  searchAmazon() {
+     const {activeMessage} = this.props 
+     const newQuery = activeMessage;
+     if (!this.state.searchParam) {
+      console.log('search input is empty: ',this.state.searchParam)
+     }
+     newQuery.msg = this.state.searchParam
+     newQuery.bucket = 'search'
+     newQuery.action = 'initial'
+     newQuery.client_res.msg = newQuery.msg
+     newQuery.tokens = newQuery.msg.split(' ')
+     newQuery.source.origin = 'supervisor'
+     socket.emit('new message', newQuery); 
+  }
+
   render() {
     const { fields, saveState,messages, activeChannel} = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
@@ -129,8 +144,8 @@ class DynamicForm extends Component {
           </form>
 
               <div id="search-box" style={showSearchBox}>
-                 <input type="text" id="seach-input" {...fields['action']} onChange={this.handleChange} />
-                <Button bsSize = "medium" style={{ margin: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon(activeMessage)} >
+                 <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
+                <Button bsSize = "medium" style={{ margin: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                   Search Amazon
                 </Button>
               </div>

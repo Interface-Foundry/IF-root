@@ -60,6 +60,7 @@ export default class Chat extends Component {
      socket.on('disconnect bc', socket =>
       console.log('user disconnected! ',socket)
     );
+   
     if (!this.props.user.username) {
       actions.loadAuth();
     }
@@ -93,7 +94,7 @@ export default class Chat extends Component {
     const { actions, messages, activeChannel} = this.props;
     const activeMessages = messages.filter(message => message.source.channel === channel.name);
     const firstMsg = activeMessages[0]
-    console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
+    // console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
     // console.log('Chat.js:108-->',firstMsg)
     if (firstMsg) {

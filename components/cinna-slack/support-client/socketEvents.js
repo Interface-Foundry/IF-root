@@ -6,14 +6,20 @@ exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
-            console.log('socketEvents: new message from cinna received.', msg)
+            
             msg.ts = new Date().toISOString()
-            //Emit outgoing message to cinna-slack
-            ioClient.emit("msgFromSever", msg);
-
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
+                console.log('socketEvents: new message from cinna received.', msg)
                 socket.broadcast.emit('new bc message', msg);
+            }
+            else if (msg.client_res.msg && msg.client_res.msg.length) {
+                console.log('Sending message to client.', msg)
+                //Emit outgoing message to cinna-slack
+                ioClient.emit("msgFromSever", msg);
+            } else if (msg.bucket === 'results'){
+                console.log('Received results', msg)
+                socket.broadcast.emit('results', msg)
             }
         });
         socket.on('new channel', function(channel) {

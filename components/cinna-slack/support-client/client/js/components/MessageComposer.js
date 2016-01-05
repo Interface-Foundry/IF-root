@@ -40,6 +40,7 @@ export default class MessageComposer extends Component {
                 org: 'kip',
                 id: 'Cinna'
             },
+            bucket: 'response',
             ts: new Date().toISOString(),
             parent: activeMessage.source.id.toString()
         };
