@@ -115,7 +115,7 @@ var recallHistory = function(data,callback){
                 switch(data.action){
 
                     default: 
-                        Message.findOne({'bucket':'search','action':'initial','incoming':false}).sort({'_id': -1}).exec(function(err, msg) {  
+                        Message.findOne({'bucket':'search','action':'initial','incoming':false,'source.id':data.source.id}).sort({'_id': -1}).exec(function(err, msg) {  
                             if(err){
                                 console.log('Error: Cannot find initial search for recallHistory');
                             }   
