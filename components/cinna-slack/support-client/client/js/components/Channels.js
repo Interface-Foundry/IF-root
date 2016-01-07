@@ -8,7 +8,7 @@ import * as UserAPIUtils from '../utils/UserAPIUtils';
 // img.src = require('./kip-icon.png');
 
 
-export default class Channels extends Component {
+class Channels extends Component {
 
   static propTypes = {
     channels: PropTypes.array.isRequired,
@@ -16,7 +16,7 @@ export default class Channels extends Component {
     onClick: PropTypes.func.isRequired,
     messages: PropTypes.array.isRequired,
     chanIndex: PropTypes.number.isRequired
-  }
+  };
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -174,3 +174,5 @@ export default class Channels extends Component {
     );
   }
 }
+
+export default Channels

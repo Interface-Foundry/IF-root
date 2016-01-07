@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 
-export default class MessageListItem extends Component {
+class MessageListItem extends Component {
 
   static propTypes = {
     message: PropTypes.object.isRequired
-  }
+  };
   
    constructor (props) {
     super(props)
@@ -54,3 +54,5 @@ export default class MessageListItem extends Component {
     );
   }
 }
+
+export default MessageListItem

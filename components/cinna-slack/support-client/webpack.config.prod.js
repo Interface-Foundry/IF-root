@@ -29,6 +29,7 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       loaders: ['babel'],
+      plugins: ['transform-decorators-legacy' ],
       include: path.join(__dirname, 'client')
     }, {
       test: /\.css?$/,

@@ -34,7 +34,7 @@ ChatContainer.propTypes = {
   typers: PropTypes.array.isRequired,
   activeControl: PropTypes.object.isRequired
   ,activeMessage: PropTypes.object.isRequired
-}
+};
 console.log(connect);
 function mapStateToProps(state) {
   return {

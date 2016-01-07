@@ -91,7 +91,7 @@ const defaultItems = [{
       ]
 
 @DragDropContext(HTML5Backend)
-export default class ControlPanel extends Component {
+class ControlPanel extends Component {
     static propTypes = {
         activeControl: PropTypes.object.isRequired,
         activeChannel: PropTypes.object.isRequired,
@@ -99,7 +99,7 @@ export default class ControlPanel extends Component {
         messages: PropTypes.array.isRequired,
         onSubmit: PropTypes.func.isRequired ,
         actions: PropTypes.object.isRequired
-    }
+    };
 
     constructor (props, context) {
       super(props, context)
@@ -339,19 +339,21 @@ export default class ControlPanel extends Component {
 
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                 <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>       
+                
                     <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
                       <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, border:'0.3em solid #45a5f4', borderRadius: '0.3em'}}>
                         <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' />
                       </div>   
                     </div>
-                </ReactCSSTransitionGroup>
+               
             </div>
          </div>
       );
   }
 }
 
+ // <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>       
+ // </ReactCSSTransitionGroup>
 Array.prototype.getIndexBy = function (name, value) {
     for (var i = 0; i < this.length; i++) {
         if (this[i][name] == value) {
@@ -360,3 +362,5 @@ Array.prototype.getIndexBy = function (name, value) {
     }
     return -1;
 }
+
+export default ControlPanel

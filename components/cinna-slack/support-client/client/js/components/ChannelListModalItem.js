@@ -1,12 +1,12 @@
 import React, { PropTypes } from 'react';
 import classnames from 'classnames';
 
-export default class ChannelListModalItem extends React.Component {
+class ChannelListModalItem extends React.Component {
 
   static propTypes = {
     channel: PropTypes.object.isRequired,
     onClick: PropTypes.func.isRequired
-  }
+  };
   render() {
     const { channel } = this.props;
     const { channel: selectedChannel, onClick } = this.props;
@@ -23,3 +23,5 @@ export default class ChannelListModalItem extends React.Component {
 
   
 }
+
+export default ChannelListModalItem

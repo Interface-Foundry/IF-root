@@ -9,12 +9,12 @@ from 'react-bootstrap';
 import classnames from 'classnames';
 
 
-export default class TopPanel extends Component {
+class TopPanel extends Component {
 
     static propTypes = {
         activeControl: PropTypes.object.isRequire,
         onClick: PropTypes.func.isRequired
-    }
+    };
 
     handleChangeControl(control) {
         this.props.onClick(control);
@@ -58,3 +58,5 @@ export default class TopPanel extends Component {
     }
 
 }
+
+export default TopPanel

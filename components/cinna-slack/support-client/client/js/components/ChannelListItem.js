@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import { Button } from 'react-bootstrap';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 
-export default class ChannelListItem extends Component {
+class ChannelListItem extends Component {
 
   static propTypes = {
     channel: PropTypes.object.isRequired,
@@ -12,7 +12,7 @@ export default class ChannelListItem extends Component {
     actions: PropTypes.object.isRequired,
     channels: PropTypes.array.isRequired,
     chanIndex: PropTypes.number.isRequired
-  }
+  };
 
   closeChannel() {
     const { chanIndex, channel, channels,actions, messages, onClick } = this.props;
@@ -68,3 +68,4 @@ export default class ChannelListItem extends Component {
   }
 }
 
+export default ChannelListItem

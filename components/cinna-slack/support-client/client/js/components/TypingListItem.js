@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 
-export default class TypingListItem extends Component {
+class TypingListItem extends Component {
 
   static propTypes = {
     username: PropTypes.string.isRequired
-  }
+  };
   render() {
     return (
       <span>
@@ -13,3 +13,5 @@ export default class TypingListItem extends Component {
     );
   }
 }
+
+export default TypingListItem

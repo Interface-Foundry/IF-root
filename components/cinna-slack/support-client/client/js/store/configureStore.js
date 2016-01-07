@@ -8,7 +8,7 @@ const allReducers = Object.assign({}, reducers, {form: formReducer});
 const rootReducer = combineReducers(allReducers);
 const createStoreWithMiddleware = compose(
   applyMiddleware(thunk, promiseMiddleware),
-  devTools(),
+  // devTools(),
   persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 )(createStore);
 

@@ -3,13 +3,13 @@ import { Redirect, Router, Route } from 'react-router';
 import { Provider } from 'react-redux';
 import ChatContainer from './ChatContainer';
 import configureStore from '../store/configureStore';
-import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
+// import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 const store = configureStore();
 
-export default class Root extends Component {
+class Root extends Component {
   static propTypes = {
     history: PropTypes.object.isRequired
-  }
+  };
   render() {
     const processENV = process.env.NODE_ENV;
     const { history } = this.props;
@@ -28,6 +28,8 @@ export default class Root extends Component {
     );
   }
 }
+
+export default Root
 
  // {processENV === 'development' && <DebugPanel top left bottom >
  //          <DevTools store={store} monitor={LogMonitor} />

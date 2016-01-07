@@ -4,7 +4,7 @@ const socket = io.connect();
 import strftime from 'strftime';
 import { Input } from 'react-bootstrap';
 
-export default class MessageComposer extends Component {
+class MessageComposer extends Component {
 
   static propTypes = {
     activeChannel: PropTypes.object.isRequired,
@@ -12,7 +12,7 @@ export default class MessageComposer extends Component {
     onSave: PropTypes.func.isRequired,
     user: PropTypes.string.isRequired,
     messages:  PropTypes.array.isRequired
-  }
+  };
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -97,3 +97,5 @@ export default class MessageComposer extends Component {
     );
   }
 }
+
+export default MessageComposer

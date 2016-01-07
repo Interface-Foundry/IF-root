@@ -10,7 +10,7 @@ const socket = io();
 // const emitter = io.connect();
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 
-export default class Chat extends Component {
+class Chat extends Component {
 
   static propTypes = {
     messages: PropTypes.array.isRequired,
@@ -22,10 +22,10 @@ export default class Chat extends Component {
     typers: PropTypes.array.isRequired,
     activeControl: PropTypes.object.isRequired,
     activeMessage: PropTypes.object.isRequired
-  }
+  };
   static contextTypes = {
     router: PropTypes.object.isRequired
-  }
+  };
 
   componentDidMount() {
     const { actions, messages, activeChannel } = this.props;
@@ -214,3 +214,5 @@ export default class Chat extends Component {
     );
   }
 }
+
+export default Chat
