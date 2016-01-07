@@ -99,7 +99,7 @@ class DynamicForm extends Component {
 
   setField(choice) {
     const { fields, dirty } = this.props;
-    this.setState({ bucket : choice, dirty: true})
+    this.setState({ bucket: 'search', action : choice, dirty: true})
     // fields['bucket'].value = choice;
   }
 
@@ -119,10 +119,16 @@ class DynamicForm extends Component {
      socket.emit('new message', newQuery); 
   }
 
+  searchSimilar() {
+
+
+  }
+
   render() {
-    const { fields, saveState,messages, activeChannel} = this.props;
+    const { fields, saveState,messages, activeChannel, seleected} = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
-    const showSearchBox =  this.state.bucket === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
+    const showSearchBox =  this.state.action === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
+    const showSimilarBox =  this.state.action === 'similar' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
     var self = this
     return (
        <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
@@ -135,18 +141,23 @@ class DynamicForm extends Component {
                 <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
                   Initial
                 </Button>
-                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('purchase')} >
-                  Purchase
+                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('similar')} >
+                  Similar
                 </Button>
-                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('banter')} >
-                  Banter
+                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('modify')} >
+                  Modify
                 </Button>
                 <div id="search-box" style={showSearchBox}>
-                 <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
-                <Button bsSize = "large" style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
-                  Search Amazon
-                </Button>
-              </div>
+                     <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
+                    <Button bsSize = "large" style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
+                      Search Amazon
+                    </Button>
+                </div>
+                  <div id="similar-box" style={showSimilarBox}>
+                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name)} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
+                      Search Similar 
+                    </Button>
+                </div>
             </div>
             
           </form>

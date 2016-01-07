@@ -24,7 +24,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
         //check for incoming val
         if (typeof incoming !== 'undefined') {
             data.incoming = incoming;
-        }else {
+        } else {
             console.log('warning: messaged saved without incoming val');
         }
 

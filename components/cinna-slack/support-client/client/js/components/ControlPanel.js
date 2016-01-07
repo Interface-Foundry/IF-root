@@ -16,6 +16,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
 import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
+import ReactList from 'react-list';
 
 const style = {
   width: 400,
@@ -151,6 +152,7 @@ export default class ControlPanel extends Component {
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.prev.name)
     const firstMsg = filtered[0]
     const firstMsgOld = filteredOld[0]
+     self.setState({ selected: {name: null, index: null}})
       if (firstMsgOld) {
           var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
           var result = []
@@ -287,12 +289,33 @@ export default class ControlPanel extends Component {
         items: {[hoverIndex]: {$merge: {index: hoverIndex}}}
      }));
   }
+
+   handleClick(index) {
+    this.setState({ selected: {name: this.state.items[index].name, index: index}})
+    // console.log('Clicked!!!', this.state.selected)
+  }
+
+  renderItem(index, key) {
+      const highlightBox =  (this.state.selected && this.state.selected.index === index) ? {border:'0.6em solid #18ffff'} : {};
+      const boundClick = this.handleClick.bind(this, index);
+       return  (  
+                <div onClick={boundClick} style={highlightBox} >
+                  <Card key={this.state.items[index].id}
+                        index={index}
+                        id={this.state.items[index].id}
+                        text={this.state.items[index].name}
+                        img = {this.state.items[index].img}
+                        moveCard={this.moveCard}  />
+                </div>
+                )
+               
+    }
  
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
      const fields  = ['msg','bucket','action','searchParam']
      const self = this;
-     const { items } = this.state;
+     const { items,selected } = this.state;
 
       return ( 
          <div className="flexbox-container">
@@ -301,7 +324,7 @@ export default class ControlPanel extends Component {
           <div>   
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
-              fields={fields} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
+              fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
          
             </div>   
           </section>
@@ -313,18 +336,11 @@ export default class ControlPanel extends Component {
           </div>
 
           <div id="third-column" style= {{ padding: 0}}>          
-              <div style={style}>
-                {items.map((item, i) => {
-                  return (
-                    <Card key={item.id}
-                          index={i}
-                          id={item.id}
-                          text={item.name}
-                          img = {item.img}
-                          moveCard={this.moveCard} />
-                  );
-                })}
-             
+              <div style={style}>  
+                    <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
+                      <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, border:'0.3em solid #45a5f4', borderRadius: '0.3em'}}>
+                        <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' />
+                      </div>   
               </div>
                  
           </div>

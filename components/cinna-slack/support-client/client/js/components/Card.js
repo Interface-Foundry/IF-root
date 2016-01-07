@@ -95,7 +95,7 @@ export default class Card extends Component {
 
     return connectDragSource(connectDropTarget(
     <div style={{ display: 'flexbox', marginRight: '57%'}}>
-      <img width='120' width='100' style={{ margin: '0.2em', border:'0.3em solid orange'}} src={img} />
+      <img width='120' width='150' style={{ margin: '0.2em', border:'0.3em solid orange'}} src={img} />
     </div>
   
     ));

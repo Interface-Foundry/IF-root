@@ -60,10 +60,6 @@ export default class Chat extends Component {
      socket.on('disconnect bc', socket =>
       console.log('user disconnected! ',socket)
     );
-    // socket.on('results', function (msg) {
-    //   actions.changeMessage(msg);
-    //   actions.changeChannel(msg.source.channel);
-    // })
     if (!this.props.user.username) {
       actions.loadAuth();
     }

@@ -36,9 +36,6 @@ export default class ChannelListItem extends Component {
       });
     }, Promise.resolve());
     actions.removeChannel(channel)
-    // console.log('ChannelListItem.js 39: channels: ',channels)
-    // const index = (channels[chanIndex-1]) ? (chanIndex-1) : channels.length-1
-    // console.log('ChannelListItem.js 40: switching to channel: ',channels[index])
     if (channel.name === channels[0].name && channels.length > 1) {
       // console.log('situation: first channel closed but more channels')
       onClick(channels[1])
