@@ -52,6 +52,7 @@ def parse(data):
         # isQuestion
         if s.parts_of_speech[-1][0] == '?':
             s.isQuestion = True
+            res.isQuestion = True
         else:
             s.isQuestion = False
 

@@ -127,7 +127,7 @@ function quickparse(text) {
       /^search\b/i
     ],
     // modify: [
-    //   /\bbut\b/,
+      //  /^more\ ([\w ])+/
     //   /\bin (.+)\b/i,
     //   /\bwith (.+)\b/i
     // ],
@@ -293,6 +293,10 @@ function nlpToResult(nlp) {
     }
   })
 
+  if (nlp.isQuestion) {
+    debug('its a question')
+  }
+
   debug('returning at the end');
   return res;
 }
@@ -344,7 +348,10 @@ if (!module.parent) {
     'looking for a black zara jacket',
     'I like the thrid one',
     'is there any size medium?',
-    'like 2 but blue'
+    'like 2 but blue',
+    'does it have pockets?',
+    'morning glory (24 pack)',
+    'cheapest 32" monitor'
   ];
   sentences.map(function(a) {
     parse(a, function(e, res) {
