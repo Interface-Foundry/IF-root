@@ -17,6 +17,8 @@ import update from 'react/lib/update';
 import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
 import ReactList from 'react-list';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+
 
 const style = {
   width: 400,
@@ -337,42 +339,18 @@ export default class ControlPanel extends Component {
 
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
+                 <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>       
                     <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
                       <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, border:'0.3em solid #45a5f4', borderRadius: '0.3em'}}>
                         <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' />
                       </div>   
-              </div>
-                 
-          </div>
+                    </div>
+                </ReactCSSTransitionGroup>
+            </div>
          </div>
       );
   }
 }
-
-
- // <div>
- //                {Object.keys(this.state).map(field =>
- //                <label key={field}>
- //                  <input type="checkbox"
- //                         checked={this.state[field]}
- //                         onChange={event => this.setState({[field]: event.target.checked})}/> {labels[field]}
- //                </label>
- //                )}
- //            </div>
-
-// <div className="box" style={{display: "flex", "flexFlow": "column wrap", height: '500px', width: '500px', position: 'relative'}}>
-//    <Draggable  axis="y" onDrag={::this.handleDrag} ref="product-0" grid={[125, 125]} bounds="parent" {...drags}>
-//       <div id="product-0" className="box cursor-y product-box">First Product </div>
-//    </Draggable>
-//    <Draggable  axis="y" onDrag={::this.handleDrag} grid={[125, 125]} bounds="parent" {...drags}>
-//       <div id="product-1" className="box cursor-y product-box">Second Product </div>
-//    </Draggable>
-//    <Draggable axis="y" onDrag={::this.handleDrag} grid={[125, 125]} bounds="parent" {...drags}>
-//       <div id="product-2" className="box cursor-y product-box">Third Product </div>
-//    </Draggable>
-// </div>
-
-
 
 Array.prototype.getIndexBy = function (name, value) {
     for (var i = 0; i < this.length; i++) {

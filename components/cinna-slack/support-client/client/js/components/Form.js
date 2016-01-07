@@ -125,11 +125,12 @@ class DynamicForm extends Component {
   }
 
   render() {
-    const { fields, saveState,messages, activeChannel, seleected} = this.props;
+    const { fields, saveState,messages, activeChannel, selected} = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const showSearchBox =  this.state.action === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
     const showSimilarBox =  this.state.action === 'similar' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
-    var self = this
+    const showPrompt = (!selected || !selected.name) ? { color:'black'} : {color:'white'}
+   var self = this
     return (
        <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
           <form ref='form1' onSubmit={null}>
@@ -154,6 +155,7 @@ class DynamicForm extends Component {
                     </Button>
                 </div>
                   <div id="similar-box" style={showSimilarBox}>
+                      <h3 style={showPrompt}> Please select an item. </h3>
                     <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name)} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
                       Search Similar 
                     </Button>
