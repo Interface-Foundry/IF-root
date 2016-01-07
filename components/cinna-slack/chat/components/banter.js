@@ -583,6 +583,23 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.initial'; //do this action      
             query = 'space art';   
             break;    
+
+        // NOTE: ADD search term sensitive Kip responses
+
+        case textSimilar(input,'haters gonna hate') > 90:
+        case textSimilar(input,'kip start walking') > 90:
+        case textSimilar(input,'kip walk it off') > 90:
+            flag = 'basic'; //do this action      
+            res = 'http://kipthis.com/img/cinna_walk_whitebg.gif'; 
+            break;    
+
+        case textSimilar(input,'What does the scanner say?') > 80:
+        case textSimilar(input,'over 9000') > 90:
+        case textSimilar(input,'it\'s over 9000') > 90:
+            res = 'Over 9000?? http://image.lang-8.com/w0_h0/d17e3655c3a548908eddea8ccaa12ce6cb5b1b39.jpg';   
+            flag = 'search.initial'; //do this action      
+            query = 'dragonball z';   
+            break; 
             
         case textSimilar(input,'We’re not paid enough') > 60:
         case textSimilar(input,'i can\'t afford that') > 60:
