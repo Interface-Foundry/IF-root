@@ -91,6 +91,7 @@ var exactMatches = {
   checkout: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['checkout']},
   cart: {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['cart']},
   'view cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['view cart']},
+  'show cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['show cart']},
   '1': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['1'], searchSelect: [1]},
   '2': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['2'], searchSelect: [2]},
   '3': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['3'], searchSelect: [3]}
@@ -321,7 +322,7 @@ if (!module.parent) {
     process.env.DEBUG = 'nlp';
     parse(process.argv.slice(2).join(' '), function(e, r) {
       if (e) debug(e)
-      console.log(r)
+      console.log(JSON.stringify(r, null, 2))
       process.exit(0);
     });
   } else {
