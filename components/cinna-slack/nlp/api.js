@@ -12,6 +12,8 @@ var _ = require('lodash')
 
 var debug = require('debug')('nlp')
 
+console.log(config)
+
 var BUCKET = {
   search: 'search',
   banter: 'banter',
@@ -341,7 +343,8 @@ if (!module.parent) {
     'ok pls buy for me thanks',
     'looking for a black zara jacket',
     'I like the thrid one',
-    'is there any size medium?'
+    'is there any size medium?',
+    'like 2 but blue'
   ];
   sentences.map(function(a) {
     parse(a, function(e, res) {
@@ -349,7 +352,7 @@ if (!module.parent) {
         console.error(e);
       } else {
         console.log(a);
-        console.log(res);
+        console.log(JSON.stringify(res, null, 2));
       }
     })
   })
