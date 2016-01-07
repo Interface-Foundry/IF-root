@@ -3,7 +3,120 @@ var should = require('should')
 var config = require('config')
 var nlp = require('./api')
 
+        type: 'price',
+        param: 'less' //or 'more'
+
+
 var messages = [
+  {
+    m: 'cheapest 32" monitor with good reviews',
+    r: {
+      bucket: 'search',
+      action: 'aggregate',
+      tokens: ['cheapest 32" monitor with good reviews'],
+      execute: [ //will fire commands in arr order
+        { 
+          bucket: 'search', //initial search
+          action:'initial',
+          val: '32" monitor'
+        },
+        { 
+          bucket: 'search', //sorts cheapest
+          action:'modify',
+          dataModify: {
+            type: 'price',
+            param: 'less' //or 'more'
+          }
+        },
+        {
+          bucket: 'search', //sorts top reviews
+          action:'modify',
+          dataModify: {
+            type: 'reviews',
+            param: 'top' //or 'more'
+          }
+        }
+      ]
+    }
+  },
+  {
+    m: '32" monitor with best reviews',
+    r: {
+      bucket: 'search', 
+      action: 'aggregate',
+      tokens: ['32" monitor with best reviews'],
+      execute: [ //will fire commands in arr order
+        { 
+          bucket: 'search', //initial search
+          action:'initial',
+          val: '32" monitor'
+        },
+        {
+          bucket: 'search', //sorts top reviews
+          action:'sort',
+          dataModify: {
+            type: 'reviews',
+            param: 'top' //or 'more'
+          }
+        }
+      ]
+    }
+  },
+  {
+    m: 'best 32" monitor', 
+    r: {
+      bucket: 'search', 
+      action: 'aggregate',
+      tokens: ['best 32" monitor'],
+      execute: [ //will fire commands in arr order
+        { 
+          bucket: 'search', //initial search
+          action:'initial',
+          val: '32" monitor'
+        },
+        { 
+          bucket: 'search', //sorts cheapest
+          action:'modify',
+          dataModify: {
+            type: 'price',
+            param: 'less' //or 'more'
+          }
+        },
+        {
+          bucket: 'search', //sorts top reviews
+          action:'modify',
+          dataModify: {
+            type: 'reviews',
+            param: 'top' //or 'more'
+          }
+        }
+      ]
+    }
+  },
+  {
+    m: 'cheapest 32" monitor',
+    r: {
+      bucket: 'search', 
+      action: 'aggregate',
+      tokens: ['cheapest 32" monitor'],
+      execute: [ //will fire commands in arr order
+        { 
+          bucket: 'search', //initial search
+          action:'initial',
+          val: '32" monitor'
+        },
+        { 
+          bucket: 'search', //sorts cheapest
+          action:'modify',
+          dataModify: {
+            type: 'price',
+            param: 'less' //or 'more'
+          }
+        }
+      ]
+    }
+  },
+
   {
     m: 'skinny black jeans',
     r: {
@@ -118,11 +231,82 @@ var messages = [
       }
     }
   },
+
+  //* * * * review related queries * * * *//
+  {
+    m: '1 but best', 
+    r: {
+      bucket: 'search',
+      action: 'modify',
+      searchSelect: [1],
+      tokens: ['1 but best'],
+      dataModify: {
+        type: 'reviews',
+        param: 'top' //or 'more'
+      }
+    }
+  },
+  {
+    m: '1 but best reviews', 
+    r: {
+      bucket: 'search',
+      action: 'modify',
+      searchSelect: [1],
+      tokens: ['1 but best reviews'],
+      dataModify: {
+        type: 'reviews',
+        param: 'top' //or 'more'
+      }
+    }
+  },
+  {
+    m: '1 but good reviews', 
+    r: {
+      bucket: 'search',
+      action: 'modify',
+      searchSelect: [1],
+      tokens: ['1 but good reviews'],
+      dataModify: {
+        type: 'reviews',
+        param: 'top' //or 'more'
+      }
+    }
+  },
+  {
+    m: '1 but cheapest and best', 
+    r: {
+      bucket: 'search',
+      action: 'aggregate',
+      tokens: ['1 but cheapest and best'],
+      execute: [ //will fire commands in arr order
+        { 
+          bucket: 'search', //sorts cheapest
+          action:'modify',
+          searchSelect: [1],
+          dataModify: {
+            type: 'price',
+            param: 'less' //or 'more'
+          }
+        },
+        {
+          bucket: 'search', //sorts cheapest
+          action:'modify',
+          searchSelect: [1],
+          dataModify: {
+            type: 'reviews',
+            param: 'top' //or 'more'
+          }
+        }
+      ]
+    }
+  },
+
+  //* * * * price related * * * * //
   {
     m: '1 but less', //1 but cheaper
     r: {
       bucket: 'search',
-      action: 'similar',
+      action: 'modify',
       searchSelect: [1],
       tokens: ['1 but less'],
       dataModify: {
@@ -135,9 +319,22 @@ var messages = [
     m: '1 but cheaper', //1 but cheaper
     r: {
       bucket: 'search',
-      action: 'similar',
+      action: 'modify',
       searchSelect: [1],
       tokens: ['1 but cheaper'],
+      dataModify: {
+        type: 'price',
+        param: 'less' //or 'more'
+      }
+    }
+  },
+  {
+    m: '1 but cheapest', //1 but cheaper
+    r: {
+      bucket: 'search',
+      action: 'modify',
+      searchSelect: [1],
+      tokens: ['1 but cheapest'],
       dataModify: {
         type: 'price',
         param: 'less' //or 'more'
@@ -149,7 +346,7 @@ var messages = [
     skip: true,
     r: {
       bucket: 'search',
-      action: 'similar',
+      action: 'modify',
       searchSelect: [1],
       tokens: ['1 but less than $25'],
       dataModify: {
