@@ -3,7 +3,7 @@ import { Redirect, Router, Route } from 'react-router';
 import { Provider } from 'react-redux';
 import ChatContainer from './ChatContainer';
 import configureStore from '../store/configureStore';
-// import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
+import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools';
 const store = configureStore();
 
 class Root extends Component {

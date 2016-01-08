@@ -18,7 +18,8 @@ import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
 import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-
+import ReactTransitionGroup from 'react-addons-transition-group';
+ 
 
 const style = {
   width: 400,
@@ -108,14 +109,15 @@ class ControlPanel extends Component {
         items: defaultItems,
         msg : true,
         bucket: true,
-        action: true
+        action: true,
+        mounted: false
     }
   }
 
   componentDidMount() {
     const {actions, activeChannel, activeMessage, messages} = this.props;
     const self = this
-
+     this.setState({ mounted: true });
      socket.on('results', function (msg) {
       console.log('ControlPanel: Received results',msg)
       try {
@@ -256,9 +258,6 @@ class ControlPanel extends Component {
         }
       ]})
       }
-
-    
-
     })
   }
 
@@ -298,27 +297,26 @@ class ControlPanel extends Component {
   }
 
   renderItem(index, key) {
-      const highlightBox =  (this.state.selected && this.state.selected.index === index) ? {border:'0.6em solid #18ffff'} : {};
+      const highlightBox =  (this.state.selected && this.state.selected.index === index) ? {border:'0.2em solid #90caf9', textAlign: 'center'} : {};
       const boundClick = this.handleClick.bind(this, index);
        return  (  
-                <div onClick={boundClick} style={highlightBox} >
-                  <Card key={this.state.items[index].id}
-                        index={index}
-                        id={this.state.items[index].id}
-                        text={this.state.items[index].name}
-                        img = {this.state.items[index].img}
-                        moveCard={this.moveCard}  />
-                </div>
+                    <div key={this.state.items[index].id} onClick={boundClick} style={highlightBox} >
+                        <Card key={this.state.items[index].id}
+                              index={index}
+                              id={this.state.items[index].id}
+                              text={this.state.items[index].name}
+                              img = {this.state.items[index].img}
+                              moveCard={this.moveCard}  />
+                    </div>   
                 )
-               
     }
- 
+
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
      const fields  = ['msg','bucket','action','searchParam']
      const self = this;
      const { items,selected } = this.state;
-
+     const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
       return ( 
          <div className="flexbox-container">
           <div id="second-column">
@@ -339,28 +337,23 @@ class ControlPanel extends Component {
 
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                
-                    <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-                      <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, border:'0.3em solid #45a5f4', borderRadius: '0.3em'}}>
-                        <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' />
-                      </div>   
-                    </div>
-               
+                        <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
+
+                      <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
+                      <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
+                          {list}
+                      </ReactCSSTransitionGroup>
+                          </div>
+                    
+               </div>
             </div>
          </div>
       );
   }
 }
+// <ReactCSSTransitionGroup transitionAppear={true} transitionAppearTimeout={700} transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
+// </ReactCSSTransitionGroup>
 
- // <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>       
- // </ReactCSSTransitionGroup>
-Array.prototype.getIndexBy = function (name, value) {
-    for (var i = 0; i < this.length; i++) {
-        if (this[i][name] == value) {
-            return i;
-        }
-    }
-    return -1;
-}
+
 
 export default ControlPanel

@@ -86,6 +86,59 @@ flex-direction: column;
  align-items: inherit;
 }
 
+.transition { background-color: red; }
+
+.switch-enter {
+    opacity: 0.01;
+}
+.switch-enter.switch-enter-active {
+    opacity: 1.0;
+      background-color: yellow;
+
+}
+.switch-leave {
+    /* Completely hide the button while it's being animated and before it's removed from the DOM. */
+    visibility: hidden;
+    height: 0px;
+    width: 0px;
+    
+    /* Starting opacity */
+    opacity: 1.0;
+}
+.switch-leave.switch-leave-active {
+    /* Ending opacity: 
+    Trigger opacity change so the "transitionend" event will fire, causing React to remove from the DOM. */
+    opacity: 0;
+}
+
+.example-enter {
+  opacity: 0.01;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.example-leave {
+  opacity: 1;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+
+
+.example-appear {
+  opacity: 0.01;
+}
+
+.example-appear.example-appear-active {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
 span[class*="glyphicon-one-fine"] {
     padding-top: 0.46em;
     padding-right: 0.4em;
@@ -109,6 +162,7 @@ span[class*="glyphicon-one-fine"] {
 .btn-primary {
   border: none;
 }
+
 
 @media screen and (min-width: 750px) {
   .form-button { 
