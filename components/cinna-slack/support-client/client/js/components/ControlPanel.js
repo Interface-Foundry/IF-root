@@ -325,7 +325,7 @@ class ControlPanel extends Component {
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
               fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
-         
+
             </div>   
           </section>
 

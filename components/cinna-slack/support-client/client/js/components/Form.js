@@ -1,6 +1,8 @@
 import React, {Component, PropTypes} from 'react';
 import {reduxForm} from 'redux-form';
 import { Button } from 'react-bootstrap';
+import Spinner from 'react-spinner';
+
 export const labels = {
   msg: "Message",
   bucket: "Bucket",
@@ -25,13 +27,20 @@ class DynamicForm extends Component {
        action: '',
        bucketOptions: { initial: false, purchase: false, banter: false },
        searchParam: '',
-       dirty: false
+       dirty: false,
+       spinnerloading: false
       };
     }
 
   componentDidMount() {
    const {activeMessage, actions, messages, activeChannel, resetForm, dirty} = this.props; 
    var self = this
+
+    socket.on('results', function (msg) {
+       console.log('Form: Received results',msg)
+       self.state.spinnerloading=false 
+    })
+
    socket.on('change channel bc', function(channels) {
       if (self.state.dirty) {
         self.state.channel = channels.prev.name
@@ -50,7 +59,8 @@ class DynamicForm extends Component {
        action: firstMsg.action,
        channel: channels.next.name,
        _id: firstMsg._id,
-       dirty: false
+       dirty: false,
+       spinnerloading: false
       };
       //reset form
       resetForm()
@@ -117,6 +127,7 @@ class DynamicForm extends Component {
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
      socket.emit('new message', newQuery); 
+     this.setState({ spinnerloading: true})
   }
 
   searchSimilar() {
@@ -131,6 +142,7 @@ class DynamicForm extends Component {
     const showSimilarBox =  this.state.action === 'similar' ? {textAlign: 'center', marginTop: '5em'} : {textAlign: 'center', marginTop: '5em', display: 'none'};
     const showPrompt = (!selected || !selected.name) ? { color:'black'} : {color:'white'}
    var self = this
+    const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange', color: 'black'} : {backgroundColor: 'orange', color: 'orange', display: 'none'}
     return (
        <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
           <form ref='form1' onSubmit={null}>
@@ -150,9 +162,14 @@ class DynamicForm extends Component {
                 </Button>
                 <div id="search-box" style={showSearchBox}>
                      <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
-                    <Button bsSize = "large" style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
+                    
+                    <Button bsSize = "large" disabled={this.state.spinnerloading}  style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                       Search Amazon
+                       <div style={spinnerStyle}>
+                        <Spinner />
+                      </div>
                     </Button>
+                      
                 </div>
                   <div id="similar-box" style={showSimilarBox}>
                       <h3 style={showPrompt}> Please select an item. </h3>
