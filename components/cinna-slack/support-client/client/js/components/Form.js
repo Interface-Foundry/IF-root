@@ -55,6 +55,7 @@ class DynamicForm extends Component {
       self.state = {
        filteredMessages: filtered,
        msg: firstMsg.msg,
+       received: firstMsg.ts,
        bucket: firstMsg.bucket,
        action: firstMsg.action,
        channel: channels.next.name,
@@ -81,15 +82,18 @@ class DynamicForm extends Component {
   }
 
   renderJSON(filtered) {
-      const {activeMessage, actions, messages, activeChannel} = this.props    
+      const {activeMessage, actions, messages, activeChannel, selected} = this.props    
       return (
         <div style={{fontSize: '0.2em', marginTop: '5em'}}>
         <pre>
-        <div>
+          <div>
           <label>channel: </label>{ this.state.channel } 
           </div>
           <div>
-          <label>msg: </label>{ this.state.msg } 
+          <label>received: </label>{ this.state.received} 
+          </div>
+          <div>
+          <label>original msg: </label>{ this.state.msg } 
           </div>
           <div>
           <label>bucket: </label>{ this.state.bucket } 
@@ -113,12 +117,16 @@ class DynamicForm extends Component {
     // fields['bucket'].value = choice;
   }
 
-  searchAmazon() {
-     const {activeMessage} = this.props 
+  searchAmazon(query) {
+     const {activeMessage, resetForm} = this.props 
      const newQuery = activeMessage;
      if (!this.state.searchParam) {
-      console.log('search input is empty: ',this.state.searchParam)
-      return
+      if (query) {
+        this.state.searchParam = query
+      } else {
+        console.log('search input is empty: ',this.state.searchParam)
+        return
+      }
      }
      newQuery.msg = this.state.searchParam
      newQuery.bucket = 'search'
@@ -128,11 +136,31 @@ class DynamicForm extends Component {
      newQuery.source.origin = 'supervisor'
      socket.emit('new message', newQuery); 
      this.setState({ spinnerloading: true})
+     resetForm()
   }
 
   searchSimilar() {
+     const {activeMessage, resetForm, selected} = this.props 
+     const newQuery = activeMessage;
+     if (!selected || !selected.name || !selected.id) {
+      console.log('Please select an item.')
+      return
+     }
+     newQuery.msg = selected.id
+     newQuery.bucket = 'search'
+     newQuery.action = 'similar'
+     newQuery.client_res.msg = newQuery.msg
+     newQuery.tokens = newQuery.msg.split(' ')
+     newQuery.source.origin = 'supervisor'
+     socket.emit('new message', newQuery); 
+     this.setState({ spinnerloading: true})
+     resetForm()
+  }
 
-
+  handleSubmit(e) {
+    let query = e.target[3].value
+    this.searchAmazon(query)
+    e.preventDefault()
   }
 
   render() {
@@ -145,7 +173,7 @@ class DynamicForm extends Component {
     const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange', color: 'black'} : {backgroundColor: 'orange', color: 'orange', display: 'none'}
     return (
        <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
-          <form ref='form1' onSubmit={null}>
+          <form ref='form1' onSubmit={::this.handleSubmit}>
            <div className="jsonBox" style={{width: '50em'}}>
             {self.renderJSON(filtered)}
            </div>
@@ -161,13 +189,13 @@ class DynamicForm extends Component {
                   Modify
                 </Button>
                 <div id="search-box" style={showSearchBox}>
-                     <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
+                  <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
                     
                     <Button bsSize = "large" disabled={this.state.spinnerloading}  style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                       Search Amazon
                        <div style={spinnerStyle}>
                         <Spinner />
-                      </div>
+                       </div>
                     </Button>
                       
                 </div>

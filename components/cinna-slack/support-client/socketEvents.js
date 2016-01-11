@@ -14,7 +14,7 @@ exports = module.exports = function(io, cinnaio) {
                 socket.broadcast.emit('new bc message', msg);
             }
             else if (msg.client_res.msg && msg.client_res.msg.length) {
-                console.log('Sending message to client.', msg)
+                // console.log('Sending message to client.', msg)
                 //Emit outgoing message to cinna-slack
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){

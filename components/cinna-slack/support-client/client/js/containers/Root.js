@@ -22,7 +22,7 @@ class Root extends Component {
             <Route path="/chat" component={ChatContainer} />
           </Router>
         </Provider>
-      
+    
  
       </div>
     );
@@ -31,6 +31,6 @@ class Root extends Component {
 
 export default Root
 
- // {processENV === 'development' && <DebugPanel top left bottom >
- //          <DevTools store={store} monitor={LogMonitor} />
- //        </DebugPanel>}
+// {processENV === 'development' && <DebugPanel top left bottom >
+//       <DevTools store={store} monitor={LogMonitor} />
+//     </DebugPanel>}

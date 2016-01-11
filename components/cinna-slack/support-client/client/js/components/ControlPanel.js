@@ -292,7 +292,7 @@ class ControlPanel extends Component {
   }
 
    handleClick(index) {
-    this.setState({ selected: {name: this.state.items[index].name, index: index}})
+    this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index}})
     // console.log('Clicked!!!', this.state.selected)
   }
 
