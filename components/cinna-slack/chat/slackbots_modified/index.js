@@ -240,9 +240,8 @@ Bot.prototype.postTyping = function(id) {
         channel:id,
         id:1
     }
-
     zzz = JSON.stringify(zzz);
-
+    
     this.ws.send(zzz, function(data) {
     }.bind(this));
 };
