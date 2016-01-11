@@ -24,7 +24,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
         //check for incoming val
         if (typeof incoming !== 'undefined') {
             data.incoming = incoming;
-        } else {
+        }else {
             console.log('warning: messaged saved without incoming val');
         }
 
@@ -115,7 +115,7 @@ var recallHistory = function(data,callback){
                 switch(data.action){
 
                     default: 
-                        Message.findOne({'bucket':'search','action':'initial','incoming':false}).sort({'_id': -1}).exec(function(err, msg) {  
+                        Message.findOne({'$or':[{'action':'initial'},{'action':'similar'},{'action':'modify'}],'bucket':'search','incoming':false,'source.id':data.source.id}).sort({'_id': -1}).exec(function(err, msg) {  
                             if(err){
                                 console.log('Error: Cannot find initial search for recallHistory');
                             }   

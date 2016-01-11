@@ -10,7 +10,10 @@ var slackbotSchema = mongoose.Schema({
     access_token: String,
     scope: String,
     team_name: String,
-    team_id: String,
+    team_id: {
+      type: String,
+      unique: true
+    },
     incoming_webhook: {
         url: String,
         channel: String,

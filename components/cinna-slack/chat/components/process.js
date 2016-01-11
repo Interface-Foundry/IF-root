@@ -12,7 +12,7 @@ var urlShorten = function(data,callback2) {
            var escapeAmazon = querystring.escape(data.client_res);
             request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon)+'&format=txt', function(err, res, body) {
               if(err){
-                console.log('URL SHORTEN ',err);
+                console.log('URL SHORTEN error ',err);
               }
               else {
                 callback2(body);
@@ -39,6 +39,7 @@ var urlShorten = function(data,callback2) {
                   }
                   else {
                     urlArr.push(body);
+                    console.log('!! ',urlArr);
                     callback();
                   }
                 });

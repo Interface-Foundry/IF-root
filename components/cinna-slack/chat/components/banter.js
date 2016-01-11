@@ -118,13 +118,13 @@ var checkForCanned = function(input,callback,origin) {
             if (origin == 'slack'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
 
-                'Chat me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
+                'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
                 'Use commands to refine your search, for example:\n\n'+
 
                 '`more` : view more search results\n'+
                 '`more like 3` : find similar items to search result :three:\n\n'+
 
-                '`2` : check product details for item :two:\n'+
+                '`2` : check for product details for item :two:\n'+
                 '`1 but cheaper` : finds :one: or similar in a lower price\n'+
                 '`2 but in XL` : finds :two: or similar in size XL\n'+
                 '`3 but in blue` : finds :three: or similar in color blue\n'+
@@ -133,20 +133,20 @@ var checkForCanned = function(input,callback,origin) {
                 '`buy 1` : to buy item :one:\n'+
                 '`save 2` : save item :two: to cart\n\n'+
 
-                '`help` : view command list\n'+
-                'Try it now! Maybe you need new headphones? :headphones: Type `headphones` to start.';
+                '`help` : view guidelines\n'+
+                'Try it now! Maybe you need new headphones? Type `headphones` to start.';
             }
             else if (origin == 'socket.io'){
                 
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?<br>'+
 
-                'Chat me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
+                'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
                 'Use commands to refine your search, for example:<br><br>'+
 
                 '<span class="typer">more</span> : view more search results<br>'+
                 '<span class="typer">more like 3</span> : find similar items to search result ➌<br><br>'+
 
-                '<span class="typer">2</span> : check product details for item <span class="selector">➋</span><br>'+
+                '<span class="typer">2</span> : check for product details for item <span class="selector">➋</span><br>'+
                 '<span class="typer">1 but cheaper</span> : finds <span class="selector">➊</span> or similar in a lower price<br>'+
                 '<span class="typer">2 but in XL</span> : finds <span class="selector">➋</span> or similar in size XL<br>'+
                 '<span class="typer">3 but in blue</span> : finds <span class="selector">➌</span> or similar in color blue<br>'+
@@ -155,8 +155,8 @@ var checkForCanned = function(input,callback,origin) {
                 '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
                 '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br><br>'+
 
-                '<span class="typer">help</span> : view command list<br>'+
-                'Try it now! Maybe you need new headphones? 🎧 Type <span class="typer">headphones</span> to start.';
+                '<span class="typer">help</span> : view guidelines<br>'+
+                'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.';
             }
 
 
@@ -506,13 +506,13 @@ var checkForCanned = function(input,callback,origin) {
             if (origin == 'slack'){
                 res = 'I\'m Kip, your personal shopper.\n'+
 
-                'Chat me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
+                'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
                 'Use commands to refine your search, for example:\n\n'+
 
                 '`more` : view more search results\n'+
                 '`more like 3` : find similar items to search result :three:\n\n'+
 
-                '`2` : check product details for item :two:\n'+
+                '`2` : check for product details for item :two:\n'+
                 '`1 but cheaper` : finds :one: or similar in a lower price\n'+
                 '`2 but in XL` : finds :two: or similar in size XL\n'+
                 '`3 but in blue` : finds :three: or similar in color blue\n'+
@@ -521,20 +521,20 @@ var checkForCanned = function(input,callback,origin) {
                 '`buy 1` : to buy item :one:\n'+
                 '`save 2` : save item :two: to cart\n\n'+
 
-                '`help` : view command list\n'+
-                'Try it now! Maybe you need new headphones? :headphones: Type `headphones` to start.';
+                '`help` : view guidelines\n'+
+                'Try it now! Maybe you need new headphones? Type `headphones` to start.';
             }
             else if (origin == 'socket.io'){
                 
                 res = 'I\'m Kip, your personal shopper.<br>'+
 
-                'Chat me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
+                'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
                 'Use commands to refine your search, for example:<br><br>'+
 
                 '<span class="typer">more</span> : view more search results<br>'+
                 '<span class="typer">more like 3</span> : find similar items to search result ➌<br><br>'+
 
-                '<span class="typer">2</span> : check product details for item <span class="selector">➋</span><br>'+
+                '<span class="typer">2</span> : check for product details for item <span class="selector">➋</span><br>'+
                 '<span class="typer">1 but cheaper</span> : finds <span class="selector">➊</span> or similar in a lower price<br>'+
                 '<span class="typer">2 but in XL</span> : finds <span class="selector">➋</span> or similar in size XL<br>'+
                 '<span class="typer">3 but in blue</span> : finds <span class="selector">➌</span> or similar in color blue<br>'+
@@ -543,8 +543,8 @@ var checkForCanned = function(input,callback,origin) {
                 '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
                 '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br><br>'+
 
-                '<span class="typer">help</span> : view command list<br>'+
-                'Try it now! Maybe you need new headphones? 🎧 Type <span class="typer">headphones</span> to start.';
+                '<span class="typer">help</span> : view guidelines<br>'+
+                'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.';
             }
 
             break;
@@ -583,6 +583,23 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.initial'; //do this action      
             query = 'space art';   
             break;    
+
+        // NOTE: ADD search term sensitive Kip responses
+
+        case textSimilar(input,'haters gonna hate') > 90:
+        case textSimilar(input,'kip start walking') > 90:
+        case textSimilar(input,'kip walk it off') > 90:
+            flag = 'basic'; //do this action      
+            res = 'http://kipthis.com/img/cinna_walk_whitebg.gif'; 
+            break;    
+
+        case textSimilar(input,'What does the scanner say?') > 80:
+        case textSimilar(input,'over 9000') > 90:
+        case textSimilar(input,'it\'s over 9000') > 90:
+            res = 'Over 9000?? http://image.lang-8.com/w0_h0/d17e3655c3a548908eddea8ccaa12ce6cb5b1b39.jpg';   
+            flag = 'search.initial'; //do this action      
+            query = 'dragonball z';   
+            break; 
             
         case textSimilar(input,'We’re not paid enough') > 60:
         case textSimilar(input,'i can\'t afford that') > 60:
@@ -686,7 +703,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running on Kip v0.4 Beta (Pepper)';
+            res = 'I\'m a penguin running Kip v0.4 Beta (Pepper)';
             break;
 
         case '/':
@@ -694,12 +711,32 @@ var checkForCanned = function(input,callback,origin) {
             res = '../../ need help? Use "help" instead.';
             break;
 
+        case 'top kek':
+            flag = 'basic'; //do this action
+            if (origin == 'slack'){
+                res = 'T O P\nK\nE\nK\n';
+            }
+            else if (origin = 'socket.io'){
+                res = 'T O P<br>K<br>E<br>K<br>';
+            }
+            break;
+
         case 'k':
             flag = 'basic'; //do this action
             res = 'yah';
             break;
 
+        case 'hello world':
+        case 'Hello world':
+        case 'Hello World':
+            flag = 'search.initial'; //do this action
+            res = 'Developers, developers, developers, developers 👌';
+            query = 'introduction to computer programming'; //what we're going to search for
+            break;
+
         case '🐈':
+        case 'meow':
+        case ':3':
             flag = 'search.initial'; //do this action
             res = 'meow :3';
             query = 'neko atsume'; //what we're going to search for
@@ -771,25 +808,25 @@ var welcomeMessage = function(data,callback){
 
     if (data.source.origin == 'slack'){
         res = 'Hi I\'m Kip, your personal shopper!\n'+
-        'Chat me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n\n\n'+
+        'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n\n\n'+
         
-        'Check product details for item :three: by chatting `3`\n'+
+        'Check for product details for item :three: by chatting `3`\n'+
         'See more results with `more`. Search more items like :two: with `more like 2`\n\n\n'+
         // 'You can buy item :one: by chatting `buy 1`\n\n'+
 
-        'See more ways to chat with Kip by chatting `help`\n'+
-        'Try it now! Maybe you need new headphones? :headphones: Chat `headphones` to start.'
+        'See more ways to chat with Kip by typing `help`\n'+
+        'Try it now! Maybe you need new headphones? Type `headphones` to start.'
     }
     else if (data.source.origin == 'socket.io'){
         res = 'Hi I\'m Kip, your personal shopper!<br>'+
-        'Chat me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br><br><br>'+
+        'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br><br><br>'+
         
-        'Check product details for item <span class="selector">➌</span> by chatting <span class="typer">3</span><br>'+
+        'Check for product details for item <span class="selector">➌</span> by chatting <span class="typer">3</span><br>'+
         'See more results with <span class="typer">more</span>. Search more items like <span class="selector">➋</span> with <span class="typer">more like 2</span><br><br><br>'+
         // 'You can buy item <span class="selector">➊</span> by chatting <span class="typer">buy 1</span><br><br>'+
 
-        'See more ways to chat with Kip by chatting <span class="typer">help</span><br>'+
-        'Try it now! Maybe you need new headphones? 🎧 Chat <span class="typer">headphones</span> to start.'
+        'See more ways to chat with Kip by typing <span class="typer">help</span><br>'+
+        'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.'
     }  
     else {
         res = 'I\'m Kip, your personal shopper';

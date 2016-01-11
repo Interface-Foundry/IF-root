@@ -12,6 +12,8 @@ var _ = require('lodash')
 
 var debug = require('debug')('nlp')
 
+console.log(config)
+
 var BUCKET = {
   search: 'search',
   banter: 'banter',
@@ -91,6 +93,7 @@ var exactMatches = {
   checkout: {bucket: BUCKET.purchase, action: ACTION.checkout, tokens: ['checkout']},
   cart: {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['cart']},
   'view cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['view cart']},
+  'show cart': {bucket: BUCKET.purchase, action: ACTION.list, tokens: ['show cart']},
   '1': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['1'], searchSelect: [1]},
   '2': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['2'], searchSelect: [2]},
   '3': {bucket: BUCKET.search, action: ACTION.focus, tokens: ['3'], searchSelect: [3]}
@@ -124,7 +127,7 @@ function quickparse(text) {
       /^search\b/i
     ],
     // modify: [
-    //   /\bbut\b/,
+      //  /^more\ ([\w ])+/
     //   /\bin (.+)\b/i,
     //   /\bwith (.+)\b/i
     // ],
@@ -290,6 +293,10 @@ function nlpToResult(nlp) {
     }
   })
 
+  if (nlp.isQuestion) {
+    debug('its a question')
+  }
+
   debug('returning at the end');
   return res;
 }
@@ -321,7 +328,7 @@ if (!module.parent) {
     process.env.DEBUG = 'nlp';
     parse(process.argv.slice(2).join(' '), function(e, r) {
       if (e) debug(e)
-      console.log(r)
+      console.log(JSON.stringify(r, null, 2))
       process.exit(0);
     });
   } else {
@@ -340,7 +347,11 @@ if (!module.parent) {
     'ok pls buy for me thanks',
     'looking for a black zara jacket',
     'I like the thrid one',
-    'is there any size medium?'
+    'is there any size medium?',
+    'like 2 but blue',
+    'does it have pockets?',
+    'morning glory (24 pack)',
+    'cheapest 32" monitor'
   ];
   sentences.map(function(a) {
     parse(a, function(e, res) {
@@ -348,7 +359,7 @@ if (!module.parent) {
         console.error(e);
       } else {
         console.log(a);
-        console.log(res);
+        console.log(JSON.stringify(res, null, 2));
       }
     })
   })
