@@ -155,6 +155,7 @@ schemas.map(function(schema) {
     var model = require('./' + schema.filename);
     module.exports[schema.single] = model;
     module.exports[schema.plural] = model;
+    module.exports[schema.plural.toLowerCase()] = model;
     model.schema.plugin(ensureIndexes, {
         mongoose: mongoose
     });
