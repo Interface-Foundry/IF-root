@@ -90,7 +90,7 @@ class DynamicForm extends Component {
           <label>channel: </label>{ this.state.channel } 
           </div>
           <div>
-          <label>received: </label>{ this.state.received} 
+          <label>received: </label>{ new Date(this.state.received).toLocaleString()} 
           </div>
           <div>
           <label>original msg: </label>{ this.state.msg } 
@@ -131,7 +131,7 @@ class DynamicForm extends Component {
      newQuery.msg = this.state.searchParam
      newQuery.bucket = 'search'
      newQuery.action = 'initial'
-     newQuery.client_res.msg = newQuery.msg
+     newQuery.client_res.push(newQuery.msg)
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
      socket.emit('new message', newQuery); 

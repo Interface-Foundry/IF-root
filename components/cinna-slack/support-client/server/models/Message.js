@@ -24,9 +24,7 @@ var messageSchema = mongoose.Schema({
         org: String,
         id: String
     },
-    client_res: {
-        msg: String //outgoing message, if applicable
-    },
+    client_res: [Schema.Types.Mixed],
     ts: {
         type: Date,
         default: Date.now

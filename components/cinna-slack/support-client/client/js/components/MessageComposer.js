@@ -31,9 +31,7 @@ class MessageComposer extends Component {
             id: messages.length,
             msg: text,
             incoming: false,
-            client_res: {
-                msg: text
-            },
+            client_res: [text],
             source: {
                 origin: 'socket.io',
                 channel: activeChannel.name,

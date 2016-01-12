@@ -21,9 +21,7 @@ const initialState = {
         org: 'default',
         id: 'default'
     },
-    client_res: {
-        msg: ''
-    },
+    client_res: [],
     ts: Date.now(),
     resolved: false,
     parent: 'default'
@@ -50,9 +48,7 @@ export default function activeMessage(state = initialState, action) {
                     org: (action.message.source && action.message.source.org) ? action.message.source.org : 'kip',
                     id: (action.message.source && action.message.source.id) ? action.message.source.id : ''
                 },
-                client_res: {
-                    msg: action.message.client_res
-                },
+                client_res: action.message.client_res,
                 ts: action.message.ts,
                 resolved: action.message.resolved,
                 parent: action.message.parent

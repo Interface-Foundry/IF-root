@@ -16,7 +16,8 @@ class MessageListItem extends Component {
 
   componentDidMount() {
     const { message } = this.props 
-    const messageToDisplay = message.msg ? message.msg : message.client_res.msg
+    
+    const messageToDisplay = message.msg ? message.msg : message.client_res[0]
     this.setState({ displayMsg: messageToDisplay })
     function checkImgURL (msg) {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
@@ -42,7 +43,7 @@ class MessageListItem extends Component {
 
   render() {
     var self = this;
-    const { message} = this.props;
+    const { message } = this.props;
     return (
       <li>
         <span>

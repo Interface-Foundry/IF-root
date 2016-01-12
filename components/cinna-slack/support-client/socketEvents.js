@@ -6,15 +6,13 @@ exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
-            
             msg.ts = new Date().toISOString()
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
                 console.log('socketEvents: new message from cinna received.')
                 socket.broadcast.emit('new bc message', msg);
             }
-            else if (msg.client_res.msg && msg.client_res.msg.length) {
-                // console.log('Sending message to client.', msg)
+            else if (msg.client_res && msg.client_res.length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
                 //Emit outgoing message to cinna-slack
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){
@@ -24,7 +22,7 @@ exports = module.exports = function(io, cinnaio) {
         });
         socket.on('new channel', function(channel) {
             socket.broadcast.emit('new channel', channel)
-        });
+        }); 
         socket.on('typing', function() {
             socket.broadcast.emit('typing bc', socket.username);
         });

@@ -92,9 +92,9 @@ class Channels extends Component {
   }
   render() {
     const { channels, actions, messages, chanIndex } = this.props;
-    const filteredChannels = channels.slice(0, 8);
-    const moreChannelsBoolean = channels.length > 8;
-    const restOfTheChannels = channels.slice(8);
+    const filteredChannels = channels.filter(channel => channel.bucket === 'supervisor')
+    const moreChannelsBoolean = true;
+    const restOfTheChannels = channels.filter(channel => channel.bucket !== 'supervisor')
     const newChannelModal = (
       <div>
         <Modal key={1} show={this.state.addChannelModal} onHide={::this.closeAddChannelModal}>

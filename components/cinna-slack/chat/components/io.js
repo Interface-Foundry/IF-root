@@ -1,25 +1,19 @@
 var async = require('async');
 var request = require('request');
-
 var Bot = require('../slackbots_modified'); //load slack api
-
 var banter = require("./banter.js");
 var history = require("./history.js");
 var search = require("./search.js");
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
-
 var nlp = require('../../nlp/api');
 var ioClient = require('socket.io-client').connect("http://localhost:3000");
 ioClient.on('connect', function() {
         console.log('Connected to support client.')
     })
-
-
 //set env vars
 var config = require('config');
-
 //load mongoose models
 var db = require('db');
 var Message = db.Message;
@@ -221,7 +215,6 @@ var loadSocketIO = function(server){
     io = require('socket.io').listen(server);
     io.sockets.on('connection', function(socket) {
         console.log("socket connected");
-
         //* * * * send welcome message
         var hello = {
             msg: 'welcome'
@@ -236,7 +229,6 @@ var loadSocketIO = function(server){
             sendTxtResponse(hello,res);
         });
        // * * * * * * * * * * //
-        
         socket.on("msgToClient", function(data) {
             data.source = {
                 'origin':'socket.io',
@@ -246,13 +238,10 @@ var loadSocketIO = function(server){
             }
             preProcess(data);
         });
-
         socket.on("msgFromSever", function(data) {
-            // console.log('Received message from supervisor', data)
+            console.log('Received message from supervisor', data)
             incomingAction(data);
         })
-
-
     }); 
 }
 
@@ -280,54 +269,54 @@ function preProcess(data){
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
         //found canned response
-        // if(flag){
-        //     data.client_res = [];
-        //     switch(flag){
-        //         case 'basic': //just respond, no actions
-        //             //send message
-        //             data.client_res = [];
-        //             data.client_res.push(res);
-        //             cannedBanter(data);
-        //             break;
-        //         case 'search.initial':
-        //             //send message
-        //             data.client_res = [];
-        //             data.client_res.push(res);
-        //             cannedBanter(data);
+        if(flag){
+            data.client_res = [];
+            switch(flag){
+                case 'basic': //just respond, no actions
+                    //send message
+                    data.client_res = [];
+                    data.client_res.push(res);
+                    cannedBanter(data);
+                    break;
+                case 'search.initial':
+                    //send message
+                    data.client_res = [];
+                    data.client_res.push(res);
+                    cannedBanter(data);
 
-        //             //now search for item
-        //             data.tokens = [];
-        //             data.tokens.push(query); //search for this item
-        //             data.bucket = 'search';
-        //             data.action = 'initial';
-        //             incomingAction(data);
-        //             break;
-        //         case 'search.focus':
-        //             data.searchSelect = [];
-        //             data.searchSelect.push(query);
-        //             data.bucket = 'search';
-        //             data.action = 'focus';
-        //             incomingAction(data);
-        //             break;
-        //         default:
-        //             console.log('error: canned action flag missing');
-        //     }
-        // }
-        //proceed to NLP instead
-        // else {
-        //     routeNLP(data);
-        // }
+                    //now search for item
+                    data.tokens = [];
+                    data.tokens.push(query); //search for this item
+                    data.bucket = 'search';
+                    data.action = 'initial';
+                    incomingAction(data);
+                    break;
+                case 'search.focus':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'search';
+                    data.action = 'focus';
+                    incomingAction(data);
+                    break;
+                default:
+                    console.log('error: canned action flag missing');
+            }
+        }
+        // proceed to NLP instead
+        else {
+            routeNLP(data);
+        }
         
         //TESTING SUPERVISOR
-        data.client_res = [];
-        if (res) {
-           data.client_res.push(res.split(' ')); 
-        }
-        data.tokens = [];
-        data.tokens.push(query); //search for this item
-        data.bucket = 'supervisor';
-        data.action = 'initial';
-        incomingAction(data);
+        // data.client_res = [];
+        // if (res) {
+        //    data.client_res.push(res.split(' ')); 
+        // }
+        // data.tokens = [];
+        // data.tokens.push(query); //search for this item
+        // data.bucket = 'supervisor';
+        // data.action = 'initial';
+        // incomingAction(data);
 
     },data.source.origin);
 
@@ -341,42 +330,42 @@ function routeNLP(data){
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
-            // console.log('NLP RES ',res);
+            console.log('NLP RES ',res);
 
-            // if(!res.bucket){
-            //     res.bucket = 'search';
-            // }
-            // if(!res.action){
-            //     res.action = 'initial';
-            // }
+            if(!res.bucket){
+                res.bucket = 'search';
+            }
+            if(!res.action){
+                res.action = 'initial';
+            }
 
-            // //- - - temp stuff to transfer nlp results to data object - - - //
-            // if (res.bucket){
-            //     data.bucket = res.bucket;
-            // }
-            // if (res.action){
-            //     data.action = res.action;
-            // }
-            // if (res.tokens){
-            //     data.tokens = res.tokens;
-            // }
-            // if (res.searchSelect){
-            //     data.searchSelect = res.searchSelect;
-            // }
-            // if (res.dataModify){
-            //     data.dataModify = res.dataModify;
-            // }
+            //- - - temp stuff to transfer nlp results to data object - - - //
+            if (res.bucket){
+                data.bucket = res.bucket;
+            }
+            if (res.action){
+                data.action = res.action;
+            }
+            if (res.tokens){
+                data.tokens = res.tokens;
+            }
+            if (res.searchSelect){
+                data.searchSelect = res.searchSelect;
+            }
+            if (res.dataModify){
+                data.dataModify = res.dataModify;
+            }
             //- - - - end temp - - - - //
 
              //TESTING SUPERVISOR
-            if (res) {
-           data.client_res.push(res.split(' ')); 
-            }
-            //now search for item
-            data.tokens = [];
-            data.tokens.push(query); //search for this item
-            data.bucket = 'supervisor';
-            data.action = 'initial';
+           //  if (res) {
+           // data.client_res.push(res.split(' ')); 
+           //  }
+           //  //now search for item
+           //  data.tokens = [];
+           //  data.tokens.push(query); //search for this item
+           //  data.bucket = 'supervisor';
+           //  data.action = 'initial';
             incomingAction(data);
 
         }
@@ -387,23 +376,13 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
-    //save a new message obj
-    // history.saveHistory(data,true); //saving incoming message
-    
-    //sort context bucket (search vs. banter vs. purchase)
-    switch (data.bucket) {
-        case 'search':
-            searchBucket(data);
-            break;
-        case 'banter':
-            banterBucket(data);
-            break;
-        case 'purchase':
-            purchaseBucket(data);
-            break;
-        case 'supervisor':
-            //route to supervisor chat window
-               var rand = Math.random().toString(36).slice(2)
+    //Emit to Supervisor:
+         //route to supervisor chat window
+         if (data.bucket === 'response') {
+            return sendResponse(data)
+         }
+         console.log(1)
+            var rand = Math.random().toString(36).slice(2)
             if (!ioClient.connected) {
                 ioClient.on('connect', function() {
                     console.log('Connected to support client.')
@@ -472,6 +451,21 @@ function incomingAction(data){
                     parent: rand
                 })
             }
+            console.log(2)
+    //save a new message obj
+    // history.saveHistory(data,true); 
+    //saving incoming message    
+    //sort context bucket (search vs. banter vs. purchase)
+    switch (data.bucket) {
+        case 'search':
+            searchBucket(data);
+            break;
+        case 'banter':
+            banterBucket(data);
+            break;
+        case 'purchase':
+            purchaseBucket(data);
+            break;       
         default:
             searchBucket(data);
     }
@@ -491,6 +485,7 @@ function searchBucket(data){
     //sort search action type
     switch (data.action) {
         case 'initial':
+            console.log('Getting to initial!')
             search.searchInitial(data);
             break;
         case 'similar':
@@ -637,20 +632,26 @@ var checkOutgoingBanter = function(data){
 var sendResponse = function(data){
 
     if (data.source.channel && data.source.origin == 'socket.io'){
+        // console.log(3)
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){
+            // console.log(4)
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) { 
+                // console.log(5)
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
             }            
         }
         else if (data.source.channel && data.source.origin == 'supervisor') {
+            // console.log(6)
                data.bucket = 'results'
                if (!ioClient.connected) {
                 ioClient.on('connect', function() {
+                    // console.log(7)
                      ioClient.emit('new message', data)
                 })
             } else {
+                    // console.log(8)
                     ioClient.emit('new message', data)
             }
         }
