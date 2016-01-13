@@ -39,6 +39,8 @@ class DynamicForm extends Component {
     socket.on('results', function (msg) {
        console.log('Form: Received results',msg)
        self.state.spinnerloading=false 
+       self.state.searchParam = ''
+       // resetForm()
     })
 
    socket.on('change channel bc', function(channels) {
@@ -131,12 +133,14 @@ class DynamicForm extends Component {
      newQuery.msg = this.state.searchParam
      newQuery.bucket = 'search'
      newQuery.action = 'initial'
-     newQuery.client_res.push(newQuery.msg)
+     newQuery.client_res = [newQuery.msg]
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
+     // this.state.searchParam = ''
+     // resetForm()
      socket.emit('new message', newQuery); 
      this.setState({ spinnerloading: true})
-     resetForm()
+     
   }
 
   searchSimilar() {
@@ -149,7 +153,7 @@ class DynamicForm extends Component {
      newQuery.msg = selected.id
      newQuery.bucket = 'search'
      newQuery.action = 'similar'
-     newQuery.client_res.msg = newQuery.msg
+     // newQuery.client_res.msg = newQuery.msg
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
      socket.emit('new message', newQuery); 
@@ -158,9 +162,9 @@ class DynamicForm extends Component {
   }
 
   handleSubmit(e) {
+    e.preventDefault()
     let query = e.target[3].value
     this.searchAmazon(query)
-    e.preventDefault()
   }
 
   render() {

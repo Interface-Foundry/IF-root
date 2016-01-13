@@ -5,15 +5,18 @@ ioClient.on('connect', function() {
 exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
+
         socket.on('new message', function(msg) {
-            msg.ts = new Date().toISOString()
+            msg.ts = new Date().toISOString();
+            console.log('raw msg in socket events: ',msg)
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
                 console.log('socketEvents: new message from cinna received.')
                 socket.broadcast.emit('new bc message', msg);
             }
-            else if (msg.client_res && msg.client_res.length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
-                //Emit outgoing message to cinna-slack
+            //Emit outgoing message to cinna-slack
+            else if (msg.client_res[0] && msg.client_res[0].length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
+               console.log('bro is it getting here? ',msg)
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){
                 console.log('Received results from cinna')
@@ -39,9 +42,9 @@ exports = module.exports = function(io, cinnaio) {
             socket.emit('change channel bc', channel);
         });
 
-        socket.on('disconnect', function(socket) {
-            socket.emit('disconnect bc', socket);
-        });
+        // socket.on('disconnect', function(socket) {
+        //     socket.emit('disconnect bc', socket);
+        // });
 
     });
 }

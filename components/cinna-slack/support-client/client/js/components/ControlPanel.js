@@ -313,7 +313,7 @@ class ControlPanel extends Component {
 
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
-     const fields  = ['msg','bucket','action','searchParam']
+     const fields  = ['msg','bucket','action']
      const self = this;
      const { items,selected } = this.state;
      const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null

@@ -3,7 +3,8 @@ import { Redirect, Router, Route } from 'react-router';
 import { Provider } from 'react-redux';
 import ChatContainer from './ChatContainer';
 import configureStore from '../store/configureStore';
-import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools';
+// import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools';
+import DevTools from './DevTools';
 const store = configureStore();
 
 class Root extends Component {
@@ -22,7 +23,7 @@ class Root extends Component {
             <Route path="/chat" component={ChatContainer} />
           </Router>
         </Provider>
-    
+   <DevTools store={store} />
  
       </div>
     );
@@ -31,6 +32,4 @@ class Root extends Component {
 
 export default Root
 
-// {processENV === 'development' && <DebugPanel top left bottom >
-//       <DevTools store={store} monitor={LogMonitor} />
-//     </DebugPanel>}
+  // <DevTools store={store} />

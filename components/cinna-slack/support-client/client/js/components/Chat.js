@@ -119,7 +119,6 @@ class Chat extends Component {
   handleSubmit(state) {
     const { actions, activeMessage, activeChannel } = this.props;
     var copy = Object.assign({}, activeMessage);
-      // console.log('original state: ', state)
        Object.keys(state).forEach(function(key) {
          if (state[key]) {
           copy[key] = state[key]
@@ -144,8 +143,9 @@ class Chat extends Component {
 
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
+    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name).filter(message => (message.bucket === 'response' || message.bucket === 'supervisor'))
     const username = this.props.user.username;
+    // console.log('FM: ',filteredMessages)
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
         <DropdownButton key={95} style={{'width': '21rem', backgroundColor: '#45a5f4'}} id="user-menu"  bsSize="large" bsStyle="primary" title={username}>

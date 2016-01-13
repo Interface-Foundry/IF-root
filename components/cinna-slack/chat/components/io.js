@@ -850,7 +850,6 @@ function recallHistory(data,callback,steps){
     switch (data.bucket) {
         case 'search':
             //console.log(data);
-
             switch(data.action){
                 //if action is focus, find lastest 'initial' item
                 case 'focus':
@@ -866,7 +865,6 @@ function recallHistory(data,callback,steps){
                     callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
                     break;
             }
-
             break;
         case 'banter':
             var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1
