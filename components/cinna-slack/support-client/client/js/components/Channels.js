@@ -167,7 +167,7 @@ class Channels extends Component {
               }).length} channel={channel} key={channel.id} {...actions} onClick={::this.handleChangeChannel} />
               )}
           </ul>
-          {moreChannelsBoolean && <a onClick={::this.openMoreChannelsModal} style={{'cursor': 'pointer', 'color': '#85BBE9'}}> + {channels.length - 8} more...</a>}
+          {moreChannelsBoolean && <a onClick={::this.openMoreChannelsModal} style={{'cursor': 'pointer', 'color': '#85BBE9'}}> + {restOfTheChannels.length} un-supervised channels...</a>}
           {moreChannelsModal}
         </div>
       </section>

@@ -119,7 +119,7 @@ class ControlPanel extends Component {
     const self = this
      this.setState({ mounted: true });
      socket.on('results', function (msg) {
-      console.log('ControlPanel: Received results',msg)
+      // console.log('ControlPanel: Received results',msg)
       try {
            for (var i = 0; i < msg.amazon.length; i++) {
             self.state.items[i].index = i
@@ -142,7 +142,7 @@ class ControlPanel extends Component {
           identifier.properties.push({ [key] : msg[key]})
         }
       }  
-      console.log('identifier: ', identifier)
+      // console.log('identifier: ', identifier)
       //if no fields were updated on form take no action
       if (identifier.properties.length === 0 ) {
         return

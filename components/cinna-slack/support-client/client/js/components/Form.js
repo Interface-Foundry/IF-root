@@ -40,7 +40,8 @@ class DynamicForm extends Component {
        console.log('Form: Received results',msg)
        self.state.spinnerloading=false 
        self.state.searchParam = ''
-       // resetForm()
+       //store raw results for use in searchSimilar function
+       self.state.rawAmazonResults = msg.amazon
     })
 
    socket.on('change channel bc', function(channels) {
@@ -136,8 +137,6 @@ class DynamicForm extends Component {
      newQuery.client_res = [newQuery.msg]
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
-     // this.state.searchParam = ''
-     // resetForm()
      socket.emit('new message', newQuery); 
      this.setState({ spinnerloading: true})
      
@@ -150,12 +149,27 @@ class DynamicForm extends Component {
       console.log('Please select an item.')
       return
      }
-     newQuery.msg = selected.id
+
+  // {
+  //   searchSelect: [ 1 ],
+  //   bucket: 'search',
+  //   action: 'similar', 
+  //   recallHistory: {
+  //     amazon:["mZON1","2323"]
+  //   },
+  //   flag: 'recalled'
+  //  }
+
      newQuery.bucket = 'search'
      newQuery.action = 'similar'
-     // newQuery.client_res.msg = newQuery.msg
+     newQuery.client_res = [newQuery.msg]
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
+     newQuery.recallHistory = {
+      amazon: this.state.rawAmazonResults
+     }
+     newQuery.searchSelect = parseInt(selected.index) + 1
+     newQuery.flag = 'recalled'
      socket.emit('new message', newQuery); 
      this.setState({ spinnerloading: true})
      resetForm()
@@ -183,13 +197,13 @@ class DynamicForm extends Component {
            </div>
             
             <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
-                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
+                <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
                   Initial
                 </Button>
-                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('similar')} >
+                <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('similar')} >
                   Similar
                 </Button>
-                <Button className="form-button" bsSize = "medium" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('modify')} >
+                <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('modify')} >
                   Modify
                 </Button>
                 <div id="search-box" style={showSearchBox}>

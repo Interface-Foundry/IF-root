@@ -19,9 +19,12 @@ var searchInitial = function(data,flag){
 }
 
 var searchSimilar = function(data){
-    if (data.dataModify){
+    if (data.dataModify && data.dataModify.val.length > 0){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);  
+    } else if (data.flag && data.flag === 'recalled') {
+        // console.log('TING TANG WALLAWALLA BING BANG',data)
+        searchAmazon(data,'similar','none','null');
     }
     else {
         //RECALL LAST ITEM IN SEARCH HISTORY

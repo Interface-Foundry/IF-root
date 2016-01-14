@@ -90,7 +90,7 @@ export default function messages(state = initialState, action) {
             };
          case SET_MESSAGE_PROPERTY:
             var index = indexOf([...state.data], find([...state.data], {source: { channel : action.identifier.channel} }));
-            console.log('In messages: original array->', [...state.data])
+            // console.log('In messages: original array->', [...state.data])
             // var copy = Object.assign({}, [...state.data][index]);
             action.identifier.properties.forEach(function(propertyObj) {
                 for (var key in propertyObj) {
@@ -100,7 +100,7 @@ export default function messages(state = initialState, action) {
             // console.log('LENGTH: ',[state.data].length)
             // copy.id = [state.data].length
             // console.log('COPY: ',copy)
-            console.log('modified: ',[...state.data])
+            // console.log('modified: ',[...state.data])
            return {...state,
                     loading: false,
                     loaded: true,

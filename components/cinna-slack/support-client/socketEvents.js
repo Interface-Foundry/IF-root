@@ -8,7 +8,7 @@ exports = module.exports = function(io, cinnaio) {
 
         socket.on('new message', function(msg) {
             msg.ts = new Date().toISOString();
-            console.log('raw msg in socket events: ',msg)
+            console.log('raw msg in socket events: ')
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
                 console.log('socketEvents: new message from cinna received.')
@@ -16,14 +16,14 @@ exports = module.exports = function(io, cinnaio) {
             }
             //Emit outgoing message to cinna-slack
             else if (msg.client_res[0] && msg.client_res[0].length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
-               console.log('bro is it getting here? ',msg)
+               // console.log('bro is it getting here? ',msg)
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){
-                console.log('Received results from cinna')
+                console.log('Received results from cinna',msg)
                 socket.broadcast.emit('results', msg)
             }
         });
-        socket.on('new channel', function(channel) {
+        socket.on('new channel', function(channel) { 
             socket.broadcast.emit('new channel', channel)
         }); 
         socket.on('typing', function() {

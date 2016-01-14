@@ -120,6 +120,7 @@ var recallHistory = function(data,callback){
                                 console.log('Error: Cannot find initial search for recallHistory');
                             }   
                             else {
+                                
                                 if (msg.amazon){
                                     var tempArr = msg.amazon; //lmao amazon 
                                     msg.amazon = [];

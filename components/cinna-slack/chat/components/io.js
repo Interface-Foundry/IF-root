@@ -484,8 +484,7 @@ function searchBucket(data){
 
     //sort search action type
     switch (data.action) {
-        case 'initial':
-            console.log('Getting to initial!')
+        case 'initial':)
             search.searchInitial(data);
             break;
         case 'similar':
@@ -630,28 +629,22 @@ var checkOutgoingBanter = function(data){
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data){
-
     if (data.source.channel && data.source.origin == 'socket.io'){
-        // console.log(3)
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){
-            // console.log(4)
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) { 
-                // console.log(5)
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
             }            
         }
         else if (data.source.channel && data.source.origin == 'supervisor') {
-            // console.log(6)
                data.bucket = 'results'
+               data.incoming = false
                if (!ioClient.connected) {
                 ioClient.on('connect', function() {
-                    // console.log(7)
                      ioClient.emit('new message', data)
                 })
             } else {
-                    // console.log(8)
                     ioClient.emit('new message', data)
             }
         }
