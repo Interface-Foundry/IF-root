@@ -630,11 +630,7 @@ var checkOutgoingBanter = function(data){
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data){
-    // console.log('PENGUINNN', data)
-    
-    if (!data.source) {
-    console.log('DA FUQ', data)
-    }
+
     if (data.source.channel && data.source.origin == 'socket.io'){
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){

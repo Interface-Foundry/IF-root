@@ -221,8 +221,11 @@ class DynamicForm extends Component {
                 </div>
                   <div id="similar-box" style={showSimilarBox}>
                       <h3 style={showPrompt}> Please select an item. </h3>
-                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name)} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
+                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
                       Search Similar 
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
                     </Button>
                 </div>
             </div>

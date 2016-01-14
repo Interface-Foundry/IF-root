@@ -138,7 +138,7 @@ class Channels extends Component {
           <Modal.Body>
             <ul style={{height: 'auto', margin: '0', overflowY: 'auto', padding: '0'}}>
               {restOfTheChannels.map(channel =>
-                <ChannelListModalItem channel={channel} key={channel.id} {...actions} onClick={::this.changeChannelWithinModal} />
+                <ChannelListModalItem channel={channel} channels={channels} actions={actions} messages={messages} key={channel.id} {...actions} onClick={::this.changeChannelWithinModal} />
                 )}
             </ul>
           </Modal.Body>
