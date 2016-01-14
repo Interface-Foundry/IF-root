@@ -137,6 +137,7 @@ class DynamicForm extends Component {
      newQuery.client_res = [newQuery.msg]
      newQuery.tokens = newQuery.msg.split(' ')
      newQuery.source.origin = 'supervisor'
+     // newQuery.source.channel = 'supervisor'
      socket.emit('new message', newQuery); 
      this.setState({ spinnerloading: true})
      
@@ -168,7 +169,8 @@ class DynamicForm extends Component {
      newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults
      }
-     newQuery.searchSelect = parseInt(selected.index) + 1
+     newQuery.searchSelect = []
+     newQuery.searchSelect.push(parseInt(selected.index) + 1)
      newQuery.flag = 'recalled'
      socket.emit('new message', newQuery); 
      this.setState({ spinnerloading: true})

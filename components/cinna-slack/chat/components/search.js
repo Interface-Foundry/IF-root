@@ -280,9 +280,9 @@ var searchAmazon = function(data, type, query, flag) {
                 //outgoingResponse(data,'txt');
             }
             else {
-
+                console.log('Line 283', data)
                 if (data.recallHistory && data.recallHistory.amazon){ //we have a previously saved amazon session
-
+                              console.log('Line 285', data)
                     if (!flag){ //no flag passed in
                         flag = 'Intersection'; //default
                     }
@@ -305,7 +305,7 @@ var searchAmazon = function(data, type, query, flag) {
                       responseGroup: 'ItemAttributes,Images,OfferFull'
 
                     }).then(function(results){
-
+                        console.log('line 308',data,results)
                         data.amazon = results;
 
                         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
