@@ -325,16 +325,12 @@ class ControlPanel extends Component {
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
               fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
-
-            </div>   
+          </div>   
           </section>
-
               <Button bsSize = "large" style={{ marginLeft: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
                       Send Command
               </Button>
-       
           </div>
-
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
                         <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
@@ -344,7 +340,6 @@ class ControlPanel extends Component {
                           {list}
                       </ReactCSSTransitionGroup>
                           </div>
-                    
                </div>
             </div>
          </div>

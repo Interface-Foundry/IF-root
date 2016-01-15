@@ -430,6 +430,150 @@ var searchModify = function(data,flag){
     //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
 
+    if (data.flag && data.flag === 'recalled') {
+                  var cSearch = ''; //construct new search string
+        if (data.dataModify && data.dataModify.type){
+                    //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+
+                    //ugh dead
+                    if (data.dataModify.val){
+                        var dumbVar = data.dataModify.val[0];
+                    }
+                    else {
+                        var dumbVar = '';
+                    }
+                     
+                    switch (data.dataModify.type) {
+                        case 'price':
+                            searchInitial(data,{ // passing special FLAG for search to handle
+                                'type':data.dataModify.type,
+                                'param':data.dataModify.param,
+                                'val':dumbVar
+                            });
+                            break;
+
+                        case 'brand':
+                            searchInitial(data,{ // passing special FLAG for search to handle
+                                'type':data.dataModify.type,
+                                'val':dumbVar
+                            });
+                            break;
+
+                        default:
+                            constructAmazonQuery(); //nm just construct a new query
+                    }
+                }
+                else {
+                    console.log('error: data.dataModify params missing')
+                }
+
+                function constructAmazonQuery(){
+
+                    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+
+                        var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                        //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                        if (flag !== 'weakSearch'){
+                            console.log('weakSearch FALSE');
+                            //add brand
+                            if (itemAttrib[0].Brand){
+                                cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                            }
+                            //add clothing size
+                            if (itemAttrib[0].ClothingSize){
+                                cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                            }
+                        }
+                        else {
+                            console.log('weakSearch TRUE');
+                        }
+                        if (itemAttrib[0].Department){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                        }
+                        if (itemAttrib[0].ProductGroup){
+                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                        }
+                        if (itemAttrib[0].Binding){
+                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                        }
+
+                        callback();
+                    }, function done(){
+                          function addModifier(){
+
+            cSearch = cSearch.toLowerCase();
+
+            //SORT WHICH TRAITS TO MODIFY
+            switch (data.dataModify.type) {
+                // CASES: color, size, price, genericDetail
+                case 'color':
+
+                    //remove colors from item name for new search with new color
+                    var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
+                    async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
+                        cSearch = cSearch.replace(i,'');
+                        callback();
+                    }, function done(){
+                        cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        searchInitial(data,flag); //do a new search
+                    });
+
+                    break;
+
+                case 'size':
+
+                    var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
+                    async.eachSeries(SIZES, function(i, callback) {
+                        cSearch = cSearch.replace(i,'');
+                        callback();
+                    }, function done(){
+                        cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        searchInitial(data,flag); //do a new search
+                    });
+                    break;
+
+                //texture, fabric, coating, etc
+                case 'material':
+
+                    cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                    break;
+
+                //unsortable modifier
+                case 'genericDetail':
+                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
+                    if (data.dataModify.val == 'buy'){
+                        data.bucket = 'purchase';
+                        data.action = 'save';
+                        saveToCart(data);
+                    }
+                    //normal action here
+                    else {
+                        //SORT THROUGH RESULTS OF SIZES, FILTER
+                        cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                        data.tokens[0] = cSearch; //replace search string in data obj
+                        searchInitial(data,flag); //do a new search                        
+                    }
+                    break;
+            }
+        }
+                        addModifier(); //done processing constructing new search, add modifier and run query
+                    });
+                }
+     }
+
+
+
+
+
+
+
+
+
     //RECALL LAST ITEM IN SEARCH HISTORY
     history.recallHistory(data, function(item){
 
@@ -591,7 +735,7 @@ var searchModify = function(data,flag){
     });
 }
 
-var searchFocus = function(data){
+var searchFocus = function(data) {
 
     history.recallHistory(data, function(item){
         data.recallHistory = item; //added recalled history obj to data obj

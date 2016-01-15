@@ -330,7 +330,7 @@ function routeNLP(data){
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
-            console.log('NLP RES ',res);
+            console.log('NLP RES ',JSON.stringify(res));
 
             if(!res.bucket){
                 res.bucket = 'search';
