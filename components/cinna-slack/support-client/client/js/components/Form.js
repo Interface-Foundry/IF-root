@@ -389,7 +389,7 @@ class DynamicForm extends Component {
                           <input type="checkbox"
                             checked={this.state.modifier.color}
                             onChange={this.handleChange.bind(this, 'color')} style={{margin: '1em'}}/> 
-                           <DropdownButton bsStyle='info' title='Color' key='1' id='dropdown-basic-1' onSelect={::this.handleSelect}>
+                           <DropdownButton disabled={!this.state.color} bsStyle='info' title='Color' key='1' id='dropdown-basic-1' onSelect={::this.handleSelect}>
                             <MenuItem eventKey="Purple">Purple</MenuItem>
                             <MenuItem eventKey="Blue Violet">Blue Violet</MenuItem>
                             <MenuItem eventKey="Slate Blue">Slate Blue</MenuItem>
@@ -400,12 +400,12 @@ class DynamicForm extends Component {
                           <input type="checkbox"
                             checked={this.state.modifier.size}
                             onChange={this.handleChange.bind(this, 'size')} style={{margin: '1em'}}/> 
-                           <DropdownButton bsStyle='info' title='Size' key='2' id='dropdown-basic-2'>
-                            <MenuItem eventKey="1">X-Small</MenuItem>
-                            <MenuItem eventKey="2">Small</MenuItem>
-                            <MenuItem eventKey="3" active>Medium</MenuItem>
-                            <MenuItem eventKey="4">Large</MenuItem>
-                            <MenuItem eventKey="4">X-Large</MenuItem>
+                           <DropdownButton disabled={!this.state.size} bsStyle='info' title='Size' key='2' id='dropdown-basic-2'>
+                            <MenuItem eventKey="X-Small">X-Small</MenuItem>
+                            <MenuItem eventKey="Small">Small</MenuItem>
+                            <MenuItem eventKey="Medium" active>Medium</MenuItem>
+                            <MenuItem eventKey="Large">Large</MenuItem>
+                            <MenuItem eventKey="X-Large">X-Large</MenuItem>
                             <MenuItem divider />
                             <MenuItem eventKey="4">Separated link</MenuItem>
                           </DropdownButton>

@@ -109,6 +109,7 @@
     "react-router": "1.0.3",
     "react-shuffle": "^1.0.0",
     "react-spinner": "^0.2.3",
+    "react-toggle": "^2.0.1",
     "redux": "^3.0.0",
     "redux-devtools-dock-monitor": "^1.0.1",
     "redux-devtools-log-monitor": "^1.0.2",

@@ -19,7 +19,8 @@ import sortBy from 'lodash/collection/sortBy'
 import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import ReactTransitionGroup from 'react-addons-transition-group';
- 
+import Toggle from 'react-toggle'
+
 
 const style = {
   width: 400,
@@ -115,7 +116,7 @@ class ControlPanel extends Component {
   }
 
   componentDidMount() {
-    const {actions, activeChannel, activeMessage, messages} = this.props;
+    const {actions, activeChannel, activeMessage, messages, supervisor} = this.props;
     const self = this
      this.setState({ mounted: true });
      socket.on('results', function (msg) {
@@ -311,8 +312,9 @@ class ControlPanel extends Component {
                 )
     }
 
+
   render() {
-     const { activeControl, activeMessage, activeChannel, messages,actions} = this.props;
+     const { activeControl, activeMessage, activeChannel, messages,actions,changeMode} = this.props;
      const fields  = ['msg','bucket','action']
      const self = this;
      const { items,selected } = this.state;
@@ -322,6 +324,14 @@ class ControlPanel extends Component {
           <div id="second-column">
             <section className='rightnav'>
           <div>   
+
+            <label>
+              <Toggle
+                defaultChecked={this.props.supervisor}
+                onChange={ () => { changeMode() }} />
+              <span> Supervisor Mode</span>
+            </label>
+
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
               fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />

@@ -26,9 +26,16 @@ class Chat extends Component {
   static contextTypes = {
     router: PropTypes.object.isRequired
   };
+     constructor (props, context) {
+      super(props, context)
+      this.state = {
+        supervisor: false
+      }
+    }
 
   componentDidMount() {
     const { actions, messages, activeChannel } = this.props;
+    this.setState({ supervisor: false });
      socket.on('change state bc', function (state) {
       // console.log('change state event received', state)
        var identifier = {channel: state.channel, properties: []}
@@ -139,12 +146,17 @@ class Chat extends Component {
     event.preventDefault();
     this.setState({moreUsersModal: false});
   }
-            // <Image source={{uri: '/static/kip-icon.png'}} />
+
+  handleSupervisorChange() {
+       let current = this.state.supervisor
+       this.setState({supervisor: !current});
+    }
 
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name).filter(message => (message.bucket === 'response' || message.bucket === 'supervisor'))
     const username = this.props.user.username;
+    const supervisor = this.state.supervisor
     // console.log('FM: ',filteredMessages)
     const dropDownMenu = (
       <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
@@ -181,14 +193,14 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {{ padding: 0}} >
-              <ControlPanel ref='form1' actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} onSubmit={::this.handleSubmit} />
+              <ControlPanel ref='form1' actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} supervisor={supervisor} onSubmit={::this.handleSubmit} changeMode={::this.handleSupervisorChange} />
             </div>
           </div>
         
 
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
-        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages}/>
+        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages} supervisor={supervisor} />
           {typers.length === 1 &&
             <div>
               <span>

@@ -22,10 +22,10 @@ class MessageComposer extends Component {
   }
   handleSubmit(event) {
     const {
-        user, activeChannel, activeMessage, messages
+        user, activeChannel, activeMessage, messages, supervisor
     } = this.props;
     const text = event.target.value.trim();
-    if (event.which === 13) {
+    if (event.which === 13 && supervisor) {
         event.preventDefault();
         var newMessage = {
             id: messages.length,
@@ -55,6 +55,8 @@ class MessageComposer extends Component {
     }
 }
   handleChange(event) {
+    const { supervisor } = this.props
+    if (!supervisor) return
     this.setState({ text: event.target.value });
     if (event.target.value.length > 0 && !this.state.typing) {
       socket.emit('typing');
@@ -65,6 +67,7 @@ class MessageComposer extends Component {
       this.setState({ typing: false});
     }
   }
+  
   render() {
     return (
       <div style={{
