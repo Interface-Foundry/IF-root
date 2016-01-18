@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 import DynamicForm,{labels} from './Form';
-import Draggable from 'react-draggable';
+import DraggableList from './DraggableList';
 import { DragDropContext  } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
