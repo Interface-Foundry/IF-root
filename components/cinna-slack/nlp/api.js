@@ -9,6 +9,7 @@ var brands = require('./brands')
 var verbs = require('./verbs')
 var price = require('./price')
 var _ = require('lodash')
+var stopwords = require('./stopwords');
 
 var debug = require('debug')('nlp')
 
@@ -138,7 +139,7 @@ function quickparse(text) {
     // ],
     similar: [
       // /more like ([\n])/i,
-      /like the ([\w]+)\b/i
+      // /like the ([\w]+)\b/i
     ],
     focus: []
   };
@@ -276,6 +277,18 @@ function nlpToResult(nlp) {
     res.searchSelect = nlp.focus;
   }
 
+  // take care of invalid adjectives that are actually focuses (first)
+  nlp.adjectives = nlp.adjectives || [];
+  var invalidAdjectives = ['first', 'second', 'third'];
+  nlp.adjectives = nlp.adjectives.filter(function(a) {
+    return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
+  })
+
+  // take care of invalid nouns
+  nlp.nouns = (nlp.nouns || []).filter(function(n) {
+    return stopwords.indexOf(n.toLowerCase()) < 0;
+  })
+
   // handle all initial search requests first
   if (nlp.focus.length === 0) {
 
@@ -317,7 +330,9 @@ function nlpToResult(nlp) {
       res.execute.push({
         bucket: BUCKET.search,
         action: ACTION.initial,
-        val: nlp.nouns.join(' ')
+        val: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
+          return stopwords.indexOf(n) < 0;
+        })).join(' ')
       })
     }
   }
@@ -333,14 +348,16 @@ function nlpToResult(nlp) {
     })
   }
 
+  // get all the nouns and adjectives
   var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
+
+  // if there is a focus and a modifier, it's a modified search
   if (nlp.focus.length === 1 && modifierWords.length === 1) {
-    debug('CHECK THIS LOGIC BECAUSE A DOG PROBABLY WROTE IT')
-    // assume it's a modifier...  what even is this?
-    debug('modifier triggered')
+    debug('single focus, single modifier triggered')
     res.bucket = BUCKET.search;
     res.action = ACTION.modify;
     res.dataModify = getModifier(modifierWords[0]);
+    res.execute = [];
     return res;
   }
 
@@ -378,20 +395,15 @@ if (!module.parent) {
   var sentences = [
     'find me a coffee machine',
     'search luxury socks',
-    'like the frist one but not so derpy',
     'kip find me running leggings',
     'like the first one but orange',
-    'does the first one have pockets?',
-    'yes please',
     'do you have 2 but in blue',
     'please show brighter blue i don\'t like dark colour',
-    'hmm I really like 3 what\'s the fabric?',
-    'ok pls buy for me thanks',
     'looking for a black zara jacket',
     'I like the thrid one',
-    'is there any size medium?',
+    // 'is there any size medium?',
     'like 2 but blue',
-    'does it have pockets?',
+    // 'does it have pockets?',
     'morning glory (24 pack)',
     'cheapest 32" monitor',
     'i need a 3d camera'
