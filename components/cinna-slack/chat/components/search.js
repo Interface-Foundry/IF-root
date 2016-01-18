@@ -7,6 +7,7 @@ var amazonHTML = require('./amazonHTML');
 var history = require("./history.js");
 var processData = require("./process.js");
 var ioKip = require("./io.js");
+var kip = require('kip')
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -770,10 +771,39 @@ var getReviews = function(ASIN,callback) {
 var getPrices = function(item,callback){
 
     var url = item.DetailPageURL[0];
+    var price;  // get price from API
+    if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
+        //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
+        console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
+
+        price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
+
+    }
+    else if (item.ItemAttributes[0].ListPrice){
+
+        console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
+
+        if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
+            price = '';
+        }
+        else {
+          // add price
+          price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
+        }
+    }
 
     amazonHTML(url, function(err, product) {
-      if (kip.err(err)) { return callback(err) }
-      callback(product.price || '');
+      kip.err(err); // print error
+
+      if (product && product.price) {
+        console.log('returning early with price: ' + product.price);
+        return callback(product.price)
+      }
+
+      console.log('product.price: ' + product.price + ', price: ' + price);
+      price = product.price || price || '';
+      console.log('final price: ' + price);
+      callback(price);
     })
 }
 

@@ -125,30 +125,6 @@ module.exports = function get(url, callback) {
         if (amazonSitePrice){  //excluding scrapes with multiple prices (-) in field
             product.price = amazonSitePrice;
         }
-        //blocked by amazon? use offer price
-        // item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0]
-        else if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
-            //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-            console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
-
-            product.price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
-
-        }
-        else if (item.ItemAttributes[0].ListPrice){
-
-            console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
-
-            if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
-                product.price = '';
-            }
-            else {
-              // add price
-              product.price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
-            }
-        }
-        else {
-            console.log('/!/!!! warning: no webscrape price found for amazon item');
-        }
 
         var textParts = {
           featureBulletText: $('#featurebullets_feature_div').text().replace(/\s+/g, ' '),
