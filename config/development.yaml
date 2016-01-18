@@ -6,4 +6,4 @@ elasticsearch:
 app:
   publicAPI: http://localhost:2997/api
 # picstitch: http://localhost:5000
-# nlp: http://localhost:8083
+nlp: http://localhost:8083
