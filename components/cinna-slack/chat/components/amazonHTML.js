@@ -3,7 +3,7 @@ var cheerio = require('cheerio')
 var kip = require('kip')
 var debug = require('debug')('amazon')
 
-
+// in mem cache that can clean itself to 1000 items max
 var cache = {
   get: function(url, cb) {
     //  in-mem impl, can do redis later
@@ -19,9 +19,30 @@ var cache = {
     this._cache[url] = product;
   },
 
-  _cache: {}
+  _cache: {},
+
+  clean: function() {
+    // keep only 1000 items in cache
+    if (Object.keys(cache._cache) > 1000) {
+      // randomly delete 1000 of them...
+      Object.keys(cache._cache)
+        .map(function(k) {
+          return {
+            key: k,
+            sort: Math.random()
+          }
+        })
+        .sort(function(a, b) { return a.sort > b.sort })
+        .splice(-1000)
+        .map(function(i) {
+          delete cache._cache[k.key];
+        })
+    }
+  }
 };
 
+// cache cleaning, every day make sure there are at most 1000 items in cache
+setInterval(cache.clean, 24 * 60 * 60 * 1000)
 
 /**
  callback should be function(error, product) {}
@@ -68,9 +89,8 @@ module.exports = function get(url, callback) {
       };
 
       request(options, function(err, response, body) {
-        if(err){
+        if (kip.error(err)) {
           console.error('error amazon get url ' + url)
-          console.error(err);
           callback(err);
           return
         }
