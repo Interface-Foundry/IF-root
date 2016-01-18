@@ -1,6 +1,8 @@
 var cheerio = require('cheerio');
 var request = require('request');
 var async = require('async');
+var _ = require('underscore');
+
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 
 var history = require("./history.js");
@@ -44,7 +46,7 @@ var searchAmazon = function(data, type, query, flag) {
 
             //add some amazon query params
             var amazonParams = {};
-            amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull';
+            amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank';
 
             //remove random symbols 
             removeSpecials(data.tokens[0],function(res){
@@ -84,36 +86,237 @@ var searchAmazon = function(data, type, query, flag) {
                                     modPrice = modPrice - per; // subtract percentage
                                     modPrice = Math.round(modPrice); //clean price
 
+                                    if (modPrice < 0){
+                                        modPrice = 25;
+                                    }
+
+                                    //its a real number, shoudl always be a real number here, 
                                     if (modPrice > 0){
 
-                                        //add price param
-                                        amazonParams.MaximumPrice = modPrice.toString();
+                                        // console.log('1 ',data.recallHistory.amazon[searchSelect]);
 
-                                        //now resolving the search term param
-                                        var itemAttrib = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                                        var cSearch = '';
+                                        console.log('browsenode?1 ',JSON.stringify(data.recallHistory.amazon[searchSelect].BrowseNodes));
 
-                                        if (itemAttrib.Department){
-                                            cSearch = cSearch + ' ' + itemAttrib.Department[0];
-                                        }
-                                        if (itemAttrib.ProductGroup){
-                                            cSearch = cSearch + ' ' + itemAttrib.ProductGroup[0];
-                                        }
-                                        if (itemAttrib.Binding){
-                                            cSearch = cSearch + ' ' + itemAttrib.Binding[0];
-                                        }
-                                        if (itemAttrib.Color){
-                                            cSearch = cSearch + ' ' + itemAttrib.Color[0];
-                                        }
-                                        if (itemAttrib.ClothingSize){
-                                            cSearch = cSearch + ' ' + itemAttrib.ClothingSize[0];
+                                        // console.log('!!productGroup <--> SearchIndex ',data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0]);
+
+                                        if (data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup){
+
+                                            var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+                                            var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;
+
+                                            console.log('!!productGroup <-- ',productGroup);
+
+                                            parseAmazon(productGroup,browseNodes,function(res){
+                                                amazonParams.SearchIndex = res.SearchIndex;
+                                                amazonParams.BrowseNode = res.BrowseNode;
+                                                amazonParams.MaximumPrice = modPrice.toString(); 
+                                                delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+                                                doSearch();
+                                            });
+
+
+                                            //     if chain contains "clothing" && "women" { 
+                                            //         searchindex = 'FashionWomen'
+                                            //     }
+
+                                            // if product group == Hobby {
+                                            //     searchindex == toys
+                                            //     same chain as toys, deepest index for node,
+                                            //     if not enough results in deepest node, move up one node id, etc.
+                                            // }
+
+                                            // if PG == Wine {
+                                            //     if node in chain == "Wine"
+                                            //     deepest browser node
+
+                                            // }
+
+                                            // //FIND BROWSENODE CHAIN 
+
+                                            // PG == "Personal Computer":
+                                            //     SI == "PCHardware"
+                                            //     find chain that has "Computers & Accessories", move down chain
+
+                                            // BN == BrowseNodes
+
+                                            // PG == CE ??
+
+                                            // PG == 'Speakers':
+                                            //     SI == "Electronics"
+                                            //     BN == move down chain to last node that matches "Electronics" to get node #
+
+                                            // PG == 'Art and Craft Supply':
+                                            //     SI == 'ArtsAndCrafts'
+                                            //     DOWN chain that contains 'Painting, Drawing & Art Supplies' || < << << <  < <  add all bottom nodes for this top node 'Arts, Crafts & Sewing'
+
+
+
+                                            //     SI == 'Miscellaneous'
+
+                                            // PG == 'eBooks':
+                                            //     SI == 'Kindle Store'
+
+
+
+
+                                            // SI == wireless ?? 
+
+                                            // ArtsAndCrafts
+
+
+        //SEARCH INDEX:
+        // [\n\t\t\t\t\'All\',\'Wine\',\'Wireless\',\'ArtsAndCrafts\',\'Miscellaneous\',\'Electronics\',\'Jewelry\',\'MobileApps\',\'Photo\',
+        // \'Shoes\',\'Kindle Store\',\'Automotive\',\'Pantry\',\'MusicalInstruments\',\'DigitalMusic\',\'GiftCards\',\'FashionBaby\',\'FashionGirls\'
+        // ,\'GourmetFood\',\'HomeGarden\',\'MusicTracks\',\'UnboxVideo\',\'FashionWomen\',\'VideoGames\',\'FashionMen\',\'Kitchen\',\'Video\',
+        // \'Software\',\'Beauty\',\'Grocery\',,\'FashionBoys\',\'Industrial\',\'PetSupplies\',\'OfficeProducts\',\'Magazines\',\'Watches\',
+        // \'Luggage\',\'OutdoorLiving\',\'Toys\',\'SportingGoods\',\'PCHardware\',\'Movies\',\'Books\',\'Collectibles\',\'VHS\',\'MP3Downloads\',
+        // \'Fashion\',\'Tools\',\'Baby\',\'Apparel\',\'Marketplace\',\'DVD\',\'Appliances\',\'Music\',\'LawnAndGarden\',\'WirelessAccessories\',
+        // \'Blended\',\'HealthPersonalCare\',\'Classical\'\n\t\t\t\t].' ]
+
+        // [\n\t\t\t\t\'All\',\'Wine\',\'Wireless\',\'ArtsAndCrafts\',\'Miscellaneous\',\'Electronics\',\'Jewelry\',\'MobileApps\',\'Photo\',
+        // \'Shoes\',\'KindleStore\',\'Automotive\',\'Pantry\',\'MusicalInstruments\',\'DigitalMusic\',\'GiftCards\',\'FashionBaby\',\'FashionGirls\'
+        // ,\'GourmetFood\',\'HomeGarden\',\'MusicTracks\',\'UnboxVideo\',\'FashionWomen\',\'VideoGames\',\'FashionMen\',\'Kitchen\',\'Video\',
+        // \'Software\',\'Beauty\',\'Grocery\',,\'FashionBoys\',\'Industrial\',\'PetSupplies\',\'OfficeProducts\',\'Magazines\',\'Watches\',
+        // \'Luggage\',\'OutdoorLiving\',\'Toys\',\'SportingGoods\',\'PCHardware\',\'Movies\',\'Books\',\'Collectibles\',\'VHS\',\'MP3Downloads\',
+        // \'Fashion\',\'Tools\',\'Baby\',\'Apparel\',\'Marketplace\',\'DVD\',\'Appliances\',\'Music\',\'LawnAndGarden\',\'WirelessAccessories\',
+        // \'Blended\',\'HealthPersonalCare\',\'Classical\'\n\t\t\t\t].' ]
+
+        //Clothing, Shoes & Jewelry = 
+
+        //traverse array backwards, match value
+
+
                                         }
 
-                                        amazonParams.Keywords = cSearch;
-                    
-                                        doSearch();
+
+                                        function parseAmazon(productGroup,browseNodes,callback5){
+                                            var resParams = {};
+                                            switch(productGroup){
+                                                case 'Hobby':
+                                                case 'Toy':
+                                                    resParams.SearchIndex = 'Toys'; //link product group to searchindex
+                                                    traverseNodes(browseNodes,'Toys & Games',function(res){
+                                                        resParams.BrowseNode = res; 
+                                                        callback5(resParams);
+                                                    });
+                                                break;
+                                                case 'Wine':
+                                                break;
+                                                case 'Personal Computer':
+                                                break;
+                                                case 'Speakers':
+                                                break;
+                                                case 'Art and Craft Supply':
+                                                break;
+                                                case 'eBooks':
+                                                break;
+                                                default:
+                                                    resParams.SearchIndex = 'All';
+                                                    callback5(resParams);
+                                            }                                           
+                                        }
+
+                                        function traverseNodes(nodeList,findMe,callbackMM){
+
+                                            var nodeArr = []; //collect all browse nodes
+
+                                            async.eachSeries(nodeList, function(item, callbackZ) {
+
+                                                var currentNode = item;
+                                                var childNodeId = currentNode.BrowseNodeId[0]; //get first ID in nest tree
+                                                
+                                                async.whilst(
+                                                    function () { 
+                                                        if (currentNode.Name && currentNode.Name[0] == findMe){ //we found the string, stop traversing
+                                                            nodeArr.push(childNodeId);
+                                                            return false;
+                                                        }else if (currentNode.Ancestors){ //didn't find string, keep traversing
+                                                            currentNode = currentNode.Ancestors[0].BrowseNode[0];
+                                                            return true;
+                                                        }
+                                                        else {
+                                                            return false;
+                                                        }
+                                                    },
+                                                    function (callback) {
+                                                        callback();                                                                
+                                                    },
+                                                    function (err) {
+                                                        if (err){
+                                                            console.log('WHILST error in search.js ',err);
+                                                        }
+                                                        callbackZ();
+                                                    }
+                                                );     
+
+                                            }, function done(){
+                                                if (nodeArr.length > 0){                                                    
+                                                    callbackMM(nodeArr.toString()); 
+                                                }
+                                                else {
+                                                    console.log('error: no browseNodes found')
+                                                }                                          
+                                            });                                  
+
+                                        }
+                                       
+
+
+
+                                        // amazonParams.SearchIndex = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0].toString();
+                                        
+
+                                        //amazonParams.SearchIndex = '';                                     
+
+                                        
+
+
+                                        // console.log('link1 ',data.recallHistory.amazon[searchSelect].ItemLinks[0].ItemLink[0]);
+
+                                        // console.log('BELOW THIS PRICE1 ', modPrice);
+
+
+                                        //amazonParams.BrowseNode = modPrice.toString();   
+
+                                        // function continueStuff(){
+
+                                        //     //add price param
+                                        //     amazonParams.MaximumPrice = modPrice.toString();  
+
+
+                                        //     //now resolving the search term param
+                                        //     var itemAttrib = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                                        //     var cSearch = '';
+
+                                        //     if (itemAttrib.Department){
+                                        //         cSearch = cSearch + ' ' + itemAttrib.Department[0];
+                                        //     }
+                                        //     if (itemAttrib.ProductGroup){
+                                        //         cSearch = cSearch + ' ' + itemAttrib.ProductGroup[0];
+                                        //     }
+                                        //     if (itemAttrib.Binding){
+                                        //         cSearch = cSearch + ' ' + itemAttrib.Binding[0];
+                                        //     }
+                                        //     if (itemAttrib.Color){
+                                        //         cSearch = cSearch + ' ' + itemAttrib.Color[0];
+                                        //     }
+                                        //     if (itemAttrib.ClothingSize){
+                                        //         cSearch = cSearch + ' ' + itemAttrib.ClothingSize[0];
+                                        //     }
+
+                                        //     amazonParams.Keywords = cSearch;
+
+
+                                        //     delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+                        
+                                        //     doSearch();
+
+                                        // }
+
+
                                     }
                                     else {
+                                     
                                         doSearch();
                                         console.log('Error: not allowing search for max price below 0');
                                     }
@@ -125,6 +328,10 @@ var searchAmazon = function(data, type, query, flag) {
                                 }
 
                                 break;
+
+
+                                //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/SortingbyPopularityPriceorCondition.html
+                                /// sort by reviews / cheaper
 
                             // case 'less than':
                             //     console.log('less than');
@@ -205,7 +412,7 @@ var searchAmazon = function(data, type, query, flag) {
                 client.itemSearch(amazonParams).then(function(results,err){
                     data.amazon = results;
 
-                    //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
+                    //temporarily using async parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
                     if (results.length >= 3){   
 
                         //get reviews and real prices
@@ -240,8 +447,6 @@ var searchAmazon = function(data, type, query, flag) {
                         });
                     }
 
-
-
                 }).catch(function(err){
 
                     //handle err codes. do stuff.
@@ -251,7 +456,7 @@ var searchAmazon = function(data, type, query, flag) {
                             //CASE: No results for search
                             case 'AWS.ECommerceService.NoExactMatches':
                                 //do a weak search
-                                weakSearch(data,type,query,flag);
+                                weakSearch(data,type,query,flag,amazonParams);
                                 break;
 
                             default:
@@ -299,7 +504,7 @@ var searchAmazon = function(data, type, query, flag) {
                       ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
                       // Keywords: data.recallHistory.tokens,
                       SimilarityType: flag, //other option is "Random" <<< test which is better results
-                      responseGroup: 'ItemAttributes,Images,OfferFull'
+                      responseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
 
                     }).then(function(results){
 
@@ -385,7 +590,7 @@ var searchAmazon = function(data, type, query, flag) {
 };
 
 //re-search but with less specific terms
-function weakSearch(data,type,query,flag){
+function weakSearch(data,type,query,flag,amazonParams){
     //sort incoming flags for redundant searches
     switch (flag) {
         case 'weakSearch': //we already did weakSearch
@@ -411,8 +616,10 @@ function weakSearch(data,type,query,flag){
             switch (data.action) {
                 case 'modify':
                     if (data.dataModify && data.dataModify.type == 'price'){
-                        console.log('cant find lower price item, preventing infinite loop');
+                        //console.log('cant find lower price item, preventing infinite loop');
+                        console.log('dataforModifyPRICE ',amazonParams);
                         ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
+
                     }
                     else {
                         searchModify(data, 'weakSearch');
@@ -611,6 +818,9 @@ var searchFocus = function(data){
                     //check for large image to send back
                     if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
                         data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
+                    }
+                    else if (data.recallHistory.amazon[searchSelect].ImageSets && data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet && data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet[0].MediumImage && data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet[0].MediumImage[0]){
+                        data.client_res.push(data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]);
                     }
                     //push number emoji + item URL
                     processData.getNumEmoji(data,searchSelect+1,function(res){

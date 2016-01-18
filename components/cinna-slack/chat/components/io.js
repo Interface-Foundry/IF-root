@@ -55,6 +55,7 @@ var initSlackUsers = function(env){
     }
 }
 
+//fired when server gets /newslack route request
 var newSlack = function(){
     //find all bots not added to our system yet
     Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
@@ -133,7 +134,8 @@ function loadSlackUsers(users){
                     }
                   }
                 });
-
+                
+                //* * * * * POST PROCESSING * * * * * * //
                 //find all bots not added to our system yet
                 Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
                     if(err){
