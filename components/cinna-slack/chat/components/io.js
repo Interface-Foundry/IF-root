@@ -392,20 +392,40 @@ function searchBucket(data){
             search.searchInitial(data);
             break;
         case 'similar':
-            search.searchSimilar(data);
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchSimilar(data);
+            });
             break;
         case 'modify':
         case 'modified': //because the nlp json is wack
-            search.searchModify(data);
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchModify(data);
+            });
             break;
         case 'focus':
-            search.searchFocus(data);
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchFocus(data);
+            });
             break;
         case 'back':
             //search.searchBack(data);
             break;
         case 'more':
-            search.searchMore(data); //Search more from same query
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchMore(data); //Search more from same query
+            });
             break;
         default:
             search.searchInitial(data);

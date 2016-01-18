@@ -23,12 +23,12 @@ var searchSimilar = function(data){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);  
     }
+    else if (data.recallHistory && data.recallHistory.amazon){
+        searchAmazon(data,'similar','none','null');        
+    }
     else {
-        //RECALL LAST ITEM IN SEARCH HISTORY
-        history.recallHistory(data, function(item){
-            data.recallHistory = item; //added recalled history obj to data obj
-            searchAmazon(data,'similar','none','null');
-        });       
+        console.log('warning: recallhistory obj missing');
+        ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
     }
 }
 
@@ -430,282 +430,265 @@ var searchModify = function(data,flag){
     //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
 
-    //RECALL LAST ITEM IN SEARCH HISTORY
-    history.recallHistory(data, function(item){
+    var cSearch = ''; //construct new search string
 
-        if (item){//history item found
+    //CONSTRUCT QUERY FROM AMAZON OBJECT
+    if (data.recallHistory && data.recallHistory.amazon){
 
-            data.recallHistory = item;
+        if (data.dataModify && data.dataModify.type){
+            //handle special modifiers that need care, consideration, hard tweaks of amazon search API
 
-            var cSearch = ''; //construct new search string
+            //ugh dead
+            if (data.dataModify.val){
+                var dumbVar = data.dataModify.val[0];
+            }
+            else {
+                var dumbVar = '';
+            }
+             
+            switch (data.dataModify.type) {
+                case 'price':
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':dumbVar
+                    });
+                    break;
 
-            //CONSTRUCT QUERY FROM AMAZON OBJECT
-            if (data.recallHistory.amazon){
+                case 'brand':
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'val':dumbVar
+                    });
+                    break;
 
-                if (data.dataModify && data.dataModify.type){
-                    //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+                default:
+                    constructAmazonQuery(); //nm just construct a new query
+            }
+        }
+        else {
+            console.log('error: data.dataModify params missing')
+        }
 
-                    //ugh dead
-                    if (data.dataModify.val){
-                        var dumbVar = data.dataModify.val[0];
+        function constructAmazonQuery(){
+
+            async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+
+                var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
+
+                //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                if (flag !== 'weakSearch'){
+                    console.log('weakSearch FALSE');
+                    //add brand
+                    if (itemAttrib[0].Brand){
+                        cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
                     }
-                    else {
-                        var dumbVar = '';
-                    }
-                     
-                    switch (data.dataModify.type) {
-                        case 'price':
-                            searchInitial(data,{ // passing special FLAG for search to handle
-                                'type':data.dataModify.type,
-                                'param':data.dataModify.param,
-                                'val':dumbVar
-                            });
-                            break;
-
-                        case 'brand':
-                            searchInitial(data,{ // passing special FLAG for search to handle
-                                'type':data.dataModify.type,
-                                'val':dumbVar
-                            });
-                            break;
-
-                        default:
-                            constructAmazonQuery(); //nm just construct a new query
+                    //add clothing size
+                    if (itemAttrib[0].ClothingSize){
+                        cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
                     }
                 }
                 else {
-                    console.log('error: data.dataModify params missing')
+                    console.log('weakSearch TRUE');
+                }
+                if (itemAttrib[0].Department){
+                    cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                }
+                if (itemAttrib[0].ProductGroup){
+                    cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                }
+                if (itemAttrib[0].Binding){
+                    cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
                 }
 
-                function constructAmazonQuery(){
-
-                    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-
-                        var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
-
-                        //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                        if (flag !== 'weakSearch'){
-                            console.log('weakSearch FALSE');
-                            //add brand
-                            if (itemAttrib[0].Brand){
-                                cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
-                            }
-                            //add clothing size
-                            if (itemAttrib[0].ClothingSize){
-                                cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
-                            }
-                        }
-                        else {
-                            console.log('weakSearch TRUE');
-                        }
-                        if (itemAttrib[0].Department){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
-                        }
-                        if (itemAttrib[0].ProductGroup){
-                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                        }
-                        if (itemAttrib[0].Binding){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
-                        }
-
-                        callback();
-                    }, function done(){
-                        addModifier(); //done processing constructing new search, add modifier and run query
-                    });
-                }
-            }
-            else {
-                console.log('no Amazon data found in last history item. can not modify search');
-                data.action = 'initial';
-                searchInitial(data); //do a search anyway
-            }
+                callback();
+            }, function done(){
+                addModifier(); //done processing constructing new search, add modifier and run query
+            });
         }
-        else { //no item history found 
-            console.log('warning: no history item found for modification query');
-            data.action = 'initial';
-            searchInitial(data); //do a search anyway
-        }
+    }
+    else {
+        console.log('no Amazon data found in last history item. can not modify search');
+        data.action = 'initial';
+        searchInitial(data); //do a search anyway
+    }
 
-        //after query construction, add modifier and fire search
-        function addModifier(){
 
-            cSearch = cSearch.toLowerCase();
+    //after query construction, add modifier and fire search
+    function addModifier(){
 
-            //SORT WHICH TRAITS TO MODIFY
-            switch (data.dataModify.type) {
-                // CASES: color, size, price, genericDetail
-                case 'color':
+        cSearch = cSearch.toLowerCase();
 
-                    //remove colors from item name for new search with new color
-                    var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
-                    async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
-                        cSearch = cSearch.replace(i,'');
-                        callback();
-                    }, function done(){
-                        cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-                    });
+        //SORT WHICH TRAITS TO MODIFY
+        switch (data.dataModify.type) {
+            // CASES: color, size, price, genericDetail
+            case 'color':
 
-                    break;
+                //remove colors from item name for new search with new color
+                var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
+                async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
+                    cSearch = cSearch.replace(i,'');
+                    callback();
+                }, function done(){
+                    cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                });
 
-                case 'size':
+                break;
 
-                    var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
-                    async.eachSeries(SIZES, function(i, callback) {
-                        cSearch = cSearch.replace(i,'');
-                        callback();
-                    }, function done(){
-                        cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-                    });
-                    break;
+            case 'size':
 
-                //texture, fabric, coating, etc
-                case 'material':
-
+                var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
+                async.eachSeries(SIZES, function(i, callback) {
+                    cSearch = cSearch.replace(i,'');
+                    callback();
+                }, function done(){
                     cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
-                    break;
+                });
+                break;
 
-                //unsortable modifier
-                case 'genericDetail':
-                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                    if (data.dataModify.val == 'buy'){
-                        data.bucket = 'purchase';
-                        data.action = 'save';
-                        saveToCart(data);
-                    }
-                    //normal action here
-                    else {
-                        //SORT THROUGH RESULTS OF SIZES, FILTER
-                        cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search                        
-                    }
-                    break;
-            }
+            //texture, fabric, coating, etc
+            case 'material':
+
+                cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
+                data.tokens[0] = cSearch; //replace search string in data obj
+                searchInitial(data,flag); //do a new search
+                break;
+
+            //unsortable modifier
+            case 'genericDetail':
+                //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
+                if (data.dataModify.val == 'buy'){
+                    data.bucket = 'purchase';
+                    data.action = 'save';
+                    saveToCart(data);
+                }
+                //normal action here
+                else {
+                    //SORT THROUGH RESULTS OF SIZES, FILTER
+                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search                        
+                }
+                break;
         }
-    });
+    }
+   
 }
 
 var searchFocus = function(data){
 
-    history.recallHistory(data, function(item){
-        data.recallHistory = item; //added recalled history obj to data obj
+    if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
+        if(data.recallHistory && data.recallHistory.amazon){
 
-        if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
-            if(data.recallHistory && data.recallHistory.amazon){
+            var searchSelect = data.searchSelect[0] - 1;
 
-                var searchSelect = data.searchSelect[0] - 1;
+            if (data.recallHistory.amazon[searchSelect]){
 
-                if (data.recallHistory.amazon[searchSelect]){
+                var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                var cString = ''; //construct text reply
+                data.client_res = []; //building order of msg delivery to user
 
-                    var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                    var cString = ''; //construct text reply
-                    data.client_res = []; //building order of msg delivery to user
-
-                    // * * * * * Building response message array * * * * * //
-                    //check for large image to send back
-                    if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
-                        data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
-                    }
-                    //push number emoji + item URL
-                    processData.getNumEmoji(data,searchSelect+1,function(res){
-                        data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
-                        dumbFunction(); //fire after get 
-                    })
-
-                    //pointless ¯\_(ツ)_/¯ ... just makes sure the emoji number + product URL go first in msg order
-                    function dumbFunction(){
-                        //send product title + price
-                        var topStr = attribs.Title[0];
-
-                        //if realprice exists, add it to title
-                        if (data.recallHistory.amazon[searchSelect].realPrice){
-                            topStr = data.recallHistory.amazon[searchSelect].realPrice + " – " + topStr;
-                        }
-
-                        //Make top line bold
-                        if (data.source.origin == 'slack'){ 
-                            topStr = '*'+topStr+'*';
-                        }else if (data.source.origin == 'socket.io'){
-                            topStr = '<b>'+topStr+'</b>';
-                        }
-
-                        data.client_res.push(topStr);
-
-                        ///// build product details string //////
-
-                        //get size
-                        if (attribs.Size){
-                            cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
-                        }
-
-                        //get artist
-                        if (attribs.Artist){
-                            cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
-                        }
-
-                        //get brand or manfacturer
-                        if (attribs.Brand){
-                            cString = cString + ' ○ ' +  attribs.Brand[0];
-                        }
-                        else if (attribs.Manufacturer){
-                            cString = cString + ' ○ ' +  attribs.Manufacturer[0];
-                        }
-
-                        //get all stuff in details box
-                        if (attribs.Feature){
-                            cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
-                        }
-
-                        //done collecting details string, now send
-                        if (cString){
-                            data.client_res.push(cString);
-                            //outgoingResponse(data,'final');
-                        }
-                        ///// end product details string /////
-
-                        //get review
-                        if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
-                            data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
-                        }
-                        
-                        ioKip.outgoingResponse(data,'final');
-
-                    }
-
-
-                }else {
-                    console.log('warning: item selection does not exist in amazon array');
-                    ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+                // * * * * * Building response message array * * * * * //
+                //check for large image to send back
+                if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
+                    data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
                 }
+                //push number emoji + item URL
+                processData.getNumEmoji(data,searchSelect+1,function(res){
+                    data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
+                    dumbFunction(); //fire after get 
+                })
+
+                //pointless ¯\_(ツ)_/¯ ... just makes sure the emoji number + product URL go first in msg order
+                function dumbFunction(){
+                    //send product title + price
+                    var topStr = attribs.Title[0];
+
+                    //if realprice exists, add it to title
+                    if (data.recallHistory.amazon[searchSelect].realPrice){
+                        topStr = data.recallHistory.amazon[searchSelect].realPrice + " – " + topStr;
+                    }
+
+                    //Make top line bold
+                    if (data.source.origin == 'slack'){ 
+                        topStr = '*'+topStr+'*';
+                    }else if (data.source.origin == 'socket.io'){
+                        topStr = '<b>'+topStr+'</b>';
+                    }
+
+                    data.client_res.push(topStr);
+
+                    ///// build product details string //////
+
+                    //get size
+                    if (attribs.Size){
+                        cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                    }
+
+                    //get artist
+                    if (attribs.Artist){
+                        cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                    }
+
+                    //get brand or manfacturer
+                    if (attribs.Brand){
+                        cString = cString + ' ○ ' +  attribs.Brand[0];
+                    }
+                    else if (attribs.Manufacturer){
+                        cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                    }
+
+                    //get all stuff in details box
+                    if (attribs.Feature){
+                        cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
+                    }
+
+                    //done collecting details string, now send
+                    if (cString){
+                        data.client_res.push(cString);
+                        //outgoingResponse(data,'final');
+                    }
+                    ///// end product details string /////
+
+                    //get review
+                    if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
+                        data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
+                    }
+                    
+                    ioKip.outgoingResponse(data,'final');
+
+                }
+
             }else {
-                console.log('error: amazon search missing from recallHistory obj');
-                ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+                console.log('warning: item selection does not exist in amazon array');
+                ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
             }
         }else {
-            console.log('error: you can only select one item for search focus');
-            ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+            console.log('error: amazon search missing from recallHistory obj');
+            ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
-    });
+    }else {
+        console.log('error: you can only select one item for search focus');
+        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+    }
+ 
 }
 
 var searchMore = function(data){
 
-    history.recallHistory(data, function(res){
-
+    if (data.recallHistory && data.recallHistory.amazon){
         //build new data obj so there's no mongo duplicate
         data = {};
-        data.amazon = res.amazon;
-        data.source = res.source;
-        data.bucket = res.bucket;
-        data.action = res.action;
-        data.msg = res.msg;
-        data.tokens = res.tokens;
+        data.amazon = data.recallHistory.amazon;
+        data.source = data.recallHistory.source;
+        data.bucket = data.recallHistory.bucket;
+        data.action = data.recallHistory.action;
+        data.msg = data.recallHistory.msg;
+        data.tokens = data.recallHistory.tokens;
 
         if (data.amazon.length > 3){ //only trim down in thirds for now
             data.amazon.splice(0, 3);
@@ -742,8 +725,12 @@ var searchMore = function(data){
             }, function done(){
                 ioKip.outgoingResponse(data,'stitch','amazon');
             });
-        }
-    });
+        }        
+    }else {
+        console.log('warning: recallHistory missing in searchMore()');
+        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?'); 
+    }
+
 }
 
 //* * * * tools for helping with search * * * * //
