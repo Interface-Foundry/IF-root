@@ -652,3 +652,11 @@ module.exports = [
   'z',
   // 'zero'
 ];
+
+var natural = require('natural')
+tokenizer = new natural.WordTokenizer();
+module.exports.removeFrom = function(sentence) {
+  return tokenizer.tokenize(sentence).map(function(word) {
+    return module.exports.indexOf(word) < 0;
+  }).join(' ');
+}

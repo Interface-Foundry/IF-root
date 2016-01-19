@@ -792,7 +792,7 @@ var getPrices = function(item,callback){
         }
     }
 
-    amazonHTML(url, function(err, product) {
+    amazonHTML.basic(url, function(err, product) {
       kip.err(err); // print error
 
       if (product && product.price) {

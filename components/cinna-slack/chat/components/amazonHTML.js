@@ -1,14 +1,19 @@
+'use strict'
+
 var request = require('request')
 var cheerio = require('cheerio')
 var kip = require('kip')
 var debug = require('debug')('amazon')
+var memcache = require('memory-cache');
+
+const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 // in mem cache that can clean itself to 1000 items max
 var cache = {
-  get: function(url, cb) {
+  get: function(key, cb) {
     //  in-mem impl, can do redis later
-    if (this._cache[url]) {
-      cb(null, this._cache[url])
+    if (memcache.get(key)) {
+      cb(null, memcache.get(key))
     } else {
       cb()
     }
@@ -16,33 +21,9 @@ var cache = {
 
   put: function(url, product) {
     debug('putting cache for ' + url);
-    this._cache[url] = product;
-  },
-
-  _cache: {},
-
-  clean: function() {
-    // keep only 1000 items in cache
-    if (Object.keys(cache._cache) > 1000) {
-      // randomly delete 1000 of them...
-      Object.keys(cache._cache)
-        .map(function(k) {
-          return {
-            key: k,
-            sort: Math.random()
-          }
-        })
-        .sort(function(a, b) { return a.sort > b.sort })
-        .splice(-1000)
-        .map(function(i) {
-          delete cache._cache[k.key];
-        })
-    }
+    memcache.put(url,  product, CACHE_TTL);
   }
 };
-
-// cache cleaning, every day make sure there are at most 1000 items in cache
-setInterval(cache.clean, 24 * 60 * 60 * 1000)
 
 /**
  callback should be function(error, product) {}
@@ -52,7 +33,7 @@ setInterval(cache.clean, 24 * 60 * 60 * 1000)
            text: ''
          }
  */
-module.exports = function get(url, callback) {
+module.exports.basic = function basic(url, callback) {
 
     //remove referral info just in case
     url = url.replace('%26tag%3Dbubboorev-20','');
@@ -144,11 +125,31 @@ module.exports = function get(url, callback) {
     })
 }
 
+// get the questions and ansewrs for a specific product url
+module.exports.qa = function(url, callback) {
+  var cachekey = url + '#QA'
+
+  cache.get(cachekey, function(err, qa) {
+    kip.err(err);
+    if (qa) {
+      debug('cache hit for qa ' + cachekey);
+      return callback(null, qa);
+    }
+
+    // example url:
+    // http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor
+    var dp = url.match(/\/dp\/(.*)\//)[1];
+    var question_template = 'http://www.amazon.com/ask/questions/inline/$DP/$PAGE';
+    
+  })
+
+}
+
 if (!module.parent) {
-  module.exports('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
+  module.exports.basic('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
     kip.fatal(err)
     console.log(product);
-    module.exports('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
+    module.exports.basic('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
       console.log('hopefully hit cache')
     })
 

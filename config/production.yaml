@@ -22,3 +22,4 @@ app:
   publicAPI: https://kipapp.co/styles/api
 picstitch: http://localhost:5000
 nlp: http://localhost:8083
+doc2vec: http://localhost:8084
