@@ -1,5 +1,3 @@
-
-
 /**
  * Pass a question to this question-answering module, supplying optional
  * source text (like the text of an amazon.com page)
