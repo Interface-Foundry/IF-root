@@ -1,5 +1,7 @@
 var request = require('request');
 var kip = require('kip')
+var config = require('config')
+var debug = require('debug')('nlp')
 
 /* get embeddings for one or more sentences.
 
@@ -9,7 +11,7 @@ doc2vec('this is a sentence', function(err, embedding) {})
 doc2vec(['lots of sentences', ...], function(err, embeddings) {})
 
 */
-module.exports = function(text, callback)) {
+module.exports = function(text, callback) {
   if (typeof text === 'string') {
     getOne(text, callback);
   } else if (text instanceof Array) {
@@ -17,7 +19,7 @@ module.exports = function(text, callback)) {
   }
 }
 
-function getOne = function(s, callback) {
+function getOne (s, callback) {
   request({
     method: 'POST',
     url: config.doc2vec + '/embedone',
@@ -26,12 +28,12 @@ function getOne = function(s, callback) {
       text: s
     }
   }, function(e, r, b) {
-    if (kiperr(e)) { return callback(e) }
+    if (kip.err(e)) { return callback(e) }
     callback(null, b);
   })
 }
 
-function getMany = function(s, callback) {
+function getMany (s, callback) {
   request({
     method: 'POST',
     url: config.doc2vec + '/embedmany',
@@ -40,7 +42,32 @@ function getMany = function(s, callback) {
       text: s
     }
   }, function(e, r, b) {
-    if (kiperr(e)) { return callback(e) }
+    if (kip.err(e)) { return callback(e) }
     callback(null, b);
   })
+}
+
+if (!module.parent) {
+  var sentences = [
+    'i would like to buy a hamburger',
+    'please help me locate the sheep',
+    'can you help me find the sheep',
+    'where are the sheep?',
+    'where are the lambs?',
+    'does it come in size medium?',
+    'does it run big or small?'
+  ]
+
+  function run(i) {
+    console.log(sentences[i])
+    module.exports(sentences[i], function(err, embedding) {
+      kip.fatal(err);
+      console.log(embedding)
+      if (sentences[++i]) {
+        run(i);
+      }
+    })
+  }
+
+  run(0);
 }
