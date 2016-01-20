@@ -136,20 +136,80 @@ module.exports.qa = function(url, callback) {
       return callback(null, qa);
     }
 
+    debug('cache miss for qa ' + cachekey);
+
+    var QA = [];
+
     // example url:
     // http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor
     var dp = url.match(/\/dp\/(.*)\//)[1];
-    var question_template = 'http://www.amazon.com/ask/questions/inline/$DP/$PAGE';
-    
+    var question_template = 'http://www.amazon.com/ask/questions/inline/$DP/$PAGE?_=$TIMESTAMP';
+    function getQuestions(dp, page, lastb) {
+      debug(page);
+      var timestamp = +new Date();
+      var url = question_template
+        .replace('$DP', dp)
+        .replace('$PAGE', page)
+        .replace('$TIMESTAMP', timestamp)
+
+      debug(url);
+      request({
+        method: 'GET',
+        url: url
+      }, function (e, r, b) {
+        if (e) {
+          kip.err(e);
+        }
+
+        var $ = cheerio.load(b);
+        // omg this is so brittle
+        var done = false;
+        $('[id^=question]').map(function(i, e) {
+          var q = $(this).find('a').text().trim();
+          var answer = $(this)
+            .parent()
+            .find('span').eq(2);
+          if (answer.find('.askLongText')[0]) {
+            answer.find('a').remove();
+            answer = answer.find('.askLongText').text().trim()
+          } else {
+            answer = answer.text().trim()
+          }
+          var qa = {
+            q: q,
+            a: [answer]
+          }
+          QA.map(function(qa) {
+            if (!done && qa.q === q) {
+              done = true;
+              cache.put(cachekey, QA)
+              return callback(null, QA)
+            }
+          })
+          if (!done) {
+            debug(qa);
+            QA.push(qa);
+          }
+        })
+        if (!done) {
+          getQuestions(dp, ++page, b);
+        }
+      })
+    }
+    getQuestions(dp, 1);
+
   })
 
 }
 
 if (!module.parent) {
-  module.exports.basic('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
+  var a = 0;
+  //module.exports.qa('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
+  module.exports.qa('http://www.amazon.com/WantDo-Fashion-Windbreaker-Jackets-X-Large/dp/B017NCR7TO/ref=sr_1_1?ie=UTF8&qid=1453154503&sr=8-1&keywords=jacket', function(err, product) {
     kip.fatal(err)
     console.log(product);
-    module.exports.basic('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
+    console.log(a++);
+    module.exports.qa('http://www.amazon.com/WantDo-Fashion-Windbreaker-Jackets-X-Large/dp/B017NCR7TO/ref=sr_1_1?ie=UTF8&qid=1453154503&sr=8-1&keywords=jacket', function(err, product) {
       console.log('hopefully hit cache')
     })
 
