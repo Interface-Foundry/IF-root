@@ -111,7 +111,8 @@ class ControlPanel extends Component {
         msg : true,
         bucket: true,
         action: true,
-        mounted: false
+        mounted: false,
+        visible: false
     }
   }
 
@@ -312,7 +313,6 @@ class ControlPanel extends Component {
                 )
     }
 
-
   render() {
      const { activeControl, activeMessage, activeChannel, messages,actions,changeMode} = this.props;
      const fields  = ['msg','bucket','action']
@@ -337,7 +337,9 @@ class ControlPanel extends Component {
               fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
           </div>   
           </section>
-              <Button bsSize = "large" style={{ marginLeft: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+
+
+              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
                       Send Command
               </Button>
           </div>

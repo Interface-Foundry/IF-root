@@ -78,7 +78,6 @@ class DynamicForm extends Component {
         color: false,
         size: false
       };
-      //reset form
       resetForm()
     })
   }

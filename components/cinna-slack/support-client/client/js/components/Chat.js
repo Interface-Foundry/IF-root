@@ -1,4 +1,5 @@
 import React, { Component, PropTypes, Image } from 'react';
+import ReactDOM from 'react-dom';
 import TopPanel from './TopPanel';
 import ControlPanel from './ControlPanel';
 import MessageComposer from './MessageComposer';
@@ -7,10 +8,9 @@ import Channels from './Channels';
 import * as Actions from '../actions/Actions';
 import TypingListItem from './TypingListItem';
 const socket = io();
-// const emitter = io.connect();
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
-import ChatView from 'react-chatview';
+
 
 class Chat extends Component {
 
@@ -57,7 +57,6 @@ class Chat extends Component {
       }
     })   
     socket.on('new bc message', function(msg) {      
-      self.scrollToBottom()
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>
@@ -119,7 +118,6 @@ class Chat extends Component {
     const messageList = this.refs.messageList;
     // console.log('Did update fired: ', window.innerHeight-110)
     messageList.scrollTop = messageList.scrollHeight;
-    this.scrollToBottom()
   }
   handleSave(newMessage) {
     const { actions } = this.props;
@@ -162,38 +160,27 @@ class Chat extends Component {
   toggleStream()  {
     let current = this.state.stream
      this.setState({stream: !current});
-     window.scrollTo(0, window.innerHeight);
+     // window.scrollTo(0, window.innerHeight);
   }
 
-  scrollToBottom() {
-   //  console.log('scrolling',window.innerHeight)
-   // setTimeout(function() {
-   //   window.scrollTo(0, window.innerHeight)},500)
-  }
+
 
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name).filter(message => (message.bucket === 'response' || message.bucket === 'supervisor'))
     const username = this.props.user.username;
     const supervisor = this.state.supervisor
-    // console.log('FM: ',filteredMessages)
-    const dropDownMenu = (
-      <div style={{'width': '21rem', 'top': '0', alignSelf: 'baseline', padding: '0', margin: '0', order: '1'}}>
-        <DropdownButton key={95} style={{'width': '21rem', backgroundColor: '#45a5f4'}} id="user-menu"  bsSize="large" bsStyle="primary" title={username}>
-          <MenuItem style={{'width': '21rem'}} eventKey="4" onSelect={::this.handleSignOut}>Sign out</MenuItem>
-        </DropdownButton>
-      </div>
-    );
-    // 
+    const stream = this.state.stream
     const displayMessages = this.state.stream ?   
-                       messages.slice(messages.length-15,messages.length).map(message =>
+                       messages.filter(message => message.client_res[0]).slice(messages.length-15,messages.length).map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                            )
                            :  
                         filteredMessages.map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                           )
-    // const messagesHeight = this.state.stream ?  44.5781                  
+    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeMessage.source.channel}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
+    const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
@@ -212,7 +199,7 @@ class Chat extends Component {
           <header style={{background: '#FFFFFF', color: 'black', flexGrow: '0', order: '0', fontSize: '2.3em', paddingLeft: '0.2em'}}>
             <div>
             <span style={{fontSize: '0.5em', marginLeft: '2em'}}>
-            Message Count: {filteredMessages.length}
+            {chatDisplay}
             </span>
             </div>
           </header>
@@ -222,22 +209,23 @@ class Chat extends Component {
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
                 <Infinite elementHeight={44.5781}
-               containerHeight={window.innerHeight-90}
-               displayBottomUpwards>
-                { displayMessages }
-                 </Infinite>
-                
+                 containerHeight={window.innerHeight-90}
+                 displayBottomUpwards>
+                  { displayMessages }
+                </Infinite>
               </ul>
             </div>
-            <div style= {{ padding: 0}} >
-              <ControlPanel ref='form1' actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} supervisor={supervisor} onSubmit={::this.handleSubmit} changeMode={::this.handleSupervisorChange} />
+            <div style= {streamDisplay} >
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} supervisor={supervisor} onSubmit={::this.handleSubmit} changeMode={::this.handleSupervisorChange} />
             </div>
           </div>
         
 
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
-        <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages} supervisor={supervisor} />
+        <div style= {streamDisplay}>
+          <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages} supervisor={supervisor} stream={stream} />
+        </div>  
           {typers.length === 1 &&
             <div>
               <span>
@@ -264,11 +252,6 @@ class Chat extends Component {
   }
 }
 
-<ChatView className="message-list"
-flipped={true}
-scrollLoadThreshold={50}
-onInfiniteLoad={null}>
-</ChatView>
 
 
 
