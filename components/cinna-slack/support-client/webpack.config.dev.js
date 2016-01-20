@@ -40,7 +40,13 @@ module.exports = {
       }, {
         test: /\.png$/,
         loader: 'url-loader?limit=8192&&mimetype=image/png'
-      } // inline base64 URLs for <=8k images, direct URLs for the rest
+      }, // inline base64 URLs for <=8k images, direct URLs for the rest
+      { test: /node_modules\/react-chatview/, 
+        loader: 'babel',
+        query: {
+          presets: ['es2015', 'react', 'stage-0']
+        } 
+      }
     ]
   }
 };

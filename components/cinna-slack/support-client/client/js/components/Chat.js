@@ -10,6 +10,7 @@ const socket = io();
 // const emitter = io.connect();
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
+import ChatView from 'react-chatview';
 
 class Chat extends Component {
 
@@ -185,7 +186,7 @@ class Chat extends Component {
     );
     // 
     const displayMessages = this.state.stream ?   
-                       messages.map(message =>
+                       messages.slice(messages.length-15,messages.length).map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                            )
                            :  
@@ -220,11 +221,11 @@ class Chat extends Component {
           <div className="flexbox-container">
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
-              <Infinite elementHeight={44.5781}
+                <Infinite elementHeight={44.5781}
                containerHeight={window.innerHeight-90}
                displayBottomUpwards>
                 { displayMessages }
-               </Infinite>
+                 </Infinite>
                 
               </ul>
             </div>
@@ -262,5 +263,14 @@ class Chat extends Component {
     );
   }
 }
+
+<ChatView className="message-list"
+flipped={true}
+scrollLoadThreshold={50}
+onInfiniteLoad={null}>
+</ChatView>
+
+
+
 
 export default Chat
