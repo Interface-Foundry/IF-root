@@ -51,7 +51,11 @@ var stitchResults = function(data,source,callback) {
                     if (data.amazon[i].MediumImage && data.amazon[i].MediumImage[0].URL[0]){
                         imageURL = data.amazon[i].MediumImage[0].URL[0];
                     }
+                    else if (data.amazon[i].ImageSets && data.amazon[i].ImageSets[0].ImageSet && data.amazon[i].ImageSets[0].ImageSet[0].MediumImage && data.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0]){
+                        imageURL = data.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
+                    }
                     else {
+                        console.log('NO IMAGE FOUND ',data.amazon[i]);
                         imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
                     }
 

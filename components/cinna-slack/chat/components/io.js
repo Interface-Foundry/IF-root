@@ -29,7 +29,7 @@ var io; //global socket.io var...probably a bad idea, idk lol
 var initSlackUsers = function(env){
     console.log('loading with env: ',env);
     //load kip-pepper for testing
-    if (env === 'development') {
+    if (env === 'development_alyx') {
         var testUser = [{
             team_id:'T0H72FMNK',
             bot: {
@@ -54,6 +54,7 @@ var initSlackUsers = function(env){
     }
 }
 
+//fired when server gets /newslack route request
 var newSlack = function(){
     //find all bots not added to our system yet
     Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
@@ -132,7 +133,8 @@ function loadSlackUsers(users){
                     }
                   }
                 });
-
+                
+                //* * * * * POST PROCESSING * * * * * * //
                 //find all bots not added to our system yet
                 Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
                     if(err){
@@ -489,20 +491,40 @@ function searchBucket(data){
             search.searchInitial(data);
             break;
         case 'similar':
-            search.searchSimilar(data);
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchSimilar(data);
+            });
             break;
         case 'modify':
         case 'modified': //because the nlp json is wack
-            search.searchModify(data);
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchModify(data);
+            });
             break;
         case 'focus':
-            search.searchFocus(data);
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchFocus(data);
+            });
             break;
         case 'back':
             //search.searchBack(data);
             break;
         case 'more':
-            search.searchMore(data); //Search more from same query
+            history.recallHistory(data, function(res){
+                if (res){
+                    data.recallHistory = res;
+                }
+                search.searchMore(data); //Search more from same query
+            });
             break;
         default:
             search.searchInitial(data);

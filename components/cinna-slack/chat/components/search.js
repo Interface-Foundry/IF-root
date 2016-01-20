@@ -1,11 +1,15 @@
 var cheerio = require('cheerio');
 var request = require('request');
 var async = require('async');
+var _ = require('underscore');
+
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var amazonHTML = require('./amazonHTML');
 
 var history = require("./history.js");
 var processData = require("./process.js");
 var ioKip = require("./io.js");
+var kip = require('kip')
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -15,23 +19,20 @@ var client = amazon.createClient({
 
 
 var searchInitial = function(data,flag){
-    searchAmazon(data,'initial','none',flag);
+    searchAmazon(data,data.action,'none',flag);
 }
 
 var searchSimilar = function(data){
     if (data.dataModify && data.dataModify.val.length > 0){
         data.action = 'modify'; //because NLP changed randomly =_=;
-        searchModify(data);  
-    } else if (data.flag && data.flag === 'recalled') {
-        // console.log('TING TANG WALLAWALLA BING BANG',data)
+        searchModify(data);
+    }
+    else if (data.recallHistory && data.recallHistory.amazon){
         searchAmazon(data,'similar','none','null');
     }
     else {
-        //RECALL LAST ITEM IN SEARCH HISTORY
-        history.recallHistory(data, function(item){
-            data.recallHistory = item; //added recalled history obj to data obj
-            searchAmazon(data,'similar','none','null');
-        });       
+        console.log('warning: recallhistory obj missing');
+        ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
     }
 }
 
@@ -44,24 +45,44 @@ var searchAmazon = function(data, type, query, flag) {
     //sort query type
     switch (type) {
         case 'initial':
+        case 'modify':
 
             //add some amazon query params
             var amazonParams = {};
-            amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull';
+            amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank';
 
-            //remove random symbols 
+            //remove random symbols
             removeSpecials(data.tokens[0],function(res){
                 amazonParams.Keywords = res;
                 continueProcess();
-            }); 
+            });
 
             function continueProcess(){
+
+                if (data.recallHistory && data.searchSelect){
+                    var searchSelect = data.searchSelect[0] - 1;
+                    var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+                    var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;                    
+                }
 
                 //check for flag to modify amazon search params
                 if (flag && flag.type){ //search modifier
 
                     //parse flags
-                    if (flag.type == 'price'){
+
+                    if (flag.type == 'color' && flag.val){  
+
+                        console.log('continueProcess() color fired');
+
+                        parseAmazon(productGroup,browseNodes,function(res){
+                            amazonParams.SearchIndex = res.SearchIndex;
+                            amazonParams.BrowseNode = res.BrowseNode;
+                            amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
+                            doSearch();
+                        });
+                    }
+
+                    else if (flag.type == 'price'){
 
                         //TEMPORARY
                         if (flag.param == 'less than'){
@@ -71,63 +92,85 @@ var searchAmazon = function(data, type, query, flag) {
                         switch (flag.param) {
                             case 'less':
 
-                                var searchSelect = data.searchSelect[0] - 1;
-
-                                //there's a price for the item
-                                if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect].realPrice){
-
-                                    var modPrice = data.recallHistory.amazon[searchSelect].realPrice;
-
-                                    modPrice = modPrice.replace('$','');
-                                    modPrice = modPrice.replace('.','');
-
-                                    modPrice = parseInt(modPrice);
-                                    
-                                    var per = modPrice * .35; //get 35% of price
-                                    modPrice = modPrice - per; // subtract percentage
-                                    modPrice = Math.round(modPrice); //clean price
-
-                                    if (modPrice > 0){
-
-                                        //add price param
-                                        amazonParams.MaximumPrice = modPrice.toString();
-
-                                        //now resolving the search term param
-                                        var itemAttrib = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                                        var cSearch = '';
-
-                                        if (itemAttrib.Department){
-                                            cSearch = cSearch + ' ' + itemAttrib.Department[0];
-                                        }
-                                        if (itemAttrib.ProductGroup){
-                                            cSearch = cSearch + ' ' + itemAttrib.ProductGroup[0];
-                                        }
-                                        if (itemAttrib.Binding){
-                                            cSearch = cSearch + ' ' + itemAttrib.Binding[0];
-                                        }
-                                        if (itemAttrib.Color){
-                                            cSearch = cSearch + ' ' + itemAttrib.Color[0];
-                                        }
-                                        if (itemAttrib.ClothingSize){
-                                            cSearch = cSearch + ' ' + itemAttrib.ClothingSize[0];
-                                        }
-
-                                        amazonParams.Keywords = cSearch;
-                    
+                                if (flag.flagAction == 'weakSearchContinue' || flag.flagAction == 'weakSearch' && data.amazonParams){
+                                    console.log('? ?? ? ? ? ? ? ? ');
+                                    if (data.amazonParams){
+                                        console.log('DOING WEAK NODE SEARCH');
+                                        amazonParams = data.amazonParams;
                                         doSearch();
                                     }
                                     else {
-                                        doSearch();
-                                        console.log('Error: not allowing search for max price below 0');
+                                        console.log('Error: data.amazonParams not found while doing weaksearch in initial search');
+                                        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
                                     }
-
                                 }
                                 else {
-                                    doSearch();
-                                    console.log('error: amazon price missing');
-                                }
+                                    //there's a price for the item
+                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect].realPrice){
 
+                                        var modPrice = data.recallHistory.amazon[searchSelect].realPrice;
+
+                                        modPrice = modPrice.replace('$','');
+                                        modPrice = modPrice.replace('.','');
+
+                                        modPrice = parseInt(modPrice);
+                                        
+                                        var per = modPrice * .35; //get 35% of price
+                                        modPrice = modPrice - per; // subtract percentage
+                                        modPrice = Math.round(modPrice); //clean price
+
+                                        if (modPrice < 0){
+                                            modPrice = 25;
+                                        }
+
+                                        //its a real number, shoudl always be a real number here, 
+                                        if (modPrice > 0){
+
+                                            console.log('browsenode?1 ',JSON.stringify(data.recallHistory.amazon[searchSelect].BrowseNodes));
+
+                                            //WHAT DO IF NO PG? NORMAL SEARCH?
+                                            if (data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup){
+
+                                                console.log('!!productGroup <-- ',productGroup);
+
+                                                parseAmazon(productGroup,browseNodes,function(res){
+                                                    amazonParams.SearchIndex = res.SearchIndex;
+                                                    amazonParams.BrowseNode = res.BrowseNode;
+                                                    amazonParams.MaximumPrice = modPrice.toString(); 
+                                                    delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+                                                    doSearch();
+                                                });
+                                            }
+                                            else {
+                                                console.log('Error: Product Group missing from amazon itemAttributes');
+                                                doSearch();
+                                            }
+
+                                            //SEARCH INDEX:
+                                            // [\n\t\t\t\t\'All\',\'Wine\',\'Wireless\',\'ArtsAndCrafts\',\'Miscellaneous\',\'Electronics\',\'Jewelry\',\'MobileApps\',\'Photo\',
+                                            // \'Shoes\',\'Kindle Store\',\'Automotive\',\'Pantry\',\'MusicalInstruments\',\'DigitalMusic\',\'GiftCards\',\'FashionBaby\',\'FashionGirls\'
+                                            // ,\'GourmetFood\',\'HomeGarden\',\'MusicTracks\',\'UnboxVideo\',\'FashionWomen\',\'VideoGames\',\'FashionMen\',\'Kitchen\',\'Video\',
+                                            // \'Software\',\'Beauty\',\'Grocery\',,\'FashionBoys\',\'Industrial\',\'PetSupplies\',\'OfficeProducts\',\'Magazines\',\'Watches\',
+                                            // \'Luggage\',\'OutdoorLiving\',\'Toys\',\'SportingGoods\',\'PCHardware\',\'Movies\',\'Books\',\'Collectibles\',\'VHS\',\'MP3Downloads\',
+                                            // \'Fashion\',\'Tools\',\'Baby\',\'Apparel\',\'Marketplace\',\'DVD\',\'Appliances\',\'Music\',\'LawnAndGarden\',\'WirelessAccessories\',
+                                            // \'Blended\',\'HealthPersonalCare\',\'Classical\'\n\t\t\t\t].' ]
+                                        }
+                                        else {
+                                            doSearch();
+                                            console.log('Error: not allowing search for max price below 0');
+                                        }
+
+                                    }
+                                    else {
+                                        doSearch();
+                                        console.log('error: amazon price missing');
+                                    }
+                                }
                                 break;
+
+
+                                //http://docs.aws.amazon.com/AWSECommerceService/latest/DG/SortingbyPopularityPriceorCondition.html
+                                /// sort by reviews / cheaper
 
                             // case 'less than':
                             //     console.log('less than');
@@ -173,12 +216,10 @@ var searchAmazon = function(data, type, query, flag) {
                             //     break;
                             case 'more':
                                 doSearch();
-
                                 break;
                             case 'more than':
                                 doSearch();
                                 break;
-
                             default:
                                 console.log('error: no flag.param found with flag.modify == price');
                                 doSearch();
@@ -195,7 +236,6 @@ var searchAmazon = function(data, type, query, flag) {
                 else {
                     doSearch();
                 }
-
             }
 
             //console.log('amazonParams ',amazonParams);
@@ -204,24 +244,36 @@ var searchAmazon = function(data, type, query, flag) {
                 //AMAZON BASIC SEARCH
 
                 console.log('PARAMS ',amazonParams);
+                if (!data.amazonParams){
+                    data.amazonParams = amazonParams;
+                }
 
                 client.itemSearch(amazonParams).then(function(results,err){
                     data.amazon = results;
 
-                    //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
+                    console.log('#1 browsenode ',JSON.stringify(data.amazon[0].BrowseNodes));
+                    console.log('#1 productGroup <-- ',data.amazon[0].ItemAttributes[0].ProductGroup[0]);
+
+                    console.log('#2 browsenode ',JSON.stringify(data.amazon[1].BrowseNodes));
+                    console.log('#2 productGroup <-- ',data.amazon[1].ItemAttributes[0].ProductGroup[0]);
+
+                    console.log('#3 browsenode ',JSON.stringify(data.amazon[2].BrowseNodes));
+                    console.log('#3 productGroup <-- ',data.amazon[2].ItemAttributes[0].ProductGroup[0]);
+                    
+                    //temporarily using async parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
                     if (results.length >= 3){   
 
                         //get reviews and real prices
                         getAmazonStuff(data,results,function(res){
                             ioKip.outgoingResponse(res,'stitch','amazon');
-                        });            
+                        });
                     }
                     //TEMP PATCH, FOR RESULTS UNDER 3 items
                     else {
                         var loopLame = [0,1,2];//lol
                         async.eachSeries(loopLame, function(i, callback) {
                             if (data.amazon[i]){
-                                //get reviews by ASIN 
+                                //get reviews by ASIN
                                 getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                                     //adding scraped reviews to amazon objects
                                     data.amazon[i].reviews = {
@@ -243,8 +295,6 @@ var searchAmazon = function(data, type, query, flag) {
                         });
                     }
 
-
-
                 }).catch(function(err){
 
                     //handle err codes. do stuff.
@@ -254,7 +304,7 @@ var searchAmazon = function(data, type, query, flag) {
                             //CASE: No results for search
                             case 'AWS.ECommerceService.NoExactMatches':
                                 //do a weak search
-                                weakSearch(data,type,query,flag);
+                                weakSearch(data,type,query,flag,amazonParams);
                                 break;
 
                             default:
@@ -300,25 +350,25 @@ var searchAmazon = function(data, type, query, flag) {
                       ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
                       // Keywords: data.recallHistory.tokens,
                       SimilarityType: flag, //other option is "Random" <<< test which is better results
-                      responseGroup: 'ItemAttributes,Images,OfferFull'
+                      responseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
 
                     }).then(function(results){
                         data.amazon = results;
 
                         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
-                        if (results.length >= 3){   
+                        if (results.length >= 3){
 
                             //get reviews and real prices
                             getAmazonStuff(data,results,function(res){
                                 ioKip.outgoingResponse(res,'stitch','amazon');
-                            });            
+                            });
                         }
                         //TEMP PATCH, FOR RESULTS UNDER 3 items
                         else {
                             var loopLame = [0,1,2];//lol
                             async.eachSeries(loopLame, function(i, callback) {
                                 if (data.amazon[i]){
-                                    //get reviews by ASIN 
+                                    //get reviews by ASIN
                                     getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                                         //adding scraped reviews to amazon objects
                                         data.amazon[i].reviews = {
@@ -385,7 +435,7 @@ var searchAmazon = function(data, type, query, flag) {
 };
 
 //re-search but with less specific terms
-function weakSearch(data,type,query,flag){
+function weakSearch(data,type,query,flag,amazonParams){
     //sort incoming flags for redundant searches
     switch (flag) {
         case 'weakSearch': //we already did weakSearch
@@ -410,9 +460,28 @@ function weakSearch(data,type,query,flag){
             //select weakSearch action (initial, modify, etc)
             switch (data.action) {
                 case 'modify':
-                    if (data.dataModify && data.dataModify.type == 'price'){
-                        console.log('cant find lower price item, preventing infinite loop');
-                        ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
+                    if (data.dataModify && data.dataModify.type == 'price' && data.amazonParams){
+                        //console.log('cant find lower price item, preventing infinite loop');
+                        console.log('dataforModifyPRICE ',data.amazonParams);
+                        data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.split(',');
+                        console.log('newNodes ',data.amazonParams.BrowseNode);
+                        data.amazonParams.BrowseNode.pop(); // remove last id in arr
+                        console.log('newNodes POPPED ', data.amazonParams.BrowseNode);
+
+                        console.log('arr length ',data.amazonParams.BrowseNode.length);
+
+                        setTimeout(function() {
+                            if(data.amazonParams.BrowseNode.length > 1){
+                                console.log('continue trying to search!');
+                                data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.toString();
+                                searchModify(data, 'weakSearchContinue');
+                            }else {
+                                data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.toString();
+                                console.log('ok our last search!!!!!!!!!!!!!!!!!!!');
+                                searchModify(data, 'weakSearch');
+                            }
+                        }, 250);
+
                     }
                     else {
                         searchModify(data, 'weakSearch');
@@ -430,443 +499,336 @@ var searchModify = function(data,flag){
     //A child ASIN would be a blue shirt, size 16, sold by MyApparelStore
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
 
-    if (data.flag && data.flag === 'recalled') {
-                  var cSearch = ''; //construct new search string
+    var cSearch = ''; //construct new search string
+
+
+    //CONSTRUCT QUERY FROM AMAZON OBJECT
+    if (data.recallHistory && data.recallHistory.amazon){
+
         if (data.dataModify && data.dataModify.type){
-                    //handle special modifiers that need care, consideration, hard tweaks of amazon search API
+            //handle special modifiers that need care, consideration, hard tweaks of amazon search API
 
-                    //ugh dead
-                    if (data.dataModify.val){
-                        var dumbVar = data.dataModify.val[0];
-                    }
-                    else {
-                        var dumbVar = '';
-                    }
-                     
-                    switch (data.dataModify.type) {
-                        case 'price':
-                            searchInitial(data,{ // passing special FLAG for search to handle
-                                'type':data.dataModify.type,
-                                'param':data.dataModify.param,
-                                'val':dumbVar
-                            });
-                            break;
-
-                        case 'brand':
-                            searchInitial(data,{ // passing special FLAG for search to handle
-                                'type':data.dataModify.type,
-                                'val':dumbVar
-                            });
-                            break;
-
-                        default:
-                            constructAmazonQuery(); //nm just construct a new query
-                    }
-                }
-                else {
-                    console.log('error: data.dataModify params missing')
-                }
-
-                function constructAmazonQuery(){
-
-                    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-
-                        var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
-
-                        //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                        if (flag !== 'weakSearch'){
-                            console.log('weakSearch FALSE');
-                            //add brand
-                            if (itemAttrib[0].Brand){
-                                cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
-                            }
-                            //add clothing size
-                            if (itemAttrib[0].ClothingSize){
-                                cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
-                            }
-                        }
-                        else {
-                            console.log('weakSearch TRUE');
-                        }
-                        if (itemAttrib[0].Department){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
-                        }
-                        if (itemAttrib[0].ProductGroup){
-                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                        }
-                        if (itemAttrib[0].Binding){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
-                        }
-
-                        callback();
-                    }, function done(){
-                          function addModifier(){
-
-            cSearch = cSearch.toLowerCase();
-
-            //SORT WHICH TRAITS TO MODIFY
-            switch (data.dataModify.type) {
-                // CASES: color, size, price, genericDetail
-                case 'color':
-
-                    //remove colors from item name for new search with new color
-                    var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
-                    async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
-                        cSearch = cSearch.replace(i,'');
-                        callback();
-                    }, function done(){
-                        cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-                    });
-
-                    break;
-
-                case 'size':
-
-                    var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
-                    async.eachSeries(SIZES, function(i, callback) {
-                        cSearch = cSearch.replace(i,'');
-                        callback();
-                    }, function done(){
-                        cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-                    });
-                    break;
-
-                //texture, fabric, coating, etc
-                case 'material':
-
-                    cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
-                    data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
-                    break;
-
-                //unsortable modifier
-                case 'genericDetail':
-                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                    if (data.dataModify.val == 'buy'){
-                        data.bucket = 'purchase';
-                        data.action = 'save';
-                        saveToCart(data);
-                    }
-                    //normal action here
-                    else {
-                        //SORT THROUGH RESULTS OF SIZES, FILTER
-                        cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search                        
-                    }
-                    break;
-            }
-        }
-                        addModifier(); //done processing constructing new search, add modifier and run query
-                    });
-                }
-     }
-
-
-
-
-
-
-
-
-
-    //RECALL LAST ITEM IN SEARCH HISTORY
-    history.recallHistory(data, function(item){
-
-        if (item){//history item found
-
-            data.recallHistory = item;
-
-            var cSearch = ''; //construct new search string
-
-            //CONSTRUCT QUERY FROM AMAZON OBJECT
-            if (data.recallHistory.amazon){
-
-                if (data.dataModify && data.dataModify.type){
-                    //handle special modifiers that need care, consideration, hard tweaks of amazon search API
-
-                    //ugh dead
-                    if (data.dataModify.val){
-                        var dumbVar = data.dataModify.val[0];
-                    }
-                    else {
-                        var dumbVar = '';
-                    }
-                     
-                    switch (data.dataModify.type) {
-                        case 'price':
-                            searchInitial(data,{ // passing special FLAG for search to handle
-                                'type':data.dataModify.type,
-                                'param':data.dataModify.param,
-                                'val':dumbVar
-                            });
-                            break;
-
-                        case 'brand':
-                            searchInitial(data,{ // passing special FLAG for search to handle
-                                'type':data.dataModify.type,
-                                'val':dumbVar
-                            });
-                            break;
-
-                        default:
-                            constructAmazonQuery(); //nm just construct a new query
-                    }
-                }
-                else {
-                    console.log('error: data.dataModify params missing')
-                }
-
-                function constructAmazonQuery(){
-
-                    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-
-                        var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
-
-                        //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
-                        if (flag !== 'weakSearch'){
-                            console.log('weakSearch FALSE');
-                            //add brand
-                            if (itemAttrib[0].Brand){
-                                cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
-                            }
-                            //add clothing size
-                            if (itemAttrib[0].ClothingSize){
-                                cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
-                            }
-                        }
-                        else {
-                            console.log('weakSearch TRUE');
-                        }
-                        if (itemAttrib[0].Department){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
-                        }
-                        if (itemAttrib[0].ProductGroup){
-                            cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
-                        }
-                        if (itemAttrib[0].Binding){
-                            cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
-                        }
-
-                        callback();
-                    }, function done(){
-                        addModifier(); //done processing constructing new search, add modifier and run query
-                    });
-                }
+            //ugh dead
+            if (data.dataModify.val){
+                var dumbVal = data.dataModify.val[0];
             }
             else {
-                console.log('no Amazon data found in last history item. can not modify search');
-                data.action = 'initial';
-                searchInitial(data); //do a search anyway
+                var dumbVal = '';
+            }
+
+            switch (data.dataModify.type) {
+                case 'price':
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':dumbVal,
+                        'flagAction':flag
+                    });
+                    break;
+
+                case 'color':
+                    console.log('COLOR FIRED!!!');
+                    console.log('COLOR type: ',data.dataModify.type);
+                    console.log('COLOR param: ',data.dataModify.param);
+                    console.log('COLOR val: ',dumbVal);
+                    console.log('COLOR val: name: ',dumbVal.name);
+                    console.log('COLOR flagAction: ',flag);
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':dumbVal,
+                        'flagAction':flag
+                    });
+                    break;
+
+                case 'brand':
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'val':dumbVal
+                    });
+                    break;
+
+                default:
+                    constructAmazonQuery(); //nm just construct a new query
             }
         }
-        else { //no item history found 
-            console.log('warning: no history item found for modification query');
-            data.action = 'initial';
-            searchInitial(data); //do a search anyway
+        else {
+            console.log('error: data.dataModify params missing')
         }
 
-        //after query construction, add modifier and fire search
-        function addModifier(){
+        function constructAmazonQuery(){
 
-            cSearch = cSearch.toLowerCase();
+            async.eachSeries(data.searchSelect, function(searchSelect, callback) {
 
-            //SORT WHICH TRAITS TO MODIFY
-            switch (data.dataModify.type) {
-                // CASES: color, size, price, genericDetail
-                case 'color':
+                var itemAttrib = data.recallHistory.amazon[searchSelect - 1].ItemAttributes; //get selected item attributes
 
-                    //remove colors from item name for new search with new color
-                    var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
-                    async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
-                        cSearch = cSearch.replace(i,'');
-                        callback();
-                    }, function done(){
-                        cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-                    });
+                //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
+                if (flag !== 'weakSearch'){
+                    console.log('weakSearch FALSE');
+                    //add brand
+                    if (itemAttrib[0].Brand){
+                        cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
+                    }
+                    //add clothing size
+                    if (itemAttrib[0].ClothingSize){
+                        cSearch = cSearch + ' ' + itemAttrib[0].ClothingSize[0];
+                    }
+                }
+                else {
+                    console.log('weakSearch TRUE');
+                }
+                if (itemAttrib[0].Department){
+                    cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
+                }
+                if (itemAttrib[0].ProductGroup){
+                    cSearch = cSearch + ' ' + itemAttrib[0].ProductGroup[0];
+                }
+                if (itemAttrib[0].Binding){
+                    cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
+                }
 
-                    break;
+                callback();
+            }, function done(){
+                addModifier(); //done processing constructing new search, add modifier and run query
+            });
+        }
+    }
+    else {
+        console.log('no Amazon data found in last history item. can not modify search');
+        data.action = 'initial';
+        searchInitial(data); //do a search anyway
+    }
 
-                case 'size':
 
-                    var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
-                    async.eachSeries(SIZES, function(i, callback) {
-                        cSearch = cSearch.replace(i,'');
-                        callback();
-                    }, function done(){
-                        cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search
-                    });
-                    break;
+    //after query construction, add modifier and fire search
+    function addModifier(){
 
-                //texture, fabric, coating, etc
-                case 'material':
+        cSearch = cSearch.toLowerCase();
 
+        //SORT WHICH TRAITS TO MODIFY
+        switch (data.dataModify.type) {
+            // CASES: color, size, price, genericDetail
+            // case 'color':
+
+
+            //     // searchInitial(data,{ // passing special FLAG for search to handle
+            //     //     'type':data.dataModify.type,
+            //     //     'param':data.dataModify.param,
+            //     //     'val':dumbVal,
+            //     //     'flagAction':flag
+            //     // });
+
+            //     // //WHAT DO IF NO PG? NORMAL SEARCH?
+            //     // if (data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup){
+
+            //     //     var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+            //     //     var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;
+
+            //     //     console.log('!!productGroup <-- ',productGroup);
+
+            //     //     parseAmazon(productGroup,browseNodes,function(res){
+            //     //         amazonParams.SearchIndex = res.SearchIndex;
+            //     //         amazonParams.BrowseNode = res.BrowseNode;
+            //     //         amazonParams.MaximumPrice = modPrice.toString(); 
+            //     //         delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+            //     //         doSearch();
+            //     //     });
+            //     // }
+            //     // else {
+            //     //     console.log('Error: Product Group missing from amazon itemAttributes');
+            //     //     doSearch();
+            //     // }
+
+
+            //     // //remove colors from item name for new search with new color
+            //     // var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
+            //     // async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
+            //     //     cSearch = cSearch.replace(i,'');
+            //     //     callback();
+            //     // }, function done(){
+            //     //     cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
+            //     //     data.tokens[0] = cSearch; //replace search string in data obj
+            //     //     searchInitial(data,flag); //do a new search
+            //     // });
+
+            //     break;
+
+            case 'size':
+
+                var SIZES = ["xxxs","xxs"," xs ","extra small"," s ","small"," m ","medium"," l ", "large"," xl ","extra large","xxl","xxxl","xxxxl","slimfit"," slim ","skinny", "petite", "plus size", "chubby", " big ", "curvy", " hourglass ", "rectangle-body", "triangle-body", "apple-shape", "pear-shape"];
+                async.eachSeries(SIZES, function(i, callback) {
+                    cSearch = cSearch.replace(i,'');
+                    callback();
+                }, function done(){
                     cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
                     searchInitial(data,flag); //do a new search
-                    break;
+                });
+                break;
 
-                //unsortable modifier
-                case 'genericDetail':
-                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                    if (data.dataModify.val == 'buy'){
-                        data.bucket = 'purchase';
-                        data.action = 'save';
-                        saveToCart(data);
-                    }
-                    //normal action here
-                    else {
-                        //SORT THROUGH RESULTS OF SIZES, FILTER
-                        cSearch = data.dataModify.val + ' ' + cSearch; //add new color
-                        data.tokens[0] = cSearch; //replace search string in data obj
-                        searchInitial(data,flag); //do a new search                        
-                    }
-                    break;
-            }
+            //texture, fabric, coating, etc
+            case 'material':
+
+                cSearch = data.dataModify.val[0] + ' ' + cSearch; //add new color
+                data.tokens[0] = cSearch; //replace search string in data obj
+                searchInitial(data,flag); //do a new search
+                break;
+
+            //unsortable modifier
+            case 'genericDetail':
+                //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
+                if (data.dataModify.val == 'buy'){
+                    data.bucket = 'purchase';
+                    data.action = 'save';
+                    saveToCart(data);
+                }
+                //normal action here
+                else {
+                    //SORT THROUGH RESULTS OF SIZES, FILTER
+                    cSearch = data.dataModify.val + ' ' + cSearch; //add new color
+                    data.tokens[0] = cSearch; //replace search string in data obj
+                    searchInitial(data,flag); //do a new search
+                }
+                break;
         }
-    });
+    }
+
 }
 
 var searchFocus = function(data) {
 
-    history.recallHistory(data, function(item){
-        data.recallHistory = item; //added recalled history obj to data obj
+    if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
+        if(data.recallHistory && data.recallHistory.amazon){
 
-        if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
-            if(data.recallHistory && data.recallHistory.amazon){
+            var searchSelect = data.searchSelect[0] - 1;
 
-                var searchSelect = data.searchSelect[0] - 1;
+            if (data.recallHistory.amazon[searchSelect]){
 
-                if (data.recallHistory.amazon[searchSelect]){
+                var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
+                var cString = ''; //construct text reply
+                data.client_res = []; //building order of msg delivery to user
 
-                    var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                    var cString = ''; //construct text reply
-                    data.client_res = []; //building order of msg delivery to user
-
-                    // * * * * * Building response message array * * * * * //
-                    //check for large image to send back
-                    if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
-                        data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
-                    }
-                    //push number emoji + item URL
-                    processData.getNumEmoji(data,searchSelect+1,function(res){
-                        data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
-                        dumbFunction(); //fire after get 
-                    })
-
-                    //pointless ¯\_(ツ)_/¯ ... just makes sure the emoji number + product URL go first in msg order
-                    function dumbFunction(){
-                        //send product title + price
-                        var topStr = attribs.Title[0];
-
-                        //if realprice exists, add it to title
-                        if (data.recallHistory.amazon[searchSelect].realPrice){
-                            topStr = data.recallHistory.amazon[searchSelect].realPrice + " – " + topStr;
-                        }
-
-                        //Make top line bold
-                        if (data.source.origin == 'slack'){ 
-                            topStr = '*'+topStr+'*';
-                        }else if (data.source.origin == 'socket.io'){
-                            topStr = '<b>'+topStr+'</b>';
-                        }
-
-                        data.client_res.push(topStr);
-
-                        ///// build product details string //////
-
-                        //get size
-                        if (attribs.Size){
-                            cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
-                        }
-
-                        //get artist
-                        if (attribs.Artist){
-                            cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
-                        }
-
-                        //get brand or manfacturer
-                        if (attribs.Brand){
-                            cString = cString + ' ○ ' +  attribs.Brand[0];
-                        }
-                        else if (attribs.Manufacturer){
-                            cString = cString + ' ○ ' +  attribs.Manufacturer[0];
-                        }
-
-                        //get all stuff in details box
-                        if (attribs.Feature){
-                            cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
-                        }
-
-                        //done collecting details string, now send
-                        if (cString){
-                            data.client_res.push(cString);
-                            //outgoingResponse(data,'final');
-                        }
-                        ///// end product details string /////
-
-                        //get review
-                        if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
-                            data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
-                        }
-                        
-                        ioKip.outgoingResponse(data,'final');
-
-                    }
-
-
-                }else {
-                    console.log('warning: item selection does not exist in amazon array');
-                    ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+                // * * * * * Building response message array * * * * * //
+                //check for large image to send back
+                if (data.recallHistory.amazon[searchSelect].LargeImage && data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]){
+                    data.client_res.push(data.recallHistory.amazon[searchSelect].LargeImage[0].URL[0]);
                 }
+                else if (data.recallHistory.amazon[searchSelect].ImageSets && data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet && data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet[0].MediumImage && data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet[0].MediumImage[0]){
+                    data.client_res.push(data.recallHistory.amazon[searchSelect].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]);
+                }
+                //push number emoji + item URL
+                processData.getNumEmoji(data,searchSelect+1,function(res){
+                    data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
+                    dumbFunction(); //fire after get
+                })
+
+                //pointless ¯\_(ツ)_/¯ ... just makes sure the emoji number + product URL go first in msg order
+                function dumbFunction(){
+                    //send product title + price
+                    var topStr = attribs.Title[0];
+
+                    //if realprice exists, add it to title
+                    if (data.recallHistory.amazon[searchSelect].realPrice){
+                        topStr = data.recallHistory.amazon[searchSelect].realPrice + " – " + topStr;
+                    }
+
+                    //Make top line bold
+                    if (data.source.origin == 'slack'){
+                        topStr = '*'+topStr+'*';
+                    }else if (data.source.origin == 'socket.io'){
+                        topStr = '<b>'+topStr+'</b>';
+                    }
+
+                    data.client_res.push(topStr);
+
+                    ///// build product details string //////
+
+                    //get size
+                    if (attribs.Size){
+                        cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                    }
+
+                    //get artist
+                    if (attribs.Artist){
+                        cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                    }
+
+                    //get brand or manfacturer
+                    if (attribs.Brand){
+                        cString = cString + ' ○ ' +  attribs.Brand[0];
+                    }
+                    else if (attribs.Manufacturer){
+                        cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                    }
+
+                    //get all stuff in details box
+                    if (attribs.Feature){
+                        cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
+                    }
+
+                    //done collecting details string, now send
+                    if (cString){
+                        data.client_res.push(cString);
+                        //outgoingResponse(data,'final');
+                    }
+                    ///// end product details string /////
+
+                    //get review
+                    if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
+                        data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
+                    }
+
+                    ioKip.outgoingResponse(data,'final');
+
+                }
+
             }else {
-                console.log('error: amazon search missing from recallHistory obj');
-                ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
+                console.log('warning: item selection does not exist in amazon array');
+                ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
             }
         }else {
-            console.log('error: you can only select one item for search focus');
-            ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+            console.log('error: amazon search missing from recallHistory obj');
+            ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
-    });
+    }else {
+        console.log('error: you can only select one item for search focus');
+        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+    }
+
 }
+
 
 var searchMore = function(data){
 
-    history.recallHistory(data, function(res){
+    if (data.recallHistory && data.recallHistory.amazon){
+
+        var moreHist = data;
 
         //build new data obj so there's no mongo duplicate
         data = {};
-        data.amazon = res.amazon;
-        data.source = res.source;
-        data.bucket = res.bucket;
-        data.action = res.action;
-        data.msg = res.msg;
-        data.tokens = res.tokens;
+        data.amazon = moreHist.recallHistory.amazon;
+        data.source = moreHist.recallHistory.source;
+        data.bucket = moreHist.recallHistory.bucket;
+        data.action = moreHist.recallHistory.action;
+        data.msg = moreHist.recallHistory.msg;
+        data.tokens = moreHist.recallHistory.tokens;
 
         if (data.amazon.length > 3){ //only trim down in thirds for now
             data.amazon.splice(0, 3);
         }
 
         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
-        if (data.amazon.length >= 3){   
-            getAmazonStuff(data,data.amazon,function(res){                
+        if (data.amazon.length >= 3){
+            getAmazonStuff(data,data.amazon,function(res){
                 ioKip.outgoingResponse(res,'stitch','amazon');
-            });              
+            });
         }
         //TEMP PATCH, FOR RESULTS UNDER 3 items
         else {
             var loopLame = [0,1,2];//lol
             async.eachSeries(loopLame, function(i, callback) {
                 if (data.amazon[i]){
-                    //get reviews by ASIN 
+                    //get reviews by ASIN
                     getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                         //adding scraped reviews to amazon objects
                         data.amazon[i].reviews = {
@@ -887,7 +849,11 @@ var searchMore = function(data){
                 ioKip.outgoingResponse(data,'stitch','amazon');
             });
         }
-    });
+    }else {
+        console.log('warning: recallHistory missing in searchMore()');
+        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+    }
+
 }
 
 //* * * * tools for helping with search * * * * //
@@ -913,104 +879,40 @@ var getReviews = function(ASIN,callback) {
 var getPrices = function(item,callback){
 
     var url = item.DetailPageURL[0];
+    var price;  // get price from API
+    if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
+        //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
+        console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
 
-    //remove referral info
-    //url = url.substring(0, url.indexOf('%'));
-    url = url.replace('%26tag%3Dbubboorev-20','');
+        price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
 
-    //add request headers
-    var options = {
-        url: url,
-        headers: {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            //'Accept-Encoding':'gzip, deflate, sdch',
-            'Accept-Language':'en-US,en;q=0.8',
-            'Cache-Control':'no-cache',
-            'Connection':'keep-alive',
-            'Cookie': 'x-wl-uid=1pueisgHxMYKWT0rswq5JqfnPdFseLZ/OxR7UupM9FY0RLpoyRkASv5p0aqDde7UxdAH0ye/4HGk=; ubid-main=184-9837454-1099037; session-id-time=2082787201l; session-id=189-6797902-2253123',
-            'Host':'www.amazon.com',
-            'Origin':'http://www.amazon.com',
-            'Pragma':'no-cache',
-            'Upgrade-Insecure-Requests':'1',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
-            'Referer':url
-        }
-    };
+    }
+    else if (item.ItemAttributes[0].ListPrice){
 
-    // x-wl-uid=1pueisgHxMYKWT0rswq5JqfnPdFseLZ/OxR7UupM9FY0RLpoyRkASv5p0aqDde7UxdAH0ye/4HGk=; session-token=pHpj+cnUgYC4W2Rn2n9o73yp+lXb0KSR/RbK3x0u3v3WlRsNCa/OUvsttZ96usiUcaxYriSqj01Z5SfTJ3FDKfR26IzhBNWkL6RfUz+HGW7FAcXDB9o753uz+PuRJPiySAKOH/rPFCUb8VIAJRBEWAv6znee4buG2t6zmYgRcTY9JxeR2a+rbm47d8sDJ6D2N+gT7NcJ4m2gC3FLET2y1ebwWTgvHHAbYmiMAdFtfIZkY9Lgh985Ow0wt9CIqxOI; ubid-main=184-9837454-1099037; session-id-time=2082787201l; session-id=189-6797902-2253123
-    // x-wl-uid=1BjpaGuxCTGdAWCxWU+87j+O+jpfyZqUylkd3CN1WoeO9KIRkjfML+wpDwHWA8DucgbG7gBgUpx8=; session-token=g74T/8uiz3D897wNrVE7VcWXJAkKIURxLCI+Tnjf94aIBBtNDTI065vGc31bO7NG2V/U9FW4mEgBsWCy60e5Dqscj/OXBD1k4auqBj0p5RSGftxSCZzlCXmkGxe2aTECiW87OqDvvze8bpWgdlt4J8kpl/SXmbMVGg5w9N9BfxULpNtvYmm61nyCI7tTwr7noOluf+z6rI9W+4hTCZpU8xewfrQEG6NZKdAz+T7D25zfjfqciUZ+KEzAcmR+Jk3DYDDoG57sSiU=; csm-hit=0X1PVGRZ848AM38HDXQY+s-0X1PVGRZ848AM38HDXQY|1451428278076; ubid-main=192-9287373-0652310; session-id-time=2082787201l; session-id=185-1853384-1692700
-    //expired
-    // csm-hit=1M5M5G84TW4EN2G1T6T1+s-0W6WGGYC27MJ8C0HPSF5|1451418645254; 
+        console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
 
-    //new
-    // csm-hit=0X1PVGRZ848AM38HDXQY+s-0X1PVGRZ848AM38HDXQY|1451428278076; 
-
-    //tsu
-    // csm-hit=0XK6JCHDTNBQY3ZT0BZA+s-19NN5QDKVXWYPA059PBF|1451429645652;
-
-
-    request(options, function(err, response, body) {
-      if(err){
-        console.log('getPrices error: ',err);
-        callback();
-      }
-      else {
-        $ = cheerio.load(body);
-        var realPrice;
-        var amazonSitePrice;
-
-        //sort scraped price
-        //try for miniATF
-        if ($('#miniATF_price').text() && $('#miniATF_price').text().indexOf('-') < 0){  //excluding scrapes with multiple prices (-) in field      
-            console.log('😊 kk');  
-            amazonSitePrice = $('#miniATF_price').text().trim();
-        }
-        //if no miniATF, try for priceblock_ourprice
-        else if ($('#priceblock_ourprice').text() && $('#priceblock_ourprice').text().indexOf('-') < 0){
-            console.log('😊 kk');  
-            amazonSitePrice = $('#priceblock_ourprice').text().trim();
-        }
-
-        //* * * * * * * * * *//
-
-        //we have price from website
-        if (amazonSitePrice){  //excluding scrapes with multiple prices (-) in field        
-            realPrice = amazonSitePrice;
-        }
-        //blocked by amazon? use offer price
-        // item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0]
-        else if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
-            //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-            console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
-
-            realPrice = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
-
-        }
-        else if (item.ItemAttributes[0].ListPrice){
-
-            console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
-
-            if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
-                realPrice = '';
-            }
-            else {
-              // add price
-              realPrice = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
-            }
+        if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
+            price = '';
         }
         else {
-            console.log('/!/!!! warning: no webscrape price found for amazon item');
-            realPrice = '';
+          // add price
+          price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
         }
+    }
 
+    amazonHTML.basic(url, function(err, product) {
+      kip.err(err); // print error
 
-        if (!realPrice){
-            realPrice = '';
-        }
-        callback(realPrice);
+      if (product && product.price) {
+        console.log('returning early with price: ' + product.price);
+        return callback(product.price)
       }
-    });
 
+      console.log('product.price: ' + product.price + ', price: ' + price);
+      price = product.price || price || '';
+      console.log('final price: ' + price);
+      callback(price);
+    })
 }
 
 
@@ -1105,7 +1007,7 @@ var getAmazonStuff = function(data,results,callback3){
                     data.amazon[i].realPrice = rez[count].realPrice;
                 }
                 else {
-                    console.log('/!/ Warning: no reviews or real prices found for current item: ',data);
+                    console.log('/!/ Warning: no reviews or real prices found for current item');
                 }
                 count++;
                 callback();
@@ -1116,7 +1018,7 @@ var getAmazonStuff = function(data,results,callback3){
         }, function done(){
             callback3(data);
         });
-    });   
+    });
 }
 
 /////////// tools /////////////
@@ -1133,6 +1035,319 @@ function removeSpecials(str,callback) {
     callback(res);
 }
 
+
+////////// Amazon Specials /////////
+function parseAmazon(productGroup,browseNodes,callback5){
+    var resParams = {};
+    switch(productGroup){
+        case 'Hobby':
+        case 'Toy':
+            console.log('Toy or Hobby');
+            resParams.SearchIndex = 'Toys'; //link product group to searchindex
+
+            //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
+            traverseNodes(browseNodes,['Toys & Games'],function(res){ 
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Book':
+            console.log('Book');
+            resParams.SearchIndex = 'Books'; //link product group to searchindex
+            traverseNodes(browseNodes,['Books'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Apparel':
+            console.log('apparel');
+            resParams.SearchIndex = 'Apparel'; //link product group to searchindex
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Wine':
+            console.log('Wine');
+            resParams.SearchIndex = 'Wine'; //link product group to searchindex
+            traverseNodes(browseNodes,['Wine'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });                                                    
+        break;
+        case 'Personal Computer':
+            console.log('personal computer');
+            resParams.SearchIndex = 'PCHardware'; //link product group to searchindex
+            traverseNodes(browseNodes,['Computers & Accessories'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });     
+        break;
+        case 'Speakers':
+        case 'Network Media Player':
+        case 'GPS or Navigation System':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });  
+        break;
+        case 'Wireless':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Wireless'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Cell Phones & Accessories'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });  
+        break;
+        case 'Art and Craft Supply':
+            console.log('arts crafts supply');
+            resParams.SearchIndex = 'ArtsAndCrafts'; //link product group to searchindex
+            traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'eBooks':
+            console.log('kindle store');
+            resParams.SearchIndex = 'KindleStore'; //link product group to searchindex
+            traverseNodes(browseNodes,['Kindle Store','Books'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'CE':
+            console.log('>> CE');
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Digital Accessories 3':
+            console.log('Digital Accessories 3');
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Kindle Store'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Kitchen':
+            console.log('kitchen');
+            resParams.SearchIndex = 'Kitchen'; //link product group to searchindex
+            traverseNodes(browseNodes,['Home & Kitchen'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Grocery':
+            console.log('grocery');
+            resParams.SearchIndex = 'Grocery'; //link product group to searchindex
+            traverseNodes(browseNodes,['Grocery & Gourmet Food','Baby Products'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'TV Series Episode Video on Demand':
+        case 'Movie':
+            console.log('tv series Episode video on demand OR Movie');
+            resParams.SearchIndex = 'Video'; //link product group to searchindex
+            traverseNodes(browseNodes,['Movies & TV'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'DVD':
+            console.log('DVD');
+            resParams.SearchIndex = 'DVD'; //link product group to searchindex
+            traverseNodes(browseNodes,['Movies & TV'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Baby Product':
+            console.log('baby product');
+            resParams.SearchIndex = 'Baby'; //link product group to searchindex
+            traverseNodes(browseNodes,['Baby Products','Clothing, Shoes & Jewelry','Clothing, Shoes & Jewelry','Home & Kitchen'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+        case 'Home Improvement':
+            console.log('home improvement');
+            resParams.SearchIndex = 'Tools'; //link product group to searchindex
+            traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+
+        case 'Major Appliances':
+            console.log('Major Appliances');
+            resParams.SearchIndex = 'Appliances'; //link product group to searchindex
+            traverseNodes(browseNodes,['Appliances'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Amazon Home':
+            console.log('amaazon home');
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Tools & Home Improvement','Kindle Store'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Mobile Application':
+            console.log('mobile app');
+            resParams.SearchIndex = 'Grocery'; //link product group to searchindex
+            traverseNodes(browseNodes,['Apps & Games'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Office Product':
+            console.log('Office Product');
+            resParams.SearchIndex = 'OfficeProducts'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Arts, Crafts & Sewing','Office Products'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Jewelry':
+            console.log('Jewelry');
+            resParams.SearchIndex = 'Jewelry'; //link product group to searchindex
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Home':
+            console.log('home');
+            resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
+            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Furniture':
+            console.log('Furniture');
+            resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
+            traverseNodes(browseNodes,['Arts, Crafts & Sewing'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Automotive Parts and Accessories':
+        case 'Boost':
+        case 'Car Audio or Theater':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Automotive'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Health & Personal Care','Automotive','Patio, Lawn & Garden','Cell Phones & Accessories','Industrial & Scientific'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Health and Beauty':
+            console.log('Health and Beauty');
+            resParams.SearchIndex = 'HealthPersonalCare'; //link product group to searchindex
+            traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Sports':
+            console.log('Sports');
+            resParams.SearchIndex = 'SportingGoods'; //link product group to searchindex
+            traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'BISS':
+            console.log('BISS');
+            resParams.SearchIndex = 'Industrial'; //link product group to searchindex
+            traverseNodes(browseNodes,['Industrial & Scientific','Automotive'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+
+
+        default:
+            resParams.SearchIndex = 'All';
+            callback5(resParams);
+    }                                           
+}
+
+function traverseNodes(nodeList,findMe,callbackMM){
+
+    console.log(findMe);
+    console.log(findMe[0]);
+
+    var nodeArr = []; //collect all browse nodes
+
+    async.eachSeries(nodeList, function(item, callbackZ) {
+
+        var currentNode = item;
+        var childNodeId = currentNode.BrowseNodeId[0]; //get first ID in nest tree
+            
+        async.whilst(
+            function () { 
+                //authors note: findMe[i] logic a real shit way to check for multiple string matches while traversing nodes
+                if (currentNode.Name && findMe.length > 0 && currentNode.Name[0] == findMe[0]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 1 && currentNode.Name[0] == findMe[1]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 2 && currentNode.Name[0] == findMe[2]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 3 && currentNode.Name[0] == findMe[3]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 4 && currentNode.Name[0] == findMe[4]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 5 && currentNode.Name[0] == findMe[5]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 6 && currentNode.Name[0] == findMe[6]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;                                                                                                                                                                                            
+                }else if (currentNode.Ancestors){ //didn't find string, keep traversing
+                    currentNode = currentNode.Ancestors[0].BrowseNode[0];
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            },
+            function (callback) {
+                callback();                                                                
+            },
+            function (err) {
+                if (err){
+                    console.log('WHILST error in search.js ',err);
+                }
+                callbackZ();
+            }
+        );     
+
+    }, function done(){
+        if (nodeArr.length > 0){                                                    
+            callbackMM(nodeArr.toString()); 
+        }
+        else {
+            console.log('error: no browseNodes found')
+        }                                          
+    });                                  
+}
 
 
 /// exports

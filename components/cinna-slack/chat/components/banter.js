@@ -619,14 +619,6 @@ var checkForCanned = function(input,callback,origin) {
             res = 'Sorry, I\'ll try to help better next time';
             break;
 
-        // - 'version' -- Kip 0.0.3
-        // - "kip" key word (that's me!)
-        // - "nm" key word == 'nevermind'
-        // - unlock
-        // - /
-        // - Top search trends on start up 
-        //  those suck
-        //  lame
 
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
@@ -703,7 +695,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.4 Beta (Pepper)';
+            res = 'I\'m a penguin running Kip v0.5 Beta (Ginger)';
             break;
 
         case '/':
@@ -884,7 +876,7 @@ var getCinnaResponse = function(data,callback){
                     break;
                 case 'modify':
                 case 'modified': //because the nlp json is wack
-                    switch (data.dataModify.type) {
+                    switch (data.dataModify && data.dataModify.type) {
                         case 'price':
                             if (data.dataModify.param == 'less'){
                                 res = 'Here you go! Which do you like best? Use `more like 1`, `2` or `3` to find similar or `help` for more options';

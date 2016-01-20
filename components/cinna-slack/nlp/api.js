@@ -9,8 +9,11 @@ var brands = require('./brands')
 var verbs = require('./verbs')
 var price = require('./price')
 var _ = require('lodash')
+var stopwords = require('./stopwords');
 
 var debug = require('debug')('nlp')
+
+
 
 console.log(config)
 
@@ -67,6 +70,7 @@ var parse = module.exports.parse = function(text, callback) {
   // var qtype = question.classify(normalizedText);
   // debug('qtype:', qtype)
 
+  // Get help from TextBlob and spaCy python modules
   request({
     method: 'POST',
     url: config.nlp + '/parse',
@@ -124,7 +128,9 @@ function quickparse(text) {
       /^find\b/i,
       /^search for a\b/i,
       /^search for\b/,
-      /^search\b/i
+      /^search\b/i,
+      /^i need a\b/i,
+      /^i need\b/i
     ],
     // modify: [
       //  /^more\ ([\w ])+/
@@ -133,7 +139,7 @@ function quickparse(text) {
     // ],
     similar: [
       // /more like ([\n])/i,
-      /like the ([\w]+)\b/i
+      // /like the ([\w]+)\b/i
     ],
     focus: []
   };
@@ -214,23 +220,84 @@ function getModifier(text) {
   }
 }
 
+
+/*
+input be like:
+{ adjectives: [ 'cheapest' ],
+  entities: [ [ '32', 'CARDINAL' ] ],
+  focus: [],
+  nouns: [ 'monitor' ],
+  parts_of_speech: [ [ 'cheapest', 'ADJ' ], [ '32', 'NUM' ], [ '"', 'PUNCT' ], [ 'monitor', 'NOUN' ] ],
+  ss: [ { focus: [], isQuestion: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
+  text: 'cheapest 32" monitor',
+  verbs: [] }}
+*/
 function nlpToResult(nlp) {
   debug(nlp)
 
-  // add tokens
+  /*
+  THIS ISN'T EVEN MY FINAL FORM
+  {
+      bucket: 'search',
+      action: 'aggregate',
+      tokens: ['cheapest 32" monitor with good reviews'],
+      execute: [ //will fire commands in arr order
+        {
+          bucket: 'search', //initial search
+          action:'initial',
+          val: '32" monitor'
+        },
+        {
+          bucket: 'search', //sorts cheapest
+          action:'modify',
+          dataModify: {
+            type: 'price',
+            param: 'less' //or 'more'
+          }
+        },
+        {
+          bucket: 'search', //sorts top reviews
+          action:'modify',
+          dataModify: {
+            type: 'reviews',
+            param: 'top' //or 'more'
+          }
+        }
+      ]
+    }
+  */
   var res = {
-    tokens: [nlp.text]
+    tokens: [nlp.text],
+    execute: []
   };
 
   // add focus
-  if (nlp.focus && nlp.focus[0]) {
+  nlp.focus = nlp.focus || [];
+  if (nlp.focus[0]) {
     res.searchSelect = nlp.focus;
+  }
+
+  // take care of invalid adjectives that are actually focuses (first)
+  nlp.adjectives = nlp.adjectives || [];
+  var invalidAdjectives = ['first', 'second', 'third'];
+  nlp.adjectives = nlp.adjectives.filter(function(a) {
+    return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
+  })
+
+  // take care of invalid nouns
+  nlp.nouns = (nlp.nouns || []).filter(function(n) {
+    return stopwords.indexOf(n.toLowerCase()) < 0;
+  })
+
+  // handle all initial search requests first
+  if (nlp.focus.length === 0) {
+
   }
 
   // check for "about"
   if (nlp.focus.length === 1) {
     if (nlp.text.indexOf('about') >= 0) {
-      debug('about')
+      debug('about triggered')
       res.bucket = BUCKET.search;
       res.action = ACTION.focus;
       return res;
@@ -241,52 +308,61 @@ function nlpToResult(nlp) {
   if (nlp.focus.length >= 1) {
     for (var i = 0; i < nlp.parts_of_speech.length; i++) {
       if (nlp.parts_of_speech[i][0] === 'more') {
-        debug('more')
+        debug('more triggered')
         res.bucket = BUCKET.search;
         res.action = ACTION.similar;
         return res;
       }
     }
-  } else if (nlp.ss.length === 1) {
-    var s = nlp.ss[0];
-    if (!s.isQuestion) {
-      debug('simple case initial');
-      res.bucket = BUCKET.search;
-      res.action = ACTION.initial;
-      return res;
-    }
   }
 
   if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
+    debug('verbs.getAction triggered')
     res.action = verbs.getAction(nlp.verbs[0])
     res.bucket = verbs.getBucket(nlp.verbs[0])
     return res;
   }
 
-  var priceModifier = price(nlp.text);
-  if (priceModifier) {
-    res.bucket = BUCKET.search;
-    res.action = ACTION.similar;
-    res.dataModify = priceModifier;
-    return res;
+  if (nlp.ss.length === 1) {
+    var s = nlp.ss[0];
+    if (!s.isQuestion) {
+      debug('simple case initial triggered');
+      res.execute.push({
+        bucket: BUCKET.search,
+        action: ACTION.initial,
+        val: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
+          return stopwords.indexOf(n) < 0;
+        })).join(' ')
+      })
+    }
   }
 
+
+  var priceModifier = price(nlp.text);
+  if (priceModifier) {
+    debug('priceModifier triggered')
+    res.execute.push({
+      bucket: BUCKET.search,
+      action: ACTION.modify,
+      dataModify: priceModifier
+    })
+  }
+
+  // get all the nouns and adjectives
   var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
+
+  // if there is a focus and a modifier, it's a modified search
   if (nlp.focus.length === 1 && modifierWords.length === 1) {
-    // assume it's a modifier...
+    debug('single focus, single modifier triggered')
     res.bucket = BUCKET.search;
     res.action = ACTION.modify;
     res.dataModify = getModifier(modifierWords[0]);
+    res.execute = [];
     return res;
   }
 
-  // parse out the focused element for each sentence
-  // if there is an ordinal, that's the focus
-
-
-
   // break out the entities into stores, locations, etc
-  nlp.locaitons = [];
+  nlp.locations = [];
   nlp.entities.map(function(e) {
     if (e[1] === 'GPE') {
       nlp.locations.push(e[0])
@@ -301,31 +377,14 @@ function nlpToResult(nlp) {
   return res;
 }
 
-// shit this is hard
-function isQuestion(nlp) {
-  if (nlp.parts_of_speech[nlp.parts_of_speech.length - 1][0] === '?') {
-    return true;
-  }
 
-  // some questions start off with verbs like "is, are, does"
-  for (var i = 0; i < nlp.parts_of_speech.length; i++) {
-    if (i[1] === 'INTJ') {
-      continue;
-    } else if ('is,are,does,which'.indexOf(i[0]) >= 0) {
-      return true;
-    } else {
-      break;
-    }
-  }
-
-  return false;
-}
-
+//
+// for testing
+//
 if (!module.parent) {
   request(config.nlp + '/reload')
 
   if (process.argv.length > 2) {
-    process.env.DEBUG = 'nlp';
     parse(process.argv.slice(2).join(' '), function(e, r) {
       if (e) debug(e)
       console.log(JSON.stringify(r, null, 2))
@@ -336,22 +395,18 @@ if (!module.parent) {
   var sentences = [
     'find me a coffee machine',
     'search luxury socks',
-    'like the frist one but not so derpy',
     'kip find me running leggings',
     'like the first one but orange',
-    'does the first one have pockets?',
-    'yes please',
-    'do you have B but in blue',
+    'do you have 2 but in blue',
     'please show brighter blue i don\'t like dark colour',
-    'hmm I really like C what\'s the fabric?',
-    'ok pls buy for me thanks',
     'looking for a black zara jacket',
     'I like the thrid one',
-    'is there any size medium?',
+    // 'is there any size medium?',
     'like 2 but blue',
-    'does it have pockets?',
+    // 'does it have pockets?',
     'morning glory (24 pack)',
-    'cheapest 32" monitor'
+    'cheapest 32" monitor',
+    'i need a 3d camera'
   ];
   sentences.map(function(a) {
     parse(a, function(e, res) {
