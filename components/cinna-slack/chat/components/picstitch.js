@@ -55,6 +55,7 @@ var stitchResults = function(data,source,callback) {
                         imageURL = data.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
                     }
                     else {
+                        console.log('NO IMAGE FOUND ',data.amazon[i]);
                         imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
                     }
 
