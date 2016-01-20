@@ -86,7 +86,7 @@ module.exports.basic = function basic(url, callback) {
 
         var amazonSitePrice;
 
-        $ = cheerio.load(body);
+        var $ = cheerio.load(body);
 
         //sort scraped price
         //try for miniATF
@@ -140,9 +140,18 @@ module.exports.qa = function(url, callback) {
 
     var QA = [];
 
-    // example url:
+    // Extract product ID
+    // example urls:
     // http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor
-    var dp = url.match(/\/dp\/(.*)\//)[1];
+    // http://www.amazon.com/gp/product/B00R8NSSGK/ref=s9_aas_bw_g193_i3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-4&pf_rd_r=1YSQG3YFK2RM66XKNQ9C&pf_rd_t=101&pf_rd_p=2337894602&pf_rd_i=13429645011
+    var dp = url.match(/\/dp\/(.*)\//);
+    if (!dp) {
+      dp = url.match(/\/product\/(.*)\//);
+    }
+    if (!dp || !dp[1]) {
+      return callback('Could not extract product id from url: ' + url);
+    }
+    dp = dp[1]
     var question_template = 'http://www.amazon.com/ask/questions/inline/$DP/$PAGE?_=$TIMESTAMP';
     function getQuestions(dp, page, lastb) {
       debug(page);
@@ -191,6 +200,12 @@ module.exports.qa = function(url, callback) {
             QA.push(qa);
           }
         })
+
+        // add a question cap
+        if (page >= 10) {
+          return callback(null, QA);
+        }
+
         if (!done) {
           getQuestions(dp, ++page, b);
         }
@@ -203,15 +218,23 @@ module.exports.qa = function(url, callback) {
 }
 
 if (!module.parent) {
-  var a = 0;
-  //module.exports.qa('http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor', function(err, product) {
-  module.exports.qa('http://www.amazon.com/WantDo-Fashion-Windbreaker-Jackets-X-Large/dp/B017NCR7TO/ref=sr_1_1?ie=UTF8&qid=1453154503&sr=8-1&keywords=jacket', function(err, product) {
-    kip.fatal(err)
-    console.log(product);
-    console.log(a++);
-    module.exports.qa('http://www.amazon.com/WantDo-Fashion-Windbreaker-Jackets-X-Large/dp/B017NCR7TO/ref=sr_1_1?ie=UTF8&qid=1453154503&sr=8-1&keywords=jacket', function(err, product) {
-      console.log('hopefully hit cache')
-    })
+  var urls = [
+    'http://www.amazon.com/dp/B00BGO0Q9O/ref=s9_acsd_bw_wf_s_NRwaterf_cdl_5?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-top-3&pf_rd_r=1648MF65W33MBPQPSZSJ&pf_rd_t=101&pf_rd_p=2058449622&pf_rd_i=10711515011',
+    'http://www.amazon.com/WantDo-Fashion-Windbreaker-Jackets-X-Large/dp/B017NCR7TO/ref=sr_1_1?ie=UTF8&qid=1453154503&sr=8-1&keywords=jacket'
+  ]
 
-  })
+  function run(index) {
+    console.log('running url ' + urls[index]);
+    module.exports.qa(urls[index], function(err, qa) {
+      kip.fatal(err);
+      console.log(qa);
+      index++;
+      if (urls[index]) {
+        run(index);
+      }
+    })
+  }
+
+  run(0);
+
 }
