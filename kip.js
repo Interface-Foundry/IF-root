@@ -12,6 +12,8 @@ module.exports.err = function(e) {
         return true;
     }
 };
+module.exports.error = module.exports.err;
+
 
 /**
  * Kills the process if there's an ERROR

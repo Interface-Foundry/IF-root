@@ -39,8 +39,10 @@ module.exports.isPriceModifier = function(text) {
 
 var price_terms = {
   less: [
+  'cheapest',
   'cheaper',
   'cheap',
+  'least expensive',
   'less expensive',
   'less',
   'too expensive',

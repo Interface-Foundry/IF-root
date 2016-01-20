@@ -4,10 +4,12 @@ var async = require('async');
 var _ = require('underscore');
 
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var amazonHTML = require('./amazonHTML');
 
 var history = require("./history.js");
 var processData = require("./process.js");
 var ioKip = require("./io.js");
+var kip = require('kip')
 
 var client = amazon.createClient({
   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -23,10 +25,10 @@ var searchInitial = function(data,flag){
 var searchSimilar = function(data){
     if (data.dataModify){
         data.action = 'modify'; //because NLP changed randomly =_=;
-        searchModify(data);  
+        searchModify(data);
     }
     else if (data.recallHistory && data.recallHistory.amazon){
-        searchAmazon(data,'similar','none','null');        
+        searchAmazon(data,'similar','none','null');
     }
     else {
         console.log('warning: recallhistory obj missing');
@@ -49,11 +51,11 @@ var searchAmazon = function(data, type, query, flag) {
             var amazonParams = {};
             amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank';
 
-            //remove random symbols 
+            //remove random symbols
             removeSpecials(data.tokens[0],function(res){
                 amazonParams.Keywords = res;
                 continueProcess();
-            }); 
+            });
 
             function continueProcess(){
 
@@ -103,8 +105,6 @@ var searchAmazon = function(data, type, query, flag) {
                                     }
                                 }
                                 else {
-                                    
-
                                     //there's a price for the item
                                     if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect].realPrice){
 
@@ -266,14 +266,14 @@ var searchAmazon = function(data, type, query, flag) {
                         //get reviews and real prices
                         getAmazonStuff(data,results,function(res){
                             ioKip.outgoingResponse(res,'stitch','amazon');
-                        });            
+                        });
                     }
                     //TEMP PATCH, FOR RESULTS UNDER 3 items
                     else {
                         var loopLame = [0,1,2];//lol
                         async.eachSeries(loopLame, function(i, callback) {
                             if (data.amazon[i]){
-                                //get reviews by ASIN 
+                                //get reviews by ASIN
                                 getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                                     //adding scraped reviews to amazon objects
                                     data.amazon[i].reviews = {
@@ -359,19 +359,19 @@ var searchAmazon = function(data, type, query, flag) {
                         data.amazon = results;
 
                         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
-                        if (results.length >= 3){   
+                        if (results.length >= 3){
 
                             //get reviews and real prices
                             getAmazonStuff(data,results,function(res){
                                 ioKip.outgoingResponse(res,'stitch','amazon');
-                            });            
+                            });
                         }
                         //TEMP PATCH, FOR RESULTS UNDER 3 items
                         else {
                             var loopLame = [0,1,2];//lol
                             async.eachSeries(loopLame, function(i, callback) {
                                 if (data.amazon[i]){
-                                    //get reviews by ASIN 
+                                    //get reviews by ASIN
                                     getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                                         //adding scraped reviews to amazon objects
                                         data.amazon[i].reviews = {
@@ -517,7 +517,7 @@ var searchModify = function(data,flag){
             else {
                 var dumbVal = '';
             }
-             
+
             switch (data.dataModify.type) {
                 case 'price':
                     searchInitial(data,{ // passing special FLAG for search to handle
@@ -689,12 +689,12 @@ var searchModify = function(data,flag){
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search                        
+                    searchInitial(data,flag); //do a new search
                 }
                 break;
         }
     }
-   
+
 }
 
 var searchFocus = function(data){
@@ -721,7 +721,7 @@ var searchFocus = function(data){
                 //push number emoji + item URL
                 processData.getNumEmoji(data,searchSelect+1,function(res){
                     data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
-                    dumbFunction(); //fire after get 
+                    dumbFunction(); //fire after get
                 })
 
                 //pointless ¯\_(ツ)_/¯ ... just makes sure the emoji number + product URL go first in msg order
@@ -735,7 +735,7 @@ var searchFocus = function(data){
                     }
 
                     //Make top line bold
-                    if (data.source.origin == 'slack'){ 
+                    if (data.source.origin == 'slack'){
                         topStr = '*'+topStr+'*';
                     }else if (data.source.origin == 'socket.io'){
                         topStr = '<b>'+topStr+'</b>';
@@ -779,7 +779,7 @@ var searchFocus = function(data){
                     if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating){
                         data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
                     }
-                    
+
                     ioKip.outgoingResponse(data,'final');
 
                 }
@@ -796,7 +796,7 @@ var searchFocus = function(data){
         console.log('error: you can only select one item for search focus');
         ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
     }
- 
+
 }
 
 
@@ -820,17 +820,17 @@ var searchMore = function(data){
         }
 
         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
-        if (data.amazon.length >= 3){   
-            getAmazonStuff(data,data.amazon,function(res){                
+        if (data.amazon.length >= 3){
+            getAmazonStuff(data,data.amazon,function(res){
                 ioKip.outgoingResponse(res,'stitch','amazon');
-            });              
+            });
         }
         //TEMP PATCH, FOR RESULTS UNDER 3 items
         else {
             var loopLame = [0,1,2];//lol
             async.eachSeries(loopLame, function(i, callback) {
                 if (data.amazon[i]){
-                    //get reviews by ASIN 
+                    //get reviews by ASIN
                     getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
                         //adding scraped reviews to amazon objects
                         data.amazon[i].reviews = {
@@ -850,10 +850,10 @@ var searchMore = function(data){
             }, function done(){
                 ioKip.outgoingResponse(data,'stitch','amazon');
             });
-        }        
+        }
     }else {
         console.log('warning: recallHistory missing in searchMore()');
-        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?'); 
+        ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
     }
 
 }
@@ -881,104 +881,40 @@ var getReviews = function(ASIN,callback) {
 var getPrices = function(item,callback){
 
     var url = item.DetailPageURL[0];
+    var price;  // get price from API
+    if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
+        //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
+        console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
 
-    //remove referral info
-    //url = url.substring(0, url.indexOf('%'));
-    url = url.replace('%26tag%3Dbubboorev-20','');
+        price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
 
-    //add request headers
-    var options = {
-        url: url,
-        headers: {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            //'Accept-Encoding':'gzip, deflate, sdch',
-            'Accept-Language':'en-US,en;q=0.8',
-            'Cache-Control':'no-cache',
-            'Connection':'keep-alive',
-            'Cookie': 'x-wl-uid=1pueisgHxMYKWT0rswq5JqfnPdFseLZ/OxR7UupM9FY0RLpoyRkASv5p0aqDde7UxdAH0ye/4HGk=; ubid-main=184-9837454-1099037; session-id-time=2082787201l; session-id=189-6797902-2253123',
-            'Host':'www.amazon.com',
-            'Origin':'http://www.amazon.com',
-            'Pragma':'no-cache',
-            'Upgrade-Insecure-Requests':'1',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
-            'Referer':url
-        }
-    };
+    }
+    else if (item.ItemAttributes[0].ListPrice){
 
-    // x-wl-uid=1pueisgHxMYKWT0rswq5JqfnPdFseLZ/OxR7UupM9FY0RLpoyRkASv5p0aqDde7UxdAH0ye/4HGk=; session-token=pHpj+cnUgYC4W2Rn2n9o73yp+lXb0KSR/RbK3x0u3v3WlRsNCa/OUvsttZ96usiUcaxYriSqj01Z5SfTJ3FDKfR26IzhBNWkL6RfUz+HGW7FAcXDB9o753uz+PuRJPiySAKOH/rPFCUb8VIAJRBEWAv6znee4buG2t6zmYgRcTY9JxeR2a+rbm47d8sDJ6D2N+gT7NcJ4m2gC3FLET2y1ebwWTgvHHAbYmiMAdFtfIZkY9Lgh985Ow0wt9CIqxOI; ubid-main=184-9837454-1099037; session-id-time=2082787201l; session-id=189-6797902-2253123
-    // x-wl-uid=1BjpaGuxCTGdAWCxWU+87j+O+jpfyZqUylkd3CN1WoeO9KIRkjfML+wpDwHWA8DucgbG7gBgUpx8=; session-token=g74T/8uiz3D897wNrVE7VcWXJAkKIURxLCI+Tnjf94aIBBtNDTI065vGc31bO7NG2V/U9FW4mEgBsWCy60e5Dqscj/OXBD1k4auqBj0p5RSGftxSCZzlCXmkGxe2aTECiW87OqDvvze8bpWgdlt4J8kpl/SXmbMVGg5w9N9BfxULpNtvYmm61nyCI7tTwr7noOluf+z6rI9W+4hTCZpU8xewfrQEG6NZKdAz+T7D25zfjfqciUZ+KEzAcmR+Jk3DYDDoG57sSiU=; csm-hit=0X1PVGRZ848AM38HDXQY+s-0X1PVGRZ848AM38HDXQY|1451428278076; ubid-main=192-9287373-0652310; session-id-time=2082787201l; session-id=185-1853384-1692700
-    //expired
-    // csm-hit=1M5M5G84TW4EN2G1T6T1+s-0W6WGGYC27MJ8C0HPSF5|1451418645254; 
+        console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
 
-    //new
-    // csm-hit=0X1PVGRZ848AM38HDXQY+s-0X1PVGRZ848AM38HDXQY|1451428278076; 
-
-    //tsu
-    // csm-hit=0XK6JCHDTNBQY3ZT0BZA+s-19NN5QDKVXWYPA059PBF|1451429645652;
-
-
-    request(options, function(err, response, body) {
-      if(err){
-        console.log('getPrices error: ',err);
-        callback();
-      }
-      else {
-        $ = cheerio.load(body);
-        var realPrice;
-        var amazonSitePrice;
-
-        //sort scraped price
-        //try for miniATF
-        if ($('#miniATF_price').text() && $('#miniATF_price').text().indexOf('-') < 0){  //excluding scrapes with multiple prices (-) in field      
-            console.log('😊 kk');  
-            amazonSitePrice = $('#miniATF_price').text().trim();
-        }
-        //if no miniATF, try for priceblock_ourprice
-        else if ($('#priceblock_ourprice').text() && $('#priceblock_ourprice').text().indexOf('-') < 0){
-            console.log('😊 kk');  
-            amazonSitePrice = $('#priceblock_ourprice').text().trim();
-        }
-
-        //* * * * * * * * * *//
-
-        //we have price from website
-        if (amazonSitePrice){  //excluding scrapes with multiple prices (-) in field        
-            realPrice = amazonSitePrice;
-        }
-        //blocked by amazon? use offer price
-        // item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0]
-        else if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
-            //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-            console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
-
-            realPrice = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
-
-        }
-        else if (item.ItemAttributes[0].ListPrice){
-
-            console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
-
-            if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
-                realPrice = '';
-            }
-            else {
-              // add price
-              realPrice = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
-            }
+        if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
+            price = '';
         }
         else {
-            console.log('/!/!!! warning: no webscrape price found for amazon item');
-            realPrice = '';
+          // add price
+          price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
         }
+    }
 
+    amazonHTML.basic(url, function(err, product) {
+      kip.err(err); // print error
 
-        if (!realPrice){
-            realPrice = '';
-        }
-        callback(realPrice);
+      if (product && product.price) {
+        console.log('returning early with price: ' + product.price);
+        return callback(product.price)
       }
-    });
 
+      console.log('product.price: ' + product.price + ', price: ' + price);
+      price = product.price || price || '';
+      console.log('final price: ' + price);
+      callback(price);
+    })
 }
 
 
@@ -1084,7 +1020,7 @@ var getAmazonStuff = function(data,results,callback3){
         }, function done(){
             callback3(data);
         });
-    });   
+    });
 }
 
 /////////// tools /////////////

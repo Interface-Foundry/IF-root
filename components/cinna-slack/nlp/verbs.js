@@ -1,15 +1,21 @@
+var debug = require('debug')('nlp')
 
 var checkout = ['get', 'checkout', 'buy']
 var remove = ['remove', 'delete', 'cancel']
 var list = ['view', 'show', 'list']
 var save = ['save']
 var focus = ['focus', 'info']
+var search = ['need', 'want']
 
 var purchase = checkout.concat(remove).concat(list).concat(save);
 var search = focus;
 
 module.exports.getAction = function(v) {
+  debug('getting action for ' + v)
   v = v.toLowerCase();
+  if (search.indexOf(v) >= 0) {
+    return 'initial'
+  }
   if (save.indexOf(v) >= 0) {
     return 'save'
   }

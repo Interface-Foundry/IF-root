@@ -30,7 +30,7 @@ var io; //global socket.io var...probably a bad idea, idk lol
 var initSlackUsers = function(env){
     console.log('loading with env: ',env);
     //load kip-pepper for testing
-    if (env === 'development') {
+    if (env === 'development_alyx') {
         var testUser = [{
             team_id:'T0H72FMNK',
             bot: {
