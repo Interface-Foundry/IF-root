@@ -25,11 +25,11 @@ class DynamicForm extends Component {
       msg: '',
       bucket: '',
       action: '',
-      bucketOptions: {
-        initial: false,
-        purchase: false,
-        banter: false
-      },
+      // bucketOptions: {
+      //   initial: false,
+      //   purchase: false,
+      //   banter: false
+      // },
       searchParam: '',
       dirty: false,
       spinnerloading: false,
@@ -155,7 +155,7 @@ class DynamicForm extends Component {
       if (query) {
         this.state.searchParam = query
       } else {
-        console.log('search input is empty: ', this.state.searchParam)
+        console.log('search input is empty: ', this.state,'Query:' ,query)
         return
       }
     }
@@ -298,7 +298,9 @@ class DynamicForm extends Component {
 
   handleSubmit(e) {
     e.preventDefault()
-    let query = e.target[3].value
+    console.log('handle submit event: ',e)
+    //increase the numerical value of below property when adding new buttons to form.  yeah it's weird sorry
+    let query = e.target[6].value
     this.searchAmazon(query)
   }
 
@@ -362,19 +364,28 @@ class DynamicForm extends Component {
                 <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('modify')} >
                   Modify
                 </Button>
+                 <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('focus')} >
+                  Focus
+                </Button>
+                <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('more')} >
+                  More
+                </Button>
+                <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('checkout')} >
+                  Checkout
+                </Button>
+           
                 <div id="search-box" style={showSearchBox}>
                   <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
-                    
                     <Button bsSize = "large" disabled={this.state.spinnerloading}  style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                       Search Amazon
                        <div style={spinnerStyle}>
                         <Spinner />
                        </div>
-                    </Button>
-                      
+                    </Button>      
                 </div>
+
                 <div id="similar-box" style={showSimilarBox}>
-                      <h3 style={showPrompt}> Please select an item. </h3>
+                    <h3 style={showPrompt}> Please select an item. </h3>
                     <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
                       Search Similar 
                         <div style={spinnerStyle}>
@@ -382,6 +393,7 @@ class DynamicForm extends Component {
                        </div>
                     </Button>
                 </div>
+
                  <div id="modify-box" style={showModifyBox}>
                       <h3 style={showPrompt}> Please select a modifier. </h3>
                       <br />
@@ -410,15 +422,18 @@ class DynamicForm extends Component {
                             <MenuItem eventKey="4">Separated link</MenuItem>
                           </DropdownButton>
                       </div>
-                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading || (!this.state.color && !this.state.size) || (!this.state.modifier.color && !this.state.modifier.size )} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
-                      Search Modify
+                      <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading || (!this.state.color && !this.state.size) || (!this.state.modifier.color && !this.state.modifier.size )} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
+                        Search Modify
                         <div style={spinnerStyle}>
-                        <Spinner />
-                       </div>
-                    </Button>
+                          <Spinner />
+                        </div>
+                      </Button>
                 </div>
+
+
+
             </div>
-            
+
           </form>
        </div>
     );

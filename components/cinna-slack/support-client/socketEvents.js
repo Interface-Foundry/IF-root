@@ -16,7 +16,6 @@ exports = module.exports = function(io, cinnaio) {
             }
             //Emit outgoing message to cinna-slack
             else if (msg.client_res[0] && msg.client_res[0].length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
-               // console.log('bro is it getting here? ',msg)
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){
                 console.log('Received results from cinna',msg)
@@ -48,5 +47,3 @@ exports = module.exports = function(io, cinnaio) {
 
     });
 }
-// var io = require('socket.io').listen(app);
-// io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res});

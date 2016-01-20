@@ -8,7 +8,8 @@ import * as Actions from '../actions/Actions';
 import TypingListItem from './TypingListItem';
 const socket = io();
 // const emitter = io.connect();
-import { DropdownButton, MenuItem } from 'react-bootstrap';
+import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
+import Infinite from 'react-infinite';
 
 class Chat extends Component {
 
@@ -29,13 +30,15 @@ class Chat extends Component {
      constructor (props, context) {
       super(props, context)
       this.state = {
-        supervisor: false
+        supervisor: false,
+        stream: false
       }
     }
 
   componentDidMount() {
     const { actions, messages, activeChannel } = this.props;
     this.setState({ supervisor: false });
+    const self = this
      socket.on('change state bc', function (state) {
       // console.log('change state event received', state)
        var identifier = {channel: state.channel, properties: []}
@@ -53,6 +56,7 @@ class Chat extends Component {
       }
     })   
     socket.on('new bc message', function(msg) {      
+      self.scrollToBottom()
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>
@@ -112,7 +116,9 @@ class Chat extends Component {
 
   componentDidUpdate() {
     const messageList = this.refs.messageList;
+    // console.log('Did update fired: ', window.innerHeight-110)
     messageList.scrollTop = messageList.scrollHeight;
+    this.scrollToBottom()
   }
   handleSave(newMessage) {
     const { actions } = this.props;
@@ -152,6 +158,18 @@ class Chat extends Component {
        this.setState({supervisor: !current});
     }
 
+  toggleStream()  {
+    let current = this.state.stream
+     this.setState({stream: !current});
+     window.scrollTo(0, window.innerHeight);
+  }
+
+  scrollToBottom() {
+   //  console.log('scrolling',window.innerHeight)
+   // setTimeout(function() {
+   //   window.scrollTo(0, window.innerHeight)},500)
+  }
+
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name).filter(message => (message.bucket === 'response' || message.bucket === 'supervisor'))
@@ -165,11 +183,26 @@ class Chat extends Component {
         </DropdownButton>
       </div>
     );
-
+    // 
+    const displayMessages = this.state.stream ?   
+                       messages.map(message =>
+                            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
+                           )
+                           :  
+                        filteredMessages.map(message =>
+                            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
+                          )
+    // const messagesHeight = this.state.stream ?  44.5781                  
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
-        <div className="kipicon"></div>
+
+        <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none' }} disabled={this.state.spinnerloading} onClick = { () => { this.toggleStream() } } >
+          <div className="kipicon">
+          </div>
+          </Button> 
+        
+
           <section style={{order: '2', marginTop: '1.5em'}}>
             <Channels onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
           </section>
@@ -187,9 +220,12 @@ class Chat extends Component {
           <div className="flexbox-container">
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
-                {filteredMessages.map(message =>
-                  <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
-                )}
+              <Infinite elementHeight={44.5781}
+               containerHeight={window.innerHeight-90}
+               displayBottomUpwards>
+                { displayMessages }
+               </Infinite>
+                
               </ul>
             </div>
             <div style= {{ padding: 0}} >
