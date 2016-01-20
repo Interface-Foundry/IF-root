@@ -406,7 +406,10 @@ if (!module.parent) {
     // 'does it have pockets?',
     'morning glory (24 pack)',
     'cheapest 32" monitor',
-    'i need a 3d camera'
+    'i need a 3d camera',
+    '3 but 8 axis',
+    '2 but more fun',
+    '1 but green', // this is returning lime?
   ];
   sentences.map(function(a) {
     parse(a, function(e, res) {
