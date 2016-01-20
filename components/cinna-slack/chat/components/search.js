@@ -17,7 +17,7 @@ var client = amazon.createClient({
 
 
 var searchInitial = function(data,flag){
-    searchAmazon(data,'initial','none',flag);
+    searchAmazon(data,data.action,'none',flag);
 }
 
 var searchSimilar = function(data){
@@ -43,6 +43,7 @@ var searchAmazon = function(data, type, query, flag) {
     //sort query type
     switch (type) {
         case 'initial':
+        case 'modify':
 
             //add some amazon query params
             var amazonParams = {};
@@ -56,11 +57,30 @@ var searchAmazon = function(data, type, query, flag) {
 
             function continueProcess(){
 
+                if (data.recallHistory && data.searchSelect){
+                    var searchSelect = data.searchSelect[0] - 1;
+                    var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+                    var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;                    
+                }
+
                 //check for flag to modify amazon search params
                 if (flag && flag.type){ //search modifier
 
                     //parse flags
-                    if (flag.type == 'price'){
+
+                    if (flag.type == 'color' && flag.val){  
+
+                        console.log('continueProcess() color fired');
+
+                        parseAmazon(productGroup,browseNodes,function(res){
+                            amazonParams.SearchIndex = res.SearchIndex;
+                            amazonParams.BrowseNode = res.BrowseNode;
+                            amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
+                            doSearch();
+                        });
+                    }
+
+                    else if (flag.type == 'price'){
 
                         //TEMPORARY
                         if (flag.param == 'less than'){
@@ -83,7 +103,7 @@ var searchAmazon = function(data, type, query, flag) {
                                     }
                                 }
                                 else {
-                                    var searchSelect = data.searchSelect[0] - 1;
+                                    
 
                                     //there's a price for the item
                                     if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect].realPrice){
@@ -106,17 +126,10 @@ var searchAmazon = function(data, type, query, flag) {
                                         //its a real number, shoudl always be a real number here, 
                                         if (modPrice > 0){
 
-                                            // console.log('1 ',data.recallHistory.amazon[searchSelect]);
-
                                             console.log('browsenode?1 ',JSON.stringify(data.recallHistory.amazon[searchSelect].BrowseNodes));
-
-                                            // console.log('!!productGroup <--> SearchIndex ',data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0]);
 
                                             //WHAT DO IF NO PG? NORMAL SEARCH?
                                             if (data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup){
-
-                                                var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
-                                                var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;
 
                                                 console.log('!!productGroup <-- ',productGroup);
 
@@ -127,424 +140,22 @@ var searchAmazon = function(data, type, query, flag) {
                                                     delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
                                                     doSearch();
                                                 });
-
-                                                //SEARCH INDEX:
-                                                // [\n\t\t\t\t\'All\',\'Wine\',\'Wireless\',\'ArtsAndCrafts\',\'Miscellaneous\',\'Electronics\',\'Jewelry\',\'MobileApps\',\'Photo\',
-                                                // \'Shoes\',\'Kindle Store\',\'Automotive\',\'Pantry\',\'MusicalInstruments\',\'DigitalMusic\',\'GiftCards\',\'FashionBaby\',\'FashionGirls\'
-                                                // ,\'GourmetFood\',\'HomeGarden\',\'MusicTracks\',\'UnboxVideo\',\'FashionWomen\',\'VideoGames\',\'FashionMen\',\'Kitchen\',\'Video\',
-                                                // \'Software\',\'Beauty\',\'Grocery\',,\'FashionBoys\',\'Industrial\',\'PetSupplies\',\'OfficeProducts\',\'Magazines\',\'Watches\',
-                                                // \'Luggage\',\'OutdoorLiving\',\'Toys\',\'SportingGoods\',\'PCHardware\',\'Movies\',\'Books\',\'Collectibles\',\'VHS\',\'MP3Downloads\',
-                                                // \'Fashion\',\'Tools\',\'Baby\',\'Apparel\',\'Marketplace\',\'DVD\',\'Appliances\',\'Music\',\'LawnAndGarden\',\'WirelessAccessories\',
-                                                // \'Blended\',\'HealthPersonalCare\',\'Classical\'\n\t\t\t\t].' ]
+                                            }
+                                            else {
+                                                console.log('Error: Product Group missing from amazon itemAttributes');
+                                                doSearch();
                                             }
 
-                                                // PG == "Personal Computer":
-                                                //     SI == "PCHardware"
-                                                //     find chain that has "Computers & Accessories", move down chain
-
-                                                // BN == BrowseNodes
-
-                                                // PG == CE ??
-
-                                                // PG == 'Speakers':
-                                                //     SI == "Electronics"
-                                                //     BN == move down chain to last node that matches "Electronics" to get node #
-
-                                                // PG == 'Art and Craft Supply':
-                                                //     SI == 'ArtsAndCrafts'
-                                                //     DOWN chain that contains 'Painting, Drawing & Art Supplies' || < << << <  < <  add all bottom nodes for this top node 'Arts, Crafts & Sewing'
-
-
-
-                                                //     SI == 'Miscellaneous'
-
-                                                // PG == 'eBooks':
-                                                //     SI == 'Kindle Store'
-
-
-                                                //     if chain contains "clothing" && "women" { 
-                                                //         searchindex = 'FashionWomen'
-                                                //     }
-
-
-                                                // SI == wireless ?? 
-
-                                                // ArtsAndCrafts
-
-
-                                            function parseAmazon(productGroup,browseNodes,callback5){
-                                                var resParams = {};
-                                                switch(productGroup){
-                                                    case 'Hobby':
-                                                    case 'Toy':
-                                                        console.log('Toy or Hobby');
-                                                        resParams.SearchIndex = 'Toys'; //link product group to searchindex
-
-                                                        //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
-                                                        traverseNodes(browseNodes,['Toys & Games'],function(res){ 
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });
-                                                    break;
-                                                    case 'Book':
-                                                        console.log('Book');
-                                                        resParams.SearchIndex = 'Books'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Books'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });
-                                                    break;
-                                                    case 'Apparel':
-                                                        console.log('apparel');
-                                                        resParams.SearchIndex = 'Apparel'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });
-                                                    break;
-                                                    case 'Wine':
-                                                        console.log('Wine');
-                                                        resParams.SearchIndex = 'Wine'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Wine'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });                                                    
-                                                    break;
-                                                    case 'Personal Computer':
-                                                        console.log('personal computer');
-                                                        resParams.SearchIndex = 'PCHardware'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Computers & Accessories'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });     
-                                                    break;
-                                                    case 'Speakers':
-                                                    case 'Network Media Player':
-                                                    case 'GPS or Navigation System':
-                                                        console.log(productGroup);
-                                                        resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Electronics'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });  
-                                                    break;
-                                                    case 'Wireless':
-                                                        console.log(productGroup);
-                                                        resParams.SearchIndex = 'Wireless'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Electronics','Cell Phones & Accessories'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        });  
-                                                    break;
-                                                    case 'Art and Craft Supply':
-                                                        console.log('arts crafts supply');
-                                                        resParams.SearchIndex = 'ArtsAndCrafts'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'eBooks':
-                                                        console.log('kindle store');
-                                                        resParams.SearchIndex = 'KindleStore'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Kindle Store','Books'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'CE':
-                                                        console.log('>> CE');
-                                                        resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Digital Accessories 3':
-                                                        console.log('Digital Accessories 3');
-                                                        resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Kindle Store'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Kitchen':
-                                                        console.log('kitchen');
-                                                        resParams.SearchIndex = 'Kitchen'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Home & Kitchen'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Grocery':
-                                                        console.log('grocery');
-                                                        resParams.SearchIndex = 'Grocery'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Grocery & Gourmet Food','Baby Products'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'TV Series Episode Video on Demand':
-                                                    case 'Movie':
-                                                        console.log('tv series Episode video on demand OR Movie');
-                                                        resParams.SearchIndex = 'Video'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Movies & TV'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'DVD':
-                                                        console.log('DVD');
-                                                        resParams.SearchIndex = 'DVD'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Movies & TV'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Baby Product':
-                                                        console.log('baby product');
-                                                        resParams.SearchIndex = 'Baby'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Baby Products','Clothing, Shoes & Jewelry','Clothing, Shoes & Jewelry','Home & Kitchen'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-
-                                                    case 'Home Improvement':
-                                                        console.log('home improvement');
-                                                        resParams.SearchIndex = 'Tools'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-
-
-                                                    case 'Major Appliances':
-                                                        console.log('Major Appliances');
-                                                        resParams.SearchIndex = 'Appliances'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Appliances'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Amazon Home':
-                                                        console.log('amaazon home');
-                                                        resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Electronics','Tools & Home Improvement','Kindle Store'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Mobile Application':
-                                                        console.log('mobile app');
-                                                        resParams.SearchIndex = 'Grocery'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Apps & Games'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Office Product':
-                                                        console.log('Office Product');
-                                                        resParams.SearchIndex = 'OfficeProducts'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Electronics','Arts, Crafts & Sewing','Office Products'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Jewelry':
-                                                        console.log('Jewelry');
-                                                        resParams.SearchIndex = 'Jewelry'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Home':
-                                                        console.log('home');
-                                                        resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Furniture':
-                                                        console.log('Furniture');
-                                                        resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Arts, Crafts & Sewing'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Automotive Parts and Accessories':
-                                                    case 'Boost':
-                                                    case 'Car Audio or Theater':
-                                                        console.log(productGroup);
-                                                        resParams.SearchIndex = 'Automotive'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Electronics','Health & Personal Care','Automotive','Patio, Lawn & Garden','Cell Phones & Accessories','Industrial & Scientific'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Health and Beauty':
-                                                        console.log('Health and Beauty');
-                                                        resParams.SearchIndex = 'HealthPersonalCare'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'Sports':
-                                                        console.log('Sports');
-                                                        resParams.SearchIndex = 'SportingGoods'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-                                                    case 'BISS':
-                                                        console.log('BISS');
-                                                        resParams.SearchIndex = 'Industrial'; //link product group to searchindex
-                                                        traverseNodes(browseNodes,['Industrial & Scientific','Automotive'],function(res){
-                                                            resParams.BrowseNode = res; 
-                                                            callback5(resParams);
-                                                        }); 
-                                                    break;
-
-
-
-
-
-
-                                                    default:
-                                                        resParams.SearchIndex = 'All';
-                                                        callback5(resParams);
-                                                }                                           
-                                            }
-
-                                            function traverseNodes(nodeList,findMe,callbackMM){
-
-                                                console.log(findMe);
-                                                console.log(findMe[0]);
-
-                                                var nodeArr = []; //collect all browse nodes
-
-                                                async.eachSeries(nodeList, function(item, callbackZ) {
-
-                                                    var currentNode = item;
-                                                    var childNodeId = currentNode.BrowseNodeId[0]; //get first ID in nest tree
-                                                        
-                                                    async.whilst(
-                                                        function () { 
-                                                            //authors note: findMe[i] logic a real shit way to check for multiple string matches while traversing nodes
-                                                            if (currentNode.Name && findMe.length > 0 && currentNode.Name[0] == findMe[0]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false;
-                                                            }else if (currentNode.Name && findMe.length > 1 && currentNode.Name[0] == findMe[1]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false; 
-                                                            }else if (currentNode.Name && findMe.length > 2 && currentNode.Name[0] == findMe[2]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false;     
-                                                            }else if (currentNode.Name && findMe.length > 3 && currentNode.Name[0] == findMe[3]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false;    
-                                                            }else if (currentNode.Name && findMe.length > 4 && currentNode.Name[0] == findMe[4]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false; 
-                                                            }else if (currentNode.Name && findMe.length > 5 && currentNode.Name[0] == findMe[5]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false;  
-                                                            }else if (currentNode.Name && findMe.length > 6 && currentNode.Name[0] == findMe[6]){ //we found the string, stop traversing
-                                                                nodeArr.push(childNodeId);
-                                                                return false;                                                                                                                                                                                            
-                                                            }else if (currentNode.Ancestors){ //didn't find string, keep traversing
-                                                                currentNode = currentNode.Ancestors[0].BrowseNode[0];
-                                                                return true;
-                                                            }
-                                                            else {
-                                                                return false;
-                                                            }
-                                                        },
-                                                        function (callback) {
-                                                            callback();                                                                
-                                                        },
-                                                        function (err) {
-                                                            if (err){
-                                                                console.log('WHILST error in search.js ',err);
-                                                            }
-                                                            callbackZ();
-                                                        }
-                                                    );     
-
-                                                }, function done(){
-                                                    if (nodeArr.length > 0){                                                    
-                                                        callbackMM(nodeArr.toString()); 
-                                                    }
-                                                    else {
-                                                        console.log('error: no browseNodes found')
-                                                    }                                          
-                                                });                                  
-
-                                            }
-                                           
-
-
-
-                                            // amazonParams.SearchIndex = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0].toString();
-                                            
-
-                                            //amazonParams.SearchIndex = '';                                     
-
-                                            
-
-
-                                            // console.log('link1 ',data.recallHistory.amazon[searchSelect].ItemLinks[0].ItemLink[0]);
-
-                                            // console.log('BELOW THIS PRICE1 ', modPrice);
-
-
-                                            //amazonParams.BrowseNode = modPrice.toString();   
-
-                                            // function continueStuff(){
-
-                                            //     //add price param
-                                            //     amazonParams.MaximumPrice = modPrice.toString();  
-
-
-                                            //     //now resolving the search term param
-                                            //     var itemAttrib = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
-                                            //     var cSearch = '';
-
-                                            //     if (itemAttrib.Department){
-                                            //         cSearch = cSearch + ' ' + itemAttrib.Department[0];
-                                            //     }
-                                            //     if (itemAttrib.ProductGroup){
-                                            //         cSearch = cSearch + ' ' + itemAttrib.ProductGroup[0];
-                                            //     }
-                                            //     if (itemAttrib.Binding){
-                                            //         cSearch = cSearch + ' ' + itemAttrib.Binding[0];
-                                            //     }
-                                            //     if (itemAttrib.Color){
-                                            //         cSearch = cSearch + ' ' + itemAttrib.Color[0];
-                                            //     }
-                                            //     if (itemAttrib.ClothingSize){
-                                            //         cSearch = cSearch + ' ' + itemAttrib.ClothingSize[0];
-                                            //     }
-
-                                            //     amazonParams.Keywords = cSearch;
-
-
-                                            //     delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
-                            
-                                            //     doSearch();
-
-                                            // }
-
-
+                                            //SEARCH INDEX:
+                                            // [\n\t\t\t\t\'All\',\'Wine\',\'Wireless\',\'ArtsAndCrafts\',\'Miscellaneous\',\'Electronics\',\'Jewelry\',\'MobileApps\',\'Photo\',
+                                            // \'Shoes\',\'Kindle Store\',\'Automotive\',\'Pantry\',\'MusicalInstruments\',\'DigitalMusic\',\'GiftCards\',\'FashionBaby\',\'FashionGirls\'
+                                            // ,\'GourmetFood\',\'HomeGarden\',\'MusicTracks\',\'UnboxVideo\',\'FashionWomen\',\'VideoGames\',\'FashionMen\',\'Kitchen\',\'Video\',
+                                            // \'Software\',\'Beauty\',\'Grocery\',,\'FashionBoys\',\'Industrial\',\'PetSupplies\',\'OfficeProducts\',\'Magazines\',\'Watches\',
+                                            // \'Luggage\',\'OutdoorLiving\',\'Toys\',\'SportingGoods\',\'PCHardware\',\'Movies\',\'Books\',\'Collectibles\',\'VHS\',\'MP3Downloads\',
+                                            // \'Fashion\',\'Tools\',\'Baby\',\'Apparel\',\'Marketplace\',\'DVD\',\'Appliances\',\'Music\',\'LawnAndGarden\',\'WirelessAccessories\',
+                                            // \'Blended\',\'HealthPersonalCare\',\'Classical\'\n\t\t\t\t].' ]
                                         }
                                         else {
-                                         
                                             doSearch();
                                             console.log('Error: not allowing search for max price below 0');
                                         }
@@ -555,9 +166,6 @@ var searchAmazon = function(data, type, query, flag) {
                                         console.log('error: amazon price missing');
                                     }
                                 }
-
-
-
                                 break;
 
 
@@ -608,12 +216,10 @@ var searchAmazon = function(data, type, query, flag) {
                             //     break;
                             case 'more':
                                 doSearch();
-
                                 break;
                             case 'more than':
                                 doSearch();
                                 break;
-
                             default:
                                 console.log('error: no flag.param found with flag.modify == price');
                                 doSearch();
@@ -630,7 +236,6 @@ var searchAmazon = function(data, type, query, flag) {
                 else {
                     doSearch();
                 }
-
             }
 
             //console.log('amazonParams ',amazonParams);
@@ -907,19 +512,33 @@ var searchModify = function(data,flag){
 
             //ugh dead
             if (data.dataModify.val){
-                var dumbVar = data.dataModify.val[0];
+                var dumbVal = data.dataModify.val[0];
             }
             else {
-                var dumbVar = '';
+                var dumbVal = '';
             }
              
             switch (data.dataModify.type) {
                 case 'price':
-
                     searchInitial(data,{ // passing special FLAG for search to handle
                         'type':data.dataModify.type,
                         'param':data.dataModify.param,
-                        'val':dumbVar,
+                        'val':dumbVal,
+                        'flagAction':flag
+                    });
+                    break;
+
+                case 'color':
+                    console.log('COLOR FIRED!!!');
+                    console.log('COLOR type: ',data.dataModify.type);
+                    console.log('COLOR param: ',data.dataModify.param);
+                    console.log('COLOR val: ',dumbVal);
+                    console.log('COLOR val: name: ',dumbVal.name);
+                    console.log('COLOR flagAction: ',flag);
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':dumbVal,
                         'flagAction':flag
                     });
                     break;
@@ -927,7 +546,7 @@ var searchModify = function(data,flag){
                 case 'brand':
                     searchInitial(data,{ // passing special FLAG for search to handle
                         'type':data.dataModify.type,
-                        'val':dumbVar
+                        'val':dumbVal
                     });
                     break;
 
@@ -991,20 +610,50 @@ var searchModify = function(data,flag){
         //SORT WHICH TRAITS TO MODIFY
         switch (data.dataModify.type) {
             // CASES: color, size, price, genericDetail
-            case 'color':
+            // case 'color':
 
-                //remove colors from item name for new search with new color
-                var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
-                async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
-                    cSearch = cSearch.replace(i,'');
-                    callback();
-                }, function done(){
-                    cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
-                    data.tokens[0] = cSearch; //replace search string in data obj
-                    searchInitial(data,flag); //do a new search
-                });
 
-                break;
+            //     // searchInitial(data,{ // passing special FLAG for search to handle
+            //     //     'type':data.dataModify.type,
+            //     //     'param':data.dataModify.param,
+            //     //     'val':dumbVal,
+            //     //     'flagAction':flag
+            //     // });
+
+            //     // //WHAT DO IF NO PG? NORMAL SEARCH?
+            //     // if (data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup){
+
+            //     //     var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+            //     //     var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;
+
+            //     //     console.log('!!productGroup <-- ',productGroup);
+
+            //     //     parseAmazon(productGroup,browseNodes,function(res){
+            //     //         amazonParams.SearchIndex = res.SearchIndex;
+            //     //         amazonParams.BrowseNode = res.BrowseNode;
+            //     //         amazonParams.MaximumPrice = modPrice.toString(); 
+            //     //         delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+            //     //         doSearch();
+            //     //     });
+            //     // }
+            //     // else {
+            //     //     console.log('Error: Product Group missing from amazon itemAttributes');
+            //     //     doSearch();
+            //     // }
+
+
+            //     // //remove colors from item name for new search with new color
+            //     // var CSS_COLOR_NAMES = ["aliceblue","antiquewhite","aqua","aquamarine","azure","beige","bisque","black","blanchedalmond","blue","blueviolet","brown","burlywood","cadetblue","chartreuse","chocolate","coral","cornflowerblue","cornsilk","crimson","cyan","darkblue","darkcyan","darkgoldenrod","darkgray","darkgrey","darkgreen","darkkhaki","darkmagenta","darkolivegreen","darkorange","darkorchid","darkred","darksalmon","darkseagreen","darkslateblue","darkslategray","darkslategrey","darkturquoise","darkviolet","deeppink","deepskyblue","dimgray","dimgrey","dodgerblue","firebrick","floralwhite","forestgreen","fuchsia","gainsboro","ghostwhite","gold","goldenrod","gray","grey","green","greenyellow","honeydew","hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush","lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow","lightgray","lightgrey","lightgreen","lightpink","lightsalmon","lightseagreen","lightskyblue","lightslategray","lightslategrey","lightsteelblue","lightyellow","lime","limegreen","linen","magenta","maroon","mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen","mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred","midnightblue","mintcream","mistyrose","moccasin","navajowhite","navy","oldlace","olive","olivedrab","orange","orangered","orchid","palegoldenrod","palegreen","paleturquoise","palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue","purple","red","rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen","seashell","sienna","silver","skyblue","slateblue","slategray","slategrey","snow","springgreen","steelblue","tan","teal","thistle","tomato","turquoise","violet","wheat","white","whitesmoke","yellow","yellowgreen"];
+            //     // async.eachSeries(CSS_COLOR_NAMES, function(i, callback) {
+            //     //     cSearch = cSearch.replace(i,'');
+            //     //     callback();
+            //     // }, function done(){
+            //     //     cSearch = data.dataModify.val[0].name + ' ' + cSearch; //add new color
+            //     //     data.tokens[0] = cSearch; //replace search string in data obj
+            //     //     searchInitial(data,flag); //do a new search
+            //     // });
+
+            //     break;
 
             case 'size':
 
@@ -1452,6 +1101,319 @@ function removeSpecials(str,callback) {
     callback(res);
 }
 
+
+////////// Amazon Specials /////////
+function parseAmazon(productGroup,browseNodes,callback5){
+    var resParams = {};
+    switch(productGroup){
+        case 'Hobby':
+        case 'Toy':
+            console.log('Toy or Hobby');
+            resParams.SearchIndex = 'Toys'; //link product group to searchindex
+
+            //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
+            traverseNodes(browseNodes,['Toys & Games'],function(res){ 
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Book':
+            console.log('Book');
+            resParams.SearchIndex = 'Books'; //link product group to searchindex
+            traverseNodes(browseNodes,['Books'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Apparel':
+            console.log('apparel');
+            resParams.SearchIndex = 'Apparel'; //link product group to searchindex
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Wine':
+            console.log('Wine');
+            resParams.SearchIndex = 'Wine'; //link product group to searchindex
+            traverseNodes(browseNodes,['Wine'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });                                                    
+        break;
+        case 'Personal Computer':
+            console.log('personal computer');
+            resParams.SearchIndex = 'PCHardware'; //link product group to searchindex
+            traverseNodes(browseNodes,['Computers & Accessories'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });     
+        break;
+        case 'Speakers':
+        case 'Network Media Player':
+        case 'GPS or Navigation System':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });  
+        break;
+        case 'Wireless':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Wireless'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Cell Phones & Accessories'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });  
+        break;
+        case 'Art and Craft Supply':
+            console.log('arts crafts supply');
+            resParams.SearchIndex = 'ArtsAndCrafts'; //link product group to searchindex
+            traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'eBooks':
+            console.log('kindle store');
+            resParams.SearchIndex = 'KindleStore'; //link product group to searchindex
+            traverseNodes(browseNodes,['Kindle Store','Books'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'CE':
+            console.log('>> CE');
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Digital Accessories 3':
+            console.log('Digital Accessories 3');
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Kindle Store'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Kitchen':
+            console.log('kitchen');
+            resParams.SearchIndex = 'Kitchen'; //link product group to searchindex
+            traverseNodes(browseNodes,['Home & Kitchen'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Grocery':
+            console.log('grocery');
+            resParams.SearchIndex = 'Grocery'; //link product group to searchindex
+            traverseNodes(browseNodes,['Grocery & Gourmet Food','Baby Products'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'TV Series Episode Video on Demand':
+        case 'Movie':
+            console.log('tv series Episode video on demand OR Movie');
+            resParams.SearchIndex = 'Video'; //link product group to searchindex
+            traverseNodes(browseNodes,['Movies & TV'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'DVD':
+            console.log('DVD');
+            resParams.SearchIndex = 'DVD'; //link product group to searchindex
+            traverseNodes(browseNodes,['Movies & TV'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Baby Product':
+            console.log('baby product');
+            resParams.SearchIndex = 'Baby'; //link product group to searchindex
+            traverseNodes(browseNodes,['Baby Products','Clothing, Shoes & Jewelry','Clothing, Shoes & Jewelry','Home & Kitchen'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+        case 'Home Improvement':
+            console.log('home improvement');
+            resParams.SearchIndex = 'Tools'; //link product group to searchindex
+            traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+
+        case 'Major Appliances':
+            console.log('Major Appliances');
+            resParams.SearchIndex = 'Appliances'; //link product group to searchindex
+            traverseNodes(browseNodes,['Appliances'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Amazon Home':
+            console.log('amaazon home');
+            resParams.SearchIndex = 'Electronics'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Tools & Home Improvement','Kindle Store'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Mobile Application':
+            console.log('mobile app');
+            resParams.SearchIndex = 'Grocery'; //link product group to searchindex
+            traverseNodes(browseNodes,['Apps & Games'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Office Product':
+            console.log('Office Product');
+            resParams.SearchIndex = 'OfficeProducts'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Arts, Crafts & Sewing','Office Products'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Jewelry':
+            console.log('Jewelry');
+            resParams.SearchIndex = 'Jewelry'; //link product group to searchindex
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Home':
+            console.log('home');
+            resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
+            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Furniture':
+            console.log('Furniture');
+            resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
+            traverseNodes(browseNodes,['Arts, Crafts & Sewing'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Automotive Parts and Accessories':
+        case 'Boost':
+        case 'Car Audio or Theater':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Automotive'; //link product group to searchindex
+            traverseNodes(browseNodes,['Electronics','Health & Personal Care','Automotive','Patio, Lawn & Garden','Cell Phones & Accessories','Industrial & Scientific'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Health and Beauty':
+            console.log('Health and Beauty');
+            resParams.SearchIndex = 'HealthPersonalCare'; //link product group to searchindex
+            traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Sports':
+            console.log('Sports');
+            resParams.SearchIndex = 'SportingGoods'; //link product group to searchindex
+            traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'BISS':
+            console.log('BISS');
+            resParams.SearchIndex = 'Industrial'; //link product group to searchindex
+            traverseNodes(browseNodes,['Industrial & Scientific','Automotive'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+
+
+        default:
+            resParams.SearchIndex = 'All';
+            callback5(resParams);
+    }                                           
+}
+
+function traverseNodes(nodeList,findMe,callbackMM){
+
+    console.log(findMe);
+    console.log(findMe[0]);
+
+    var nodeArr = []; //collect all browse nodes
+
+    async.eachSeries(nodeList, function(item, callbackZ) {
+
+        var currentNode = item;
+        var childNodeId = currentNode.BrowseNodeId[0]; //get first ID in nest tree
+            
+        async.whilst(
+            function () { 
+                //authors note: findMe[i] logic a real shit way to check for multiple string matches while traversing nodes
+                if (currentNode.Name && findMe.length > 0 && currentNode.Name[0] == findMe[0]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 1 && currentNode.Name[0] == findMe[1]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 2 && currentNode.Name[0] == findMe[2]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 3 && currentNode.Name[0] == findMe[3]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 4 && currentNode.Name[0] == findMe[4]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 5 && currentNode.Name[0] == findMe[5]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 6 && currentNode.Name[0] == findMe[6]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    return false;                                                                                                                                                                                            
+                }else if (currentNode.Ancestors){ //didn't find string, keep traversing
+                    currentNode = currentNode.Ancestors[0].BrowseNode[0];
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            },
+            function (callback) {
+                callback();                                                                
+            },
+            function (err) {
+                if (err){
+                    console.log('WHILST error in search.js ',err);
+                }
+                callbackZ();
+            }
+        );     
+
+    }, function done(){
+        if (nodeArr.length > 0){                                                    
+            callbackMM(nodeArr.toString()); 
+        }
+        else {
+            console.log('error: no browseNodes found')
+        }                                          
+    });                                  
+}
 
 
 /// exports
