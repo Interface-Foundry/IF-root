@@ -70,16 +70,48 @@ var searchAmazon = function(data, type, query, flag) {
 
                     //parse flags
 
-                    if (flag.type == 'color' && flag.val){  
+                    if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material' || flag.type == 'genericDetail' && flag.val){  
 
-                        console.log('continueProcess() color fired');
+                        console.log('FLAG TYPE &!&!&! ',flag.type);
 
-                        parseAmazon(productGroup,browseNodes,function(res){
-                            amazonParams.SearchIndex = res.SearchIndex;
-                            amazonParams.BrowseNode = res.BrowseNode;
-                            amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
-                            doSearch();
-                        });
+                        if (flag.flagAction == 'weakSearchContinue' && data.amazonParams || flag.flagAction == 'weakSearch' && data.amazonParams){
+                            console.log('? ?? ? ? ? ? ? ? ');
+                            if (data.amazonParams){
+                                console.log('GENERCICCC: DOING WEAK NODE SEARCH');
+                                amazonParams = data.amazonParams;
+                                doSearch();
+                            }
+                            else {
+                                console.log('Error: data.amazonParams not found while doing weaksearch in initial search');
+                                ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
+                            }
+                        }
+                        else {
+                            console.log('INITIAL MODOFY SEARCH FLAGGGGG: ',flag);
+                            parseAmazon(productGroup,browseNodes,function(res){
+                                amazonParams.SearchIndex = res.SearchIndex;
+                                amazonParams.BrowseNode = res.BrowseNode;
+                                var modder;
+
+                                if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material'){
+                                    modder = flag.type;
+                                }
+
+                                if (flag.val instanceof Array){
+                                    console.log('IS ARRAY');
+                                    amazonParams.Keywords = modder + ' ' + flag.val[0].name; //!\!\!\!\ remove so we query by browsenode
+                                }else {
+                                    if (flag.val.name){
+                                        amazonParams.Keywords = modder + ' ' + flag.val.name; //!\!\!\!\ remove so we query by browsenode
+                                    }else {
+                                        amazonParams.Keywords = modder + ' ' +  flag.val; //!\!\!\!\ remove so we query by browsenode
+                                    }
+                                }
+                                console.log('KEYWORDS ',amazonParams.Keywords);
+                                doSearch();
+                            });
+                        }
+
                     }
 
                     else if (flag.type == 'price'){
@@ -463,7 +495,7 @@ function weakSearch(data,type,query,flag,amazonParams){
             //select weakSearch action (initial, modify, etc)
             switch (data.action) {
                 case 'modify':
-                    if (data.dataModify && data.dataModify.type == 'price' && data.amazonParams){
+                    if (data.dataModify && data.amazonParams){
                         //console.log('cant find lower price item, preventing infinite loop');
                         console.log('dataforModifyPRICE ',data.amazonParams);
                         data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.split(',');
@@ -478,10 +510,14 @@ function weakSearch(data,type,query,flag,amazonParams){
                                 console.log('continue trying to search!');
                                 data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.toString();
                                 searchModify(data, 'weakSearchContinue');
-                            }else {
+                            }else if (data.amazonParams.BrowseNode.length == 1) { //ok last one, set flag
                                 data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.toString();
                                 console.log('ok our last search!!!!!!!!!!!!!!!!!!!');
                                 searchModify(data, 'weakSearch');
+                            }
+                            else {
+                                console.log('warning: no results found after trying weak searches. consider re-searching for SOMETHING to give user');
+                                ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
                             }
                         }, 250);
 
@@ -543,10 +579,71 @@ var searchModify = function(data,flag){
                     });
                     break;
 
+
+                case 'size':
+
+                    console.log('SIZE FIRED!!!');
+                    console.log('SIZE type: ',data.dataModify.type);
+                    console.log('SIZE param: ',data.dataModify.param);
+                    console.log('SIZE val: ',dumbVal);
+                    console.log('SIZE val: name: ',dumbVal.name);
+                    console.log('SIZE flagAction: ',flag);
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':dumbVal,
+                        'flagAction':flag
+                    });
+                    break;
+
+                //texture, fabric, coating, etc
+                case 'material':
+
+                    console.log('material FIRED!!!');
+                    console.log('material type: ',data.dataModify.type);
+                    console.log('material param: ',data.dataModify.param);
+                    console.log('material val: ',dumbVal);
+                    console.log('material val: name: ',dumbVal.name);
+                    console.log('material flagAction: ',flag);
+                    searchInitial(data,{ // passing special FLAG for search to handle
+                        'type':data.dataModify.type,
+                        'param':data.dataModify.param,
+                        'val':dumbVal,
+                        'flagAction':flag
+                    });
+                    break;
+
+                //unsortable modifier
+                case 'genericDetail':
+                    //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
+                    if (data.dataModify.val == 'buy'){
+                        data.bucket = 'purchase';
+                        data.action = 'save';
+                        saveToCart(data);
+                    }
+                    //normal action here
+                    else {
+                        console.log('genericDetail FIRED!!!');
+                        console.log('genericDetail type: ',data.dataModify.type);
+                        console.log('genericDetail param: ',data.dataModify.param);
+                        console.log('genericDetail val: ',dumbVal);
+                        console.log('genericDetail val: name: ',dumbVal.name);
+                        console.log('genericDetail flagAction: ',flag);
+                        searchInitial(data,{ // passing special FLAG for search to handle
+                            'type':data.dataModify.type,
+                            'param':data.dataModify.param,
+                            'val':dumbVal,
+                            'flagAction':flag
+                        });
+                    }
+                    break;
+
                 case 'brand':
                     searchInitial(data,{ // passing special FLAG for search to handle
                         'type':data.dataModify.type,
-                        'val':dumbVal
+                        'param':data.dataModify.param,
+                        'val':dumbVal,
+                        'flagAction':flag
                     });
                     break;
 
@@ -559,6 +656,8 @@ var searchModify = function(data,flag){
         }
 
         function constructAmazonQuery(){
+
+            console.log('how is this still firing ??? ');
 
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
 
@@ -1064,7 +1163,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Apparel':
             console.log('apparel');
             resParams.SearchIndex = 'Apparel'; //link product group to searchindex
-            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry'],function(res){
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
