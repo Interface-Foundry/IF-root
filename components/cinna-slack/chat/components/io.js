@@ -1,19 +1,20 @@
 var async = require('async');
 var request = require('request');
+
 var Bot = require('../slackbots_modified'); //load slack api
+
 var banter = require("./banter.js");
 var history = require("./history.js");
 var search = require("./search.js");
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
+
 var nlp = require('../../nlp/api');
-var ioClient = require('socket.io-client').connect("http://localhost:3000");
-ioClient.on('connect', function() {
-        console.log('Connected to support client.')
-    })
+
 //set env vars
 var config = require('config');
+
 //load mongoose models
 var db = require('db');
 var Message = db.Message;
@@ -22,6 +23,7 @@ var Slackbots = db.Slackbots;
 var slackUsers = {};
 var messageHistory = {}; //fake database, stores all users and their chat histories
 var io; //global socket.io var...probably a bad idea, idk lol
+var supervisor = require('./supervisor')
 
 /////////// LOAD INCOMING ////////////////
 
@@ -33,7 +35,7 @@ var initSlackUsers = function(env){
         var testUser = [{
             team_id:'T0H72FMNK',
             bot: {
-               bot_user_id: 'cinnatest',
+                bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
             meta: {
@@ -217,6 +219,7 @@ var loadSocketIO = function(server){
     io = require('socket.io').listen(server);
     io.sockets.on('connection', function(socket) {
         console.log("socket connected");
+
         //* * * * send welcome message
         var hello = {
             msg: 'welcome'
@@ -231,6 +234,7 @@ var loadSocketIO = function(server){
             sendTxtResponse(hello,res);
         });
        // * * * * * * * * * * //
+        
         socket.on("msgToClient", function(data) {
             data.source = {
                 'origin':'socket.io',
@@ -240,10 +244,13 @@ var loadSocketIO = function(server){
             }
             preProcess(data);
         });
+
         socket.on("msgFromSever", function(data) {
             console.log('Received message from supervisor', data)
             incomingAction(data);
         })
+
+
     }); 
 }
 
@@ -304,22 +311,10 @@ function preProcess(data){
                     console.log('error: canned action flag missing');
             }
         }
-        // proceed to NLP instead
+        //proceed to NLP instead
         else {
             routeNLP(data);
         }
-        
-        //TESTING SUPERVISOR
-        // data.client_res = [];
-        // if (res) {
-        //    data.client_res.push(res.split(' ')); 
-        // }
-        // data.tokens = [];
-        // data.tokens.push(query); //search for this item
-        // data.bucket = 'supervisor';
-        // data.action = 'initial';
-        // incomingAction(data);
-
     },data.source.origin);
 
   //  });
@@ -332,7 +327,7 @@ function routeNLP(data){
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
-            console.log('NLP RES ',JSON.stringify(res));
+            console.log('NLP RES ',res);
 
             if(!res.bucket){
                 res.bucket = 'search';
@@ -359,15 +354,6 @@ function routeNLP(data){
             }
             //- - - - end temp - - - - //
 
-             //TESTING SUPERVISOR
-           //  if (res) {
-           // data.client_res.push(res.split(' ')); 
-           //  }
-           //  //now search for item
-           //  data.tokens = [];
-           //  data.tokens.push(query); //search for this item
-           //  data.bucket = 'supervisor';
-           //  data.action = 'initial';
             incomingAction(data);
 
         }
@@ -378,85 +364,18 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
-    //Emit to Supervisor:
-         //route to supervisor chat window
-         if (data.bucket === 'response') {
+
+    //---supervisor stuff---//
+    if (data.bucket === 'response') {
             return sendResponse(data)
          }
-         console.log(1)
-            var rand = Math.random().toString(36).slice(2)
-            if (!ioClient.connected) {
-                ioClient.on('connect', function() {
-                    console.log('Connected to support client.')
-                    ioClient.emit('new channel', {
-                        name: data.source.channel,
-                        id: data.source.channel,
-                        resolved: false
-                    })
-                    ioClient.emit('new message', {
-                        id: null,
-                        incoming: true,
-                        msg: data.msg,
-                        tokens: [data.msg.split(' ')],
-                        bucket: 'supervisor',
-                        action: '',
-                        amazon: [],
-                        // dataModify: {
-                        //     type: '',
-                        //     val: [],
-                        //     param: ''
-                        // },
-                        source: {
-                            origin: 'socket.io',
-                            channel: data.source.channel,
-                            org: 'kip',
-                            id: data.source.channel
-                        },
-                        client_res: {
-                            msg: ''
-                        },
-                        ts: Date.now,
-                        resolved: false,
-                        parent: rand
-                    })
-                })
-            } else {
-                ioClient.emit('new channel', {
-                    name: data.source.channel,
-                    id: data.source.channel,
-                    resolved: false
-                })
-                ioClient.emit('new message', {
-                    id: null,
-                    incoming: true,
-                    msg: data.msg,
-                    tokens: [data.msg.split(' ')],
-                    bucket: 'supervisor',
-                    action: '',
-                    amazon: [],
-                    // dataModify: {
-                    //     type: '',
-                    //     val: [],
-                    //     param: ''
-                    // },
-                    source: {
-                        origin: 'socket.io',
-                        channel: data.source.channel,
-                        org: 'kip',
-                        id: data.source.channel
-                    },
-                    client_res: {
-                        msg: ''
-                    },
-                    ts: Date.now,
-                    resolved: false,
-                    parent: rand
-                })
-            }
-            console.log(2)
+    supervisor.emit(data, true)
+    //----------------------//
+
+
     //save a new message obj
-    // history.saveHistory(data,true); 
-    //saving incoming message    
+    history.saveHistory(data,true); //saving incoming message
+    
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
         case 'search':
@@ -467,7 +386,9 @@ function incomingAction(data){
             break;
         case 'purchase':
             purchaseBucket(data);
-            break;       
+            break;
+        case 'supervisor':
+            //route to supervisor chat window
         default:
             searchBucket(data);
     }
@@ -487,25 +408,39 @@ function searchBucket(data){
     //sort search action type
     switch (data.action) {
         case 'initial':
-            console.log('Getting to initial!')
             search.searchInitial(data);
             break;
         case 'similar':
-            history.recallHistory(data, function(res){
+            //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flag && data.flag === 'recalled') { 
+                 search.searchSimilar(data);
+            } 
+            //-----------------------------------------------------------------//
+            else {
+                history.recallHistory(data, function(res){
                 if (res){
                     data.recallHistory = res;
                 }
                 search.searchSimilar(data);
-            });
+                });
+            }
+     
             break;
         case 'modify':
         case 'modified': //because the nlp json is wack
-            history.recallHistory(data, function(res){
-                if (res){
-                    data.recallHistory = res;
-                }
-                search.searchModify(data);
-            });
+            //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flag && data.flag === 'recalled') { 
+                 search.searchModify(data);
+            } 
+            //-----------------------------------------------------------------//
+            else {
+                history.recallHistory(data, function(res){
+                    if (res){
+                        data.recallHistory = res;
+                    }
+                    search.searchModify(data);
+                });
+            }
             break;
         case 'focus':
             history.recallHistory(data, function(res){
@@ -661,16 +596,12 @@ var sendResponse = function(data){
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
             }            
         }
+        //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.bucket = 'results'
-               if (!ioClient.connected) {
-                ioClient.on('connect', function() {
-                     ioClient.emit('new message', data)
-                })
-            } else {
-                    ioClient.emit('new message', data)
-            }
+               supervisor.emit(data)
         }
+        //----------------------------------------------------------------//
         else {
             console.log('error: socket io channel missing');
         }
@@ -781,11 +712,13 @@ var sendResponse = function(data){
             console.log('error: slackUsers channel missing');
         }
     }
+     //---supervisor: relay search result previews back to supervisor---//
     else if (data.source.channel && data.source.origin == 'supervisor'){
-        console.log('Line 1501: Sending results back to supervisor')
+        console.log('Sending results back to supervisor')
         data.bucket = 'results'
-        ioClient.emit('new message', data)
+        supervisor.emit(data)
     }
+    //----------------------------------------------------------------//
     else {
         console.log('error: data.source.channel or source.origin missing')
     }
@@ -866,6 +799,7 @@ function recallHistory(data,callback,steps){
     switch (data.bucket) {
         case 'search':
             //console.log(data);
+
             switch(data.action){
                 //if action is focus, find lastest 'initial' item
                 case 'focus':
@@ -881,6 +815,7 @@ function recallHistory(data,callback,steps){
                     callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
                     break;
             }
+
             break;
         case 'banter':
             var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1

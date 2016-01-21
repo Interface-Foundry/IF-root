@@ -118,6 +118,7 @@ export function resolveChannel(channel) {
     .send(channel)
     .end((err, res) => {
       if (err) {
+        console.log('resovle channel err: ',err)
         reject(res.body || err);
       } else {
         resolve();

@@ -28,6 +28,7 @@ var searchSimilar = function(data){
         searchModify(data);
     }
     else if (data.recallHistory && data.recallHistory.amazon){
+        console.log('TING TANG WALLAWALLA BING BANG',data)
         searchAmazon(data,'similar','none','null');
     }
     else {

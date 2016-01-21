@@ -11,7 +11,7 @@ exports = module.exports = function(io, cinnaio) {
             console.log('raw msg in socket events: ')
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
-                console.log('socketEvents: new message from cinna received.')
+                console.log('socketEvents: new message from cinna received.', msg)
                 socket.broadcast.emit('new bc message', msg);
             }
             //Emit outgoing message to cinna-slack

@@ -121,7 +121,7 @@ class ControlPanel extends Component {
     const self = this
      this.setState({ mounted: true });
      socket.on('results', function (msg) {
-      // console.log('ControlPanel: Received results',msg)
+      console.log('ControlPanel: Received results in Control Panel',msg)
       try {
            for (var i = 0; i < msg.amazon.length; i++) {
             self.state.items[i].index = i

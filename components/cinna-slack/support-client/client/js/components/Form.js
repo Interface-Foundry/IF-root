@@ -185,7 +185,7 @@ class DynamicForm extends Component {
     newQuery.action = 'similar'
     newQuery.client_res = [newQuery.msg]
     newQuery.tokens = newQuery.msg.split(' ')
-    newQuery.source.origin = 'supervisor'
+    newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults
     }
