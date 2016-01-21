@@ -1,0 +1,398 @@
+
+a {
+  text-decoration: none;
+}
+
+html,
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.react,
+.root {
+  height: 100%;
+}
+
+.flexbox-container {
+  display: -ms-flex;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.flexbox-container > div {
+  width: 50%;
+  padding: 10px;
+}
+
+.flexbox-container > div:first-child {
+  margin-right: 20px;
+}
+
+.kipicon {
+  content: url("/static/kip-icon.png");
+  width: 3.5em;
+  height: 3.5em;
+  margin: 0 auto;
+}
+
+.product-box {
+  box-sizing: border-box;
+      background: #fff;
+      border: 1px solid #999;
+      border-radius: 3px;
+      width: 100px;
+      height: 100px;
+      margin: 10px;
+      padding: 10px;
+      float: left;
+}
+
+.nav {
+  margin: 0;
+  color: white;
+  background: #337ab7;
+  width: 21rem;
+-ms-flex: 0 1rem;
+-webkit-box-flex:  0;
+-moz-box-flex:  0;
+-ms-box-flex:  0;
+box-flex:  0;
+display: flex;
+justify-content: flex-start;
+-webkit-box-orient: vertical;
+-moz-box-orient: vertical;
+-webkit-box-direction: normal;
+-moz-box-direction: normal;
+-webkit-flex-direction: column;
+-ms-flex-direction: column;
+flex-direction: column;
+}
+
+.main {
+  margin: 0;
+  background: #F5F8FF;
+ -ms-flex: 1;
+ -webkit-box-flex: 1;
+ -moz-box-flex: 1;
+ -ms-box-flex: 1;
+ box-flex: 1;
+ display: flex;
+ flex-direction: column;
+ margin-bottom: 2rem;
+ justify-content: flex-start;
+ align-content: flex-start;
+ align-items: inherit;
+}
+
+.transition { background-color: red; }
+
+.switch-enter {
+    opacity: 0.01;
+}
+.switch-enter.switch-enter-active {
+    opacity: 1.0;
+      background-color: yellow;
+
+}
+.switch-leave {
+    /* Completely hide the button while it's being animated and before it's removed from the DOM. */
+    visibility: hidden;
+    height: 0px;
+    width: 0px;
+    
+    /* Starting opacity */
+    opacity: 1.0;
+}
+.switch-leave.switch-leave-active {
+    /* Ending opacity: 
+    Trigger opacity change so the "transitionend" event will fire, causing React to remove from the DOM. */
+    opacity: 0;
+}
+
+.example-enter {
+  opacity: 0.01;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.example-leave {
+  opacity: 1;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+
+
+.example-appear {
+  opacity: 0.01;
+}
+
+.example-appear.example-appear-active {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
+span[class*="glyphicon-one-fine"] {
+    padding-top: 0.46em;
+    padding-right: 0.4em;
+}
+
+.jsonBox {
+  font-size: 0.4em;
+}
+ 
+.glyphicon-one-fine-green-dot:before {
+    content:"\25cf";
+    font-size: 0.7em;
+    color: #34A853;
+}
+
+.glyphicon-one-fine-empty-dot:before {
+    content:"\25cb";
+    font-size: 0.7em;
+}
+
+.btn-primary {
+  border: none;
+}
+
+.react-spinner {
+  position: relative;
+  width: 20px;
+  height: 6px;
+  top: 50%;
+  left: 50%;
+}
+
+.react-spinner_bar {
+  -webkit-animation: react-spinner_spin 1.2s linear infinite;
+  -moz-animation: react-spinner_spin 1.2s linear infinite;
+  animation: react-spinner_spin 1.2s linear infinite;
+  border-radius: 5px;
+  background-color: white;
+  position: absolute;
+  width: 20%;
+  height: 7.8%;
+  top: -3.9%;
+  left: -10%;
+}
+
+.react-toggle {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.react-toggle-screenreader-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.react-toggle--disabled {
+  opacity: 0.5;
+  -webkit-transition: opacity 0.25s;
+  transition: opacity 0.25s;
+}
+
+.react-toggle-track {
+  width: 50px;
+  height: 24px;
+  padding: 0;
+  border-radius: 30px;
+  background-color: #4D4D4D;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.react-toggle:hover .react-toggle-track {
+  background-color: #000000;
+}
+
+.react-toggle--checked .react-toggle-track {
+  background-color: #19AB27;
+}
+
+.react-toggle.react-toggle--checked:hover .react-toggle-track {
+  background-color: #128D15;
+}
+
+.react-toggle-track-check {
+  position: absolute;
+  width: 14px;
+  height: 10px;
+  top: 0px;
+  bottom: 0px;
+  margin-top: auto;
+  margin-bottom: auto;
+  line-height: 0;
+  left: 8px;
+  opacity: 0;
+  -webkit-transition: opacity 0.25s ease;
+  -moz-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.react-toggle--checked .react-toggle-track-check {
+  opacity: 1;
+  -webkit-transition: opacity 0.25s ease;
+  -moz-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.react-toggle-track-x {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 0px;
+  bottom: 0px;
+  margin-top: auto;
+  margin-bottom: auto;
+  line-height: 0;
+  right: 10px;
+  opacity: 1;
+  -webkit-transition: opacity 0.25s ease;
+  -moz-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.react-toggle--checked .react-toggle-track-x {
+  opacity: 0;
+}
+
+.react-toggle-thumb {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #4D4D4D;
+  border-radius: 50%;
+  background-color: #FAFAFA;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+.react-toggle--checked .react-toggle-thumb {
+  left: 27px;
+  border-color: #19AB27;
+}
+
+.react-toggle--focus .react-toggle-thumb {
+  -webkit-box-shadow: 0px 0px 3px 2px #0099E0;
+  -moz-box-shadow: 0px 0px 3px 2px #0099E0;
+  box-shadow: 0px 0px 2px 3px #0099E0;
+}
+
+.react-toggle:active .react-toggle-thumb {
+  -webkit-box-shadow: 0px 0px 5px 5px #0099E0;
+  -moz-box-shadow: 0px 0px 5px 5px #0099E0;
+  box-shadow: 0px 0px 5px 5px #0099E0;
+}
+
+/*Draggable List*/
+
+  .demo8-outer {
+    background-color: #EEE;
+    color: #FFF;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    font: 28px/1em "Helvetica";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: -webkit-flex;
+    -webkit-justify-content: center;
+    -webkit-align-items: center;
+  }
+  .demo8 {
+    width: 320px;
+    height: 400px;
+  }
+  .demo8-item {
+    position: absolute;
+    width: 320px;
+    height: 90px;
+    overflow: visible;
+    pointer-events: auto;
+    transform-origin: 50% 50% 0px;
+    border-radius: 4px;
+    color: rgb(153, 153, 153);
+    line-height: 96px;
+    padding-left: 32px;
+    font-size: 24px;
+    font-weight: 400;
+    background-color: rgb(255, 255, 255);
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+  }
+  .link {
+    position: absolute;
+    color: rgb(76, 76, 76);
+    text-decoration: none;
+    font: 14px/1em "Helvetica";
+    padding: 10px;
+    top: 0;
+    left: 0;
+  }
+
+  /*end draggablelist*/
+
+
+
+@keyframes react-spinner_spin {
+ 0% { opacity: 1; }
+ 100% { opacity: 0.15; }
+}
+
+@-moz-keyframes react-spinner_spin {
+ 0% { opacity: 1; }
+ 100% { opacity: 0.15; }
+}
+
+@-webkit-keyframes react-spinner_spin {
+ 0% { opacity: 1; }
+ 100% { opacity: 0.15; }
+
+
+@media screen and (min-width: 750px) {
+  .form-button { 
+    -ms-flex-direction: vertical;
+    -webkit-box-orient: column;
+    flex-direction: vertical; 
+  }
+}

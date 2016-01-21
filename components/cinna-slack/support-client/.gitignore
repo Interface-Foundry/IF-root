@@ -1,0 +1,7 @@
+**/node_modules/
+**/*.sw*
+.env
+npm-debug.log
+db/
+static/
+config/oAuthConfig.js
