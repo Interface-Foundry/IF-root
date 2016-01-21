@@ -76,4 +76,3 @@ ioKip.loadSocketIO(server);
 app.get('/newslack', function(req, res) {
     ioKip.newSlack();
 });
-

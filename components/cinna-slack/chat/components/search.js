@@ -23,11 +23,12 @@ var searchInitial = function(data,flag){
 }
 
 var searchSimilar = function(data){
-    if (data.dataModify){
+    if (data.dataModify && data.dataModify.val.length > 0){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);
     }
     else if (data.recallHistory && data.recallHistory.amazon){
+        console.log('TING TANG WALLAWALLA BING BANG',data)
         searchAmazon(data,'similar','none','null');
     }
     else {
@@ -330,9 +331,7 @@ var searchAmazon = function(data, type, query, flag) {
                 //outgoingResponse(data,'txt');
             }
             else {
-
                 if (data.recallHistory && data.recallHistory.amazon){ //we have a previously saved amazon session
-
                     if (!flag){ //no flag passed in
                         flag = 'Intersection'; //default
                     }
@@ -355,7 +354,6 @@ var searchAmazon = function(data, type, query, flag) {
                       responseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
 
                     }).then(function(results){
-
                         data.amazon = results;
 
                         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
@@ -503,6 +501,7 @@ var searchModify = function(data,flag){
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/Variations_VariationDimensions.html
 
     var cSearch = ''; //construct new search string
+
 
     //CONSTRUCT QUERY FROM AMAZON OBJECT
     if (data.recallHistory && data.recallHistory.amazon){
@@ -697,7 +696,7 @@ var searchModify = function(data,flag){
 
 }
 
-var searchFocus = function(data){
+var searchFocus = function(data) {
 
     if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
         if(data.recallHistory && data.recallHistory.amazon){
