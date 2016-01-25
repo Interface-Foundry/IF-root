@@ -191,6 +191,7 @@ class DynamicForm extends Component {
             })
         // });
       // });
+  document.querySelector('#search-input').value = ''
   resetForm()
   }
 
