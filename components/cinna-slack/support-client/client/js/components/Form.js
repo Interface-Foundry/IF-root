@@ -77,7 +77,8 @@ class DynamicForm extends Component {
         spinnerloading: false,
         modifier: { color: null, size: null},
         color: false,
-        size: false
+        size: false,
+        searchParam: ''
       };
       resetForm()
     })
@@ -166,8 +167,10 @@ class DynamicForm extends Component {
              if (!this.state.searchParam) {
               if (query) {
                 this.state.searchParam = query
+              } else if (document.querySelector('#search-input').value !== ''){
+                this.state.searchParam = document.querySelector('#search-input').value
               } else {
-                console.log('search input is empty: ', this.state,'Query:' ,query)
+                console.log('search input is empty.')
                 return
               }
             }
@@ -183,11 +186,12 @@ class DynamicForm extends Component {
             // console.log('Form.js 180: ', newQuery)
             socket.emit('new message', newQuery);
             this.setState({
-              spinnerloading: true
+              spinnerloading: true,
+              searchParam: ''
             })
         // });
       // });
-  // resetForm()
+  resetForm()
   }
 
   searchSimilar() {
@@ -430,7 +434,7 @@ class DynamicForm extends Component {
                 </Button>
            
                 <div id="search-box" style={showSearchBox}>
-                  <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
+                  <input type="text" id="search-input" {...fields['searchParam']} onChange={this.OnChange} />
                     <Button bsSize = "large" disabled={this.state.spinnerloading}  style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                       Search Amazon
                        <div style={spinnerStyle}>
