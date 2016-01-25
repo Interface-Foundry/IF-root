@@ -337,6 +337,9 @@ function preProcess(data){
 //pushing incoming messages to python
 function routeNLP(data){
 
+    //sanitize msg before sending to NLP
+    data.msg = data.msg.replace(/[^\w\s]/gi, ''); 
+
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
@@ -555,7 +558,9 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                         data.urlShorten.push(i);//save shortened URLs
                         processData.getNumEmoji(data,count+1,function(emoji){
 
-                            res[count] = res[count].trim();
+                            res[count] = res[count].trim(); 
+
+                            console.log('PUSH TO attach ','<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
 
                             data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             count++;                           
@@ -655,9 +660,11 @@ var sendResponse = function(data){
                 attachThis.shift(); //remove image from array
 
                 attachments[1].fallback = 'Here are some options you might like';
+
+                console.log('attachThis ',attachThis); 
+
                 //put in attachment fields
                 async.eachSeries(attachThis, function(attach, callback) {
-                    //attach = attach.replace('\\n','');
                     var field = {
                         "value": attach,
                         "short":false

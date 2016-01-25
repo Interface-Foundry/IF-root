@@ -100,12 +100,12 @@ var searchAmazon = function(data, type, query, flag) {
 
                                 if (flag.val instanceof Array){
                                     console.log('IS ARRAY');
-                                    amazonParams.Keywords = modder + ' ' + flag.val[0].name; //!\!\!\!\ remove so we query by browsenode
+                                    amazonParams.Keywords = flag.val[0].name; //!\!\!\!\ remove so we query by browsenode
                                 }else {
                                     if (flag.val.name){
-                                        amazonParams.Keywords = modder + ' ' + flag.val.name; //!\!\!\!\ remove so we query by browsenode
+                                        amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
                                     }else {
-                                        amazonParams.Keywords = modder + ' ' +  flag.val; //!\!\!\!\ remove so we query by browsenode
+                                        amazonParams.Keywords = flag.val; //!\!\!\!\ remove so we query by browsenode
                                     }
                                 }
                                 console.log('KEYWORDS ',amazonParams.Keywords);
@@ -296,29 +296,32 @@ var searchAmazon = function(data, type, query, flag) {
                     }
                     //TEMP PATCH, FOR RESULTS UNDER 3 items
                     else {
-                        var loopLame = [0,1,2];//lol
-                        async.eachSeries(loopLame, function(i, callback) {
-                            if (data.amazon[i]){
-                                //get reviews by ASIN
-                                getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                                    //adding scraped reviews to amazon objects
-                                    data.amazon[i].reviews = {
-                                        rating: rating,
-                                        reviewCount: reviewCount
-                                    }
-                                    //GET PRICE
-                                    getPrices(data.amazon[i],function(realPrice){
-                                        data.amazon[i].realPrice = realPrice;
-                                        callback();
-                                    });
-                                });
-                            }
-                            else {
-                                callback();
-                            }
-                        }, function done(){
-                            ioKip.outgoingResponse(data,'stitch','amazon');
-                        });
+                        //do a weak search
+                        weakSearch(data,type,query,flag,amazonParams);
+
+                        // var loopLame = [0,1,2];//lol
+                        // async.eachSeries(loopLame, function(i, callback) {
+                        //     if (data.amazon[i]){
+                        //         //get reviews by ASIN
+                        //         getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                        //             //adding scraped reviews to amazon objects
+                        //             data.amazon[i].reviews = {
+                        //                 rating: rating,
+                        //                 reviewCount: reviewCount
+                        //             }
+                        //             //GET PRICE
+                        //             getPrices(data.amazon[i],function(realPrice){
+                        //                 data.amazon[i].realPrice = realPrice;
+                        //                 callback();
+                        //             });
+                        //         });
+                        //     }
+                        //     else {
+                        //         callback();
+                        //     }
+                        // }, function done(){
+                        //     ioKip.outgoingResponse(data,'stitch','amazon');
+                        // });
                     }
 
                 }).catch(function(err){
@@ -492,6 +495,7 @@ function weakSearch(data,type,query,flag,amazonParams){
                         data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.split(',');
                         console.log('newNodes ',data.amazonParams.BrowseNode);
                         data.amazonParams.BrowseNode.pop(); // remove last id in arr
+                        //data.amazonParams.BrowseNode.shift(); // remove last id in arr
                         console.log('newNodes POPPED ', data.amazonParams.BrowseNode);
 
                         console.log('arr length ',data.amazonParams.BrowseNode.length);
@@ -823,15 +827,17 @@ var searchFocus = function(data) {
                     //send product title + price
                     //var topStr = attribs.Title[0];
 
+                    var topStr;
+
                     //if realprice exists, add it to title
                     if (data.recallHistory.amazon[searchSelect].realPrice){
                         topStr = data.recallHistory.amazon[searchSelect].realPrice;
                     }
 
                     //Make top line bold
-                    if (data.source.origin == 'slack'){
+                    if (data.source.origin == 'slack' && topStr){
                         topStr = '*'+topStr+'*';
-                    }else if (data.source.origin == 'socket.io'){
+                    }else if (data.source.origin == 'socket.io' && topStr){
                         topStr = '<b>'+topStr+'</b>';
                     }
 
@@ -1141,6 +1147,12 @@ function removeSpecials(str,callback) {
 ////////// Amazon Specials /////////
 function parseAmazon(productGroup,browseNodes,callback5){
 
+    // * * * * * * * *
+    // Note: the traverseNodes(browseNodes,['Toys & Games','Clothing, Shoes & Jewelry','Electronics','Office Products'] 
+    //      -----> parts can be re-arranged to improve search results 
+    //      -----> favor strings related to search index 
+    // * * * * * * * *
+
     //SEARCH INDEX:
     // [\n\t\t\t\t\'All\',\'Wine\',\'Wireless\',\'ArtsAndCrafts\',\'Miscellaneous\',\'Electronics\',\'Jewelry\',\'MobileApps\',\'Photo\',
     // \'Shoes\',\'Kindle Store\',\'Automotive\',\'Pantry\',\'MusicalInstruments\',\'DigitalMusic\',\'GiftCards\',\'FashionBaby\',\'FashionGirls\'
@@ -1182,7 +1194,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Watch':
             console.log('watch');
             resParams.SearchIndex = 'Watches'; //link product group to searchindex
-            traverseNodes(browseNodes,['Health & Personal Care','Electronics','Clothing, Shoes & Jewelry'],function(res){
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics','Health & Personal Care'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1192,6 +1204,14 @@ function parseAmazon(productGroup,browseNodes,callback5){
             console.log('Digital Music Track OR Digital Music Album');
             resParams.SearchIndex = 'DigitalMusic'; //link product group to searchindex
             traverseNodes(browseNodes,['Digital Music'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Musical Instruments':
+            console.log('MusicalInstruments');
+            resParams.SearchIndex = 'MusicalInstruments'; //link product group to searchindex
+            traverseNodes(browseNodes,['Musical Instruments','Electronics','Sports & Outdoors'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1207,6 +1227,14 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Apparel':
             console.log('apparel');
             resParams.SearchIndex = 'Apparel'; //link product group to searchindex
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Shoes':
+            console.log('shoes');
+            resParams.SearchIndex = 'Shoes'; //link product group to searchindex
             traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
@@ -1266,16 +1294,35 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'CE':
         case 'Home Theater':
-        case 'Video Games':
             console.log('>> CE OR home theater');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-            traverseNodes(browseNodes,['Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry','Industrial & Scientific','Video Games'],function(res){
+            traverseNodes(browseNodes,['Electronics','Video Games','Cell Phones & Accessories','Office Products','Sports & Outdoors','Clothing, Shoes & Jewelry','Car Audio or Theater','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
         break;
+        case 'Video Games':
+        case 'Digital Video Games':
+            console.log('>> VideoGames OR digital video games');
+            resParams.SearchIndex = 'VideoGames'; //link product group to searchindex
+            traverseNodes(browseNodes,['Video Games','Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Gift Card':
+        case 'Electronic Gift Card':
+            console.log('Gift Card or Electronic Gift Card');
+            resParams.SearchIndex = 'GiftCards'; //link product group to searchindex
+            traverseNodes(browseNodes,['Gift Cards'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Digital Accessories 1':
+        case 'Digital Accessories 2':
         case 'Digital Accessories 3':
-            console.log('Digital Accessories 3');
+            console.log('Digital Accessories 1 or 2 or 3');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
             traverseNodes(browseNodes,['Kindle Store','Electronics','Video Games'],function(res){
                 resParams.BrowseNode = res; 
@@ -1404,7 +1451,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Home':
             console.log('home');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics'],function(res){
+            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1537,11 +1584,19 @@ function traverseNodes(nodeList,findMe,callbackMM){
         );     
 
     }, function done(){
-        if (nodeArr.length > 0){                                                    
+        if (nodeArr.length > 0){    
+            console.log('arr ',nodeArr);
+            console.log('ARRAY LENGTH ',nodeArr.length);     
+            if (nodeArr.length > 2){
+                nodeArr = nodeArr.slice(0,2);
+            }                                
+            console.log('arr ',nodeArr);
+            console.log('ARRAY LENGTH ',nodeArr.length);                
             callbackMM(nodeArr.toString()); 
         }
         else {
-            console.log('error: no browseNodes found')
+            console.log('error: no browseNodes found');
+            ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
         }                                          
     });                                  
 }
