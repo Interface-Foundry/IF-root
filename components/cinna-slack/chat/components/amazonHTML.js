@@ -30,7 +30,8 @@ var cache = {
  where product = {
            price: '',
            color_options: [], // TODO scrape color options in the future
-           text: ''
+           text: '',
+           full_html: ''
          }
  */
 module.exports.basic = function basic(url, callback) {
@@ -81,7 +82,8 @@ module.exports.basic = function basic(url, callback) {
         // we weill fill in these fields 🍹🌴
         var product = {
           price: '',
-          text: ''
+          text: '',
+          full_html: body
         }
 
         var amazonSitePrice;
