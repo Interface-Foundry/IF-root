@@ -35,6 +35,18 @@ var initSlackUsers = function(env){
         var testUser = [{
             team_id:'T0H72FMNK',
             bot: {
+                bot_user_id: 'U0H6YHBNZ',
+                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+            },
+            meta: {
+                initialized: false
+            }
+        }];
+        loadSlackUsers(testUser);
+    }else if (env === 'development_mitsu'){
+        var testUser = [{
+            team_id:'T0H72FMNK',
+            bot: {
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
@@ -43,7 +55,8 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
-    }else {
+    }
+    else {
         console.log('retrieving slackbots from mongo');
         Slackbots.find().exec(function(err, users) {
             if(err){
@@ -324,6 +337,9 @@ function preProcess(data){
 //pushing incoming messages to python
 function routeNLP(data){
 
+    //sanitize msg before sending to NLP
+    data.msg = data.msg.replace(/[^\w\s]/gi, ''); 
+
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
@@ -551,7 +567,12 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                     async.eachSeries(res, function(i, callback) {
                         data.urlShorten.push(i);//save shortened URLs
                         processData.getNumEmoji(data,count+1,function(emoji){
-                            data.client_res.push(emoji + ' ' + res[count]);
+
+                            res[count] = res[count].trim(); 
+
+                            console.log('PUSH TO attach ','<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
+
+                            data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             count++;                           
                             callback();
                         });
@@ -650,9 +671,11 @@ var sendResponse = function(data){
                 attachThis.shift(); //remove image from array
 
                 attachments[1].fallback = 'Here are some options you might like';
+
+                console.log('attachThis ',attachThis); 
+
                 //put in attachment fields
                 async.eachSeries(attachThis, function(attach, callback) {
-                    //attach = attach.replace('\\n','');
                     var field = {
                         "value": attach,
                         "short":false
@@ -711,7 +734,7 @@ var sendResponse = function(data){
             else {
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
-                    slackUsers[data.source.org].postMessage(data.source.channel, message, params).then(function(res) {
+                    slackUsers[data.source.org].postMessage(data.source.channel,message, params).then(function(res) {
                         callback();
                     });
                 }, function done(){
@@ -840,6 +863,16 @@ function recallHistory(data,callback,steps){
     }
 
 }
+
+/////TOOLS
+
+//trim a string to char #
+function truncate(string){
+   if (string.length > 55)
+      return string.substring(0,55)+'...';
+   else
+      return string;
+};
 
 
 
