@@ -8,17 +8,18 @@ exports = module.exports = function(io, cinnaio) {
 
         socket.on('new message', function(msg) {
             msg.ts = new Date().toISOString();
-            console.log('raw msg in socket events: ')
+            console.log('\nSE: raw msg -->\n', msg.bucket, msg.msg)
             //Emit throughout supervisor client
             if(msg.bucket === 'supervisor') {
-                console.log('socketEvents: new message from cinna received.', msg)
+                console.log('\nSE: incoming msg -->\n', msg.bucket, msg.msg)
                 socket.broadcast.emit('new bc message', msg);
             }
             //Emit outgoing message to cinna-slack
             else if (msg.client_res[0] && msg.client_res[0].length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
+                console.log('SE: outgoing msg -->', msg.bucket, msg.msg)
                 ioClient.emit("msgFromSever", msg);
             } else if (msg.bucket === 'results'){
-                console.log('Received results from cinna',msg)
+                console.log('SE: incoming results -->', msg.bucket, msg.msg)
                 socket.broadcast.emit('results', msg)
             }
         });

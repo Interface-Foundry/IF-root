@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { reduxForm } from 'redux-form';
 import { Button,DropdownButton,MenuItem } from 'react-bootstrap';
 import Spinner from 'react-spinner';
+// import processData from '../../../../chat/components/process'
 
 export const labels = {
   msg: "Message",
@@ -46,7 +47,7 @@ class DynamicForm extends Component {
     var self = this
 
     socket.on('results', function(msg) {
-      console.log('Form: Received results', msg)
+      // console.log('Form: Received results', msg)
       self.state.spinnerloading = false
       self.state.searchParam = ''
         //store raw results for use in searchSimilar function
@@ -150,26 +151,43 @@ class DynamicForm extends Component {
       activeMessage, resetForm
     } = this.props
     const newQuery = activeMessage;
-    if (!this.state.searchParam) {
-      if (query) {
-        this.state.searchParam = query
-      } else {
-        console.log('search input is empty: ', this.state,'Query:' ,query)
-        return
-      }
-    }
-    newQuery.msg = this.state.searchParam
-    newQuery.bucket = 'search'
-    newQuery.action = 'initial'
-    newQuery.client_res = [newQuery.msg]
-    newQuery.tokens = newQuery.msg.split(' ')
-    newQuery.source.origin = 'supervisor'
-      // newQuery.source.channel = 'supervisor'
-    socket.emit('new message', newQuery);
-    this.setState({
-      spinnerloading: true
-    })
-
+     //TODO
+     // processData.urlShorten(data,function(res){
+     //    var count = 0;
+     //    //put all result URLs into arr
+     //    async.eachSeries(res, function(i, callback) {
+     //        data.urlShorten.push(i);//save shortened URLs
+     //        processData.getNumEmoji(data,count+1,function(emoji){
+     //            data.client_res.push(emoji + ' ' + res[count]);
+     //            count++;                           
+     //            callback();
+     //        });
+     //    }, function done(){
+             if (!this.state.searchParam) {
+              if (query) {
+                this.state.searchParam = query
+              } else {
+                console.log('search input is empty: ', this.state,'Query:' ,query)
+                return
+              }
+            }
+            newQuery.msg = this.state.searchParam
+            newQuery.bucket = 'search'
+            newQuery.action = 'initial'
+            newQuery.client_res = [newQuery.msg]
+            newQuery.tokens = newQuery.msg.split(' ')
+            newQuery.source.origin = 'supervisor'
+            newQuery.flags = {}
+            newQuery.flags.preview = true
+              // newQuery.source.channel = 'supervisor'
+            // console.log('Form.js 180: ', newQuery)
+            socket.emit('new message', newQuery);
+            this.setState({
+              spinnerloading: true
+            })
+        // });
+      // });
+  // resetForm()
   }
 
   searchSimilar() {
@@ -177,8 +195,8 @@ class DynamicForm extends Component {
       activeMessage, resetForm, selected
     } = this.props
     const newQuery = activeMessage;
-    if (!selected || !selected.name || !selected.id) {
-      console.log('Please select an item.')
+    if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults[0]) {
+      console.log('Please select an item or do an initial search.')
       return
     }
     newQuery.bucket = 'search'
@@ -192,6 +210,7 @@ class DynamicForm extends Component {
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flag = 'recalled'
+    console.log('Form.js 209 : newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
@@ -275,6 +294,35 @@ class DynamicForm extends Component {
     // }
   }
 
+  searchFocus() {
+     const {
+      activeMessage, resetForm, selected
+    } = this.props
+    const newQuery = activeMessage;
+    if (!selected || !selected.name || !selected.id) {
+      console.log('Please select an item.')
+      return
+    }
+    newQuery.bucket = 'search'
+    newQuery.action = 'focus'
+    newQuery.client_res = [newQuery.msg]
+    newQuery.tokens = newQuery.msg.split(' ')
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory = {
+      amazon: this.state.rawAmazonResults
+    }
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flag = 'recalled'
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    resetForm()
+
+  }
+
+
   handleChange(field, e) {
     var nextState = {}
     nextState[field] = e.target.checked
@@ -297,7 +345,7 @@ class DynamicForm extends Component {
 
   handleSubmit(e) {
     e.preventDefault()
-    console.log('handle submit event: ',e)
+    // console.log('handle submit event: ',e)
     //increase the numerical value of below property when adding new buttons to form.  yeah it's weird sorry
     let query = e.target[6].value
     this.searchAmazon(query)
@@ -325,6 +373,14 @@ class DynamicForm extends Component {
       display: 'none'
     };
     const showModifyBox = this.state.action === 'modify' ? {
+      textAlign: 'center',
+      marginTop: '5em'
+    } : {
+      textAlign: 'center',
+      marginTop: '5em',
+      display: 'none'
+    };
+    const showFocusBox = this.state.action === 'focus' ? {
       textAlign: 'center',
       marginTop: '5em'
     } : {
@@ -429,6 +485,15 @@ class DynamicForm extends Component {
                       </Button>
                 </div>
 
+                <div id="focus-box" style={showFocusBox}>
+                    <h3 style={showPrompt}> Please select an item. </h3>
+                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
+                      Search Focus
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
+                    </Button>
+                </div>
 
 
             </div>

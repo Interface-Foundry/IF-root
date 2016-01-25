@@ -4,17 +4,22 @@ ioClient.on('connect', function() {
 })
 
 //flag to determine is emitting 'new message' event or both 'new message' and 'new channel'
-function emit(data, flag) {
+function emit(data, newmessage) {
   if (!ioClient.connected) {
     ioClient.on('connect', function() {
-      if (flag) {
-         emitBoth(data) 
+      if (newmessage) {
+      //    if (data.bucket === 'results') {
+      //       console.log('supervisor.js --> 12',data)
+            emitMsg(data)
+         // } else {
+         //    emitBoth(data) 
+         // }
       } else {
         emitMsg(data)
       }
     })
   } else {
-        if (flag) {
+        if (newmessage) {
          emitBoth(data) 
       } else {
         emitMsg(data)
@@ -24,7 +29,6 @@ function emit(data, flag) {
 //Used for banter or returning result set to supervisor
 function emitMsg(data) {
  console.log('emitting message')
- var rand = Math.random().toString(36).slice(2)
  ioClient.emit('new message', data)
 }
 
@@ -37,13 +41,15 @@ function emitBoth(data) {
     id: data.source.channel,
     resolved: false
   })
+  var action = data.action ? data.action : ''
+  var flags = data.flags ? data.flags : {};
   ioClient.emit('new message', {
     id: null,
     incoming: true,
     msg: data.msg,
     tokens: [data.msg.split(' ')],
     bucket: 'supervisor',
-    action: '',
+    action: action,
     amazon: [],
     // dataModify: {
     //     type: '',
@@ -61,7 +67,8 @@ function emitBoth(data) {
     },
     ts: Date.now,
     resolved: false,
-    parent: rand
+    parent: rand,
+    flags: flags
   })
 }
 

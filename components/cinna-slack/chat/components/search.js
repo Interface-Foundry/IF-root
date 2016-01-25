@@ -719,6 +719,7 @@ var searchFocus = function(data) {
                 }
                 //push number emoji + item URL
                 processData.getNumEmoji(data,searchSelect+1,function(res){
+                    console.log('search722/res: ',res)
                     data.client_res.push(res + ' ' + data.recallHistory.urlShorten[searchSelect]);
                     dumbFunction(); //fire after get
                 })
@@ -779,6 +780,7 @@ var searchFocus = function(data) {
                         data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews');
                     }
 
+                    console.log('FOCUS: Line 782: ', data)
                     ioKip.outgoingResponse(data,'final');
 
                 }

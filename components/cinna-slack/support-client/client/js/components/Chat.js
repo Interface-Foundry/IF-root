@@ -41,7 +41,7 @@ class Chat extends Component {
     this.setState({ supervisor: false });
     const self = this
      socket.on('change state bc', function (state) {
-      // console.log('change state event received', state)
+      console.log('change state event received', state)
        var identifier = {channel: state.channel, properties: []}
       for (var key in state) {
         if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved' || key == 'amazon') && state[key] !== '' ) {
@@ -52,7 +52,9 @@ class Chat extends Component {
       //if no fields were updated on form take no action
       if (identifier.properties.length === 0 ) {
         return
-      } else {
+      } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'default') {
+        return
+      }else {
         actions.setMessageProperty(identifier)
       }
     })   

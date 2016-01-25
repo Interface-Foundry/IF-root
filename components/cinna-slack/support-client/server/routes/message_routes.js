@@ -80,6 +80,7 @@ module.exports = function(router) {
         });
       }
       if (!data) {
+        // console.log('message_routes: req.body: ',req.body)
         if (req.body.amazon && req.body.amazon.length > 0) {
           var stringifiedItems = []
           async.eachSeries(req.body.amazon, function(item, callback) {

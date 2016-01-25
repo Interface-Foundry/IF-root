@@ -369,7 +369,10 @@ function incomingAction(data){
     if (data.bucket === 'response') {
             return sendResponse(data)
          }
+    console.log('Supervisor: 372 ',data)
     supervisor.emit(data, true)
+
+    
     //----------------------//
 
 
@@ -443,12 +446,19 @@ function searchBucket(data){
             }
             break;
         case 'focus':
+          //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flag && data.flag === 'recalled') { 
+                    search.searchFocus(data);
+            } 
+            //-----------------------------------------------------------------//
+            else {
             history.recallHistory(data, function(res){
-                if (res){
-                    data.recallHistory = res;
-                }
-                search.searchFocus(data);
-            });
+                    if (res){
+                        data.recallHistory = res;
+                    }
+                    search.searchFocus(data);
+                });
+            }
             break;
         case 'back':
             //search.searchBack(data);
@@ -599,6 +609,7 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.bucket = 'results'
+                console.log('Supervisor: 610 ',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -716,6 +727,7 @@ var sendResponse = function(data){
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
         data.bucket = 'results'
+        console.log('Supervisor: 728', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//

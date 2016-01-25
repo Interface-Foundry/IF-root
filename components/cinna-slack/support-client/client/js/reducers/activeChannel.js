@@ -2,7 +2,8 @@ import { CHANGE_CHANNEL } from '../constants/ActionTypes';
 
 const initialState = {
   name: 'Lobby',
-  id: 0
+  id: 0,
+  resolved: false
 };
 
 export default function activeChannel(state = initialState, action) {

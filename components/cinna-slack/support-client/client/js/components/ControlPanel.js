@@ -140,7 +140,7 @@ class ControlPanel extends Component {
       }
       var identifier = {channel: msg.source.id, properties: []}
       for (var key in msg) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
+        if ((key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
           identifier.properties.push({ [key] : msg[key]})
         }
       }  
