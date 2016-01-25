@@ -50,6 +50,10 @@ var ACTION = {
 var parse = module.exports.parse = function(text, callback) {
   debug('parsing:' + text)
 
+  // First do some global hacks
+  text = text.replace(' but blue', ' but in blue').replace(/[^\w\s,.$!]/gi, '')
+
+
   // check for exact matches
   var res = exactMatch(text);
   if (res) {
@@ -323,7 +327,7 @@ function nlpToResult(nlp) {
     return res;
   }
 
-  if (nlp.ss.length === 1) {
+  if (nlp.ss.length === 1 && nlp.focus.length === 0) {
     var s = nlp.ss[0];
     if (!s.isQuestion) {
       debug('simple case initial triggered');
@@ -352,7 +356,7 @@ function nlpToResult(nlp) {
   var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
-  if (nlp.focus.length === 1 && modifierWords.length === 1) {
+  if (nlp.focus.length === 1 && modifierWords.length === 1 && res.execute.length == 0) {
     debug('single focus, single modifier triggered')
     res.bucket = BUCKET.search;
     res.action = ACTION.modify;
@@ -410,6 +414,7 @@ if (!module.parent) {
     '3 but 8 axis',
     '2 but more fun',
     '1 but green', // this is returning lime?
+    '2 but blue',
   ];
   sentences.map(function(a) {
     parse(a, function(e, res) {
