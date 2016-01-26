@@ -17,14 +17,14 @@ const initialState = {
     },
     source: {
         origin: 'default',
-        channel: 'default',
+        channel: 'Lobby',
         org: 'default',
-        id: 'default'
+        id: 'Lobby'
     },
     client_res: [],
     ts: Date.now(),
     resolved: false,
-    parent: 'default'
+    parent: null
 };
 
 export default function activeMessage(state = initialState, action) {

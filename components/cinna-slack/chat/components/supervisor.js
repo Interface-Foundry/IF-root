@@ -43,6 +43,8 @@ function emitBoth(data) {
   })
   var action = data.action ? data.action : ''
   var flags = data.flags ? data.flags : {};
+  //Resolved = false only if this is a supervisor flagged message
+  var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new message', {
     id: null,
     incoming: true,
@@ -66,7 +68,7 @@ function emitBoth(data) {
       msg: ''
     },
     ts: Date.now,
-    resolved: false,
+    resolved: resolved,
     parent: rand,
     flags: flags
   })

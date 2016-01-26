@@ -46,7 +46,7 @@ var initSlackUsers = function(env){
     }else if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0H72FMNK',
-            bot: {
+            bot: { 
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
@@ -420,6 +420,7 @@ function searchBucket(data){
     //* * * * typing event
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
         if (data.source.origin == 'slack'){
+            console.log('Io.js: line 423: ', slackUsers)
             slackUsers[data.source.org].postTyping(data.source.channel);
         }
     }

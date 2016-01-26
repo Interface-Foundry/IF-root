@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component, PropTypes} from 'react';
 import ChannelListItem from './ChannelListItem';
 import ChannelListModalItem from './ChannelListModalItem';
 import { Modal, Glyphicon, Input, Button } from 'react-bootstrap';
@@ -90,11 +90,49 @@ class Channels extends Component {
     this.closeMoreChannelsModal();
     this.handleChangeChannel(channel);
   }
+  closeAllChannels() {
+    const { channels } = this.props;
+    const restOfTheChannels = channels.filter(channel => channel.bucket !== 'supervisor')
+
+
+
+    const filtered = messages.filter(message => message.source).filter(message => message.source.channel === channel.name)
+    const firstMsg = filtered[0]
+    UserAPIUtils.resolveChannel(channel)
+    const resolveMessageInState = function(msg) {
+        return new Promise(function(resolve, reject) {
+              var identifier = {channel: channel.name, properties: []} 
+              identifier.properties.push({ resolved : true})
+                actions.setMessageProperty(identifier)
+                msg.resolved = true
+            return resolve(msg);
+        });
+     };
+    filtered.reduce(function(sequence, msg) {
+      return sequence.then(function() {
+        return resolveMessageInState(msg);
+      }).then(function(msg) {
+        UserAPIUtils.resolveMessage(msg)
+      });
+    }, Promise.resolve());
+    actions.removeChannel(channel)
+    if (channel.name === channels[0].name && channels.length > 1) {
+      // console.log('situation: first channel closed but more channels')
+      onClick(channels[1])
+    } else if (channel.name === channels[0].name && channels.length === 1){ 
+      // console.log('situation: first channel closed and last channel')
+      onClick(null)
+    } else {
+      // console.log('situation: non-first channel closed and more channels left')
+      onClick(channels[0])
+    }
+  }
+
   render() {
     const { channels, actions, messages, chanIndex } = this.props;
-    const filteredChannels = channels.filter(channel => channel.bucket === 'supervisor')
+    const filteredChannels = channels.filter(channel => (channel.bucket === 'supervisor') || (channel.name === 'Lobby'))
     const moreChannelsBoolean = true;
-    const restOfTheChannels = channels.filter(channel => channel.bucket !== 'supervisor')
+    const restOfTheChannels = channels.filter(channel => (channel.bucket !== 'supervisor') && (channel.name !== 'Lobby'))
     const newChannelModal = (
       <div>
         <Modal key={1} show={this.state.addChannelModal} onHide={::this.closeAddChannelModal}>
@@ -143,6 +181,7 @@ class Channels extends Component {
             </ul>
           </Modal.Body>
           <Modal.Footer>
+            <Button bsStyle='danger' style={{ marginRight: '5%'}} onClick={::this.closeAllChannels}>Clear Channels</Button>
             <button onClick={::this.closeMoreChannelsModal}>Cancel</button>
           </Modal.Footer>
         </Modal>

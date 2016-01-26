@@ -200,7 +200,7 @@ class DynamicForm extends Component {
       activeMessage, resetForm, selected
     } = this.props
     const newQuery = activeMessage;
-    if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults[0]) {
+    if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
