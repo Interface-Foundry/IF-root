@@ -101,7 +101,7 @@ class Channels extends Component {
     UserAPIUtils.resolveChannel(channel)
     const resolveMessageInState = function(msg) {
         return new Promise(function(resolve, reject) {
-              var identifier = {channel: channel.name, properties: []} 
+              var identifier = {id: channel.id, properties: []} 
               identifier.properties.push({ resolved : true})
                 actions.setMessageProperty(identifier)
                 msg.resolved = true

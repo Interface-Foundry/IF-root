@@ -42,7 +42,7 @@ class Chat extends Component {
     const self = this
      socket.on('change state bc', function (state) {
       console.log('change state event received', state)
-       var identifier = {channel: state.channel, properties: []}
+       var identifier = {id: state.id, properties: []}
       for (var key in state) {
         if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved' || key == 'amazon') && state[key] !== '' ) {
           identifier.properties.push({ [key] : state[key]})
@@ -59,6 +59,11 @@ class Chat extends Component {
       }
     })   
     socket.on('new bc message', function(msg) {      
+      //Set parent boolean of incoming msg here
+      let filtered = messages.filter(message => message.source.id === msg.source.id);
+      console.log('Chat 64: filtered: ',filtered)
+      let parent = (filtered.length > 0) ? ((filtered[0].msg === msg.msg) ? true :false) : false
+      msg.parent = parent
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>

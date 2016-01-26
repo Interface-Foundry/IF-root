@@ -40,7 +40,7 @@ class MessageComposer extends Component {
             },
             bucket: 'response',
             ts: new Date().toISOString(),
-            parent: activeMessage.source.id.toString(),
+            parent: false,
             resolved: activeMessage.resolved
         };
         socket.emit('new message', newMessage);

@@ -56,7 +56,7 @@ class DynamicForm extends Component {
 
     socket.on('change channel bc', function(channels) {
       if (self.state.dirty) {
-        self.state.channel = channels.prev.name
+        self.state.id = channels.prev.id
         console.log('saving state: ', self.state)
         socket.emit('change state', self.state);
       }
@@ -182,8 +182,7 @@ class DynamicForm extends Component {
             newQuery.source.origin = 'supervisor'
             newQuery.flags = {}
             newQuery.flags.preview = true
-              // newQuery.source.channel = 'supervisor'
-            // console.log('Form.js 180: ', newQuery)
+            newQuery.parent = false
             socket.emit('new message', newQuery);
             this.setState({
               spinnerloading: true,
@@ -214,7 +213,9 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    //TODO: Might change this flag below here and in cinna, extraneous properties
     newQuery.flag = 'recalled'
+    newQuery.parent = false
     console.log('Form.js 209 : newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
@@ -241,7 +242,9 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    //TODO: Might change this flag below here and in cinna, extraneous properties
     newQuery.flag = 'recalled'
+    newQuery.parent = false
     newQuery.dataModify = { type: '', val: []}
     if (this.state.color) {
       newQuery.dataModify.type = 'color'
@@ -319,6 +322,7 @@ class DynamicForm extends Component {
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flag = 'recalled'
+    newQuery.parent = false
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true

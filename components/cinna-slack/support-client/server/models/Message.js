@@ -33,7 +33,7 @@ var messageSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    parent: String,
+    parent: Boolean,
     flags: {}
 });
 

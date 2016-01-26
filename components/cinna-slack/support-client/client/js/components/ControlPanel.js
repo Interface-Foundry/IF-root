@@ -138,7 +138,7 @@ class ControlPanel extends Component {
         console.log('CPanel Error 114 Could not get results :',err)
         return
       }
-      var identifier = {channel: msg.source.id, properties: []}
+      var identifier = {id: msg.source.id, properties: []}
       for (var key in msg) {
         if ((key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
           identifier.properties.push({ [key] : msg[key]})
@@ -169,7 +169,7 @@ class ControlPanel extends Component {
               }
             })
           })
-          var identifier = {channel: firstMsgOld.source.id, properties: []}
+          var identifier = {id: firstMsgOld.source.id, properties: []}
           identifier.properties.push({ amazon : result})
           actions.setMessageProperty(identifier)
       }

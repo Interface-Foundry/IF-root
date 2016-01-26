@@ -24,7 +24,7 @@ const initialState = {
     client_res: [],
     ts: Date.now(),
     resolved: false,
-    parent: null
+    parent: true
 };
 
 export default function activeMessage(state = initialState, action) {

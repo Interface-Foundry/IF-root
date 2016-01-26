@@ -91,7 +91,7 @@ export default function messages(state = initialState, action) {
                     data: [...state.data]
             };
          case SET_MESSAGE_PROPERTY:
-            var index = indexOf([...state.data], find([...state.data], {source: { channel : action.identifier.channel} }));
+            var index = indexOf([...state.data], find([...state.data], {source: { id : action.identifier.id} }));
             // console.log('Inside messages reducer: channel: ', action.identifier.channel, ' state.data: ',[...state.data])
             // console.log('In messages: original array->', [...state.data])
             // var copy = Object.assign({}, [...state.data][index]);

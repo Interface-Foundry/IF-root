@@ -35,14 +35,14 @@ function emitMsg(data) {
 //This function is used for new messages/channels
 function emitBoth(data) {
   console.log('emitting new channel')
-  var rand = Math.random().toString(36).slice(2)
   ioClient.emit('new channel', {
     name: data.source.channel,
-    id: data.source.channel,
+    id: data.source.id,
     resolved: false
   })
   var action = data.action ? data.action : ''
   var flags = data.flags ? data.flags : {};
+  // var parent = (!data.parent) ? data.parent : 'parent'
   //Resolved = false only if this is a supervisor flagged message
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new message', {
@@ -62,14 +62,14 @@ function emitBoth(data) {
       origin: 'socket.io',
       channel: data.source.channel,
       org: 'kip',
-      id: data.source.channel
+      id: data.source.id
     },
     client_res: {
       msg: ''
     },
     ts: Date.now,
     resolved: resolved,
-    parent: rand,
+    parent: false,
     flags: flags
   })
 }

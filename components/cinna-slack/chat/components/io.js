@@ -259,7 +259,7 @@ var loadSocketIO = function(server){
         });
 
         socket.on("msgFromSever", function(data) {
-            console.log('Received message from supervisor', data)
+            // console.log('Received message from supervisor', data)
             incomingAction(data);
         })
 
@@ -385,7 +385,7 @@ function incomingAction(data){
     if (data.bucket === 'response') {
             return sendResponse(data)
          }
-    console.log('Supervisor: 372 ',data)
+    // console.log('Supervisor: 372 ',data)
     supervisor.emit(data, true)
 
     
@@ -631,7 +631,7 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.bucket = 'results'
-                console.log('Supervisor: 610 ',data)
+                // console.log('Supervisor: 610 ',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -751,7 +751,7 @@ var sendResponse = function(data){
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
         data.bucket = 'results'
-        console.log('Supervisor: 728', data)
+        // console.log('Supervisor: 728', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//

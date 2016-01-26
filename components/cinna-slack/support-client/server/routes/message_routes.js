@@ -70,8 +70,8 @@ module.exports = function(router) {
   router.post('/newmessage', function(req, res) {
     Message.findOne({
       'source.channel': req.body.source.channel,
-      'msg': req.body.msg,
-      'resolved': false
+      'source.id': req.body.source.id,
+      'msg': req.body.msg
     }, function(err, data) {
       if (err) {
         console.log(err);
