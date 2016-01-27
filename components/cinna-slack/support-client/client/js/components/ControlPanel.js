@@ -158,6 +158,15 @@ class ControlPanel extends Component {
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.prev.name)
     const firstMsg = filtered[0]
     const firstMsgOld = filteredOld[0]
+
+    //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
+    if (firstMsg.resolved && self.refs.toggle.state.checked === true) {
+      self.refs.toggle.handleClick('forced')
+    } else if (!firstMsg.resolved && self.refs.toggle.state.checked === false) {
+      self.refs.toggle.handleClick('forced')
+    }
+    console.log('self: ',channels, self.refs.toggle)
+
      self.setState({ selected: {name: null, index: null}})
       if (firstMsgOld) {
           var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
@@ -319,7 +328,7 @@ class ControlPanel extends Component {
      const self = this;
      const { items,selected } = this.state;
      const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
-      return ( 
+     return ( 
          <div className="flexbox-container">
           <div id="second-column">
             <section className='rightnav'>
@@ -327,9 +336,10 @@ class ControlPanel extends Component {
 
             <label>
               <Toggle
+                ref='toggle'
                 defaultChecked={this.props.supervisor}
-                onChange={ () => { changeMode() }} />
-              <span> Supervisor Mode</span>
+                onChange={ () => { changeMode(this) }} />
+              <span>  Communication Mode</span>
             </label>
 
             <DynamicForm

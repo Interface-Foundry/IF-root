@@ -37,7 +37,7 @@ class Chat extends Component {
     }
 
   componentDidMount() {
-    const { actions, messages, activeChannel } = this.props;
+    const { actions, messages, activeChannel,activeMessage } = this.props;
     this.setState({ supervisor: false });
     const self = this
      socket.on('change state bc', function (state) {
@@ -48,7 +48,7 @@ class Chat extends Component {
           identifier.properties.push({ [key] : state[key]})
         }
       }  
-      console.log('identifier: ', identifier)
+      // console.log('identifier: ', identifier)
       //if no fields were updated on form take no action
       if (identifier.properties.length === 0 ) {
         return
@@ -59,10 +59,12 @@ class Chat extends Component {
       }
     })   
     socket.on('new bc message', function(msg) {      
+
       //Set parent boolean of incoming msg here
-      let filtered = messages.filter(message => message.source.id === msg.source.id);
-      console.log('Chat 64: filtered: ',filtered)
-      let parent = (filtered.length > 0) ? ((filtered[0].msg === msg.msg) ? true :false) : false
+      let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
+      console.log('Chat 64: filtered: ',filtered, msg, self.props.messages)
+      // ((filtered[0].msg === msg.msg) ? true :false)
+      let parent = (filtered.length > 0) ?  false : true
       msg.parent = parent
       actions.receiveRawMessage(msg) 
     });
@@ -78,9 +80,14 @@ class Chat extends Component {
      socket.on('disconnect bc', socket =>
       console.log('user disconnected! ',socket)
     );
-    if (!this.props.user.username) {
-      actions.loadAuth();
-    }
+    socket.on('change channel bc', function(channels) {
+      const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
+      const nextmsg = filtered[0]
+      self.setState({ supervisor: !nextmsg.resolved })
+      console.log('Chat84',channels, self.state)
+
+    })
+
   }
   changeActiveChannel(channel) {
     const { actions, activeChannel } = this.props;
@@ -160,8 +167,12 @@ class Chat extends Component {
   }
 
   handleSupervisorChange() {
-       let current = this.state.supervisor
-       this.setState({supervisor: !current});
+       const {activeChannel, activeMessage, actions} = this.props;
+       this.setState({supervisor: !this.state.supervisor});
+        console.log('Chat172',this.state, activeChannel,activeMessage) 
+       var identifier = {id: activeChannel.id, properties: [{resolved: !activeMessage.resolved }]}
+       actions.setMessageProperty(identifier)
+       
     }
 
   toggleStream()  {
@@ -186,7 +197,7 @@ class Chat extends Component {
                         filteredMessages.map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                           )
-    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeMessage.source.channel}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
+    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
     const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     return (

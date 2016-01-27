@@ -17,7 +17,8 @@ export default function channels(state = initialState, action) {
             return {...state,
                 data: [...state.data, {
                     name: action.channel.name,
-                    id: (state.data.length === 0) ? 0 : state.data[state.data.length - 1].id + 1
+                    id: action.channel.id
+                    // (state.data.length === 0) ? 0 : state.data[state.data.length - 1].id + 1
                 }]
             };
         case RECEIVE_CHANNEL:
@@ -27,7 +28,7 @@ export default function channels(state = initialState, action) {
             return {...state,
                 data: [...state.data, {
                     name: action.channel.name,
-                    id: (state.data.length === 0) ? 0 : state.data[state.data.length - 1].id + 1
+                    id: action.channel.id
                 }]
             };
         case LOAD_CHANNELS:

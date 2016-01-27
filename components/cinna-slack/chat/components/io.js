@@ -45,7 +45,7 @@ var initSlackUsers = function(env){
         loadSlackUsers(testUser);
     }else if (env === 'development_mitsu'){
         var testUser = [{
-            team_id:'T0H72FMNK',
+            team_id:'T0HLZP09L',
             bot: { 
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
@@ -184,6 +184,7 @@ function loadSlackUsers(users){
                 //     console.log('CHANGEGEE ',doneata);
                 //     slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
                 // }
+                
                 if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){ //settings.name = kip's slack username
                     //public channel
                     if (data.channel && data.channel.charAt(0) == 'C'){
@@ -420,7 +421,7 @@ function searchBucket(data){
     //* * * * typing event
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
         if (data.source.origin == 'slack'){
-            console.log('Io.js: line 423: ', slackUsers)
+            console.log('Io.js: line 423: ', slackUsers[data.source.org])
             slackUsers[data.source.org].postTyping(data.source.channel);
         }
     }

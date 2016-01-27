@@ -36,12 +36,13 @@ class MessageComposer extends Component {
                 origin: 'socket.io',
                 channel: activeChannel.name,
                 org: 'kip',
-                id: 'Cinna'
+                id: activeChannel.id
             },
             bucket: 'response',
             ts: new Date().toISOString(),
             parent: false,
-            resolved: activeMessage.resolved
+            resolved: activeMessage.resolved,
+            flags: {response: true}
         };
         socket.emit('new message', newMessage);
         var copy = Object.assign({}, newMessage);

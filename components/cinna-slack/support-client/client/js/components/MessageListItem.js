@@ -31,7 +31,7 @@ class MessageListItem extends Component {
 
   renderMsg() {
      const {message} = this.props
-     const msgType = (this.state.isImage === 'true') ? 'image' : ((message.flags && message.flags.preview) ? 'preview' : 'message')
+     const msgType = (this.state.isImage === 'true') ? 'image' : ((message.flags && message.flags.preview) ? 'preview' : ((message.flags && message.flags.response) ? 'response' : 'message'))
 
      switch (msgType){
       case 'image' : 
@@ -47,8 +47,10 @@ class MessageListItem extends Component {
             case 'similar': 
                 return 'Previewing ' + message.action + ' search: ' + message.msg
           }
-        
         break;
+      case 'response':
+          return this.state.displayMsg
+          break;
       default:
         return this.state.displayMsg
         break;
@@ -58,7 +60,7 @@ class MessageListItem extends Component {
   render() {
     var self = this;
     const { message } = this.props;
-    const displayName = ((message.flags && message.flags.preview) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : message.source.id
+    const displayName = ((message.flags && message.flags.preview) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : ((message.flags && message.flags.response) ? 'Cinna' : message.source.id)
     const nameStyle = (message.flags && message.flags.preview) ? {color: '#e57373'} : {color: '#66c'}
     const messageStyle = (message.flags && message.flags.preview) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
     return (
