@@ -320,6 +320,11 @@ function preProcess(data){
                     data.action = 'focus';
                     incomingAction(data);
                     break;
+                case 'search.more':
+                    data.bucket = 'search';
+                    data.action = 'more';
+                    incomingAction(data);
+                    break;
                 default:
                     console.log('error: canned action flag missing');
             }
@@ -338,39 +343,89 @@ function preProcess(data){
 function routeNLP(data){
 
     //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^\w\s]/gi, ''); 
+    data.msg = data.msg.replace(/[^\w\s]/gi, ' '); 
+
+    console.log('in ',data.msg);
 
     nlp.parse(data.msg, function(e, res) {
         if (e){console.log('NLP error ',e)}
         else {
             console.log('NLP RES ',res);
 
-            if(!res.bucket){
-                res.bucket = 'search';
+            if(res.execute && res.execute.length > 0){
+
+                if(!res.execute[0].bucket){
+                    res.execute[0].bucket = 'search';
+                }
+                if(!res.execute[0].action){
+                    res.execute[0].execute[0].action = 'initial';
+                }
+
+                //- - - temp stuff to transfer nlp results to data object - - - //
+                if (res.execute[0].bucket){
+                    data.bucket = res.execute[0].bucket;
+                }
+                if (res.execute[0].action){
+                    data.action = res.execute[0].action;
+                }
+                if (res.tokens){
+                    data.tokens = res.tokens;
+                }
+                if (res.searchSelect){
+                    data.searchSelect = res.searchSelect;
+                }
+                if (res.execute[0].dataModify){
+                    data.dataModify = res.execute[0].dataModify;
+                }
+                //- - - - end temp - - - - //
+
+                console.log('EXECUTE MODIFY ',data);
+                incomingAction(data);
+
+
+                // async.eachSeries(res.execute, function(fire, callback) {
+                    
+                //     incomingAction(data);
+
+                //     callback();
+
+                    
+                // }, function done(){
+                    
+                // });          
             }
-            if(!res.action){
-                res.action = 'initial';
+            else {
+
+                if(!res.bucket){
+                    res.bucket = 'search';
+                }
+                if(!res.action){
+                    res.action = 'initial';
+                }
+
+                //- - - temp stuff to transfer nlp results to data object - - - //
+                if (res.bucket){
+                    data.bucket = res.bucket;
+                }
+                if (res.action){
+                    data.action = res.action;
+                }
+                if (res.tokens){
+                    data.tokens = res.tokens;
+                }
+                if (res.searchSelect){
+                    data.searchSelect = res.searchSelect;
+                }
+                if (res.dataModify){
+                    data.dataModify = res.dataModify;
+                }
+                //- - - - end temp - - - - //
+
+                incomingAction(data);
+
             }
 
-            //- - - temp stuff to transfer nlp results to data object - - - //
-            if (res.bucket){
-                data.bucket = res.bucket;
-            }
-            if (res.action){
-                data.action = res.action;
-            }
-            if (res.tokens){
-                data.tokens = res.tokens;
-            }
-            if (res.searchSelect){
-                data.searchSelect = res.searchSelect;
-            }
-            if (res.dataModify){
-                data.dataModify = res.dataModify;
-            }
-            //- - - - end temp - - - - //
 
-            incomingAction(data);
 
         }
 

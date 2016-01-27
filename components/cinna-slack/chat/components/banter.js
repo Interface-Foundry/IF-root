@@ -706,10 +706,10 @@ var checkForCanned = function(input,callback,origin) {
         case 'top kek':
             flag = 'basic'; //do this action
             if (origin == 'slack'){
-                res = 'T O P\nK\nE\nK\n';
+                res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
-                res = 'T O P<br>K<br>E<br>K<br>';
+                res = 'T O P<br>K<br>E<br>K';
             }
             break;
 
@@ -750,6 +750,12 @@ var checkForCanned = function(input,callback,origin) {
         case 'q': 
             flag = 'search.focus';
             query = 1;
+            break;
+
+        case 'more': 
+        case 'mroe': 
+        case 'mor': 
+            flag = 'search.more';
             break;
 
         case '2':
@@ -898,7 +904,8 @@ var getCinnaResponse = function(data,callback){
                             res = 'Here are some choices with *'+data.dataModify.val[0] +'*, which do you like best?';
                             break;
                         default:
-                            console.log('warning: no modifier response selected!');
+                            res = 'Here are some more choices, which do you like best?'; //most likely a "more" command
+                            //console.log('warning: no modifier response selected!');
                     }     
                     break;
                 case 'focus':
