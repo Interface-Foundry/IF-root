@@ -10,7 +10,7 @@ function emit(data, newmessage) {
       if (newmessage) {
       //    if (data.bucket === 'results') {
       //       console.log('supervisor.js --> 12',data)
-            emitMsg(data)
+            emitBoth(data)
          // } else {
          //    emitBoth(data) 
          // }
@@ -28,17 +28,18 @@ function emit(data, newmessage) {
 }
 //Used for banter or returning result set to supervisor
 function emitMsg(data) {
- console.log('emitting message')
+ // console.log('emitting message', data)
  ioClient.emit('new message', data)
 }
 
 //This function is used for new messages/channels
 function emitBoth(data) {
-  console.log('emitting new channel')
+  // console.log('emitting new channel', data)
+  var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new channel', {
     name: data.source.channel,
     id: data.source.id,
-    resolved: false
+    resolved: resolved
   })
   var action = data.action ? data.action : ''
   var flags = data.flags ? data.flags : {};

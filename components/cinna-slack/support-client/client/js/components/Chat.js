@@ -59,7 +59,6 @@ class Chat extends Component {
       }
     })   
     socket.on('new bc message', function(msg) {      
-
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
       console.log('Chat 64: filtered: ',filtered, msg, self.props.messages)
@@ -84,14 +83,14 @@ class Chat extends Component {
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const nextmsg = filtered[0]
       self.setState({ supervisor: !nextmsg.resolved })
-      console.log('Chat84',channels, self.state)
+      // console.log('Chat84',channels, self.state)
 
     })
 
   }
   changeActiveChannel(channel) {
     const { actions, activeChannel } = this.props;
-    console.log('firing changeactivechannel');
+    // console.log('firing changeactivechannel');
     if (channel) {
       var channels = { prev: {}, next:{}}
       channels.prev =  Object.assign({}, activeChannel);
@@ -169,10 +168,13 @@ class Chat extends Component {
   handleSupervisorChange() {
        const {activeChannel, activeMessage, actions} = this.props;
        this.setState({supervisor: !this.state.supervisor});
-        console.log('Chat172',this.state, activeChannel,activeMessage) 
+        // console.log('Chat172',this.state, activeChannel,activeMessage) 
        var identifier = {id: activeChannel.id, properties: [{resolved: !activeMessage.resolved }]}
        actions.setMessageProperty(identifier)
-       
+       let tempChannel = activeChannel
+       tempChannel.resolved = !tempChannel.resolved
+       actions.resolveChannel(tempChannel)
+       this.refs.channelsref.forceUpdate()
     }
 
   toggleStream()  {
@@ -211,7 +213,7 @@ class Chat extends Component {
         
 
           <section style={{order: '2', marginTop: '1.5em'}}>
-            <Channels onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
+            <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
           </section>
         </div>
         <div className="main">

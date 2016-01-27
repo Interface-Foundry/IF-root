@@ -44,6 +44,14 @@ export function removeChannel(channel) {
     };
 }
 
+export function resolveChannel(channel) {
+    return {
+        type: types.RESOLVE_CHANNEL,
+        channel
+    };
+}
+
+
 export function typing(username) {
     return {
         type: types.TYPING,

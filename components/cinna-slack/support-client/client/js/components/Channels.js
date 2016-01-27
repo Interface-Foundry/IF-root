@@ -130,9 +130,10 @@ class Channels extends Component {
 
   render() {
     const { channels, actions, messages, chanIndex } = this.props;
-    const filteredChannels = channels.filter(channel => (channel.bucket === 'supervisor') || (channel.name === 'Lobby'))
+    const filteredChannels = channels.filter(channel => (!channel.resolved) || (channel.name === 'Lobby'))
     const moreChannelsBoolean = true;
-    const restOfTheChannels = channels.filter(channel => (channel.bucket !== 'supervisor') && (channel.name !== 'Lobby'))
+    const restOfTheChannels = channels.filter(channel => (channel.resolved) && (channel.name !== 'Lobby'))
+    // console.log('Channels136: ',filteredChannels,restOfTheChannels)
     const newChannelModal = (
       <div>
         <Modal key={1} show={this.state.addChannelModal} onHide={::this.closeAddChannelModal}>

@@ -165,7 +165,7 @@ class ControlPanel extends Component {
     } else if (!firstMsg.resolved && self.refs.toggle.state.checked === false) {
       self.refs.toggle.handleClick('forced')
     }
-    console.log('self: ',channels, self.refs.toggle)
+    // console.log('self: ',channels, self.refs.toggle)
 
      self.setState({ selected: {name: null, index: null}})
       if (firstMsgOld) {
@@ -339,7 +339,7 @@ class ControlPanel extends Component {
                 ref='toggle'
                 defaultChecked={this.props.supervisor}
                 onChange={ () => { changeMode(this) }} />
-              <span>  Communication Mode</span>
+              <span></span>
             </label>
 
             <DynamicForm

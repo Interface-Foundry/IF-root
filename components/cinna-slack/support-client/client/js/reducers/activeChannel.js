@@ -11,7 +11,8 @@ export default function activeChannel(state = initialState, action) {
   case CHANGE_CHANNEL:
     return {
       name: action.channel.name,
-      id: action.channel.id
+      id: action.channel.id,
+      resolved: action.channel.resolved
     };
   default:
     return state;

@@ -65,7 +65,7 @@ class DynamicForm extends Component {
       // console.log('messages: ', self.props.messages, ' channel: ',channel)
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const firstMsg = filtered[0]
-        console.log('first: ', firstMsg)
+        // console.log('first: ', firstMsg)
       self.state = {
         filteredMessages: filtered,
         msg: firstMsg.msg,
