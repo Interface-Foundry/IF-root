@@ -117,6 +117,9 @@ module.exports.basic = function basic(url, callback) {
         //we found an image alternate for missing item images
         if($('#imgTagWrapperId').children('img').attr('data-old-hires')){
           product.altImage = $('#imgTagWrapperId').children('img').attr('data-old-hires');
+        }else if ($('#imgTagWrapperId').children('img').attr('src') && checkURL($('#imgTagWrapperId').children('img').attr('src'))){
+          console.log('wow we found an image url um ok, proceed....proceed...');
+          product.altImage = $('#imgTagWrapperId').children('img').attr('src');
         }
 
         var textParts = {
@@ -249,4 +252,9 @@ if (!module.parent) {
 
   run(0);
 
+}
+
+
+function checkURL(url) {
+    return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
 }

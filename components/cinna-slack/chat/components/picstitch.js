@@ -40,6 +40,10 @@ var stitchResults = function(data,source,callback) {
                       }                     
                     }
 
+                    //check for non price, remove
+                    if(price == 'Add to cart to see product details. Why?' || price == 'Too low to display' || price == 'See price in cart'){
+                      price = '';
+                    }
 
 
                     var primeAvail = 0;
@@ -62,6 +66,13 @@ var stitchResults = function(data,source,callback) {
                         console.log('NO IMAGE FOUND ',data.amazon[i]);
                         imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
                     }
+
+                    //removing 
+                    if(data.amazon[i].reviews && data.amazon[i].reviews.rating == 0){
+                      delete data.amazon[i].reviews;
+                    }
+
+                    console.log('REVIEWS ',data.amazon[i].reviews);
 
                     //if title exists in amazon result
                     if (data.amazon[i] && data.amazon[i].ItemAttributes && data.amazon[i].ItemAttributes[0].Title){

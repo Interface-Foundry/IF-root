@@ -343,33 +343,37 @@ var searchAmazon = function(data, type, query, flag) {
                         });
                     }
                     //TEMP PATCH, FOR RESULTS UNDER 3 items
+                    else if (results.length >= 1){
+                        // //do a weak search
+                        // weakSearch(data,type,query,flag,amazonParams);
+
+                        var loopLame = [0,1,2];//lol
+                        async.eachSeries(loopLame, function(i, callback) {
+                            if (data.amazon[i]){
+                                //get reviews by ASIN
+                                getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                                    //adding scraped reviews to amazon objects
+                                    data.amazon[i].reviews = {
+                                        rating: rating,
+                                        reviewCount: reviewCount
+                                    }
+                                    //GET PRICE
+                                    getPrices(data.amazon[i],function(realPrice){
+                                        data.amazon[i].realPrice = realPrice;
+                                        callback();
+                                    });
+                                });
+                            }
+                            else {
+                                callback();
+                            }
+                        }, function done(){
+                            ioKip.outgoingResponse(data,'stitch','amazon');
+                        });
+                    }
                     else {
                         //do a weak search
                         weakSearch(data,type,query,flag,amazonParams);
-
-                        // var loopLame = [0,1,2];//lol
-                        // async.eachSeries(loopLame, function(i, callback) {
-                        //     if (data.amazon[i]){
-                        //         //get reviews by ASIN
-                        //         getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                        //             //adding scraped reviews to amazon objects
-                        //             data.amazon[i].reviews = {
-                        //                 rating: rating,
-                        //                 reviewCount: reviewCount
-                        //             }
-                        //             //GET PRICE
-                        //             getPrices(data.amazon[i],function(realPrice){
-                        //                 data.amazon[i].realPrice = realPrice;
-                        //                 callback();
-                        //             });
-                        //         });
-                        //     }
-                        //     else {
-                        //         callback();
-                        //     }
-                        // }, function done(){
-                        //     ioKip.outgoingResponse(data,'stitch','amazon');
-                        // });
                     }
 
                 }).catch(function(err){
@@ -1303,10 +1307,28 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             });
         break;
+        case 'Pantry':
+            console.log('pantry');
+            resParams.SearchIndex = 'Pantry'; //link product group to searchindex
+
+            //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
+            traverseNodes(browseNodes,['Electronics','Office Products','Health & Personal Care','Grocery & Gourmet Food','Beauty','Baby Products','Toys & Games','Clothing, Shoes & Jewelry'],function(res){ 
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
         case 'Book':
             console.log('Book');
             resParams.SearchIndex = 'Books'; //link product group to searchindex
             traverseNodes(browseNodes,['Books'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Magazine':
+            console.log('Magazine');
+            resParams.SearchIndex = 'Magazines'; //link product group to searchindex
+            traverseNodes(browseNodes,['Magazine Subscriptions','Magazines'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1322,7 +1344,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Watch':
             console.log('watch');
             resParams.SearchIndex = 'Watches'; //link product group to searchindex
-            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics','Health & Personal Care'],function(res){
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics','Health & Personal Care','Sports & Outdoors'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1336,10 +1358,20 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             });
         break;
+        case 'Entertainment Memorabilia':
+        case 'Art':
+        case 'Coins':
+            console.log('Entertainment Memorabilia OR art');
+            resParams.SearchIndex = 'Collectibles'; //link product group to searchindex
+            traverseNodes(browseNodes,['Collectibles & Fine Art'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
         case 'Musical Instruments':
             console.log('MusicalInstruments');
             resParams.SearchIndex = 'MusicalInstruments'; //link product group to searchindex
-            traverseNodes(browseNodes,['Musical Instruments','Electronics','Sports & Outdoors'],function(res){
+            traverseNodes(browseNodes,['Musical Instruments','Electronics','Sports & Outdoors','Toys & Games'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1355,7 +1387,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Apparel':
             console.log('apparel');
             resParams.SearchIndex = 'Apparel'; //link product group to searchindex
-            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors'],function(res){
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors','Health & Personal Care'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1404,10 +1436,18 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             });  
         break;
+        case 'Single Detail Page Misc':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Miscellaneous'; //link product group to searchindex
+            traverseNodes(browseNodes,['Everything Else'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });  
+        break;
         case 'Art and Craft Supply':
             console.log('arts crafts supply');
             resParams.SearchIndex = 'ArtsAndCrafts'; //link product group to searchindex
-            traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen','Office Products'],function(res){
+            traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen','Office Products','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1420,11 +1460,19 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             }); 
         break;
+        case 'Pet Products':
+            console.log('Pet Products');
+            resParams.SearchIndex = 'PetSupplies'; //link product group to searchindex
+            traverseNodes(browseNodes,['Pet Supplies','Patio, Lawn & Garden','Electronics','Industrial & Scientific','Toys & Games'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
         case 'CE':
         case 'Home Theater':
             console.log('>> CE OR home theater');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-            traverseNodes(browseNodes,['Electronics','Video Games','Cell Phones & Accessories','Office Products','Sports & Outdoors','Clothing, Shoes & Jewelry','Car Audio or Theater','Industrial & Scientific'],function(res){
+            traverseNodes(browseNodes,['Electronics','Video Games','Cell Phones & Accessories','Office Products','Sports & Outdoors','Clothing, Shoes & Jewelry','Car Audio or Theater','Industrial & Scientific','Toys & Games'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1433,7 +1481,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Digital Video Games':
             console.log('>> VideoGames OR digital video games');
             resParams.SearchIndex = 'VideoGames'; //link product group to searchindex
-            traverseNodes(browseNodes,['Video Games','Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry'],function(res){
+            traverseNodes(browseNodes,['Video Games','Gift Cards','Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1442,7 +1490,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Electronic Gift Card':
             console.log('Gift Card or Electronic Gift Card');
             resParams.SearchIndex = 'GiftCards'; //link product group to searchindex
-            traverseNodes(browseNodes,['Gift Cards'],function(res){
+            traverseNodes(browseNodes,['Gift Cards','Apps & Games','Grocery & Gourmet Food','Baby Products','Appliances','Patio, Lawn & Garden','Beauty','Health & Personal Care','Tools & Home Improvement','Painting, Drawing & Art Supplies','Books','Arts, Crafts & Sewing','Pet Supplies','Home & Kitchen','Electronics','Video Games','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry','Industrial & Scientific','Kindle Store','Automotive','Movies & TV','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1473,6 +1521,14 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             }); 
         break;
+        case 'Wine':
+            console.log('wine');
+            resParams.SearchIndex = 'Wine'; //link product group to searchindex
+            traverseNodes(browseNodes,['Grocery & Gourmet Food'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
         case 'TV Series Episode Video on Demand':
         case 'Movie':
             console.log('tv series Episode video on demand OR Movie');
@@ -1485,7 +1541,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'DVD':
             console.log('DVD');
             resParams.SearchIndex = 'DVD'; //link product group to searchindex
-            traverseNodes(browseNodes,['Movies & TV','Electronics'],function(res){
+            traverseNodes(browseNodes,['Movies & TV','Electronics','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1493,7 +1549,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'VHS':
             console.log('VHS');
             resParams.SearchIndex = 'VHS'; //link product group to searchindex
-            traverseNodes(browseNodes,['Movies & TV','Electronics'],function(res){
+            traverseNodes(browseNodes,['Movies & TV','Electronics','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1511,7 +1567,16 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Tools':
             console.log('home improvement');
             resParams.SearchIndex = 'Tools'; //link product group to searchindex
-            traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement','Electronics','Automotive','Office Products'],function(res){
+            traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement','Electronics','Automotive','Office Products','Patio, Lawn & Garden'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+        case 'Guild Product':
+            console.log('Guild Product');
+            resParams.SearchIndex = 'Home & Kitchen'; //link product group to searchindex
+            traverseNodes(browseNodes,['Handmade Products','Tools & Home Improvement','Home & Kitchen'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1553,9 +1618,11 @@ function parseAmazon(productGroup,browseNodes,callback5){
             }); 
         break;
         case 'Mobile Application':
-            console.log('mobile app');
-            resParams.SearchIndex = 'Grocery'; //link product group to searchindex
-            traverseNodes(browseNodes,['Apps & Games','Office Products','Video Games'],function(res){
+        case 'Software':
+        case 'Digital Software':
+            console.log('mobile app OR software');
+            resParams.SearchIndex = 'Software'; //link product group to searchindex
+            traverseNodes(browseNodes,['Apps & Games','Software','Office Products','Video Games','Toys & Games'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1563,7 +1630,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Office Product':
             console.log('Office Product');
             resParams.SearchIndex = 'OfficeProducts'; //link product group to searchindex
-            traverseNodes(browseNodes,['Electronics','Arts, Crafts & Sewing','Office Products','Tools & Home Improvement','Industrial & Scientific'],function(res){
+            traverseNodes(browseNodes,['Office Products','Electronics','Arts, Crafts & Sewing','Tools & Home Improvement','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1579,7 +1646,15 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Home':
             console.log('home');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics','Clothing, Shoes & Jewelry'],function(res){
+            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics','Clothing, Shoes & Jewelry','Industrial & Scientific'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Lawn & Patio':
+            console.log('Lawn & Patio');
+            resParams.SearchIndex = 'LawnAndGarden'; //link product group to searchindex
+            traverseNodes(browseNodes,['Patio, Lawn & Garden','Home & Kitchen','Industrial & Scientific','Electronics','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1587,7 +1662,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Furniture':
             console.log('Furniture');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-            traverseNodes(browseNodes,['Arts, Crafts & Sewing','Office Products','Home & Kitchen','Patio, Lawn & Garden'],function(res){
+            traverseNodes(browseNodes,['Office Products','Arts, Crafts & Sewing','Home & Kitchen','Patio, Lawn & Garden'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1610,11 +1685,19 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             }); 
         break;
+        case 'Custom Services':
+            console.log('Custom Services');
+            resParams.SearchIndex = 'Miscellaneous'; //link product group to searchindex
+            traverseNodes(browseNodes,['Local Business'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
 
         case 'Health and Beauty':
             console.log('Health and Beauty');
             resParams.SearchIndex = 'HealthPersonalCare'; //link product group to searchindex
-            traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products'],function(res){
+            traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1623,7 +1706,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Beauty':
             console.log('Beauty');
             resParams.SearchIndex = 'Beauty'; //link product group to searchindex
-            traverseNodes(browseNodes,['Beauty','Health & Personal Care','Grocery & Gourmet Food','Home & Kitchen','Electronics'],function(res){
+            traverseNodes(browseNodes,['Beauty','Health & Personal Care','Grocery & Gourmet Food','Home & Kitchen','Electronics','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1631,23 +1714,22 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Sports':
             console.log('Sports');
             resParams.SearchIndex = 'SportingGoods'; //link product group to searchindex
-            traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive','Toys & Games','Electronics'],function(res){
+            traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive','Toys & Games','Electronics','Collectibles & Fine Art','Grocery & Gourmet Food','Health & Personal Care','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
         break;
         case 'BISS':
+        case 'BISS Basic':
             console.log('BISS');
             resParams.SearchIndex = 'Industrial'; //link product group to searchindex
-            traverseNodes(browseNodes,['Industrial & Scientific','Automotive','Beauty'],function(res){
+            traverseNodes(browseNodes,['Industrial & Scientific','Office Products','Automotive','Beauty','Health & Personal Care','Electronics','Home & Kitchen','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
         break;
-
-
-
         default:
+            console.log('Warning: "All" search category fired! this shouldn\'t happen. productGroup is: ',productGroup);
             resParams.SearchIndex = 'All';
             callback5(resParams);
     }                                           
@@ -1700,7 +1782,79 @@ function traverseNodes(nodeList,findMe,callbackMM){
                 }else if (currentNode.Name && findMe.length > 7 && currentNode.Name[0] == findMe[7]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
                     console.log('CHILD NAME ',childNodeName);
-                    return false;                                                                                                                                                                                            
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 8 && currentNode.Name[0] == findMe[8]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 9 && currentNode.Name[0] == findMe[9]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 10 && currentNode.Name[0] == findMe[10]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 11 && currentNode.Name[0] == findMe[11]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 12 && currentNode.Name[0] == findMe[12]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 13 && currentNode.Name[0] == findMe[13]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 14 && currentNode.Name[0] == findMe[14]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 15 && currentNode.Name[0] == findMe[15]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 16 && currentNode.Name[0] == findMe[16]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 17 && currentNode.Name[0] == findMe[17]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 18 && currentNode.Name[0] == findMe[18]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 19 && currentNode.Name[0] == findMe[19]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;         
+                }else if (currentNode.Name && findMe.length > 20 && currentNode.Name[0] == findMe[20]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 21 && currentNode.Name[0] == findMe[21]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 22 && currentNode.Name[0] == findMe[22]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 23 && currentNode.Name[0] == findMe[23]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 24 && currentNode.Name[0] == findMe[24]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 25 && currentNode.Name[0] == findMe[25]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;                                                                                                                                                                                         
                 }else if (currentNode.Ancestors){ //didn't find string, keep traversing
                     currentNode = currentNode.Ancestors[0].BrowseNode[0];
                     return true;

@@ -394,6 +394,26 @@ function routeNLP(data){
                     
                 // });          
             }
+            else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
+                //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
+                var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
+                modDetail = modDetail.replace('but','').trim();
+                console.log('mod string ',modDetail);
+
+                data.tokens = res.tokens;
+                data.searchSelect = res.searchSelect;
+                data.bucket = 'search';
+                data.action = 'modify';
+                data.dataModify = {
+                    type:'genericDetail',
+                    val:[modDetail]
+                };
+
+                console.log('constructor ',data);
+
+                incomingAction(data);
+
+            }
             else {
 
                 if(!res.bucket){
