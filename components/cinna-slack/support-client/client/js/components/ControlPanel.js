@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 import DynamicForm,{labels} from './Form';
-import DraggableList from './DraggableList';
 import { DragDropContext  } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
@@ -20,7 +19,8 @@ import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import ReactTransitionGroup from 'react-addons-transition-group';
 import Toggle from 'react-toggle'
-
+import defaultItems from './defaultItems'
+import DraggableList from './DraggableList.jsx'
 
 const style = {
   width: 400,
@@ -28,69 +28,6 @@ const style = {
   textAlign: 'center'
 };
 const socket = io();
-const defaultItems = [{
-        id: 'product-0',
-        name: 'Product 0',
-        index: 0,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-1',
-        name: 'Product 1',
-        index: 1,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-2',
-        name: 'Product 2',
-        index: 2,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-3',
-        name: 'Product 3',
-        index: 3,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-4',
-        name: 'Product 4',
-        index: 4,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },
-      {
-        id: 'product-5',
-        name: 'Product 5',
-        index: 5,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-6',
-        name: 'Product 6',
-        index: 6,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-7',
-        name: 'Product 7',
-        index: 7,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-8',
-        name: 'Product 8',
-        index: 8,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-9',
-        name: 'Product 9',
-        index: 9,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-        }
-      ]
 
 @DragDropContext(HTML5Backend)
 class ControlPanel extends Component {
@@ -205,69 +142,7 @@ class ControlPanel extends Component {
       if (arrayvar.length > 0) {
         self.setState({ items: arrayvar })
       } else {
-        self.setState({items: [{
-        id: 'product-0',
-        name: 'Product 0',
-        index: 0,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-1',
-        name: 'Product 1',
-        index: 1,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-2',
-        name: 'Product 2',
-        index: 2,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-3',
-        name: 'Product 3',
-        index: 3,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-4',
-        name: 'Product 4',
-        index: 4,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },
-      {
-        id: 'product-5',
-        name: 'Product 5',
-        index: 5,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-6',
-        name: 'Product 6',
-        index: 6,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-7',
-        name: 'Product 7',
-        index: 7,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-8',
-        name: 'Product 8',
-        index: 8,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-9',
-        name: 'Product 9',
-        index: 9,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-        }
-      ]})
+        self.setState({items: defaultItems})
       }
     })
   }
@@ -358,19 +233,23 @@ class ControlPanel extends Component {
               <div style={style}>  
                         <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
 
-                      <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
-                      <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
-                          {list}
-                      </ReactCSSTransitionGroup>
-                          </div>
+                      <DraggableList items={items} style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
+                  
+                          
                </div>
             </div>
          </div>
       );
   }
 }
-// <ReactCSSTransitionGroup transitionAppear={true} transitionAppearTimeout={700} transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
-// </ReactCSSTransitionGroup>
+
+                      // <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
+                        // </div>
+
+
+    // <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
+    //     {list}
+    // </ReactCSSTransitionGroup>
 
 
 

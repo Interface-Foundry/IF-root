@@ -49,7 +49,7 @@ const DraggableList = React.createClass({
       delta: pageY - pressY,
       mouse: pressY,
       isPressed: true,
-      lastPressed: pos,
+      lastPressed: pos
     });
   },
 
@@ -73,7 +73,7 @@ const DraggableList = React.createClass({
 
     return (
       <div className="demo8">
-        { items.map(item => {
+        { items.slice(0,10).map(item => {
           const style = lastPressed === item.index && isPressed
             ? {
                 scale: spring(1.1, springConfig),
@@ -100,8 +100,20 @@ const DraggableList = React.createClass({
                     WebkitTransform: `translate3d(0, ${y}px, 0) scale(${scale})`,
                     zIndex: item.index === lastPressed ? 99 : item.index
                   }}>
-                  <img height='100%' width='100%' style={{border:'0.1em solid orange'}} src={item.img} />
-                </div>
+                  <div className="flexbox-container">
+                  <span style={{fontSize:'0.5em', color:'#000', margin: '0 auto', display:'inlineBlock', textAlign:'right'}}>Index: {item.index+1} </span>   
+                  <img height='90px' width='90px' style={{'MozUserSelect': 'none',
+                      'WebkitUserSelect': 'none',
+                      'WebkitUserDrag': 'none',
+                      'userSelect': 'none',
+                      'userDrag' : 'none',
+                      // 'marginRight':'90%',
+                      'display' : 'inlineBlock'
+                      }} src={item.img} />
+                      
+                    
+                  </div>
+                </div>  
               }
             </Motion>
           );
@@ -110,7 +122,7 @@ const DraggableList = React.createClass({
     );
   },
 });
-
+  // <label style={{fontSize:'0.5em', color:'#000'}}>Product: {item.name}</label>
  // {order.indexOf(i) + 1}
 
 export default DraggableList;

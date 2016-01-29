@@ -31,7 +31,17 @@ module.exports = {
           plugins: ['transform-decorators-legacy'],
           presets: ['es2015', 'react', 'stage-0']
         }
-      }, {
+      }, 
+      {
+        test: /\.jsx$/,
+        loader: 'babel',
+        include: path.join(__dirname, 'client'),
+        query: {
+          plugins: ['transform-decorators-legacy'],
+          presets: ['es2015', 'react', 'stage-0']
+        }
+      },
+      {
         test: /\.css?$/,
         loaders: ['style', 'raw']
       }, {

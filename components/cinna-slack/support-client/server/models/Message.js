@@ -40,6 +40,19 @@ var messageSchema = mongoose.Schema({
         toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
         searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
         recalled: Boolean //flag to bypass history function in cinna
+    },  
+    thread: {
+        id: String,
+        sequence: Number, //calculated by Cinna, will use in supervisor to keep track of state index in redux
+        isOpen: Boolean,
+        ticket: {
+            id: String, 
+            isOpen: Boolean
+        },
+        parent: {
+            isParent:Boolean,
+            parentId:String
+        }
     }
 });
 

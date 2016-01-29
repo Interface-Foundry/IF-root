@@ -340,12 +340,13 @@ span[class*="glyphicon-one-fine"] {
     -webkit-align-items: center;
   }
   .demo8 {
-    width: 320px;
+    marginTop: -20px;
+    width: 180px;
     height: 400px;
   }
   .demo8-item {
     position: absolute;
-    width: 320px;
+    width: 180px;
     height: 90px;
     overflow: visible;
     pointer-events: auto;
@@ -353,7 +354,8 @@ span[class*="glyphicon-one-fine"] {
     border-radius: 4px;
     color: rgb(153, 153, 153);
     line-height: 96px;
-    padding-left: 32px;
+/*    margin:20px;
+*/    /*padding-left: 32px;*/
     font-size: 24px;
     font-weight: 400;
     background-color: rgb(255, 255, 255);
@@ -365,10 +367,11 @@ span[class*="glyphicon-one-fine"] {
     color: rgb(76, 76, 76);
     text-decoration: none;
     font: 14px/1em "Helvetica";
-    padding: 10px;
+    /*padding: 10px;*/
     top: 0;
     left: 0;
   }
+
 
   /*end draggablelist*/
 

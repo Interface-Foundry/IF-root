@@ -759,7 +759,7 @@ var sendResponse = function(data){
     }
 
     //SAVE OUTGOING MESSAGES TO MONGO
-    if (data.bucket && data.action){
+    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
         history.saveHistory(data,false); //saving outgoing message

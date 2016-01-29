@@ -178,7 +178,7 @@ class DynamicForm extends Component {
             newQuery.msg = this.state.searchParam
             newQuery.bucket = 'search'
             newQuery.action = 'initial'
-            newQuery.tokens = newQuery.msg.split(' ')
+            newQuery.tokens = newQuery.msg.split()
             newQuery.source.origin = 'supervisor'
             newQuery.flags = {}
             newQuery.flags.toCinna = true
@@ -208,7 +208,7 @@ class DynamicForm extends Component {
     newQuery.action = 'similar'
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.tokens = newQuery.msg.split(' ')
+    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults
@@ -234,7 +234,7 @@ class DynamicForm extends Component {
     }
     newQuery.bucket = 'search'
     newQuery.action = 'modify'
-    newQuery.tokens = newQuery.msg.split(' ')
+    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
     newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults
@@ -312,7 +312,7 @@ class DynamicForm extends Component {
     }
     newQuery.bucket = 'search'
     newQuery.action = 'focus'
-    newQuery.tokens = newQuery.msg.split(' ')
+    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults

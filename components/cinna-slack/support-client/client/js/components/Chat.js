@@ -52,7 +52,7 @@ class Chat extends Component {
       //if no fields were updated on form take no action
       if (identifier.properties.length === 0 ) {
         return
-      } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'default') {
+      } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'Lobby') {
         return
       }else {
         actions.setMessageProperty(identifier)
