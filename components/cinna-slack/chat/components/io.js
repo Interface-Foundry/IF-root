@@ -199,8 +199,12 @@ function loadSlackUsers(users){
                     }
                     //direct message
                     else if (data.channel && data.channel.charAt(0) == 'D'){
+                        data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
                         incomingSlack(data);
                     }    
+                    else {
+                        console.log('error: not handling slack channel type hmm',data.channel);
+                    }
                 }
                 function incomingSlack(data){
                     if (data.type == 'message' && data.username !== settings.name && data.hidden !== true ){
