@@ -178,17 +178,17 @@ class DynamicForm extends Component {
             newQuery.msg = this.state.searchParam
             newQuery.bucket = 'search'
             newQuery.action = 'initial'
-            newQuery.client_res = [newQuery.msg]
             newQuery.tokens = newQuery.msg.split(' ')
             newQuery.source.origin = 'supervisor'
             newQuery.flags = {}
-            newQuery.flags.preview = true
+            newQuery.flags.toCinna = true
             newQuery.parent = false
             socket.emit('new message', newQuery);
             this.setState({
               spinnerloading: true,
               searchParam: ''
             })
+
         // });
       // });
   document.querySelector('#search-input').value = ''
@@ -206,7 +206,8 @@ class DynamicForm extends Component {
     }
     newQuery.bucket = 'search'
     newQuery.action = 'similar'
-    newQuery.client_res = [newQuery.msg]
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
     newQuery.tokens = newQuery.msg.split(' ')
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
@@ -214,8 +215,6 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    //TODO: Might change this flag below here and in cinna, extraneous properties
-    newQuery.flag = 'recalled'
     newQuery.parent = false
     console.log('Form.js 209 : newQuery: ',newQuery)
     socket.emit('new message', newQuery);
@@ -235,7 +234,6 @@ class DynamicForm extends Component {
     }
     newQuery.bucket = 'search'
     newQuery.action = 'modify'
-    newQuery.client_res = [newQuery.msg]
     newQuery.tokens = newQuery.msg.split(' ')
     newQuery.source.origin = 'supervisor'
     newQuery.recallHistory = {
@@ -243,8 +241,8 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    //TODO: Might change this flag below here and in cinna, extraneous properties
-    newQuery.flag = 'recalled'
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
     newQuery.parent = false
     newQuery.dataModify = { type: '', val: []}
     if (this.state.color) {
@@ -314,7 +312,6 @@ class DynamicForm extends Component {
     }
     newQuery.bucket = 'search'
     newQuery.action = 'focus'
-    newQuery.client_res = [newQuery.msg]
     newQuery.tokens = newQuery.msg.split(' ')
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
@@ -322,7 +319,8 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    newQuery.flag = 'recalled'
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
     newQuery.parent = false
     socket.emit('new message', newQuery);
     this.setState({

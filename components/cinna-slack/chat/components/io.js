@@ -419,7 +419,6 @@ function searchBucket(data){
     //* * * * typing event
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
         if (data.source.origin == 'slack'){
-            console.log('Io.js: line 423: ', slackUsers[data.source.org])
             slackUsers[data.source.org].postTyping(data.source.channel);
         }
     }
@@ -620,8 +619,9 @@ var checkOutgoingBanter = function(data){
 var sendResponse = function(data){
 
     if (data.source.channel && data.source.origin == 'socket.io'){
-        //check if socket user exists
+        //check if socket user exists        
         if (io.sockets.connected[data.source.channel]){
+            // console.log('io625: getting here')
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) { 
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
@@ -629,13 +629,13 @@ var sendResponse = function(data){
         }
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
-               data.bucket = 'results'
+               data.flags = {searchResults: true}
                 // console.log('Supervisor: 610 ',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
         else {
-            console.log('error: socket io channel missing');
+            console.log('error: socket io channel missing', data);
         }
     }
     else if (data.source.channel && data.source.origin == 'slack'){
@@ -749,7 +749,7 @@ var sendResponse = function(data){
      //---supervisor: relay search result previews back to supervisor---//
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
-        data.bucket = 'results'
+       data.flags = {searchResults: true}
         // console.log('Supervisor: 728', data)
         supervisor.emit(data)
     }

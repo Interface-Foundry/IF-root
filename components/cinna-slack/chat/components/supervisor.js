@@ -28,13 +28,13 @@ function emit(data, newmessage) {
 }
 //Used for banter or returning result set to supervisor
 function emitMsg(data) {
- // console.log('emitting message', data)
+ console.log('emitting message', data)
  ioClient.emit('new message', data)
 }
 
 //This function is used for new messages/channels
 function emitBoth(data) {
-  // console.log('emitting new channel', data)
+  console.log('emitting both', data)
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new channel', {
     name: data.source.channel,
@@ -42,8 +42,7 @@ function emitBoth(data) {
     resolved: resolved
   })
   var action = data.action ? data.action : ''
-  var flags = data.flags ? data.flags : {};
-  // var parent = (!data.parent) ? data.parent : 'parent'
+  var flags = data.flags ? data.flags : {toSupervisor: true};
   //Resolved = false only if this is a supervisor flagged message
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new message', {
@@ -51,7 +50,7 @@ function emitBoth(data) {
     incoming: true,
     msg: data.msg,
     tokens: [data.msg.split(' ')],
-    bucket: 'supervisor',
+    bucket: data.bucket,
     action: action,
     amazon: [],
     // dataModify: {

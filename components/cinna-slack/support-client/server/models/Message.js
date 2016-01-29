@@ -33,8 +33,14 @@ var messageSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    parent: Boolean,
-    flags: {}
+    parent: Boolean, //TODO: remove this use alyx's new prop
+    flags: {
+        toSupervisor: Boolean, //messages coming from cinna to supervisor
+        toClient: Boolean, //messages going from supervisor to cinna to client
+        toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
+        searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
+        recalled: Boolean //flag to bypass history function in cinna
+    }
 });
 
 module.exports = mongoose.model('Message', messageSchema);

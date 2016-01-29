@@ -117,7 +117,7 @@ class ControlPanel extends Component {
   }
 
   componentDidMount() {
-    const {actions, activeChannel, activeMessage, messages, supervisor} = this.props;
+    const {actions, activeChannel, activeMessage, messages, resolved} = this.props;
     const self = this
      this.setState({ mounted: true });
      socket.on('results', function (msg) {
@@ -334,13 +334,14 @@ class ControlPanel extends Component {
             <section className='rightnav'>
           <div>   
 
-            <label>
-              <Toggle
-                ref='toggle'
-                defaultChecked={this.props.supervisor}
-                onChange={ () => { changeMode(this) }} />
-              <span></span>
-            </label>
+      
+              <label>
+                <Toggle
+                  ref='toggle'
+                  defaultChecked={this.props.resolved}
+                  onChange={ () => { changeMode(this) }} />
+                  <span style={{fontSize:'1.3em'}}> INTERACT MODE</span>
+              </label>
 
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
