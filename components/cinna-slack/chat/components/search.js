@@ -54,10 +54,15 @@ var searchAmazon = function(data, type, query, flag) {
 
             if (data.tokens && data.tokens.length > 0){
                 //remove random symbols
-                removeSpecials(data.tokens[0],function(res){
-                    amazonParams.Keywords = res;
-                    continueProcess();
-                });                
+                amazonParams.Keywords = data.tokens[0];
+                continueProcess();
+
+                // console.log('X X X ',data.tokens[0]);
+                // removeSpecials(data.tokens[0],function(res){
+                //     console.log('Y Y Y ',res)
+                //     amazonParams.Keywords = data.tokens[0];
+                //     continueProcess();
+                // });                
             }
             else {
                 console.log('Error: data.tokens missing from searchAmazon');
@@ -69,8 +74,15 @@ var searchAmazon = function(data, type, query, flag) {
 
                 if (data.recallHistory && data.searchSelect){
                     var searchSelect = data.searchSelect[0] - 1;
-                    var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
-                    var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;                    
+                    if (data.recallHistory.amazon[searchSelect]){
+                        var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+                        var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;      
+                    }
+                    else { //fixing an NLP parse issue and routing to normal query
+                        flag = '';
+                        data.action = 'initial';
+                        doSearch();
+                    }
                 }
 
                 //check for flag to modify amazon search params

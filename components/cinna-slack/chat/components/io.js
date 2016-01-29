@@ -292,6 +292,8 @@ function preProcess(data){
         messageHistory[data.source.id].allBuckets = []; //all buckets, chronological chat history
     }
 
+    data.msg = data.msg.trim();
+
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
         //found canned response
@@ -347,7 +349,7 @@ function preProcess(data){
 function routeNLP(data){
 
     //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^\w\s]/gi, ' '); 
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
 
     console.log('in ',data.msg);
 
@@ -400,22 +402,37 @@ function routeNLP(data){
             }
             else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
                 //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
-                var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
-                modDetail = modDetail.replace('but','').trim();
-                console.log('mod string ',modDetail);
 
-                data.tokens = res.tokens;
-                data.searchSelect = res.searchSelect;
-                data.bucket = 'search';
-                data.action = 'modify';
-                data.dataModify = {
-                    type:'genericDetail',
-                    val:[modDetail]
-                };
+                //looking for modifier search 
+                if (res.tokens && res.tokens[0].indexOf('but') > -1){
+                    var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
+                    modDetail = modDetail.replace('but','').trim();
+                    console.log('mod string ',modDetail);
 
-                console.log('constructor ',data);
+                    data.tokens = res.tokens;
+                    data.searchSelect = res.searchSelect;
+                    data.bucket = 'search';
+                    data.action = 'modify';
+                    data.dataModify = {
+                        type:'genericDetail',
+                        val:[modDetail]
+                    };
 
-                incomingAction(data);
+                    console.log('constructor ',data);
+
+                    incomingAction(data);
+                }
+                else {
+                    data.tokens = res.tokens;
+                    data.searchSelect = res.searchSelect;
+                    data.bucket = 'search';
+                    data.action = 'initial';
+
+                    console.log('un struct ',data);
+
+                    incomingAction(data);
+                }
+
 
             }
             else {
