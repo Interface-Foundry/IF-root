@@ -15,11 +15,12 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
 import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
+import isNaN from 'lodash/lang/isNaN'
 import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import ReactTransitionGroup from 'react-addons-transition-group';
 import Toggle from 'react-toggle'
-import defaultItems from './defaultItems'
+import localStateItems from './localStateItems'
 import DraggableList from './DraggableList.jsx'
 
 const style = {
@@ -44,12 +45,13 @@ class ControlPanel extends Component {
       super(props, context)
       this.moveCard = this.moveCard.bind(this);
       this.state = {
-        items: defaultItems,
+        items: localStateItems.localState,
         msg : true,
         bucket: true,
         action: true,
         mounted: false,
-        visible: false
+        visible: false,
+        newOrder: []
     }
   }
 
@@ -91,35 +93,77 @@ class ControlPanel extends Component {
     })
 
    socket.on('change channel bc', function(channels) {
-    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
-    const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.prev.name)
+    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
+    const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
     const firstMsg = filtered[0]
     const firstMsgOld = filteredOld[0]
-
+      // console.log('firstMsg: ',firstMsg, 'firstMsgOld: ',firstMsgOld)
     //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
-    if (firstMsg.resolved && self.refs.toggle.state.checked === true) {
+    if ( self.refs.toggle && firstMsg.resolved && self.refs.toggle.state.checked === true) {
       self.refs.toggle.handleClick('forced')
-    } else if (!firstMsg.resolved && self.refs.toggle.state.checked === false) {
+    } else if (self.refs.toggle && !firstMsg.resolved && self.refs.toggle.state.checked === false) {
       self.refs.toggle.handleClick('forced')
     }
-    // console.log('self: ',channels, self.refs.toggle)
 
+    // if (self.state.newOrder.length > 0) {
+    //    self.setState({items: self.state.newOrder})
+    // }
+   
+
+    //Reset selected state
      self.setState({ selected: {name: null, index: null}})
-      if (firstMsgOld) {
-          var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
-          var result = []
-          self.state.items.forEach(function(stateItem){
-            globalitems.forEach(function(globalItem){
-              if (stateItem.id == globalItem.ASIN[0]) {
-               result.push(globalItem)
-              }
-            })
-          })
-          var identifier = {id: firstMsgOld.source.id, properties: []}
-          identifier.properties.push({ amazon : result})
-          actions.setMessageProperty(identifier)
-      }
 
+      //If there is atleast one channel existing already
+      if (firstMsgOld) {
+                console.log('self.state:', self.state)
+
+        //   //Update local state with new item ordering
+        //   const updateArrayState = function(items, i, order) {
+        //     return new Promise(function(resolve, reject) {
+        //          if (items[i].index !== order[i]) {
+        //             self.setState(update(self.state, {
+        //                 items: {
+        //                   $splice: 
+        //                     [[i, 1], [order[i], 0, items[i]]]
+        //                 }
+        //               }));
+        //              self.setState(update(self.state, {
+        //                 items: {[order[i]]: {$merge: {index: order[i]}}}
+        //             }));
+        //           }
+        //         return resolve();
+        //     });
+        //  };
+        //  //proxy var to hold original items ordering
+        //  const oldItems = self.state.items
+        // self.state.items.reduce(function(sequence, item, i) {
+        //   return sequence.then(function() {
+
+        //     return updateArrayState(oldItems, i, self.state.newOrder);
+        //   })
+        //  }, Promise.resolve()).then(function() {
+
+
+          // console.log('self.state.newOrder', self.state.newOrder)
+            //Update redux state with new item ordering        
+            var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
+            var result = []
+            self.state.items.forEach(function(stateItem){
+              globalitems.forEach(function(globalItem){
+                if (stateItem.id == globalItem.ASIN[0]) {
+                 result.push(globalItem)
+                }
+              })
+            })
+            var identifier = {id: firstMsgOld.source.id, properties: []}
+            identifier.properties.push({ amazon : result})
+            actions.setMessageProperty(identifier)
+
+
+          // });
+      }
+        
+        //Load items into state for next channel
         var arrayvar= []
          try {
            for (var i = 0; i < firstMsg.amazon.length; i++) {
@@ -138,11 +182,77 @@ class ControlPanel extends Component {
         console.log('CPanel Error 169 Could not get results :',err)
         return
       }
-      // console.log('Arrayvar is: ',arrayvar)
+      console.log('Arrayvar: ',arrayvar, 'result:',result ,'defaultState: ',localStateItems.defaultState[0].name)
       if (arrayvar.length > 0) {
+         console.log(0)
         self.setState({ items: arrayvar })
+        // self.refs.draggableListRef.forceUpdate()
       } else {
-        self.setState({items: defaultItems})
+        console.log(1)
+        self.setState({items: [{
+        id: 'product-0',
+        name: 'Product 0',
+        index: 0,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-1',
+        name: 'Product 1',
+        index: 1,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-2',
+        name: 'Product 2',
+        index: 2,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-3',
+        name: 'Product 3',
+        index: 3,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-4',
+        name: 'Product 4',
+        index: 4,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },
+      {
+        id: 'product-5',
+        name: 'Product 5',
+        index: 5,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-6',
+        name: 'Product 6',
+        index: 6,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-7',
+        name: 'Product 7',
+        index: 7,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-8',
+        name: 'Product 8',
+        index: 8,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-9',
+        name: 'Product 9',
+        index: 9,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+        }]})
+        // self.refs.draggableListRef.forceUpdate()
+        // self.forceUpdate()
       }
     })
   }
@@ -179,7 +289,28 @@ class ControlPanel extends Component {
 
    handleClick(index) {
     this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index}})
-    // console.log('Clicked!!!', this.state.selected)
+  }
+
+  handleReorder(order) {
+    const { items } = this.state;
+    const self = this
+    this.setState({items: order})
+
+    console.log('HandleReorder(): Local state items updated ',order, this.state)
+
+    // for (var i = 0; i < items.length; i++) {
+    //   if (items[i].index !== order[i]) {
+    //       this.setState(update(this.state, {
+    //           items: {
+    //             $splice: 
+    //               [[i, 1], [order[i], 0, items[i]]]
+    //           }
+    //         }));
+    //       this.setState(update(this.state, {
+    //           items: {[order[i]]: {$merge: {index: order[i]}}}
+    //       }));
+    //     }
+    //   }
   }
 
   renderItem(index, key) {
@@ -231,11 +362,8 @@ class ControlPanel extends Component {
           </div>
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                        <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-
-                      <DraggableList items={items} style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
-                  
-                          
+                <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
+                      <DraggableList ref='draggableListRef' items={items} messages={messages} reorder={::this.handleReorder} style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>
          </div>

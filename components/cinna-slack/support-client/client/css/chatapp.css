@@ -341,12 +341,12 @@ span[class*="glyphicon-one-fine"] {
   }
   .demo8 {
     marginTop: -20px;
-    width: 180px;
+    width: 240px;
     height: 400px;
   }
   .demo8-item {
     position: absolute;
-    width: 180px;
+    width: 240px;
     height: 90px;
     overflow: visible;
     pointer-events: auto;

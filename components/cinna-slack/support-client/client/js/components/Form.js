@@ -63,7 +63,7 @@ class DynamicForm extends Component {
       }
       //reset local state
       // console.log('messages: ', self.props.messages, ' channel: ',channel)
-      const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
+      const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
       const firstMsg = filtered[0]
         // console.log('first: ', firstMsg)
       self.state = {
