@@ -5,10 +5,10 @@ var cheerio = require('cheerio')
 var kip = require('kip')
 var debug = require('debug')('amazon')
 var memcache = require('memory-cache');
+var fs = require('fs')
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
-// in mem cache that can clean itself to 1000 items max
 var cache = {
   get: function(key, cb) {
     //  in-mem impl, can do redis later
@@ -83,12 +83,19 @@ module.exports.basic = function basic(url, callback) {
         var product = {
           price: '',
           text: '',
-          full_html: body
+          full_html: '',
+          asin: ''
         }
 
         var amazonSitePrice;
 
         var $ = cheerio.load(body);
+        $('html').find('script').remove()
+        $('html').find('style').remove()
+        // fs.writeFileSync('debug.html', $.html());
+
+        product.asin = $('input#ASIN').val();
+
 
         //sort scraped price
         //try for miniATF
@@ -99,18 +106,18 @@ module.exports.basic = function basic(url, callback) {
         //if no miniATF, try for priceblock_ourprice
         else if ($('#priceblock_ourprice').text()){
             console.log('😊 kk');
-            amazonSitePrice = $('#priceblock_ourprice').text().trim();  
+            amazonSitePrice = $('#priceblock_ourprice').text().trim();
         }
         else if ($('.buybox-price').text()){
             console.log('😊 kk');
-            amazonSitePrice = $('.buybox-price').text().trim();  
+            amazonSitePrice = $('.buybox-price').text().trim();
             amazonSitePrice = amazonSitePrice.split("\n");
             amazonSitePrice = amazonSitePrice[0];
         }
         //* * * * * * * * * *//
 
         //we have price from website
-        if (amazonSitePrice){  
+        if (amazonSitePrice){
             product.price = amazonSitePrice;
         }
 
@@ -141,8 +148,8 @@ module.exports.basic = function basic(url, callback) {
 }
 
 // get the questions and ansewrs for a specific product url
-module.exports.qa = function(url, callback) {
-  var cachekey = url + '#QA'
+module.exports.qa = function(asin, callback) {
+  var cachekey = asin + '#QA'
 
   cache.get(cachekey, function(err, qa) {
     kip.err(err);
@@ -155,24 +162,12 @@ module.exports.qa = function(url, callback) {
 
     var QA = [];
 
-    // Extract product ID
-    // example urls:
-    // http://www.amazon.com/Acer-G226HQL-21-5-Inch-Screen-Monitor/dp/B009POS0GS/ref=sr_1_1?s=pc&ie=UTF8&qid=1453137893&sr=1-1&keywords=monitor
-    // http://www.amazon.com/gp/product/B00R8NSSGK/ref=s9_aas_bw_g193_i3?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-4&pf_rd_r=1YSQG3YFK2RM66XKNQ9C&pf_rd_t=101&pf_rd_p=2337894602&pf_rd_i=13429645011
-    var dp = url.match(/\/dp\/(.*)\//);
-    if (!dp) {
-      dp = url.match(/\/product\/(.*)\//);
-    }
-    if (!dp || !dp[1]) {
-      return callback('Could not extract product id from url: ' + url);
-    }
-    dp = dp[1]
-    var question_template = 'http://www.amazon.com/ask/questions/inline/$DP/$PAGE?_=$TIMESTAMP';
-    function getQuestions(dp, page, lastb) {
+    var question_template = 'http://www.amazon.com/ask/questions/inline/$ASIN/$PAGE?_=$TIMESTAMP';
+    function getQuestions(page, lastb) {
       debug(page);
       var timestamp = +new Date();
       var url = question_template
-        .replace('$DP', dp)
+        .replace('$ASIN', asin)
         .replace('$PAGE', page)
         .replace('$TIMESTAMP', timestamp)
 
@@ -183,6 +178,11 @@ module.exports.qa = function(url, callback) {
       }, function (e, r, b) {
         if (e) {
           kip.err(e);
+        }
+
+        if (b === lastb) {
+          cache.put(cachekey, QA)
+          return callback(null, QA)
         }
 
         var $ = cheerio.load(b);
@@ -221,39 +221,20 @@ module.exports.qa = function(url, callback) {
           return callback(null, QA);
         }
 
+        if ($('[id^=question]').toArray().length === 0) {
+          return callback(null, QA);
+        }
+
         if (!done) {
-          getQuestions(dp, ++page, b);
+          getQuestions(++page, b);
         }
       })
     }
-    getQuestions(dp, 1);
+    getQuestions(1);
 
   })
 
 }
-
-if (!module.parent) {
-  var urls = [
-    'http://www.amazon.com/dp/B00BGO0Q9O/ref=s9_acsd_bw_wf_s_NRwaterf_cdl_5?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-top-3&pf_rd_r=1648MF65W33MBPQPSZSJ&pf_rd_t=101&pf_rd_p=2058449622&pf_rd_i=10711515011',
-    'http://www.amazon.com/WantDo-Fashion-Windbreaker-Jackets-X-Large/dp/B017NCR7TO/ref=sr_1_1?ie=UTF8&qid=1453154503&sr=8-1&keywords=jacket'
-  ]
-
-  function run(index) {
-    console.log('running url ' + urls[index]);
-    module.exports.qa(urls[index], function(err, qa) {
-      kip.fatal(err);
-      console.log(qa);
-      index++;
-      if (urls[index]) {
-        run(index);
-      }
-    })
-  }
-
-  run(0);
-
-}
-
 
 function checkURL(url) {
     return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);

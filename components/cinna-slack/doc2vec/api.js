@@ -49,13 +49,14 @@ function getMany (s, callback) {
 
 if (!module.parent) {
   var sentences = [
-    'i would like to buy a hamburger',
-    'please help me locate the sheep',
-    'can you help me find the sheep',
-    'where are the sheep?',
-    'where are the lambs?',
-    'does it come in size medium?',
-    'does it run big or small?'
+    'did sid chamberlain explode'
+    // 'i would like to buy a hamburger',
+    // 'please help me locate the sheep',
+    // 'can you help me find the sheep',
+    // 'where are the sheep?',
+    // 'where are the lambs?',
+    // 'does it come in size medium?',
+    // 'does it run big or small?'
   ]
 
   function run(i) {

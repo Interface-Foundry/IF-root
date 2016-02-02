@@ -1,6 +1,8 @@
 from easydict import EasyDict as edict
+from gensim import utils
 from gensim.models import Doc2Vec
 import json
+import re
 # from gensim import Doc2Vec
 from flask import (
     Flask,
@@ -14,7 +16,7 @@ from flask import (
 print 'loading data, usually takes 75 seconds on my mac'
 # TODO make own model
 # model = Doc2Vec.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary=True)
-model_loaded = Doc2Vec.load('./question_answering_model.doc2vec')
+model = Doc2Vec.load('./question_answering_model.doc2vec')
 
 app = Flask(__name__)
 
