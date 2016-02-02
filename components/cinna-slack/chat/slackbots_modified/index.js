@@ -376,10 +376,12 @@ Bot.prototype._api = function(methodName, params) {
 
     return new Vow.Promise(function(resolve, reject) {
 
+        console.log('POSTING DATA ',data);
+
         request.post(data, function(err, request, body) {
             if (err) {
                 reject(err);
-
+                console.log('SLACK ERROR 1 ',err);
                 return false;
             }
 
@@ -396,6 +398,7 @@ Bot.prototype._api = function(methodName, params) {
 
             } catch (e) {
                 reject(e);
+                console.log('SLACK ERROR 2 ',e);
             }
         });
     });

@@ -5,6 +5,7 @@ var Message = db.Message;
 var config = require('config');
 var async = require('async');
 var _ = require('underscore');
+var shortid = require('shortid');
 
 process.on('uncaughtException', function (err) {
   console.log(err);
@@ -16,6 +17,191 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
     // / / / / / / / /
     //CHECK FOR "recallhistory" property, remove
     // / / / / / / / / 
+
+    //currentbucket
+    //currentaction
+
+    // thread: {
+    //     id: String,
+    //     sequence: Number,
+    //     isOpen: Boolean,
+    //     ticket: {
+    //         id: String, 
+    //         isOpen: Boolean
+    //     },
+    //     parent: {
+    //         isParent:Boolean,
+    //         parentId:String
+    //     }
+    // }
+
+    //if bucket == search
+    //if action == initial
+
+    console.log('INCOMING ',incoming);
+    console.log('BUCKET ',data.bucket);
+    console.log('ACTION ',data.action);
+
+    if (data.bucket == 'search'){
+        if (data.action == 'initial'){
+            //user messaging Kip
+            if (incoming == true){
+                newParentItem(function(res){
+                    data.thread = res;
+                    console.log('new parent thread ',res);
+                });
+            }   
+            //response from Kip to user
+            else if (incoming == false){
+                //data thread exists, add new child item
+                if (data.thread){
+                    newChildItem(data,function(res){
+                        data.thread = res;
+                        console.log('new child thread ',res);
+                    });
+                }else {
+                    console.log('warning: * * * data thread missing in history.js!!')
+                    newParentItem(function(res){
+                        data.thread = res;
+                        console.log('new parent thread ',res);
+                    });
+                }
+            }
+            else {
+                console.log('Error: missing `incoming` value in saveHistory()');
+            }
+        }
+        //all other search actions but initial
+        else {
+            //data thread exists, adding new child item
+
+            //get last item in thread
+            // Message.findOne({'$or':[{'action':'initial'},{'action':'similar'},{'action':'modify'}],'bucket':'search','incoming':false,'source.id':data.source.id}).sort({'_id': -1}).exec(function(err, msg) {  
+            //     if(err){
+            //         console.log('Error: Cannot find initial search for recallHistory');
+            //     }   
+            //     else {
+            //         if (msg && msg.amazon){
+            //             var tempArr = msg.amazon; //lmao amazon 
+            //             msg.amazon = [];
+            //             async.eachSeries(tempArr, function(item, callback2) {
+            //                 msg.amazon.push(JSON.parse(item)); //ughhhh
+            //                 callback2();
+            //             }, function done(){
+            //                 callback(msg); 
+            //             });
+            //         }
+            //         else {
+            //             callback(msg);
+            //         }
+            //     }
+            // });
+
+            if (data.recallHistory && data.recallHistory.thread){
+                
+                //PASS BOTH DATA HERE
+
+                data.thread = data.recallHistory.thread; //using recalled thread to add as child item
+                
+                console.log('data.recallHistory found!! ',data.thread);
+
+                newChildItem(data,data.recallHistory.thread,function(res){
+                    data.thread = res;
+                    console.log('new child thread ',res);
+                });
+            }else {
+
+                console.log('data.recallHistory not found getting new recall');
+
+                //no recallHistory found
+                recallHistory(data,function(recalled){
+                    console.log('RECALLED OBJECT ', recalled);
+                    if (recalled && recalled.thread){
+                        data.thread = recalled.thread; //using recalled thread to add as child item
+                        newChildItem(data,function(res){
+                            data.thread = res;
+                            console.log('new child thread ',res);
+                        });
+                    }
+                    else {
+                        console.log('warning: recall and/or recall.thread not found')
+                        newParentItem(function(res){
+                            data.thread = res;
+                            console.log('new parent thread ',res);
+                        });                        
+                    }
+
+                });
+
+
+            }
+        }
+    }else {
+        console.log('non search ',data);
+
+        //just create 2 item threads!
+
+        //create new thread? thread goes back to a search bucket?
+    }
+
+
+    //THREAD FUNCTIONS ////
+
+    function newParentItem(callback){
+        var thread = {
+            id: shortid.generate(),
+            sequence: 1,
+            isOpen: true,
+            parent:{
+                isParent: true
+            }
+        };
+        callback(thread);
+    }
+
+    function newChildItem(data,callback){
+
+        console.log('childitem ',data.thread);
+        data.thread.sequence++;
+        console.log(data.thread.sequence);
+        console.log('childitem2 ',data.thread);
+
+        if (data.thread.isOpen == true){
+            console.log('thread open');
+
+            if (data.thread.id){
+
+                //first item under parent, need to assign previous thread ID to parent
+                if (data.thread.parent.isParent){
+                    console.log('new parent id assigned to preceding item, now adding child id');
+                    data.thread.parent.isParent = false;
+                    data.thread.parent.id = data.thread.id; //assign preceding item in thread to parent id
+                }     
+                else {
+                    console.log('adding another child id, parent id already created');
+                }
+
+                data.thread.id = shortid.generate(); //gen new idea for this item in thread
+
+            }
+            console.log('add new child thread ',data.thread.sequence);
+            callback(data.thread);
+
+            // else{
+            // }
+
+        }else if (data.thread.isOpen == false){
+            console.log('thread closed');
+        }
+    }
+
+    function updateThread(){
+
+    }
+    
+    ///////// / / / / / / / / 
+
+
 
     if (!data.source.id){
         console.log('error: missing source.id');
