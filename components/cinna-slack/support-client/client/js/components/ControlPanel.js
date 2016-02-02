@@ -50,8 +50,7 @@ class ControlPanel extends Component {
         bucket: true,
         action: true,
         mounted: false,
-        visible: false,
-        newOrder: []
+        visible: false
     }
   }
 
@@ -60,7 +59,10 @@ class ControlPanel extends Component {
     const self = this
      this.setState({ mounted: true });
      socket.on('results', function (msg) {
-      console.log('ControlPanel: Received results in Control Panel',msg)
+      
+      //enable react-motion animation
+      self.refs.draggableList.setState({previewing: true})
+
       try {
            for (var i = 0; i < msg.amazon.length; i++) {
             self.state.items[i].index = i
@@ -90,6 +92,11 @@ class ControlPanel extends Component {
       } else {
         actions.setMessageProperty(identifier)
       }
+
+       setTimeout(function(){
+         self.refs.draggableList.setState({previewing: false})
+      }, 2000)
+
     })
 
    socket.on('change channel bc', function(channels) {
@@ -97,7 +104,7 @@ class ControlPanel extends Component {
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
     const firstMsg = filtered[0]
     const firstMsgOld = filteredOld[0]
-      // console.log('firstMsg: ',firstMsg, 'firstMsgOld: ',firstMsgOld)
+
     //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
     if ( self.refs.toggle && firstMsg.resolved && self.refs.toggle.state.checked === true) {
       self.refs.toggle.handleClick('forced')
@@ -105,46 +112,11 @@ class ControlPanel extends Component {
       self.refs.toggle.handleClick('forced')
     }
 
-    // if (self.state.newOrder.length > 0) {
-    //    self.setState({items: self.state.newOrder})
-    // }
-   
-
     //Reset selected state
      self.setState({ selected: {name: null, index: null}})
 
       //If there is atleast one channel existing already
       if (firstMsgOld) {
-                console.log('self.state:', self.state)
-
-        //   //Update local state with new item ordering
-        //   const updateArrayState = function(items, i, order) {
-        //     return new Promise(function(resolve, reject) {
-        //          if (items[i].index !== order[i]) {
-        //             self.setState(update(self.state, {
-        //                 items: {
-        //                   $splice: 
-        //                     [[i, 1], [order[i], 0, items[i]]]
-        //                 }
-        //               }));
-        //              self.setState(update(self.state, {
-        //                 items: {[order[i]]: {$merge: {index: order[i]}}}
-        //             }));
-        //           }
-        //         return resolve();
-        //     });
-        //  };
-        //  //proxy var to hold original items ordering
-        //  const oldItems = self.state.items
-        // self.state.items.reduce(function(sequence, item, i) {
-        //   return sequence.then(function() {
-
-        //     return updateArrayState(oldItems, i, self.state.newOrder);
-        //   })
-        //  }, Promise.resolve()).then(function() {
-
-
-          // console.log('self.state.newOrder', self.state.newOrder)
             //Update redux state with new item ordering        
             var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
             var result = []
@@ -158,9 +130,6 @@ class ControlPanel extends Component {
             var identifier = {id: firstMsgOld.source.id, properties: []}
             identifier.properties.push({ amazon : result})
             actions.setMessageProperty(identifier)
-
-
-          // });
       }
         
         //Load items into state for next channel
@@ -186,7 +155,6 @@ class ControlPanel extends Component {
       if (arrayvar.length > 0) {
          console.log(0)
         self.setState({ items: arrayvar })
-        // self.refs.draggableListRef.forceUpdate()
       } else {
         console.log(1)
         self.setState({items: [{
@@ -251,8 +219,6 @@ class ControlPanel extends Component {
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
         }]})
-        // self.refs.draggableListRef.forceUpdate()
-        // self.forceUpdate()
       }
     })
   }
@@ -295,22 +261,6 @@ class ControlPanel extends Component {
     const { items } = this.state;
     const self = this
     this.setState({items: order})
-
-    console.log('HandleReorder(): Local state items updated ',order, this.state)
-
-    // for (var i = 0; i < items.length; i++) {
-    //   if (items[i].index !== order[i]) {
-    //       this.setState(update(this.state, {
-    //           items: {
-    //             $splice: 
-    //               [[i, 1], [order[i], 0, items[i]]]
-    //           }
-    //         }));
-    //       this.setState(update(this.state, {
-    //           items: {[order[i]]: {$merge: {index: order[i]}}}
-    //       }));
-    //     }
-    //   }
   }
 
   renderItem(index, key) {
@@ -363,22 +313,12 @@ class ControlPanel extends Component {
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
                 <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-                      <DraggableList ref='draggableListRef' items={items} messages={messages} reorder={::this.handleReorder} style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
+                      <DraggableList ref='draggableList' items={items} messages={messages} reorder={::this.handleReorder} style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>
          </div>
       );
   }
 }
-
-                      // <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
-                        // </div>
-
-
-    // <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
-    //     {list}
-    // </ReactCSSTransitionGroup>
-
-
 
 export default ControlPanel

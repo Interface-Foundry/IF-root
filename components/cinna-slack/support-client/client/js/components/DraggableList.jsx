@@ -91,7 +91,9 @@ const DraggableList = React.createClass({
       lastPressed: 0,
       order: this.props.items,
       pageY: 0,
-      switching: false
+      switching: false,
+      previewing: false,
+      mounted: false
     };
   },
 
@@ -102,6 +104,7 @@ const DraggableList = React.createClass({
     window.addEventListener('mousemove', this.handleMouseMove);
     window.addEventListener('mouseup', this.handleMouseUp);
     const self = this
+    this.setState({ mounted: true });
     socket.on('change channel bc', function(channels) {
       // console.log('DraggableList105: delta: ', self.state.delta)
       
@@ -165,9 +168,7 @@ const DraggableList = React.createClass({
     if (isPressed) {
       const mouse = pageY - delta;
       const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
-          // console.log('DELTA:',delta)
       const newOrder = reinsert(order, findIndex(order, function(o) { return o.index == lastPressed }), row);
-      // console.log(order, order.indexOf(lastPressed), row)
       this.setState({mouse: mouse, order: newOrder});
 
     }
@@ -175,7 +176,6 @@ const DraggableList = React.createClass({
 
   handleMouseUp() {
     const {isPressed, delta, order, lastPressed} = this.state;
-    // console.log('delta: ',delta)
     this.setState({isPressed: false, delta: 0}); 
      if ((delta !== 0) && (this.props.items !== defaultItems) && (order !== defaultItems) && this.props.items !== order) {
        this.props.reorder(order)
@@ -183,12 +183,12 @@ const DraggableList = React.createClass({
   },
 
   render() {
-    const {mouse, isPressed, lastPressed, order, switching} = this.state;
+    const {mouse, isPressed, lastPressed, order, switching, previewing,mounted} = this.state;
     const { items } = this.props
      const allStyle = this.state.switching ? { y: (spring(5, springConfig)) } : {} 
     return (
       <div className="demo8">
-        { items.slice(0,10).map(item => {
+        { mounted ? items.slice(0,10).map(item => {
           const style = lastPressed === item.index && (isPressed)
             ? {
                 scale: spring(1.1, springConfig),
@@ -199,12 +199,12 @@ const DraggableList = React.createClass({
             : {
                 scale: spring(1, springConfig),
                 shadow: spring(1, springConfig),
-                y: this.state.switching ? (spring(-600, springConfig)) : (spring(findIndex(order, function(o) { return o.index == item.index }) * 100, springConfig)), 
+                y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(order, function(o) { return o.index == item.index }) * 100, springConfig)), 
                 textAlign: 'center'
               };
           return (
             <Motion style={style} key={item.index}>
-              {({scale, shadow, y}) =>
+              {({scale, shadow, y, x}) =>
                 <div
                   onMouseDown={this.handleMouseDown.bind(null, item.index, y)}
                   onTouchStart={this.handleTouchStart.bind(null, item.index, y)}
@@ -232,7 +232,7 @@ const DraggableList = React.createClass({
               }
             </Motion>
           );
-        })}
+        }) : null}
       </div>
     );
   },
