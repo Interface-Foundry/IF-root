@@ -39,7 +39,6 @@ var urlShorten = function(data,callback2) {
                   }
                   else {
                     urlArr.push(body);
-                    console.log('!! ',urlArr);
                     callback();
                   }
                 });

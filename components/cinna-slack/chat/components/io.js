@@ -200,8 +200,12 @@ function loadSlackUsers(users){
                     }
                     //direct message
                     else if (data.channel && data.channel.charAt(0) == 'D'){
+                        data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
                         incomingSlack(data);
                     }    
+                    else {
+                        console.log('error: not handling slack channel type hmm',data.channel);
+                    }
                 }
                 function incomingSlack(data){
                     if (data.type == 'message' && data.username !== settings.name && data.hidden !== true ){
@@ -289,6 +293,8 @@ function preProcess(data){
         messageHistory[data.source.id].allBuckets = []; //all buckets, chronological chat history
     }
 
+    data.msg = data.msg.trim();
+
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
         //found canned response
@@ -321,6 +327,11 @@ function preProcess(data){
                     data.action = 'focus';
                     incomingAction(data);
                     break;
+                case 'search.more':
+                    data.bucket = 'search';
+                    data.action = 'more';
+                    incomingAction(data);
+                    break;
                 default:
                     console.log('error: canned action flag missing');
             }
@@ -339,43 +350,126 @@ function preProcess(data){
 function routeNLP(data){
 
     //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^\w\s]/gi, ''); 
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
 
-    nlp.parse(data.msg, function(e, res) {
-        if (e){console.log('NLP error ',e)}
-        else {
-            console.log('NLP RES ',res);
+    if (data.msg){
 
-            if(!res.bucket){
-                res.bucket = 'search';
-            }
-            if(!res.action){
-                res.action = 'initial';
-            }
+        //passing a context (last 10 items in DB to NLP)
+        history.recallContext(data,function(res){
+            data.recallContext = res;
+            continueNLP();
+        });
 
-            //- - - temp stuff to transfer nlp results to data object - - - //
-            if (res.bucket){
-                data.bucket = res.bucket;
-            }
-            if (res.action){
-                data.action = res.action;
-            }
-            if (res.tokens){
-                data.tokens = res.tokens;
-            }
-            if (res.searchSelect){
-                data.searchSelect = res.searchSelect;
-            }
-            if (res.dataModify){
-                data.dataModify = res.dataModify;
-            }
-            //- - - - end temp - - - - //
+        function continueNLP(){
+            nlp.parse(data.msg, function(e, res) {
+                if (e){console.log('NLP error ',e)}
+                else {
+                    console.log('NLP RES ',res);
 
-            incomingAction(data);
+                    if(res.execute && res.execute.length > 0){
 
-        }
+                        if(!res.execute[0].bucket){
+                            res.execute[0].bucket = 'search';
+                        }
+                        if(!res.execute[0].action){
+                            res.execute[0].execute[0].action = 'initial';
+                        }
 
-    })
+                        //- - - temp stuff to transfer nlp results to data object - - - //
+                        if (res.execute[0].bucket){
+                            data.bucket = res.execute[0].bucket;
+                        }
+                        if (res.execute[0].action){
+                            data.action = res.execute[0].action;
+                        }
+                        if (res.tokens){
+                            data.tokens = res.tokens;
+                        }
+                        if (res.searchSelect){
+                            data.searchSelect = res.searchSelect;
+                        }
+                        if (res.execute[0].dataModify){
+                            data.dataModify = res.execute[0].dataModify;
+                        }
+                        //- - - - end temp - - - - //
+
+                        incomingAction(data);
+
+                    }
+                    else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
+                        //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
+
+                        //looking for modifier search 
+                        if (res.tokens && res.tokens[0].indexOf('but') > -1){
+                            var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
+                            modDetail = modDetail.replace('but','').trim();
+                            console.log('mod string ',modDetail);
+
+                            data.tokens = res.tokens;
+                            data.searchSelect = res.searchSelect;
+                            data.bucket = 'search';
+                            data.action = 'modify';
+                            data.dataModify = {
+                                type:'genericDetail',
+                                val:[modDetail]
+                            };
+
+                            console.log('constructor ',data);
+
+                            incomingAction(data);
+                        }
+                        else {
+                            data.tokens = res.tokens;
+                            data.searchSelect = res.searchSelect;
+                            data.bucket = 'search';
+                            data.action = 'initial';
+
+                            console.log('un struct ',data);
+
+                            incomingAction(data);
+                        }
+
+                    }
+                    else {
+
+                        if(!res.bucket){
+                            res.bucket = 'search';
+                        }
+                        if(!res.action){
+                            res.action = 'initial';
+                        }
+
+                        //- - - temp stuff to transfer nlp results to data object - - - //
+                        if (res.bucket){
+                            data.bucket = res.bucket;
+                        }
+                        if (res.action){
+                            data.action = res.action;
+                        }
+                        if (res.tokens){
+                            data.tokens = res.tokens;
+                        }
+                        if (res.searchSelect){
+                            data.searchSelect = res.searchSelect;
+                        }
+                        if (res.dataModify){
+                            data.dataModify = res.dataModify;
+                        }
+                        //- - - - end temp - - - - //
+
+                        incomingAction(data);
+
+                    }
+                }
+            }) 
+        }       
+    }
+    else {
+        //we get this if we killed the whole user request (i.e. they sent a URL)
+        sendTxtResponse(data,'Oops sorry, I didn\'t understand your request');
+    }
+
+
 }
 
 //sentence breakdown incoming from python
@@ -389,7 +483,6 @@ function incomingAction(data){
     // console.log('Supervisor: 372 ',data)
     supervisor.emit(data, true)
     //----------------------//
-
 
     //save a new message obj
     history.saveHistory(data,true); //saving incoming message
@@ -569,9 +662,12 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
 
                             res[count] = res[count].trim(); 
 
-                            console.log('PUSH TO attach ','<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
+                            if (data.source.origin == 'slack'){
+                                data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
+                            }else if (data.source.origin == 'socket.io'){
+                                data.client_res.push(emoji + '<a href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                            }
 
-                            data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             count++;                           
                             callback();
                         });
@@ -671,8 +767,6 @@ var sendResponse = function(data){
                 attachThis.shift(); //remove image from array
 
                 attachments[1].fallback = 'Here are some options you might like';
-
-                console.log('attachThis ',attachThis); 
 
                 //put in attachment fields
                 async.eachSeries(attachThis, function(attach, callback) {

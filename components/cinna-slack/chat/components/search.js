@@ -52,18 +52,37 @@ var searchAmazon = function(data, type, query, flag) {
             var amazonParams = {};
             amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank';
 
-            //remove random symbols
-            removeSpecials(data.tokens[0],function(res){
-                amazonParams.Keywords = res;
+            if (data.tokens && data.tokens.length > 0){
+                //remove random symbols
+                amazonParams.Keywords = data.tokens[0];
                 continueProcess();
-            });
+
+                // console.log('X X X ',data.tokens[0]);
+                // removeSpecials(data.tokens[0],function(res){
+                //     console.log('Y Y Y ',res)
+                //     amazonParams.Keywords = data.tokens[0];
+                //     continueProcess();
+                // });                
+            }
+            else {
+                console.log('Error: data.tokens missing from searchAmazon');
+                ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');                
+            }
+
 
             function continueProcess(){
 
                 if (data.recallHistory && data.searchSelect){
                     var searchSelect = data.searchSelect[0] - 1;
-                    var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
-                    var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;                    
+                    if (data.recallHistory.amazon[searchSelect]){
+                        var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
+                        var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;      
+                    }
+                    else { //fixing an NLP parse issue and routing to normal query
+                        flag = '';
+                        data.action = 'initial';
+                        doSearch();
+                    }
                 }
 
                 //check for flag to modify amazon search params
@@ -76,7 +95,6 @@ var searchAmazon = function(data, type, query, flag) {
                         console.log('FLAG TYPE &!&!&! ',flag.type);
 
                         if (flag.flagAction == 'weakSearchContinue' && data.amazonParams || flag.flagAction == 'weakSearch' && data.amazonParams){
-                            console.log('? ?? ? ? ? ? ? ? ');
                             if (data.amazonParams){
                                 console.log('GENERCICCC: DOING WEAK NODE SEARCH');
                                 amazonParams = data.amazonParams;
@@ -92,17 +110,24 @@ var searchAmazon = function(data, type, query, flag) {
                             parseAmazon(productGroup,browseNodes,function(res){
                                 amazonParams.SearchIndex = res.SearchIndex;
                                 amazonParams.BrowseNode = res.BrowseNode;
-                                var modder;
+                                // var modder;
 
-                                if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material'){
-                                    modder = flag.type;
-                                }
+                                // if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material'){
+                                //     modder = flag.type;
+                                // }
+
 
                                 if (flag.val instanceof Array){
                                     console.log('IS ARRAY');
+                                    // if (flag.val[0].name == 'lime' || flag.val[0].name == 'Lime'){
+                                    //     flag.val[0].name = 'green';
+                                    // }
                                     amazonParams.Keywords = flag.val[0].name; //!\!\!\!\ remove so we query by browsenode
                                 }else {
                                     if (flag.val.name){
+                                        // if (flag.val.name == 'lime' || flag.val.name == 'Lime'){
+                                        //     flag.val.name = 'green';
+                                        // }
                                         amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
                                     }else {
                                         amazonParams.Keywords = flag.val; //!\!\!\!\ remove so we query by browsenode
@@ -143,6 +168,15 @@ var searchAmazon = function(data, type, query, flag) {
 
                                         var modPrice = data.recallHistory.amazon[searchSelect].realPrice;
 
+                                        //remove price range text
+                                        if (modPrice.indexOf('-') > 0){
+                                          //this is a price range, e.g. $29.95 - $42.95, just process lowest number
+                                          modPrice = modPrice.substring(0, modPrice.indexOf('-'));
+                                          modPrice = modPrice.trim();  
+                                        }
+
+                                        console.log('MODDED PROCE ',modPrice);
+
                                         modPrice = modPrice.replace('$','');
                                         modPrice = modPrice.replace('.','');
 
@@ -167,6 +201,21 @@ var searchAmazon = function(data, type, query, flag) {
                                                 console.log('!!productGroup <-- ',productGroup);
 
                                                 parseAmazon(productGroup,browseNodes,function(res){
+
+                                                    //* * * * * TEMPORARY TO HELP WITH CHEAPER RESULTS??????????? * * * * * //
+                                                    res.BrowseNode = res.BrowseNode.split(',');
+                                                    console.log('arr ',res.BrowseNode);
+                                                    console.log('ARRAY LENGTH ',res.BrowseNode.length);     
+                                                    if (res.BrowseNode && res.BrowseNode.length >= 2){
+                                                        res.BrowseNode = res.BrowseNode.slice(0,2);
+                                                    }                                
+                                                    console.log('arr ',res.BrowseNode);
+                                                    console.log('ARRAY LENGTH ',res.BrowseNode.length); 
+                                                    
+                                                    res.BrowseNode = res.BrowseNode.toString();
+                                                    //* * * * * * * * * * * END TEST * * * * * * * * * * * * * * * * * * //
+
+
                                                     amazonParams.SearchIndex = res.SearchIndex;
                                                     amazonParams.BrowseNode = res.BrowseNode;
                                                     amazonParams.MaximumPrice = modPrice.toString(); 
@@ -255,6 +304,12 @@ var searchAmazon = function(data, type, query, flag) {
                         console.log('BRAND FIRED');
                         doSearch();
                     }
+                    //this fires if we didn't get enough results from normal initial query
+                    else if (flag.type == 'initial' && flag.flagAction == 'weakSearchContinue' && data.amazonParams || flag.type == 'initial' && flag.flagAction == 'weakSearch' && data.amazonParams){
+                        console.log('intial search advanced query', data.amazonParams);
+                        amazonParams = data.amazonParams;
+                        doSearch();
+                    }   
                     else {
                         doSearch();
                     }
@@ -277,15 +332,19 @@ var searchAmazon = function(data, type, query, flag) {
                 client.itemSearch(amazonParams).then(function(results,err){
                     data.amazon = results;
 
-                    console.log('#1 browsenode ',JSON.stringify(data.amazon[0].BrowseNodes));
-                    console.log('#1 productGroup <-- ',data.amazon[0].ItemAttributes[0].ProductGroup[0]);
+                    if (data.amazon[0]){
+                        console.log('#1 browsenode ',JSON.stringify(data.amazon[0].BrowseNodes));
+                        console.log('#1 productGroup <-- ',data.amazon[0].ItemAttributes[0].ProductGroup[0]);                        
+                    }
+                    if (data.amazon[1]){
+                        console.log('#2 browsenode ',JSON.stringify(data.amazon[1].BrowseNodes));
+                        console.log('#2 productGroup <-- ',data.amazon[1].ItemAttributes[0].ProductGroup[0]);
+                    }
+                    if (data.amazon[2]){
+                        console.log('#3 browsenode ',JSON.stringify(data.amazon[2].BrowseNodes));
+                        console.log('#3 productGroup <-- ',data.amazon[2].ItemAttributes[0].ProductGroup[0]);
+                    }
 
-                    console.log('#2 browsenode ',JSON.stringify(data.amazon[1].BrowseNodes));
-                    console.log('#2 productGroup <-- ',data.amazon[1].ItemAttributes[0].ProductGroup[0]);
-
-                    console.log('#3 browsenode ',JSON.stringify(data.amazon[2].BrowseNodes));
-                    console.log('#3 productGroup <-- ',data.amazon[2].ItemAttributes[0].ProductGroup[0]);
-                    
                     //temporarily using async parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
                     if (results.length >= 3){   
 
@@ -295,33 +354,37 @@ var searchAmazon = function(data, type, query, flag) {
                         });
                     }
                     //TEMP PATCH, FOR RESULTS UNDER 3 items
+                    else if (results.length >= 1){
+                        // //do a weak search
+                        // weakSearch(data,type,query,flag,amazonParams);
+
+                        var loopLame = [0,1,2];//lol
+                        async.eachSeries(loopLame, function(i, callback) {
+                            if (data.amazon[i]){
+                                //get reviews by ASIN
+                                getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
+                                    //adding scraped reviews to amazon objects
+                                    data.amazon[i].reviews = {
+                                        rating: rating,
+                                        reviewCount: reviewCount
+                                    }
+                                    //GET PRICE
+                                    getPrices(data.amazon[i],function(realPrice){
+                                        data.amazon[i].realPrice = realPrice;
+                                        callback();
+                                    });
+                                });
+                            }
+                            else {
+                                callback();
+                            }
+                        }, function done(){
+                            ioKip.outgoingResponse(data,'stitch','amazon');
+                        });
+                    }
                     else {
                         //do a weak search
                         weakSearch(data,type,query,flag,amazonParams);
-
-                        // var loopLame = [0,1,2];//lol
-                        // async.eachSeries(loopLame, function(i, callback) {
-                        //     if (data.amazon[i]){
-                        //         //get reviews by ASIN
-                        //         getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                        //             //adding scraped reviews to amazon objects
-                        //             data.amazon[i].reviews = {
-                        //                 rating: rating,
-                        //                 reviewCount: reviewCount
-                        //             }
-                        //             //GET PRICE
-                        //             getPrices(data.amazon[i],function(realPrice){
-                        //                 data.amazon[i].realPrice = realPrice;
-                        //                 callback();
-                        //             });
-                        //         });
-                        //     }
-                        //     else {
-                        //         callback();
-                        //     }
-                        // }, function done(){
-                        //     ioKip.outgoingResponse(data,'stitch','amazon');
-                        // });
                     }
 
                 }).catch(function(err){
@@ -405,8 +468,11 @@ var searchAmazon = function(data, type, query, flag) {
                                             reviewCount: reviewCount
                                         }
                                         //GET PRICE
-                                        getPrices(data.amazon[i],function(realPrice){
+                                        getPrices(data.amazon[i],function(realPrice,altImage){
                                             data.amazon[i].realPrice = realPrice;
+                                            if (altImage){
+                                               data.amazon[i].altImage = altImage; 
+                                            }
                                             callback();
                                         });
                                     });
@@ -519,6 +585,54 @@ function weakSearch(data,type,query,flag,amazonParams){
                     }
                     else {
                         searchModify(data, 'weakSearch');
+                    }
+                    break;
+                case 'initial':
+                    if (data.amazonParams && data.amazonParams.Keywords){
+
+                        console.log('PARAMS ',data.amazonParams);
+
+                        var newQuery = data.amazonParams.Keywords.split(/[ ,]+/).filter(Boolean);
+                        console.log('split ',newQuery);
+                        newQuery.pop();
+                        console.log('newQuery ',newQuery);
+                        console.log('newQuery length ',newQuery.length);
+
+                        // if (newQuery.length > 1){
+                        //     newQuery = newQuery.pop();
+                        //     console.log('newQuery ',newQuery);
+                        // }
+                        // else {
+                        //     //last search
+                        // }
+
+                        setTimeout(function() {
+
+                            if(newQuery.length > 1){
+                                console.log('continue trying to search!');
+                                data.amazonParams.Keywords = newQuery.toString();
+                                searchInitial(data, {type:'initial',flagAction:'weakSearchContinue'});
+
+                            }else if (newQuery.length == 1) { //ok last one, set flag
+                                console.log('ok our last search!!!!!!!!!!!!!!!!!!!');
+                                data.amazonParams.Keywords = newQuery.toString();
+                                searchInitial(data, {type:'initial',flagAction:'weakSearchContinue'});
+                            }
+                            else {
+                                console.log('warning: no results found after trying weak INITIAL searches.');
+                                ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
+                            }
+
+                        }, 250);
+
+
+
+
+
+                    }
+                    else {
+                        //searchModify(data, 'weakSearch');
+                        console.log('NO PARAMS FOUND ',data);
                     }
                     break;
                 default:
@@ -946,8 +1060,11 @@ var searchMore = function(data){
                             reviewCount: reviewCount
                         }
                         //GET PRICE
-                        getPrices(data.amazon[i],function(realPrice){
+                        getPrices(data.amazon[i],function(realPrice,altImage){
                             data.amazon[i].realPrice = realPrice;
+                            if (altImage){
+                               data.amazon[i].altImage = altImage; 
+                            }
                             callback();
                         });
                     });
@@ -956,6 +1073,7 @@ var searchMore = function(data){
                     callback();
                 }
             }, function done(){
+                console.log('more data',data);
                 ioKip.outgoingResponse(data,'stitch','amazon');
             });
         }
@@ -990,6 +1108,8 @@ var getPrices = function(item,callback){
 
     var url = item.DetailPageURL[0];
     var price;  // get price from API
+    var altImage;
+
     if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
         //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
         console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
@@ -1010,18 +1130,28 @@ var getPrices = function(item,callback){
         }
     }
 
+    console.log('price PRE PROCESS ',price);
+
     amazonHTML.basic(url, function(err, product) {
       kip.err(err); // print error
 
       if (product && product.price) {
         console.log('returning early with price: ' + product.price);
-        return callback(product.price)
+        console.log('returning early with rice ' + product.altImage);
+          // if(product.altImage){
+          //   altImage = product.altImage;
+          // }
+        return callback(product.price,product.altImage)
       }
 
-      // console.log('product.price: ' + product.price + ', price: ' + price);
+        console.log('product.price: ' + product.price + ', price: ' + price);
+
       price = product.price || price || '';
       console.log('final price: ' + price);
-      callback(price);
+      if(product.altImage){
+        altImage = product.altImage;
+      }
+      callback(price,altImage);
     })
 }
 
@@ -1046,9 +1176,12 @@ var getAmazonStuff = function(data,results,callback3){
         //get real price
         function(callback){
             //GET PRICE
-            getPrices(results[0],function(realPrice){
+            getPrices(results[0],function(realPrice,altImage){
                 var obj = {
                     realPrice:realPrice
+                }
+                if (altImage){
+                    obj.altImage = altImage;
                 }
                 callback(null,obj);
             });
@@ -1068,9 +1201,12 @@ var getAmazonStuff = function(data,results,callback3){
         },
         //get real price
         function(callback){
-            getPrices(results[1],function(realPrice){
+            getPrices(results[1],function(realPrice,altImage){
                 var obj = {
                     realPrice:realPrice
+                }
+                if (altImage){
+                    obj.altImage = altImage;
                 }
                 callback(null,obj);
             });
@@ -1090,9 +1226,12 @@ var getAmazonStuff = function(data,results,callback3){
         },
         //get real price
         function(callback){
-            getPrices(results[2],function(realPrice){
+            getPrices(results[2],function(realPrice,altImage){
                 var obj = {
                     realPrice:realPrice
+                }
+                if (altImage){
+                    obj.altImage = altImage;
                 }
                 callback(null,obj);
             });
@@ -1115,6 +1254,10 @@ var getAmazonStuff = function(data,results,callback3){
                 else if(rez[count].realPrice){
                     console.log('add real price');
                     data.amazon[i].realPrice = rez[count].realPrice;
+
+                    if(rez[count].altImage){ //adding alt image here as well
+                       data.amazon[i].altImage = rez[count].altImage; 
+                    }
                 }
                 else {
                     console.log('/!/ Warning: no reviews or real prices found for current item');
@@ -1177,10 +1320,28 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             });
         break;
+        case 'Pantry':
+            console.log('pantry');
+            resParams.SearchIndex = 'Pantry'; //link product group to searchindex
+
+            //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
+            traverseNodes(browseNodes,['Electronics','Office Products','Health & Personal Care','Grocery & Gourmet Food','Beauty','Baby Products','Toys & Games','Clothing, Shoes & Jewelry'],function(res){ 
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
         case 'Book':
             console.log('Book');
             resParams.SearchIndex = 'Books'; //link product group to searchindex
             traverseNodes(browseNodes,['Books'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
+        case 'Magazine':
+            console.log('Magazine');
+            resParams.SearchIndex = 'Magazines'; //link product group to searchindex
+            traverseNodes(browseNodes,['Magazine Subscriptions','Magazines'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1196,7 +1357,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Watch':
             console.log('watch');
             resParams.SearchIndex = 'Watches'; //link product group to searchindex
-            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics','Health & Personal Care'],function(res){
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics','Health & Personal Care','Sports & Outdoors'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1210,10 +1371,20 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             });
         break;
+        case 'Entertainment Memorabilia':
+        case 'Art':
+        case 'Coins':
+            console.log('Entertainment Memorabilia OR art');
+            resParams.SearchIndex = 'Collectibles'; //link product group to searchindex
+            traverseNodes(browseNodes,['Collectibles & Fine Art'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });
+        break;
         case 'Musical Instruments':
             console.log('MusicalInstruments');
             resParams.SearchIndex = 'MusicalInstruments'; //link product group to searchindex
-            traverseNodes(browseNodes,['Musical Instruments','Electronics','Sports & Outdoors'],function(res){
+            traverseNodes(browseNodes,['Musical Instruments','Electronics','Sports & Outdoors','Toys & Games'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1229,7 +1400,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Apparel':
             console.log('apparel');
             resParams.SearchIndex = 'Apparel'; //link product group to searchindex
-            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors'],function(res){
+            traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors','Health & Personal Care'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             });
@@ -1278,10 +1449,18 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             });  
         break;
+        case 'Single Detail Page Misc':
+            console.log(productGroup);
+            resParams.SearchIndex = 'Miscellaneous'; //link product group to searchindex
+            traverseNodes(browseNodes,['Everything Else'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            });  
+        break;
         case 'Art and Craft Supply':
             console.log('arts crafts supply');
             resParams.SearchIndex = 'ArtsAndCrafts'; //link product group to searchindex
-            traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen','Office Products'],function(res){
+            traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen','Office Products','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1294,11 +1473,19 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             }); 
         break;
+        case 'Pet Products':
+            console.log('Pet Products');
+            resParams.SearchIndex = 'PetSupplies'; //link product group to searchindex
+            traverseNodes(browseNodes,['Pet Supplies','Patio, Lawn & Garden','Electronics','Industrial & Scientific','Toys & Games'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
         case 'CE':
         case 'Home Theater':
             console.log('>> CE OR home theater');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
-            traverseNodes(browseNodes,['Electronics','Video Games','Cell Phones & Accessories','Office Products','Sports & Outdoors','Clothing, Shoes & Jewelry','Car Audio or Theater','Industrial & Scientific'],function(res){
+            traverseNodes(browseNodes,['Electronics','Video Games','Cell Phones & Accessories','Office Products','Sports & Outdoors','Clothing, Shoes & Jewelry','Car Audio or Theater','Industrial & Scientific','Toys & Games'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1307,7 +1494,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Digital Video Games':
             console.log('>> VideoGames OR digital video games');
             resParams.SearchIndex = 'VideoGames'; //link product group to searchindex
-            traverseNodes(browseNodes,['Video Games','Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry'],function(res){
+            traverseNodes(browseNodes,['Video Games','Gift Cards','Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1316,7 +1503,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Electronic Gift Card':
             console.log('Gift Card or Electronic Gift Card');
             resParams.SearchIndex = 'GiftCards'; //link product group to searchindex
-            traverseNodes(browseNodes,['Gift Cards'],function(res){
+            traverseNodes(browseNodes,['Gift Cards','Apps & Games','Grocery & Gourmet Food','Baby Products','Appliances','Patio, Lawn & Garden','Beauty','Health & Personal Care','Tools & Home Improvement','Painting, Drawing & Art Supplies','Books','Arts, Crafts & Sewing','Pet Supplies','Home & Kitchen','Electronics','Video Games','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry','Industrial & Scientific','Kindle Store','Automotive','Movies & TV','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1347,6 +1534,14 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             }); 
         break;
+        case 'Wine':
+            console.log('wine');
+            resParams.SearchIndex = 'Wine'; //link product group to searchindex
+            traverseNodes(browseNodes,['Grocery & Gourmet Food'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
         case 'TV Series Episode Video on Demand':
         case 'Movie':
             console.log('tv series Episode video on demand OR Movie');
@@ -1359,7 +1554,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'DVD':
             console.log('DVD');
             resParams.SearchIndex = 'DVD'; //link product group to searchindex
-            traverseNodes(browseNodes,['Movies & TV','Electronics'],function(res){
+            traverseNodes(browseNodes,['Movies & TV','Electronics','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1367,7 +1562,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'VHS':
             console.log('VHS');
             resParams.SearchIndex = 'VHS'; //link product group to searchindex
-            traverseNodes(browseNodes,['Movies & TV','Electronics'],function(res){
+            traverseNodes(browseNodes,['Movies & TV','Electronics','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1385,7 +1580,16 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Tools':
             console.log('home improvement');
             resParams.SearchIndex = 'Tools'; //link product group to searchindex
-            traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement','Electronics','Automotive','Office Products'],function(res){
+            traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement','Electronics','Automotive','Office Products','Patio, Lawn & Garden'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+
+        case 'Guild Product':
+            console.log('Guild Product');
+            resParams.SearchIndex = 'Home & Kitchen'; //link product group to searchindex
+            traverseNodes(browseNodes,['Handmade Products','Tools & Home Improvement','Home & Kitchen'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1427,9 +1631,11 @@ function parseAmazon(productGroup,browseNodes,callback5){
             }); 
         break;
         case 'Mobile Application':
-            console.log('mobile app');
-            resParams.SearchIndex = 'Grocery'; //link product group to searchindex
-            traverseNodes(browseNodes,['Apps & Games','Office Products','Video Games'],function(res){
+        case 'Software':
+        case 'Digital Software':
+            console.log('mobile app OR software');
+            resParams.SearchIndex = 'Software'; //link product group to searchindex
+            traverseNodes(browseNodes,['Apps & Games','Software','Office Products','Video Games','Toys & Games'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1437,7 +1643,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Office Product':
             console.log('Office Product');
             resParams.SearchIndex = 'OfficeProducts'; //link product group to searchindex
-            traverseNodes(browseNodes,['Electronics','Arts, Crafts & Sewing','Office Products','Tools & Home Improvement','Industrial & Scientific'],function(res){
+            traverseNodes(browseNodes,['Office Products','Electronics','Arts, Crafts & Sewing','Tools & Home Improvement','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1453,7 +1659,15 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Home':
             console.log('home');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics','Clothing, Shoes & Jewelry'],function(res){
+            traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics','Clothing, Shoes & Jewelry','Industrial & Scientific'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
+        case 'Lawn & Patio':
+            console.log('Lawn & Patio');
+            resParams.SearchIndex = 'LawnAndGarden'; //link product group to searchindex
+            traverseNodes(browseNodes,['Patio, Lawn & Garden','Home & Kitchen','Industrial & Scientific','Electronics','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1461,7 +1675,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Furniture':
             console.log('Furniture');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
-            traverseNodes(browseNodes,['Arts, Crafts & Sewing','Office Products','Home & Kitchen','Patio, Lawn & Garden'],function(res){
+            traverseNodes(browseNodes,['Office Products','Arts, Crafts & Sewing','Home & Kitchen','Patio, Lawn & Garden'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1484,11 +1698,19 @@ function parseAmazon(productGroup,browseNodes,callback5){
                 callback5(resParams);
             }); 
         break;
+        case 'Custom Services':
+            console.log('Custom Services');
+            resParams.SearchIndex = 'Miscellaneous'; //link product group to searchindex
+            traverseNodes(browseNodes,['Local Business'],function(res){
+                resParams.BrowseNode = res; 
+                callback5(resParams);
+            }); 
+        break;
 
         case 'Health and Beauty':
             console.log('Health and Beauty');
             resParams.SearchIndex = 'HealthPersonalCare'; //link product group to searchindex
-            traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products'],function(res){
+            traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1497,7 +1719,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Beauty':
             console.log('Beauty');
             resParams.SearchIndex = 'Beauty'; //link product group to searchindex
-            traverseNodes(browseNodes,['Beauty','Health & Personal Care','Grocery & Gourmet Food','Home & Kitchen','Electronics'],function(res){
+            traverseNodes(browseNodes,['Beauty','Health & Personal Care','Grocery & Gourmet Food','Home & Kitchen','Electronics','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
@@ -1505,23 +1727,22 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Sports':
             console.log('Sports');
             resParams.SearchIndex = 'SportingGoods'; //link product group to searchindex
-            traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive','Toys & Games','Electronics'],function(res){
+            traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive','Toys & Games','Electronics','Collectibles & Fine Art','Grocery & Gourmet Food','Health & Personal Care','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
         break;
         case 'BISS':
+        case 'BISS Basic':
             console.log('BISS');
             resParams.SearchIndex = 'Industrial'; //link product group to searchindex
-            traverseNodes(browseNodes,['Industrial & Scientific','Automotive','Beauty'],function(res){
+            traverseNodes(browseNodes,['Industrial & Scientific','Office Products','Automotive','Beauty','Health & Personal Care','Electronics','Home & Kitchen','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res; 
                 callback5(resParams);
             }); 
         break;
-
-
-
         default:
+            console.log('Warning: "All" search category fired! this shouldn\'t happen. productGroup is: ',productGroup);
             resParams.SearchIndex = 'All';
             callback5(resParams);
     }                                           
@@ -1538,34 +1759,115 @@ function traverseNodes(nodeList,findMe,callbackMM){
 
         var currentNode = item;
         var childNodeId = currentNode.BrowseNodeId[0]; //get first ID in nest tree
+        var childNodeName = currentNode.Name[0];
             
         async.whilst(
             function () { 
                 //authors note: findMe[i] logic a real shit way to check for multiple string matches while traversing nodes
                 if (currentNode.Name && findMe.length > 0 && currentNode.Name[0] == findMe[0]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 1 && currentNode.Name[0] == findMe[1]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false; 
                 }else if (currentNode.Name && findMe.length > 2 && currentNode.Name[0] == findMe[2]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false;     
                 }else if (currentNode.Name && findMe.length > 3 && currentNode.Name[0] == findMe[3]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false;    
                 }else if (currentNode.Name && findMe.length > 4 && currentNode.Name[0] == findMe[4]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false; 
                 }else if (currentNode.Name && findMe.length > 5 && currentNode.Name[0] == findMe[5]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false;  
                 }else if (currentNode.Name && findMe.length > 6 && currentNode.Name[0] == findMe[6]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 7 && currentNode.Name[0] == findMe[7]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    return false;                                                                                                                                                                                            
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 8 && currentNode.Name[0] == findMe[8]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 9 && currentNode.Name[0] == findMe[9]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 10 && currentNode.Name[0] == findMe[10]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 11 && currentNode.Name[0] == findMe[11]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 12 && currentNode.Name[0] == findMe[12]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 13 && currentNode.Name[0] == findMe[13]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 14 && currentNode.Name[0] == findMe[14]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 15 && currentNode.Name[0] == findMe[15]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 16 && currentNode.Name[0] == findMe[16]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 17 && currentNode.Name[0] == findMe[17]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 18 && currentNode.Name[0] == findMe[18]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 19 && currentNode.Name[0] == findMe[19]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;         
+                }else if (currentNode.Name && findMe.length > 20 && currentNode.Name[0] == findMe[20]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;     
+                }else if (currentNode.Name && findMe.length > 21 && currentNode.Name[0] == findMe[21]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;    
+                }else if (currentNode.Name && findMe.length > 22 && currentNode.Name[0] == findMe[22]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false; 
+                }else if (currentNode.Name && findMe.length > 23 && currentNode.Name[0] == findMe[23]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;  
+                }else if (currentNode.Name && findMe.length > 24 && currentNode.Name[0] == findMe[24]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;
+                }else if (currentNode.Name && findMe.length > 25 && currentNode.Name[0] == findMe[25]){ //we found the string, stop traversing
+                    nodeArr.push(childNodeId);
+                    console.log('CHILD NAME ',childNodeName);
+                    return false;                                                                                                                                                                                         
                 }else if (currentNode.Ancestors){ //didn't find string, keep traversing
                     currentNode = currentNode.Ancestors[0].BrowseNode[0];
                     return true;
@@ -1587,13 +1889,13 @@ function traverseNodes(nodeList,findMe,callbackMM){
 
     }, function done(){
         if (nodeArr.length > 0){    
-            console.log('arr ',nodeArr);
-            console.log('ARRAY LENGTH ',nodeArr.length);     
-            if (nodeArr.length > 2){
-                nodeArr = nodeArr.slice(0,2);
-            }                                
-            console.log('arr ',nodeArr);
-            console.log('ARRAY LENGTH ',nodeArr.length);                
+            // console.log('arr ',nodeArr);
+            // console.log('ARRAY LENGTH ',nodeArr.length);     
+            // if (nodeArr.length >= 2){
+            //     nodeArr = nodeArr.slice(0,2);
+            // }                                
+            // console.log('arr ',nodeArr);
+            // console.log('ARRAY LENGTH ',nodeArr.length);                
             callbackMM(nodeArr.toString()); 
         }
         else {

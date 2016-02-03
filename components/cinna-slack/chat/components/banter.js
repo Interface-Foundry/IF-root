@@ -11,6 +11,11 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'hi') > 60:
         case textSimilar(input,'hello') > 60:
         case textSimilar(input,'hey') > 60:
+        case textSimilar(input,'hi kip') > 60:
+        case textSimilar(input,'hello kip') > 60:
+        case textSimilar(input,'hey kip') > 60:
+        case textSimilar(input,'hey you') > 60:
+        case textSimilar(input,'hey you muthafucka') > 60:
         case textSimilar(input,'hey there') > 60:
         case textSimilar(input,'salutations') > 60:
             flag = 'basic';
@@ -44,10 +49,17 @@ var checkForCanned = function(input,callback,origin) {
             res = 'That\'s good to hear. It\'s a hard life being in retail, want to help a bot out and buy something? We have discounts! 😊';
             break;
         case textSimilar(input,'yes') > 90:
+        case textSimilar(input,'yah') > 90:
+        case textSimilar(input,'yeah') > 90:
             flag = 'basic'; //do this action
             res = 'Cool';
             break;
         case textSimilar(input,'no') > 90:
+        case textSimilar(input,'nah') > 90:
+        case textSimilar(input,'nahh') > 90:
+        case textSimilar(input,'nope') > 90:
+        case textSimilar(input,'fuck') > 90:
+        case textSimilar(input,'shit') > 90:
             flag = 'basic'; //do this action
             res = 'Ok';
             break;
@@ -109,6 +121,24 @@ var checkForCanned = function(input,callback,origin) {
             res = 'Guess you weren\'t in the mood.... oh well, at least I tried 😅 hope you have a great day';
             break;
 
+        case textSimilar(input,'nothing') > 90:
+        case textSimilar(input,'im good') > 90:
+        case textSimilar(input,'no thank you') > 90:
+        case textSimilar(input,'no thx') > 90:
+        case textSimilar(input,'no thanks') > 90:
+        case textSimilar(input,'fart') > 90:
+            flag = 'basic'; //do this action
+            res = 'Ok, let me know if you want anything 😊';
+            break;
+
+        case textSimilar(input,'are you stupid') > 80:
+        case textSimilar(input,'you are stupid') > 80:
+        case textSimilar(input,'ur stupid') > 80:
+        case textSimilar(input,'ur dumb') > 80:
+        case textSimilar(input,'youre dumb') > 70:
+            flag = 'basic'; //do this action
+            res = 'I\'m not that smart yet 🙃';
+            break;
 
         case textSimilar(input,'nevermind') > 60:
         case textSimilar(input,'nm') > 60:
@@ -277,6 +307,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'tell me a joke') > 60:
         case textSimilar(input,'say something funny') > 60:
         case textSimilar(input,'talk to me') > 60:
+        case textSimilar(input,'joke') > 60:
             flag = 'basic';
             res = 'Q: What do penguins like to eat? A: Brrrrrrrritos. 😎';
             break;
@@ -308,10 +339,18 @@ var checkForCanned = function(input,callback,origin) {
             res = 'You\'re welcome 😊';
             break;
 
+        case textSimilar(input,'sorry') > 90:
+        case textSimilar(input,'sry') > 90:
+            flag = 'basic';
+            res = 'No problem 😊';
+            break;
+
         case textSimilar(input,'good') > 80:
         case textSimilar(input,'aight') > 80:
         case textSimilar(input,'alright') > 80:
         case textSimilar(input,'ok') > 80:
+        case textSimilar(input,'k') > 80:
+        case textSimilar(input,'kk') > 80:
             flag = 'basic';
             res = 'yup 😎 if you need help finding anything, just let me know!';
             break;
@@ -436,6 +475,8 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'what a waste of time') > 90:
         case textSimilar(input,'useless bot') > 90:
         case textSimilar(input,'die') > 90:
+        case textSimilar(input,'fuck off') > 90:
+        case textSimilar(input,'eat shit') > 90:
         case textSimilar(input,'lame') > 90:
         case textSimilar(input,'those suck') > 60:
             flag = 'basic';
@@ -467,6 +508,14 @@ var checkForCanned = function(input,callback,origin) {
             res = 'qwerty';
             break;
 
+        case textSimilar(input,'nice going') > 80:
+        case textSimilar(input,'nice going kip') > 80:
+        case textSimilar(input,'good job') > 80:
+        case textSimilar(input,'good job kip') > 80:
+            flag = 'basic';
+            res = 'Thanks!';
+            break;
+
         case textSimilar(input,'↑ ↑ ↓ ↓ ← → ← → B A') > 60:
         case textSimilar(input,'uuddlrlrBA') > 60:
         case textSimilar(input,'up up down down left right left right B A') > 60:
@@ -491,6 +540,15 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'huh') > 90:
         case textSimilar(input,'eh') > 90:
         case textSimilar(input,'wah') > 90:
+        case textSimilar(input,'um') > 90:
+        case textSimilar(input,'umm') > 90:
+        case textSimilar(input,'hmm') > 90:
+        case textSimilar(input,'mm') > 90:
+        case textSimilar(input,'wt') > 90:
+        case textSimilar(input,'help me shop') > 90:
+        case textSimilar(input,'help me') > 90:
+        case textSimilar(input,':|') > 90:
+        case textSimilar(input,':\\') > 90:
         case textSimilar(input,'i dont understand') > 70:
         case textSimilar(input,'i dont get it') > 70:
         case textSimilar(input,'this doesnt make sense') > 60:
@@ -706,10 +764,10 @@ var checkForCanned = function(input,callback,origin) {
         case 'top kek':
             flag = 'basic'; //do this action
             if (origin == 'slack'){
-                res = 'T O P\nK\nE\nK\n';
+                res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
-                res = 'T O P<br>K<br>E<br>K<br>';
+                res = 'T O P<br>K<br>E<br>K';
             }
             break;
 
@@ -728,9 +786,11 @@ var checkForCanned = function(input,callback,origin) {
 
         case '🐈':
         case 'meow':
+        case 'moew':
         case ':3':
+        case 'pussy':
             flag = 'search.initial'; //do this action
-            res = 'meow :3';
+            res = 'meow 🐈';
             query = 'neko atsume'; //what we're going to search for
             break;
 
@@ -750,6 +810,12 @@ var checkForCanned = function(input,callback,origin) {
         case 'q': 
             flag = 'search.focus';
             query = 1;
+            break;
+
+        case 'more': 
+        case 'mroe': 
+        case 'mor': 
+            flag = 'search.more';
             break;
 
         case '2':
@@ -898,7 +964,8 @@ var getCinnaResponse = function(data,callback){
                             res = 'Here are some choices with *'+data.dataModify.val[0] +'*, which do you like best?';
                             break;
                         default:
-                            console.log('warning: no modifier response selected!');
+                            res = 'Here are some more choices, which do you like best?'; //most likely a "more" command
+                            //console.log('warning: no modifier response selected!');
                     }     
                     break;
                 case 'focus':

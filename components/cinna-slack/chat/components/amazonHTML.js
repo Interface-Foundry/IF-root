@@ -92,21 +92,34 @@ module.exports.basic = function basic(url, callback) {
 
         //sort scraped price
         //try for miniATF
-        if ($('#miniATF_price').text() && $('#miniATF_price').text().indexOf('-') < 0){  //excluding scrapes with multiple prices (-) in field
+        if ($('#miniATF_price').text()){  //excluding scrapes with multiple prices (-) in field
             console.log('😊 kk');
             amazonSitePrice = $('#miniATF_price').text().trim();
         }
         //if no miniATF, try for priceblock_ourprice
-        else if ($('#priceblock_ourprice').text() && $('#priceblock_ourprice').text().indexOf('-') < 0){
+        else if ($('#priceblock_ourprice').text()){
             console.log('😊 kk');
-            amazonSitePrice = $('#priceblock_ourprice').text().trim();
+            amazonSitePrice = $('#priceblock_ourprice').text().trim();  
         }
-
+        else if ($('.buybox-price').text()){
+            console.log('😊 kk');
+            amazonSitePrice = $('.buybox-price').text().trim();  
+            amazonSitePrice = amazonSitePrice.split("\n");
+            amazonSitePrice = amazonSitePrice[0];
+        }
         //* * * * * * * * * *//
 
         //we have price from website
-        if (amazonSitePrice){  //excluding scrapes with multiple prices (-) in field
+        if (amazonSitePrice){  
             product.price = amazonSitePrice;
+        }
+
+        //we found an image alternate for missing item images
+        if($('#imgTagWrapperId').children('img').attr('data-old-hires')){
+          product.altImage = $('#imgTagWrapperId').children('img').attr('data-old-hires');
+        }else if ($('#imgTagWrapperId').children('img').attr('src') && checkURL($('#imgTagWrapperId').children('img').attr('src'))){
+          console.log('wow we found an image url um ok, proceed....proceed...');
+          product.altImage = $('#imgTagWrapperId').children('img').attr('src');
         }
 
         var textParts = {
@@ -239,4 +252,9 @@ if (!module.parent) {
 
   run(0);
 
+}
+
+
+function checkURL(url) {
+    return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
 }
