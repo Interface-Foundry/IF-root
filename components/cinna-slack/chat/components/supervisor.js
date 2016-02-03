@@ -37,7 +37,7 @@ function emitBoth(data) {
   //Prevent the dreaded infinite loop
   if (data.flags && data.flags.toCinna) return
   
-  console.log('emitting both', data)
+  console.log('emitting both', data.thread)
   
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new channel', {
@@ -47,6 +47,19 @@ function emitBoth(data) {
   })
   var action = data.action ? data.action : ''
   var flags = data.flags ? data.flags : {toSupervisor: true};
+  // var thread = {
+  //               id: data.thread.id,
+  //               sequence: data.thread.sequence,
+  //               isOpen: data.thread.isOpen,
+  //               ticket: {
+  //                   id: data.thread.ticket.id ? data.thread.ticket.id : ,
+  //                   isOpen: action.message.thread.ticket.isOpen
+  //               },
+  //               parent: {
+  //                   isParent: action.message.thread.parent.isParent,
+  //                   id: action.message.parent.id
+  //               }
+  //             }
   //Resolved = false only if this is a supervisor flagged message
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new message', {
@@ -57,11 +70,6 @@ function emitBoth(data) {
     bucket: data.bucket,
     action: action,
     amazon: [],
-    // dataModify: {
-    //     type: '',
-    //     val: [],
-    //     param: ''
-    // },
     source: {
       origin: 'socket.io',
       channel: data.source.channel,
@@ -70,8 +78,8 @@ function emitBoth(data) {
     },
     client_res: [],
     ts: Date.now,
-    resolved: resolved,
-    parent: false,
+    thread: data.thread,
+    urlShorten:data.urlShorten,
     flags: flags
   })
 }

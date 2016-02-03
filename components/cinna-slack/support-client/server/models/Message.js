@@ -26,10 +26,12 @@ var messageSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    //Delete dis
     resolved: {
         type: Boolean,
         default: false
     },
+    //Delete dis 
     parent:{
         id: String
     },
