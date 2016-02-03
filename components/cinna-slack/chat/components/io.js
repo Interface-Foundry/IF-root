@@ -352,119 +352,116 @@ function routeNLP(data){
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
 
     if (data.msg){
-        nlp.parse(data.msg, function(e, res) {
-            if (e){console.log('NLP error ',e)}
-            else {
-                console.log('NLP RES ',res);
 
-                if(res.execute && res.execute.length > 0){
+        //passing a context (last 10 items in DB to NLP)
+        history.recallContext(data,function(res){
+            data.recallContext = res;
+            continueNLP();
+        });
 
-                    if(!res.execute[0].bucket){
-                        res.execute[0].bucket = 'search';
-                    }
-                    if(!res.execute[0].action){
-                        res.execute[0].execute[0].action = 'initial';
-                    }
+        function continueNLP(){
+            nlp.parse(data.msg, function(e, res) {
+                if (e){console.log('NLP error ',e)}
+                else {
+                    console.log('NLP RES ',res);
 
-                    //- - - temp stuff to transfer nlp results to data object - - - //
-                    if (res.execute[0].bucket){
-                        data.bucket = res.execute[0].bucket;
-                    }
-                    if (res.execute[0].action){
-                        data.action = res.execute[0].action;
-                    }
-                    if (res.tokens){
-                        data.tokens = res.tokens;
-                    }
-                    if (res.searchSelect){
-                        data.searchSelect = res.searchSelect;
-                    }
-                    if (res.execute[0].dataModify){
-                        data.dataModify = res.execute[0].dataModify;
-                    }
-                    //- - - - end temp - - - - //
+                    if(res.execute && res.execute.length > 0){
 
-                    //console.log('EXECUTE MODIFY ',data);
-                    incomingAction(data);
+                        if(!res.execute[0].bucket){
+                            res.execute[0].bucket = 'search';
+                        }
+                        if(!res.execute[0].action){
+                            res.execute[0].execute[0].action = 'initial';
+                        }
 
-                    // async.eachSeries(res.execute, function(fire, callback) {
-                        
-                    //     incomingAction(data);
-
-                    //     callback();
-
-                        
-                    // }, function done(){
-                        
-                    // });          
-                }
-                else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
-                    //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
-
-                    //looking for modifier search 
-                    if (res.tokens && res.tokens[0].indexOf('but') > -1){
-                        var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
-                        modDetail = modDetail.replace('but','').trim();
-                        console.log('mod string ',modDetail);
-
-                        data.tokens = res.tokens;
-                        data.searchSelect = res.searchSelect;
-                        data.bucket = 'search';
-                        data.action = 'modify';
-                        data.dataModify = {
-                            type:'genericDetail',
-                            val:[modDetail]
-                        };
-
-                        console.log('constructor ',data);
+                        //- - - temp stuff to transfer nlp results to data object - - - //
+                        if (res.execute[0].bucket){
+                            data.bucket = res.execute[0].bucket;
+                        }
+                        if (res.execute[0].action){
+                            data.action = res.execute[0].action;
+                        }
+                        if (res.tokens){
+                            data.tokens = res.tokens;
+                        }
+                        if (res.searchSelect){
+                            data.searchSelect = res.searchSelect;
+                        }
+                        if (res.execute[0].dataModify){
+                            data.dataModify = res.execute[0].dataModify;
+                        }
+                        //- - - - end temp - - - - //
 
                         incomingAction(data);
+
+                    }
+                    else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
+                        //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
+
+                        //looking for modifier search 
+                        if (res.tokens && res.tokens[0].indexOf('but') > -1){
+                            var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
+                            modDetail = modDetail.replace('but','').trim();
+                            console.log('mod string ',modDetail);
+
+                            data.tokens = res.tokens;
+                            data.searchSelect = res.searchSelect;
+                            data.bucket = 'search';
+                            data.action = 'modify';
+                            data.dataModify = {
+                                type:'genericDetail',
+                                val:[modDetail]
+                            };
+
+                            console.log('constructor ',data);
+
+                            incomingAction(data);
+                        }
+                        else {
+                            data.tokens = res.tokens;
+                            data.searchSelect = res.searchSelect;
+                            data.bucket = 'search';
+                            data.action = 'initial';
+
+                            console.log('un struct ',data);
+
+                            incomingAction(data);
+                        }
+
                     }
                     else {
-                        data.tokens = res.tokens;
-                        data.searchSelect = res.searchSelect;
-                        data.bucket = 'search';
-                        data.action = 'initial';
 
-                        console.log('un struct ',data);
+                        if(!res.bucket){
+                            res.bucket = 'search';
+                        }
+                        if(!res.action){
+                            res.action = 'initial';
+                        }
+
+                        //- - - temp stuff to transfer nlp results to data object - - - //
+                        if (res.bucket){
+                            data.bucket = res.bucket;
+                        }
+                        if (res.action){
+                            data.action = res.action;
+                        }
+                        if (res.tokens){
+                            data.tokens = res.tokens;
+                        }
+                        if (res.searchSelect){
+                            data.searchSelect = res.searchSelect;
+                        }
+                        if (res.dataModify){
+                            data.dataModify = res.dataModify;
+                        }
+                        //- - - - end temp - - - - //
 
                         incomingAction(data);
+
                     }
-
-
                 }
-                else {
-
-                    if(!res.bucket){
-                        res.bucket = 'search';
-                    }
-                    if(!res.action){
-                        res.action = 'initial';
-                    }
-
-                    //- - - temp stuff to transfer nlp results to data object - - - //
-                    if (res.bucket){
-                        data.bucket = res.bucket;
-                    }
-                    if (res.action){
-                        data.action = res.action;
-                    }
-                    if (res.tokens){
-                        data.tokens = res.tokens;
-                    }
-                    if (res.searchSelect){
-                        data.searchSelect = res.searchSelect;
-                    }
-                    if (res.dataModify){
-                        data.dataModify = res.dataModify;
-                    }
-                    //- - - - end temp - - - - //
-
-                    incomingAction(data);
-
-                }
-            }
-        })        
+            }) 
+        }       
     }
     else {
         //we get this if we killed the whole user request (i.e. they sent a URL)
@@ -484,7 +481,6 @@ function incomingAction(data){
          }
     supervisor.emit(data, true)
     //----------------------//
-
 
     //save a new message obj
     history.saveHistory(data,true); //saving incoming message

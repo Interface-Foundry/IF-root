@@ -43,7 +43,7 @@ var messageSchema = mongoose.Schema({
         },
         parent: {
             isParent:Boolean,
-            parentId:String
+            id:String
         }
     },
     urlShorten:[String]
