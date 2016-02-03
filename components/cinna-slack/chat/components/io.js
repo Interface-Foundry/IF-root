@@ -267,8 +267,6 @@ var loadSocketIO = function(server){
             console.log('Received message from supervisor', data)
             incomingAction(data);
         })
-
-
     }); 
 }
 
@@ -476,18 +474,18 @@ function routeNLP(data){
 function incomingAction(data){
 
 
-    //---supervisor stuff---//
-    if (data.bucket === 'response') {
-            return sendResponse(data)
-         }
-    
-    //WTFFFFFRF
-    // console.log('Supervisor: 372 ',data)
-    supervisor.emit(data, true)
-    //----------------------//
+   
 
     //save a new message obj
     history.saveHistory(data,true); //saving incoming message
+    
+     //---supervisor stuff---//
+    if (data.bucket === 'response') {
+            return sendResponse(data)
+         }
+    // console.log('Supervisor: 372 ',data)
+    supervisor.emit(data, true)
+    //----------------------//
     
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {

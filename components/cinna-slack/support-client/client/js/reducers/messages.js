@@ -33,12 +33,22 @@ export default function messages(state = initialState, action) {
                         org: (action.message.source && action.message.source.org) ? action.message.source.org : 'kip',
                         id: (action.message.source && action.message.source.id) ? action.message.source.id : ''
                     },
-                    client_res: {
-                      msg: action.message.client_res
-                    },
+                    client_res: action.message.client_res,
                     ts: action.message.ts,
-                    resolved: action.message.resolved,
-                    parent: action.message.parent,
+                    thread: {
+                        id: action.message.thread.id,
+                        sequence: action.message.thread.sequence,
+                        isOpen: action.message.thread.isOpen,
+                        ticket: {
+                            id: (action.message.thread.ticket && action.message.thread.ticket.id) ? action.message.thread.ticket.id : null, 
+                             isOpen: (action.message.thread.ticket && action.message.thread.ticket.isOpen) ? action.message.thread.ticket.isOpen : null
+                        },
+                        parent: {
+                            isParent: action.message.thread.parent.isParent,
+                            id: action.message.parent.id
+                        }
+                    },
+                    urlShorten: action.message.thread.urlShorten,
                     flags: action.message.flags ? action.message.flags : {}
                 }]
             };
@@ -64,12 +74,22 @@ export default function messages(state = initialState, action) {
                         org: (action.message.source && action.message.source.org) ? action.message.source.org : 'kip',
                         id: (action.message.source && action.message.source.id) ? action.message.source.id : ''
                     },
-                    client_res: {
-                      msg: action.message.client_res
-                    },
+                    client_res: action.message.client_res,
                     ts: action.message.ts,
-                    resolved: action.message.resolved,
-                    parent: action.message.parent,
+                    thread: {
+                        id: action.message.thread.id,
+                        sequence: action.message.thread.sequence,
+                        isOpen: action.message.thread.isOpen,
+                        ticket: {
+                            id: (action.message.thread.ticket && action.message.thread.ticket.id) ? action.message.thread.ticket.id : null, 
+                            isOpen: (action.message.thread.ticket && action.message.thread.ticket.isOpen) ? action.message.thread.ticket.isOpen : null
+                        },
+                        parent: {
+                            isParent: action.message.thread.parent.isParent,
+                            id: action.message.parent.id
+                        }
+                    },
+                    urlShorten: action.message.thread.urlShorten,
                     flags: action.message.flags ? action.message.flags : {}
                 }]
             };

@@ -23,8 +23,20 @@ const initialState = {
     },
     client_res: [],
     ts: Date.now(),
-    resolved: false,
-    parent: true
+    thread: {
+            id: 'default',
+            sequence: 0,
+            isOpen: false,
+            ticket: {
+                id: 'default',
+                isOpen: false
+            },
+            parent: {
+                isParent: false,
+                id: 'default'
+            }
+        },
+    urlShorten: null
 };
 
 export default function activeMessage(state = initialState, action) {
@@ -50,9 +62,21 @@ export default function activeMessage(state = initialState, action) {
                 },
                 client_res: action.message.client_res,
                 ts: action.message.ts,
-                resolved: action.message.resolved,
-                parent: action.message.parent,
-                flags: action.message.flags ? action.message.flags : {}
+                  thread: {
+                        id: action.message.thread.id,
+                        sequence: action.message.thread.sequence,
+                        isOpen: action.message.thread.isOpen,
+                        ticket: {
+                            id: (action.message.thread.ticket && action.message.thread.ticket.id) ? action.message.thread.ticket.id : null, 
+                             isOpen: (action.message.thread.ticket && action.message.thread.ticket.isOpen) ? action.message.thread.ticket.isOpen : null
+                        },
+                        parent: {
+                            isParent: action.message.thread.parent.isParent,
+                            id: action.message.parent && action.message.parent.id ? action.message.parent.id : null
+                        }
+                    },
+                    urlShorten: action.message.thread.urlShorten,
+                    flags: action.message.flags ? action.message.flags : {}
             };
         case LOAD_MESSAGE:
             return {...state,

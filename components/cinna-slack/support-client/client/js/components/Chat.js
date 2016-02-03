@@ -107,7 +107,20 @@ class Chat extends Component {
                 incoming: true,
                 msg: 'No channels left',
                 ts: '',
-                resolved: false
+                resolved: false,
+                thread: {
+                        id: 'default',
+                        sequence: 0,
+                        isOpen: false,
+                        ticket: {
+                            id: 'default',
+                            isOpen: false
+                        },
+                        parent: {
+                            isParent: false,
+                            id: 'default'
+                        }
+                      }
                 });
     }
   }
@@ -118,7 +131,7 @@ class Chat extends Component {
     const firstMsg = activeMessages[0]
     // console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
-    // console.log('Chat.js:108-->',firstMsg)
+    console.log('Chat.js:108-->',firstMsg)
     if (firstMsg) {
       actions.changeMessage(firstMsg);
     } else {
