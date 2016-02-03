@@ -95,7 +95,6 @@ var searchAmazon = function(data, type, query, flag) {
                         console.log('FLAG TYPE &!&!&! ',flag.type);
 
                         if (flag.flagAction == 'weakSearchContinue' && data.amazonParams || flag.flagAction == 'weakSearch' && data.amazonParams){
-                            console.log('? ?? ? ? ? ? ? ? ');
                             if (data.amazonParams){
                                 console.log('GENERCICCC: DOING WEAK NODE SEARCH');
                                 amazonParams = data.amazonParams;

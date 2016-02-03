@@ -33,6 +33,19 @@ var messageSchema = mongoose.Schema({
     parent:{
         id: String
     },
+    thread: {
+        id: String,
+        sequence: Number,
+        isOpen: Boolean,
+        ticket: {
+            id: String, 
+            isOpen: Boolean
+        },
+        parent: {
+            isParent:Boolean,
+            id:String
+        }
+    },
     urlShorten:[String]
 });
 

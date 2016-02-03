@@ -11,6 +11,8 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'hi') > 60:
         case textSimilar(input,'hello') > 60:
         case textSimilar(input,'hey') > 60:
+        case textSimilar(input,'hi kip') > 60:
+        case textSimilar(input,'hello kip') > 60:
         case textSimilar(input,'hey kip') > 60:
         case textSimilar(input,'hey you') > 60:
         case textSimilar(input,'hey you muthafucka') > 60:
