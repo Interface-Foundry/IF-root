@@ -105,43 +105,14 @@ const DraggableList = React.createClass({
     window.addEventListener('mouseup', this.handleMouseUp);
     const self = this
     this.setState({ mounted: true });
-    socket.on('change channel bc', function(channels) {
-      // console.log('DraggableList105: delta: ', self.state.delta)
-      
-      const firstMsg = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)[0]
+    socket.on('change channel bc', function(channels) {      
       const firstMsgOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)[0]
       if (typeof firstMsgOld !== 'undefined') {
-        
-            self.setState({switching: true})
-           
-      }
-      var arrayvar= []
-         try {
-           for (var i = 0; i < firstMsg.amazon.length; i++) {
-            var item = { index: null, id: null, name: null, changed: true}
-            item.index = i
-            item.id = firstMsg.amazon[i].ASIN[0]
-            item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
-            try {
-              item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
-            } catch(err) {
-              console.log('Could not get image for item: ',i)
-            }
-            arrayvar.push(item)
-          } 
-      } catch(err) {
-        console.log('CPanel Error 169 Could not get results :',err)
-        return
-      }
-      console.log('DraggableList124: Arrayvar is: ',arrayvar)
-      if (arrayvar.length > 0) {
-        self.setState({ order: arrayvar })
-      } else {
-        self.setState({order: defaultItems})
+            self.setState({switching: true})    
       }
       setTimeout(function(){
          self.setState({switching: false})
-      }, 2000)
+      }, 1000)
     })
   },
 
@@ -168,26 +139,26 @@ const DraggableList = React.createClass({
     if (isPressed) {
       const mouse = pageY - delta;
       const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
-      const newOrder = reinsert(order, findIndex(order, function(o) { return o.index == lastPressed }), row);
-      this.setState({mouse: mouse, order: newOrder});
-
+      this.setState({mouse: mouse});
+      this.props.mouseMove(lastPressed, row)
     }
   },
 
   handleMouseUp() {
     const {isPressed, delta, order, lastPressed} = this.state;
-    this.setState({isPressed: false, delta: 0}); 
-     if ((delta !== 0) && (this.props.items !== defaultItems) && (order !== defaultItems) && this.props.items !== order) {
-       this.props.reorder(order)
-      }
+     // if (delta !== 0) {
+     //   this.props.mouseUp()
+     //  }
+     this.setState({isPressed: false, delta: 0}); 
   },
 
   render() {
     const {mouse, isPressed, lastPressed, order, switching, previewing,mounted} = this.state;
     const { items } = this.props
-     const allStyle = this.state.switching ? { y: (spring(5, springConfig)) } : {} 
+
     return (
       <div className="demo8">
+     
         { mounted ? items.slice(0,10).map(item => {
           const style = lastPressed === item.index && (isPressed)
             ? {
@@ -199,10 +170,11 @@ const DraggableList = React.createClass({
             : {
                 scale: spring(1, springConfig),
                 shadow: spring(1, springConfig),
-                y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(order, function(o) { return o.index == item.index }) * 100, springConfig)), 
+                y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)), 
                 textAlign: 'center'
               };
           return (
+          
             <Motion style={style} key={item.index}>
               {({scale, shadow, y, x}) =>
                 <div
@@ -231,11 +203,19 @@ const DraggableList = React.createClass({
                 </div>  
               }
             </Motion>
+            
           );
+        
         }) : null}
       </div>
     );
   },
 });
- 
+
+  // <div className="flexbox-container">
+  //             <div className="roundedOne">
+  //               <input type="checkbox" value="None" id="roundedOne" name="check" checked />
+  //               <label for="roundedOne"></label>
+  //            </div>
+ // </div>
 export default DraggableList;

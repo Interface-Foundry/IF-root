@@ -15,6 +15,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
 import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
+import findIndex from 'lodash/array/findIndex'
 import isNaN from 'lodash/lang/isNaN'
 import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
@@ -57,12 +58,13 @@ class ControlPanel extends Component {
   componentDidMount() {
     const {actions, activeChannel, activeMessage, messages, resolved} = this.props;
     const self = this
-     this.setState({ mounted: true });
+     self.setState({ mounted: true });
      socket.on('results', function (msg) {
       
       //enable react-motion animation
       self.refs.draggableList.setState({previewing: true})
 
+      //convert returned results into local state format
       try {
            for (var i = 0; i < msg.amazon.length; i++) {
             self.state.items[i].index = i
@@ -95,7 +97,7 @@ class ControlPanel extends Component {
 
        setTimeout(function(){
          self.refs.draggableList.setState({previewing: false})
-      }, 2000)
+      }, 1000)
 
     })
 
@@ -118,25 +120,25 @@ class ControlPanel extends Component {
       //If there is atleast one channel existing already
       if (firstMsgOld) {
             //Update redux state with new item ordering        
-            var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
-            var result = []
+            const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
+            const result = []
             self.state.items.forEach(function(stateItem){
-              globalitems.forEach(function(globalItem){
-                if (stateItem.id == globalItem.ASIN[0]) {
-                 result.push(globalItem)
+              reduxItems.forEach(function(reduxItem){
+                if (stateItem.id == reduxItem.ASIN[0]) {
+                 result.push(reduxItem)
                 }
               })
             })
-            var identifier = {id: firstMsgOld.source.id, properties: []}
+            let identifier = {id: firstMsgOld.source.id, properties: []}
             identifier.properties.push({ amazon : result})
             actions.setMessageProperty(identifier)
       }
         
         //Load items into state for next channel
-        var arrayvar= []
+         const nextItems = []
          try {
            for (var i = 0; i < firstMsg.amazon.length; i++) {
-            var item = { index: null, id: null, name: null, changed: true}
+            let item = { index: null, id: null, name: null, changed: true}
             item.index = i
             item.id = firstMsg.amazon[i].ASIN[0]
             item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
@@ -145,16 +147,16 @@ class ControlPanel extends Component {
             } catch(err) {
               console.log('Could not get image for item: ',i)
             }
-            arrayvar.push(item)
+            nextItems.push(item)
           } 
       } catch(err) {
         console.log('CPanel Error 169 Could not get results :',err)
         return
       }
-      console.log('Arrayvar: ',arrayvar, 'result:',result ,'defaultState: ',localStateItems.defaultState[0].name)
-      if (arrayvar.length > 0) {
+      console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
+      if (nextItems.length > 0) {
          console.log(0)
-        self.setState({ items: arrayvar })
+        self.setState({ items: nextItems })
       } else {
         console.log(1)
         self.setState({items: [{
@@ -257,10 +259,23 @@ class ControlPanel extends Component {
     this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index}})
   }
 
-  handleReorder(order) {
+  handleMouseMove(lastPressed, row) {
     const { items } = this.state;
-    const self = this
-    this.setState({items: order})
+    function reinsert(arr, from, to) {
+      const _arr = arr.slice(0);
+      const val = _arr[from];
+      _arr.splice(from, 1);
+      _arr.splice(to, 0, val);
+      return _arr;
+    }
+    const itemsReordered = reinsert(items, findIndex(items, function(o) { return o.index == lastPressed }), row);
+    this.setState({items: itemsReordered});
+  }
+
+
+  handleMouseUp() {
+    const { items } = this.state;
+      this.setState({items: items})
   }
 
   renderItem(index, key) {
@@ -313,7 +328,8 @@ class ControlPanel extends Component {
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
                 <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-                      <DraggableList ref='draggableList' items={items} messages={messages} reorder={::this.handleReorder} style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
+                      
+                      <DraggableList ref='draggableList'  mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>
          </div>
