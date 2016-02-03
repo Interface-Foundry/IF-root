@@ -933,7 +933,6 @@ var searchFocus = function(data) {
                     //data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
 
                     data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
-
                     dumbFunction(); //fire after get
                 })
 
@@ -1001,7 +1000,6 @@ var searchFocus = function(data) {
                         data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts);
                     }
 
-                    console.log('FOCUS: Line 782: ', data)
                     ioKip.outgoingResponse(data,'final');
 
                 }

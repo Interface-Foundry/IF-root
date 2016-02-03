@@ -264,7 +264,7 @@ var loadSocketIO = function(server){
         });
 
         socket.on("msgFromSever", function(data) {
-            // console.log('Received message from supervisor', data)
+            console.log('Received message from supervisor', data)
             incomingAction(data);
         })
 
@@ -480,6 +480,8 @@ function incomingAction(data){
     if (data.bucket === 'response') {
             return sendResponse(data)
          }
+    
+    //WTFFFFFRF
     // console.log('Supervisor: 372 ',data)
     supervisor.emit(data, true)
     //----------------------//
@@ -661,7 +663,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                         processData.getNumEmoji(data,count+1,function(emoji){
 
                             res[count] = res[count].trim(); 
-
+                            //MITSU: Note to self - check this out for slack messages 
                             if (data.source.origin == 'slack'){
                                 data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             }else if (data.source.origin == 'socket.io'){

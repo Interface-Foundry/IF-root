@@ -183,12 +183,13 @@ class DynamicForm extends Component {
             newQuery.flags = {}
             newQuery.flags.toCinna = true
             newQuery.parent = false
+            newQuery.client_res = []
             socket.emit('new message', newQuery);
             this.setState({
               spinnerloading: true,
               searchParam: ''
             })
-
+            console.log('\n\n\nDATA OBJECT: ',newQuery)
         // });
       // });
   document.querySelector('#search-input').value = ''

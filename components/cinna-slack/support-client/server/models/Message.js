@@ -1,30 +1,27 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema,
-    ObjectID = Schema.ObjectID;
+var amazonResult = mongoose.Schema;
+var modifyVal = mongoose.Schema;
 var messageSchema = mongoose.Schema({
-    id: Number, //to keep track of state index in redux
-    incoming: { type: Boolean, default: true } , //if true, incoming message, if false, outgoing message
+    incoming: Boolean, //if true, incoming message, if false, outgoing message
     msg: String, //raw incoming message (if applicable)
     tokens: [String], //broken up incoming message (if applicable)
-    bucket: String,
-    action: String,
-    amazon: [Schema.Types.Mixed], //amazon search results
+    bucket: { type: String, index: true},
+    action: { type: String, index: true},
+    amazon: [mongoose.Schema.Types.Mixed], //amazon search results
     dataModify: {
-        type: {
-            type: String
-        },
-        val: [Schema.Types.Mixed],
+        type: {type: String},
+        val: [mongoose.Schema.Types.Mixed],
         param: String
     },
     source: {
         origin: String,
         channel: String,
         org: String,
-        id: String
+        id: { type: String, index: true }
     },
-    client_res: [Schema.Types.Mixed],
+    client_res: [String], //outgoing messages, if applicable
     ts: {
         type: Date,
         default: Date.now
@@ -33,17 +30,12 @@ var messageSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    parent: Boolean, //TODO: remove this use alyx's new prop
-    flags: {
-        toSupervisor: Boolean, //messages coming from cinna to supervisor
-        toClient: Boolean, //messages going from supervisor to cinna to client
-        toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
-        searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
-        recalled: Boolean //flag to bypass history function in cinna
-    },  
+    parent:{
+        id: String
+    },
     thread: {
         id: String,
-        sequence: Number, //calculated by Cinna, will use in supervisor to keep track of state index in redux
+        sequence: Number,
         isOpen: Boolean,
         ticket: {
             id: String, 
@@ -51,9 +43,19 @@ var messageSchema = mongoose.Schema({
         },
         parent: {
             isParent:Boolean,
-            parentId:String
+            id:String
         }
-    }
+    },
+    urlShorten:[String],
+    flags: {
+            toSupervisor: Boolean, //messages coming from cinna to supervisor
+            toClient: Boolean, //messages going from supervisor to cinna to client
+            toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
+            searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
+            recalled: Boolean //flag to bypass history function in cinna
+        }
 });
 
 module.exports = mongoose.model('Message', messageSchema);
+
+

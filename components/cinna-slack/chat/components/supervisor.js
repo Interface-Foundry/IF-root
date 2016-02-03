@@ -34,7 +34,11 @@ function emitMsg(data) {
 
 //This function is used for new messages/channels
 function emitBoth(data) {
+  //Prevent the dreaded infinite loop
+  if (data.flags && data.flags.toCinna) return
+  
   console.log('emitting both', data)
+  
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new channel', {
     name: data.source.channel,
@@ -49,7 +53,7 @@ function emitBoth(data) {
     id: null,
     incoming: true,
     msg: data.msg,
-    tokens: [data.msg.split(' ')],
+    tokens: [data.msg.split()],
     bucket: data.bucket,
     action: action,
     amazon: [],
@@ -64,9 +68,7 @@ function emitBoth(data) {
       org: 'kip',
       id: data.source.id
     },
-    client_res: {
-      msg: ''
-    },
+    client_res: [],
     ts: Date.now,
     resolved: resolved,
     parent: false,
