@@ -10,17 +10,19 @@ import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 import DynamicForm,{labels} from './Form';
-import DraggableList from './DraggableList';
 import { DragDropContext  } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'react/lib/update';
 import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
+import findIndex from 'lodash/array/findIndex'
+import isNaN from 'lodash/lang/isNaN'
 import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import ReactTransitionGroup from 'react-addons-transition-group';
 import Toggle from 'react-toggle'
-
+import localStateItems from './localStateItems'
+import DraggableList from './DraggableList.jsx'
 
 const style = {
   width: 400,
@@ -28,69 +30,6 @@ const style = {
   textAlign: 'center'
 };
 const socket = io();
-const defaultItems = [{
-        id: 'product-0',
-        name: 'Product 0',
-        index: 0,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-1',
-        name: 'Product 1',
-        index: 1,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-2',
-        name: 'Product 2',
-        index: 2,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-3',
-        name: 'Product 3',
-        index: 3,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-4',
-        name: 'Product 4',
-        index: 4,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },
-      {
-        id: 'product-5',
-        name: 'Product 5',
-        index: 5,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-6',
-        name: 'Product 6',
-        index: 6,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-7',
-        name: 'Product 7',
-        index: 7,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-8',
-        name: 'Product 8',
-        index: 8,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-      },{
-        id: 'product-9',
-        name: 'Product 9',
-        index: 9,
-        img: 'http://kipthis.com/img/kip-cart.png',
-        changed: false
-        }
-      ]
 
 @DragDropContext(HTML5Backend)
 class ControlPanel extends Component {
@@ -107,7 +46,7 @@ class ControlPanel extends Component {
       super(props, context)
       this.moveCard = this.moveCard.bind(this);
       this.state = {
-        items: defaultItems,
+        items: localStateItems.localState,
         msg : true,
         bucket: true,
         action: true,
@@ -117,11 +56,15 @@ class ControlPanel extends Component {
   }
 
   componentDidMount() {
-    const {actions, activeChannel, activeMessage, messages, supervisor} = this.props;
+    const {actions, activeChannel, activeMessage, messages, resolved} = this.props;
     const self = this
-     this.setState({ mounted: true });
+     self.setState({ mounted: true });
      socket.on('results', function (msg) {
-      console.log('ControlPanel: Received results in Control Panel',msg)
+      
+      //enable react-motion animation
+      self.refs.draggableList.setState({previewing: true})
+
+      //convert returned results into local state format
       try {
            for (var i = 0; i < msg.amazon.length; i++) {
             self.state.items[i].index = i
@@ -138,9 +81,9 @@ class ControlPanel extends Component {
         console.log('CPanel Error 114 Could not get results :',err)
         return
       }
-      var identifier = {channel: msg.source.id, properties: []}
+      var identifier = {id: msg.source.id, properties: []}
       for (var key in msg) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
+        if ((key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
           identifier.properties.push({ [key] : msg[key]})
         }
       }  
@@ -151,33 +94,51 @@ class ControlPanel extends Component {
       } else {
         actions.setMessageProperty(identifier)
       }
+
+       setTimeout(function(){
+         self.refs.draggableList.setState({previewing: false})
+      }, 1000)
+
     })
 
    socket.on('change channel bc', function(channels) {
-    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
-    const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.prev.name)
+    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
+    const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
     const firstMsg = filtered[0]
     const firstMsgOld = filteredOld[0]
-     self.setState({ selected: {name: null, index: null}})
-      if (firstMsgOld) {
-          var globalitems = firstMsgOld.amazon.filter(function(obj){ return true })
-          var result = []
-          self.state.items.forEach(function(stateItem){
-            globalitems.forEach(function(globalItem){
-              if (stateItem.id == globalItem.ASIN[0]) {
-               result.push(globalItem)
-              }
-            })
-          })
-          var identifier = {channel: firstMsgOld.source.id, properties: []}
-          identifier.properties.push({ amazon : result})
-          actions.setMessageProperty(identifier)
-      }
 
-        var arrayvar= []
+    //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
+    if ( self.refs.toggle && firstMsg.resolved && self.refs.toggle.state.checked === true) {
+      self.refs.toggle.handleClick('forced')
+    } else if (self.refs.toggle && !firstMsg.resolved && self.refs.toggle.state.checked === false) {
+      self.refs.toggle.handleClick('forced')
+    }
+
+    //Reset selected state
+     self.setState({ selected: {name: null, index: null}})
+
+      //If there is atleast one channel existing already
+      if (firstMsgOld) {
+            //Update redux state with new item ordering        
+            const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
+            const result = []
+            self.state.items.forEach(function(stateItem){
+              reduxItems.forEach(function(reduxItem){
+                if (stateItem.id == reduxItem.ASIN[0]) {
+                 result.push(reduxItem)
+                }
+              })
+            })
+            let identifier = {id: firstMsgOld.source.id, properties: []}
+            identifier.properties.push({ amazon : result})
+            actions.setMessageProperty(identifier)
+      }
+        
+        //Load items into state for next channel
+         const nextItems = []
          try {
            for (var i = 0; i < firstMsg.amazon.length; i++) {
-            var item = { index: null, id: null, name: null, changed: true}
+            let item = { index: null, id: null, name: null, changed: true}
             item.index = i
             item.id = firstMsg.amazon[i].ASIN[0]
             item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
@@ -186,16 +147,18 @@ class ControlPanel extends Component {
             } catch(err) {
               console.log('Could not get image for item: ',i)
             }
-            arrayvar.push(item)
+            nextItems.push(item)
           } 
       } catch(err) {
         console.log('CPanel Error 169 Could not get results :',err)
         return
       }
-      // console.log('Arrayvar is: ',arrayvar)
-      if (arrayvar.length > 0) {
-        self.setState({ items: arrayvar })
+      console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
+      if (nextItems.length > 0) {
+         console.log(0)
+        self.setState({ items: nextItems })
       } else {
+        console.log(1)
         self.setState({items: [{
         id: 'product-0',
         name: 'Product 0',
@@ -257,8 +220,7 @@ class ControlPanel extends Component {
         index: 9,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
-        }
-      ]})
+        }]})
       }
     })
   }
@@ -295,7 +257,25 @@ class ControlPanel extends Component {
 
    handleClick(index) {
     this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index}})
-    // console.log('Clicked!!!', this.state.selected)
+  }
+
+  handleMouseMove(lastPressed, row) {
+    const { items } = this.state;
+    function reinsert(arr, from, to) {
+      const _arr = arr.slice(0);
+      const val = _arr[from];
+      _arr.splice(from, 1);
+      _arr.splice(to, 0, val);
+      return _arr;
+    }
+    const itemsReordered = reinsert(items, findIndex(items, function(o) { return o.index == lastPressed }), row);
+    this.setState({items: itemsReordered});
+  }
+
+
+  handleMouseUp() {
+    const { items } = this.state;
+      this.setState({items: items})
   }
 
   renderItem(index, key) {
@@ -319,18 +299,20 @@ class ControlPanel extends Component {
      const self = this;
      const { items,selected } = this.state;
      const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
-      return ( 
+     return ( 
          <div className="flexbox-container">
           <div id="second-column">
             <section className='rightnav'>
           <div>   
 
-            <label>
-              <Toggle
-                defaultChecked={this.props.supervisor}
-                onChange={ () => { changeMode() }} />
-              <span> Supervisor Mode</span>
-            </label>
+      
+              <label>
+                <Toggle
+                  ref='toggle'
+                  defaultChecked={this.props.resolved}
+                  onChange={ () => { changeMode(this) }} />
+                  <span style={{fontSize:'1.3em'}}> INTERACT MODE</span>
+              </label>
 
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
@@ -345,22 +327,14 @@ class ControlPanel extends Component {
           </div>
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                        <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-
-                      <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
-                      <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
-                          {list}
-                      </ReactCSSTransitionGroup>
-                          </div>
+                <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
+                      
+                      <DraggableList ref='draggableList'  mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>
          </div>
       );
   }
 }
-// <ReactCSSTransitionGroup transitionAppear={true} transitionAppearTimeout={700} transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
-// </ReactCSSTransitionGroup>
-
-
 
 export default ControlPanel

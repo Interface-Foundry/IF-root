@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { reduxForm } from 'redux-form';
 import { Button,DropdownButton,MenuItem } from 'react-bootstrap';
 import Spinner from 'react-spinner';
+// import processData from '../../../../chat/components/process'
 
 export const labels = {
   msg: "Message",
@@ -35,7 +36,8 @@ class DynamicForm extends Component {
       spinnerloading: false,
       modifier: {},
       color: false,
-      size: false
+      size: false,
+      resolved: ''
     };
   }
 
@@ -46,7 +48,7 @@ class DynamicForm extends Component {
     var self = this
 
     socket.on('results', function(msg) {
-      console.log('Form: Received results', msg)
+      // console.log('Form: Received results', msg)
       self.state.spinnerloading = false
       self.state.searchParam = ''
         //store raw results for use in searchSimilar function
@@ -55,13 +57,13 @@ class DynamicForm extends Component {
 
     socket.on('change channel bc', function(channels) {
       if (self.state.dirty) {
-        self.state.channel = channels.prev.name
+        self.state.id = channels.prev.id
         console.log('saving state: ', self.state)
         socket.emit('change state', self.state);
       }
       //reset local state
       // console.log('messages: ', self.props.messages, ' channel: ',channel)
-      const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
+      const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
       const firstMsg = filtered[0]
         // console.log('first: ', firstMsg)
       self.state = {
@@ -76,7 +78,8 @@ class DynamicForm extends Component {
         spinnerloading: false,
         modifier: { color: null, size: null},
         color: false,
-        size: false
+        size: false,
+        searchParam: ''
       };
       resetForm()
     })
@@ -150,26 +153,47 @@ class DynamicForm extends Component {
       activeMessage, resetForm
     } = this.props
     const newQuery = activeMessage;
-    if (!this.state.searchParam) {
-      if (query) {
-        this.state.searchParam = query
-      } else {
-        console.log('search input is empty: ', this.state,'Query:' ,query)
-        return
-      }
-    }
-    newQuery.msg = this.state.searchParam
-    newQuery.bucket = 'search'
-    newQuery.action = 'initial'
-    newQuery.client_res = [newQuery.msg]
-    newQuery.tokens = newQuery.msg.split(' ')
-    newQuery.source.origin = 'supervisor'
-      // newQuery.source.channel = 'supervisor'
-    socket.emit('new message', newQuery);
-    this.setState({
-      spinnerloading: true
-    })
-
+     //TODO
+     // processData.urlShorten(data,function(res){
+     //    var count = 0;
+     //    //put all result URLs into arr
+     //    async.eachSeries(res, function(i, callback) {
+     //        data.urlShorten.push(i);//save shortened URLs
+     //        processData.getNumEmoji(data,count+1,function(emoji){
+     //            data.client_res.push(emoji + ' ' + res[count]);
+     //            count++;                           
+     //            callback();
+     //        });
+     //    }, function done(){
+             if (!this.state.searchParam) {
+              if (query) {
+                this.state.searchParam = query
+              } else if (document.querySelector('#search-input').value !== ''){
+                this.state.searchParam = document.querySelector('#search-input').value
+              } else {
+                console.log('search input is empty.')
+                return
+              }
+            }
+            newQuery.msg = this.state.searchParam
+            newQuery.bucket = 'search'
+            newQuery.action = 'initial'
+            newQuery.tokens = newQuery.msg.split()
+            newQuery.source.origin = 'supervisor'
+            newQuery.flags = {}
+            newQuery.flags.toCinna = true
+            newQuery.parent = false
+            newQuery.client_res = []
+            socket.emit('new message', newQuery);
+            this.setState({
+              spinnerloading: true,
+              searchParam: ''
+            })
+            console.log('\n\n\nDATA OBJECT: ',newQuery)
+        // });
+      // });
+  document.querySelector('#search-input').value = ''
+  resetForm()
   }
 
   searchSimilar() {
@@ -177,21 +201,23 @@ class DynamicForm extends Component {
       activeMessage, resetForm, selected
     } = this.props
     const newQuery = activeMessage;
-    if (!selected || !selected.name || !selected.id) {
-      console.log('Please select an item.')
+    if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults) {
+      console.log('Please select an item or do an initial search.')
       return
     }
     newQuery.bucket = 'search'
     newQuery.action = 'similar'
-    newQuery.client_res = [newQuery.msg]
-    newQuery.tokens = newQuery.msg.split(' ')
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    newQuery.flag = 'recalled'
+    newQuery.parent = false
+    console.log('Form.js 209 : newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
@@ -209,15 +235,16 @@ class DynamicForm extends Component {
     }
     newQuery.bucket = 'search'
     newQuery.action = 'modify'
-    newQuery.client_res = [newQuery.msg]
-    newQuery.tokens = newQuery.msg.split(' ')
+    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
     newQuery.recallHistory = {
       amazon: this.state.rawAmazonResults
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    newQuery.flag = 'recalled'
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    newQuery.parent = false
     newQuery.dataModify = { type: '', val: []}
     if (this.state.color) {
       newQuery.dataModify.type = 'color'
@@ -275,6 +302,36 @@ class DynamicForm extends Component {
     // }
   }
 
+  searchFocus() {
+     const {
+      activeMessage, resetForm, selected
+    } = this.props
+    const newQuery = activeMessage;
+    if (!selected || !selected.name || !selected.id) {
+      console.log('Please select an item.')
+      return
+    }
+    newQuery.bucket = 'search'
+    newQuery.action = 'focus'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory = {
+      amazon: this.state.rawAmazonResults
+    }
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    newQuery.parent = false
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    resetForm()
+
+  }
+
+
   handleChange(field, e) {
     var nextState = {}
     nextState[field] = e.target.checked
@@ -297,7 +354,7 @@ class DynamicForm extends Component {
 
   handleSubmit(e) {
     e.preventDefault()
-    console.log('handle submit event: ',e)
+    // console.log('handle submit event: ',e)
     //increase the numerical value of below property when adding new buttons to form.  yeah it's weird sorry
     let query = e.target[6].value
     this.searchAmazon(query)
@@ -325,6 +382,14 @@ class DynamicForm extends Component {
       display: 'none'
     };
     const showModifyBox = this.state.action === 'modify' ? {
+      textAlign: 'center',
+      marginTop: '5em'
+    } : {
+      textAlign: 'center',
+      marginTop: '5em',
+      display: 'none'
+    };
+    const showFocusBox = this.state.action === 'focus' ? {
       textAlign: 'center',
       marginTop: '5em'
     } : {
@@ -374,7 +439,7 @@ class DynamicForm extends Component {
                 </Button>
            
                 <div id="search-box" style={showSearchBox}>
-                  <input type="text" id="seach-input" {...fields['searchParam']} onChange={this.OnChange} />
+                  <input type="text" id="search-input" {...fields['searchParam']} onChange={this.OnChange} />
                     <Button bsSize = "large" disabled={this.state.spinnerloading}  style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
                       Search Amazon
                        <div style={spinnerStyle}>
@@ -429,6 +494,15 @@ class DynamicForm extends Component {
                       </Button>
                 </div>
 
+                <div id="focus-box" style={showFocusBox}>
+                    <h3 style={showPrompt}> Please select an item. </h3>
+                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
+                      Search Focus
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
+                    </Button>
+                </div>
 
 
             </div>

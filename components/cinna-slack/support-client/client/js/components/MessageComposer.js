@@ -22,25 +22,27 @@ class MessageComposer extends Component {
   }
   handleSubmit(event) {
     const {
-        user, activeChannel, activeMessage, messages, supervisor
+        user, activeChannel, activeMessage, messages, resolved
     } = this.props;
     const text = event.target.value.trim();
-    if (event.which === 13 && supervisor) {
+    const activeMsg = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)[0]
+    if (event.which === 13 && !resolved) {
         event.preventDefault();
         var newMessage = {
             id: messages.length,
             msg: text,
             incoming: false,
-            client_res: [text],
             source: {
                 origin: 'socket.io',
                 channel: activeChannel.name,
                 org: 'kip',
-                id: 'Cinna'
+                id: activeChannel.id
             },
             bucket: 'response',
             ts: new Date().toISOString(),
-            parent: activeMessage.source.id.toString()
+            parent: false,
+            resolved: resolved,
+            flags: {toClient: true}
         };
         socket.emit('new message', newMessage);
         var copy = Object.assign({}, newMessage);
@@ -55,8 +57,8 @@ class MessageComposer extends Component {
     }
 }
   handleChange(event) {
-    const { supervisor } = this.props
-    if (!supervisor) return
+    const { resolved } = this.props
+    if (resolved) return
     this.setState({ text: event.target.value });
     if (event.target.value.length > 0 && !this.state.typing) {
       socket.emit('typing');

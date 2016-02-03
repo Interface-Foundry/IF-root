@@ -17,14 +17,14 @@ const initialState = {
     },
     source: {
         origin: 'default',
-        channel: 'default',
+        channel: 'Lobby',
         org: 'default',
-        id: 'default'
+        id: 'Lobby'
     },
     client_res: [],
     ts: Date.now(),
     resolved: false,
-    parent: 'default'
+    parent: true
 };
 
 export default function activeMessage(state = initialState, action) {
@@ -51,7 +51,8 @@ export default function activeMessage(state = initialState, action) {
                 client_res: action.message.client_res,
                 ts: action.message.ts,
                 resolved: action.message.resolved,
-                parent: action.message.parent
+                parent: action.message.parent,
+                flags: action.message.flags ? action.message.flags : {}
             };
         case LOAD_MESSAGE:
             return {...state,

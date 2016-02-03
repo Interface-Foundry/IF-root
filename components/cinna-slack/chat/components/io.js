@@ -45,8 +45,8 @@ var initSlackUsers = function(env){
         loadSlackUsers(testUser);
     }else if (env === 'development_mitsu'){
         var testUser = [{
-            team_id:'T0H72FMNK',
-            bot: {
+            team_id:'T0HLZP09L',
+            bot: { 
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
@@ -184,6 +184,7 @@ function loadSlackUsers(users){
                 //     console.log('CHANGEGEE ',doneata);
                 //     slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
                 // }
+                
                 if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){ //settings.name = kip's slack username
                     //public channel
                     if (data.channel && data.channel.charAt(0) == 'C'){
@@ -479,6 +480,9 @@ function incomingAction(data){
     if (data.bucket === 'response') {
             return sendResponse(data)
          }
+    
+    //WTFFFFFRF
+    // console.log('Supervisor: 372 ',data)
     supervisor.emit(data, true)
     //----------------------//
 
@@ -552,12 +556,19 @@ function searchBucket(data){
             }
             break;
         case 'focus':
+          //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flag && data.flag === 'recalled') { 
+                    search.searchFocus(data);
+            } 
+            //-----------------------------------------------------------------//
+            else {
             history.recallHistory(data, function(res){
-                if (res){
-                    data.recallHistory = res;
-                }
-                search.searchFocus(data);
-            });
+                    if (res){
+                        data.recallHistory = res;
+                    }
+                    search.searchFocus(data);
+                });
+            }
             break;
         case 'back':
             //search.searchBack(data);
@@ -652,7 +663,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                         processData.getNumEmoji(data,count+1,function(emoji){
 
                             res[count] = res[count].trim(); 
-
+                            //MITSU: Note to self - check this out for slack messages 
                             if (data.source.origin == 'slack'){
                                 data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             }else if (data.source.origin == 'socket.io'){
@@ -706,8 +717,9 @@ var checkOutgoingBanter = function(data){
 var sendResponse = function(data){
 
     if (data.source.channel && data.source.origin == 'socket.io'){
-        //check if socket user exists
+        //check if socket user exists        
         if (io.sockets.connected[data.source.channel]){
+            // console.log('io625: getting here')
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) { 
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
@@ -715,12 +727,13 @@ var sendResponse = function(data){
         }
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
-               data.bucket = 'results'
+               data.flags = {searchResults: true}
+                // console.log('Supervisor: 610 ',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
         else {
-            console.log('error: socket io channel missing');
+            console.log('error: socket io channel missing', data);
         }
     }
     else if (data.source.channel && data.source.origin == 'slack'){
@@ -832,7 +845,8 @@ var sendResponse = function(data){
      //---supervisor: relay search result previews back to supervisor---//
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
-        data.bucket = 'results'
+       data.flags = {searchResults: true}
+        // console.log('Supervisor: 728', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//
@@ -841,7 +855,7 @@ var sendResponse = function(data){
     }
 
     //SAVE OUTGOING MESSAGES TO MONGO
-    if (data.bucket && data.action){
+    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
         history.saveHistory(data,false); //saving outgoing message

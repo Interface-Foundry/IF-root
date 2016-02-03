@@ -5,13 +5,40 @@ module.exports = function(router) {
   router.use(bodyparser.json());
   // query db for channel users
   router.get('/channels', function(req, res) {
-    Channel.find({'resolved':false},{name: 1, id:1, resolved:1 , _id:0}, function(err, data) {
+     Channel.findOne({'name':'Lobby'}, function(err, lobby) {
       if(err) {
         console.log(err);
         return res.status(500).json({msg: 'internal server error'});
       }
-      res.json(data);
-    });
+      if (lobby) {
+        Channel.find({'resolved':false},{name: 1, id:1, resolved:1 , _id:0}, function(err, data) {
+          if(err) {
+            console.log(err);
+            return res.status(500).json({msg: 'internal server error'});
+          }
+          res.json(data);
+        });
+      }
+
+      if (!lobby) {
+        var lobbyChannel = new Channel({name: 'Lobby', id: 0});
+        lobbyChannel.save(function(err, saved) {
+              if (err) {
+                console.log(err);
+                return res.status(500).json({
+                  msg: 'internal server error'
+                });
+              }
+              Channel.find({'resolved':false},{name: 1, id:1, resolved:1 , _id:0}, function(err, data) {
+                if(err) {
+                  console.log(err);
+                  return res.status(500).json({msg: 'internal server error'});
+                }
+                res.json(data);
+              });              
+            })
+        }
+    });    
   });
 
   // get a specific channel

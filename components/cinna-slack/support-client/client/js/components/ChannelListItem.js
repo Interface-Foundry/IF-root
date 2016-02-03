@@ -21,7 +21,7 @@ class ChannelListItem extends Component {
     UserAPIUtils.resolveChannel(channel)
     const resolveMessageInState = function(msg) {
         return new Promise(function(resolve, reject) {
-              var identifier = {channel: channel.name, properties: []} 
+              var identifier = {id: channel.id, properties: []} 
               identifier.properties.push({ resolved : true})
                 actions.setMessageProperty(identifier)
                 msg.resolved = true
@@ -51,6 +51,7 @@ class ChannelListItem extends Component {
   render() {
     const { channel, actions, channels } = this.props;
     const { channel: selectedChannel, onClick } = this.props;
+    const closebuttonStyle = (channel.name === 'Lobby') ? { padding: 0, visibility: 'hidden' } : { padding: 0, visibility: 'visible'};
     return (
     <div className="flexbox-container" style={{backgroundColor: '#45a5f4'}}>
       <Button bsSize="xsmall" bsStyle="primary" style={{backgroundColor: '#45a5f4'}}>
@@ -62,7 +63,7 @@ class ChannelListItem extends Component {
           </li>
         </a>
       </Button>
-      <Button type="button" className="close" style={{ padding: 0}} onClick={() => this.closeChannel()}>&times;</Button>
+      <Button type="button" className="close" style={closebuttonStyle} onClick={() => this.closeChannel()}>&times;</Button>
     </div>
     );
   }

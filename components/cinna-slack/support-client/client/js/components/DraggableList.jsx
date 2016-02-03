@@ -1,7 +1,9 @@
 import React from 'react';
 import {Motion, spring} from 'react-motion';
 import util from 'lodash'
-
+import isNaN from 'lodash/lang/isNaN'
+import findIndex from 'lodash/array/findIndex'
+const socket = io();
 function reinsert(arr, from, to) {
   const _arr = arr.slice(0);
   const val = _arr[from];
@@ -17,6 +19,69 @@ function clamp(n, min, max) {
 const springConfig = [300, 50];
 const itemsCount = 10;
 
+const defaultItems = [{
+        id: 'product-0',
+        name: 'Product 0',
+        index: 0,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-1',
+        name: 'Product 1',
+        index: 1,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-2',
+        name: 'Product 2',
+        index: 2,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-3',
+        name: 'Product 3',
+        index: 3,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-4',
+        name: 'Product 4',
+        index: 4,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },
+      {
+        id: 'product-5',
+        name: 'Product 5',
+        index: 5,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-6',
+        name: 'Product 6',
+        index: 6,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-7',
+        name: 'Product 7',
+        index: 7,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-8',
+        name: 'Product 8',
+        index: 8,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+      },{
+        id: 'product-9',
+        name: 'Product 9',
+        index: 9,
+        img: 'http://kipthis.com/img/kip-cart.png',
+        changed: false
+        }]
+
 const DraggableList = React.createClass({
   getInitialState() {
     return {
@@ -24,15 +89,31 @@ const DraggableList = React.createClass({
       mouse: 0,
       isPressed: false,
       lastPressed: 0,
-      order: util.range(itemsCount),
+      order: this.props.items,
+      pageY: 0,
+      switching: false,
+      previewing: false,
+      mounted: false
     };
   },
 
   componentDidMount() {
+    const {delta} = this.state;
     window.addEventListener('touchmove', this.handleTouchMove);
     window.addEventListener('touchend', this.handleMouseUp);
     window.addEventListener('mousemove', this.handleMouseMove);
     window.addEventListener('mouseup', this.handleMouseUp);
+    const self = this
+    this.setState({ mounted: true });
+    socket.on('change channel bc', function(channels) {      
+      const firstMsgOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)[0]
+      if (typeof firstMsgOld !== 'undefined') {
+            self.setState({switching: true})    
+      }
+      setTimeout(function(){
+         self.setState({switching: false})
+      }, 1000)
+    })
   },
 
   handleTouchStart(key, pressLocation, e) {
@@ -49,7 +130,7 @@ const DraggableList = React.createClass({
       delta: pageY - pressY,
       mouse: pressY,
       isPressed: true,
-      lastPressed: pos,
+      lastPressed: pos
     });
   },
 
@@ -58,23 +139,28 @@ const DraggableList = React.createClass({
     if (isPressed) {
       const mouse = pageY - delta;
       const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
-      const newOrder = reinsert(order, order.indexOf(lastPressed), row);
-      this.setState({mouse: mouse, order: newOrder});
+      this.setState({mouse: mouse});
+      this.props.mouseMove(lastPressed, row)
     }
   },
 
   handleMouseUp() {
-    this.setState({isPressed: false, delta: 0});
+    const {isPressed, delta, order, lastPressed} = this.state;
+     // if (delta !== 0) {
+     //   this.props.mouseUp()
+     //  }
+     this.setState({isPressed: false, delta: 0}); 
   },
 
   render() {
-    const {mouse, isPressed, lastPressed, order} = this.state;
+    const {mouse, isPressed, lastPressed, order, switching, previewing,mounted} = this.state;
     const { items } = this.props
 
     return (
       <div className="demo8">
-        { items.map(item => {
-          const style = lastPressed === item.index && isPressed
+     
+        { mounted ? items.slice(0,10).map(item => {
+          const style = lastPressed === item.index && (isPressed)
             ? {
                 scale: spring(1.1, springConfig),
                 shadow: spring(16, springConfig),
@@ -84,12 +170,13 @@ const DraggableList = React.createClass({
             : {
                 scale: spring(1, springConfig),
                 shadow: spring(1, springConfig),
-                y: spring(order.indexOf(item.index) * 100, springConfig),
+                y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)), 
                 textAlign: 'center'
               };
           return (
+          
             <Motion style={style} key={item.index}>
-              {({scale, shadow, y}) =>
+              {({scale, shadow, y, x}) =>
                 <div
                   onMouseDown={this.handleMouseDown.bind(null, item.index, y)}
                   onTouchStart={this.handleTouchStart.bind(null, item.index, y)}
@@ -100,17 +187,35 @@ const DraggableList = React.createClass({
                     WebkitTransform: `translate3d(0, ${y}px, 0) scale(${scale})`,
                     zIndex: item.index === lastPressed ? 99 : item.index
                   }}>
-                  <img height='100%' width='100%' style={{border:'0.1em solid orange'}} src={item.img} />
-                </div>
+                  <div className="flexbox-container">
+                  <span style={{fontSize:'0.4em', color:'#000', margin: '0 auto', display:'inlineBlock', textAlign:'left'}}>{item.name.substring(0,20)} </span>   
+                  <img height='90px' width='90px' style={{'MozUserSelect': 'none',
+                      'WebkitUserSelect': 'none',
+                      'WebkitUserDrag': 'none',
+                      'userSelect': 'none',
+                      'userDrag' : 'none',
+                      // 'marginRight':'90%',
+                      'display' : 'inlineBlock'
+                      }} src={item.img} />
+                      
+                    
+                  </div>
+                </div>  
               }
             </Motion>
+            
           );
-        })}
+        
+        }) : null}
       </div>
     );
   },
 });
 
- // {order.indexOf(i) + 1}
-
+  // <div className="flexbox-container">
+  //             <div className="roundedOne">
+  //               <input type="checkbox" value="None" id="roundedOne" name="check" checked />
+  //               <label for="roundedOne"></label>
+  //            </div>
+ // </div>
 export default DraggableList;

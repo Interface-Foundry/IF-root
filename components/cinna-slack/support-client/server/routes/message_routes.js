@@ -9,7 +9,7 @@ module.exports = function(router) {
   //query db for messages
   router.get('/messages', function(req, res) {
     Message.find({
-      // resolved: false
+      resolved: false
     }, function(err, data) {
       if (err) {
         console.log(err);
@@ -70,8 +70,8 @@ module.exports = function(router) {
   router.post('/newmessage', function(req, res) {
     Message.findOne({
       'source.channel': req.body.source.channel,
-      'msg': req.body.msg,
-      'resolved': false
+      'source.id': req.body.source.id,
+      'msg': req.body.msg
     }, function(err, data) {
       if (err) {
         console.log(err);
@@ -80,6 +80,7 @@ module.exports = function(router) {
         });
       }
       if (!data) {
+        // console.log('message_routes: req.body: ',req.body)
         if (req.body.amazon && req.body.amazon.length > 0) {
           var stringifiedItems = []
           async.eachSeries(req.body.amazon, function(item, callback) {
@@ -127,7 +128,8 @@ module.exports = function(router) {
   //resolve existing message in db
   router.post('/resolve', function(req, res) {
 
-    Message.findOne({
+    Message.find({
+      'source.id': req.body.source.id,
       'source.channel': req.body.source.channel
     }, function(err, data) {
       if (err) {
@@ -136,50 +138,57 @@ module.exports = function(router) {
           msg: 'internal server error'
         });
       }
-      if (!data) {
+      if (data && data.length < 1) {
         console.log('Message not found.')
         return res.status(500).json({
           msg: 'internal server error'
         });
       }
       if (data) {
-        data.resolved = true
-        if (req.body.amazon && req.body.amazon.length > 0) {
-          var stringifiedItems = []
-          async.eachSeries(req.body.amazon, function(item, callback) {
-            stringifiedItems.push(JSON.stringify(item));
-            callback();
-          }, function done(err) {
-            if (err) {
-              console.log(err);
-              return res.status(500).json({
-                msg: 'internal server error'
-              });
-            }
-            data.amazon = stringifiedItems
-            data.save(function(err, result) {
-              if (err) {
-                console.log(err);
-                return res.status(500).json({
-                  msg: 'internal server error'
-                });
+
+        async.eachSeries(data, function iteratior(msg, callback){ 
+              msg.resolved = true
+              if (req.body.amazon && req.body.amazon.length > 0) {
+                var stringifiedItems = []
+                async.eachSeries(req.body.amazon, function(item, callback) {
+                  stringifiedItems.push(JSON.stringify(item));
+                  callback();
+                }, function done(err) {
+                  if (err) {
+                    console.log(err);
+                    return res.status(500).json({
+                      msg: 'internal server error'
+                    });
+                  }
+                  msg.amazon = stringifiedItems
+                  msg.save(function(err, result) {
+                    if (err) {
+                      console.log(err);
+                      return res.status(500).json({
+                        msg: 'internal server error'
+                      });
+                    }
+                    console.log('Message resolved.')
+                    callback()
+                  })
+                })
+              } else {
+                msg.save(function(err, result) {
+                  if (err) {
+                    console.log(err);
+                    return res.status(500).json({
+                      msg: 'internal server error'
+                    });
+                  }
+                  console.log('Message resolved.')
+                  callback()
+                })
               }
-              console.log('Message resolved.')
-              res.json({});
-            })
-          })
-        } else {
-          data.save(function(err, result) {
-            if (err) {
-              console.log(err);
-              return res.status(500).json({
-                msg: 'internal server error'
-              });
-            }
-            console.log('Message resolved.')
-            res.json({});
-          })
-        }
+        }, function done(){
+          res.json({});
+        })
+
+
       }
     });
   });

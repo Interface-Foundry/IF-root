@@ -5,22 +5,39 @@ ioClient.on('connect', function() {
 exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
-
         socket.on('new message', function(msg) {
             msg.ts = new Date().toISOString();
-            console.log('raw msg in socket events: ')
-            //Emit throughout supervisor client
-            if(msg.bucket === 'supervisor') {
-                console.log('socketEvents: new message from cinna received.', msg)
-                socket.broadcast.emit('new bc message', msg);
+            var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
+            console.log('\nI/O: raw msg:', msg)
+            switch(type) {
+                case 'incoming':
+                    console.log('\nI/O: routed to  --> incoming msg\n')
+                    socket.broadcast.emit('new bc message', msg)
+                    break;
+                case 'outgoing':
+                    console.log('I/O: routed to --> outgoing msg\n')
+                    ioClient.emit("msgFromSever", msg);
+                    break;
+                case 'searchResults':
+                    console.log('I/O: routed to --> incoming results\n')
+                    socket.broadcast.emit('results', msg)
+                    break;
+                default:
+                    console.log('I/O: Could not determine message type.')
             }
-            //Emit outgoing message to cinna-slack
-            else if (msg.client_res[0] && msg.client_res[0].length > 0 && (msg.bucket === 'response' || msg.bucket === 'search') ) {
-                ioClient.emit("msgFromSever", msg);
-            } else if (msg.bucket === 'results'){
-                console.log('Received results from cinna',msg)
-                socket.broadcast.emit('results', msg)
-            }
+            // //Emit throughout supervisor client
+            // if(msg.flags && msg.flags.toSupervisor) {
+            //     console.log('\nI/O: routed to  --> incoming msg')
+            //     socket.broadcast.emit('new bc message', msg);
+            // }
+            // //Emit outgoing message to cinna-slack
+            // else if (msg.flags && (msg.flags.toClient || msg.flags.toCinna)) {
+            //     console.log('I/O: routed to --> outgoing msg')
+            //     ioClient.emit("msgFromSever", msg);
+            // } else if (msg.bucket === 'results'){
+            //     console.log('I/O: routed to --> incoming results ')
+            //     socket.broadcast.emit('results', msg)
+            // }
         });
         socket.on('new channel', function(channel) { 
             socket.broadcast.emit('new channel', channel)

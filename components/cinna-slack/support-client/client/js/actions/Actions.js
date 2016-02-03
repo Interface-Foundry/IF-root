@@ -13,7 +13,7 @@ export function addMessage(message) {
 }
 
 export function receiveRawMessage(message) {
-    // console.log('Raw message in Actions: ', message)
+    console.log('Raw message in Actions: ', message)
     UserAPIUtils.createMessage(message);
     return {
         type: types.RECEIVE_MESSAGE,
@@ -43,6 +43,14 @@ export function removeChannel(channel) {
         channel
     };
 }
+
+export function resolveChannel(channel) {
+    return {
+        type: types.RESOLVE_CHANNEL,
+        channel
+    };
+}
+
 
 export function typing(username) {
     return {
@@ -95,7 +103,7 @@ export function changeMessage(message) {
 }
 
 export function setMessageProperty(identifier) {
-    console.log('Actions: ',identifier)
+    // console.log('Actions: ',identifier)
     return {
         type: types.SET_MESSAGE_PROPERTY,
         identifier
