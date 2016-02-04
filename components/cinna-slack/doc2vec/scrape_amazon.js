@@ -9,11 +9,12 @@ function scrape (url, cb) {
       kip.err('no product for url ' + url);
       return cb(e || 'no product for url');
     }
+    console.log('got product ' + product.asin + ' ')
     db.insertProduct(product);
 
     // returns [{q: String, a: [String]}]
     amazonHTML.qa(product.asin, function(e, questions) {
-      console.log('done with product');
+      console.log('got QA for ' + product.asin);
       if (kip.err(e)) {
         cb(e)
       }
@@ -56,10 +57,11 @@ function shuffle(array) {
 Array.prototype.shuffle = function() { return shuffle(this); }
 
 var ASINS = fs.readFileSync('./asins.txt', 'utf8').split('\n').shuffle();
-// ASINS = ['B00F23LOJQ'];
+//ASINS = ['B00VVOCSOU', 'B00F23LOJQ'];
 
-scrape('http://www.amazon.com/gp/product/' + ASINS[0] + '/', function(e) {
-  console.error(e);
-  console.log('done');
-  process.exit(0);
-})
+var i = 0;
+setInterval(function() {
+  scrape('http://www.amazon.com/gp/product/' + ASINS[i++] + '/', function(e) {
+    console.error(e);
+  })
+}, 3 * 1000)

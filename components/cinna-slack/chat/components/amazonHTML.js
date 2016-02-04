@@ -92,9 +92,12 @@ module.exports.basic = function basic(url, callback) {
         var $ = cheerio.load(body);
         $('html').find('script').remove()
         $('html').find('style').remove()
-        // fs.writeFileSync('debug.html', $.html());
+        fs.writeFileSync('debug.html', $.html());
 
         product.asin = $('input#ASIN').val();
+        product.title = $('#productTitle').text();
+        $('.votingStripe').remove()
+        product.reviews = $('#revMHRL').text();
 
 
         //sort scraped price
@@ -132,7 +135,7 @@ module.exports.basic = function basic(url, callback) {
         var textParts = {
           featureBulletText: $('#featurebullets_feature_div').text().replace(/\s+/g, ' '),
           descriptionText: $('#productDescription').text().replace(/\s+/g, ' '),
-          productDetails: $('#prodDetails').text().replace(/\s+/g, ' '),
+          productDetails: $('#productDetailsTable').text().replace(/<li>([^<li>]*)<\/li>/g, ' $1. ').replace(/\s+/g, ' '),
           aplusProductDescription: $('#aplusProductDescription').text().replace(/\s+/g, ' ')
         };
 
