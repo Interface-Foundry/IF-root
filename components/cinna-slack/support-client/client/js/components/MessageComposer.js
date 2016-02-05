@@ -25,9 +25,13 @@ class MessageComposer extends Component {
         user, activeChannel, activeMessage, messages, resolved
     } = this.props;
     const text = event.target.value.trim();
-    const activeMsg = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)[0]
+    const activeMsg = messages.filter(message => message.source).filter(message => (message.source && message.source.channel === activeChannel.name))[0]
     if (event.which === 13 && !resolved) {
         event.preventDefault();
+        let thread = activeMsg.thread
+        thread.parent.id = activeMsg.thread.id
+        thread.parent.isParent = false;
+        thread.sequence = activeMsg.thread + 1
         var newMessage = {
             id: messages.length,
             msg: text,
@@ -40,8 +44,7 @@ class MessageComposer extends Component {
             },
             bucket: 'response',
             ts: new Date().toISOString(),
-            parent: false,
-            resolved: resolved,
+            thread: thread,
             flags: {toClient: true}
         };
         socket.emit('new message', newMessage);

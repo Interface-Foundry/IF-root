@@ -17,10 +17,9 @@ class ChannelListModalItem extends React.Component {
     UserAPIUtils.resolveChannel(channel)
     const resolveMessageInState = function(msg) {
         return new Promise(function(resolve, reject) {
-              var identifier = {id: channel.id, properties: []} 
-              identifier.properties.push({ resolved : true})
-                actions.setMessageProperty(identifier)
-                msg.resolved = true
+              msg.thread.ticket = (msg.thread.ticket && msg.thread.ticket.id &&  msg.thread.ticket.isOpen) ? { id: msg.thread.ticket.id, isOpen: false }  : { id: shortid.generate(), isOpen: false };
+              var identifier = {id: channel.id, properties: [{thread: msg.thread }]}
+              actions.setMessageProperty(identifier)
             return resolve(msg);
         });
      };

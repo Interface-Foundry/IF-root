@@ -45,7 +45,7 @@ export default function messages(state = initialState, action) {
                         },
                         parent: {
                             isParent: action.message.thread.parent.isParent,
-                            id: action.message.parent.id
+                            id: (action.message.parent && action.message.parent.id) ? action.message.parent.id : null
                         }
                     },
                     urlShorten: action.message.thread.urlShorten,
@@ -86,7 +86,7 @@ export default function messages(state = initialState, action) {
                         },
                         parent: {
                             isParent: action.message.thread.parent.isParent,
-                            id: action.message.parent.id
+                            id: (action.message.parent && action.message.parent.id) ? action.message.parent.id : null
                         }
                     },
                     urlShorten: action.message.thread.urlShorten,

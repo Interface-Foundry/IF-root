@@ -108,9 +108,9 @@ class ControlPanel extends Component {
     const firstMsgOld = filteredOld[0]
 
     //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
-    if ( self.refs.toggle && firstMsg.resolved && self.refs.toggle.state.checked === true) {
+    if ( self.refs.toggle && (firstMsg.thread.ticket && firstMsg.thread.ticket.isOpen) && self.refs.toggle.state.checked === true) {
       self.refs.toggle.handleClick('forced')
-    } else if (self.refs.toggle && !firstMsg.resolved && self.refs.toggle.state.checked === false) {
+    } else if (self.refs.toggle && (!firstMsg.thread.ticket || (firstMsg.thread.ticket && !firstMsg.thread.ticket.isOpen)) && self.refs.toggle.state.checked === false) {
       self.refs.toggle.handleClick('forced')
     }
 
@@ -132,7 +132,7 @@ class ControlPanel extends Component {
             let identifier = {id: firstMsgOld.source.id, properties: []}
             identifier.properties.push({ amazon : result})
             actions.setMessageProperty(identifier)
-      }
+       }
         
         //Load items into state for next channel
          const nextItems = []
@@ -233,8 +233,6 @@ class ControlPanel extends Component {
 
   sendCommand(newMessage) {
     const { activeChannel, activeMessage,actions } = this.props
-    newMessage.parent = activeMessage.source.id
-    newMessage.resolved = true
     socket.emit('new message', newMessage);
     UserAPIUtils.createMessage(newMessage);
   }
@@ -273,9 +271,10 @@ class ControlPanel extends Component {
   }
 
 
-  handleMouseUp() {
+  handleMouseUp(selectedBool, index) {
     const { items } = this.state;
-      this.setState({items: items})
+    let selectedIndex = findIndex(items, function(o) { return o.index == index })
+    this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
   }
 
   renderItem(index, key) {
@@ -304,8 +303,6 @@ class ControlPanel extends Component {
           <div id="second-column">
             <section className='rightnav'>
           <div>   
-
-      
               <label>
                 <Toggle
                   ref='toggle'
@@ -327,8 +324,7 @@ class ControlPanel extends Component {
           </div>
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-                      
+                <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div> 
                       <DraggableList ref='draggableList'  mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>

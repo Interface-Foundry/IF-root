@@ -144,12 +144,19 @@ const DraggableList = React.createClass({
     }
   },
 
-  handleMouseUp() {
+  handleMouseUp({pageY}) {
     const {isPressed, delta, order, lastPressed} = this.state;
-     // if (delta !== 0) {
-     //   this.props.mouseUp()
-     //  }
-     this.setState({isPressed: false, delta: 0}); 
+    console.log('149:',pageY)
+    //TEST THIS OUT: supposed to keep item floated if the item order hasn't changed - 
+    const mouse = pageY - delta;
+    const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
+    this.setState({isPressed: false, delta: 0}); 
+    if (lastPressed !== row && delta !== 0) {
+      this.props.mouseUp(false)
+    } else if (delta !== 0){
+      this.state.order[lastPressed].selected = true
+      this.props.mouseUp(true, lastPressed)
+    }
   },
 
   render() {
@@ -159,8 +166,8 @@ const DraggableList = React.createClass({
     return (
       <div className="demo8">
      
-        { mounted ? items.slice(0,10).map(item => {
-          const style = lastPressed === item.index && (isPressed)
+        { mounted ? items.slice(0,10).map( (item, index) => {
+          const style = ((lastPressed === item.index && isPressed) || (order[index].selected))
             ? {
                 scale: spring(1.1, springConfig),
                 shadow: spring(16, springConfig),

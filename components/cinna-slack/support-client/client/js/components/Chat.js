@@ -10,6 +10,8 @@ import TypingListItem from './TypingListItem';
 const socket = io();
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
+import shortid from 'shortid';
+
 
 
 class Chat extends Component {
@@ -44,7 +46,7 @@ class Chat extends Component {
       console.log('change state event received', state)
        var identifier = {id: state.id, properties: []}
       for (var key in state) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved' || key == 'amazon') && state[key] !== '' ) {
+        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'thread' || key == 'amazon') && state[key] !== '' ) {
           identifier.properties.push({ [key] : state[key]})
         }
       }  
@@ -61,9 +63,9 @@ class Chat extends Component {
     socket.on('new bc message', function(msg) {      
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
-      msg.parent = (filtered.length > 0) ?  false : true
-      msg.resolved = (filtered.length > 0) ? filtered[0].resolved : ((msg.bucket === 'supervisor') ? false : true) 
-      console.log('Chat67:', filtered, self.props.messages,msg)
+      // msg.parent = (filtered.length > 0) ?  false : true
+      // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
+      // console.log('Chat67:', filtered, self.props.messages,msg)
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>
@@ -81,7 +83,8 @@ class Chat extends Component {
     socket.on('change channel bc', function(channels) {
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const nextmsg = filtered[0]
-      self.setState({ resolved: nextmsg.resolved })
+      let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.isOpen) ? false : true;
+      self.setState({ resolved: resolved })
       // console.log('Chat84',channels, self.state)
 
     })
@@ -107,7 +110,6 @@ class Chat extends Component {
                 incoming: true,
                 msg: 'No channels left',
                 ts: '',
-                resolved: false,
                 thread: {
                         id: 'default',
                         sequence: 0,
@@ -131,7 +133,7 @@ class Chat extends Component {
     const firstMsg = activeMessages[0]
     // console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
-    console.log('Chat.js:108-->',firstMsg)
+    // console.log('Chat.js:108-->',firstMsg)
     if (firstMsg) {
       actions.changeMessage(firstMsg);
     } else {
@@ -181,9 +183,15 @@ class Chat extends Component {
        const {activeChannel, actions, messages} = this.props;
        const filtered = messages.filter(message => (message.source && message.source.channel === activeChannel.name))
        const activeMsg = filtered[0]
+       //switch local state
        this.setState({resolved: !this.state.resolved})
-       var identifier = {id: activeChannel.id, properties: [{resolved: !activeMsg.resolved }]}
+       
+       //update message: if ticket not open create ticket id and set boolean, if already open set it to false
+       activeMsg.thread.ticket = (activeMsg.thread.ticket && activeMsg.thread.ticket.isOpen) ? { id: activeMsg.thread.ticket.id, isOpen: false } :{ id: shortid.generate(), isOpen: true };
+       var identifier = {id: activeChannel.id, properties: [{thread: activeMsg.thread }]}
        actions.setMessageProperty(identifier)
+       
+       //change resolved status of channel
        let tempChannel = activeChannel
        tempChannel.resolved = !tempChannel.resolved
        actions.resolveChannel(tempChannel)
@@ -217,7 +225,7 @@ class Chat extends Component {
 
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
+    const filteredMessages = messages.filter(message => (message.source && message.source.channel === activeChannel.name)).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
     const username = this.props.user.username;
     const resolved = this.state.resolved
     const stream = this.state.stream

@@ -182,7 +182,6 @@ class DynamicForm extends Component {
             newQuery.source.origin = 'supervisor'
             newQuery.flags = {}
             newQuery.flags.toCinna = true
-            newQuery.parent = false
             newQuery.client_res = []
             socket.emit('new message', newQuery);
             this.setState({
@@ -216,7 +215,6 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    newQuery.parent = false
     console.log('Form.js 209 : newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
@@ -244,7 +242,6 @@ class DynamicForm extends Component {
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.parent = false
     newQuery.dataModify = { type: '', val: []}
     if (this.state.color) {
       newQuery.dataModify.type = 'color'
@@ -322,7 +319,6 @@ class DynamicForm extends Component {
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.parent = false
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
