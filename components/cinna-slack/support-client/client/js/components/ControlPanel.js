@@ -271,9 +271,10 @@ class ControlPanel extends Component {
   }
 
 
-  handleMouseUp(selectedBool, index) {
+  handleMouseUp(index) {
     const { items } = this.state;
     let selectedIndex = findIndex(items, function(o) { return o.index == index })
+
     this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
   }
 
@@ -325,7 +326,7 @@ class ControlPanel extends Component {
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
                 <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div> 
-                      <DraggableList ref='draggableList'  mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
+                      <DraggableList ref='draggableList'  selected={this.state.selected} mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>
          </div>

@@ -371,9 +371,25 @@ span[class*="glyphicon-one-fine"] {
     top: 0;
     left: 0;
   }
-
-
   /*end draggablelist*/
+
+ .beingDragged {
+      scale: spring(1.1, springConfig),
+      shadow: spring(16, springConfig),
+      y: mouse,
+      textAlign: 'center'
+  }
+.selectedItem {
+      background: 'red';
+      background-color: rgb(255, 255, 255);
+  } 
+.previewing {
+        scale: spring(1, springConfig),
+        shadow: spring(1, springConfig),
+        y: (spring(-600, springConfig)) : (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)), 
+        textAlign: 'center'
+      };
+
 
 /*checkbox*/
 /* $activeColor: #c0392b; //red */

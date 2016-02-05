@@ -477,15 +477,17 @@ function incomingAction(data){
    
 
     //save a new message obj
-    history.saveHistory(data,true); //saving incoming message
+    history.saveHistory(data,true,function(res){
+         //---supervisor stuff---//
+        if (data.bucket === 'response') {
+                return sendResponse(data)
+             }
+        // console.log('Supervisor: 372 ',data)
+        supervisor.emit(res, true)
+        //----------------------//        
+    }); //saving incoming message
     
-     //---supervisor stuff---//
-    if (data.bucket === 'response') {
-            return sendResponse(data)
-         }
-    // console.log('Supervisor: 372 ',data)
-    supervisor.emit(data, true)
-    //----------------------//
+
     
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -856,7 +858,9 @@ var sendResponse = function(data){
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
-        history.saveHistory(data,false); //saving outgoing message
+        history.saveHistory(data,false,function(res){
+            //whatever
+        }); //saving outgoing message
         //});        
     }
     else {

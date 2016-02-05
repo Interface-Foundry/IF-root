@@ -12,7 +12,7 @@ process.on('uncaughtException', function (err) {
 });
 
 
-var saveHistory = function(data,incoming) { //incoming == 1 or 0
+var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
 
     ///// CREATING THREAD //////
     if (data.bucket == 'search'){
@@ -22,6 +22,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                 closeSearchThread(data); //will close a previous thread
                 newParentItem(function(res){
                     data.thread = res;
+                    callbackZZ(data);
                     continueSaving();
                 });
             }   
@@ -31,6 +32,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                 if (data.thread){
                     newChildItem(data,function(res){
                         data.thread = res;
+                        callbackZZ(data);
                         continueSaving();
                     });
                 }else {
@@ -38,6 +40,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                     closeSearchThread(data); 
                     newParentItem(function(res){
                         data.thread = res;
+                        callbackZZ(data);
                         continueSaving();
                     });
                 }
@@ -53,6 +56,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                 //recallHist found in data                
                 newChildItem(data,function(res){
                     data.thread = res;
+                    callbackZZ(data);
                     continueSaving();
                 });
             }else {
@@ -64,6 +68,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                         data.recallHistory = recalled;
                         newChildItem(data,function(res){
                             data.thread = res;
+                            callbackZZ(data);
                             continueSaving();
                         });
                     }
@@ -72,6 +77,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
                         closeSearchThread(data); 
                         newParentItem(function(res){
                             data.thread = res;
+                            callbackZZ(data);
                             continueSaving();
                         });                        
                     }
@@ -95,6 +101,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
             closeSearchThread(data); //will close a previous thread
             newParentItem(function(res){
                 data.thread = res;
+                callbackZZ(data);
                 continueSaving();
             });
         }   
@@ -103,6 +110,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
         else if (incoming == false){
             newChildItem(data,function(res){
                 data.thread = res;
+                callbackZZ(data);
                 continueSaving();
             });
         }            
@@ -116,6 +124,7 @@ var saveHistory = function(data,incoming) { //incoming == 1 or 0
 
 
     function continueSaving(){
+
         if (!data.source.id){
             console.log('error: missing source.id');
         }
