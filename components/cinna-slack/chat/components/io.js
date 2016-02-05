@@ -14,6 +14,7 @@ var nlp = require('../../nlp/api');
 
 //set env vars
 var config = require('config');
+var mailerTransport = require('../../../IF_mail/IF_mail.js');
 
 //load mongoose models
 var db = require('db');
@@ -222,6 +223,23 @@ function loadSlackUsers(users){
                     }                    
                 }
             });
+
+            //if slack connection fails, we should restart connection
+            slackUsers[user.team_id].on('close', function(res) { //on bot message
+                console.log('Warning: Slack connection closed: ',res);
+                var mailOptions = {
+                    to: 'Kip Server <hello@kipthis.com>',
+                    from: 'Kip Server Status <server@kipthis.com>',
+                    subject: 'Slack disconnected!',
+                    text: 'Fix this ok thx: '+ JSON.stringify(res);
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) console.log(err);
+                    console.log('Server status email sent. Now restarting server.');
+                    process.exit(1);
+                });
+            });
+
         });
 
         callback();
