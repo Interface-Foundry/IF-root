@@ -231,7 +231,7 @@ function loadSlackUsers(users){
                     to: 'Kip Server <hello@kipthis.com>',
                     from: 'Kip Server Status <server@kipthis.com>',
                     subject: 'Slack disconnected!',
-                    text: 'Fix this ok thx: '+ JSON.stringify(res);
+                    text: 'Fix this ok thx: '+ JSON.stringify(res)
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
                     if (err) console.log(err);
