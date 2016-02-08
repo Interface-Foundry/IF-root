@@ -276,6 +276,9 @@ class ControlPanel extends Component {
     let selectedIndex = findIndex(items, function(o) { return o.index == index })
 
     this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
+    // this.refs.draggableList.handleMouseDown()
+    // this.refs.draggableList.handleMouseUp()
+    console.log('this.refs.draggableList: ', this.refs.draggableList)
   }
 
   renderItem(index, key) {

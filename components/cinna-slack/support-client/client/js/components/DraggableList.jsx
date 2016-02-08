@@ -94,7 +94,7 @@ const DraggableList = React.createClass({
       switching: false,
       previewing: false,
       mounted: false,
-      flag: null,
+      flag: 0,
       selectedIndex : null
     };
   },
@@ -143,13 +143,11 @@ const DraggableList = React.createClass({
       const mouse = pageY - delta;
       const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
       this.props.mouseMove(lastPressed, row)
-      this.setState({mouse: mouse, flag: 1, lastPressed: row});
-      if (this.props.selected && this.props.selected.name && delta !== 0) {
-        this.setState({selectedIndex: row})
-        console.log('drag: ',mouse,row, selectedIndex, flag)
-      }
-      
-      
+      this.setState({mouse: mouse, flag:1});
+      // if (this.props.selected && this.props.selected.name && delta !== 0) {
+      //   this.setState({selectedIndex: row})
+      //   console.log('drag: ',mouse,row, selectedIndex, flag)
+      // }
     }
   },
 
@@ -158,12 +156,11 @@ const DraggableList = React.createClass({
     //TEST THIS OUT: supposed to keep item floated if the item order hasn't changed - 
     const mouse = pageY - delta;
     const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
-    // console.log('149:',lastPressed, row, delta)
-
     this.setState({isPressed: false, delta: 0}); 
-    if (lastPressed === row && delta !== 0){
+    console.log('pre click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
+    if (flag === 0 && delta !== 0 ){
       // this.state.order[lastPressed].selected = this.state.order[lastPressed].selected  ? !this.state.order[lastPressed].selected : true
-      console.log('click: ',lastPressed, row, flag)
+      console.log('click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
       this.setState({selectedIndex: lastPressed})
       this.props.mouseUp(lastPressed)
     }
@@ -178,19 +175,21 @@ const DraggableList = React.createClass({
      
         { mounted ? items.slice(0,10).map( (item, index) => {
           const style = ((lastPressed === item.index && isPressed)
-           || (index === selectedIndex)
+           // || (index === selectedIndex)
            )
             ? {
                 scale: spring(1.1, springConfig),
                 shadow: spring(16, springConfig),
-                y: (index === selectedIndex ? (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)) : mouse),
+                y: mouse,
+                // y: (index === selectedIndex ? (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)) : mouse),
                 textAlign: 'center'
               }
             : {
                 scale: spring(1, springConfig),
                 shadow: spring(1, springConfig),
                 y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)), 
-                textAlign: 'center'
+                textAlign: 'center',
+                border: index === selectedIndex ?  '3px solid blue' : 'none'
               };
           return (
           
