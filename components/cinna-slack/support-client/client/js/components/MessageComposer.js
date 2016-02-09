@@ -75,6 +75,7 @@ class MessageComposer extends Component {
   }
   
   render() {
+    const disabled = this.props.resolved ? true : false
     return (
       <div style={{
         zIndex: '52',
@@ -99,6 +100,7 @@ class MessageComposer extends Component {
           value={this.state.text}
           onChange={::this.handleChange}
           onKeyDown={::this.handleSubmit}
+          disabled= {disabled}
         />
       </div>
     );

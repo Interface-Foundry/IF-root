@@ -86,13 +86,13 @@ class Chat extends Component {
 
        //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
       if (  self.refs.cpanel.refs.child.refs.toggle && channels.next.resolved ===  self.refs.cpanel.refs.child.refs.toggle.state.checked) {
-        console.log('Case 1 Toggle and Channel Resolved Not in Sync:  nextchan: ', channels.next.resolved ,'toggle:' ,self.refs.cpanel.refs.child.refs.toggle.state.checked)
+        // console.log('Case 1 Toggle and Channel Resolved Not in Sync:  nextchan: ', channels.next.resolved ,'toggle:' ,self.refs.cpanel.refs.child.refs.toggle.state.checked)
                   self.handleToggleChange()
       }
       else if (self.refs.cpanel.refs.child.refs.toggle && channels.next.resolved !==  self.refs.cpanel.refs.child.refs.toggle.state.checked){
-          console.log('Case 2 Toggle and Channel Resolved in Sync:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
+          // console.log('Case 2 Toggle and Channel Resolved in Sync:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
       } else {
-        console.log('Case 3:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
+        // console.log('Case 3:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
       }
 
       let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
@@ -198,11 +198,11 @@ class Chat extends Component {
        const filtered = messages.filter(message => (message.source && message.source.channel === activeChannel.name))
        const activeMsg = filtered[0]
        if (this.state.autoToggled) {
-        console.log('handleModeChange DENIED')
+        // console.log('handleModeChange DENIED')
         this.setState({autoToggled: false})
         return
        }
-       console.log('handleModeChange fired')
+       // console.log('handleModeChange fired')
        //switch local state
        // this.setState({resolved: !this.state.resolved})
        
@@ -219,7 +219,7 @@ class Chat extends Component {
   }
 
   handleToggleChange() {
-    console.log('hangleToggleChange fired')
+    // console.log('hangleToggleChange fired')
     this.setState({autoToggled: true})
     this.refs.cpanel.refs.child.refs.toggle.handleClick('forced')
     
@@ -246,7 +246,7 @@ class Chat extends Component {
                         filteredMessages.map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                           )
-    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br /> resolved: {resolved ? 'TRUE' : 'FALSE'}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
+    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br/></div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
     const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     return (

@@ -28,7 +28,6 @@ var searchSimilar = function(data){
         searchModify(data);
     }
     else if (data.recallHistory && data.recallHistory.amazon){
-        console.log('TING TANG WALLAWALLA BING BANG',data)
         searchAmazon(data,'similar','none','null');
     }
     else {
@@ -431,6 +430,7 @@ var searchAmazon = function(data, type, query, flag) {
                     var IdArray = [];
                     for (var i = 0; i < data.searchSelect.length; i++) { //match item choices to product IDs
                         var searchNum = data.searchSelect[i];
+                        // console.log('searchNum:', searchNum,'recallhistory.amazon:',data.recallHistory.amazon)
                         IdArray.push(data.recallHistory.amazon[searchNum - 1].ASIN[0]);
                     }
                     var ItemIdString = IdArray.toString();
@@ -489,6 +489,13 @@ var searchAmazon = function(data, type, query, flag) {
                         console.log('amazon err ',err[0].Error[0]);
                         console.log('SIMILAR FAILED: should we fire random query or mod query');
 
+                         //----supervisor: adding flag to variable since it is overwitten in the HACK code below ---//
+                        console.log('Mitsu search.js493: ',data)
+                        var flags = null
+                        if (data.flags && data.flags.toCinna) {
+                            flags = data.flags
+                        }
+                        //------------------------------------------------------------------------------------------//
                         var cSearch = '';
                         var itemAttrib = data.recallHistory.amazon[data.searchSelect - 1].ItemAttributes; //get selected item attributes
 
@@ -508,6 +515,11 @@ var searchAmazon = function(data, type, query, flag) {
                         console.log('BS string ugh ',cSearch);
 
                         data = data.recallHistory; //HACK!!!!!!
+                        //----supervisor: re-adding back flag from above var ---//
+                        if (flags) {
+                           data.flags = flags
+                        }
+                        //------------------------------------------------------------------------------------------//
                         data.tokens = [];
                         data.tokens.push(cSearch);
                         searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead

@@ -226,8 +226,14 @@ class ControlPanel extends Component {
 
   sendCommand(newMessage) {
     const { activeChannel, activeMessage,actions } = this.props
+    newMessage.source.org = activeChannel.id.split('_')[0]
+    newMessage.flags = {toClient: true}
+    newMessage.amazon = this.state.items
+    newMessage.msg = 'Here are some options you might like'
+    newMessage.client_res[0] = 'Here are some options you might like'
+    console.log('Cpanel229: Send Command: ', newMessage)
     socket.emit('new message', newMessage);
-    UserAPIUtils.createMessage(newMessage);
+    // UserAPIUtils.createMessage(newMessage);
   }
 
    moveCard(dragIndex, hoverIndex) {
@@ -292,6 +298,9 @@ class ControlPanel extends Component {
      const self = this;
      const { items,selected } = this.state;
      const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
+     const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
+     const statusStyle = activeChannel.resolved ?  { fontSize:'1.3em' ,color: 'green'} : { fontSize:'1.3em',color: 'red'}
+     const sendDisabled = activeChannel.resolved ? true : false
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
@@ -302,7 +311,7 @@ class ControlPanel extends Component {
                   ref='toggle'
                   defaultChecked={this.props.resolved}
                   onChange={ () => { changeMode(activeChannel) }} />
-                  <span style={{fontSize:'1.3em'}}> OPEN TICKET</span>
+                  <span style={statusStyle}>  {statusText}</span>
               </label>
 
             <DynamicForm
@@ -312,13 +321,13 @@ class ControlPanel extends Component {
           </section>
 
 
-              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} disabled={sendDisabled} >
                       Send Command
               </Button>
           </div>
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div> 
+                <div style={{textAlign: 'left', fontSize:'1.1em'}}> {(this.state.selected && this.state.selected.name) ? this.state.selected.name: 'none selected'} </div> 
                       <DraggableList ref='draggableList'  selected={this.state.selected} mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>

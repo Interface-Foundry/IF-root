@@ -498,7 +498,7 @@ function incomingAction(data){
     //save a new message obj
     history.saveHistory(data,true,function(res){
          //---supervisor stuff---//
-        if (data.bucket === 'response') {
+        if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
                 return sendResponse(data)
              }
         // console.log('Supervisor: 372 ',data)
@@ -747,7 +747,7 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.flags = {searchResults: true}
-                // console.log('Supervisor: 610 ',data)
+                console.log('Supervisor: 610 ',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -865,7 +865,7 @@ var sendResponse = function(data){
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
        data.flags = {searchResults: true}
-        // console.log('Supervisor: 728', data)
+        console.log('Supervisor: 728', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//

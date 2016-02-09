@@ -73,7 +73,7 @@ function emitBoth(data) {
     source: {
       origin: 'socket.io',
       channel: data.source.channel,
-      org: 'kip',
+      org: data.source.id.split('_')[0],
       id: data.source.id
     },
     client_res: [],
