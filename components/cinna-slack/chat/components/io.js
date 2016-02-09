@@ -474,8 +474,9 @@ function routeNLP(data){
 function incomingAction(data){
 
 
-   
-
+    if (data.bucket === 'response') {
+                return sendResponse(data)
+             }
     //save a new message obj
     history.saveHistory(data,true,function(res){
          //---supervisor stuff---//
@@ -736,7 +737,7 @@ var sendResponse = function(data){
             console.log('error: socket io channel missing', data);
         }
     }
-    else if (data.source.channel && data.source.origin == 'slack'){
+    else if (data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
 
         //eventually cinna can change emotions in this pic based on response type
@@ -839,7 +840,7 @@ var sendResponse = function(data){
 
 
         }else {
-            console.log('error: slackUsers channel missing');
+            console.log('error: slackUsers channel missing', slackUsers);
         }
     }
      //---supervisor: relay search result previews back to supervisor---//

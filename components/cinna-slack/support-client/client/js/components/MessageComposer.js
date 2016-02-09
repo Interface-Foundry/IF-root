@@ -31,15 +31,16 @@ class MessageComposer extends Component {
         let thread = activeMsg.thread
         thread.parent.id = activeMsg.thread.id
         thread.parent.isParent = false;
-        thread.sequence = activeMsg.thread + 1
+        thread.sequence = parseInt(activeMsg.thread + 1)
         var newMessage = {
             id: messages.length,
             msg: text,
+            client_res: [text],
             incoming: false,
             source: {
-                origin: 'socket.io',
+                origin: 'slack',
                 channel: activeChannel.name,
-                org: 'kip',
+                org: activeChannel.id.split('_')[0],
                 id: activeChannel.id
             },
             bucket: 'response',
@@ -58,7 +59,7 @@ class MessageComposer extends Component {
         });
         socket.emit('stop typing');
     }
-}
+  }
   handleChange(event) {
     const { resolved } = this.props
     if (resolved) return

@@ -33,7 +33,7 @@ class Chat extends Component {
      constructor (props, context) {
       super(props, context)
       this.state = {
-        resolved: null,
+        autoToggled: false,
         stream: false
       }
     }
@@ -83,8 +83,21 @@ class Chat extends Component {
     socket.on('change channel bc', function(channels) {
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const nextmsg = filtered[0]
-      let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.isOpen) ? false : true;
-      self.setState({ resolved: resolved })
+
+       //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
+      if (  self.refs.cpanel.refs.child.refs.toggle && channels.next.resolved ===  self.refs.cpanel.refs.child.refs.toggle.state.checked) {
+        console.log('Case 1 Toggle and Channel Resolved Not in Sync:  nextchan: ', channels.next.resolved ,'toggle:' ,self.refs.cpanel.refs.child.refs.toggle.state.checked)
+                  self.handleToggleChange()
+      }
+      else if (self.refs.cpanel.refs.child.refs.toggle && channels.next.resolved !==  self.refs.cpanel.refs.child.refs.toggle.state.checked){
+          console.log('Case 2 Toggle and Channel Resolved in Sync:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
+      } else {
+        console.log('Case 3:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
+      }
+
+      let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
+
+      self.setState({ resolved: channels.next.resolved })
       // console.log('Chat84',channels, self.state)
 
     })
@@ -94,6 +107,7 @@ class Chat extends Component {
     const { actions, activeChannel } = this.props;
     // console.log('firing changeactivechannel');
     if (channel) {
+      if (channel.name === activeChannel.name) return
       var channels = { prev: {}, next:{}}
       channels.prev =  Object.assign({}, activeChannel);
       channels.next = Object.assign({}, channel)
@@ -183,11 +197,17 @@ class Chat extends Component {
        const {activeChannel, actions, messages} = this.props;
        const filtered = messages.filter(message => (message.source && message.source.channel === activeChannel.name))
        const activeMsg = filtered[0]
+       if (this.state.autoToggled) {
+        console.log('handleModeChange DENIED')
+        this.setState({autoToggled: false})
+        return
+       }
+       console.log('handleModeChange fired')
        //switch local state
-       this.setState({resolved: !this.state.resolved})
+       // this.setState({resolved: !this.state.resolved})
        
-       //update message: if ticket not open create ticket id and set boolean, if already open set it to false
-       activeMsg.thread.ticket = (activeMsg.thread.ticket && activeMsg.thread.ticket.isOpen) ? { id: activeMsg.thread.ticket.id, isOpen: false } :{ id: shortid.generate(), isOpen: true };
+       //update message
+       activeMsg.thread.ticket = (activeMsg.thread.ticket && activeMsg.thread.ticket.isOpen) ? { id: activeMsg.thread.ticket.id, isOpen: false } :{ id: (activeMsg.thread.ticket && activeMsg.thread.ticket.id ? activeMsg.thread.ticket.id : shortid.generate()), isOpen: true };
        var identifier = {id: activeChannel.id, properties: [{thread: activeMsg.thread }]}
        actions.setMessageProperty(identifier)
        
@@ -196,38 +216,27 @@ class Chat extends Component {
        tempChannel.resolved = !tempChannel.resolved
        actions.resolveChannel(tempChannel)
        this.refs.channelsref.forceUpdate()
-       //Change resolved property for parent and all child messages
-        // const resolveMessageInState = function(msg) {
-        //   return new Promise(function(resolve, reject) {
-        //     var identifier = {id: activeChannel.id, properties: []} 
-        //     identifier.properties.push({ resolved : this.state.resolved})
-        //     actions.setMessageProperty(identifier)
-        //     msg.resolved = this.state.resolved
-        //     return resolve(msg);
-        //     });
-        //  };
-        // filtered.reduce(function(sequence, msg) {
-        //   return sequence.then(function() {
-        //     return resolveMessageInState(msg);
-        //   }).then(function(msg) {
-         
-        //   });
-        // }, Promise.resolve());
   }
 
-  toggleStream()  {
+  handleToggleChange() {
+    console.log('hangleToggleChange fired')
+    this.setState({autoToggled: true})
+    this.refs.cpanel.refs.child.refs.toggle.handleClick('forced')
+    
+  }
+
+
+  toggleStream() {
     let current = this.state.stream
      this.setState({stream: !current});
      // window.scrollTo(0, window.innerHeight);
   }
 
-
-
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => (message.source && message.source.channel === activeChannel.name)).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
     const username = this.props.user.username;
-    const resolved = this.state.resolved
+    const resolved = activeChannel.resolved
     const stream = this.state.stream
     const displayMessages = this.state.stream ?   
                        messages.slice(messages.length-15,messages.length).map(message =>
@@ -275,7 +284,7 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
-              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} />
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
             </div>
           </div>
         

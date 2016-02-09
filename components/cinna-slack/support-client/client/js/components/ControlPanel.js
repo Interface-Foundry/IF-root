@@ -107,13 +107,6 @@ class ControlPanel extends Component {
     const firstMsg = filtered[0]
     const firstMsgOld = filteredOld[0]
 
-    //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
-    if ( self.refs.toggle && (firstMsg.thread.ticket && firstMsg.thread.ticket.isOpen) && self.refs.toggle.state.checked === true) {
-      self.refs.toggle.handleClick('forced')
-    } else if (self.refs.toggle && (!firstMsg.thread.ticket || (firstMsg.thread.ticket && !firstMsg.thread.ticket.isOpen)) && self.refs.toggle.state.checked === false) {
-      self.refs.toggle.handleClick('forced')
-    }
-
     //Reset selected state
      self.setState({ selected: {name: null, index: null}})
 
@@ -153,12 +146,12 @@ class ControlPanel extends Component {
         console.log('CPanel Error 169 Could not get results :',err)
         return
       }
-      console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
+      // console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
       if (nextItems.length > 0) {
-         console.log(0)
+         // console.log(0)
         self.setState({ items: nextItems })
       } else {
-        console.log(1)
+        // console.log(1)
         self.setState({items: [{
         id: 'product-0',
         name: 'Product 0',
@@ -276,9 +269,6 @@ class ControlPanel extends Component {
     let selectedIndex = findIndex(items, function(o) { return o.index == index })
 
     this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
-    // this.refs.draggableList.handleMouseDown()
-    // this.refs.draggableList.handleMouseUp()
-    console.log('this.refs.draggableList: ', this.refs.draggableList)
   }
 
   renderItem(index, key) {
@@ -311,8 +301,8 @@ class ControlPanel extends Component {
                 <Toggle
                   ref='toggle'
                   defaultChecked={this.props.resolved}
-                  onChange={ () => { changeMode(this) }} />
-                  <span style={{fontSize:'1.3em'}}> INTERACT MODE</span>
+                  onChange={ () => { changeMode(activeChannel) }} />
+                  <span style={{fontSize:'1.3em'}}> OPEN TICKET</span>
               </label>
 
             <DynamicForm

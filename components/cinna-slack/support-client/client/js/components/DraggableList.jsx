@@ -157,10 +157,10 @@ const DraggableList = React.createClass({
     const mouse = pageY - delta;
     const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
     this.setState({isPressed: false, delta: 0}); 
-    console.log('pre click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
+    // console.log('pre click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
     if (flag === 0 && delta !== 0 ){
       // this.state.order[lastPressed].selected = this.state.order[lastPressed].selected  ? !this.state.order[lastPressed].selected : true
-      console.log('click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
+      // console.log('click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
       this.setState({selectedIndex: lastPressed})
       this.props.mouseUp(lastPressed)
     }
@@ -174,23 +174,29 @@ const DraggableList = React.createClass({
       <div className="demo8">
      
         { mounted ? items.slice(0,10).map( (item, index) => {
-          const style = ((lastPressed === item.index && isPressed)
-           // || (index === selectedIndex)
-           )
-            ? {
+          const styleState = (lastPressed === item.index && isPressed) ? 'beingDragged' : ((index === selectedIndex) ? 'beingSelected' : 'beingDefault')
+          let style = {}
+          switch (styleState) {
+            case 'beingDragged':
+              style = {
                 scale: spring(1.1, springConfig),
                 shadow: spring(16, springConfig),
                 y: mouse,
                 // y: (index === selectedIndex ? (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)) : mouse),
-                textAlign: 'center'
+                textAlign: 'center',
+                backgroundColor: (index === selectedIndex) ?  'blue' : 'none'
               }
-            : {
+              break;
+            case 'beingSelected':
+            default:
+              style = {
                 scale: spring(1, springConfig),
                 shadow: spring(1, springConfig),
                 y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)), 
                 textAlign: 'center',
-                border: index === selectedIndex ?  '3px solid blue' : 'none'
-              };
+                backgroundColor: (index === selectedIndex) ?  'blue' : 'none'
+              }
+          }
           return (
           
             <Motion style={style} key={item.index}>
