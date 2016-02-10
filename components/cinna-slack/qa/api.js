@@ -12,7 +12,7 @@ const VEC_SIZE = 300;
 //  an embedding which is a unit vector from doc2vec
 const defaultSentence = {
   string: '',
-  embedding: Array.apply(null, Array(VEC_SIZE)).map(function(){ return 0 })
+  embedding: Array.apply(null, Array(VEC_SIZE)).map( () => 0)
 }
 
 // struct for sources from which we find answers to questions posed by users.
@@ -78,18 +78,18 @@ function getAmazonStuff(url, callback) {
   debug(url);
   amazonHTML.basic(url, function (err, product) {
     debug('got product from amazonHTML')
-    if (kip.err(err) || !product) {
+    if (kip.err(err) || !product || !product.asin) {
       console.error('could not get product for url ' + url);
       return callback(null, defaultSource)
     }
 
     // split the description text into sentences
     var desc = (product.text || '')
-      .replace(/[.]/g, '.')
-      .split(/[]/);
+      .replace(/\.\.\./g, '.')
+      .split(/[.!?]/);
 
     var source = _.merge({}, {descriptionSentences: desc})
-    amazonHTML.qa(url, function(err, qa) {
+    amazonHTML.qa(product.asin, function(err, qa) {
       if(kip.err(err)) {
         return callback(null, source)
       }

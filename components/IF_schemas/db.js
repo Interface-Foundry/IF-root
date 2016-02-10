@@ -82,6 +82,10 @@ var schemas = [{
     single: 'Metric',
     plural: 'Metrics'
 }, {
+    filename: 'product_schema',
+    single: 'Product',
+    plural: 'Products'
+}, {
     filename: 'project_schema',
     single: 'Project',
     plural: 'Projects'
