@@ -282,7 +282,7 @@ var loadSocketIO = function(server){
         });
 
         socket.on("msgFromSever", function(data) {
-            console.log('Received message from supervisor', data)
+            console.log('\n\n\nReceived message from supervisor: ',data,data.flags,'\n\n\n')
             incomingAction(data);
         })
     }); 
@@ -491,21 +491,19 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
-
-    if (data.bucket === 'response') {
-                return sendResponse(data)
+//------------------------supervisor stuff-----------------------------------//
+      if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
+                if (data.bucket === 'response') {
+                    return sendResponse(data)
+                } else {
+                    return outgoingResponse(data,'stitch','amazon');
+                }
              }
-    //save a new message obj
     history.saveHistory(data,true,function(res){
-         //---supervisor stuff---//
-        if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
-                return sendResponse(data)
-             }
-        // console.log('Supervisor: 372 ',data)
         supervisor.emit(res, true)
-        //----------------------//        
-    }); //saving incoming message
-    
+    }); 
+//---------------------------------------------------------------------------//        
+
 
     
     //sort context bucket (search vs. banter vs. purchase)
@@ -662,11 +660,11 @@ var sendTxtResponse = function(data,msg){
 }
 
 //Constructing reply to user
-var outgoingResponse = function(data,action,source){ //what we're replying to user with
+var outgoingResponse = function(data,action,source){ //what we're replying to user with 
+// console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(url){
-
             //sending out stitched image response
             data.client_res = [];
             data.urlShorten = [];
@@ -680,9 +678,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                     async.eachSeries(res, function(i, callback) {
                         data.urlShorten.push(i);//save shortened URLs
                         processData.getNumEmoji(data,count+1,function(emoji){
-
                             res[count] = res[count].trim(); 
-                            //MITSU: Note to self - check this out for slack messages 
                             if (data.source.origin == 'slack'){
                                 data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             }else if (data.source.origin == 'socket.io'){
@@ -724,9 +720,12 @@ var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
             data.client_res.unshift(res); // add to beginning of message
+             console.log('mitsu6')
+
             sendResponse(data);
         }
         else {
+             console.log('mitsu7', res)
             sendResponse(data);
         }
     });            
@@ -747,7 +746,7 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.flags = {searchResults: true}
-                console.log('Supervisor: 610 ',data)
+                // console.log('Supervisor: 610 ',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -865,7 +864,7 @@ var sendResponse = function(data){
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
        data.flags = {searchResults: true}
-        console.log('Supervisor: 728', data)
+        // console.log('Supervisor: 728', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//

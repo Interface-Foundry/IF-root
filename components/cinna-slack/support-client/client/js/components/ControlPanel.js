@@ -36,7 +36,6 @@ class ControlPanel extends Component {
     static propTypes = {
         activeControl: PropTypes.object.isRequired,
         activeChannel: PropTypes.object.isRequired,
-        activeMessage: PropTypes.object.isRequired,
         messages: PropTypes.array.isRequired,
         onSubmit: PropTypes.func.isRequired ,
         actions: PropTypes.object.isRequired
@@ -56,11 +55,10 @@ class ControlPanel extends Component {
   }
 
   componentDidMount() {
-    const {actions, activeChannel, activeMessage, messages, resolved} = this.props;
+    const {actions, activeChannel, messages, resolved} = this.props;
     const self = this
      self.setState({ mounted: true });
      socket.on('results', function (msg) {
-      
       //enable react-motion animation
       self.refs.draggableList.setState({previewing: true})
 
@@ -81,6 +79,9 @@ class ControlPanel extends Component {
         console.log('CPanel Error 114 Could not get results :',err)
         return
       }
+     
+      self.setState({rawAmazonResults:msg.amazon})
+
       var identifier = {id: msg.source.id, properties: []}
       for (var key in msg) {
         if ((key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
@@ -95,16 +96,18 @@ class ControlPanel extends Component {
         actions.setMessageProperty(identifier)
       }
 
-       setTimeout(function(){
+      setTimeout(function(){
          self.refs.draggableList.setState({previewing: false})
       }, 1000)
+      
+      
 
     })
 
    socket.on('change channel bc', function(channels) {
-    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
+    // const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
-    const firstMsg = filtered[0]
+    const firstMsg = self.props.activeMsg
     const firstMsgOld = filteredOld[0]
 
     //Reset selected state
@@ -218,21 +221,21 @@ class ControlPanel extends Component {
     })
   }
 
-  componentDidUpdate() {
-      const {activeMessage} = this.props;
-      const self = this;
-    
-  }
-
   sendCommand(newMessage) {
-    const { activeChannel, activeMessage,actions } = this.props
+    const { activeChannel, actions } = this.props
     newMessage.source.org = activeChannel.id.split('_')[0]
     newMessage.flags = {toClient: true}
-    newMessage.amazon = this.state.items
-    newMessage.msg = 'Here are some options you might like'
-    newMessage.client_res[0] = 'Here are some options you might like'
-    console.log('Cpanel229: Send Command: ', newMessage)
+    newMessage.amazon = this.state.rawAmazonResults ? this.state.rawAmazonResults : null
+    newMessage.source.origin = 'slack'
+    // console.log('Cpanel229: Send Command: ', newMessage)
+    if (newMessage.amazon === null) return
+
     socket.emit('new message', newMessage);
+    this.setState({sendingToClient: true})
+    const self = this
+    setTimeout(function(){
+          self.setState({sendingToClient: false})
+    }, 1500)
     // UserAPIUtils.createMessage(newMessage);
   }
 
@@ -293,14 +296,14 @@ class ControlPanel extends Component {
     }
 
   render() {
-     const { activeControl, activeMessage, activeChannel, messages,actions,changeMode} = this.props;
+     const { activeMsg, activeControl, activeChannel, messages,actions,changeMode} = this.props;
      const fields  = ['msg','bucket','action']
      const self = this;
      const { items,selected } = this.state;
      const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
      const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
      const statusStyle = activeChannel.resolved ?  { fontSize:'1.3em' ,color: 'green'} : { fontSize:'1.3em',color: 'red'}
-     const sendDisabled = activeChannel.resolved ? true : false
+     const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
@@ -316,12 +319,12 @@ class ControlPanel extends Component {
 
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
-              fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
+              fields={fields} selected={selected} activeMsg={activeMsg} activeChannel={activeChannel} messages={messages} actions={actions} />
           </div>   
           </section>
 
 
-              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} disabled={sendDisabled} >
+              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
                       Send Command
               </Button>
           </div>

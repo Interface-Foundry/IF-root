@@ -28,7 +28,7 @@ function emit(data, newmessage) {
 }
 //Used for banter or returning result set to supervisor
 function emitMsg(data) {
- console.log('emitting message', data)
+ // console.log('\n\n\nEmitting message\n\n\n')
  ioClient.emit('new message', data)
 }
 
@@ -37,7 +37,7 @@ function emitBoth(data) {
   //Prevent the dreaded infinite loop
   if (data.flags && data.flags.toCinna) return
   
-  console.log('emitting both', data.thread)
+  // console.log('\n\n\nEmitting both\n\n\n')
   
   var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new channel', {

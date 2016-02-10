@@ -8,7 +8,6 @@ class MessageComposer extends Component {
 
   static propTypes = {
     activeChannel: PropTypes.object.isRequired,
-    activeMessage: PropTypes.object.isRequired,
     onSave: PropTypes.func.isRequired,
     user: PropTypes.string.isRequired,
     messages:  PropTypes.array.isRequired
@@ -22,10 +21,9 @@ class MessageComposer extends Component {
   }
   handleSubmit(event) {
     const {
-        user, activeChannel, activeMessage, messages, resolved
+        user, activeChannel, activeMsg, messages, resolved
     } = this.props;
     const text = event.target.value.trim();
-    const activeMsg = messages.filter(message => message.source).filter(message => (message.source && message.source.channel === activeChannel.name))[0]
     if (event.which === 13 && !resolved) {
         event.preventDefault();
         let thread = activeMsg.thread

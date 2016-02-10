@@ -235,6 +235,7 @@ class Chat extends Component {
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => (message.source && message.source.channel === activeChannel.name)).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
+    const activeMsg =  messages.filter(message => (message.source && message.source.channel === activeChannel.name))[0]
     const username = this.props.user.username;
     const resolved = activeChannel.resolved
     const stream = this.state.stream
@@ -284,7 +285,7 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
-              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
             </div>
           </div>
         
@@ -292,7 +293,7 @@ class Chat extends Component {
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
         <div style= {streamDisplay}>
-          <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} stream={stream} />
+          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} stream={stream} />
         </div>  
           {typers.length === 1 &&
             <div>
