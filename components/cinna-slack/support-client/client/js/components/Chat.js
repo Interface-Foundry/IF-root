@@ -10,6 +10,8 @@ import TypingListItem from './TypingListItem';
 const socket = io();
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
+import shortid from 'shortid';
+
 
 
 class Chat extends Component {
@@ -31,7 +33,7 @@ class Chat extends Component {
      constructor (props, context) {
       super(props, context)
       this.state = {
-        resolved: null,
+        autoToggled: false,
         stream: false
       }
     }
@@ -44,7 +46,7 @@ class Chat extends Component {
       console.log('change state event received', state)
        var identifier = {id: state.id, properties: []}
       for (var key in state) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'resolved' || key == 'amazon') && state[key] !== '' ) {
+        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'thread' || key == 'amazon') && state[key] !== '' ) {
           identifier.properties.push({ [key] : state[key]})
         }
       }  
@@ -61,9 +63,9 @@ class Chat extends Component {
     socket.on('new bc message', function(msg) {      
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
-      msg.parent = (filtered.length > 0) ?  false : true
-      msg.resolved = (filtered.length > 0) ? filtered[0].resolved : ((msg.bucket === 'supervisor') ? false : true) 
-      console.log('Chat67:', filtered, self.props.messages,msg)
+      // msg.parent = (filtered.length > 0) ?  false : true
+      // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
+      // console.log('Chat67:', filtered, self.props.messages,msg)
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>
@@ -81,7 +83,21 @@ class Chat extends Component {
     socket.on('change channel bc', function(channels) {
       const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.channel === channels.next.name)
       const nextmsg = filtered[0]
-      self.setState({ resolved: nextmsg.resolved })
+
+       //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
+      if (  self.refs.cpanel.refs.child.refs.toggle && channels.next.resolved ===  self.refs.cpanel.refs.child.refs.toggle.state.checked) {
+        // console.log('Case 1 Toggle and Channel Resolved Not in Sync:  nextchan: ', channels.next.resolved ,'toggle:' ,self.refs.cpanel.refs.child.refs.toggle.state.checked)
+                  self.handleToggleChange()
+      }
+      else if (self.refs.cpanel.refs.child.refs.toggle && channels.next.resolved !==  self.refs.cpanel.refs.child.refs.toggle.state.checked){
+          // console.log('Case 2 Toggle and Channel Resolved in Sync:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
+      } else {
+        // console.log('Case 3:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
+      }
+
+      let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
+
+      self.setState({ resolved: channels.next.resolved })
       // console.log('Chat84',channels, self.state)
 
     })
@@ -91,6 +107,7 @@ class Chat extends Component {
     const { actions, activeChannel } = this.props;
     // console.log('firing changeactivechannel');
     if (channel) {
+      if (channel.name === activeChannel.name) return
       var channels = { prev: {}, next:{}}
       channels.prev =  Object.assign({}, activeChannel);
       channels.next = Object.assign({}, channel)
@@ -107,7 +124,6 @@ class Chat extends Component {
                 incoming: true,
                 msg: 'No channels left',
                 ts: '',
-                resolved: false,
                 thread: {
                         id: 'default',
                         sequence: 0,
@@ -131,7 +147,7 @@ class Chat extends Component {
     const firstMsg = activeMessages[0]
     // console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
-    console.log('Chat.js:108-->',firstMsg)
+    // console.log('Chat.js:108-->',firstMsg)
     if (firstMsg) {
       actions.changeMessage(firstMsg);
     } else {
@@ -181,45 +197,47 @@ class Chat extends Component {
        const {activeChannel, actions, messages} = this.props;
        const filtered = messages.filter(message => (message.source && message.source.channel === activeChannel.name))
        const activeMsg = filtered[0]
-       this.setState({resolved: !this.state.resolved})
-       var identifier = {id: activeChannel.id, properties: [{resolved: !activeMsg.resolved }]}
+       if (this.state.autoToggled) {
+        // console.log('handleModeChange DENIED')
+        this.setState({autoToggled: false})
+        return
+       }
+       // console.log('handleModeChange fired')
+       //switch local state
+       // this.setState({resolved: !this.state.resolved})
+       
+       //update message
+       activeMsg.thread.ticket = (activeMsg.thread.ticket && activeMsg.thread.ticket.isOpen) ? { id: activeMsg.thread.ticket.id, isOpen: false } :{ id: (activeMsg.thread.ticket && activeMsg.thread.ticket.id ? activeMsg.thread.ticket.id : shortid.generate()), isOpen: true };
+       var identifier = {id: activeChannel.id, properties: [{thread: activeMsg.thread }]}
        actions.setMessageProperty(identifier)
+       
+       //change resolved status of channel
        let tempChannel = activeChannel
        tempChannel.resolved = !tempChannel.resolved
        actions.resolveChannel(tempChannel)
        this.refs.channelsref.forceUpdate()
-       //Change resolved property for parent and all child messages
-        // const resolveMessageInState = function(msg) {
-        //   return new Promise(function(resolve, reject) {
-        //     var identifier = {id: activeChannel.id, properties: []} 
-        //     identifier.properties.push({ resolved : this.state.resolved})
-        //     actions.setMessageProperty(identifier)
-        //     msg.resolved = this.state.resolved
-        //     return resolve(msg);
-        //     });
-        //  };
-        // filtered.reduce(function(sequence, msg) {
-        //   return sequence.then(function() {
-        //     return resolveMessageInState(msg);
-        //   }).then(function(msg) {
-         
-        //   });
-        // }, Promise.resolve());
   }
 
-  toggleStream()  {
+  handleToggleChange() {
+    // console.log('hangleToggleChange fired')
+    this.setState({autoToggled: true})
+    this.refs.cpanel.refs.child.refs.toggle.handleClick('forced')
+    
+  }
+
+
+  toggleStream() {
     let current = this.state.stream
      this.setState({stream: !current});
      // window.scrollTo(0, window.innerHeight);
   }
 
-
-
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
+    const filteredMessages = messages.filter(message => (message.source && message.source.channel === activeChannel.name)).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
+    const activeMsg =  messages.filter(message => (message.source && message.source.channel === activeChannel.name))[0]
     const username = this.props.user.username;
-    const resolved = this.state.resolved
+    const resolved = activeChannel.resolved
     const stream = this.state.stream
     const displayMessages = this.state.stream ?   
                        messages.slice(messages.length-15,messages.length).map(message =>
@@ -229,7 +247,7 @@ class Chat extends Component {
                         filteredMessages.map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                           )
-    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br /> resolved: {resolved ? 'TRUE' : 'FALSE'}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
+    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br/></div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
     const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     return (
@@ -267,7 +285,7 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
-              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} />
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
             </div>
           </div>
         
@@ -275,7 +293,7 @@ class Chat extends Component {
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
         <div style= {streamDisplay}>
-          <MessageComposer activeChannel={activeChannel} activeMessage={activeMessage} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} stream={stream} />
+          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} stream={stream} />
         </div>  
           {typers.length === 1 &&
             <div>

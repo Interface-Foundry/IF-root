@@ -36,7 +36,6 @@ class ControlPanel extends Component {
     static propTypes = {
         activeControl: PropTypes.object.isRequired,
         activeChannel: PropTypes.object.isRequired,
-        activeMessage: PropTypes.object.isRequired,
         messages: PropTypes.array.isRequired,
         onSubmit: PropTypes.func.isRequired ,
         actions: PropTypes.object.isRequired
@@ -56,11 +55,10 @@ class ControlPanel extends Component {
   }
 
   componentDidMount() {
-    const {actions, activeChannel, activeMessage, messages, resolved} = this.props;
+    const {actions, activeChannel, messages, resolved} = this.props;
     const self = this
      self.setState({ mounted: true });
      socket.on('results', function (msg) {
-      
       //enable react-motion animation
       self.refs.draggableList.setState({previewing: true})
 
@@ -81,6 +79,9 @@ class ControlPanel extends Component {
         console.log('CPanel Error 114 Could not get results :',err)
         return
       }
+     
+      self.setState({rawAmazonResults:msg.amazon})
+
       var identifier = {id: msg.source.id, properties: []}
       for (var key in msg) {
         if ((key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
@@ -95,24 +96,19 @@ class ControlPanel extends Component {
         actions.setMessageProperty(identifier)
       }
 
-       setTimeout(function(){
+      setTimeout(function(){
          self.refs.draggableList.setState({previewing: false})
       }, 1000)
+      
+      
 
     })
 
    socket.on('change channel bc', function(channels) {
-    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
+    // const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
-    const firstMsg = filtered[0]
+    const firstMsg = self.props.activeMsg
     const firstMsgOld = filteredOld[0]
-
-    //Handle toggle change based on whether next channel is resolved or not (if handleclick doesn't work you need the hacked version of the module)
-    if ( self.refs.toggle && firstMsg.resolved && self.refs.toggle.state.checked === true) {
-      self.refs.toggle.handleClick('forced')
-    } else if (self.refs.toggle && !firstMsg.resolved && self.refs.toggle.state.checked === false) {
-      self.refs.toggle.handleClick('forced')
-    }
 
     //Reset selected state
      self.setState({ selected: {name: null, index: null}})
@@ -132,7 +128,7 @@ class ControlPanel extends Component {
             let identifier = {id: firstMsgOld.source.id, properties: []}
             identifier.properties.push({ amazon : result})
             actions.setMessageProperty(identifier)
-      }
+       }
         
         //Load items into state for next channel
          const nextItems = []
@@ -153,12 +149,12 @@ class ControlPanel extends Component {
         console.log('CPanel Error 169 Could not get results :',err)
         return
       }
-      console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
+      // console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
       if (nextItems.length > 0) {
-         console.log(0)
+         // console.log(0)
         self.setState({ items: nextItems })
       } else {
-        console.log(1)
+        // console.log(1)
         self.setState({items: [{
         id: 'product-0',
         name: 'Product 0',
@@ -225,18 +221,22 @@ class ControlPanel extends Component {
     })
   }
 
-  componentDidUpdate() {
-      const {activeMessage} = this.props;
-      const self = this;
-    
-  }
-
   sendCommand(newMessage) {
-    const { activeChannel, activeMessage,actions } = this.props
-    newMessage.parent = activeMessage.source.id
-    newMessage.resolved = true
+    const { activeChannel, actions } = this.props
+    newMessage.source.org = activeChannel.id.split('_')[0]
+    newMessage.flags = {toClient: true}
+    newMessage.amazon = this.state.rawAmazonResults ? this.state.rawAmazonResults : null
+    newMessage.source.origin = 'slack'
+    // console.log('Cpanel229: Send Command: ', newMessage)
+    if (newMessage.amazon === null) return
+
     socket.emit('new message', newMessage);
-    UserAPIUtils.createMessage(newMessage);
+    this.setState({sendingToClient: true})
+    const self = this
+    setTimeout(function(){
+          self.setState({sendingToClient: false})
+    }, 1500)
+    // UserAPIUtils.createMessage(newMessage);
   }
 
    moveCard(dragIndex, hoverIndex) {
@@ -273,9 +273,11 @@ class ControlPanel extends Component {
   }
 
 
-  handleMouseUp() {
+  handleMouseUp(index) {
     const { items } = this.state;
-      this.setState({items: items})
+    let selectedIndex = findIndex(items, function(o) { return o.index == index })
+
+    this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
   }
 
   renderItem(index, key) {
@@ -294,42 +296,42 @@ class ControlPanel extends Component {
     }
 
   render() {
-     const { activeControl, activeMessage, activeChannel, messages,actions,changeMode} = this.props;
+     const { activeMsg, activeControl, activeChannel, messages,actions,changeMode} = this.props;
      const fields  = ['msg','bucket','action']
      const self = this;
      const { items,selected } = this.state;
      const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
+     const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
+     const statusStyle = activeChannel.resolved ?  { fontSize:'1.3em' ,color: 'green'} : { fontSize:'1.3em',color: 'red'}
+     const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
             <section className='rightnav'>
           <div>   
-
-      
               <label>
                 <Toggle
                   ref='toggle'
                   defaultChecked={this.props.resolved}
-                  onChange={ () => { changeMode(this) }} />
-                  <span style={{fontSize:'1.3em'}}> INTERACT MODE</span>
+                  onChange={ () => { changeMode(activeChannel) }} />
+                  <span style={statusStyle}>  {statusText}</span>
               </label>
 
             <DynamicForm
               onSubmit={this.props.onSubmit} changed=""
-              fields={fields} selected={selected} activeMessage={activeMessage} activeChannel={activeChannel} messages={messages} actions={actions} />
+              fields={fields} selected={selected} activeMsg={activeMsg} activeChannel={activeChannel} messages={messages} actions={actions} />
           </div>   
           </section>
 
 
-              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMessage)} >
+              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
                       Send Command
               </Button>
           </div>
           <div id="third-column" style= {{ padding: 0}}>          
               <div style={style}>  
-                <div style={{textAlign: 'left'}}> {(this.state.selected) ? this.state.selected.name: null} </div>
-                      
-                      <DraggableList ref='draggableList'  mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
+                <div style={{textAlign: 'left', fontSize:'1.1em'}}> {(this.state.selected && this.state.selected.name) ? this.state.selected.name: 'none selected'} </div> 
+                      <DraggableList ref='draggableList'  selected={this.state.selected} mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
                </div>
             </div>
          </div>

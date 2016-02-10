@@ -2,6 +2,8 @@ import React, { Component, PropTypes } from 'react';
 import classnames from 'classnames';
 import { Button } from 'react-bootstrap';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
+import shortid from 'shortid';
+
 
 class ChannelListItem extends Component {
 
@@ -16,15 +18,14 @@ class ChannelListItem extends Component {
 
   closeChannel() {
     const { chanIndex, channel, channels,actions, messages, onClick } = this.props;
-    const filtered = messages.filter(message => message.source).filter(message => message.source.channel === channel.name)
+    const filtered = messages.filter(message => (message.source && message.source.channel === channel.name))
     const firstMsg = filtered[0]
     UserAPIUtils.resolveChannel(channel)
     const resolveMessageInState = function(msg) {
         return new Promise(function(resolve, reject) {
-              var identifier = {id: channel.id, properties: []} 
-              identifier.properties.push({ resolved : true})
-                actions.setMessageProperty(identifier)
-                msg.resolved = true
+               msg.thread.ticket = (msg.thread.ticket && msg.thread.ticket.id && msg.thread.ticket.isOpen) ? { id: msg.thread.ticket.id, isOpen: false }  : { id: shortid.generate(), isOpen: false };
+               var identifier = {id: channel.id, properties: [{thread: msg.thread }]}
+               actions.setMessageProperty(identifier)
             return resolve(msg);
         });
      };

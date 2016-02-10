@@ -43,7 +43,7 @@ class DynamicForm extends Component {
 
   componentDidMount() {
     const {
-      activeMessage, actions, messages, activeChannel, resetForm, dirty
+      actions, messages, activeChannel, resetForm, dirty
     } = this.props;
     var self = this
 
@@ -88,7 +88,7 @@ class DynamicForm extends Component {
   //Update local state on form as user types
   componentWillReceiveProps(nextProps) {
     const {
-      activeMessage, actions, messages, activeChannel
+      actions, messages, activeChannel
     } = this.props
     this.setState({
       filteredMessages: messages.filter(message => message.source).filter(message => message.source.channel === nextProps.activeChannel.name)
@@ -104,7 +104,7 @@ class DynamicForm extends Component {
 
   renderJSON(filtered) {
     const {
-      activeMessage, actions, messages, activeChannel, selected
+      actions, messages, activeChannel, selected
     } = this.props
     return (
       <div style={{fontSize: '0.2em', marginTop: '5em'}}>
@@ -150,9 +150,9 @@ class DynamicForm extends Component {
 
   searchAmazon(query) {
     const {
-      activeMessage, resetForm
+      activeMsg, resetForm
     } = this.props
-    const newQuery = activeMessage;
+    const newQuery = activeMsg;
      //TODO
      // processData.urlShorten(data,function(res){
      //    var count = 0;
@@ -182,14 +182,16 @@ class DynamicForm extends Component {
             newQuery.source.origin = 'supervisor'
             newQuery.flags = {}
             newQuery.flags.toCinna = true
-            newQuery.parent = false
             newQuery.client_res = []
+            if(newQuery.recallHistory) {
+              delete newQuery.recallHistory
+            } 
             socket.emit('new message', newQuery);
             this.setState({
               spinnerloading: true,
               searchParam: ''
             })
-            console.log('\n\n\nDATA OBJECT: ',newQuery)
+            // console.log('\n\n\nDATA OBJECT: ',newQuery)
         // });
       // });
   document.querySelector('#search-input').value = ''
@@ -198,15 +200,16 @@ class DynamicForm extends Component {
 
   searchSimilar() {
     const {
-      activeMessage, resetForm, selected
+      activeMsg, resetForm, selected
     } = this.props
-    const newQuery = activeMessage;
+    const newQuery = activeMsg;
     if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
     newQuery.bucket = 'search'
     newQuery.action = 'similar'
+    newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
     newQuery.tokens = newQuery.msg.split()
@@ -216,7 +219,6 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    newQuery.parent = false
     console.log('Form.js 209 : newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
@@ -227,8 +229,8 @@ class DynamicForm extends Component {
 
 
   searchModify() {
-    const { activeMessage, resetForm, selected } = this.props
-    const newQuery = activeMessage;
+    const { activeMsg, resetForm, selected } = this.props
+    const newQuery = activeMsg;
     if (!selected || !selected.name || !selected.id) {
       console.log('Please select an item.')
       return
@@ -242,9 +244,9 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.parent = false
     newQuery.dataModify = { type: '', val: []}
     if (this.state.color) {
       newQuery.dataModify.type = 'color'
@@ -304,9 +306,9 @@ class DynamicForm extends Component {
 
   searchFocus() {
      const {
-      activeMessage, resetForm, selected
+      activeMsg, resetForm, selected
     } = this.props
-    const newQuery = activeMessage;
+    const newQuery = activeMsg;
     if (!selected || !selected.name || !selected.id) {
       console.log('Please select an item.')
       return
@@ -320,9 +322,9 @@ class DynamicForm extends Component {
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.parent = false
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true

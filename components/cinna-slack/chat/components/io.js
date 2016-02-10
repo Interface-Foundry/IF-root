@@ -282,7 +282,7 @@ var loadSocketIO = function(server){
         });
 
         socket.on("msgFromSever", function(data) {
-            console.log('Received message from supervisor', data)
+            console.log('\n\n\nReceived message from supervisor: ',data,data.flags,'\n\n\n')
             incomingAction(data);
         })
     }); 
@@ -491,19 +491,20 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
+//------------------------supervisor stuff-----------------------------------//
+      if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
+                if (data.bucket === 'response') {
+                    return sendResponse(data)
+                } else {
+                    return outgoingResponse(data,'stitch','amazon');
+                }
+             }
+    history.saveHistory(data,true,function(res){
+        supervisor.emit(res, true)
+    }); 
+//---------------------------------------------------------------------------//        
 
-   
 
-    //save a new message obj
-    history.saveHistory(data,true); //saving incoming message
-    
-     //---supervisor stuff---//
-    if (data.bucket === 'response') {
-            return sendResponse(data)
-         }
-    // console.log('Supervisor: 372 ',data)
-    supervisor.emit(data, true)
-    //----------------------//
     
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
@@ -659,11 +660,11 @@ var sendTxtResponse = function(data,msg){
 }
 
 //Constructing reply to user
-var outgoingResponse = function(data,action,source){ //what we're replying to user with
+var outgoingResponse = function(data,action,source){ //what we're replying to user with 
+// console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(url){
-
             //sending out stitched image response
             data.client_res = [];
             data.urlShorten = [];
@@ -677,9 +678,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                     async.eachSeries(res, function(i, callback) {
                         data.urlShorten.push(i);//save shortened URLs
                         processData.getNumEmoji(data,count+1,function(emoji){
-
                             res[count] = res[count].trim(); 
-                            //MITSU: Note to self - check this out for slack messages 
                             if (data.source.origin == 'slack'){
                                 data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             }else if (data.source.origin == 'socket.io'){
@@ -721,9 +720,12 @@ var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
             data.client_res.unshift(res); // add to beginning of message
+             console.log('mitsu6')
+
             sendResponse(data);
         }
         else {
+             console.log('mitsu7', res)
             sendResponse(data);
         }
     });            
@@ -752,7 +754,7 @@ var sendResponse = function(data){
             console.log('error: socket io channel missing', data);
         }
     }
-    else if (data.source.channel && data.source.origin == 'slack'){
+    else if (data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
 
         //eventually cinna can change emotions in this pic based on response type
@@ -855,7 +857,7 @@ var sendResponse = function(data){
 
 
         }else {
-            console.log('error: slackUsers channel missing');
+            console.log('error: slackUsers channel missing', slackUsers);
         }
     }
      //---supervisor: relay search result previews back to supervisor---//
@@ -874,7 +876,9 @@ var sendResponse = function(data){
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE');
         //history.newMessage(data, function(newMsg){
-        history.saveHistory(data,false); //saving outgoing message
+        history.saveHistory(data,false,function(res){
+            //whatever
+        }); //saving outgoing message
         //});        
     }
     else {

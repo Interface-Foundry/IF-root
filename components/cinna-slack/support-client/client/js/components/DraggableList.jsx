@@ -93,7 +93,9 @@ const DraggableList = React.createClass({
       pageY: 0,
       switching: false,
       previewing: false,
-      mounted: false
+      mounted: false,
+      flag: 0,
+      selectedIndex : null
     };
   },
 
@@ -130,49 +132,71 @@ const DraggableList = React.createClass({
       delta: pageY - pressY,
       mouse: pressY,
       isPressed: true,
-      lastPressed: pos
+      lastPressed: pos,
+      flag: 0
     });
   },
 
   handleMouseMove({pageY}) {
-    const {isPressed, delta, order, lastPressed} = this.state;
+    const {isPressed, delta, order, lastPressed, selectedIndex, flag} = this.state;
     if (isPressed) {
       const mouse = pageY - delta;
       const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
-      this.setState({mouse: mouse});
       this.props.mouseMove(lastPressed, row)
+      this.setState({mouse: mouse, flag:1});
+      // if (this.props.selected && this.props.selected.name && delta !== 0) {
+      //   this.setState({selectedIndex: row})
+      //   console.log('drag: ',mouse,row, selectedIndex, flag)
+      // }
     }
   },
 
-  handleMouseUp() {
-    const {isPressed, delta, order, lastPressed} = this.state;
-     // if (delta !== 0) {
-     //   this.props.mouseUp()
-     //  }
-     this.setState({isPressed: false, delta: 0}); 
+  handleMouseUp({pageY}) {
+    const {isPressed, delta, order, lastPressed, flag} = this.state;
+    //TEST THIS OUT: supposed to keep item floated if the item order hasn't changed - 
+    const mouse = pageY - delta;
+    const row = clamp(Math.round(mouse / 100), 0, itemsCount - 1);
+    this.setState({isPressed: false, delta: 0}); 
+    // console.log('pre click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
+    if (flag === 0 && delta !== 0 ){
+      // this.state.order[lastPressed].selected = this.state.order[lastPressed].selected  ? !this.state.order[lastPressed].selected : true
+      // console.log('click: start - ',lastPressed, ' end - ',row,' flag -' ,flag)
+      this.setState({selectedIndex: lastPressed})
+      this.props.mouseUp(lastPressed)
+    }
   },
 
   render() {
-    const {mouse, isPressed, lastPressed, order, switching, previewing,mounted} = this.state;
+    const {mouse, isPressed, lastPressed, order, switching, previewing,mounted, selectedIndex} = this.state;
     const { items } = this.props
 
     return (
       <div className="demo8">
      
-        { mounted ? items.slice(0,10).map(item => {
-          const style = lastPressed === item.index && (isPressed)
-            ? {
+        { mounted ? items.slice(0,10).map( (item, index) => {
+          const styleState = (lastPressed === item.index && isPressed) ? 'beingDragged' : ((index === selectedIndex) ? 'beingSelected' : 'beingDefault')
+          let style = {}
+          switch (styleState) {
+            case 'beingDragged':
+              style = {
                 scale: spring(1.1, springConfig),
                 shadow: spring(16, springConfig),
                 y: mouse,
-                textAlign: 'center'
+                // y: (index === selectedIndex ? (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)) : mouse),
+                textAlign: 'center',
+                backgroundColor: (index === selectedIndex) ?  'blue' : 'none'
               }
-            : {
+              break;
+            case 'beingSelected':
+            default:
+              style = {
                 scale: spring(1, springConfig),
                 shadow: spring(1, springConfig),
                 y: (this.state.switching || this.state.previewing) ? (spring(-600, springConfig)) : (spring(findIndex(items, function(o) { return o.index == item.index }) * 100, springConfig)), 
-                textAlign: 'center'
-              };
+                textAlign: 'center',
+                backgroundColor: (index === selectedIndex) ?  'blue' : 'none'
+              }
+          }
           return (
           
             <Motion style={style} key={item.index}>
@@ -188,7 +212,9 @@ const DraggableList = React.createClass({
                     zIndex: item.index === lastPressed ? 99 : item.index
                   }}>
                   <div className="flexbox-container">
-                  <span style={{fontSize:'0.4em', color:'#000', margin: '0 auto', display:'inlineBlock', textAlign:'left'}}>{item.name.substring(0,20)} </span>   
+                  <span style={{fontSize:'0.4em', color:'#000', margin: '0 auto', display:'inlineBlock', textAlign:'left','MozUserSelect': 'none',
+                      'WebkitUserSelect': 'none',
+                      'userSelect': 'none'}}>{item.name.substring(0,20)} </span>   
                   <img height='90px' width='90px' style={{'MozUserSelect': 'none',
                       'WebkitUserSelect': 'none',
                       'WebkitUserDrag': 'none',

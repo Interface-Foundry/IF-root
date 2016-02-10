@@ -8,7 +8,7 @@ exports = module.exports = function(io, cinnaio) {
         socket.on('new message', function(msg) {
             msg.ts = new Date().toISOString();
             var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
-            console.log('\nI/O: raw msg:', msg)
+            // console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
                     console.log('\nI/O: routed to  --> incoming msg\n')
@@ -25,19 +25,6 @@ exports = module.exports = function(io, cinnaio) {
                 default:
                     console.log('I/O: Could not determine message type.')
             }
-            // //Emit throughout supervisor client
-            // if(msg.flags && msg.flags.toSupervisor) {
-            //     console.log('\nI/O: routed to  --> incoming msg')
-            //     socket.broadcast.emit('new bc message', msg);
-            // }
-            // //Emit outgoing message to cinna-slack
-            // else if (msg.flags && (msg.flags.toClient || msg.flags.toCinna)) {
-            //     console.log('I/O: routed to --> outgoing msg')
-            //     ioClient.emit("msgFromSever", msg);
-            // } else if (msg.bucket === 'results'){
-            //     console.log('I/O: routed to --> incoming results ')
-            //     socket.broadcast.emit('results', msg)
-            // }
         });
         socket.on('new channel', function(channel) { 
             socket.broadcast.emit('new channel', channel)

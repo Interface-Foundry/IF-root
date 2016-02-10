@@ -8,7 +8,6 @@ class MessageComposer extends Component {
 
   static propTypes = {
     activeChannel: PropTypes.object.isRequired,
-    activeMessage: PropTypes.object.isRequired,
     onSave: PropTypes.func.isRequired,
     user: PropTypes.string.isRequired,
     messages:  PropTypes.array.isRequired
@@ -22,26 +21,29 @@ class MessageComposer extends Component {
   }
   handleSubmit(event) {
     const {
-        user, activeChannel, activeMessage, messages, resolved
+        user, activeChannel, activeMsg, messages, resolved
     } = this.props;
     const text = event.target.value.trim();
-    const activeMsg = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)[0]
     if (event.which === 13 && !resolved) {
         event.preventDefault();
+        let thread = activeMsg.thread
+        thread.parent.id = activeMsg.thread.id
+        thread.parent.isParent = false;
+        thread.sequence = parseInt(activeMsg.thread + 1)
         var newMessage = {
             id: messages.length,
             msg: text,
+            client_res: [text],
             incoming: false,
             source: {
-                origin: 'socket.io',
+                origin: 'slack',
                 channel: activeChannel.name,
-                org: 'kip',
+                org: activeChannel.id.split('_')[0],
                 id: activeChannel.id
             },
             bucket: 'response',
             ts: new Date().toISOString(),
-            parent: false,
-            resolved: resolved,
+            thread: thread,
             flags: {toClient: true}
         };
         socket.emit('new message', newMessage);
@@ -55,7 +57,7 @@ class MessageComposer extends Component {
         });
         socket.emit('stop typing');
     }
-}
+  }
   handleChange(event) {
     const { resolved } = this.props
     if (resolved) return
@@ -71,6 +73,7 @@ class MessageComposer extends Component {
   }
   
   render() {
+    const disabled = this.props.resolved ? true : false
     return (
       <div style={{
         zIndex: '52',
@@ -95,6 +98,7 @@ class MessageComposer extends Component {
           value={this.state.text}
           onChange={::this.handleChange}
           onKeyDown={::this.handleSubmit}
+          disabled= {disabled}
         />
       </div>
     );
