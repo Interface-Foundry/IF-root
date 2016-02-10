@@ -21,12 +21,12 @@ db.serialize(function() {
 
   db.insert_product = db.prepare(`insert or replace into product_tbl (asin, title, price, text, image_url, reviews, full_html) values (
     $asin,
-    coalesce($title, (select price from product_tbl where asin = $asin)),
+    coalesce($title, (select title from product_tbl where asin = $asin)),
     coalesce($price, (select price from product_tbl where asin = $asin)),
-    coalesce($text, (select price from product_tbl where asin = $asin)),
-    coalesce($altImage, (select price from product_tbl where asin = $asin)),
-    coalesce($reviews, (select price from product_tbl where asin = $asin)),
-    coalesce($full_html, (select price from product_tbl where asin = $asin))
+    coalesce($text, (select text from product_tbl where asin = $asin)),
+    coalesce($altImage, (select altImage from product_tbl where asin = $asin)),
+    coalesce($reviews, (select reviews from product_tbl where asin = $asin)),
+    coalesce($full_html, (select full_html from product_tbl where asin = $asin))
   )`)
 
   db.insert_qa = db.prepare(`insert into qa_tbl (asin, question, answer) values ($asin, $q, $a)`)
