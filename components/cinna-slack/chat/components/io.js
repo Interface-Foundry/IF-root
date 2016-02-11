@@ -682,7 +682,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                             if (data.source.origin == 'slack'){
                                 data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             }else if (data.source.origin == 'socket.io'){
-                                data.client_res.push(emoji + '<a href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                                data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             }
 
                             count++;                           
