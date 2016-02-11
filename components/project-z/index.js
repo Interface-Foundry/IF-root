@@ -1,3 +1,9 @@
+var mongoose = require('mongoose');
+// connect our DB
+var db = require('db');
+var Airport = db.Message;
+var config = require('config');
+
 // # Ghost Startup
 // Orchestrates the startup of Ghost when run from command line.
 var express,
@@ -18,6 +24,7 @@ parentApp = express();
 
 var querystring = require('querystring');
 parentApp.get('/product/*', function(req, res, next) {
+   saveAirport(req);
    res.redirect(querystring.unescape(req.url.replace('/product/',''))); //magic cinna moment ✨ 
 });
 
@@ -31,3 +38,31 @@ ghost().then(function (ghostServer) {
 }).catch(function (err) {
     errors.logErrorAndExit(err, err.context, err.help);
 });
+
+
+function saveAirport(req){
+
+	var itemURL = querystring.unescape(req.url.replace('/product/','')); //magic cinna moment ✨
+	
+	var data = {
+
+	};
+
+	data = new Airport(data);
+
+	msg.save(function(err, data){
+	    if(err){
+	        console.log('Mongo err ',err);
+	    }
+	    else{
+	        //console.log('INCOMING ',incoming);
+	        //console.log('STATUS ',incoming);
+	        //console.log('mongo res ',data);
+	        //callback('d'); //eventually send back _id for parent id??        
+	    }
+	}); 
+
+}
+		
+              
+        
