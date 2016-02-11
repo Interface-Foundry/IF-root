@@ -27,7 +27,7 @@ var searchSimilar = function(data){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);
     }
-    else if (data.recallHistory && data.recallHistory.amazon){
+    else if ((data.recallHistory && data.recallHistory.amazon) || data.flags.recalled){
         searchAmazon(data,'similar','none','null');
     }
     else {
@@ -446,7 +446,6 @@ var searchAmazon = function(data, type, query, flag) {
 
                     }).then(function(results){
                         data.amazon = results;
-
                         //temporarily using parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
                         if (results.length >= 3){
 
@@ -490,7 +489,7 @@ var searchAmazon = function(data, type, query, flag) {
                         console.log('SIMILAR FAILED: should we fire random query or mod query');
 
                          //----supervisor: adding flag to variable since it is overwitten in the HACK code below ---//
-                        console.log('Mitsu search.js493: ',data)
+                        // console.log('Mitsu search.js493: ',data)
                         var flags = null
                         if (data.flags && data.flags.toCinna) {
                             flags = data.flags
@@ -518,6 +517,7 @@ var searchAmazon = function(data, type, query, flag) {
                         //----supervisor: re-adding back flag from above var ---//
                         if (flags) {
                            data.flags = flags
+                           console.log('\n\n\n\n!!!Mitsu search520: ',data,'\n\n\n\n')
                         }
                         //------------------------------------------------------------------------------------------//
                         data.tokens = [];
@@ -943,8 +943,9 @@ var searchFocus = function(data) {
                 processData.getNumEmoji(data,searchSelect+1,function(res){
 
                     //data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-
-                    data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
+                    if (data.source.origin !== 'supervisor') {
+                     data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
+                    }
                     dumbFunction(); //fire after get
                 })
 
@@ -1011,6 +1012,20 @@ var searchFocus = function(data) {
                         }
                         data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts);
                     }
+                    
+                      //----supervisor: making item detail info more digestable on supervisor end ---//
+                      if (data.source.origin == 'supervisor') {
+                        data.focusInfo = {}
+                        if (topStr) data.focusInfo.topStr = topStr
+                        if (attribs.Size) data.focusInfo.size = attribs.Size
+                        if (attribs.Artist) data.focusInfo.artist = attribs.Artist
+                        if (attribs.Brand) data.focusInfo.brand = attribs.Brand
+                        if (attribs.Manufacturer) data.focusInfo.manufacturer = attribs.Manufacturer
+                        if (attribs.Feature) data.focusInfo.feature = attribs.Feature
+                        if (data.recallHistory && data.recallHistory.amazon[searchSelect] && data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating && reviewCounts) data.focusInfo.reviews = data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts   
+                        
+                      } 
+                      //--------------------------------------------------------------//
 
                     ioKip.outgoingResponse(data,'final');
 

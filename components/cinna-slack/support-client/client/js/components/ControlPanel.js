@@ -60,7 +60,8 @@ class ControlPanel extends Component {
      self.setState({ mounted: true });
      socket.on('results', function (msg) {
       //enable react-motion animation
-      self.refs.draggableList.setState({previewing: true})
+      if (msg.action === 'initial' || msg.action === 'similar' || msg.action === 'modify') {
+      self.refs.draggableList.setState({previewing: true}) }
 
       //convert returned results into local state format
       try {

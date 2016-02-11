@@ -250,21 +250,19 @@ class Chat extends Component {
     const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br/></div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
     const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
+    const chatStyle = this.state.stream ? {background: '#fff', color: '#000'} : {background: '#45a5f4', color:'red'}
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
-
-        <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none' }} disabled={this.state.spinnerloading} onClick = { () => { this.toggleStream() } } >
-          <div className="kipicon">
-          </div>
-          </Button> 
-        
-
-          <section style={{order: '2', marginTop: '1.5em'}}>
-            <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
-          </section>
+            <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none' }} disabled={this.state.spinnerloading} onClick = { () => { this.toggleStream() } } >
+              <div className="kipicon">
+              </div>
+            </Button> 
+            <section style={{order: '2', marginTop: '1.5em'}}>
+              <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
+            </section>
         </div>
-        <div className="main">
+        <div className="main" style={{chatStyle}}>
           <header style={{background: '#FFFFFF', color: 'black', flexGrow: '0', order: '0', fontSize: '2.3em', paddingLeft: '0.2em'}}>
             <div>
             <span style={{fontSize: '0.5em', marginLeft: '2em'}}>
@@ -272,8 +270,6 @@ class Chat extends Component {
             </span>
             </div>
           </header>
-          
-
           <div className="flexbox-container">
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">

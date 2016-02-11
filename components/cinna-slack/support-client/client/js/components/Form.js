@@ -51,8 +51,19 @@ class DynamicForm extends Component {
       // console.log('Form: Received results', msg)
       self.state.spinnerloading = false
       self.state.searchParam = ''
-        //store raw results for use in searchSimilar function
       self.state.rawAmazonResults = msg.amazon
+      //set new recallHistory if last action was not 'focus'
+      if (msg.action !== 'focus') {
+        // if (msg.recallHistory) {
+        //     self.state.recallHistory = msg.recallHistory
+        // } else {
+            self.state.recallHistory = {amazon: msg.amazon}
+        // }
+      }
+      //store focus info
+      if (msg.action === 'focus' && msg.focusInfo) {
+        self.setState({focusInfo: msg.focusInfo})
+      }
     })
 
     socket.on('change channel bc', function(channels) {
@@ -79,7 +90,8 @@ class DynamicForm extends Component {
         modifier: { color: null, size: null},
         color: false,
         size: false,
-        searchParam: ''
+        searchParam: '',
+        focusInfo: null
       };
       resetForm()
     })
@@ -153,6 +165,7 @@ class DynamicForm extends Component {
       activeMsg, resetForm
     } = this.props
     const newQuery = activeMsg;
+    const self = this;
      //TODO
      // processData.urlShorten(data,function(res){
      //    var count = 0;
@@ -175,6 +188,9 @@ class DynamicForm extends Component {
                 return
               }
             }
+            if (newQuery._id) {
+              delete newQuery._id
+            }
             newQuery.msg = this.state.searchParam
             newQuery.bucket = 'search'
             newQuery.action = 'initial'
@@ -183,14 +199,23 @@ class DynamicForm extends Component {
             newQuery.flags = {}
             newQuery.flags.toCinna = true
             newQuery.client_res = []
-            if(newQuery.recallHistory) {
-              delete newQuery.recallHistory
-            } 
+            // if(newQuery.recallHistory) {
+            //   delete newQuery.recallHistory
+            // } 
             socket.emit('new message', newQuery);
             this.setState({
               spinnerloading: true,
               searchParam: ''
             })
+
+            setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
+
             // console.log('\n\n\nDATA OBJECT: ',newQuery)
         // });
       // });
@@ -203,10 +228,14 @@ class DynamicForm extends Component {
       activeMsg, resetForm, selected
     } = this.props
     const newQuery = activeMsg;
+    const self = this
     if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
+      if (newQuery._id) {
+          delete newQuery._id
+        }
     newQuery.bucket = 'search'
     newQuery.action = 'similar'
     newQuery.flags = {}
@@ -214,33 +243,43 @@ class DynamicForm extends Component {
     newQuery.flags.recalled = true
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory = {
-      amazon: this.state.rawAmazonResults
-    }
+    newQuery.recallHistory =  this.state.recallHistory
+    newQuery.amazon =  this.state.rawAmazonResults
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
-    console.log('Form.js 209 : newQuery: ',newQuery)
+    console.log('Form209-searchSimilar(): newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
     })
     resetForm()
+    setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
   }
 
 
   searchModify() {
     const { activeMsg, resetForm, selected } = this.props
     const newQuery = activeMsg;
+    const self = this
     if (!selected || !selected.name || !selected.id) {
       console.log('Please select an item.')
       return
     }
+     if (newQuery._id) {
+              delete newQuery._id
+            }
     newQuery.bucket = 'search'
     newQuery.action = 'modify'
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
     newQuery.recallHistory = {
-      amazon: this.state.rawAmazonResults
+      amazon: this.state.recallHistory ? this.state.recallHistory : this.state.rawAmazonResults
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
@@ -272,6 +311,13 @@ class DynamicForm extends Component {
       spinnerloading: true
     })
     resetForm()
+    setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
     //  {
     //   "tokens": ["1 but in purple"],
     //   "searchSelect": [1],
@@ -309,16 +355,20 @@ class DynamicForm extends Component {
       activeMsg, resetForm, selected
     } = this.props
     const newQuery = activeMsg;
+    const self = this
     if (!selected || !selected.name || !selected.id) {
       console.log('Please select an item.')
       return
     }
+      if (newQuery._id) {
+              delete newQuery._id
+            }
     newQuery.bucket = 'search'
     newQuery.action = 'focus'
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory = {
-      amazon: this.state.rawAmazonResults
+      amazon: this.state.recallHistory ? this.state.recallHistory : this.state.rawAmazonResults
     }
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
@@ -330,7 +380,13 @@ class DynamicForm extends Component {
       spinnerloading: true
     })
     resetForm()
-
+    setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
   }
 
 
@@ -413,6 +469,7 @@ class DynamicForm extends Component {
       color: 'orange',
       display: 'none'
     }
+    const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0} : { display: 'none'}
     return (
       <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
           <form ref='form1' onSubmit={::this.handleSubmit}>
@@ -497,6 +554,15 @@ class DynamicForm extends Component {
                 </div>
 
                 <div id="focus-box" style={showFocusBox}>
+                              <div style={focusInfoStyle}> 
+                                 Price: {this.state.focusInfo && this.state.focusInfo.topStr ? this.state.focusInfo.topStr : null}
+                                 <br />
+                                 Reviews: {this.state.focusInfo && this.state.focusInfo.reviews ? this.state.focusInfo.reviews : null}
+                                 <br />
+                                 Feature: {this.state.focusInfo && this.state.focusInfo.feature ? this.state.focusInfo.feature : null}
+                                 <br />
+                              </div>
+                                
                     <h3 style={showPrompt}> Please select an item. </h3>
                     <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
                       Search Focus

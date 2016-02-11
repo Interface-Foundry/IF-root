@@ -11,7 +11,7 @@ exports = module.exports = function(io, cinnaio) {
             // console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
-                    console.log('\nI/O: routed to  --> incoming msg\n')
+                    console.log('\nI/O: routed to  --> incoming msg:\n')
                     socket.broadcast.emit('new bc message', msg)
                     break;
                 case 'outgoing':
