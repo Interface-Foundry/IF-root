@@ -1,7 +1,11 @@
+from gensim import utils
 from gensim.models import Doc2Vec
+from gensim.models.doc2vec import LabeledSentence
+
 
 import numpy
 from random import shuffle
+import re
 
 class Sentences(object):
     def __init__(self, file):
@@ -10,7 +14,7 @@ class Sentences(object):
     def __iter__(self):
         with utils.smart_open(self.file) as fin:
             for item_no, line in enumerate(fin):
-                line = line.lower()
+                line = line.lower().strip()
                 line = re.sub('[?!"\']', '', line)
                 yield LabeledSentence(utils.to_unicode(line).split(), ['SENT_%s' % item_no])
 

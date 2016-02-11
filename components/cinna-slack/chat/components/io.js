@@ -686,7 +686,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                             if (data.source.origin == 'slack'){
                                 data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                             }else if (data.source.origin == 'socket.io'){
-                                data.client_res.push(emoji + '<a href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                                data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             }
 
                             count++;                           
@@ -900,6 +900,7 @@ var sendResponse = function(data){
 //save amazon item to cart
 function saveToCart(data){
 
+
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
 
     history.recallHistory(data, function(item){
@@ -913,7 +914,7 @@ function saveToCart(data){
             sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
         else {
-            
+
             //async push items to cart
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
                 if (item.recallHistory && item.recallHistory.amazon){
@@ -923,7 +924,7 @@ function saveToCart(data){
                 }
                 callback();
             }, function done(){
-                purchase.outputCart(data,messageHistory[data.source.id],function(res){
+                purchase.outputCart(data,messageHistory[data.source.id],function(res){ 
                     processData.urlShorten(res, function(res2){
                         res.client_res = [];
                         res.client_res.push(res2);

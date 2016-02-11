@@ -10,6 +10,8 @@ var product = mongoose.Schema({
 
   price: String,
 
+  asin: String,
+
   answeredQuestions: [{
     q: String,
     a: [String]

@@ -25,6 +25,7 @@ var outputCart = function(data,cartHistory,callback) {
         }, function done(){
             //only support "add to cart" message for one item.
             //static:
+            
             buildAmazonCart(cartItems);
         });
 
@@ -39,13 +40,20 @@ var outputCart = function(data,cartHistory,callback) {
                 options[propQuan] = items[i].Quantity;
             }
             client.createCart(options).then(function(results) {
-                // console.log('CREATE CART ',results);
-                data.client_res = results.PurchaseURL[0];
-                callback(data);
+                
+
+                if(results && results.PurchaseURL){
+                    data.client_res = results.PurchaseURL[0];
+                    callback(data);                    
+                }else {
+                    //add fix for this amazon error: ["AWS.ECommerceService.ItemNotEligibleForCart"]
+                    console.log('Error: create cart failed: ',JSON.stringify(results));
+                    data.client_res = 'Sorry, my brain broke, I can\'t add this item to your cart.';
+                    callback(data);    
+                }
+
 
             }).catch(function(err) {
-                console.log(err);
-                console.log(err.Error[0]);
                 console.log('amazon err ', err[0].Error[0]);
             });
         }
