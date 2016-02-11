@@ -27,7 +27,7 @@ var searchSimilar = function(data){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);
     }
-    else if ((data.recallHistory && data.recallHistory.amazon) || data.flags.recalled){
+    else if ((data.recallHistory && data.recallHistory.amazon) || (data.flags && data.flags.recalled)){
         searchAmazon(data,'similar','none','null');
     }
     else {

@@ -26,11 +26,6 @@ class DynamicForm extends Component {
       msg: '',
       bucket: '',
       action: '',
-      // bucketOptions: {
-      //   initial: false,
-      //   purchase: false,
-      //   banter: false
-      // },
       searchParam: '',
       dirty: false,
       spinnerloading: false,
@@ -61,8 +56,10 @@ class DynamicForm extends Component {
         // }
       }
       //store focus info
-      if (msg.action === 'focus' && msg.focusInfo) {
+      if (msg.focusInfo && msg.client_res && msg.client_res.length > 0) {
         self.setState({focusInfo: msg.focusInfo})
+      } else if (msg.action !== 'focus'){
+        self.setState({focusInfo: null})
       }
     })
 
@@ -278,9 +275,7 @@ class DynamicForm extends Component {
     newQuery.action = 'modify'
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
-    newQuery.recallHistory = {
-      amazon: this.state.recallHistory ? this.state.recallHistory : this.state.rawAmazonResults
-    }
+    newQuery.recallHistory =  this.state.recallHistory
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flags = {}
@@ -367,9 +362,7 @@ class DynamicForm extends Component {
     newQuery.action = 'focus'
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory = {
-      amazon: this.state.recallHistory ? this.state.recallHistory : this.state.rawAmazonResults
-    }
+    newQuery.recallHistory =  this.state.recallHistory
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flags = {}
@@ -426,35 +419,17 @@ class DynamicForm extends Component {
     const showSearchBox = this.state.action === 'initial' ? {
       textAlign: 'center',
       marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+    } : {display: 'none'};
     const showSimilarBox = this.state.action === 'similar' ? {
       textAlign: 'center',
       marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+    } : {display: 'none'};
     const showModifyBox = this.state.action === 'modify' ? {
       textAlign: 'center',
       marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+    } : {display: 'none'};
     const showFocusBox = this.state.action === 'focus' ? {
-      textAlign: 'center',
-      marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+      textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
     const showPrompt = (!selected || !selected.name) ? {
       color: 'black'
     } : {
@@ -469,7 +444,7 @@ class DynamicForm extends Component {
       color: 'orange',
       display: 'none'
     }
-    const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0} : { display: 'none'}
+    const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
     return (
       <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
           <form ref='form1' onSubmit={::this.handleSubmit}>

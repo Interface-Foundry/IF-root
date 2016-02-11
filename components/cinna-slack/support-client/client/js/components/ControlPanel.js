@@ -61,7 +61,8 @@ class ControlPanel extends Component {
      socket.on('results', function (msg) {
       //enable react-motion animation
       if (msg.action === 'initial' || msg.action === 'similar' || msg.action === 'modify') {
-      self.refs.draggableList.setState({previewing: true}) }
+      self.refs.draggableList.setState({previewing: true}) 
+    }
 
       //convert returned results into local state format
       try {
@@ -83,9 +84,16 @@ class ControlPanel extends Component {
      
       self.setState({rawAmazonResults:msg.amazon})
 
+      //store client_res for focus and more commands
+      if (msg.action === 'focus' && msg.client_res && msg.client_res.length > 0) {
+        self.setState({client_res: msg.client_res})
+      }
       var identifier = {id: msg.source.id, properties: []}
       for (var key in msg) {
-        if ((key === 'amazon') && msg[key] !== '' && msg[key] !== [] ) {
+        if ((key === 'amazon' || key === 'client_res') && msg[key] !== '' ) {
+          // if (key === 'client_res' && (msg['client_res'].length === 0)) {
+            
+          // }
           identifier.properties.push({ [key] : msg[key]})
         }
       }  
@@ -230,7 +238,12 @@ class ControlPanel extends Component {
     newMessage.source.origin = 'slack'
     // console.log('Cpanel229: Send Command: ', newMessage)
     if (newMessage.amazon === null) return
-
+    if (newMessage.action === 'focus') {
+      if (!this.state.client_res || (this.state.client_res && this.state.client_res.length === 0)) {return}
+        else {
+          newMessage.client_res = this.state.client_res
+        }
+    }
     socket.emit('new message', newMessage);
     this.setState({sendingToClient: true})
     const self = this

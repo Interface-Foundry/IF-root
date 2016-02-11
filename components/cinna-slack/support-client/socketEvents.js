@@ -15,11 +15,11 @@ exports = module.exports = function(io, cinnaio) {
                     socket.broadcast.emit('new bc message', msg)
                     break;
                 case 'outgoing':
-                    console.log('I/O: routed to --> outgoing msg\n')
+                    console.log('I/O: routed to --> outgoing msg',msg,'\n')
                     ioClient.emit("msgFromSever", msg);
                     break;
                 case 'searchResults':
-                    console.log('I/O: routed to --> incoming results\n')
+                    console.log('I/O: routed to --> incoming results',msg,'\n')
                     socket.broadcast.emit('results', msg)
                     break;
                 default:

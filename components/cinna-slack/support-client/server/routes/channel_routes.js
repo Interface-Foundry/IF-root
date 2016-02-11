@@ -62,7 +62,7 @@ module.exports = function(router) {
           return res.status(500).json({msg: 'internal server error'});
         }
         if (data) {
-          console.log('Channel exists: ',data)
+          // console.log('Channel exists: ',data)
           return res.json(data)
         } else if (!data){
               var newChannel = new Channel(req.body);

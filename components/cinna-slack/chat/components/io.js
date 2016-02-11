@@ -497,10 +497,14 @@ function incomingAction(data){
 
 //------------------------supervisor stuff-----------------------------------//
       if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
-                if (data.bucket === 'response') {
+                if (data.bucket === 'response' || data.action === 'focus') {
                     return sendResponse(data)
                 } else {
-                    return outgoingResponse(data,'stitch','amazon');
+                    // if (data.action === 'focus') {
+                    //     return outgoingResponse(data,'final','amazon');
+                    // } else {
+                        return outgoingResponse(data,'stitch','amazon');
+                    // }
                 }
              }
     history.saveHistory(data,true,function(res){
@@ -595,6 +599,11 @@ function searchBucket(data){
             //search.searchBack(data);
             break;
         case 'more':
+            //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flags && data.flags.recalled) { 
+                    search.searchMore(data);
+            } 
+            //-----------------------------------------------------------------//
             history.recallHistory(data, function(res){
                 if (res){
                     data.recallHistory = res;
@@ -750,7 +759,7 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.flags = {searchResults: true}
-                // console.log('Supervisor: 610 ',data)
+                // console.log('Supervisor: 610 Emitting',data)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -868,7 +877,7 @@ var sendResponse = function(data){
     else if (data.source.channel && data.source.origin == 'supervisor'){
         console.log('Sending results back to supervisor')
        data.flags = {searchResults: true}
-        // console.log('Supervisor: 728', data)
+        // console.log('Supervisor: 728 emitting', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//
