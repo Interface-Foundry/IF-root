@@ -8,6 +8,7 @@
             routes = [
                 'ui/cards', 'ui/typography', 'ui/buttons', 'ui/icons', 'ui/grids', 'ui/widgets', 'ui/components', 'ui/timeline', 'ui/lists', 'ui/pricing-tables',
                 'map/maps',
+                'vc/timexsearch',
                 'table/static', 'table/dynamic', 'table/responsive',
                 'status/servers',
                 'query/test',

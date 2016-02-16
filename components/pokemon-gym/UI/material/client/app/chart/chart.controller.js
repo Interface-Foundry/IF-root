@@ -3,7 +3,7 @@
 
     angular.module('app.chart')
         .controller('EasyPieChartCtrl', ['$scope', EasyPieChartCtrl])
-        .controller('SparklineCtrl', ['$scope', SparklineCtrl]);
+        .controller('SparklineCtrl', ['$scope', '$http',SparklineCtrl]);
 
     function EasyPieChartCtrl($scope) {
         $scope.easypiechartsm1 = {};
@@ -114,7 +114,28 @@
         };
     }
 
-    function SparklineCtrl($scope) {
+    function SparklineCtrl($scope,$http) {
+
+
+        $http({
+          method: 'GET',
+          url: '/vc/timexsearch'
+        }).then(function successCallback(res) {
+
+            // this callback will be called asynchronously
+            // when the response is available
+            console.log('db ',res)
+          }, function errorCallback(res) {
+
+            console.log('ERROR: ',res);
+            // called asynchronously if an error occurs
+            // or server returns response with an error status.
+          });
+
+
+
+
+
         $scope.demoData1 = {};
         $scope.simpleChart1 = {};
         $scope.simpleChart2 = {};

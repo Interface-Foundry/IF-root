@@ -6,12 +6,17 @@ var config = require('config')
 var request = require('request')
 var auth = require('basic-auth-connect')
 
+var mongoose = require('mongoose');
+// connect our DB
+var db = require('db');
+var Message = db.Message;
+
 app.use(bodyParser.json());
 app.use(morgan())
 
 
 app.use(auth('kip', 'vampirecat1200'))
-app.use(express.static(__dirname + '/../UI/material/dist'));
+app.use(express.static(__dirname + '/../UI/material/client'));
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -19,6 +24,7 @@ app.use(function(req, res, next) {
   next();
 })
 
+//the auth is username: kip, password: vampirecat1200
 //
 // Server status monitoring
 //
@@ -41,6 +47,29 @@ app.get('/status', function(req, res) {
       res.send(stats);
     }
   })
+})
+
+app.get('/vc/timexsearch', function(req, res) {
+
+  Message.find({}).sort({'_id': -1}).limit(10).exec(function(err, msg) {  
+    if(err){
+        console.log('Error: Cannot find initial search for recallHistory');
+    }   
+    else {
+
+      res.send(msg);
+        //console.log('db ',msg);
+    }
+  });
+  // check_server.list(servers, function(e, stats) {
+  //   if(e) {
+  //     res.status(500);
+  //     res.send(e);
+  //   } else {
+  //     res.send(stats);
+  //   }
+  // })
+
 })
 
 //

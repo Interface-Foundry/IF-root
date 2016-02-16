@@ -32,7 +32,7 @@ parentApp.get('/product/*', function(req, res, next) {
 	processReq = processReq.split('/pid/')[0];
 	var userId = processReq.split('/id/')[1];
 	var url = processReq.split('/id/')[0].replace('/product/','');
-	saveClick(productId,userId,url);
+	saveClick(productId,userId,url); //store click to user id
 
 	//redirect 
 	res.redirect(url); //magic cinna moment ✨ 
