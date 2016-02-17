@@ -149,8 +149,13 @@ class DynamicForm extends Component {
     const {
       fields, dirty
     } = this.props;
+    let bucket = ''
+    if (choice === 'checkout') {
+      bucket = 'purchase'
+    }
+
     this.setState({
-        bucket: 'search',
+        bucket: choice === 'checkout' ? 'purchase' : 'search',
         action: choice,
         dirty: true
       })
@@ -382,6 +387,71 @@ class DynamicForm extends Component {
              },8000)
   }
 
+  searchMore() {
+   const {
+    activeMsg, resetForm, selected
+  } = this.props
+  const newQuery = activeMsg;
+  const self = this
+    if (newQuery._id) {
+            delete newQuery._id
+          }
+  newQuery.bucket = 'search'
+  newQuery.action = 'more'
+  newQuery.tokens = newQuery.msg.split()
+  newQuery.source.origin = 'supervisor';
+  newQuery.recallHistory =  this.state.recallHistory
+  newQuery.flags = {}
+  newQuery.flags.toCinna = true
+  newQuery.flags.recalled = true
+  socket.emit('new message', newQuery);
+  this.setState({
+    spinnerloading: true
+  })
+  resetForm()
+  setTimeout(function(){
+            if (self.state.spinnerloading === true) {
+               self.setState({
+                  spinnerloading: false
+                })
+            }
+           },8000)
+  }
+
+  checkOut() {
+    const {
+        activeMsg, resetForm, selected
+      } = this.props
+    const newQuery = activeMsg;
+    const self = this
+        if (newQuery._id) {
+            delete newQuery._id
+          }
+    newQuery.bucket = 'purchase'
+    newQuery.action = 'checkout'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  this.state.recallHistory
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.msg = 'buy ' + newQuery.searchSelect.toString(); 
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    resetForm()
+    setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
+  }
+
 
   handleChange(field, e) {
     var nextState = {}
@@ -430,11 +500,15 @@ class DynamicForm extends Component {
     } : {display: 'none'};
     const showFocusBox = this.state.action === 'focus' ? {
       textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
+    const showMoreBox = this.state.action === 'more' ? {
+      textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
     const showPrompt = (!selected || !selected.name) ? {
       color: 'black'
     } : {
       color: 'white'
     }
+    const showCheckoutBox = this.state.action === 'checkout' ? {
+      textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
     var self = this
     const spinnerStyle = (this.state.spinnerloading === true) ? {
       backgroundColor: 'orange',
@@ -547,6 +621,28 @@ class DynamicForm extends Component {
                     </Button>
                 </div>
 
+                 <div id="more-box" style={showMoreBox}>
+                    <Button bsSize = "large" disabled={this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchMore()} >
+                      Search More
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
+                    </Button>
+                 </div>
+
+                  <div id="checkout-box" style={showCheckoutBox}>
+                              <div style={focusInfoStyle}> 
+                                 
+                              </div>
+                                
+                    <h3 style={showPrompt}> Please select an item. </h3>
+                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.checkOut()} >
+                      Checkout Item
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
+                    </Button>
+                </div>
 
             </div>
 

@@ -500,11 +500,12 @@ function incomingAction(data){
                 if (data.bucket === 'response' || data.action === 'focus') {
                     return sendResponse(data)
                 } else {
-                    // if (data.action === 'focus') {
-                    //     return outgoingResponse(data,'final','amazon');
-                    // } else {
+                    if (data.action === 'checkout') {
+                        console.log('Mitsuio504: ',data)
+                        return outgoingResponse(data,'txt');
+                    } else {
                         return outgoingResponse(data,'stitch','amazon');
-                    // }
+                    }
                 }
              }
     history.saveHistory(data,true,function(res){
@@ -523,6 +524,7 @@ function incomingAction(data){
             banterBucket(data);
             break;
         case 'purchase':
+            // console.log('Mitsu io526: data: ',data)
             purchaseBucket(data);
             break;
         case 'supervisor':
@@ -713,6 +715,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
     }
 
     else if (action == 'txt'){  
+        // console.log('Mitsuio717: should be getting here',data)
         sendResponse(data);
         banter.getCinnaResponse(data,function(res){
             if(res && res !== 'null'){
@@ -733,12 +736,12 @@ var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
             data.client_res.unshift(res); // add to beginning of message
-             console.log('mitsu6')
+             // console.log('mitsu6')
 
             sendResponse(data);
         }
         else {
-             console.log('mitsu7', res)
+             // console.log('mitsu7', res)
             sendResponse(data);
         }
     });            
@@ -759,7 +762,9 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.flags = {searchResults: true}
-                // console.log('Supervisor: 610 Emitting',data)
+               var proxy = data
+               delete proxy.amazon
+                console.log('Supervisor: 610 Emitting',proxy)
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -911,6 +916,36 @@ function saveToCart(data){
 
 
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
+
+       //----supervisor: flag to skip history.recallHistory step below ---//
+        if (data.flags && data.flags.recalled) { 
+            var cartHistory = { cart: [] }
+              //async push items to cart
+            // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                // if (item.recallHistory && item.recallHistory.amazon){
+                    // proxy.cart.push(data.amazon[data.searchSelect - 1]); //add selected items to cart
+                // }else {
+                   cartHistory.cart.push(data.amazon[data.searchSelect - 1]); //add selected items to cart
+                // }
+                // callback();
+            // }, function done(){
+            // console.log('io930: cartHistory: ', cartHistory)
+                purchase.outputCart(data, cartHistory,function(res){ 
+                    // processData.urlShorten(res, function(res2){
+                        res.client_res = [res.client_res];
+                        // res.client_res.push(res2);
+                        // console.log('Mitsu937ios: res2 = :',res2)
+                        // var proxy = res
+                        // delete proxy.amazon
+                        // console.log('Mitsu iojs935: ', JSON.stringify(res.client_res))
+                       
+                        outgoingResponse(res,'txt');
+                    });
+                // });
+            // });    
+            return
+        } 
+        //-----------------------------------------------------------------//
 
     history.recallHistory(data, function(item){
 

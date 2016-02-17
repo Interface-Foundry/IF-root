@@ -1048,7 +1048,7 @@ var searchFocus = function(data) {
 
 
 var searchMore = function(data){
-
+    console.log('FIRING SEARCHMORE')
     if (data.recallHistory && data.recallHistory.amazon){
 
         var moreHist = data;
@@ -1061,6 +1061,12 @@ var searchMore = function(data){
         data.action = moreHist.recallHistory.action;
         data.msg = moreHist.recallHistory.msg;
         data.tokens = moreHist.recallHistory.tokens;
+         //----supervisor: readding flags ---//
+         if (moreHist.flags) {
+             data.flags = moreHist.flags
+             data.source = moreHist.source
+         }
+         //----------------------------------//
 
         if (data.amazon.length > 3){ //only trim down in thirds for now
             data.amazon.splice(0, 3);

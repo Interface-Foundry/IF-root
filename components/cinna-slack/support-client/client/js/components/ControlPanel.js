@@ -63,29 +63,31 @@ class ControlPanel extends Component {
       if (msg.action === 'initial' || msg.action === 'similar' || msg.action === 'modify') {
       self.refs.draggableList.setState({previewing: true}) 
     }
-
-      //convert returned results into local state format
-      try {
-           for (var i = 0; i < msg.amazon.length; i++) {
-            self.state.items[i].index = i
-            self.state.items[i].id = msg.amazon[i].ASIN[0]
-            self.state.items[i].name = msg.amazon[i].ItemAttributes[0].Title[0]
-            self.state.items[i].changed = true
-            try {
-              self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
-            } catch(err) {
-              console.log('Could not get image for item: ',i)
-            }
-          } 
-      } catch(err) {
-        console.log('CPanel Error 114 Could not get results :',err)
-        return
+      if (msg.action !== 'checkout') {
+        //convert returned results into local state format
+        try {
+             for (var i = 0; i < msg.amazon.length; i++) {
+              self.state.items[i].index = i
+              self.state.items[i].id = msg.amazon[i].ASIN[0]
+              self.state.items[i].name = msg.amazon[i].ItemAttributes[0].Title[0]
+              self.state.items[i].changed = true
+              try {
+                self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+              } catch(err) {
+                console.log('Could not get image for item: ',i)
+              }
+            } 
+        } catch(err) {
+          console.log('CPanel Error 114 Could not get results :',err, msg)
+          return
+        }
       }
-     
-      self.setState({rawAmazonResults:msg.amazon})
 
+      if (msg.action !== 'checkout') {
+      self.setState({rawAmazonResults:msg.amazon})
+     }
       //store client_res for focus and more commands
-      if (msg.action === 'focus' && msg.client_res && msg.client_res.length > 0) {
+      if ((msg.action === 'focus' || msg.action === 'more' || msg.action === 'checkout') && msg.client_res && msg.client_res.length > 0) {
         self.setState({client_res: msg.client_res})
       }
       var identifier = {id: msg.source.id, properties: []}
@@ -236,14 +238,18 @@ class ControlPanel extends Component {
     newMessage.flags = {toClient: true}
     newMessage.amazon = this.state.rawAmazonResults ? this.state.rawAmazonResults : null
     newMessage.source.origin = 'slack'
-    // console.log('Cpanel229: Send Command: ', newMessage)
-    if (newMessage.amazon === null) return
-    if (newMessage.action === 'focus') {
-      if (!this.state.client_res || (this.state.client_res && this.state.client_res.length === 0)) {return}
+
+    console.log('Cpanel SendCommand: ',newMessage)
+    if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
+      if (!this.state.client_res || (this.state.client_res && this.state.client_res.length === 0)) { console.log('Cpanel244',newMessage); return}
         else {
-          newMessage.client_res = this.state.client_res
+           // if (newMessage.action === 'checkout') { newMessage.client_res = [this.state.client_res] }
+          // else { 
+            newMessage.client_res = this.state.client_res
+          // }
         }
     }
+        console.log('Cpanel246: Send Command: ', newMessage)
     socket.emit('new message', newMessage);
     this.setState({sendingToClient: true})
     const self = this
