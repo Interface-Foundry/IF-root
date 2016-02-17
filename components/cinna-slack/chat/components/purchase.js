@@ -42,7 +42,7 @@ var outputCart = function(data,cartHistory,callback) {
             client.createCart(options).then(function(results) {
                 if(results && results.PurchaseURL){
                     data.client_res = results.PurchaseURL[0];
-                    console.log('Mitsu purchase47: ', JSON.stringify(results))
+                    // console.log('Mitsu purchase47: ', JSON.stringify(results))
                     callback(data);                    
                 }else {
                     //add fix for this amazon error: ["AWS.ECommerceService.ItemNotEligibleForCart"]

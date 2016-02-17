@@ -3,6 +3,8 @@
 var express = require('express');
 var path = require('path');
 var app = express();
+app.use(bodyParser.json({limit: '200mb'}));
+app.use(bodyParser.urlencoded({limit: '200mb', extended: true}));
 var http = require('http').Server(app);
 var mongoose = require('mongoose');
 var session = require('express-session');
@@ -10,6 +12,7 @@ var cors = require('cors');
 var passport = require('passport');
 require('./config/passport')(passport);
 var io = require('socket.io')(http);
+var bodyParser = require('body-parser');
 
 // attach socket.io onto our server
 var socketEvents = require('./socketEvents')(io)
