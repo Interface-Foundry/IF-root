@@ -1,12 +1,7 @@
-import React, {
-    Component, PropTypes
-}
-from 'react/addons';
-import {
-    Button
-}
-from 'react-bootstrap';
+import React, { Component, PropTypes } from 'react/addons';
+import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
+import Spinner from 'react-spinner';
 import classnames from 'classnames';
 import * as UserAPIUtils from '../utils/UserAPIUtils';
 import DynamicForm,{labels} from './Form';
@@ -46,10 +41,16 @@ class ControlPanel extends Component {
       this.moveCard = this.moveCard.bind(this);
       this.state = {
         items: localStateItems.localState,
-        msg : true,
-        bucket: true,
-        action: true,
+        msg: '',
+        bucket: '',
+        action: '',
+        searchParam: '',
+        spinnerloading: false,
+        modifier: {},
+        color: false,
+        size: false,
         mounted: false,
+        focusInfo: null,
         visible: false
     }
   }
@@ -59,11 +60,15 @@ class ControlPanel extends Component {
     const self = this
      self.setState({ mounted: true });
      socket.on('results', function (msg) {
-      //enable react-motion animation
-      if (msg.action === 'initial' || msg.action === 'similar' || msg.action === 'modify') {
-      self.refs.draggableList.setState({previewing: true}) 
-    }
+      //-Stop loading spinner
+      self.state.spinnerloading = false
+      //-Reset search param
+      self.state.searchParam = ''
       if (msg.action !== 'checkout') {
+        //Store raw amazon results in state unless action was focus bc focus returns empty amazon for some reason
+        if (msg.action !== 'focus') {
+          self.setState({rawAmazonResults:msg.amazon})
+        }
         //convert returned results into local state format
         try {
              for (var i = 0; i < msg.amazon.length; i++) {
@@ -82,86 +87,80 @@ class ControlPanel extends Component {
           return
         }
       }
+    //-Store focus info
+    if (msg.focusInfo && msg.client_res && msg.client_res.length > 0) {
+      self.setState({focusInfo: msg.focusInfo})
+    } else if (msg.action !== 'focus'){
+      self.setState({focusInfo: null})
+    }
+    //-Store client_res for focus and more commands
+    if ((msg.action === 'focus' || msg.action === 'more' || msg.action === 'checkout') && msg.client_res && msg.client_res.length > 0) {
+      self.setState({client_res: msg.client_res})
+    }
 
-      if (msg.action !== 'checkout') {
-      self.setState({rawAmazonResults:msg.amazon})
-     }
-      //store client_res for focus and more commands
-      if ((msg.action === 'focus' || msg.action === 'more' || msg.action === 'checkout') && msg.client_res && msg.client_res.length > 0) {
-        self.setState({client_res: msg.client_res})
+    //Change active message in state
+    var identifier = {id: msg.source.id, properties: []}
+    for (var key in msg) {
+      if ((key === 'amazon' || key === 'client_res') && msg[key] !== '' ) {
+        identifier.properties.push({ [key] : msg[key]})
       }
-      var identifier = {id: msg.source.id, properties: []}
-      for (var key in msg) {
-        if ((key === 'amazon' || key === 'client_res') && msg[key] !== '' ) {
-          // if (key === 'client_res' && (msg['client_res'].length === 0)) {
-            
-          // }
-          identifier.properties.push({ [key] : msg[key]})
-        }
-      }  
-      // console.log('identifier: ', identifier)
-      //if no fields were updated on form take no action
-      if (identifier.properties.length === 0 ) {
-        return
-      } else {
-        actions.setMessageProperty(identifier)
-      }
-
-      setTimeout(function(){
-         self.refs.draggableList.setState({previewing: false})
-      }, 1000)
-      
-      
-
-    })
+    }  
+    if (identifier.properties.length === 0 ) {
+      return
+    } else {
+      actions.setMessageProperty(identifier)
+    }
+  })
 
    socket.on('change channel bc', function(channels) {
-    // const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
+    const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
     const firstMsg = self.props.activeMsg
     const firstMsgOld = filteredOld[0]
 
+    //-Emit change state event
+    socket.emit('change state', self.state);
+
     //Reset selected state
      self.setState({ selected: {name: null, index: null}})
 
-      //If there is atleast one channel existing already
-      if (firstMsgOld) {
-            //Update redux state with new item ordering        
-            const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
-            const result = []
-            self.state.items.forEach(function(stateItem){
-              reduxItems.forEach(function(reduxItem){
-                if (stateItem.id == reduxItem.ASIN[0]) {
-                 result.push(reduxItem)
-                }
-              })
+    //If there is atleast one channel existing...
+    if (firstMsgOld) {
+          //Update redux state with new item ordering        
+          const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
+          const result = []
+          self.state.items.forEach(function(stateItem){
+            reduxItems.forEach(function(reduxItem){
+              if (stateItem.id == reduxItem.ASIN[0]) {
+               result.push(reduxItem)
+              }
             })
-            let identifier = {id: firstMsgOld.source.id, properties: []}
-            identifier.properties.push({ amazon : result})
-            actions.setMessageProperty(identifier)
-       }
+          })
+          let identifier = {id: firstMsgOld.source.id, properties: []}
+          identifier.properties.push({ amazon : result})
+          actions.setMessageProperty(identifier)
+     }
         
-        //Load items into state for next channel
-         const nextItems = []
-         try {
-           for (var i = 0; i < firstMsg.amazon.length; i++) {
-            let item = { index: null, id: null, name: null, changed: true}
-            item.index = i
-            item.id = firstMsg.amazon[i].ASIN[0]
-            item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
-            try {
-              item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
-            } catch(err) {
-              console.log('Could not get image for item: ',i)
-            }
-            nextItems.push(item)
-          } 
-      } catch(err) {
-        console.log('CPanel Error 169 Could not get results :',err)
-        return
-      }
-      // console.log('nextItems: ',nextItems,'defaultState: ',localStateItems.defaultState[0].name)
-      if (nextItems.length > 0) {
+    //Load items into state for next channel
+     const nextItems = []
+     try {
+       for (var i = 0; i < firstMsg.amazon.length; i++) {
+        let item = { index: null, id: null, name: null, changed: true}
+        item.index = i
+        item.id = firstMsg.amazon[i].ASIN[0]
+        item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
+        try {
+          item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+        } catch(err) {
+          console.log('Could not get image for item: ',i)
+        }
+        nextItems.push(item)
+      } 
+    } catch(err) {
+      console.log('CPanel Error 169 Could not get results :',err)
+      return
+    }
+    if (nextItems.length > 0) {
          // console.log(0)
         self.setState({ items: nextItems })
       } else {
@@ -229,7 +228,299 @@ class ControlPanel extends Component {
         changed: false
         }]})
       }
+
+     //-Reset local state params as necessary
+      self.state.msg =  firstMsg.msg
+      self.state.bucket =  firstMsg.bucket
+      self.state.action =  firstMsg.action
+      self.state.spinnerloading = false
+      self.state.modifier = { color: null, size: null}
+      self.state.color = false
+      self.state.size = false
+      self.state.searchParam = ''
+      self.state.focusInfo = null
     })
+  }
+
+  // onChange(e) {
+  //   const val = e.target.value;
+  //   this.setState({
+  //     searchParam: val
+  //   })
+  // }
+
+  setField(choice) {
+    let bucket = ''
+    if (choice === 'checkout') {
+      bucket = 'purchase'
+    }
+    this.setState({
+        bucket: choice === 'checkout' ? 'purchase' : 'search',
+        action: choice
+      })
+  }
+
+  searchAmazon(query) {
+    const {activeMsg} = this.props
+    const newQuery = activeMsg;
+    const self = this;
+     //TODO
+     // processData.urlShorten(data,function(res){
+     //    var count = 0;
+     //    //put all result URLs into arr
+     //    async.eachSeries(res, function(i, callback) {
+     //        data.urlShorten.push(i);//save shortened URLs
+     //        processData.getNumEmoji(data,count+1,function(emoji){
+     //            data.client_res.push(emoji + ' ' + res[count]);
+     //            count++;                           
+     //            callback();
+     //        });
+     //    }, function done(){
+             if (!this.state.searchParam) {
+              if (query) {
+                this.state.searchParam = query
+              } else if (document.querySelector('#search-input').value !== ''){
+                this.state.searchParam = document.querySelector('#search-input').value
+              } else {
+                console.log('search input is empty.')
+                return
+              }
+            }
+            if (newQuery._id) {
+              delete newQuery._id
+            }
+            newQuery.msg = this.state.searchParam
+            newQuery.bucket = 'search'
+            newQuery.action = 'initial'
+            newQuery.tokens = newQuery.msg.split()
+            newQuery.source.origin = 'supervisor'
+            newQuery.flags = {}
+            newQuery.flags.toCinna = true
+            newQuery.client_res = []
+            socket.emit('new message', newQuery);
+            this.setState({
+              spinnerloading: true,
+              searchParam: ''
+            })
+            setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
+        // });
+      // });
+    document.querySelector('#search-input').value = ''
+  }
+
+  searchSimilar() {
+    const { activeMsg } = this.props
+    const newQuery = activeMsg;
+    const selected = this.state.selected
+    const self = this
+    if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults) {
+      console.log('Please select an item or do an initial search.')
+      return
+    }
+    if (newQuery._id) {
+      delete newQuery._id
+    }
+    newQuery.bucket = 'search'
+    newQuery.action = 'similar'
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
+    newQuery.amazon =  this.state.rawAmazonResults
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    // console.log('Form209-searchSimilar(): newQuery: ',newQuery)
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    setTimeout(function(){
+      if (self.state.spinnerloading === true) {
+         self.setState({
+            spinnerloading: false
+          })
+      }
+     },8000)
+  }
+
+  searchModify() {
+    const { activeMsg} = this.props;
+    const newQuery = activeMsg;
+    const selected = this.state.selected;
+    const self = this;
+    if (!selected || !selected.name || !selected.id) {
+      console.log('Please select an item.')
+      return
+    }
+   if (newQuery._id) {
+      delete newQuery._id
+    }
+    newQuery.bucket = 'search'
+    newQuery.action = 'modify'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor'
+    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    newQuery.dataModify = { type: '', val: []}
+    if (this.state.color) {
+      newQuery.dataModify.type = 'color'
+      switch (this.state.modifier.color) {
+        case 'Purple': 
+          newQuery.dataModify.val.push({"hex": "#A020F0","name": "Purple","rgb": [160, 32, 240],"hsl": [196, 222, 136]})
+          break
+        case 'Blue Violet': 
+          newQuery.dataModify.val.push({"hex": "#8A2BE2","name": "Blue Violet", "rgb": [138, 43, 226], "hsl": [192, 193, 134]})
+          break
+        case 'Slate Blue': 
+          newQuery.dataModify.val.push({"hex": "#6A5ACD","name": "Slate Blue","rgb": [106, 90, 205],"hsl": [175, 136, 147]})
+          break
+        case 'Royal Blue': 
+          newQuery.dataModify.val.push({"hex": "#4169E1","name": "Royal Blue","rgb": [65, 105, 225],"hsl": [159, 185, 145]})
+          break
+        default:
+         console.log('No color selected.')
+      }
+    }
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    setTimeout(function(){
+        if (self.state.spinnerloading === true) {
+           self.setState({
+              spinnerloading: false
+            })
+        }
+       },8000)
+  }
+
+  searchFocus() {
+    const { activeMsg} = this.props
+    const newQuery = activeMsg;
+    const selected = this.state.selected;
+    const self = this
+    if (!selected || !selected.name || !selected.id) {
+      console.log('Please select an item.')
+      return
+    }
+    if (newQuery._id) {
+      delete newQuery._id
+    }
+    newQuery.bucket = 'search'
+    newQuery.action = 'focus'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
+  }
+
+  searchMore() {
+    const { activeMsg} = this.props
+    const newQuery = activeMsg;
+    const selected = this.state.selected
+    const self = this
+    if (newQuery._id) {
+      delete newQuery._id
+    }
+    newQuery.bucket = 'search'
+    newQuery.action = 'more'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    setTimeout(function(){
+      if (self.state.spinnerloading === true) {
+         self.setState({
+            spinnerloading: false
+          })
+      }
+     },8000)
+  }
+
+  checkOut() {
+    const { activeMsg } = this.props;
+    const newQuery = activeMsg;
+    const selected = this.state.selected;
+    const self = this;
+    if (newQuery._id) {
+      delete newQuery._id;
+    }
+    newQuery.bucket = 'purchase';
+    newQuery.action = 'checkout';
+    newQuery.tokens = newQuery.msg.split();
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.msg = 'buy ' + newQuery.searchSelect.toString(); 
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    setTimeout(function(){
+      if (self.state.spinnerloading === true) {
+         self.setState({
+            spinnerloading: false
+          })
+      }
+     },8000)
+  }
+
+ handleSelect(evt, val) {
+    const self = this
+    const field = ( 'Purple Blue Violet Slate Blue Royal Blue'.indexOf(val.trim()) > -1 ) ? 'color' : ''
+    switch (field) {
+      case 'color' : 
+        self.setState( {modifier: { color : val } })
+        break
+      case 'size' : 
+        self.setState( {modifier: { size : val }})
+        break
+    } 
+  }
+
+  //Function to search amazon if key hit enter
+  handleSubmit(e) {
+    e.preventDefault()
+    //*note: increase the numerical value of below property when adding new buttons to form.  yeah it's weird sorry
+    let query = e.target[6].value
+    this.searchAmazon(query)
   }
 
   sendCommand(newMessage) {
@@ -238,8 +529,6 @@ class ControlPanel extends Component {
     newMessage.flags = {toClient: true}
     newMessage.amazon = this.state.rawAmazonResults ? this.state.rawAmazonResults : null
     newMessage.source.origin = 'slack'
-
-    console.log('Cpanel SendCommand: ',newMessage)
     if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
       if (!this.state.client_res || (this.state.client_res && this.state.client_res.length === 0)) { console.log('Cpanel244',newMessage); return}
         else {
@@ -249,7 +538,7 @@ class ControlPanel extends Component {
           // }
         }
     }
-        console.log('Cpanel246: Send Command: ', newMessage)
+    console.log('Cpanel246: Send Command: ', newMessage)
     socket.emit('new message', newMessage);
     this.setState({sendingToClient: true})
     const self = this
@@ -275,88 +564,230 @@ class ControlPanel extends Component {
      }));
   }
 
-   handleClick(index) {
+  handleClick(index) {
     this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index}})
   }
 
-  handleMouseMove(lastPressed, row) {
-    const { items } = this.state;
-    function reinsert(arr, from, to) {
-      const _arr = arr.slice(0);
-      const val = _arr[from];
-      _arr.splice(from, 1);
-      _arr.splice(to, 0, val);
-      return _arr;
-    }
-    const itemsReordered = reinsert(items, findIndex(items, function(o) { return o.index == lastPressed }), row);
-    this.setState({items: itemsReordered});
+
+  handleChange(field, e) {
+    var nextState = {}
+    nextState[field] = e.target.checked
+    this.setState(nextState)
   }
 
+  // handleMouseMove(lastPressed, row) {
+  //   const { items } = this.state;
+  //   function reinsert(arr, from, to) {
+  //     const _arr = arr.slice(0);
+  //     const val = _arr[from];
+  //     _arr.splice(from, 1);
+  //     _arr.splice(to, 0, val);
+  //     return _arr;
+  //   }
+  //   const itemsReordered = reinsert(items, findIndex(items, function(o) { return o.index == lastPressed }), row);
+  //   this.setState({items: itemsReordered});
+  // }
 
-  handleMouseUp(index) {
-    const { items } = this.state;
-    let selectedIndex = findIndex(items, function(o) { return o.index == index })
 
-    this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
-  }
+  // handleMouseUp(index) {
+  //   const { items } = this.state;
+  //   let selectedIndex = findIndex(items, function(o) { return o.index == index })
+
+  //   this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
+  // }
 
   renderItem(index, key) {
       const highlightBox =  (this.state.selected && this.state.selected.index === index) ? {border:'0.2em solid #90caf9', textAlign: 'center'} : {};
       const boundClick = this.handleClick.bind(this, index);
        return  (  
-                    <div key={this.state.items[index].id} onClick={boundClick} style={highlightBox} >
-                        <Card key={this.state.items[index].id}
-                              index={index}
-                              id={this.state.items[index].id}
-                              text={this.state.items[index].name}
-                              img = {this.state.items[index].img}
-                              moveCard={this.moveCard}  />
-                    </div>   
-                )
+                <div key={this.state.items[index].id} onClick={boundClick} style={highlightBox} >
+                    <Card key={this.state.items[index].id}
+                          index={index}
+                          id={this.state.items[index].id}
+                          text={this.state.items[index].name}
+                          img = {this.state.items[index].img}
+                          moveCard={this.moveCard}  />
+                </div>   
+      )
     }
 
   render() {
      const { activeMsg, activeControl, activeChannel, messages,actions,changeMode} = this.props;
-     const fields  = ['msg','bucket','action']
+     // const fields  = ['msg','bucket','action']
      const self = this;
      const { items,selected } = this.state;
-     const list = (this.state.selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
+     const list = (selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
      const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
      const statusStyle = activeChannel.resolved ?  { fontSize:'1.3em' ,color: 'green'} : { fontSize:'1.3em',color: 'red'}
      const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
+     const showSearchBox = this.state.action === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {display: 'none'};
+     const showSimilarBox = this.state.action === 'similar' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
+     const showModifyBox = this.state.action === 'modify' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
+     const showFocusBox = this.state.action === 'focus' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
+     const showMoreBox = this.state.action === 'more' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
+     const showPrompt = (!selected || !selected.name) ? { color: 'black'} : { color: 'white'}
+     const showCheckoutBox = this.state.action === 'checkout' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
+     const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
+     const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
-            <section className='rightnav'>
-          <div>   
-              <label>
-                <Toggle
-                  ref='toggle'
-                  defaultChecked={this.props.resolved}
-                  onChange={ () => { changeMode(activeChannel) }} />
-                  <span style={statusStyle}>  {statusText}</span>
-              </label>
-
-            <DynamicForm
-              onSubmit={this.props.onSubmit} changed=""
-              fields={fields} selected={selected} activeMsg={activeMsg} activeChannel={activeChannel} messages={messages} actions={actions} />
-          </div>   
-          </section>
-
-
-              <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
-                      Send Command
-              </Button>
-          </div>
-          <div id="third-column" style= {{ padding: 0}}>          
-              <div style={style}>  
-                <div style={{textAlign: 'left', fontSize:'1.1em'}}> {(this.state.selected && this.state.selected.name) ? this.state.selected.name: 'none selected'} </div> 
-                      <DraggableList ref='draggableList'  selected={this.state.selected} mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
-               </div>
+            <div id="search-box" style={showSearchBox}>
+              <input type="text" id="search-input" />
+                <Button bsSize = "large" disabled={this.state.spinnerloading}  style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchAmazon()} >
+                  Search Amazon
+                   <div style={spinnerStyle}>
+                    <Spinner />
+                   </div>
+                </Button>      
             </div>
-         </div>
+
+            <div id="similar-box" style={showSimilarBox}>
+                <h3 style={showPrompt}> Please select an item. </h3>
+                <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
+                  Search Similar 
+                    <div style={spinnerStyle}>
+                    <Spinner />
+                   </div>
+                </Button>
+            </div>
+
+             <div id="modify-box" style={showModifyBox}>
+                  <h3 style={showPrompt}> Please select a modifier. </h3>
+                  <br />
+                  <div>
+                      <input type="checkbox"
+                        checked={this.state.modifier.color}
+                        onChange={this.handleChange.bind(this, 'color')} style={{margin: '1em'}}/> 
+                       <DropdownButton disabled={!this.state.color} bsStyle='info' title='Color' key='1' id='dropdown-basic-1' onSelect={::this.handleSelect}>
+                        <MenuItem eventKey="Purple">Purple</MenuItem>
+                        <MenuItem eventKey="Blue Violet">Blue Violet</MenuItem>
+                        <MenuItem eventKey="Slate Blue">Slate Blue</MenuItem>
+                        <MenuItem eventKey="Royal Blue" active>Royal Blue</MenuItem>
+                        <MenuItem divider />
+                        <MenuItem eventKey="4">Separated link</MenuItem>
+                      </DropdownButton>
+                      <input type="checkbox"
+                        checked={this.state.modifier.size}
+                        onChange={this.handleChange.bind(this, 'size')} style={{margin: '1em'}}/> 
+                       <DropdownButton disabled={!this.state.size} bsStyle='info' title='Size' key='2' id='dropdown-basic-2'>
+                        <MenuItem eventKey="X-Small">X-Small</MenuItem>
+                        <MenuItem eventKey="Small">Small</MenuItem>
+                        <MenuItem eventKey="Medium" active>Medium</MenuItem>
+                        <MenuItem eventKey="Large">Large</MenuItem>
+                        <MenuItem eventKey="X-Large">X-Large</MenuItem>
+                        <MenuItem divider />
+                        <MenuItem eventKey="4">Separated link</MenuItem>
+                      </DropdownButton>
+                  </div>
+                  <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading || (!this.state.color && !this.state.size) || (!this.state.modifier.color && !this.state.modifier.size )} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
+                    Search Modify
+                    <div style={spinnerStyle}>
+                      <Spinner />
+                    </div>
+                  </Button>
+            </div>
+
+            <div id="focus-box" style={showFocusBox}>
+                          <div style={focusInfoStyle}> 
+                             Price: {this.state.focusInfo && this.state.focusInfo.topStr ? this.state.focusInfo.topStr : null}
+                             <br />
+                             Reviews: {this.state.focusInfo && this.state.focusInfo.reviews ? this.state.focusInfo.reviews : null}
+                             <br />
+                             Feature: {this.state.focusInfo && this.state.focusInfo.feature ? this.state.focusInfo.feature : null}
+                             <br />
+                          </div>
+                            
+                <h3 style={showPrompt}> Please select an item. </h3>
+                <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
+                  Search Focus
+                    <div style={spinnerStyle}>
+                    <Spinner />
+                   </div>
+                </Button>
+            </div>
+
+             <div id="more-box" style={showMoreBox}>
+                <Button bsSize = "large" disabled={this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchMore()} >
+                  Search More
+                    <div style={spinnerStyle}>
+                    <Spinner />
+                   </div>
+                </Button>
+             </div>
+
+              <div id="checkout-box" style={showCheckoutBox}>
+                <div style={focusInfoStyle}> </div>
+                <h3 style={showPrompt}> Please select an item. </h3>
+                <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.checkOut()} >
+                  Checkout Item
+                    <div style={spinnerStyle}>
+                    <Spinner />
+                   </div>
+                </Button>
+            </div>
+            <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
+              Send Command
+            </Button>
+          </div>
+
+          <div id="third-column" style= {{ padding: 0}}>
+            <section className='rightnav'> 
+                <label>
+                  <Toggle
+                    ref='toggle'
+                    defaultChecked={this.props.resolved}
+                    onChange={ () => { changeMode(activeChannel) }} />
+                    <span style={statusStyle}>  {statusText}</span>
+                </label>
+                <form ref='form1' onSubmit={::this.handleSubmit}>
+                    <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
+                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
+                          Initial
+                        </Button>
+                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('similar')} >
+                          Similar
+                        </Button>
+                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('modify')} >
+                          Modify
+                        </Button>
+                         <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('focus')} >
+                          Focus
+                        </Button>
+                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('more')} >
+                          More
+                        </Button>
+                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('checkout')} >
+                          Checkout
+                        </Button>
+                   
+                        
+
+                    </div>
+                  </form> 
+                    {list}
+            </section>
+
+            </div>
+        </div>
       );
   }
 }
+
+// <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
+// </div>
+
+
+// <DynamicForm
+//   onSubmit={this.props.onSubmit} changed=""
+//   fields={fields} selected={selected} activeMsg={activeMsg} activeChannel={activeChannel} messages={messages} actions={actions} />
+
+// <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
+ // </ReactCSSTransitionGroup>
+
+
+
+// <DraggableList ref='draggableList'  selected={this.state.selected} mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
+
 
 export default ControlPanel

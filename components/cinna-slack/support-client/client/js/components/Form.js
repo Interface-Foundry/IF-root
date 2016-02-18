@@ -22,7 +22,6 @@ class DynamicForm extends Component {
     super(props, context)
     this.state = {
       filteredMessages: null,
-      channel: '',
       msg: '',
       bucket: '',
       action: '',
@@ -31,9 +30,8 @@ class DynamicForm extends Component {
       spinnerloading: false,
       modifier: {},
       color: false,
-      size: false,
-      resolved: ''
-    };
+      size: false
+      };
   }
 
   componentDidMount() {
@@ -153,13 +151,11 @@ class DynamicForm extends Component {
     if (choice === 'checkout') {
       bucket = 'purchase'
     }
-
     this.setState({
         bucket: choice === 'checkout' ? 'purchase' : 'search',
         action: choice,
         dirty: true
       })
-      // fields['bucket'].value = choice;
   }
 
   searchAmazon(query) {
@@ -483,7 +479,7 @@ class DynamicForm extends Component {
 
   render() {
     const {
-      fields, saveState, messages, activeChannel, selected
+      fields, messages, activeChannel, selected
     } = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const showSearchBox = this.state.action === 'initial' ? {

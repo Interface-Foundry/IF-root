@@ -930,8 +930,11 @@ function saveToCart(data){
                 // callback();
             // }, function done(){
             // console.log('io930: cartHistory: ', cartHistory)
-              if (cartHistory.cart.length === 0) return console.log('No items in proxy cart: io.js : Line 933', cartHistory)  
-                purchase.outputCart(data, cartHistory,function(res){ 
+              if (cartHistory.cart.length == 0) { 
+                console.log('No items in proxy cart: io.js : Line 933', cartHistory) 
+                return 
+            } else {
+                  purchase.outputCart(data, cartHistory,function(res){ 
                     // processData.urlShorten(res, function(res2){
                         res.client_res = [res.client_res];
                         // res.client_res.push(res2);
@@ -945,6 +948,7 @@ function saveToCart(data){
                 // });
             // });    
             return
+            } 
         } 
         //-----------------------------------------------------------------//
 
