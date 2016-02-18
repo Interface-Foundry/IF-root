@@ -94,10 +94,17 @@ export default class Card extends Component {
     const opacity = isDragging ? 0 : 1;
 
     return connectDragSource(connectDropTarget(
-    <div style={{ width: '100', height:'100', overflow: 'hidden',display: 'flexbox', marginRight: '57%'}}>
-      <img style={{ maxWidth: '100', height: 'auto',margin: '0.2em', border:'0.3em solid orange'}} src={img} />
+    <div className='flexbox-container' style={{height:'100', overflow: 'hidden'}}>
+      <div>
+        <img style={{ maxWidth: '100', height: 'auto'}} src={img} />
+      </div>
+      <div style={{padding:0, margin: '0.2em',fontSize: '10px', textAlign: 'left'}}>
+        {this.props.text.slice(0,40)}
+        <br />
+        <br />
+        {this.props.price}
+      </div>
     </div>
-  
     ));
   }
 }

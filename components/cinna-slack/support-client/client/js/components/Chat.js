@@ -222,7 +222,6 @@ class Chat extends Component {
     // console.log('hangleToggleChange fired')
     this.setState({autoToggled: true})
     this.refs.cpanel.refs.child.refs.toggle.handleClick('forced')
-    
   }
 
 

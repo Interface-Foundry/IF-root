@@ -221,8 +221,8 @@ span[class*="glyphicon-one-fine"] {
 }
 
 .react-toggle-track {
-  width: 50px;
-  height: 24px;
+  width: 100px;
+  height: 48px;
   padding: 0;
   border-radius: 30px;
   background-color: #4D4D4D;
@@ -291,8 +291,8 @@ span[class*="glyphicon-one-fine"] {
   position: absolute;
   top: 1px;
   left: 1px;
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border: 1px solid #4D4D4D;
   border-radius: 50%;
   background-color: #FAFAFA;

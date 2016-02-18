@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react/addons';
-import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import { Button, ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import Spinner from 'react-spinner';
 import classnames from 'classnames';
@@ -75,6 +75,7 @@ class ControlPanel extends Component {
               self.state.items[i].index = i
               self.state.items[i].id = msg.amazon[i].ASIN[0]
               self.state.items[i].name = msg.amazon[i].ItemAttributes[0].Title[0]
+              self.state.items[i].price = msg.amazon[i].realPrice ? msg.amazon[i].realPrice : (msg.amazon[i].ItemAttributes[0].ListPrice ? msg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
               self.state.items[i].changed = true
               try {
                 self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
@@ -145,10 +146,11 @@ class ControlPanel extends Component {
      const nextItems = []
      try {
        for (var i = 0; i < firstMsg.amazon.length; i++) {
-        let item = { index: null, id: null, name: null, changed: true}
+        let item = { index: null, id: null, name: null, price: null, changed: true}
         item.index = i
         item.id = firstMsg.amazon[i].ASIN[0]
         item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
+        item.price = firstMsg.amazon[i].realPrice ? firstMsg.amazon[i].realPrice : (firstMsg.amazon[i].ItemAttributes[0].ListPrice ? firstMsg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
         try {
           item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
         } catch(err) {
@@ -234,7 +236,7 @@ class ControlPanel extends Component {
       self.state.bucket =  firstMsg.bucket
       self.state.action =  firstMsg.action
       self.state.spinnerloading = false
-      self.state.modifier = { color: null, size: null}
+      self.setState({modifier: { color: null, size: null}})
       self.state.color = false
       self.state.size = false
       self.state.searchParam = ''
@@ -565,7 +567,7 @@ class ControlPanel extends Component {
   }
 
   handleClick(index) {
-    this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index}})
+    this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index, price: this.state.items[index].price}})
   }
 
 
@@ -605,6 +607,7 @@ class ControlPanel extends Component {
                           index={index}
                           id={this.state.items[index].id}
                           text={this.state.items[index].name}
+                          price={this.state.items[index].price}
                           img = {this.state.items[index].img}
                           moveCard={this.moveCard}  />
                 </div>   
@@ -618,7 +621,7 @@ class ControlPanel extends Component {
      const { items,selected } = this.state;
      const list = (selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
      const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
-     const statusStyle = activeChannel.resolved ?  { fontSize:'1.3em' ,color: 'green'} : { fontSize:'1.3em',color: 'red'}
+     const statusStyle = activeChannel.resolved ?  { fontSize:'3em' ,color: 'green'} : { fontSize:'3em',color: 'red'}
      const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
      const showSearchBox = this.state.action === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {display: 'none'};
      const showSimilarBox = this.state.action === 'similar' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
@@ -726,13 +729,12 @@ class ControlPanel extends Component {
                    </div>
                 </Button>
             </div>
-            <Button bsSize = "large" style={{ margin: '3em',textAlign: 'center', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
-              Send Command
+            <Button block bsSize = "large" style={{ position: 'fixed', bottom:'20%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
+              SEND TO CLIENT
             </Button>
           </div>
 
           <div id="third-column" style= {{ padding: 0}}>
-            <section className='rightnav'> 
                 <label>
                   <Toggle
                     ref='toggle'
@@ -742,31 +744,32 @@ class ControlPanel extends Component {
                 </label>
                 <form ref='form1' onSubmit={::this.handleSubmit}>
                     <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
-                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('initial')} >
+                      <ButtonGroup bsSize = "large" bsStyle = "primary"  style={{margin: '0.2em'}}>
+                        <Button className="form-button" style={{backgroundColor: '#1976d2', color: 'white'}} onClick = { () => this.setField('initial')} >
                           Initial
                         </Button>
-                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('similar')} >
+                        <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('similar')} >
                           Similar
                         </Button>
-                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('modify')} >
+                        <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('modify')} >
                           Modify
                         </Button>
-                         <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('focus')} >
+
+                         <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('focus')} >
                           Focus
                         </Button>
-                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('more')} >
+                        <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('more')} >
                           More
                         </Button>
-                        <Button className="form-button" bsSize = "large" style={{ margin: '0.2em', backgroundColor: '#45a5f4' }} bsStyle = "primary" onClick = { () => this.setField('checkout')} >
+                        <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('checkout')} >
                           Checkout
                         </Button>
-                   
-                        
-
+                      </ButtonGroup>
                     </div>
                   </form> 
+                  <div style={{overflow: 'auto', maxHeight: 520, maxWidth: '95%',border: 'grey solid 0.3em'}}>
                     {list}
-            </section>
+                  </div>
 
             </div>
         </div>
