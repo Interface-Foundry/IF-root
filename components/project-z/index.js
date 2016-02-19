@@ -28,14 +28,21 @@ parentApp.get('/product/*', function(req, res, next) {
   	//localhost:9901/product/http:%2F%2Fwww.amazon.com%2FMilitary-Shockproof-Waterproof-Wireless-Bluetooth%2Fdp%2FB0192UXR4Y%253Fpsc%253D1%2526SubscriptionId%253DAKIAILD2WZTCJPBMK66A%2526tag%253Dbubboorev-20%2526linkCode%253Dxm2%2526camp%253D2025%2526creative%253D165953%2526creativeASIN%253DB0192UXR4Y/id/554zd_1Db01x/pid/ABZGQ5
 
 	var processReq = querystring.unescape(req.url); //magic cinna moment ✨
-	var productId = processReq.split('/pid/')[1];
-	processReq = processReq.split('/pid/')[0];
-	var userId = processReq.split('/id/')[1];
-	var url = processReq.split('/id/')[0].replace('/product/','');
-	saveClick(productId,userId,url); //store click to user id
 
-	//redirect 
-	res.redirect(url); //magic cinna moment ✨ 
+  //we have a newly generated link
+  if(processReq.indexOf('/pid/') > -1){
+    var productId = processReq.split('/pid/')[1];
+    processReq = processReq.split('/pid/')[0];
+    var userId = processReq.split('/id/')[1];
+    var url = processReq.split('/id/')[0].replace('/product/','');
+    saveClick(productId,userId,url,req); //store click to user id
+    //redirect 
+    res.redirect(url); //magic cinna moment ✨ 
+  }
+  //backup for old links
+  else {
+    res.redirect(req.url.replace('/product/','')); //magic cinna moment ✨ 
+  }
 
    //querystring.unescape(req.url.replace('/product/',''))
 });
@@ -51,9 +58,19 @@ ghost().then(function (ghostServer) {
     errors.logErrorAndExit(err, err.context, err.help);
 });
 
-function saveClick(productId,userId,url){
+function saveClick(productId,userId,url,req){
 
   var processId = userId.split('_');
+
+  var IP;
+
+  if(req.headers['x-forwarded-for']){
+    IP = req.headers['x-forwarded-for'];
+  }else if (req.connection.remoteAddress){
+    IP = req.connection.remoteAddress;
+  }else {
+    IP = 'missing';
+  }
 
   var data = {
     source: {
@@ -66,7 +83,9 @@ function saveClick(productId,userId,url){
     action:'click',
     click: {
       productId: productId,
-      url: url
+      url: url,
+      IP: IP,
+      headers:JSON.stringify(req.headers['user-agent'])
     }
   };
   data = new Message(data);
@@ -75,7 +94,7 @@ function saveClick(productId,userId,url){
           console.log('Mongo err ',err);
       }
       else{
-          console.log('click saved');
+          //console.log('click saved');
       }
   }); 
 }		
