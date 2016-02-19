@@ -603,13 +603,28 @@ class ControlPanel extends Component {
          this.setState({count: count})
          } else {
            let current = findIndex(this.state.searchSelect, function(el) { return (el-1) === index })
-           if (current === (count)) {
+           if (current === (count-1)) {
             console.log('clicked same count = index')
              return 
            } else {
-             tempArray[count-1] = index
-             if (tempArray[count]) {tempArray[count] = index + 1}
-             if (tempArray[count+1]) {tempArray[count+1] = index + 1}
+             switch(count) {
+              case 1: 
+                  tempArray[0] = index 
+                  tempArray[1] = tempArray[2]
+                  tempArray[2] = tempArray[3]
+              case 2:
+                  tempArray[1] = index 
+                  tempArray[2] = tempArray[3]
+                  break;
+              case 3:
+                  tempArray[2] = index 
+                  break;
+              default:
+                  return
+             }
+             if (count == 1) {tempArray[count-1] = index }
+             if (count == 2) {tempArray[count] = tempArray[count+1]}
+             if (count == 3) {tempArray[count+1] = tempArray[count+2]}
              // if (tempArray.length > 3) { tempArray = tempArray.slice(0,2)}
              this.setState({searchSelect: tempArray})
              this.setState({count: count})
