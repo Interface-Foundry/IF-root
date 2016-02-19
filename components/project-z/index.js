@@ -80,11 +80,3 @@ function saveClick(productId,userId,url){
   }); 
 }		
           
-
-    source: {
-        origin: String,
-        channel: String,
-        org: String,
-        id: { type: String, index: true }
-    },    
-        
