@@ -117,25 +117,6 @@
     function SparklineCtrl($scope,$http) {
 
 
-        $http({
-          method: 'GET',
-          url: '/vc/timexsearch'
-        }).then(function successCallback(res) {
-
-            // this callback will be called asynchronously
-            // when the response is available
-            console.log('db ',res)
-          }, function errorCallback(res) {
-
-            console.log('ERROR: ',res);
-            // called asynchronously if an error occurs
-            // or server returns response with an error status.
-          });
-
-
-
-
-
         $scope.demoData1 = {};
         $scope.simpleChart1 = {};
         $scope.simpleChart2 = {};
@@ -161,6 +142,10 @@
                 height: '150px'
             }
         };
+
+
+
+
 
         $scope.simpleChart1 = {
             data: [3, 1, 2, 3, 5, 3, 4, 2],

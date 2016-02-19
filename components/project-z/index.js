@@ -52,10 +52,15 @@ ghost().then(function (ghostServer) {
 });
 
 function saveClick(productId,userId,url){
+
+  var processId = userId.split('_');
+
   var data = {
     source: {
       id: userId,
-      org: 'kip'
+      origin: 'kip',
+      org: processId[0],
+      channel: processId[1]
     },
     bucket:'metrics',
     action:'click',
@@ -74,5 +79,12 @@ function saveClick(productId,userId,url){
       }
   }); 
 }		
-              
+          
+
+    source: {
+        origin: String,
+        channel: String,
+        org: String,
+        id: { type: String, index: true }
+    },    
         

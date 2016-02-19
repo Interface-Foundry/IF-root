@@ -4,6 +4,8 @@ var bodyParser = require('body-parser')
 var morgan = require('morgan')
 var config = require('config')
 var request = require('request')
+var async = require('async')
+var _ = require('underscore')
 var auth = require('basic-auth-connect')
 
 var mongoose = require('mongoose');
@@ -49,28 +51,282 @@ app.get('/status', function(req, res) {
   })
 })
 
-app.get('/vc/timexsearch', function(req, res) {
+app.post('/vc/timexsearch', function(req, res) {
 
-  Message.find({}).sort({'_id': -1}).limit(10).exec(function(err, msg) {  
+  // var stream = Message.find().sort({'_id': -1}).select('source').stream()
+  // stream.on('error', function (err) {
+  //   console.error(err)
+  // })
+  // stream.on('data', function (doc) {
+  //   console.log(doc)
+  // })
+
+  console.log('zzzz ',req.body);
+
+  //ADD IN TIME PERIODS HERE FOR QUERY, AND USER ID !!!!!!
+
+  if(req.body.start_date && req.body.end_date){
+
+    console.log('CHECK 1 ');
+    doQuery(req.body,function(oz){
+      res.send(oz);
+    }); 
+
+  }else {
+    console.log('error: dates missing!');
+  }
+
+  initSlackUsers(app.get('env'));
+
+
+});
+
+
+
+
+//get stored slack users from mongo
+function initSlackUsers(env){
+    console.log('loading with env: ',env);
+    //load kip-pepper for testing
+    if (env === 'development_alyx') {
+        var testUser = [{
+            team_id:'T0H72FMNK',
+            bot: {
+                bot_user_id: 'U0H6YHBNZ',
+                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+            },
+            meta: {
+                initialized: false
+            }
+        }];
+        loadSlackUsers(testUser);
+    }else if (env === 'development_mitsu'){
+        var testUser = [{
+            team_id:'T0HLZP09L',
+            bot: { 
+                bot_user_id: 'cinnatest',
+                bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
+            },
+            meta: {
+                initialized: false
+            }
+        }];
+        loadSlackUsers(testUser);
+    }
+    else {
+        console.log('retrieving slackbots from mongo');
+        Slackbots.find().exec(function(err, users) {
+            if(err){
+                console.log('saved slack bot retrieval error');
+            }
+            else {
+                loadSlackUsers(users);
+            }
+        });        
+    }
+}
+
+//* * * * * * **  * * * **  ** * * * * *  * * * * ** * 
+//SHOW USER NUMBERS BY PLATFORM, UNIQUE IDS per org???
+
+
+//load slack users into memory, adds them as slack bots
+function loadSlackUsers(users){
+    console.log('loading '+users.length+' Slack teams');
+
+    var slackTeams = [];
+
+    async.eachSeries(users, function(user, callback2) {
+
+        if (user.bot && !user.bot.bot_access_token && !user.bot.bot_user_id){
+            console.log('ERROR: bot token and id missing from DB for ',user);
+            callback2();
+        }else if (!user.bot) {
+          callback2();
+        }
+
+        //async parrallel: 
+        // 
+        async.series([
+            function(callback){
+              request('https://slack.com/api/channels.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
+                if(err){
+                  console.log('requesting channels.list error: ',err);
+                  callback(null);
+                }
+                else {
+                  callback(null,JSON.parse(body));
+                }
+              });
+            },
+            function(callback){
+              request('https://slack.com/api/team.info?token='+user.bot.bot_access_token+'', function(err, res, body) {
+                if(err){
+                  console.log('requesting team.info error: ',err);
+                  callback(null);
+                }
+                else {
+                  callback(null,JSON.parse(body));
+                }
+              });
+            },
+            function(callback){
+              request('https://slack.com/api/users.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
+                if(err){
+                  console.log('requesting users.list error: ',err);
+                  callback(null);
+                }
+                else {
+                  callback(null,JSON.parse(body));
+                }
+              });
+            }
+        ],
+        // optional callback
+        function(err, results){
+
+          //GET LIST OF USERS SIGNED UP IN MONGO
+          //REMOVE USERS OUTSIDE OF SEARCH RANGE
+
+            var returnObj = {
+              team:{
+              },
+              users:{
+                list:[]
+              },
+              channels:{
+                list:[]
+              }
+            }
+
+            //channel
+            if (results[0] && results[0].ok){
+              returnObj.channels.list = results[0].channels;
+              returnObj.channels.count = results[0].channels.length;
+            }
+
+            //team
+            if (results[1] && results[1].ok){
+              returnObj.team = results[1].team;
+            }
+
+            //users
+            if (results[2] && results[2].ok){
+              returnObj.users.list = results[2].members;
+              returnObj.users.count = results[2].members.length;
+            }
+
+            console.log('slackteam ',returnObj);
+
+            slackTeams.push(returnObj);
+
+
+            // * * * * * * * * * * //
+            callback2();
+
+        });
+
+    }, function done(){
+        console.log('done loading slack users');
+        calcTeam();
+    });
+  
+  function calcTeam(){
+
+
+    var totalUserCount = 0;
+
+    async.eachSeries(slackTeams, function(team, callback3) {
+
+        totalUserCount = totalUserCount + team.users.count;
+
+        callback3();
+    }, function done(){
+
+        console.log('team# ',slackTeams.length);
+        console.log('total users ',totalUserCount);
+
+        console.log('done loading slack users');
+    });
+
+  }
+
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function doQuery(params,callback){
+  Message.find({"ts": {"$gte": new Date(params.start_date), "$lt": new Date(params.end_date)}})
+    .select({"ts":1,"source": 1,"bucket":1,"action":1})
+    .sort({'_id': 1})
+    .exec(function(err, msg) {  
     if(err){
         console.log('Error: Cannot find initial search for recallHistory');
     }   
     else {
+      if(msg.length > 0){
 
-      res.send(msg);
-        //console.log('db ',msg);
+        var collectData = [];
+
+        async.eachSeries(msg, function(item, callback2) {
+
+            var date = item.ts.getDate();
+            var month = item.ts.getMonth()+1;
+            var year = item.ts.getFullYear();
+
+            item.ts_simple = year + '/' + month + '/' + date;
+
+            collectData.push(item);
+
+            setTimeout(function() {
+              callback2();
+            }, 0);
+        }, function done(){
+        
+            var arr = _.chain(msg)
+              .groupBy(function(item) {
+                return item.ts_simple; 
+              })
+              .map(function(value, index) {
+                  //return [index, value.length, value];
+                  return [index, value.length];
+              })
+              .value();
+
+              callback(arr);
+        });
+
+      }
+      else {
+        console.log('error: no data found in msg db response');
+        callback('error');
+      }
     }
-  });
-  // check_server.list(servers, function(e, stats) {
-  //   if(e) {
-  //     res.status(500);
-  //     res.send(e);
-  //   } else {
-  //     res.send(stats);
-  //   }
-  // })
+  });    
 
-})
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 //
 // Query testing
