@@ -11,6 +11,7 @@ import update from 'react/lib/update';
 import Card from './Card';
 import sortBy from 'lodash/collection/sortBy'
 import findIndex from 'lodash/array/findIndex'
+import some from 'lodash/collection/some'
 import isNaN from 'lodash/lang/isNaN'
 import ReactList from 'react-list';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
@@ -51,7 +52,9 @@ class ControlPanel extends Component {
         size: false,
         mounted: false,
         focusInfo: null,
-        visible: false
+        visible: false,
+        searchSelect: [],
+        count: 0
     }
   }
 
@@ -102,7 +105,7 @@ class ControlPanel extends Component {
     //Change active message in state
     var identifier = {id: msg.source.id, properties: []}
     for (var key in msg) {
-      if ((key === 'amazon' || key === 'client_res') && msg[key] !== '' ) {
+      if ((key === 'amazon' || key === 'client_res' || key === 'searchSelect') && msg[key] !== '' ) {
         identifier.properties.push({ [key] : msg[key]})
       }
     }  
@@ -123,7 +126,7 @@ class ControlPanel extends Component {
     socket.emit('change state', self.state);
 
     //Reset selected state
-     self.setState({ selected: {name: null, index: null}})
+     // self.setState({ selected: {name: null, index: null}})
 
     //If there is atleast one channel existing...
     if (firstMsgOld) {
@@ -139,6 +142,7 @@ class ControlPanel extends Component {
           })
           let identifier = {id: firstMsgOld.source.id, properties: []}
           identifier.properties.push({ amazon : result})
+          identifier.properties.push({ searchSelect : self.state.searchSelect })
           actions.setMessageProperty(identifier)
      }
         
@@ -241,6 +245,7 @@ class ControlPanel extends Component {
       self.state.size = false
       self.state.searchParam = ''
       self.state.focusInfo = null
+      self.state.count = 0
     })
   }
 
@@ -319,9 +324,9 @@ class ControlPanel extends Component {
   searchSimilar() {
     const { activeMsg } = this.props
     const newQuery = activeMsg;
-    const selected = this.state.selected
+    const selected = this.state.searchSelect
     const self = this
-    if (!selected || !selected.name || !selected.id || !this.state.rawAmazonResults) {
+    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -337,8 +342,7 @@ class ControlPanel extends Component {
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
     newQuery.amazon =  this.state.rawAmazonResults
-    newQuery.searchSelect = []
-    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.searchSelect = selected
     // console.log('Form209-searchSimilar(): newQuery: ',newQuery)
     socket.emit('new message', newQuery);
     this.setState({
@@ -356,10 +360,10 @@ class ControlPanel extends Component {
   searchModify() {
     const { activeMsg} = this.props;
     const newQuery = activeMsg;
-    const selected = this.state.selected;
+    const selected = this.state.searchSelect
     const self = this;
-    if (!selected || !selected.name || !selected.id) {
-      console.log('Please select an item.')
+    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+      console.log('Please select an item or do an initial search.')
       return
     }
    if (newQuery._id) {
@@ -370,8 +374,7 @@ class ControlPanel extends Component {
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
-    newQuery.searchSelect = []
-    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.searchSelect = selected
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
@@ -411,10 +414,10 @@ class ControlPanel extends Component {
   searchFocus() {
     const { activeMsg} = this.props
     const newQuery = activeMsg;
-    const selected = this.state.selected;
+    const selected = this.state.searchSelect
     const self = this
-    if (!selected || !selected.name || !selected.id) {
-      console.log('Please select an item.')
+    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+      console.log('Please select an item or do an initial search.')
       return
     }
     if (newQuery._id) {
@@ -425,8 +428,7 @@ class ControlPanel extends Component {
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
-    newQuery.searchSelect = []
-    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.searchSelect = selected
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
@@ -446,7 +448,11 @@ class ControlPanel extends Component {
   searchMore() {
     const { activeMsg} = this.props
     const newQuery = activeMsg;
-    const selected = this.state.selected
+    const selected = this.state.searchSelect
+    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+      console.log('Please select an item or do an initial search.')
+      return
+    }
     const self = this
     if (newQuery._id) {
       delete newQuery._id
@@ -457,6 +463,7 @@ class ControlPanel extends Component {
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
     newQuery.flags = {}
+    newQuery.searchSelect = selected
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
     socket.emit('new message', newQuery);
@@ -475,7 +482,11 @@ class ControlPanel extends Component {
   checkOut() {
     const { activeMsg } = this.props;
     const newQuery = activeMsg;
-    const selected = this.state.selected;
+    const selected = this.state.searchSelect
+    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+      console.log('Please select an item or do an initial search.')
+      return
+    }
     const self = this;
     if (newQuery._id) {
       delete newQuery._id;
@@ -485,8 +496,7 @@ class ControlPanel extends Component {
     newQuery.tokens = newQuery.msg.split();
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
-    newQuery.searchSelect = []
-    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.searchSelect = selected
     newQuery.msg = 'buy ' + newQuery.searchSelect.toString(); 
     newQuery.flags = {}
     newQuery.flags.toCinna = true
@@ -566,8 +576,40 @@ class ControlPanel extends Component {
      }));
   }
 
+  //This function selects items for top 3
   handleClick(index) {
-    this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index, price: this.state.items[index].price}})
+    let count = this.state.count
+    switch (this.state.searchSelect.length) {
+      case 0:
+      case 1:
+      case 2:
+          // console.log(!some(this.state.searchSelect, index))
+          if (!some(this.state.searchSelect, function(el){ return el === index}) ) {
+           this.setState(update(this.state, {searchSelect: {$push: [index]}}));
+          }
+         break;
+      case 3:
+         if (count >= 3) {
+          count = 1
+         } else {
+          count++
+         }
+         // console.log(!some(this.state.searchSelect, index))
+         if (!some(this.state.searchSelect, function(el){ return el === index})) {
+         let tempArray = this.state.searchSelect
+         tempArray[count-1] = index
+         this.setState({searchSelect: tempArray})
+         this.setState({count: count})
+
+         }
+         break;
+      default:
+        return
+    }
+    console.log('searchSelect : ',this.state.searchSelect)
+    // this.forceUpdate()
+    // this.setState(update(searchSelect, {$push: [item]}));
+    // this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index, price: this.state.items[index].price}})
   }
 
 
@@ -599,18 +641,24 @@ class ControlPanel extends Component {
   // }
 
   renderItem(index, key) {
-      const highlightBox =  (this.state.selected && this.state.selected.index === index) ? {border:'0.2em solid #90caf9', textAlign: 'center'} : {};
-      const boundClick = this.handleClick.bind(this, index);
+      const highlightBox =  (this.state.searchSelect && (some(this.state.searchSelect, function(el){ return (el-1) === index}))) ? {border:'1em solid #90caf9', textAlign: 'center'} : {};
+      const boundClick = this.handleClick.bind(this, index+1);
+      const included = (this.state.searchSelect && (some(this.state.searchSelect, function(el){ return (el-1) === index})))
+      const number =  (included && findIndex(this.state.searchSelect, function(el) { return (el-1) === index }) === 0) ? 1 
+                    : ((included && (findIndex(this.state.searchSelect, function(el) { return (el-1) === index }) === 1)) ? 2 
+                            : ((included && (findIndex(this.state.searchSelect, function(el){ return (el-1) === index }) === 2)) ? 3 
+                                    : null))
        return  (  
-                <div key={this.state.items[index].id} onClick={boundClick} style={highlightBox} >
-                    <Card key={this.state.items[index].id}
-                          index={index}
-                          id={this.state.items[index].id}
-                          text={this.state.items[index].name}
-                          price={this.state.items[index].price}
-                          img = {this.state.items[index].img}
-                          moveCard={this.moveCard}  />
-                </div>   
+          <div key={this.state.items[index].id} onClick={boundClick} style={highlightBox} >
+           <h5 style={{color: 'blue', fontWeight: 'bold'}}> {number} </h5>
+              <Card key={this.state.items[index].id}
+                    index={index}
+                    id={this.state.items[index].id}
+                    text={this.state.items[index].name}
+                    price={this.state.items[index].price}
+                    img = {this.state.items[index].img}
+                    moveCard={this.moveCard}  />
+          </div>   
       )
     }
 
@@ -618,8 +666,8 @@ class ControlPanel extends Component {
      const { activeMsg, activeControl, activeChannel, messages,actions,changeMode} = this.props;
      // const fields  = ['msg','bucket','action']
      const self = this;
-     const { items,selected } = this.state;
-     const list = (selected && this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
+     const { items,searchSelect } = this.state;
+     const list = (this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
      const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
      const statusStyle = activeChannel.resolved ?  { fontSize:'3em' ,color: 'green'} : { fontSize:'3em',color: 'red'}
      const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
@@ -628,7 +676,7 @@ class ControlPanel extends Component {
      const showModifyBox = this.state.action === 'modify' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
      const showFocusBox = this.state.action === 'focus' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const showMoreBox = this.state.action === 'more' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
-     const showPrompt = (!selected || !selected.name) ? { color: 'black'} : { color: 'white'}
+     const showPrompt = (!searchSelect || searchSelect.length === 0) ? { color: 'black'} : { color: 'white'}
      const showCheckoutBox = this.state.action === 'checkout' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
      const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
@@ -647,7 +695,7 @@ class ControlPanel extends Component {
 
             <div id="similar-box" style={showSimilarBox}>
                 <h3 style={showPrompt}> Please select an item. </h3>
-                <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
+                <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length === 0) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchSimilar()} >
                   Search Similar 
                     <div style={spinnerStyle}>
                     <Spinner />
@@ -683,7 +731,7 @@ class ControlPanel extends Component {
                         <MenuItem eventKey="4">Separated link</MenuItem>
                       </DropdownButton>
                   </div>
-                  <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading || (!this.state.color && !this.state.size) || (!this.state.modifier.color && !this.state.modifier.size )} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
+                  <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading || (!this.state.color && !this.state.size) || (!this.state.modifier.color && !this.state.modifier.size )} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
                     Search Modify
                     <div style={spinnerStyle}>
                       <Spinner />
@@ -702,7 +750,7 @@ class ControlPanel extends Component {
                           </div>
                             
                 <h3 style={showPrompt}> Please select an item. </h3>
-                <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
+                <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
                   Search Focus
                     <div style={spinnerStyle}>
                     <Spinner />
@@ -722,7 +770,7 @@ class ControlPanel extends Component {
               <div id="checkout-box" style={showCheckoutBox}>
                 <div style={focusInfoStyle}> </div>
                 <h3 style={showPrompt}> Please select an item. </h3>
-                <Button bsSize = "large" disabled={(!selected || !selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.checkOut()} >
+                <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length === 0) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.checkOut()} >
                   Checkout Item
                     <div style={spinnerStyle}>
                     <Spinner />
@@ -742,6 +790,7 @@ class ControlPanel extends Component {
                     onChange={ () => { changeMode(activeChannel) }} />
                     <span style={statusStyle}>  {statusText}</span>
                 </label>
+                {this.state.searchSelect}
                 <form ref='form1' onSubmit={::this.handleSubmit}>
                     <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
                       <ButtonGroup bsSize = "large" bsStyle = "primary"  style={{margin: '0.2em'}}>
