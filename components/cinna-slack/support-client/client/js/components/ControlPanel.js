@@ -594,19 +594,32 @@ class ControlPanel extends Component {
          } else {
           count++
          }
+         let tempArray = this.state.searchSelect
          // console.log(!some(this.state.searchSelect, index))
          if (!some(this.state.searchSelect, function(el){ return el === index})) {
-         let tempArray = this.state.searchSelect
+
          tempArray[count-1] = index
          this.setState({searchSelect: tempArray})
          this.setState({count: count})
-
+         } else {
+           let current = findIndex(this.state.searchSelect, function(el) { return (el-1) === index })
+           if (current === (count)) {
+            console.log('clicked same count = index')
+             return 
+           } else {
+             tempArray[count-1] = index
+             if (tempArray[count]) {tempArray[count] = index + 1}
+             if (tempArray[count+1]) {tempArray[count+1] = index + 1}
+             // if (tempArray.length > 3) { tempArray = tempArray.slice(0,2)}
+             this.setState({searchSelect: tempArray})
+             this.setState({count: count})
+           }
          }
          break;
       default:
         return
     }
-    console.log('searchSelect : ',this.state.searchSelect)
+    console.log('count: ',count, 'searchSelect : ',this.state.searchSelect)
     // this.forceUpdate()
     // this.setState(update(searchSelect, {$push: [item]}));
     // this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index, price: this.state.items[index].price}})
@@ -790,7 +803,9 @@ class ControlPanel extends Component {
                     onChange={ () => { changeMode(activeChannel) }} />
                     <span style={statusStyle}>  {statusText}</span>
                 </label>
-                {this.state.searchSelect}
+                count: {this.state.count}
+                <br / >
+                searchSelect: {this.state.searchSelect}
                 <form ref='form1' onSubmit={::this.handleSubmit}>
                     <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
                       <ButtonGroup bsSize = "large" bsStyle = "primary"  style={{margin: '0.2em'}}>
