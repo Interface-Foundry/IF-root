@@ -42,11 +42,15 @@ var messageSchema = mongoose.Schema({
             isOpen: Boolean
         },
         parent: {
-            isParent:Boolean,
-            id:String
+            isParent: Boolean,
+            id: String
         }
     },
-    urlShorten:[String]
+    urlShorten:[String],
+    click: {
+        productId: String,
+        url: String
+    }
 });
 
 module.exports = mongoose.model('Message', messageSchema);

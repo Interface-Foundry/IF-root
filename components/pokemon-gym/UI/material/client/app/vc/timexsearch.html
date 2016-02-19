@@ -1,0 +1,125 @@
+<div class="page page-dashboard">
+
+    <div class="row" data-ng-controller="FlotChartCtrl">
+        <div class="col-md-12">
+            <div class="panel panel-default panel-minimal">
+                <div class="divider divider-md"></div>
+
+                        <div class="row">
+                            <div style="float:right; margin-right:44px;"><h4>Time x Search</h4></div>
+
+                              <input type="textbox" placeholder="team id">
+
+                              <label>Initial
+                                <input type="checkbox" ng-model="metricType.value1">
+                              </label>
+                              <label>Similar
+                                <input type="checkbox" ng-model="checkboxModel.value2"
+                                       ng-true-value="'YES'" ng-false-value="'NO'">
+                               </label>
+                              <label>More
+                                <input type="checkbox" ng-model="checkboxModel.value2"
+                                       ng-true-value="'YES'" ng-false-value="'NO'">
+                               </label>
+                              <label>Modify
+                                <input type="checkbox" ng-model="checkboxModel.value2"
+                                       ng-true-value="'YES'" ng-false-value="'NO'">
+                               </label>
+                              <label>Click
+                                <input type="checkbox" ng-model="checkboxModel.value2"
+                                       ng-true-value="'YES'" ng-false-value="'NO'">
+                               </label>
+
+
+                            <div ng-show="loadingData"><img width="50" src="https://thomas.vanhoutte.be/miniblog/wp-content/uploads/light_blue_material_design_loading.gif"></div>
+
+                            <div class="col-md-3" style="margin-left:15px;">
+                                <div style="float:left; position:absolute; margin-top:41px;"><p>Start Date</p></div>
+                                <p class="input-group">
+                                  
+                                  <input type="text" class="form-control" placeholder="Start Date" uib-datepicker-popup="{{format}}" ng-model="start_date" is-open="popup1.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" close-text="Close" alt-input-formats="altInputFormats" />
+                                  <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+                                  </span>
+                                </p>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div style="float:left; position:absolute; margin-top:41px;"><p>End Date</p></div>
+                                <p class="input-group">
+                                  <input type="text" class="form-control" placeholder="End Date" uib-datepicker-popup ng-model="end_date" is-open="popup2.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" close-text="Close" />
+                                  <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+                                  </span>
+                                </p>
+                            </div>
+
+                            <div class="col-md-3">
+                                <p class="input-group">
+                                  <button ng-click="searchDB()" class="btn btn-info">Search</button>
+                                </p>
+                            </div>
+
+                        </div>
+
+                <div class="divider divider-md"></div>
+                <div class="panel-body">
+
+
+                    <canvas id="line" class="chart chart-line" chart-data="data"
+                      chart-labels="labels" chart-legend="true" chart-series="series"
+                      chart-click="onClick" >
+                    </canvas> 
+
+<!-- 
+                    <div data-flot-chart 
+                         data-data="combo3.data"
+                         data-options="combo3.options"
+                         style="height:350px"
+                    ></div> -->
+
+                    <div class="divider divider-xl"></div>
+                    <div class="row" data-ng-controller="SparklineCtrl">
+
+                        <div class="col-md-3 box-stats">
+                            <span class="box-desc">Views</span>
+                            <p class="box-num">4,268</span></p>
+                            <div data-sparkline
+                                 data-data="infoChart1.data"
+                                 data-options="infoChart1.options"
+                            ></div>            
+                        </div>
+                        <div class="col-md-3 box-stats">
+                            <span class="box-desc">Clickthroughs</span>
+                            <p class="box-num">3,239</span></p>
+                            <div data-sparkline
+                                 data-data="infoChart2.data"
+                                 data-options="infoChart2.options"
+                            ></div>                              
+                        </div>
+                        <div class="col-md-3 box-stats">
+                            <span class="box-desc">Vistors</span>
+                            <p class="box-num">2,922</span></p>
+                            <div data-sparkline
+                                 data-data="infoChart3.data"
+                                 data-options="infoChart3.options"
+                            ></div>                              
+                        </div>
+                        <div class="col-md-3 box-stats no-border">
+                            <span class="box-desc">Users</span>
+                            <p class="box-num">1,093</span></p>
+                            <div data-sparkline
+                                 data-data="infoChart4.data"
+                                 data-options="infoChart4.options"
+                            ></div>                              
+                        </div>
+                    </div>
+                    <div class="divider divider-xl"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+    
