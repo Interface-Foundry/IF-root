@@ -49,7 +49,9 @@ var messageSchema = mongoose.Schema({
     urlShorten:[String],
     click: {
         productId: String,
-        url: String
+        url: String,
+        IP: String,
+        headers:String
     }
 });
 
