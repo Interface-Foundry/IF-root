@@ -62,6 +62,17 @@ var initSlackUsers = function(env){
         Slackbots.find().exec(function(err, users) {
             if(err){
                 console.log('saved slack bot retrieval error');
+                var mailOptions = {
+                    to: 'Kip Server <hello@kipthis.com>',
+                    from: 'Kip Server Status <server@kipthis.com>',
+                    subject: 'mongo prob, restarting!',
+                    text: 'Fix this ok thx'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) console.log(err);
+                    console.log('Server status email sent. Now restarting server.');
+                    process.exit(1);
+                });
             }
             else {
                 loadSlackUsers(users);

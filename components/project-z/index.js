@@ -41,7 +41,7 @@ parentApp.get('/product/*', function(req, res, next) {
   }
   //backup for old links
   else {
-    res.redirect(req.url.replace('/product/','')); //magic cinna moment ✨ 
+    res.redirect(querystring.unescape(req.url.replace('/product/',''))); //magic cinna moment ✨
   }
 
    //querystring.unescape(req.url.replace('/product/',''))
