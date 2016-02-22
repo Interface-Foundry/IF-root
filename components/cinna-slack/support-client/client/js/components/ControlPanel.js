@@ -583,61 +583,19 @@ class ControlPanel extends Component {
       case 0:
       case 1:
       case 2:
-          // console.log(!some(this.state.searchSelect, index))
           if (!some(this.state.searchSelect, function(el){ return el === index}) ) {
            this.setState(update(this.state, {searchSelect: {$push: [index]}}));
           }
+          console.log('case 1 : count: ',count, 'searchSelect : ',this.state.searchSelect, 'index: ', index)
          break;
       case 3:
-         if (count >= 3) {
-          count = 1
-         } else {
-          count++
-         }
-         let tempArray = this.state.searchSelect
-         // console.log(!some(this.state.searchSelect, index))
-         if (!some(this.state.searchSelect, function(el){ return el === index})) {
-
-         tempArray[count-1] = index
-         this.setState({searchSelect: tempArray})
-         this.setState({count: count})
-         } else {
-           let current = findIndex(this.state.searchSelect, function(el) { return (el-1) === index })
-           if (current === (count-1)) {
-            console.log('clicked same count = index')
-             return 
-           } else {
-             switch(count) {
-              case 1: 
-                  tempArray[0] = index 
-                  tempArray[1] = tempArray[2]
-                  tempArray[2] = tempArray[3]
-              case 2:
-                  tempArray[1] = index 
-                  tempArray[2] = tempArray[3]
-                  break;
-              case 3:
-                  tempArray[2] = index 
-                  break;
-              default:
-                  return
-             }
-             if (count == 1) {tempArray[count-1] = index }
-             if (count == 2) {tempArray[count] = tempArray[count+1]}
-             if (count == 3) {tempArray[count+1] = tempArray[count+2]}
-             // if (tempArray.length > 3) { tempArray = tempArray.slice(0,2)}
-             this.setState({searchSelect: tempArray})
-             this.setState({count: count})
-           }
-         }
+          console.log('case 2 : count: ',count, 'searchSelect : ',this.state.searchSelect, 'index: ', index)
+          this.state.searchSelect = []
+          this.setState(update(this.state, {searchSelect: {$push: [index]}}));       
          break;
       default:
         return
-    }
-    console.log('count: ',count, 'searchSelect : ',this.state.searchSelect)
-    // this.forceUpdate()
-    // this.setState(update(searchSelect, {$push: [item]}));
-    // this.setState({ selected: {id: this.state.items[index].id, name: this.state.items[index].name, index: index, price: this.state.items[index].price}})
+    } 
   }
 
 
