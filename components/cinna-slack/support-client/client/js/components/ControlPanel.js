@@ -326,7 +326,7 @@ class ControlPanel extends Component {
     const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this
-    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -362,7 +362,7 @@ class ControlPanel extends Component {
     const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this;
-    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -416,7 +416,7 @@ class ControlPanel extends Component {
     const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this
-    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -449,7 +449,7 @@ class ControlPanel extends Component {
     const { activeMsg} = this.props
     const newQuery = activeMsg;
     const selected = this.state.searchSelect
-    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -483,7 +483,7 @@ class ControlPanel extends Component {
     const { activeMsg } = this.props;
     const newQuery = activeMsg;
     const selected = this.state.searchSelect
-    if (selected.length === 0 || !selected[0] || !selected[0].name || !selected[0].id || !this.state.rawAmazonResults) {
+    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -536,11 +536,17 @@ class ControlPanel extends Component {
   }
 
   sendCommand(newMessage) {
-    const { activeChannel, actions } = this.props
+    const { activeChannel, actions, activeMsg, messages } = this.props
+    newMessage.id = messages.length
     newMessage.source.org = activeChannel.id.split('_')[0]
     newMessage.flags = {toClient: true}
     newMessage.amazon = this.state.rawAmazonResults ? this.state.rawAmazonResults : null
     newMessage.source.origin = 'slack'
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newMessage.thread = thread
+    thread.sequence = parseInt(activeMsg.thread + 1)
     if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
       if (!this.state.client_res || (this.state.client_res && this.state.client_res.length === 0)) { console.log('Cpanel244',newMessage); return}
         else {

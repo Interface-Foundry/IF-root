@@ -60,7 +60,8 @@ class Chat extends Component {
         actions.setMessageProperty(identifier)
       }
     })   
-    socket.on('new bc message', function(msg) {      
+    socket.on('new bc message', function(msg) {   
+     console.log('Chat64 msg: ',msg)   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
       // msg.parent = (filtered.length > 0) ?  false : true
@@ -233,7 +234,8 @@ class Chat extends Component {
 
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => (message.source && message.source.channel === activeChannel.name)).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
+    const filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
+    // .filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
     const activeMsg =  messages.filter(message => (message.source && message.source.channel === activeChannel.name))[0]
     const username = this.props.user.username;
     const resolved = activeChannel.resolved

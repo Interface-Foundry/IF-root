@@ -16,6 +16,7 @@ exports = module.exports = function(io, cinnaio) {
                     break;
                 case 'outgoing':
                     console.log('I/O: routed to --> outgoing msg',msg,'\n')
+                    socket.emit('new bc message', msg)
                     ioClient.emit("msgFromSever", msg);
                     break;
                 case 'searchResults':

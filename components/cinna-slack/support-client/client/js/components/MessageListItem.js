@@ -17,12 +17,12 @@ class MessageListItem extends Component {
   componentDidMount() {
     const { message } = this.props 
     
-    const messageToDisplay = message.msg ? message.msg : message.client_res[0]
+    const messageToDisplay =  (message.client_res[0] && !message.flags.toCinna) ?  message.client_res[0] : message.msg
     this.setState({ displayMsg: messageToDisplay })
     function checkImgURL (msg) {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
     }
-    if (checkImgURL(this.state.displayMsg)) {
+    if (checkImgURL(messageToDisplay)) {
       this.setState({ isImage : 'true'  })
     } else {
       this.setState({ isImage : 'false'  })
@@ -31,22 +31,22 @@ class MessageListItem extends Component {
 
   renderMsg() {
      const {message} = this.props
-     const msgType = (this.state.isImage === 'true') ? 'image' : ((message.flags && message.flags.preview) ? 'preview' : ((message.flags && message.flags.response) ? 'response' : 'message'))
-
+     const msgType = (this.state.isImage === 'true') ? 'image' 
+         : (message.flags.toClient ? 'toClient' 
+              : (message.flags && message.flags.toCinna) ? 'toCinna' 
+                  : (message.flags && message.flags.response) ? 'response' : 'message')
+     // console.log('MessageListItem35: message.flags: ', message.flags)
      switch (msgType){
       case 'image' : 
         return (
           <img width='200' src={this.state.displayMsg} />
           )
         break;
-      case 'preview':
-          switch(message.action) {
-            case 'initial':
-                return 'Previewing ' + message.action + ' search: ' + message.msg
-                break;
-            case 'similar': 
-                return 'Previewing ' + message.action + ' search: ' + message.msg
-          }
+      case 'toCinna':
+        return 'Previewing ' + message.action + ' search: ' + message.msg
+        break;
+      case 'toClient':
+        return message.client_res[0]
         break;
       case 'response':
           return this.state.displayMsg
@@ -60,9 +60,9 @@ class MessageListItem extends Component {
   render() {
     var self = this;
     const { message } = this.props;
-    const displayName = ((message.flags && message.flags.preview) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : ((message.bucket === 'response') ? 'Cinna' : message.source.id)
-    const nameStyle = (message.flags && message.flags.preview) ? {color: '#e57373'} : {color: '#66c'}
-    const messageStyle = (message.flags && message.flags.preview) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
+    const displayName = ((message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : ((message.bucket === 'response') ? 'Cinna' : message.source.id)
+    const nameStyle = (message.flags && message.flags.toCinna) ? {color: '#e57373'} : {color: '#66c'}
+    const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
     return (
       <li>
         <span>
