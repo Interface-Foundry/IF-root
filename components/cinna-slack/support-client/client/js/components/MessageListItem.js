@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import findIndex from 'lodash/array/findIndex'
 
 class MessageListItem extends Component {
 
@@ -35,41 +36,141 @@ class MessageListItem extends Component {
          : (message.flags.toClient ? 'toClient' 
               : (message.flags && message.flags.toCinna) ? 'toCinna' 
                   : (message.flags && message.flags.response) ? 'response' : 'message')
-     // console.log('MessageListItem35: message.flags: ', message.flags)
+     const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
+     let text = ''
+     switch (message.action){
+      case 'initial':
+      case 'more':
+        text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
+        break;
+      case 'similar':
+        text = 'We found some options similar to '+message.searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+        break;
+      case 'checkout':
+        text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
+        break;
+      default: 
+        text = message.client_res[0]          
+     }
      switch (msgType){
       case 'image' : 
         return (
-          <img width='200' src={this.state.displayMsg} />
+          <div style={messageStyle}> 
+            <img width='200' src={this.state.displayMsg} />
+          </div>
           )
         break;
       case 'toCinna':
-        return 'Previewing ' + message.action + ' search: ' + message.msg
+        return ( <div style={messageStyle}> 
+                    Previewing  {message.action} search: {message.msg}
+                 </div>
+                )
         break;
       case 'toClient':
-        return message.client_res[0]
-        break;
+              switch(message.action) {
+                case 'initial': 
+                case 'similar':
+                case 'more':
+                  message.client_res.unshift(text)
+                  let imgIndex;
+                  try {
+                    imgIndex = findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
+                  } catch(err) {
+                    console.log('MLI81: ',err, message)
+                  }
+
+                  return (
+                    <div>
+                        <div style={messageStyle}> 
+                            {message.client_res[0]}
+                        </div>
+                         <div style={messageStyle}> 
+                            <img width='170' src={message.client_res[imgIndex]} />
+                        </div>
+                    </div>
+                    )
+                  break;
+                case 'focus':
+                  let attribs = message.amazon[message.searchSelect].ItemAttributes[0];
+                  let topStr = ''
+                  let cString = ''
+                  if (message.amazon[message.searchSelect[0]].realPrice){ topStr = message.amazon[message.searchSelect].realPrice;}
+                  if (attribs.Size){cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];}
+                  if (attribs.Artist){ cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];}
+                  if (attribs.Brand){cString = cString + ' ○ ' +  attribs.Brand[0];}
+                  else if (attribs.Manufacturer){cString = cString + ' ○ ' +  attribs.Manufacturer[0];}
+                  if (attribs.Feature){cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');}
+                  if (cString){message.client_res.unshift(cString);}
+                  let imgIndex2;
+                  try {
+                    imgIndex2 = findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
+                  } catch(err) {
+                    console.log('MLI121: ',err, message)
+                  }
+                  return (
+                    <div>
+                        <div style={messageStyle}> 
+                            {message.client_res[0]}
+                        </div>
+                         <div style={messageStyle}> 
+                            <img width='170' src={message.client_res[imgIndex2]} />
+                        </div>
+                    </div>
+                    )
+                  break;
+                case 'checkout':
+                  let linkIndex;
+                  try {
+                    linkIndex = findIndex(message.client_res,function(el){ if (el) {return (el.indexOf('www.amazon.com') > -1)}})
+                  } catch(err) {
+                    console.log('MLI126: ',err, message)
+                  }
+                  message.client_res.unshift(text)
+                  return (
+                    <div>
+                        <div style={messageStyle}> 
+                            {message.client_res[0]}
+                        </div>
+                         <div style={messageStyle}> 
+                            <a href={message.client_res[message.client_res.length-1]}> Link to Product </a>
+                        </div>
+                    </div>
+                    )
+                  break;
+                default:
+                  return (<div style={messageStyle}> 
+                            {message.client_res}
+                          </div>
+                          )
+              }
+              break;
       case 'response':
-          return this.state.displayMsg
+          return (<div style={messageStyle}> 
+                     {this.state.displayMsg}
+                  </div>
+                 )
           break;
       default:
-        return this.state.displayMsg
-        break;
+        return (
+                <div style={messageStyle}> 
+                  {this.state.displayMsg}
+                </div>
+               )
      }
   }
 
   render() {
     var self = this;
     const { message } = this.props;
-    const displayName = ((message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : ((message.bucket === 'response') ? 'Cinna' : message.source.id)
+    const displayName = ((message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify' || message.action  === 'focus' || message.action  === 'checkout' || message.action === 'more' )) ? 'Console:' : ((message.bucket === 'response' || message.flags.toClient) ? 'Cinna' : message.source.id)
     const nameStyle = (message.flags && message.flags.toCinna) ? {color: '#e57373'} : {color: '#66c'}
-    const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
     return (
       <li>
         <span>
           <b style={nameStyle}>{displayName} </b>
           <i style={{color: '#aad', opacity: '0.8'}}>{message.ts}</i>
         </span>
-        <div style={messageStyle}> {self.renderMsg()} </div>
+        {self.renderMsg()} 
       </li>
     );
   }

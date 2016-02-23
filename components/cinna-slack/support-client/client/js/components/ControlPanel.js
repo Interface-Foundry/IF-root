@@ -303,7 +303,7 @@ class ControlPanel extends Component {
             newQuery.source.origin = 'supervisor'
             newQuery.flags = {}
             newQuery.flags.toCinna = true
-            newQuery.client_res = []
+            // newQuery.client_res.unshift('Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊')
             socket.emit('new message', newQuery);
             this.setState({
               spinnerloading: true,
@@ -449,10 +449,10 @@ class ControlPanel extends Component {
     const { activeMsg} = this.props
     const newQuery = activeMsg;
     const selected = this.state.searchSelect
-    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
-      console.log('Please select an item or do an initial search.')
-      return
-    }
+    // if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
+    //   console.log('Please select an item or do an initial search.')
+    //   return
+    // }
     const self = this
     if (newQuery._id) {
       delete newQuery._id
@@ -552,7 +552,7 @@ class ControlPanel extends Component {
         else {
            // if (newMessage.action === 'checkout') { newMessage.client_res = [this.state.client_res] }
           // else { 
-            newMessage.client_res = this.state.client_res
+            newMessage.client_res.push(this.state.client_res[0])
           // }
         }
     }
