@@ -12,6 +12,7 @@ var mongoose = require('mongoose');
 // connect our DB
 var db = require('db');
 var Message = db.Message;
+var Slackbots = db.Slackbots;
 
 app.use(bodyParser.json());
 app.use(morgan())
@@ -83,10 +84,10 @@ app.post('/vc/timexsearch', function(req, res) {
 });
 
 
-// app.post('/vc/slackstats', function(req, res) {
-//   console.log('asdf');
+app.post('/vc/slackstats', function(req, res) {
+  console.log('asdf');
  
-// });
+});
 
 
 
@@ -245,7 +246,10 @@ function loadSlackUsers(users){
 
     async.eachSeries(slackTeams, function(team, callback3) {
 
+
         totalUserCount = totalUserCount + team.users.count;
+
+        
 
         callback3();
     }, function done(){

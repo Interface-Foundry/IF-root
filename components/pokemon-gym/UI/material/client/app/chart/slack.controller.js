@@ -7,15 +7,17 @@
 
     function SlackStatsCtrl($scope,$http) {
 
-        $http({
-              method: 'POST',
-              url: '/vc/slackstats',
-              data: {
-                bleh:'meh'
-              }
-            }).then(function successCallback(res){ 
+        console.log('asdf');
 
-            });
+        // $http({
+        //       method: 'POST',
+        //       url: '/vc/slackstats',
+        //       data: {
+        //         bleh:'meh'
+        //       }
+        //     }).then(function successCallback(res){ 
+
+        //     });
 
     }
 
