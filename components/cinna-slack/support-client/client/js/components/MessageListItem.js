@@ -34,8 +34,8 @@ class MessageListItem extends Component {
      const {message} = this.props
      const msgType = (this.state.isImage === 'true') ? 'image' 
          : (message.flags.toClient ? 'toClient' 
-              : (message.flags && message.flags.toCinna) ? 'toCinna' 
-                  : (message.flags && message.flags.response) ? 'response' : 'message')
+              : (message.flags && message.flags.toCinna) ? 'toCinna' : 'message')
+                  // : (message.flags && message.flags.response) ? 'response' : 'message')
      const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
      let text = ''
      switch (message.action){
@@ -71,6 +71,7 @@ class MessageListItem extends Component {
                 case 'initial': 
                 case 'similar':
                 case 'more':
+                  // console.log('case 1')
                   message.client_res.unshift(text)
                   let imgIndex;
                   try {
@@ -91,6 +92,7 @@ class MessageListItem extends Component {
                     )
                   break;
                 case 'focus':
+                  // console.log('case focus')
                   let attribs = message.amazon[message.searchSelect].ItemAttributes[0];
                   let topStr = ''
                   let cString = ''
@@ -119,6 +121,7 @@ class MessageListItem extends Component {
                     )
                   break;
                 case 'checkout':
+                  // console.log('case checkout')
                   let linkIndex;
                   try {
                     linkIndex = findIndex(message.client_res,function(el){ if (el) {return (el.indexOf('www.amazon.com') > -1)}})
@@ -138,17 +141,19 @@ class MessageListItem extends Component {
                     )
                   break;
                 default:
+                  // console.log('case default')
                   return (<div style={messageStyle}> 
-                            {message.client_res}
+                            {message.client_res[0]}
                           </div>
                           )
               }
               break;
       case 'response':
-          return (<div style={messageStyle}> 
-                     {this.state.displayMsg}
-                  </div>
-                 )
+          return 
+          // (<div style={messageStyle}> 
+          //            {this.state.displayMsg}
+          //         </div>
+          //        )
           break;
       default:
         return (

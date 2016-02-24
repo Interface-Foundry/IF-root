@@ -60,13 +60,13 @@ const cardTarget = {
     }
 
     // Time to actually perform the action
-    props.moveCard(dragIndex, hoverIndex);
+    // props.moveCard(dragIndex, hoverIndex);
 
     // Note: we're mutating the monitor item here!
     // Generally it's better to avoid mutations,
     // but it's good here for the sake of performance
     // to avoid expensive index searches.
-    monitor.getItem().index = hoverIndex;
+    // monitor.getItem().index = hoverIndex;
   }
 };
 
@@ -93,7 +93,7 @@ export default class Card extends Component {
     const { text, img, index, isDragging, connectDragSource, connectDropTarget } = this.props;
     const opacity = isDragging ? 0 : 1;
 
-    return connectDragSource(connectDropTarget(
+    return (
     <div className='flexbox-container' style={{height:'100', overflow: 'hidden'}}>
       <div>
         <img style={{ maxWidth: '100', height: 'auto'}} src={img} />
@@ -105,7 +105,7 @@ export default class Card extends Component {
         {this.props.price}
       </div>
     </div>
-    ));
+    );
   }
 }
 
