@@ -60,7 +60,7 @@ class MessageListItem extends Component {
   render() {
     var self = this;
     const { message } = this.props;
-    const displayName = ((message.flags && message.flags.preview) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : ((message.flags && message.flags.response) ? 'Cinna' : message.source.id)
+    const displayName = ((message.flags && message.flags.preview) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify')) ? 'Console:' : ((message.bucket === 'response') ? 'Cinna' : message.source.id)
     const nameStyle = (message.flags && message.flags.preview) ? {color: '#e57373'} : {color: '#66c'}
     const messageStyle = (message.flags && message.flags.preview) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
     return (

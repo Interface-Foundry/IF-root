@@ -12,6 +12,7 @@ var mongoose = require('mongoose');
 // connect our DB
 var db = require('db');
 var Message = db.Message;
+var Slackbots = db.Slackbots;
 
 app.use(bodyParser.json());
 app.use(morgan())
@@ -63,6 +64,8 @@ app.post('/vc/timexsearch', function(req, res) {
 
   console.log('zzzz ',req.body);
 
+  initSlackUsers(app.get('env'));
+
   //ADD IN TIME PERIODS HERE FOR QUERY, AND USER ID !!!!!!
 
   if(req.body.start_date && req.body.end_date){
@@ -76,9 +79,14 @@ app.post('/vc/timexsearch', function(req, res) {
     console.log('error: dates missing!');
   }
 
-  initSlackUsers(app.get('env'));
 
 
+});
+
+
+app.post('/vc/slackstats', function(req, res) {
+  console.log('asdf');
+ 
 });
 
 
@@ -216,7 +224,7 @@ function loadSlackUsers(users){
               returnObj.users.count = results[2].members.length;
             }
 
-            console.log('slackteam ',returnObj);
+            //console.log('slackteam ',returnObj);
 
             slackTeams.push(returnObj);
 
@@ -238,7 +246,10 @@ function loadSlackUsers(users){
 
     async.eachSeries(slackTeams, function(team, callback3) {
 
+
         totalUserCount = totalUserCount + team.users.count;
+
+        
 
         callback3();
     }, function done(){

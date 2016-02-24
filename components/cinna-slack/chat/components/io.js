@@ -62,6 +62,17 @@ var initSlackUsers = function(env){
         Slackbots.find().exec(function(err, users) {
             if(err){
                 console.log('saved slack bot retrieval error');
+                var mailOptions = {
+                    to: 'Kip Server <hello@kipthis.com>',
+                    from: 'Kip Server Status <server@kipthis.com>',
+                    subject: 'mongo prob, restarting!',
+                    text: 'Fix this ok thx'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) console.log(err);
+                    console.log('Server status email sent. Now restarting server.');
+                    process.exit(1);
+                });
             }
             else {
                 loadSlackUsers(users);
@@ -282,7 +293,11 @@ var loadSocketIO = function(server){
         });
 
         socket.on("msgFromSever", function(data) {
-            console.log('\n\n\nReceived message from supervisor: ',data,data.flags,'\n\n\n')
+            // var items = {}
+            // if (data.amazon && data.amazon[0] && data.amazon[0].ItemAttributes) {
+            //     items = JSON.stringify(data.amazon.slice(0,3))
+            // }
+            console.log('\n\n\nReceived message from supervisor: ',data.flags,'\n\n\n')
             incomingAction(data);
         })
     }); 
@@ -542,7 +557,7 @@ function searchBucket(data){
             break;
         case 'similar':
             //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flag && data.flag === 'recalled') { 
+            if (data.flags && data.flags.recalled) { 
                  search.searchSimilar(data);
             } 
             //-----------------------------------------------------------------//
@@ -559,7 +574,7 @@ function searchBucket(data){
         case 'modify':
         case 'modified': //because the nlp json is wack
             //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flag && data.flag === 'recalled') { 
+            if (data.flags && data.flags.recalled) { 
                  search.searchModify(data);
             } 
             //-----------------------------------------------------------------//
@@ -574,7 +589,7 @@ function searchBucket(data){
             break;
         case 'focus':
           //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flag && data.flag === 'recalled') { 
+            if (data.flags && data.flags.recalled) { 
                     search.searchFocus(data);
             } 
             //-----------------------------------------------------------------//
