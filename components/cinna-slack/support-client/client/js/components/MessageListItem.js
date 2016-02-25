@@ -16,9 +16,8 @@ class MessageListItem extends Component {
   }
 
   componentDidMount() {
-    const { message } = this.props 
-    
-    const messageToDisplay =  (message.client_res[0] && !message.flags.toCinna) ?  message.client_res[0] : message.msg
+    const { message, index } = this.props 
+    let messageToDisplay =  (message.client_res[0] && !message.flags.toCinna) ?  message.client_res[0] : message.msg
     this.setState({ displayMsg: messageToDisplay })
     function checkImgURL (msg) {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
@@ -31,7 +30,7 @@ class MessageListItem extends Component {
   }
 
   renderMsg() {
-     const {message} = this.props
+     const {message,index} = this.props
      const msgType = (this.state.isImage === 'true') ? 'image' 
          : (message.flags.toClient ? 'toClient' 
               : (message.flags && message.flags.toCinna) ? 'toCinna' : 'message')

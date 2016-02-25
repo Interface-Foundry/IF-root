@@ -504,7 +504,8 @@ function incomingAction(data){
                         console.log('Mitsuio504: ',data)
                         return outgoingResponse(data,'txt');
                     } else {
-                        return outgoingResponse(data,'stitch','amazon');
+                    // console.log('Mitsuio507: ',JSON.stringify(data.amazon[0]),JSON.stringify(data.amazon[1]),JSON.stringify(data.amazon[2]))
+                        return outgoingResponse(data,'txt','amazon');
                     }
                 }
              }

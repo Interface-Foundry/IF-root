@@ -1,5 +1,21 @@
 import superagent from 'superagent';
 
+export function stitch(toStitch) {
+  return new Promise((resolve, reject) => {
+    superagent
+    .post('/api/stitch')
+    .send(toStitch)
+    .end((err, res) => {
+      if (err) {
+        Promise.reject(err);
+      } else {
+        resolve(res.body);
+      }
+    });
+  });
+}
+
+
 export function loadAuth() {
   return new Promise((resolve, reject) => {
     superagent

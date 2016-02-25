@@ -61,7 +61,7 @@ class Chat extends Component {
       }
     })   
     socket.on('new bc message', function(msg) {   
-     console.log('Chat64 msg: ',msg)   
+     // console.log('Chat64 msg: ',msg)   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
       // msg.parent = (filtered.length > 0) ?  false : true
@@ -240,15 +240,16 @@ class Chat extends Component {
     const username = this.props.user.username;
     const resolved = activeChannel.resolved
     const stream = this.state.stream
+    // const date = new Date(activeMsg.ts) 
     const displayMessages = this.state.stream ?   
-                       messages.slice(messages.length-15,messages.length).map(message =>
+                       messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor).map(message =>
                             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
                            )
                            :  
-                        filteredMessages.map(message =>
-                            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
-                          )
-    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br/></div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
+                        filteredMessages.map(function(message,index) {
+                            return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
+                          })
+    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>Origin: {activeMsg ? activeMsg.source.origin: ''} <br/>Received: {activeMsg ? activeMsg.ts : ''}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
     const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
     const chatStyle = this.state.stream ? {background: '#fff', color: '#000'} : {background: '#45a5f4', color:'red'}

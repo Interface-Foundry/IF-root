@@ -18,8 +18,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import ReactTransitionGroup from 'react-addons-transition-group';
 import Toggle from 'react-toggle'
 import localStateItems from './localStateItems'
-import DraggableList from './DraggableList.jsx'
-
+// import picstitch from '../utils/stitcher'
 const style = {
   width: 400,
   marginBottom: '2em',
@@ -39,7 +38,7 @@ class ControlPanel extends Component {
 
     constructor (props, context) {
       super(props, context)
-      this.moveCard = this.moveCard.bind(this);
+      // this.moveCard = this.moveCard.bind(this);
       this.state = {
         items: localStateItems.localState,
         msg: '',
@@ -62,6 +61,10 @@ class ControlPanel extends Component {
     const {actions, activeChannel, messages, resolved} = this.props;
     const self = this
      self.setState({ mounted: true });
+
+
+     //------------ON RECEIVING RESULTS FROM SEARCH PREVIEW-----------//
+     
      socket.on('results', function (msg) {
       //-Stop loading spinner
       self.state.spinnerloading = false
@@ -97,7 +100,7 @@ class ControlPanel extends Component {
     } else if (msg.action !== 'focus'){
       self.setState({focusInfo: null})
     }
-    //-Store client_res for focus and more commands
+    //-Store client_res for focus,more, and checkout commands
     if ((msg.action === 'focus' || msg.action === 'more' || msg.action === 'checkout') && msg.client_res && msg.client_res.length > 0) {
       self.setState({client_res: msg.client_res})
     }
@@ -270,6 +273,7 @@ class ControlPanel extends Component {
   searchAmazon(query) {
     const {activeMsg} = this.props
     const newQuery = activeMsg;
+    const selected = this.state.searchSelect
     const self = this;
      //TODO
      // processData.urlShorten(data,function(res){
@@ -283,15 +287,16 @@ class ControlPanel extends Component {
      //            callback();
      //        });
      //    }, function done(){
+            
              if (!this.state.searchParam) {
-              if (query) {
-                this.state.searchParam = query
-              } else if (document.querySelector('#search-input').value !== ''){
-                this.state.searchParam = document.querySelector('#search-input').value
-              } else {
-                console.log('search input is empty.')
-                return
-              }
+                if (query) {
+                  this.state.searchParam = query
+                } else if (document.querySelector('#search-input').value !== ''){
+                  this.state.searchParam = document.querySelector('#search-input').value
+                } else {
+                  console.log('search input is empty.')
+                  return
+                }
             }
             if (newQuery._id) {
               delete newQuery._id
@@ -535,69 +540,180 @@ class ControlPanel extends Component {
     this.searchAmazon(query)
   }
 
+  picStitch(items) {
+    return new Promise(function(resolve, reject) {
+        let toStitch = [];
+        items.forEach(function(item){
+           if (item){
+              let price;
+              if (item.realPrice){
+                price = item.realPrice;
+              }
+              else{ 
+                if (!item.ItemAttributes[0].ListPrice){
+                    price = ''; //price missing, show blank
+                }
+                else{
+                    if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
+                        price = '';
+                    }
+                    else {
+                        // add price
+                        price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
+                    }
+                }                     
+              }
+              if(price == 'Add to cart to see product details. Why?' || price == 'Too low to display' || price == 'See price in cart'){
+                price = '';
+              }
+              let primeAvail = 0;
+              if (item.Offers && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime){
+                  primeAvail = item.Offers[0].Offer[0].OfferListing[0].IsEligibleForPrime[0];
+              }
+
+              let imageURL;
+              if (item.MediumImage && item.MediumImage[0].URL[0]){
+                  imageURL = item.MediumImage[0].URL[0];
+              }
+              else if (item.ImageSets && item.ImageSets[0].ImageSet && item.ImageSets[0].ImageSet[0].MediumImage && item.ImageSets[0].ImageSet[0].MediumImage[0]){
+                  imageURL = item.ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
+              }
+              else if (item.altImage){
+                  imageURL = item.altImage;
+              }
+              else {
+                  console.log('NO IMAGE FOUND ',item);
+                  imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
+              }
+              if(item.reviews && item.reviews.rating == 0){
+                delete item.reviews;
+              }
+              if (item && item.ItemAttributes && item.ItemAttributes[0].Title){
+                toStitch.push({
+                    url: imageURL,
+                    price: price,
+                    prime: primeAvail, //is prime available?
+                    name: item.ItemAttributes[0].Title[0].trim(),
+                    reviews: item.reviews
+                });                      
+              }
+              else {
+                toStitch.push({
+                    url: imageURL,
+                    price: price,
+                    prime: primeAvail, //is prime available?
+                    name: '',
+                    reviews: item.reviews
+                });                       
+              }
+          }
+          else {
+              console.log('IMAGE MISSING!',item);
+          }
+        })
+        UserAPIUtils.stitch(toStitch).then(function(res){
+           return resolve(res.body);
+        }).catch(function(err){
+          return resolve();
+        })
+    })
+  }
+
   sendCommand(newMessage) {
     const { activeChannel, actions, activeMsg, messages } = this.props
+    const { rawAmazonResults, searchSelect} = this.state
     newMessage.id = messages.length
     newMessage.source.org = activeChannel.id.split('_')[0]
     newMessage.flags = {toClient: true}
-    newMessage.amazon = this.state.rawAmazonResults ? this.state.rawAmazonResults : null
-    newMessage.source.origin = 'slack'
-    let thread = activeMsg.thread
-    thread.parent.id = activeMsg.thread.id
-    thread.parent.isParent = false;
-    newMessage.thread = thread
-    thread.sequence = parseInt(activeMsg.thread + 1)
-    if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
-      if (!this.state.client_res || (this.state.client_res && this.state.client_res.length === 0)) { console.log('Cpanel244',newMessage); return}
-        else {
-           // if (newMessage.action === 'checkout') { newMessage.client_res = [this.state.client_res] }
-          // else { 
-            newMessage.client_res.push(this.state.client_res[0])
-          // }
-        }
+    newMessage.amazon = rawAmazonResults ? rawAmazonResults : null
+    // if (searchSelect && searchSelect.length > 0 && newMessage.amazon) {
+    //     for (var i = 0; i < searchSelect.length; i++) {
+    //       let selectedItem = rawAmazonResults[searchSelect[i]-1]
+    //       let residentItem = rawAmazonResults[i]
+    //       newMessage.amazon[i] = selectedItem
+    //       newMessage.amazon[searchSelect[i]-1] = residentItem
+    //     }
+    //  }
+    let item1, item2, item3;
+    switch(searchSelect.length) {
+      case 0:
+        item1 = rawAmazonResults[0];
+        item2 = rawAmazonResults[1];
+        item3 = rawAmazonResults[2];
+        break;
+      case 1: 
+        item1 = rawAmazonResults[searchSelect[0]-1];
+        let temp = rawAmazonResults.slice(0);
+        temp.splice(searchSelect[0]-1,1);
+        item2 = temp[0]
+        item3 = temp[1]
+        break;
+      case 2: 
+        item1 = rawAmazonResults[searchSelect[0]-1];
+        item2 = rawAmazonResults[searchSelect[1]-1];
+        let temp1 = rawAmazonResults.slice(0)
+        temp1.splice(searchSelect[0]-1,1);
+        temp1.splice(searchSelect[1]-1,1);
+        item3 = temp1[0];
+        break;
+      case 3: 
+        item1 = rawAmazonResults[searchSelect[0]-1];
+        item2 = rawAmazonResults[searchSelect[1]-1];
+        item3 = rawAmazonResults[searchSelect[2]-1];
+        break;
+      default:
+        item1 = rawAmazonResults[0];
+        item2 = rawAmazonResults[1];
+        item3 = rawAmazonResults[2];
     }
-    console.log('Cpanel246: Send Command: ', newMessage)
-    socket.emit('new message', newMessage);
-    this.setState({sendingToClient: true})
-    const self = this
-    setTimeout(function(){
-          self.setState({sendingToClient: false})
-    }, 1500)
-    // UserAPIUtils.createMessage(newMessage);
+    const self = this;
+    let toStitch = [item1,item2,item3]
+    // console.log('SendCommand toStitch:', toStitch)
+    this.picStitch(toStitch).then(function(url){
+      if (url) {
+        let imgIndex = findIndex(newMessage.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
+        newMessage.client_res[imgIndex] = url
+      }
+      newMessage.source.origin = 'slack'
+      let thread = activeMsg.thread
+      thread.parent.id = activeMsg.thread.id
+      thread.parent.isParent = false;
+      newMessage.thread = thread
+      thread.sequence = parseInt(activeMsg.thread + 1)
+      if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
+        if (!self.state.client_res || (self.state.client_res && self.state.client_res.length === 0)) { console.log('Cpanel244 CLIENT_RES MISSING!!!!',newMessage); return}
+        else { newMessage.client_res.push(self.state.client_res[0]) }
+      }
+      console.log('Cpanel649: Send Command: ', newMessage)
+      socket.emit('new message', newMessage);
+      self.setState({sendingToClient: true})
+      setTimeout(function(){
+        self.setState({sendingToClient: false})
+      }, 1500)
+    }).catch(function(err) {
+      console.log('***Cpanel653: ERROR: Picstitch FAILED: ',err)
+    })
   }
 
-   moveCard(dragIndex, hoverIndex) {
-    const { items } = this.state;
-    const dragCard = items[dragIndex];
-    this.setState(update(this.state, {
-      items: {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, dragCard]
-        ]
-      }
-    }));
-    this.setState(update(this.state, {
-        items: {[hoverIndex]: {$merge: {index: hoverIndex}}}
-     }));
-  }
+
 
   //This function selects items for top 3
   handleClick(index) {
-    let count = this.state.count
+    // let count = this.state.count
     switch (this.state.searchSelect.length) {
       case 0:
+           // this.setState(update(this.state, {searchSelect: {$push: [index]}}));
       case 1:
       case 2:
           if (!some(this.state.searchSelect, function(el){ return el === index}) ) {
            this.setState(update(this.state, {searchSelect: {$push: [index]}}));
           }
-          console.log('case 1 : count: ',count, 'searchSelect : ',this.state.searchSelect, 'index: ', index)
+          // console.log('searchSelect updated: ',this.state.searchSelect)
          break;
       case 3:
-          console.log('case 2 : count: ',count, 'searchSelect : ',this.state.searchSelect, 'index: ', index)
-          this.state.searchSelect = []
-          this.setState(update(this.state, {searchSelect: {$push: [index]}}));       
+          this.setState({searchSelect: []})
+          // this.setState(update(this.state, {searchSelect: []}));   
+          // console.log('searchSelect updated: ',this.state.searchSelect)  
          break;
       default:
         return
@@ -610,27 +726,6 @@ class ControlPanel extends Component {
     nextState[field] = e.target.checked
     this.setState(nextState)
   }
-
-  // handleMouseMove(lastPressed, row) {
-  //   const { items } = this.state;
-  //   function reinsert(arr, from, to) {
-  //     const _arr = arr.slice(0);
-  //     const val = _arr[from];
-  //     _arr.splice(from, 1);
-  //     _arr.splice(to, 0, val);
-  //     return _arr;
-  //   }
-  //   const itemsReordered = reinsert(items, findIndex(items, function(o) { return o.index == lastPressed }), row);
-  //   this.setState({items: itemsReordered});
-  // }
-
-
-  // handleMouseUp(index) {
-  //   const { items } = this.state;
-  //   let selectedIndex = findIndex(items, function(o) { return o.index == index })
-
-  //   this.setState({ selected: {id: items[selectedIndex].id, name: items[selectedIndex].name, index: selectedIndex}})
-  // }
 
   renderItem(index, key) {
       const highlightBox =  (this.state.searchSelect && (some(this.state.searchSelect, function(el){ return (el-1) === index}))) ? {border:'1em solid #90caf9', textAlign: 'center'} : {};
@@ -649,7 +744,7 @@ class ControlPanel extends Component {
                     text={this.state.items[index].name}
                     price={this.state.items[index].price}
                     img = {this.state.items[index].img}
-                    moveCard={this.moveCard}  />
+                    />
           </div>   
       )
     }
@@ -674,6 +769,7 @@ class ControlPanel extends Component {
      const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
      return ( 
          <div className="flexbox-container">
+          {this.state.searchSelect}
           <div id="second-column">
             <div id="search-box" style={showSearchBox}>
               <input type="text" id="search-input" />
@@ -782,12 +878,9 @@ class ControlPanel extends Component {
                     onChange={ () => { changeMode(activeChannel) }} />
                     <span style={statusStyle}>  {statusText}</span>
                 </label>
-                count: {this.state.count}
-                <br / >
-                searchSelect: {this.state.searchSelect}
                 <form ref='form1' onSubmit={::this.handleSubmit}>
                     <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
-                      <ButtonGroup bsSize = "large" bsStyle = "primary"  style={{margin: '0.2em'}}>
+                      <ButtonGroup bsSize = "xsmall" bsStyle = "primary"  style={{margin: '0.2em'}}>
                         <Button className="form-button" style={{backgroundColor: '#1976d2', color: 'white'}} onClick = { () => this.setField('initial')} >
                           Initial
                         </Button>
@@ -820,20 +913,12 @@ class ControlPanel extends Component {
   }
 }
 
-// <div style={{overflow: 'auto', maxHeight: 700, maxWidth: 175, borderRadius: '0.3em'}}>
-// </div>
+//Helper function
+Array.prototype.move = function(from, to) {
+    this.splice(to, 0, this.splice(from, 1)[0]);
+};
 
 
-// <DynamicForm
-//   onSubmit={this.props.onSubmit} changed=""
-//   fields={fields} selected={selected} activeMsg={activeMsg} activeChannel={activeChannel} messages={messages} actions={actions} />
-
-// <ReactCSSTransitionGroup transitionName="example" transitionAppear={true} transitionAppearTimeout={700} transitionEnterTimeout={500} transitionLeaveTimeout={300} >
- // </ReactCSSTransitionGroup>
-
-
-
-// <DraggableList ref='draggableList'  selected={this.state.selected} mouseMove={::this.handleMouseMove} mouseUp={::this.handleMouseUp} items={items} messages={messages}  style={{maxHeight: 700, maxWidth: 175}} className='demo8-outer' />
 
 
 export default ControlPanel

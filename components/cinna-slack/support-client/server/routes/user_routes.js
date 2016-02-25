@@ -2,6 +2,7 @@
 
 var bodyparser = require('body-parser');
 var User = require('../models/User.js');
+var request = require('request')
 
 module.exports = function loadUserRoutes(router, passport) {
   router.use(bodyparser.json());
@@ -27,6 +28,23 @@ module.exports = function loadUserRoutes(router, passport) {
   router.get('/signout', function(req, res) {
     req.logout();
     res.end();
+  });
+
+  router.post('/stitch', function(req, res) {
+    // console.log('/stitch req.body',req.body)
+    request({
+      method: 'POST',
+      url: 'http://chat.kipapp.co:5000',
+      json: true,
+      body: req.body
+    }, function(e, r, b) {
+      if (e) {
+        console.log('user_routes/stitch err: ',err)
+        res.send(e)
+      } else {
+        res.json(r);
+      }
+    })
   });
 
   //get auth credentials from server
