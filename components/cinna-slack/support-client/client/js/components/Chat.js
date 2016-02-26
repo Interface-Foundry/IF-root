@@ -11,7 +11,7 @@ const socket = io();
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
 import shortid from 'shortid';
-
+import uniq from 'lodash/array/uniq';
 
 
 class Chat extends Component {
@@ -43,25 +43,25 @@ class Chat extends Component {
     this.setState({ resolved: null });
     const self = this
      socket.on('change state bc', function (state) {
-      console.log('change state event received', state)
-       var identifier = {id: state.id, properties: []}
-      for (var key in state) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'thread' || key == 'amazon') && state[key] !== '' ) {
-          identifier.properties.push({ [key] : state[key]})
-        }
-      }  
-      // console.log('identifier: ', identifier)
-      //if no fields were updated on form take no action
-      if (identifier.properties.length === 0 ) {
-        return
-      } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'Lobby') {
-        return
-      }else {
-        actions.setMessageProperty(identifier)
-      }
+      // console.log('change state event received', state)
+      //  var identifier = {id: state.id, properties: []}
+      // for (var key in state) {
+      //   if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'thread' || key == 'amazon') && state[key] !== '' ) {
+      //     identifier.properties.push({ [key] : state[key]})
+      //   }
+      // }  
+      // // console.log('identifier: ', identifier)
+      // //if no fields were updated on form take no action
+      // if (identifier.properties.length === 0 ) {
+      //   return
+      // } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'Lobby') {
+      //   return
+      // }else {
+      //   actions.setMessageProperty(identifier)
+      // }
     })   
     socket.on('new bc message', function(msg) {   
-     // console.log('Chat64 msg: ',msg)   
+     console.log('Chat64 msg: ',msg)   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
       // msg.parent = (filtered.length > 0) ?  false : true
@@ -236,7 +236,7 @@ class Chat extends Component {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
     // .filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
-    const activeMsg =  messages.filter(message => (message.source && message.source.channel === activeChannel.name))[0]
+    const activeMsg =  filteredMessages[0]
     const username = this.props.user.username;
     const resolved = activeChannel.resolved
     const stream = this.state.stream
@@ -247,6 +247,7 @@ class Chat extends Component {
                            )
                            :  
                         filteredMessages.map(function(message,index) {
+                            message.client_res = uniq(message.client_res)
                             return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
                           })
     const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>Origin: {activeMsg ? activeMsg.source.origin: ''} <br/>Received: {activeMsg ? activeMsg.ts : ''}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             

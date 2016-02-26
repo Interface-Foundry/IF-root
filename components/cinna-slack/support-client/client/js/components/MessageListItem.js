@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import findIndex from 'lodash/array/findIndex'
+import uniq from 'lodash/array/uniq'
+
 
 class MessageListItem extends Component {
 
@@ -22,7 +24,7 @@ class MessageListItem extends Component {
     function checkImgURL (msg) {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
     }
-    if (checkImgURL(messageToDisplay)) {
+    if (messageToDisplay && checkImgURL(messageToDisplay)) {
       this.setState({ isImage : 'true'  })
     } else {
       this.setState({ isImage : 'false'  })
@@ -36,21 +38,21 @@ class MessageListItem extends Component {
               : (message.flags && message.flags.toCinna) ? 'toCinna' : 'message')
                   // : (message.flags && message.flags.response) ? 'response' : 'message')
      const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
-     let text = ''
-     switch (message.action){
-      case 'initial':
-      case 'more':
-        text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
-        break;
-      case 'similar':
-        text = 'We found some options similar to '+message.searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
-        break;
-      case 'checkout':
-        text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
-        break;
-      default: 
-        text = message.client_res[0]          
-     }
+     // let text = ''
+     // switch (message.action){
+     //  case 'initial':
+     //  case 'more':
+     //    text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
+     //    break;
+     //  case 'similar':
+     //    text = 'We found some options similar to '+message.searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+     //    break;
+     //  case 'checkout':
+     //    text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
+     //    break;
+     //  default:
+     //    text = message.client_res[0]          
+     // }
      switch (msgType){
       case 'image' : 
         return (
@@ -71,13 +73,13 @@ class MessageListItem extends Component {
                 case 'similar':
                 case 'more':
                   // console.log('case 1')
-                  message.client_res.unshift(text)
-                  let imgIndex;
-                  try {
-                    imgIndex = findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
-                  } catch(err) {
-                    console.log('MLI81: ',err, message)
-                  }
+                  // message.client_res.unshift(text)
+                  // let imgIndex;
+                  // try {
+                  //   imgIndex = findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
+                  // } catch(err) {
+                  //   console.log('MLI81: ',err, message)
+                  // }
 
                   return (
                     <div>
@@ -85,7 +87,7 @@ class MessageListItem extends Component {
                             {message.client_res[0]}
                         </div>
                          <div style={messageStyle}> 
-                            <img width='170' src={message.client_res[imgIndex]} />
+                            <img width='170' src={message.client_res[1]} />
                         </div>
                     </div>
                     )
@@ -165,9 +167,9 @@ class MessageListItem extends Component {
 
   render() {
     var self = this;
-    const { message } = this.props;
-    const displayName = ((message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify' || message.action  === 'focus' || message.action  === 'checkout' || message.action === 'more' )) ? 'Console:' : ((message.bucket === 'response' || message.flags.toClient) ? 'Cinna' : message.source.id)
-    const nameStyle = (message.flags && message.flags.toCinna) ? {color: '#e57373'} : {color: '#66c'}
+    const { message, index } = this.props;
+    const displayName = (index !== 0 && (message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify' || message.action  === 'focus' || message.action  === 'checkout' || message.action === 'more' )) ? 'Console:' : (index !== 0 && (message.bucket === 'response' || message.flags.toClient) ? 'Cinna' : message.source.id)
+    const nameStyle = (index !== 0 && message.flags && message.flags.toCinna) ? {color: '#e57373'} : {color: '#66c'}
     return (
       <li>
         <span>

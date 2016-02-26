@@ -53,7 +53,8 @@ class ControlPanel extends Component {
         focusInfo: null,
         visible: false,
         searchSelect: [],
-        count: 0
+        count: 0,
+        client_res: null
     }
   }
 
@@ -101,24 +102,33 @@ class ControlPanel extends Component {
       self.setState({focusInfo: null})
     }
     //-Store client_res for focus,more, and checkout commands
-    if ((msg.action === 'focus' || msg.action === 'more' || msg.action === 'checkout') && msg.client_res && msg.client_res.length > 0) {
-      self.setState({client_res: msg.client_res})
+    if (
+      // (msg.action === 'focus' || msg.action === 'more' || msg.action === 'checkout') && 
+      msg.client_res && msg.client_res.length > 0) {
+      // if (findIndex(self.state.client_res, function(el){ if (el) {return !((el.indexOf(msg.client_res) > -1) || (el.indexOf(msg.client_res[0]) > -1))} }) > -1 ) {
+              self.setState({client_res: msg.client_res})
+      // }
     }
 
     //Change active message in state
-    var identifier = {id: msg.source.id, properties: []}
-    for (var key in msg) {
-      if ((key === 'amazon' || key === 'client_res' || key === 'searchSelect') && msg[key] !== '' ) {
-        identifier.properties.push({ [key] : msg[key]})
-      }
-    }  
-    if (identifier.properties.length === 0 ) {
-      return
-    } else {
-      actions.setMessageProperty(identifier)
-    }
+    // var identifier = {id: msg.source.id, properties: []}
+    // for (var key in msg) {
+    //   if ((
+    //     key === 'amazon' || 
+    //     key === 'client_res' || 
+    //     key === 'searchSelect') && msg[key] !== '' ) {
+    //     identifier.properties.push({ [key] : msg[key]})
+    //   }
+    // }  
+    // if (identifier.properties.length === 0 ) {
+    //   return
+    // } else {
+    //   actions.setMessageProperty(identifier)
+    // }
   })
+  //---------------------------------------------------------//
 
+  //------------ON CHANGE CHANNEL  ---------------------------//
    socket.on('change channel bc', function(channels) {
     const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
@@ -126,25 +136,25 @@ class ControlPanel extends Component {
     const firstMsgOld = filteredOld[0]
 
     //-Emit change state event
-    socket.emit('change state', self.state);
+    // socket.emit('change state', self.state);
 
     //Reset selected state
      // self.setState({ selected: {name: null, index: null}})
 
     //If there is atleast one channel existing...
     if (firstMsgOld) {
-          //Update redux state with new item ordering        
-          const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
-          const result = []
-          self.state.items.forEach(function(stateItem){
-            reduxItems.forEach(function(reduxItem){
-              if (stateItem.id == reduxItem.ASIN[0]) {
-               result.push(reduxItem)
-              }
-            })
-          })
+          //Save search results and searchSelect     
+          // const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
+          // const result = []
+          // self.state.items.forEach(function(stateItem){
+          //   reduxItems.forEach(function(reduxItem){
+          //     if (stateItem.id == reduxItem.ASIN[0]) {
+          //      result.push(reduxItem)
+          //     }
+          //   })
+          // })
           let identifier = {id: firstMsgOld.source.id, properties: []}
-          identifier.properties.push({ amazon : result})
+          identifier.properties.push({ amazon : self.state.rawAmazonResults})
           identifier.properties.push({ searchSelect : self.state.searchSelect })
           actions.setMessageProperty(identifier)
      }
@@ -250,6 +260,8 @@ class ControlPanel extends Component {
       self.state.focusInfo = null
       self.state.count = 0
     })
+  //---------------------------------------------------------//
+
   }
 
   // onChange(e) {
@@ -271,70 +283,69 @@ class ControlPanel extends Component {
   }
 
   searchAmazon(query) {
-    const {activeMsg} = this.props
-    const newQuery = activeMsg;
+    const {activeMsg, activeChannel,messages} = this.props
+    // const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this;
-     //TODO
-     // processData.urlShorten(data,function(res){
-     //    var count = 0;
-     //    //put all result URLs into arr
-     //    async.eachSeries(res, function(i, callback) {
-     //        data.urlShorten.push(i);//save shortened URLs
-     //        processData.getNumEmoji(data,count+1,function(emoji){
-     //            data.client_res.push(emoji + ' ' + res[count]);
-     //            count++;                           
-     //            callback();
-     //        });
-     //    }, function done(){
-            
-             if (!this.state.searchParam) {
-                if (query) {
-                  this.state.searchParam = query
-                } else if (document.querySelector('#search-input').value !== ''){
-                  this.state.searchParam = document.querySelector('#search-input').value
-                } else {
-                  console.log('search input is empty.')
-                  return
-                }
-            }
-            if (newQuery._id) {
-              delete newQuery._id
-            }
-            newQuery.msg = this.state.searchParam
-            newQuery.bucket = 'search'
-            newQuery.action = 'initial'
-            newQuery.tokens = newQuery.msg.split()
-            newQuery.source.origin = 'supervisor'
-            newQuery.flags = {}
-            newQuery.flags.toCinna = true
-            // newQuery.client_res.unshift('Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊')
-            socket.emit('new message', newQuery);
-            this.setState({
-              spinnerloading: true,
-              searchParam: ''
-            })
-            setTimeout(function(){
-              if (self.state.spinnerloading === true) {
-                 self.setState({
-                    spinnerloading: false
-                  })
-              }
-             },8000)
-        // });
-      // });
+     if (!this.state.searchParam) {
+        if (query) {
+          this.state.searchParam = query
+        } else if (document.querySelector('#search-input').value !== ''){
+          this.state.searchParam = document.querySelector('#search-input').value
+        } else {
+          console.log('search input is empty.')
+          return
+        }
+    }
+    let newQuery = {}
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
+    if (newQuery._id) {
+      delete newQuery._id
+    }
+    newQuery.msg = this.state.searchParam
+    newQuery.bucket = 'search'
+    newQuery.action = 'initial'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor'
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newQuery.thread = thread
+    // newQuery.client_res.unshift('Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊')
+    this.setState({
+      spinnerloading: true,
+      searchParam: '',
+      bucket: 'search',
+      action: 'initial'
+    })
+    socket.emit('new message', newQuery);
+    setTimeout(function(){
+      if (self.state.spinnerloading === true) {
+         self.setState({
+            spinnerloading: false
+          })
+      }
+     },8000)
     document.querySelector('#search-input').value = ''
   }
 
   searchSimilar() {
-    const { activeMsg } = this.props
-    const newQuery = activeMsg;
+    const { activeMsg, activeChannel, messages } = this.props
+    // const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this
     if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
+    let newQuery = {}
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
     if (newQuery._id) {
       delete newQuery._id
     }
@@ -343,7 +354,11 @@ class ControlPanel extends Component {
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.tokens = newQuery.msg.split()
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newQuery.thread = thread
+    // newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
     newQuery.amazon =  this.state.rawAmazonResults
@@ -619,11 +634,15 @@ class ControlPanel extends Component {
     })
   }
 
-  sendCommand(newMessage) {
+  sendCommand() {
     const { activeChannel, actions, activeMsg, messages } = this.props
-    const { rawAmazonResults, searchSelect} = this.state
-    newMessage.id = messages.length
+    const { rawAmazonResults, searchSelect, bucket, action} = this.state
+    let newMessage = { client_res: []}
+    newMessage.bucket = bucket
+    newMessage.action = action
+    newMessage.source = activeMsg.source
     newMessage.source.org = activeChannel.id.split('_')[0]
+    newMessage.id = messages.length
     newMessage.flags = {toClient: true}
     newMessage.amazon = rawAmazonResults ? rawAmazonResults : null
     // if (searchSelect && searchSelect.length > 0 && newMessage.amazon) {
@@ -670,9 +689,24 @@ class ControlPanel extends Component {
     let toStitch = [item1,item2,item3]
     // console.log('SendCommand toStitch:', toStitch)
     this.picStitch(toStitch).then(function(url){
-      if (url) {
-        let imgIndex = findIndex(newMessage.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
-        newMessage.client_res[imgIndex] = url
+      if (url && self.state.client_res) {
+        let text = ''
+       switch (newMessage.action){
+        case 'initial':
+        case 'more':
+          text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
+          break;
+        case 'similar':
+          text = 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+          break;
+        case 'checkout':
+          text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
+          break;
+        default:
+          text = 'Hmm, something went wrong.'          
+       }
+        newMessage.client_res.push(text)
+        newMessage.client_res.push(url)
       }
       newMessage.source.origin = 'slack'
       let thread = activeMsg.thread
@@ -680,10 +714,11 @@ class ControlPanel extends Component {
       thread.parent.isParent = false;
       newMessage.thread = thread
       thread.sequence = parseInt(activeMsg.thread + 1)
-      if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
-        if (!self.state.client_res || (self.state.client_res && self.state.client_res.length === 0)) { console.log('Cpanel244 CLIENT_RES MISSING!!!!',newMessage); return}
-        else { newMessage.client_res.push(self.state.client_res[0]) }
-      }
+      // if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
+        // if (!self.state.client_res || (self.state.client_res && self.state.client_res.length === 0)) { console.log('Cpanel244 CLIENT_RES MISSING!!!!',newMessage); return}
+        // else { 
+      //   }
+      // } 
       console.log('Cpanel649: Send Command: ', newMessage)
       socket.emit('new message', newMessage);
       self.setState({sendingToClient: true})
@@ -913,11 +948,16 @@ class ControlPanel extends Component {
   }
 }
 
-//Helper function
+//Helper functions
 Array.prototype.move = function(from, to) {
     this.splice(to, 0, this.splice(from, 1)[0]);
 };
-
+function uniq(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+}
 
 
 
