@@ -232,6 +232,35 @@ class Chat extends Component {
      // window.scrollTo(0, window.innerHeight);
   }
 
+  renderMessages() {
+     let { messages, activeChannel } = this.props;
+     let relevantMessages = this.state.stream ?  messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor) : messages.filter(message => (message.source && message.source.id === activeChannel.id))
+     let filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
+     let displayMessages = this.state.stream ?   
+       messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor).map(message =>
+            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
+           )
+           :  
+        relevantMessages.map(function(message,index) {
+                    message.client_res = uniq(message.client_res)
+            return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
+          })
+      let elHeights = [] 
+      relevantMessages.forEach(function(msg) {
+            let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 260
+             elHeights.push(elHeight)
+      })
+      console.log('Chat252: elHeights: ',elHeights)
+      return (
+           <Infinite 
+                elementHeight={elHeights}
+                 containerHeight={window.innerHeight-90}
+                 displayBottomUpwards>
+                  { displayMessages }
+            </Infinite>
+        )
+  }
+
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
@@ -276,11 +305,7 @@ class Chat extends Component {
           <div className="flexbox-container">
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
-                <Infinite elementHeight={44.5781}
-                 containerHeight={window.innerHeight-90}
-                 displayBottomUpwards>
-                  { displayMessages }
-                </Infinite>
+                {this.renderMessages()}
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
