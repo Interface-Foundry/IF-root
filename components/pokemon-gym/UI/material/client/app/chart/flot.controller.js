@@ -17,7 +17,8 @@
                 bleh:'meh'
               }
             }).then(function successCallback(res){ 
-
+                console.log(res.data);
+                $scope.slackData = res.data;
             });
 
     }

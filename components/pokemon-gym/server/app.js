@@ -54,17 +54,9 @@ app.get('/status', function(req, res) {
 
 app.post('/vc/timexsearch', function(req, res) {
 
-  // var stream = Message.find().sort({'_id': -1}).select('source').stream()
-  // stream.on('error', function (err) {
-  //   console.error(err)
-  // })
-  // stream.on('data', function (doc) {
-  //   console.log(doc)
-  // })
+
 
   console.log('zzzz ',req.body);
-
-  initSlackUsers(app.get('env'));
 
   //ADD IN TIME PERIODS HERE FOR QUERY, AND USER ID !!!!!!
 
@@ -79,21 +71,35 @@ app.post('/vc/timexsearch', function(req, res) {
     console.log('error: dates missing!');
   }
 
-
-
 });
 
 
 app.post('/vc/slackstats', function(req, res) {
-  console.log('asdf');
+  
+  initSlackUsers(app.get('env'),function(rez){
+
+    res.send(rez);
+  });
+ 
+});
+
+
+app.post('/vc/stream', function(req, res) {
+  
+  var stream = Message.find().sort({'_id': -1}).select('source').stream()
+  stream.on('error', function (err) {
+    console.error(err)
+  })
+  stream.on('data', function (doc) {
+    console.log('streaming ',doc)
+  })
  
 });
 
 
 
-
 //get stored slack users from mongo
-function initSlackUsers(env){
+function initSlackUsers(env,callback){
     console.log('loading with env: ',env);
     //load kip-pepper for testing
     if (env === 'development_alyx') {
@@ -107,8 +113,11 @@ function initSlackUsers(env){
                 initialized: false
             }
         }];
-        loadSlackUsers(testUser);
-    }else if (env === 'development_mitsu'){
+        loadSlackUsers(testUser,function(rez){
+          callback(rez);
+        });
+    }
+    else if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0HLZP09L',
             bot: { 
@@ -119,7 +128,9 @@ function initSlackUsers(env){
                 initialized: false
             }
         }];
-        loadSlackUsers(testUser);
+        loadSlackUsers(testUser,function(rez){
+          callback(rez);
+        });
     }
     else {
         console.log('retrieving slackbots from mongo');
@@ -128,7 +139,9 @@ function initSlackUsers(env){
                 console.log('saved slack bot retrieval error');
             }
             else {
-                loadSlackUsers(users);
+                loadSlackUsers(users, function(rez){
+                  callback(rez);
+                });
             }
         });        
     }
@@ -139,7 +152,7 @@ function initSlackUsers(env){
 
 
 //load slack users into memory, adds them as slack bots
-function loadSlackUsers(users){
+function loadSlackUsers(users,callbackTOP){
     console.log('loading '+users.length+' Slack teams');
 
     var slackTeams = [];
@@ -257,7 +270,15 @@ function loadSlackUsers(users){
         console.log('team# ',slackTeams.length);
         console.log('total users ',totalUserCount);
 
+        var slackObj = {
+          team_count: slackTeams.length,
+          total_users: totalUserCount,
+          teams:slackTeams
+        }
+
         console.log('done loading slack users');
+
+        callbackTOP(slackObj);
     });
 
   }
