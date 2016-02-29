@@ -6,13 +6,13 @@
                 <div class="divider divider-md"></div>
 
                         <div class="row">
-                            <div style="float:right; margin-right:44px;"><h4>Slack Stats</h4></div>
+                            <div style="float:right; margin-right:44px;"><h4>Kip Slack Stats</h4></div>
 
 
 
                             <div ng-show="loadingData"><img width="50" src="https://thomas.vanhoutte.be/miniblog/wp-content/uploads/light_blue_material_design_loading.gif"></div>
 
-                            <div class="col-md-3" style="margin-left:15px;">
+<!--                             <div class="col-md-3" style="margin-left:15px;">
                                 <div style="float:left; position:absolute; margin-top:41px;"><p>Start Date</p></div>
                                 <p class="input-group">
                                   
@@ -37,7 +37,7 @@
                                 <p class="input-group">
                                   <button ng-click="searchDB()" class="btn btn-info">Search</button>
                                 </p>
-                            </div>
+                            </div> -->
 
                         </div>
 
@@ -45,10 +45,32 @@
                 <div class="panel-body">
 
 
-                    <canvas id="line" class="chart chart-line" chart-data="data"
-                      chart-labels="labels" chart-legend="true" chart-series="series"
-                      chart-click="onClick" >
-                    </canvas> 
+                    <div><h3>Total Team Count: {{slackData.team_count}}</h3></div>
+                    <div><h3>Total Users: {{slackData.total_users}}</h3></div>
+
+                    <hr style="border-top:1px solid #000;">
+                    <h5>List of Teams:</h5>
+                    <hr style="border-top:1px solid #000;">
+
+                    <div ng-repeat="team in slackData.teams">
+                      <p><b>Name:</b> {{team.team.name}}</p>
+                      <p><b>Domain:</b> {{team.team.domain}}</p>
+                      <p><b>User Count:</b> {{team.users.count}}</p>
+                      <p><b>Channel Count:</b> {{team.channels.count}}</p>
+                      <hr style="border-top:1px solid grey;">
+
+                      <b>Channel List:</b><br><br>
+                      <div style="padding-left:15px;" ng-repeat="channel in team.channels.list">
+                        <p><b>Channel Name:</b> {{channel.name}}</p>
+                        <p><b>Member count:</b> {{channel.num_members}}</p>
+                        <p><b>Purpose:</b> {{channel.purpose.value}}</p>
+                        <hr style="border-top:1px solid grey;">
+                      </div>
+                      <br>
+                      <hr style="border-top:1px solid #000;">
+                      <br><br>
+                    </div>
+
 
 <!-- 
                     <div data-flot-chart 
@@ -58,7 +80,7 @@
                     ></div> -->
 
                     <div class="divider divider-xl"></div>
-                    <div class="row" >
+<!--                     <div class="row" >
 
                         <div class="col-md-3 box-stats">
                             <span class="box-desc">Views</span>
@@ -92,8 +114,7 @@
                                  data-options="infoChart4.options"
                             ></div>                              
                         </div>
-                    </div>
-                    <div class="divider divider-xl"></div>
+                    </div> -->
                 </div>
             </div>
         </div>
