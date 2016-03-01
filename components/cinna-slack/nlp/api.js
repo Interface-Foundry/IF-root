@@ -13,10 +13,6 @@ var stopwords = require('./stopwords');
 
 var debug = require('debug')('nlp')
 
-
-
-console.log(config)
-
 var BUCKET = {
   search: 'search',
   banter: 'banter',
@@ -47,12 +43,12 @@ var ACTION = {
         channel: '3EL18A0M' //example of slack channel (the user who is chatting) --> please send back from python
     };
   */
-var parse = module.exports.parse = function(text, callback) {
+var parse = module.exports.parse = function(data, callback) {
+  var text = data.msg;
   debug('parsing:' + text)
 
   // First do some global hacks
   text = text.replace(' but blue', ' but in blue').replace(/[^\w\s,.$!]/gi, '')
-
 
   // check for exact matches
   var res = exactMatch(text);
@@ -417,6 +413,9 @@ if (!module.parent) {
     '2 but blue',
   ];
   sentences.map(function(a) {
+    a = {
+      msg: a
+    };
     parse(a, function(e, res) {
       if (e) {
         console.error(e);
