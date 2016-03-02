@@ -10,6 +10,8 @@
 
         //console.log('asdf');
 
+        $scope.loadingData = true;
+
         $http({
               method: 'POST',
               url: '/vc/slackstats',
@@ -19,6 +21,7 @@
             }).then(function successCallback(res){ 
                 console.log(res.data);
                 $scope.slackData = res.data;
+                $scope.loadingData = false;
             });
 
     }
