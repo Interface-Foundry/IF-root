@@ -259,11 +259,10 @@ function loadSlackUsers(users,callbackTOP){
 
     async.eachSeries(slackTeams, function(team, callback3) {
 
-
-        totalUserCount = totalUserCount + team.users.count;
-
+        if (!isNaN(team.users.count)){
+          totalUserCount = totalUserCount + team.users.count;
+        }
         
-
         callback3();
     }, function done(){
 
@@ -275,6 +274,11 @@ function loadSlackUsers(users,callbackTOP){
           total_users: totalUserCount,
           teams:slackTeams
         }
+
+        ///* * * * * * * * * //
+        // GET CHANNELS WHERE KIP IS IN THEM 
+        //* * * * * * * * * * *//
+
 
         console.log('done loading slack users');
 
