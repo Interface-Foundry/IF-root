@@ -18,7 +18,10 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import ReactTransitionGroup from 'react-addons-transition-group';
 import Toggle from 'react-toggle'
 import localStateItems from './localStateItems'
-// import picstitch from '../utils/stitcher'
+import {isColor} from '../../../../nlp/colors'
+import colorHex from '../../../../nlp/colors'
+import priceModify from '../../../../nlp/price'
+
 const style = {
   width: 400,
   marginBottom: '2em',
@@ -54,7 +57,8 @@ class ControlPanel extends Component {
         visible: false,
         searchSelect: [],
         count: 0,
-        client_res: null
+        client_res: null,
+        rawAmazonResults: []
     }
   }
 
@@ -161,24 +165,27 @@ class ControlPanel extends Component {
         
     //Load items into state for next channel
      const nextItems = []
-     try {
-       for (var i = 0; i < firstMsg.amazon.length; i++) {
-        let item = { index: null, id: null, name: null, price: null, changed: true}
-        item.index = i
-        item.id = firstMsg.amazon[i].ASIN[0]
-        item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
-        item.price = firstMsg.amazon[i].realPrice ? firstMsg.amazon[i].realPrice : (firstMsg.amazon[i].ItemAttributes[0].ListPrice ? firstMsg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
-        try {
-          item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+     if (firstMsg) {
+       try {
+           for (var i = 0; i < firstMsg.amazon.length; i++) {
+            let item = { index: null, id: null, name: null, price: null, changed: true}
+            item.index = i
+            item.id = firstMsg.amazon[i].ASIN[0]
+            item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
+            item.price = firstMsg.amazon[i].realPrice ? firstMsg.amazon[i].realPrice : (firstMsg.amazon[i].ItemAttributes[0].ListPrice ? firstMsg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
+            try {
+              item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+            } catch(err) {
+              console.log('Could not get image for item: ',i)
+            }
+            nextItems.push(item)
+          } 
         } catch(err) {
-          console.log('Could not get image for item: ',i)
-        }
-        nextItems.push(item)
-      } 
-    } catch(err) {
-      console.log('CPanel Error 169 Could not get results :',err)
-      return
-    }
+          console.log('CPanel Error 169 Could not get results :',err)
+          return
+        } 
+     }
+
     if (nextItems.length > 0) {
          // console.log(0)
         self.setState({ items: nextItems })
@@ -335,7 +342,6 @@ class ControlPanel extends Component {
 
   searchSimilar() {
     const { activeMsg, activeChannel, messages } = this.props
-    // const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this
     if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
@@ -378,57 +384,122 @@ class ControlPanel extends Component {
   }
 
   searchModify() {
-    const { activeMsg} = this.props;
-    const newQuery = activeMsg;
-    const selected = this.state.searchSelect
-    const self = this;
-    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
-      console.log('Please select an item or do an initial search.')
+    let { activeMsg, activeChannel, messages } = this.props;
+    let selected = this.state.searchSelect
+    let modifier = this.state.modifier
+    let dataModify = { type: '', val: [] }
+    let self = this;
+    if (selected.length > 1 || !selected[0] || !this.state.rawAmazonResults) {
+      console.log('Please select one item.')
       return
     }
-   if (newQuery._id) {
+    let key = Object.keys(modifier)[0]
+    let value = document.querySelector('#modify-color').value ? document.querySelector('#modify-color').value : (document.querySelector('#modify-size').value ? document.querySelector('#modify-size').value : document.querySelector('#modify-price').value )
+    // console.log(key,value)
+    switch(key) {
+      case 'color': 
+        if(isColor(value)){
+          dataModify.type = 'color'
+          dataModify.val = colorHex(value)
+        } else {
+          console.log('Not a color!')
+          return
+        }
+        break;
+       case 'size': 
+        let size_names = [
+        'xs',
+        's',
+        'm',
+        'l',
+        'xl',
+        'xxl',
+        'xxxl',
+        'small',
+        'medium',
+        'large',
+        'extra large',
+        'extra small'
+        ];
+        if (findIndex(size_names, function(el) { return el === value })  > -1) {
+           dataModify.type = 'size'
+           dataModify.val = value
+        } else {
+          return
+        }
+        break;
+      case 'price': 
+        dataModify = priceModify(value)
+        console.log('Cpanel433 dataModify: ', dataModify)
+        break;
+      case 'brand': 
+        break;
+   
+    }
+    let newQuery = {}
+    newQuery.msg = value
+    newQuery.tokens = [value]
+    newQuery.dataModify = dataModify
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
+    if (newQuery._id) {
       delete newQuery._id
     }
     newQuery.bucket = 'search'
     newQuery.action = 'modify'
-    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
     newQuery.searchSelect = selected
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
-    newQuery.dataModify = { type: '', val: []}
-    if (this.state.color) {
-      newQuery.dataModify.type = 'color'
-      switch (this.state.modifier.color) {
-        case 'Purple': 
-          newQuery.dataModify.val.push({"hex": "#A020F0","name": "Purple","rgb": [160, 32, 240],"hsl": [196, 222, 136]})
-          break
-        case 'Blue Violet': 
-          newQuery.dataModify.val.push({"hex": "#8A2BE2","name": "Blue Violet", "rgb": [138, 43, 226], "hsl": [192, 193, 134]})
-          break
-        case 'Slate Blue': 
-          newQuery.dataModify.val.push({"hex": "#6A5ACD","name": "Slate Blue","rgb": [106, 90, 205],"hsl": [175, 136, 147]})
-          break
-        case 'Royal Blue': 
-          newQuery.dataModify.val.push({"hex": "#4169E1","name": "Royal Blue","rgb": [65, 105, 225],"hsl": [159, 185, 145]})
-          break
-        default:
-         console.log('No color selected.')
-      }
-    }
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
     })
     setTimeout(function(){
-        if (self.state.spinnerloading === true) {
-           self.setState({
-              spinnerloading: false
-            })
-        }
-       },8000)
+      if (self.state.spinnerloading === true) {
+         self.setState({
+            spinnerloading: false
+          })
+      }
+     },8000)
+
+
+
+    // if (this.state.color) {
+    //   newQuery.dataModify.type = 'color'
+    //   switch (this.state.modifier.color) {
+    //     case 'Purple': 
+    //       newQuery.dataModify.val.push({"hex": "#A020F0","name": "Purple","rgb": [160, 32, 240],"hsl": [196, 222, 136]})
+    //       break
+    //     case 'Blue Violet': 
+    //       newQuery.dataModify.val.push({"hex": "#8A2BE2","name": "Blue Violet", "rgb": [138, 43, 226], "hsl": [192, 193, 134]})
+    //       break
+    //     case 'Slate Blue': 
+    //       newQuery.dataModify.val.push({"hex": "#6A5ACD","name": "Slate Blue","rgb": [106, 90, 205],"hsl": [175, 136, 147]})
+    //       break
+    //     case 'Royal Blue': 
+    //       newQuery.dataModify.val.push({"hex": "#4169E1","name": "Royal Blue","rgb": [65, 105, 225],"hsl": [159, 185, 145]})
+    //       break
+    //     default:
+    //      console.log('No color selected.')
+    //   }
+    // }
+    // socket.emit('new message', newQuery);
+    // this.setState({
+    //   spinnerloading: true
+    // })
+    // setTimeout(function(){
+    //     if (self.state.spinnerloading === true) {
+    //        self.setState({
+    //           spinnerloading: false
+    //         })
+    //     }
+    //    },8000)
+
+
   }
 
   searchFocus() {
@@ -645,14 +716,7 @@ class ControlPanel extends Component {
     newMessage.id = messages.length
     newMessage.flags = {toClient: true}
     newMessage.amazon = rawAmazonResults ? rawAmazonResults : null
-    // if (searchSelect && searchSelect.length > 0 && newMessage.amazon) {
-    //     for (var i = 0; i < searchSelect.length; i++) {
-    //       let selectedItem = rawAmazonResults[searchSelect[i]-1]
-    //       let residentItem = rawAmazonResults[i]
-    //       newMessage.amazon[i] = selectedItem
-    //       newMessage.amazon[searchSelect[i]-1] = residentItem
-    //     }
-    //  }
+    
     let item1, item2, item3;
     switch(searchSelect.length) {
       case 0:
@@ -687,7 +751,7 @@ class ControlPanel extends Component {
     }
     const self = this;
     let toStitch = [item1,item2,item3]
-    // console.log('SendCommand toStitch:', toStitch)
+    console.log('toStitch: ', toStitch)
     this.picStitch(toStitch).then(function(url){
       if (url && self.state.client_res) {
         let text = ''
@@ -757,9 +821,34 @@ class ControlPanel extends Component {
 
 
   handleChange(field, e) {
-    var nextState = {}
-    nextState[field] = e.target.checked
-    this.setState(nextState)
+    const self = this
+    if(field.target.value == ''){
+       document.querySelector('#modify-color').disabled = false
+       document.querySelector('#modify-size').disabled = false
+       self.setState({ modifier: {}})
+    } else {
+    switch(field.target.id) {
+      case 'modify-color':
+        document.querySelector('#modify-size').disabled = true
+        document.querySelector('#modify-price').disabled = true
+        let modifier = {color : document.querySelector('#modify-color').value}
+        self.setState({ modifier: modifier })
+        break;
+      case 'modify-size':
+        document.querySelector('#modify-color').disabled = true
+        document.querySelector('#modify-price').disabled = true
+        let modifier2 = {size : document.querySelector('#modify-size').value}
+        self.setState({ modifier: modifier2 })
+        break;
+      case 'modify-price':
+        document.querySelector('#modify-color').disabled = true
+        document.querySelector('#modify-size').disabled = true
+        let modifier3 = {price : document.querySelector('#modify-price').value}
+        self.setState({ modifier: modifier3 })
+        break;
+      }
+    }
+
   }
 
   renderItem(index, key) {
@@ -788,7 +877,7 @@ class ControlPanel extends Component {
      const { activeMsg, activeControl, activeChannel, messages,actions,changeMode} = this.props;
      // const fields  = ['msg','bucket','action']
      const self = this;
-     const { items,searchSelect } = this.state;
+     const { items,searchSelect,rawAmazonResults } = this.state;
      const list = (this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
      const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
      const statusStyle = activeChannel.resolved ?  { fontSize:'3em' ,color: 'green'} : { fontSize:'3em',color: 'red'}
@@ -827,34 +916,13 @@ class ControlPanel extends Component {
             </div>
 
              <div id="modify-box" style={showModifyBox}>
-                  <h3 style={showPrompt}> Please select a modifier. </h3>
+                  <h3 style={showPrompt}> Please select an item. </h3>
                   <br />
                   <div>
-                      <input type="checkbox"
-                        checked={this.state.modifier.color}
-                        onChange={this.handleChange.bind(this, 'color')} style={{margin: '1em'}}/> 
-                       <DropdownButton disabled={!this.state.color} bsStyle='info' title='Color' key='1' id='dropdown-basic-1' onSelect={::this.handleSelect}>
-                        <MenuItem eventKey="Purple">Purple</MenuItem>
-                        <MenuItem eventKey="Blue Violet">Blue Violet</MenuItem>
-                        <MenuItem eventKey="Slate Blue">Slate Blue</MenuItem>
-                        <MenuItem eventKey="Royal Blue" active>Royal Blue</MenuItem>
-                        <MenuItem divider />
-                        <MenuItem eventKey="4">Separated link</MenuItem>
-                      </DropdownButton>
-                      <input type="checkbox"
-                        checked={this.state.modifier.size}
-                        onChange={this.handleChange.bind(this, 'size')} style={{margin: '1em'}}/> 
-                       <DropdownButton disabled={!this.state.size} bsStyle='info' title='Size' key='2' id='dropdown-basic-2'>
-                        <MenuItem eventKey="X-Small">X-Small</MenuItem>
-                        <MenuItem eventKey="Small">Small</MenuItem>
-                        <MenuItem eventKey="Medium" active>Medium</MenuItem>
-                        <MenuItem eventKey="Large">Large</MenuItem>
-                        <MenuItem eventKey="X-Large">X-Large</MenuItem>
-                        <MenuItem divider />
-                        <MenuItem eventKey="4">Separated link</MenuItem>
-                      </DropdownButton>
+                     <label>Color: <input type="text" id="modify-color" onChange={this.handleChange.bind(this)} /> </label> <br /> <br />
+                     <label>Size: <input type="text" id="modify-size" onChange={this.handleChange.bind(this)} />  </label> <br /> <br />
                   </div>
-                  <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading || (!this.state.color && !this.state.size) || (!this.state.modifier.color && !this.state.modifier.size )} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
+                  <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading || !this.state.modifier} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
                     Search Modify
                     <div style={spinnerStyle}>
                       <Spinner />
@@ -914,7 +982,7 @@ class ControlPanel extends Component {
                     <span style={statusStyle}>  {statusText}</span>
                 </label>
                 <form ref='form1' onSubmit={::this.handleSubmit}>
-                    <div style={{ display: 'flexbox', textAlign:'center',marginTop: '3em' }}>
+                    <div style={{ display: 'flexbox', textAlign:'center',marginTop: '0.8em' }}>
                       <ButtonGroup bsSize = "xsmall" bsStyle = "primary"  style={{margin: '0.2em'}}>
                         <Button className="form-button" style={{backgroundColor: '#1976d2', color: 'white'}} onClick = { () => this.setField('initial')} >
                           Initial
@@ -925,7 +993,6 @@ class ControlPanel extends Component {
                         <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('modify')} >
                           Modify
                         </Button>
-
                          <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('focus')} >
                           Focus
                         </Button>
@@ -938,7 +1005,7 @@ class ControlPanel extends Component {
                       </ButtonGroup>
                     </div>
                   </form> 
-                  <div style={{overflow: 'auto', maxHeight: 520, maxWidth: '95%',border: 'grey solid 0.3em'}}>
+                  <div style={{overflow: 'auto', maxHeight: 570, maxWidth: '95%',border: 'grey solid 0.3em'}}>
                     {list}
                   </div>
 

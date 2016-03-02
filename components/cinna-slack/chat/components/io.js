@@ -384,7 +384,7 @@ function routeNLP(data){
             nlp.parse(data.msg, function(e, res) {
                 if (e){console.log('NLP error ',e)}
                 else {
-                    console.log('NLP RES ',res);
+                    console.log('NLP RES ',JSON.stringify(res));
 
                     if(res.execute && res.execute.length > 0){
 
@@ -509,7 +509,7 @@ function incomingAction(data){
                     }
                 }
              }
-    history.saveHistory(data,true,function(res){
+    history.saveHistory(data,false,function(res){
         supervisor.emit(res, true)
     }); 
 //---------------------------------------------------------------------------//        
@@ -685,6 +685,8 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
             data.client_res = [];
             data.urlShorten = [];
             data.client_res.push(url); //add image results to response
+
+
 
             //send extra item URLs with image responses
             if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){

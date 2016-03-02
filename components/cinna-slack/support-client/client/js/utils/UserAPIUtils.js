@@ -170,3 +170,21 @@ export function loadInitialChannels() {
     });
   });
 }
+
+export function fetchProcessedMessage(body) {
+  // console.log('UserAPI175', body)
+  return new Promise((resolve, reject) => {
+    superagent
+    .post('/api/fetchprocessed')
+    .send(body)
+    .end((err, res) => {
+      if (err) {
+        reject(res.body || err);
+      } else {
+        const rawMessage = res.body;
+        resolve(rawMessage);
+      }
+    });
+  });
+}
+

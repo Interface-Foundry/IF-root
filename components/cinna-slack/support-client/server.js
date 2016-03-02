@@ -18,7 +18,7 @@ var bodyParser = require('body-parser');
 // attach socket.io onto our server
 var socketEvents = require('./socketEvents')(io)
 //set env vars
-process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
+process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/foundry';
 process.env.PORT = process.env.PORT || 3000;
 
 mongoose.connect(process.env.MONGOLAB_URI);

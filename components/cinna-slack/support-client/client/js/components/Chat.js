@@ -42,26 +42,8 @@ class Chat extends Component {
     const { actions, messages, activeChannel,activeMessage } = this.props;
     this.setState({ resolved: null });
     const self = this
-     socket.on('change state bc', function (state) {
-      // console.log('change state event received', state)
-      //  var identifier = {id: state.id, properties: []}
-      // for (var key in state) {
-      //   if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'thread' || key == 'amazon') && state[key] !== '' ) {
-      //     identifier.properties.push({ [key] : state[key]})
-      //   }
-      // }  
-      // // console.log('identifier: ', identifier)
-      // //if no fields were updated on form take no action
-      // if (identifier.properties.length === 0 ) {
-      //   return
-      // } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'Lobby') {
-      //   return
-      // }else {
-      //   actions.setMessageProperty(identifier)
-      // }
-    })   
     socket.on('new bc message', function(msg) {   
-     console.log('Chat64 msg: ',msg)   
+     // console.log('Chat64 msg: ',msg)   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
       // msg.parent = (filtered.length > 0) ?  false : true
@@ -241,7 +223,7 @@ class Chat extends Component {
             <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
            )
            :  
-        relevantMessages.map(function(message,index) {
+        filteredMessages.map(function(message,index) {
                     message.client_res = uniq(message.client_res)
             return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
           })
@@ -250,7 +232,7 @@ class Chat extends Component {
             let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 260
              elHeights.push(elHeight)
       })
-      console.log('Chat252: elHeights: ',elHeights)
+      // console.log('Chat252: elHeights: ',elHeights)
       return (
            <Infinite 
                 elementHeight={elHeights}
@@ -264,32 +246,28 @@ class Chat extends Component {
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
-    // .filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
     const activeMsg =  filteredMessages[0]
     const username = this.props.user.username;
     const resolved = activeChannel.resolved
-    const stream = this.state.stream
-    // const date = new Date(activeMsg.ts) 
-    const displayMessages = this.state.stream ?   
-                       messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor).map(message =>
-                            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
-                           )
-                           :  
-                        filteredMessages.map(function(message,index) {
-                            message.client_res = uniq(message.client_res)
+    const displayMessages = filteredMessages.map(function(message,index) {
                             return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
                           })
-    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>Origin: {activeMsg ? activeMsg.source.origin: ''} <br/>Received: {activeMsg ? activeMsg.ts : ''}</div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
-    const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
+    const elHeights = [] 
+    filteredMessages.forEach(function(msg) {
+      // console.log('msg : ',msg)
+            let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 260
+             elHeights.push(elHeight)
+      })
+    // console.log('EL HEIGHTS: ',elHeights)
+    const chatDisplay = <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>Origin: {activeMsg ? activeMsg.source.origin: ''} <br/>Received: {activeMsg ? activeMsg.ts : ''}</div>
+    const streamDisplay = {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'}
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
-    const chatStyle = this.state.stream ? {background: '#fff', color: '#000'} : {background: '#45a5f4', color:'red'}
+    const chatStyle = {background: '#45a5f4', color:'red'}
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
-            <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none' }} disabled={this.state.spinnerloading} onClick = { () => { this.toggleStream() } } >
               <div className="kipicon">
               </div>
-            </Button> 
             <section style={{order: '2', marginTop: '1.5em'}}>
               <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
             </section>
@@ -305,7 +283,11 @@ class Chat extends Component {
           <div className="flexbox-container">
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
-                {this.renderMessages()}
+                  <Infinite elementHeight={elHeights}
+                 containerHeight={window.innerHeight-90}
+                 displayBottomUpwards>
+                  { displayMessages }
+                </Infinite>
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
@@ -317,7 +299,7 @@ class Chat extends Component {
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
         <div style= {streamDisplay}>
-          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} stream={stream} />
+          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved}/>
         </div>  
           {typers.length === 1 &&
             <div>

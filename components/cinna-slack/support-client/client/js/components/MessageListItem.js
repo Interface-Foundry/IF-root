@@ -19,7 +19,8 @@ class MessageListItem extends Component {
 
   componentDidMount() {
     const { message, index } = this.props 
-    let messageToDisplay =  (message.client_res[0] && !message.flags.toCinna) ?  message.client_res[0] : message.msg
+    // console.log('MessageListItem message: ',message)
+    let messageToDisplay =  (message.client_res && message.client_res[0] && !message.flags.toCinna) ?  message.client_res[0] : message.msg
     this.setState({ displayMsg: messageToDisplay })
     function checkImgURL (msg) {
         return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
