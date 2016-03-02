@@ -291,7 +291,6 @@ class ControlPanel extends Component {
 
   searchAmazon(query) {
     const {activeMsg, activeChannel,messages} = this.props
-    // const newQuery = activeMsg;
     const selected = this.state.searchSelect
     const self = this;
      if (!this.state.searchParam) {
@@ -428,10 +427,10 @@ class ControlPanel extends Component {
           return
         }
         break;
-      case 'price': 
-        dataModify = priceModify(value)
-        console.log('Cpanel433 dataModify: ', dataModify)
-        break;
+      // case 'price': 
+      //   dataModify = priceModify(value)
+      //   console.log('Cpanel433 dataModify: ', dataModify)
+      //   break;
       case 'brand': 
         break;
    
@@ -443,9 +442,6 @@ class ControlPanel extends Component {
     newQuery.source = activeMsg.source
     newQuery.source.org = activeChannel.id.split('_')[0]
     newQuery.id = messages.length
-    if (newQuery._id) {
-      delete newQuery._id
-    }
     newQuery.bucket = 'search'
     newQuery.action = 'modify'
     newQuery.source.origin = 'supervisor'
@@ -454,6 +450,10 @@ class ControlPanel extends Component {
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newQuery.thread = thread
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
@@ -465,75 +465,53 @@ class ControlPanel extends Component {
           })
       }
      },8000)
-
-
-
-    // if (this.state.color) {
-    //   newQuery.dataModify.type = 'color'
-    //   switch (this.state.modifier.color) {
-    //     case 'Purple': 
-    //       newQuery.dataModify.val.push({"hex": "#A020F0","name": "Purple","rgb": [160, 32, 240],"hsl": [196, 222, 136]})
-    //       break
-    //     case 'Blue Violet': 
-    //       newQuery.dataModify.val.push({"hex": "#8A2BE2","name": "Blue Violet", "rgb": [138, 43, 226], "hsl": [192, 193, 134]})
-    //       break
-    //     case 'Slate Blue': 
-    //       newQuery.dataModify.val.push({"hex": "#6A5ACD","name": "Slate Blue","rgb": [106, 90, 205],"hsl": [175, 136, 147]})
-    //       break
-    //     case 'Royal Blue': 
-    //       newQuery.dataModify.val.push({"hex": "#4169E1","name": "Royal Blue","rgb": [65, 105, 225],"hsl": [159, 185, 145]})
-    //       break
-    //     default:
-    //      console.log('No color selected.')
-    //   }
-    // }
-    // socket.emit('new message', newQuery);
-    // this.setState({
-    //   spinnerloading: true
-    // })
-    // setTimeout(function(){
-    //     if (self.state.spinnerloading === true) {
-    //        self.setState({
-    //           spinnerloading: false
-    //         })
-    //     }
-    //    },8000)
-
-
   }
 
   searchFocus() {
-    const { activeMsg} = this.props
-    const newQuery = activeMsg;
+    const { activeMsg, messages, activeChannel} = this.props
     const selected = this.state.searchSelect
+    const rawAmazonResults = this.state.rawAmazonResults
     const self = this
     if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
-    if (newQuery._id) {
-      delete newQuery._id
-    }
+    let newQuery = {}
+    newQuery.msg = selected[0].toString()
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
     newQuery.bucket = 'search'
     newQuery.action = 'focus'
-    newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
-    newQuery.searchSelect = selected
-    newQuery.flags = {}
-    newQuery.flags.toCinna = true
-    newQuery.flags.recalled = true
-    socket.emit('new message', newQuery);
-    this.setState({
-      spinnerloading: true
+    newQuery.recallHistory =  { amazon: rawAmazonResults}
+    UserAPIUtils.urlShorten({url: rawAmazonResults[selected[0]].DetailPageURL[0]}).then(function(res){
+      newQuery.recallHistory.urlShorten = [res.body]
+      // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
+      newQuery.amazon =  rawAmazonResults
+      newQuery.searchSelect = [selected[0]]
+      newQuery.flags = {}
+      newQuery.flags.toCinna = true
+      newQuery.flags.recalled = true
+      let thread = activeMsg.thread
+      thread.parent.id = activeMsg.thread.id
+      thread.parent.isParent = false;
+      newQuery.thread = thread
+      socket.emit('new message', newQuery);
+      self.setState({
+        spinnerloading: true
+      })
+      setTimeout(function(){
+        if (self.state.spinnerloading === true) {
+           self.setState({
+              spinnerloading: false
+            })
+        }
+       },8000)
+    }).catch(function(err){
+        console.log('Cpanel511: urlShorten error: ',err)
     })
-    setTimeout(function(){
-              if (self.state.spinnerloading === true) {
-                 self.setState({
-                    spinnerloading: false
-                  })
-              }
-             },8000)
+   
   }
 
   searchMore() {
@@ -557,6 +535,10 @@ class ControlPanel extends Component {
     newQuery.searchSelect = selected
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newQuery.thread = thread
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
@@ -592,6 +574,10 @@ class ControlPanel extends Component {
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newQuery.thread = thread
     socket.emit('new message', newQuery);
     this.setState({
       spinnerloading: true
@@ -716,7 +702,12 @@ class ControlPanel extends Component {
     newMessage.id = messages.length
     newMessage.flags = {toClient: true}
     newMessage.amazon = rawAmazonResults ? rawAmazonResults : null
-    
+    newMessage.source.origin = 'slack'
+    let thread = activeMsg.thread
+    thread.parent.id = activeMsg.thread.id
+    thread.parent.isParent = false;
+    newMessage.thread = thread
+    thread.sequence = parseInt(activeMsg.thread + 1)
     let item1, item2, item3;
     switch(searchSelect.length) {
       case 0:
@@ -751,47 +742,48 @@ class ControlPanel extends Component {
     }
     const self = this;
     let toStitch = [item1,item2,item3]
-    console.log('toStitch: ', toStitch)
-    this.picStitch(toStitch).then(function(url){
-      if (url && self.state.client_res) {
-        let text = ''
-       switch (newMessage.action){
-        case 'initial':
-        case 'more':
-          text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
-          break;
-        case 'similar':
-          text = 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
-          break;
-        case 'checkout':
-          text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
-          break;
-        default:
-          text = 'Hmm, something went wrong.'          
-       }
-        newMessage.client_res.push(text)
-        newMessage.client_res.push(url)
+    // console.log('toStitch: ', toStitch)
+    if (newMessage.action == 'focus') {
+        newMessage.client_res = this.state.client_res
+        newMessage.focusInfo = this.state.focusInfo
+        newMessage.searchSelect = searchSelect
+        console.log('Cpanel649: Send Command: ', newMessage)
+        socket.emit('new message', newMessage);
+        self.setState({sendingToClient: true})
+        setTimeout(function(){
+          self.setState({sendingToClient: false})
+        }, 1500)
+      } else {
+         this.picStitch(toStitch).then(function(url){
+            if (url && self.state.client_res) {
+              let text = ''
+             switch (newMessage.action){
+              case 'initial':
+              case 'more':
+                text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
+                break;
+              case 'similar':
+                text = 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                break;
+              case 'checkout':
+                text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
+                break;
+              default:
+                text = 'Hmm, something went wrong.'          
+             } 
+              newMessage.client_res.push(text)
+              newMessage.client_res.push(url)
+            }
+            console.log('Cpanel649: Send Command: ', newMessage)
+            socket.emit('new message', newMessage);
+            self.setState({sendingToClient: true})
+            setTimeout(function(){
+              self.setState({sendingToClient: false})
+            }, 1500)
+        }).catch(function(err) {
+          console.log('***Cpanel653: ERROR: Picstitch FAILED: ',err)
+        })
       }
-      newMessage.source.origin = 'slack'
-      let thread = activeMsg.thread
-      thread.parent.id = activeMsg.thread.id
-      thread.parent.isParent = false;
-      newMessage.thread = thread
-      thread.sequence = parseInt(activeMsg.thread + 1)
-      // if (newMessage.action === 'focus' || newMessage.action === 'checkout' || newMessage.bucket === 'purchase') {
-        // if (!self.state.client_res || (self.state.client_res && self.state.client_res.length === 0)) { console.log('Cpanel244 CLIENT_RES MISSING!!!!',newMessage); return}
-        // else { 
-      //   }
-      // } 
-      console.log('Cpanel649: Send Command: ', newMessage)
-      socket.emit('new message', newMessage);
-      self.setState({sendingToClient: true})
-      setTimeout(function(){
-        self.setState({sendingToClient: false})
-      }, 1500)
-    }).catch(function(err) {
-      console.log('***Cpanel653: ERROR: Picstitch FAILED: ',err)
-    })
   }
 
 
@@ -830,22 +822,22 @@ class ControlPanel extends Component {
     switch(field.target.id) {
       case 'modify-color':
         document.querySelector('#modify-size').disabled = true
-        document.querySelector('#modify-price').disabled = true
+        // document.querySelector('#modify-price').disabled = true
         let modifier = {color : document.querySelector('#modify-color').value}
         self.setState({ modifier: modifier })
         break;
       case 'modify-size':
         document.querySelector('#modify-color').disabled = true
-        document.querySelector('#modify-price').disabled = true
+        // document.querySelector('#modify-price').disabled = true
         let modifier2 = {size : document.querySelector('#modify-size').value}
         self.setState({ modifier: modifier2 })
         break;
-      case 'modify-price':
-        document.querySelector('#modify-color').disabled = true
-        document.querySelector('#modify-size').disabled = true
-        let modifier3 = {price : document.querySelector('#modify-price').value}
-        self.setState({ modifier: modifier3 })
-        break;
+      // case 'modify-price':
+      //   document.querySelector('#modify-color').disabled = true
+      //   document.querySelector('#modify-size').disabled = true
+      //   let modifier3 = {price : document.querySelector('#modify-price').value}
+      //   self.setState({ modifier: modifier3 })
+      //   break;
       }
     }
 
@@ -890,7 +882,7 @@ class ControlPanel extends Component {
      const showPrompt = (!searchSelect || searchSelect.length === 0) ? { color: 'black'} : { color: 'white'}
      const showCheckoutBox = this.state.action === 'checkout' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
-     const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
+     const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.9em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
      return ( 
          <div className="flexbox-container">
           {this.state.searchSelect}
@@ -932,12 +924,7 @@ class ControlPanel extends Component {
 
             <div id="focus-box" style={showFocusBox}>
                           <div style={focusInfoStyle}> 
-                             Price: {this.state.focusInfo && this.state.focusInfo.topStr ? this.state.focusInfo.topStr : null}
-                             <br />
-                             Reviews: {this.state.focusInfo && this.state.focusInfo.reviews ? this.state.focusInfo.reviews : null}
-                             <br />
-                             Feature: {this.state.focusInfo && this.state.focusInfo.feature ? this.state.focusInfo.feature : null}
-                             <br />
+                               {this.state.client_res}
                           </div>
                             
                 <h3 style={showPrompt}> Please select an item. </h3>

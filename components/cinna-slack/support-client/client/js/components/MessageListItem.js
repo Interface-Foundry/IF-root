@@ -95,16 +95,23 @@ class MessageListItem extends Component {
                   break;
                 case 'focus':
                   // console.log('case focus')
-                  let attribs = message.amazon[message.searchSelect].ItemAttributes[0];
+                  let attribs = message.amazon[message.searchSelect[0]].ItemAttributes[0];
                   let topStr = ''
-                  let cString = ''
+                  let size = ''
+                  let reviews = ''
                   if (message.amazon[message.searchSelect[0]].realPrice){ topStr = message.amazon[message.searchSelect].realPrice;}
-                  if (attribs.Size){cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];}
-                  if (attribs.Artist){ cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];}
-                  if (attribs.Brand){cString = cString + ' ○ ' +  attribs.Brand[0];}
-                  else if (attribs.Manufacturer){cString = cString + ' ○ ' +  attribs.Manufacturer[0];}
-                  if (attribs.Feature){cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');}
-                  if (cString){message.client_res.unshift(cString);}
+                  if (attribs.Size){size =  ' ○ ' + "Size: " +  attribs.Size[0];}
+                  // if (attribs.Artist){ cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];}
+                  // if (attribs.Brand){cString = cString + ' ○ ' +  attribs.Brand[0];}
+                  // else if (attribs.Manufacturer){cString = cString + ' ○ ' +  attribs.Manufacturer[0];}
+                  // if (attribs.Feature){cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');}
+                  // if (cString){message.client_res.unshift(cString);}
+                  try {
+                    let itemLink = 'http:' + message.client_res[findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('bit.ly') > -1))}})].split('|')[0].split('http:')[1]
+                    let itemName =  message.client_res[findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('bit.ly') > -1))}})].split('|')[1].split('>')
+                  } catch(err) {
+                    console.log('MLI112: ',err, itemLink, itemName)
+                  }
                   let imgIndex2;
                   try {
                     imgIndex2 = findIndex(message.client_res,function(el){ if (el) {return ((el.indexOf('s3.amazonaws.com') > -1) || el.indexOf('ecx.images-amazon.com') > -1)}})
@@ -114,10 +121,13 @@ class MessageListItem extends Component {
                   return (
                     <div>
                         <div style={messageStyle}> 
-                            {message.client_res[0]}
-                        </div>
-                         <div style={messageStyle}> 
                             <img width='170' src={message.client_res[imgIndex2]} />
+                        </div>
+                        <div style={messageStyle}> 
+                            ○ {topStr}
+                            <br / >
+                            ○ {size}
+                            <br / >
                         </div>
                     </div>
                     )

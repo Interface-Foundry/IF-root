@@ -1,7 +1,8 @@
-// var Message = require('../../../../IF_schemas/message_schema');
 var bodyparser = require('body-parser');
 var async = require('async');
 var Message = require('../models/Message');
+var request = require('request')
+var querystring = require('querystring');
 
 
 module.exports = function(router) {
@@ -197,29 +198,19 @@ module.exports = function(router) {
   });
 
    //fetch processed message
-  router.post('/fetchprocessed', function(req, res) {
-    console.log('messageroutes 199: req', req.body)
-    Message.find({
-      'source.id': req.body.id,
-    }).sort({'_id':-1}).exec(function(err, data) {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          msg: 'internal server error'
-        });
-      }
-      if (data && data.length < 1) {
-        console.log('Message not found.')
-        return res.status(500).json({
-          msg: 'internal server error'
-        });
-      }
-      if (data.length > 0) {
-        console.log('Data found!',data[0].client_res)
-        res.json(data[0])
+  router.post('/urlshorten', function(req, res) {
+    console.log('messageroutes 201: req', req.body)
+    request({
+      method: 'GET',
+      url: 'https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+req.body.url)+'&format=txt',
+      }, function(e, r, b) {
+      if (e) {
+        console.log('message_routes/urlshorten: ',err)
+        res.send(e)
+      } else {
+        res.json(r);
       }
     })
   })
-
 
 }

@@ -945,6 +945,8 @@ var searchFocus = function(data) {
                     //data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                     if (data.source.origin !== 'supervisor') {
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
+                    } else {
+                     data.client_res.push(res +' <'+ data.recallHistory.urlShorten[0].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
                     }
                     dumbFunction(); //fire after get
                 })
@@ -1023,7 +1025,7 @@ var searchFocus = function(data) {
                         if (attribs.Manufacturer) data.focusInfo.manufacturer = attribs.Manufacturer
                         if (attribs.Feature) data.focusInfo.feature = attribs.Feature
                         if (data.recallHistory && data.recallHistory.amazon[searchSelect] && data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating && reviewCounts) data.focusInfo.reviews = data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts   
-                        
+                        data.focusInfo.client_res = data.client_res
                       } 
                       //--------------------------------------------------------------//
 
@@ -1061,7 +1063,7 @@ var searchMore = function(data){
         data.action = moreHist.recallHistory.action;
         data.msg = moreHist.recallHistory.msg;
         data.tokens = moreHist.recallHistory.tokens;
-         //----supervisor: readding flags ---//
+         //----supervisor: reading flags ---//
          if (moreHist.flags) {
              data.flags = moreHist.flags
              data.source = moreHist.source

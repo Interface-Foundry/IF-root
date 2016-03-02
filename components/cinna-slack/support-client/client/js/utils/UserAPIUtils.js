@@ -14,8 +14,6 @@ export function stitch(toStitch) {
     });
   });
 }
-
-
 export function loadAuth() {
   return new Promise((resolve, reject) => {
     superagent
@@ -171,20 +169,22 @@ export function loadInitialChannels() {
   });
 }
 
-export function fetchProcessedMessage(body) {
-  // console.log('UserAPI175', body)
+export function urlShorten(body) {
   return new Promise((resolve, reject) => {
     superagent
-    .post('/api/fetchprocessed')
+    .post('/api/urlshorten')
     .send(body)
     .end((err, res) => {
       if (err) {
         reject(res.body || err);
       } else {
-        const rawMessage = res.body;
-        resolve(rawMessage);
+        const url = res.body;
+        resolve(url);
       }
     });
   });
 }
+
+
+
 
