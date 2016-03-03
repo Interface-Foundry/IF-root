@@ -928,11 +928,11 @@ function saveToCart(data){
                 // if (item.recallHistory && item.recallHistory.amazon){
                     // proxy.cart.push(data.amazon[data.searchSelect - 1]); //add selected items to cart
                 // }else {
-                   cartHistory.cart.push(data.amazon[data.searchSelect - 1]); //add selected items to cart
+                   cartHistory.cart.push(data.amazon[data.searchSelect[0] - 1]); //add selected items to cart
                 // }
                 // callback();
             // }, function done(){
-            // console.log('io930: cartHistory: ', cartHistory)
+            console.log('io930: cartHistory: ', cartHistory)
               if (cartHistory.cart.length == 0) { 
                 console.log('No items in proxy cart: io.js : Line 933', cartHistory) 
                 return 

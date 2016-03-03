@@ -515,14 +515,19 @@ class ControlPanel extends Component {
   }
 
   searchMore() {
-    const { activeMsg} = this.props
-    const newQuery = activeMsg;
+    const { activeMsg, messages, activeChannel} = this.props
+    // const newQuery = activeMsg;
     const selected = this.state.searchSelect
     // if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
     //   console.log('Please select an item or do an initial search.')
     //   return
     // }
     const self = this
+    let newQuery = {}
+    newQuery.msg = 'more'
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
     if (newQuery._id) {
       delete newQuery._id
     }
@@ -553,14 +558,19 @@ class ControlPanel extends Component {
   }
 
   checkOut() {
-    const { activeMsg } = this.props;
-    const newQuery = activeMsg;
+    const { activeMsg, messages, activeChannel } = this.props;
+    // const newQuery = activeMsg;
     const selected = this.state.searchSelect
     if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
     const self = this;
+    let newQuery = {}
+    newQuery.msg = 'more'
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
     if (newQuery._id) {
       delete newQuery._id;
     }
@@ -569,6 +579,7 @@ class ControlPanel extends Component {
     newQuery.tokens = newQuery.msg.split();
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
+    newQuery.amazon = this.state.rawAmazonResults
     newQuery.searchSelect = selected
     newQuery.msg = 'buy ' + newQuery.searchSelect.toString(); 
     newQuery.flags = {}
@@ -577,6 +588,7 @@ class ControlPanel extends Component {
     let thread = activeMsg.thread
     thread.parent.id = activeMsg.thread.id
     thread.parent.isParent = false;
+    newQuery.recallHistory.thread = thread 
     newQuery.thread = thread
     socket.emit('new message', newQuery);
     this.setState({
@@ -753,7 +765,25 @@ class ControlPanel extends Component {
         setTimeout(function(){
           self.setState({sendingToClient: false})
         }, 1500)
-      } else {
+      } else if (newMessage.action == 'checkout') {
+          UserAPIUtils.urlShorten({url: this.state.client_res[0]}).then(function(res){
+            newMessage.client_res = [res.body]
+            socket.emit('new message', newMessage);
+            self.setState({
+              spinnerloading: true
+            })
+            setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
+          }).catch(function(err){
+              console.log('Cpanel511: urlShorten error: ',err)
+          })
+
+      }else {
          this.picStitch(toStitch).then(function(url){
             if (url && self.state.client_res) {
               let text = ''

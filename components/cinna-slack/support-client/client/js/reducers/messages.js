@@ -37,7 +37,7 @@ export default function messages(state = initialState, action) {
                     ts: action.message.ts,
                     thread: {
                         id: action.message.thread && action.message.thread.id ? action.message.thread.id : null, 
-                        sequence: action.message.thread.sequence,
+                        sequence: action.message.thread && action.message.thread.sequence ? action.message.thread && action.message.thread.sequence : null,
                         isOpen: action.message.thread.isOpen,
                         ticket: {
                             id: (action.message.thread.ticket && action.message.thread.ticket.id) ? action.message.thread.ticket.id : null, 

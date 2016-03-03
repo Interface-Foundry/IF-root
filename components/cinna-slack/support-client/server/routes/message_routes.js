@@ -199,10 +199,11 @@ module.exports = function(router) {
 
    //fetch processed message
   router.post('/urlshorten', function(req, res) {
-    console.log('messageroutes 201: req', req.body)
+    // var url = new URL('http://kipbubble.com/product/'+req.body.url+'&format=txt')
+    // console.log('messageroutes 201: req', querystring.escape('http://kipbubble.com/product/'+req.body.url)+'&format=txt')
     request({
       method: 'GET',
-      url: 'https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+req.body.url)+'&format=txt',
+      url: 'https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl=http://kipbubble.com/product/'+req.body.url+'&format=txt',
       }, function(e, r, b) {
       if (e) {
         console.log('message_routes/urlshorten: ',err)
