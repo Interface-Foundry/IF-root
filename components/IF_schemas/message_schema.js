@@ -42,8 +42,8 @@ var messageSchema = mongoose.Schema({
             isOpen: Boolean
         },
         parent: {
-            isParent:Boolean,
-            id:String
+            isParent: Boolean,
+            id: String
         }
     },
     urlShorten:[String],
@@ -54,6 +54,12 @@ var messageSchema = mongoose.Schema({
             searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
             recalled: Boolean //flag to bypass history function in cinna
         }
+    click: {
+        productId: String,
+        url: String,
+        IP: String,
+        headers:String
+    }
 });
 
 module.exports = mongoose.model('Message', messageSchema);

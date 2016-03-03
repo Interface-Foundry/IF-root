@@ -3,7 +3,7 @@
 
     angular.module('app.chart')
         .controller('EasyPieChartCtrl', ['$scope', EasyPieChartCtrl])
-        .controller('SparklineCtrl', ['$scope', SparklineCtrl]);
+        .controller('SparklineCtrl', ['$scope', '$http',SparklineCtrl]);
 
     function EasyPieChartCtrl($scope) {
         $scope.easypiechartsm1 = {};
@@ -114,7 +114,9 @@
         };
     }
 
-    function SparklineCtrl($scope) {
+    function SparklineCtrl($scope,$http) {
+
+
         $scope.demoData1 = {};
         $scope.simpleChart1 = {};
         $scope.simpleChart2 = {};
@@ -140,6 +142,10 @@
                 height: '150px'
             }
         };
+
+
+
+
 
         $scope.simpleChart1 = {
             data: [3, 1, 2, 3, 5, 3, 4, 2],
