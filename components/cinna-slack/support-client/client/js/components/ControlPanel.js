@@ -79,24 +79,24 @@ class ControlPanel extends Component {
         //Store raw amazon results in state unless action was focus bc focus returns empty amazon for some reason
         if (msg.action !== 'focus') {
           self.setState({rawAmazonResults:msg.amazon})
-        }
-        //convert returned results into local state format
-        try {
-             for (var i = 0; i < msg.amazon.length; i++) {
-              self.state.items[i].index = i
-              self.state.items[i].id = msg.amazon[i].ASIN[0]
-              self.state.items[i].name = msg.amazon[i].ItemAttributes[0].Title[0]
-              self.state.items[i].price = msg.amazon[i].realPrice ? msg.amazon[i].realPrice : (msg.amazon[i].ItemAttributes[0].ListPrice ? msg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
-              self.state.items[i].changed = true
-              try {
-                self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
-              } catch(err) {
-                console.log('Could not get image for item: ',i)
-              }
-            } 
-        } catch(err) {
-          console.log('CPanel Error 114 Could not get results :',err, msg)
-          return
+          //convert returned results into local state format
+          try {
+               for (var i = 0; i < msg.amazon.length; i++) {
+                self.state.items[i].index = i
+                self.state.items[i].id = msg.amazon[i].ASIN[0]
+                self.state.items[i].name = msg.amazon[i].ItemAttributes[0].Title[0]
+                self.state.items[i].price = msg.amazon[i].realPrice ? msg.amazon[i].realPrice : (msg.amazon[i].ItemAttributes[0].ListPrice ? msg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
+                self.state.items[i].changed = true
+                try {
+                  self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+                } catch(err) {
+                  console.log('Could not get image for item: ',i)
+                }
+              } 
+          } catch(err) {
+            console.log('CPanel Error 114 Could not get results :',err, msg)
+            return
+          }
         }
       }
     //-Store focus info
@@ -467,54 +467,6 @@ class ControlPanel extends Component {
      },8000)
   }
 
-  searchFocus(selected) {
-    const { activeMsg, messages, activeChannel} = this.props
-    const rawAmazonResults = this.state.rawAmazonResults
-    const self = this
-    if (!selected || !this.state.rawAmazonResults) {
-      console.log('Please select an item or do an initial search.')
-      return
-    }
-    this.setField('focus')
-    console.log('firing searchFocus: selected: ',selected)
-    let newQuery = {}
-    newQuery.msg = selected
-    newQuery.source = activeMsg.source
-    newQuery.source.org = activeChannel.id.split('_')[0]
-    newQuery.id = messages.length
-    newQuery.bucket = 'search'
-    newQuery.action = 'focus'
-    newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory =  { amazon: rawAmazonResults}
-    UserAPIUtils.urlShorten({url: rawAmazonResults[selected-1].DetailPageURL[0]}).then(function(res){
-      newQuery.recallHistory.urlShorten = [res.body]
-      // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
-      newQuery.amazon =  rawAmazonResults
-      newQuery.searchSelect = [selected]
-      newQuery.flags = {}
-      newQuery.flags.toCinna = true
-      newQuery.flags.recalled = true
-      let thread = activeMsg.thread
-      thread.parent.id = activeMsg.thread.id
-      thread.parent.isParent = false;
-      newQuery.thread = thread
-      socket.emit('new message', newQuery);
-      self.setState({
-        spinnerloading: true
-      })
-      setTimeout(function(){
-        if (self.state.spinnerloading === true) {
-           self.setState({
-              spinnerloading: false
-            })
-        }
-       },8000)
-    }).catch(function(err){
-        console.log('Cpanel511: urlShorten error: ',err)
-    })
-   
-  }
-
   searchMore() {
     const { activeMsg, messages, activeChannel} = this.props
     // const newQuery = activeMsg;
@@ -558,9 +510,56 @@ class ControlPanel extends Component {
      },8000)
   }
 
+  searchFocus(selected) {
+    const { activeMsg, messages, activeChannel} = this.props
+    const lastSeen = this.state.lastSeen
+    const self = this
+    if (!selected || !this.state.lastSeen) {
+      console.log('Please select an item or do an initial search.')
+      return
+    }
+    this.setField('focus')
+    console.log('firing searchFocus: selected: ',selected, lastSeen)
+    let newQuery = {}
+    newQuery.msg = selected
+    newQuery.source = activeMsg.source
+    newQuery.source.org = activeChannel.id.split('_')[0]
+    newQuery.id = messages.length
+    newQuery.bucket = 'search'
+    newQuery.action = 'focus'
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  { amazon: lastSeen}
+    UserAPIUtils.urlShorten({url: lastSeen[selected-1].DetailPageURL[0]}).then(function(res){
+      newQuery.recallHistory.urlShorten = [res.body]
+      // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
+      newQuery.amazon =  lastSeen
+      newQuery.searchSelect = [selected]
+      newQuery.flags = {}
+      newQuery.flags.toCinna = true
+      newQuery.flags.recalled = true
+      let thread = activeMsg.thread
+      thread.parent.id = activeMsg.thread.id
+      thread.parent.isParent = false;
+      newQuery.thread = thread
+      socket.emit('new message', newQuery);
+      self.setState({
+        spinnerloading: true
+      })
+      setTimeout(function(){
+        if (self.state.spinnerloading === true) {
+           self.setState({
+              spinnerloading: false
+            })
+        }
+       },8000)
+    }).catch(function(err){
+        console.log('Cpanel511: urlShorten error: ',err)
+    })
+  }
+
   checkOut(selected) {
     const { activeMsg, messages, activeChannel } = this.props;
-    if (!selected || !this.state.rawAmazonResults) {
+    if (!selected || !this.state.lastSeen) {
       console.log('Please select an item or do an initial search.')
       return
     }
@@ -579,8 +578,8 @@ class ControlPanel extends Component {
     newQuery.action = 'checkout';
     newQuery.tokens = newQuery.msg.split();
     newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
-    newQuery.amazon = this.state.rawAmazonResults
+    newQuery.recallHistory =  { amazon: this.state.lastSeen}
+    newQuery.amazon = this.state.lastSeen
     newQuery.searchSelect = [selected];
     newQuery.msg = 'buy ' + newQuery.selected
     newQuery.flags = {}
@@ -816,13 +815,36 @@ class ControlPanel extends Component {
         })
       }
 
-      //Store the last 3 items client saw in state 
-      let itemOne = Object.assign({},items[searchSelect[0]-1])
-      let itemTwo = Object.assign({}, items[searchSelect[1]-1])
-      let itemThree = Object.assign({}, items[searchSelect[2]-1])
-      let last3 = [item1, item2, item3]
-      this.setState({last3: last3})
-      console.log('LAST3: ',this.state.last3)
+      //Store the last items client SAW in state 
+      if (newMessage.action !== 'focus' && newMessage.action !== 'checkout' ) {
+        if (!searchSelect || searchSelect.length == 0 ) {
+          let lastSeen = [];
+          rawAmazonResults.forEach(function(item){
+            let temp = Object.assign({},item)
+            console.log('IS TEMP REAL: ',temp)
+            lastSeen.push(temp)
+          })
+          this.setState({lastSeen: lastSeen})
+        } else {
+            for (var i = 0; i < searchSelect.length; i++) {
+              let selectedItem = rawAmazonResults[searchSelect[i]-1]
+              let residentItem = rawAmazonResults[i]
+              newMessage.amazon[i] = selectedItem
+              newMessage.amazon[searchSelect[i]-1] = residentItem
+            }
+         self.setState({lastSeen: newMessage.amazon})
+        } 
+      }
+
+      
+      // let itemOneOld = Object.assign({},items[0])
+      // let itemTwoOld = Object.assign({}, items[1])
+      // let itemThreeOld = Object.assign({}, items[2])
+      // let itemOneNew = Object.assign({},items[searchSelect[0]-1])
+      // let itemTwoNew = Object.assign({}, items[searchSelect[1]-1])
+      // let itemThreeNew = Object.assign({}, items[searchSelect[2]-1])
+     
+      // console.log('LASTSEEN: ',this.state.lastSeen, lastSeen)
       //Reorder items in state if searchselected
       // if (searchSelect && searchSelect.length > 0 && newMessage.amazon && rawAmazonResults && ('initialsimilarmodifymore'.indexOf(newMessage.action) > -1)) {    
       //       for (var i = 0; i < searchSelect.length; i++) {
@@ -925,14 +947,14 @@ class ControlPanel extends Component {
      const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
      const showSearchBox = this.state.action === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {display: 'none'};
      const showSimilarBox = this.state.action === 'similar' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
-     const showModifyBox = this.state.action === 'modify' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
+     const showModifyBox = this.state.action === 'modify' ? { textAlign: 'center', marginTop: '0.1em'} : {display: 'none'};
      const showFocusBox = this.state.action === 'focus' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const showMoreBox = this.state.action === 'more' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const showPrompt = (!searchSelect || searchSelect.length === 0) ? { color: 'black'} : { color: 'white'}
      const showCheckoutBox = this.state.action === 'checkout' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
      const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.9em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
-     const selectedStyle = this.state.last3 ? {} : { display: 'none'}
+     const selectedStyle = this.state.lastSeen ? {} : { display: 'none'}
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
@@ -958,12 +980,11 @@ class ControlPanel extends Component {
 
              <div id="modify-box" style={showModifyBox}>
                   <h3 style={showPrompt}> Please select an item. </h3>
-                  <br />
                   <div>
                      <label>Color: <input type="text" id="modify-color" onChange={this.handleChange.bind(this)} /> </label> <br /> <br />
                      <label>Size: <input type="text" id="modify-size" onChange={this.handleChange.bind(this)} />  </label> <br /> <br />
                   </div>
-                  <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading || !this.state.modifier} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
+                  <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading || !this.state.modifier} style={{ marginTop: '0.01em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchModify()} >
                     Search Modify
                     <div style={spinnerStyle}>
                       <Spinner />
@@ -988,51 +1009,52 @@ class ControlPanel extends Component {
 
               <div id="checkout-box" style={showCheckoutBox}>
                 <div style={focusInfoStyle}> </div>
-                 <a href={this.state.client_res}> Item checked out.  </a>
+                 <a href={this.state.client_res}> Item checkout link.  </a>
             </div>
 
-            <div  style={{fontSize: '0.6em', position: 'fixed', bottom:'30%',maxWidth: '15em',textAlign: 'center'}} >
+            <div  style={{fontSize: '0.6em', position: 'fixed', bottom:'20%',maxWidth: '15em',textAlign: 'center'}} >
+                   <h5 style={{textAlign: 'center'}}>Last seen by client: </h5>
                <div className='flexbox-container'>
                    <div>
-                     <img width='75' height='75' src={this.state.last3 ? this.state.last3[0].SmallImage[0].URL[0] : null}  />  
+                     <img width='75' height='75' src={this.state.lastSeen ? this.state.lastSeen[0].SmallImage[0].URL[0] : null}  />  
                    </div>  
                    <div style={{padding:'0', marginLeft:'20%'}}>  
-                     <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus((searchSelect[0] ? searchSelect[0] : 1)) } >
+                     <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(1) } >
                          Focus
                      </Button>
-                     <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut((searchSelect[0] ? searchSelect[0] : 1))} >
+                     <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut(1)} >
                          Checkout
                      </Button>
                    </div>  
               </div>
              <div className='flexbox-container'>    
                <div>
-                <img width='75' height='75' src={this.state.last3 ? this.state.last3[1].SmallImage[0].URL[0] : null}  />
+                <img width='75' height='75' src={this.state.lastSeen ? this.state.lastSeen[1].SmallImage[0].URL[0] : null}  />
                </div> 
                <div style={{padding:'0', marginLeft:'20%'}}>  
-                 <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus((searchSelect[1] ? searchSelect[1] : 2))} >
+                 <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(2)} >
                        Focus
                  </Button>
-                 <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut((searchSelect[1] ? searchSelect[1] : 2))} >
+                 <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut(2)} >
                        Checkout
                   </Button>
                </div>
               </div>
             <div className='flexbox-container'>    
                 <div>
-                 <img width='75' height='75' src={this.state.last3 ? this.state.last3[2].SmallImage[0].URL[0] : null}  />
+                 <img width='75' height='75' src={this.state.lastSeen ? this.state.lastSeen[2].SmallImage[0].URL[0] : null}  />
                 </div>
                  <div style={{padding:'0', marginLeft:'20%'}}>  
-                   <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus((searchSelect[2] ? searchSelect[2] : 3))} >
+                   <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(3)} >
                        Focus
                    </Button>
-                   <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut((searchSelect[2] ? searchSelect[2] : 3))} >
+                   <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut(3)} >
                        Checkout
                      </Button>
                  </div>
                </div>
             </div>
-              <Button block bsSize = "large" style={{ position: 'fixed', bottom:'20%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
+              <Button block bsSize = "large" style={{ position: 'fixed', bottom:'10%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
               SEND TO CLIENT
             </Button>
           </div>
