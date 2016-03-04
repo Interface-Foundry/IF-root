@@ -467,17 +467,18 @@ class ControlPanel extends Component {
      },8000)
   }
 
-  searchFocus() {
+  searchFocus(selected) {
     const { activeMsg, messages, activeChannel} = this.props
-    const selected = this.state.searchSelect
     const rawAmazonResults = this.state.rawAmazonResults
     const self = this
-    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
+    if (!selected || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
+    this.setField('focus')
+    console.log('firing searchFocus: selected: ',selected)
     let newQuery = {}
-    newQuery.msg = selected[0].toString()
+    newQuery.msg = selected
     newQuery.source = activeMsg.source
     newQuery.source.org = activeChannel.id.split('_')[0]
     newQuery.id = messages.length
@@ -485,11 +486,11 @@ class ControlPanel extends Component {
     newQuery.action = 'focus'
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: rawAmazonResults}
-    UserAPIUtils.urlShorten({url: rawAmazonResults[selected[0]].DetailPageURL[0]}).then(function(res){
+    UserAPIUtils.urlShorten({url: rawAmazonResults[selected-1].DetailPageURL[0]}).then(function(res){
       newQuery.recallHistory.urlShorten = [res.body]
       // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
       newQuery.amazon =  rawAmazonResults
-      newQuery.searchSelect = [selected[0]]
+      newQuery.searchSelect = [selected]
       newQuery.flags = {}
       newQuery.flags.toCinna = true
       newQuery.flags.recalled = true
@@ -557,15 +558,15 @@ class ControlPanel extends Component {
      },8000)
   }
 
-  checkOut() {
+  checkOut(selected) {
     const { activeMsg, messages, activeChannel } = this.props;
-    // const newQuery = activeMsg;
-    const selected = this.state.searchSelect
-    if (selected.length === 0 || !selected[0] || !this.state.rawAmazonResults) {
+    if (!selected || !this.state.rawAmazonResults) {
       console.log('Please select an item or do an initial search.')
       return
     }
     const self = this;
+    console.log('checkOut(), selected: ',selected)
+    this.setField('checkout')
     let newQuery = {}
     newQuery.msg = 'more'
     newQuery.source = activeMsg.source
@@ -580,8 +581,8 @@ class ControlPanel extends Component {
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: this.state.rawAmazonResults}
     newQuery.amazon = this.state.rawAmazonResults
-    newQuery.searchSelect = selected
-    newQuery.msg = 'buy ' + newQuery.searchSelect.toString(); 
+    newQuery.searchSelect = [selected];
+    newQuery.msg = 'buy ' + newQuery.selected
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
@@ -705,7 +706,7 @@ class ControlPanel extends Component {
 
   sendCommand() {
     const { activeChannel, actions, activeMsg, messages } = this.props
-    const { rawAmazonResults, searchSelect, bucket, action} = this.state
+    const { rawAmazonResults, searchSelect, bucket, action, items} = this.state
     let newMessage = { client_res: []}
     newMessage.bucket = bucket
     newMessage.action = action
@@ -783,7 +784,7 @@ class ControlPanel extends Component {
               console.log('Cpanel511: urlShorten error: ',err)
           })
 
-      }else {
+      } else {
          this.picStitch(toStitch).then(function(url){
             if (url && self.state.client_res) {
               let text = ''
@@ -814,6 +815,24 @@ class ControlPanel extends Component {
           console.log('***Cpanel653: ERROR: Picstitch FAILED: ',err)
         })
       }
+
+      //Store the last 3 items client saw in state 
+      let itemOne = Object.assign({},items[searchSelect[0]-1])
+      let itemTwo = Object.assign({}, items[searchSelect[1]-1])
+      let itemThree = Object.assign({}, items[searchSelect[2]-1])
+      let last3 = [item1, item2, item3]
+      this.setState({last3: last3})
+      console.log('LAST3: ',this.state.last3)
+      //Reorder items in state if searchselected
+      // if (searchSelect && searchSelect.length > 0 && newMessage.amazon && rawAmazonResults && ('initialsimilarmodifymore'.indexOf(newMessage.action) > -1)) {    
+      //       for (var i = 0; i < searchSelect.length; i++) {
+      //         let selectedItem = rawAmazonResults[searchSelect[i]-1]
+      //         let residentItem = rawAmazonResults[i]
+      //         newMessage.amazon[i] = selectedItem
+      //         newMessage.amazon[searchSelect[i]-1] = residentItem
+      //       }
+      //    self.setState({rawAmazonResults: newMessage.amazon})
+      // }
   }
 
 
@@ -913,9 +932,9 @@ class ControlPanel extends Component {
      const showCheckoutBox = this.state.action === 'checkout' ? { textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
      const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
      const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.9em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
+     const selectedStyle = this.state.last3 ? {} : { display: 'none'}
      return ( 
          <div className="flexbox-container">
-          {this.state.searchSelect}
           <div id="second-column">
             <div id="search-box" style={showSearchBox}>
               <input type="text" id="search-input" />
@@ -956,14 +975,6 @@ class ControlPanel extends Component {
                           <div style={focusInfoStyle}> 
                                {this.state.client_res}
                           </div>
-                            
-                <h3 style={showPrompt}> Please select an item. </h3>
-                <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length ===  0) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchFocus()} >
-                  Search Focus
-                    <div style={spinnerStyle}>
-                    <Spinner />
-                   </div>
-                </Button>
             </div>
 
              <div id="more-box" style={showMoreBox}>
@@ -977,15 +988,51 @@ class ControlPanel extends Component {
 
               <div id="checkout-box" style={showCheckoutBox}>
                 <div style={focusInfoStyle}> </div>
-                <h3 style={showPrompt}> Please select an item. </h3>
-                <Button bsSize = "large" disabled={(!searchSelect || searchSelect.length === 0) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.checkOut()} >
-                  Checkout Item
-                    <div style={spinnerStyle}>
-                    <Spinner />
-                   </div>
-                </Button>
+                 <a href={this.state.client_res}> Item checked out.  </a>
             </div>
-            <Button block bsSize = "large" style={{ position: 'fixed', bottom:'20%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
+
+            <div  style={{fontSize: '0.6em', position: 'fixed', bottom:'30%',maxWidth: '15em',textAlign: 'center'}} >
+               <div className='flexbox-container'>
+                   <div>
+                     <img width='75' height='75' src={this.state.last3 ? this.state.last3[0].SmallImage[0].URL[0] : null}  />  
+                   </div>  
+                   <div style={{padding:'0', marginLeft:'20%'}}>  
+                     <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus((searchSelect[0] ? searchSelect[0] : 1)) } >
+                         Focus
+                     </Button>
+                     <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut((searchSelect[0] ? searchSelect[0] : 1))} >
+                         Checkout
+                     </Button>
+                   </div>  
+              </div>
+             <div className='flexbox-container'>    
+               <div>
+                <img width='75' height='75' src={this.state.last3 ? this.state.last3[1].SmallImage[0].URL[0] : null}  />
+               </div> 
+               <div style={{padding:'0', marginLeft:'20%'}}>  
+                 <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus((searchSelect[1] ? searchSelect[1] : 2))} >
+                       Focus
+                 </Button>
+                 <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut((searchSelect[1] ? searchSelect[1] : 2))} >
+                       Checkout
+                  </Button>
+               </div>
+              </div>
+            <div className='flexbox-container'>    
+                <div>
+                 <img width='75' height='75' src={this.state.last3 ? this.state.last3[2].SmallImage[0].URL[0] : null}  />
+                </div>
+                 <div style={{padding:'0', marginLeft:'20%'}}>  
+                   <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus((searchSelect[2] ? searchSelect[2] : 3))} >
+                       Focus
+                   </Button>
+                   <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.checkOut((searchSelect[2] ? searchSelect[2] : 3))} >
+                       Checkout
+                     </Button>
+                 </div>
+               </div>
+            </div>
+              <Button block bsSize = "large" style={{ position: 'fixed', bottom:'20%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
               SEND TO CLIENT
             </Button>
           </div>
@@ -1000,7 +1047,7 @@ class ControlPanel extends Component {
                 </label>
                 <form ref='form1' onSubmit={::this.handleSubmit}>
                     <div style={{ display: 'flexbox', textAlign:'center',marginTop: '0.8em' }}>
-                      <ButtonGroup bsSize = "xsmall" bsStyle = "primary"  style={{margin: '0.2em'}}>
+                      <ButtonGroup bsSize = "medium" bsStyle = "primary"  style={{margin: '0.2em'}}>
                         <Button className="form-button" style={{backgroundColor: '#1976d2', color: 'white'}} onClick = { () => this.setField('initial')} >
                           Initial
                         </Button>
@@ -1010,14 +1057,8 @@ class ControlPanel extends Component {
                         <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('modify')} >
                           Modify
                         </Button>
-                         <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('focus')} >
-                          Focus
-                        </Button>
                         <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('more')} >
                           More
-                        </Button>
-                        <Button className="form-button" style={{backgroundColor:  '#1976d2', color: 'white'}} onClick = { () => this.setField('checkout')} >
-                          Checkout
                         </Button>
                       </ButtonGroup>
                     </div>

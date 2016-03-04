@@ -53,7 +53,7 @@ var messageSchema = mongoose.Schema({
             toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
             searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
             recalled: Boolean //flag to bypass history function in cinna
-        }
+        },
     click: {
         productId: String,
         url: String,

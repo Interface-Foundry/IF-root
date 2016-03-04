@@ -352,7 +352,9 @@ function newChildItem(data,callback){
     }
     else {
         console.log('error: data.thread missing in newChildItem(), geenrating random new one');
+        data.thread = {}
         data.thread.id = shortid.generate(); //gen new idea for this item in thread
+        data.thread.parent = {}
         data.thread.parent.id = shortid.generate();
         data.thread.sequence = 1;
         data.thread.parent.isParent = false;
