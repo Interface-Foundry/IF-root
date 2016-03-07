@@ -58,7 +58,9 @@ class ControlPanel extends Component {
         searchSelect: [],
         count: 0,
         client_res: null,
-        rawAmazonResults: []
+        rawAmazonResults: [],
+        // lastSeen: [],
+        lastAction: ''
     }
   }
 
@@ -88,7 +90,22 @@ class ControlPanel extends Component {
                 self.state.items[i].price = msg.amazon[i].realPrice ? msg.amazon[i].realPrice : (msg.amazon[i].ItemAttributes[0].ListPrice ? msg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
                 self.state.items[i].changed = true
                 try {
-                  self.state.items[i].img = msg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+
+                  let imageURL;
+                  if (msg.amazon[i].MediumImage && msg.amazon[i].MediumImage[0].URL[0]){
+                      imageURL = msg.amazon[i].MediumImage[0].URL[0];
+                  }
+                  else if (msg.amazon[i].ImageSets && msg.amazon[i].ImageSets[0].ImageSet && msg.amazon[i].ImageSets[0].ImageSet[0].MediumImage && msg.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0]){
+                      imageURL = msg.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
+                  }
+                  else if (msg.amazon[i].altImage){
+                      imageURL = msg.amazon[i].altImage;
+                  }
+                  else {
+                      console.log('NO IMAGE FOUND ',item);
+                      imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
+                  }
+                  self.state.items[i].img = imageURL;
                 } catch(err) {
                   console.log('Could not get image for item: ',i)
                 }
@@ -113,40 +130,26 @@ class ControlPanel extends Component {
               self.setState({client_res: msg.client_res})
       // }
     }
-
-    //Change active message in state
-    // var identifier = {id: msg.source.id, properties: []}
-    // for (var key in msg) {
-    //   if ((
-    //     key === 'amazon' || 
-    //     key === 'client_res' || 
-    //     key === 'searchSelect') && msg[key] !== '' ) {
-    //     identifier.properties.push({ [key] : msg[key]})
-    //   }
-    // }  
-    // if (identifier.properties.length === 0 ) {
-    //   return
-    // } else {
-    //   actions.setMessageProperty(identifier)
-    // }
   })
   //---------------------------------------------------------//
 
-  //------------ON CHANGE CHANNEL  ---------------------------//
+  //------------ON CHANGING CHANNELS  ---------------------------//
    socket.on('change channel bc', function(channels) {
     const filtered = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.next.id)
     const filteredOld = self.props.messages.filter(message => message.source).filter(message => message.source.id === channels.prev.id)
-    const firstMsg = self.props.activeMsg
-    const firstMsgOld = filteredOld[0]
+    const nextMsg = self.props.activeMsg
+    const currentMsg = filteredOld[0]
+    // console.log('THIS IS PROB IT CPANEL143: ',self.props.activeMsg)
 
+    console.log('Switching channels from: ',currentMsg.source.id,' to: ',nextMsg.source.id)
     //-Emit change state event
     // socket.emit('change state', self.state);
 
     //Reset selected state
      // self.setState({ selected: {name: null, index: null}})
 
-    //If there is atleast one channel existing...
-    if (firstMsgOld) {
+    //If there is atleast one channel existing...aka this is not the first channel opened
+    if (currentMsg) {
           //Save search results and searchSelect     
           // const reduxItems = firstMsgOld.amazon.filter(function(obj){ return true })
           // const result = []
@@ -157,40 +160,61 @@ class ControlPanel extends Component {
           //     }
           //   })
           // })
-          let identifier = {id: firstMsgOld.source.id, properties: []}
-          identifier.properties.push({ amazon : self.state.rawAmazonResults})
+          let identifier = {id: currentMsg.source.id, properties: []}
+          identifier.properties.push({ amazon : self.state.rawAmazonResults.slice(0)})
           identifier.properties.push({ searchSelect : self.state.searchSelect })
+          identifier.properties.push({ lastAction : self.state.lastAction })
           actions.setMessageProperty(identifier)
+          self.state.lastSeen = [];
      }
-        
-    //Load items into state for next channel
-     const nextItems = []
-     if (firstMsg) {
+     
+     //Load redux state into local state for next channel
+     let nextItems = []
+     if (nextMsg) {
+      //Load items into state for next channel 
        try {
-           for (var i = 0; i < firstMsg.amazon.length; i++) {
+           for (var i = 0; i < nextMsg.amazon.length; i++) {
             let item = { index: null, id: null, name: null, price: null, changed: true}
             item.index = i
-            item.id = firstMsg.amazon[i].ASIN[0]
-            item.name = firstMsg.amazon[i].ItemAttributes[0].Title[0]
-            item.price = firstMsg.amazon[i].realPrice ? firstMsg.amazon[i].realPrice : (firstMsg.amazon[i].ItemAttributes[0].ListPrice ? firstMsg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
+            item.id = nextMsg.amazon[i].ASIN[0]
+            item.name = nextMsg.amazon[i].ItemAttributes[0].Title[0]
+            item.price = nextMsg.amazon[i].realPrice ? nextMsg.amazon[i].realPrice : (nextMsg.amazon[i].ItemAttributes[0].ListPrice ? nextMsg.amazon[i].ItemAttributes[0].ListPrice[0].FormattedPrice[0] : null )
             try {
-              item.img = firstMsg.amazon[i].ImageSets[0].ImageSet[0].LargeImage[0].URL[0]
+               let imageURL;
+              if (nextMsg.amazon[i].MediumImage && nextMsg.amazon[i].MediumImage[0].URL[0]){
+                  imageURL = nextMsg.amazon[i].MediumImage[0].URL[0];
+              }
+              else if (nextMsg.amazon[i].ImageSets && nextMsg.amazon[i].ImageSets[0].ImageSet && nextMsg.amazon[i].ImageSets[0].ImageSet[0].MediumImage && nextMsg.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0]){
+                  imageURL = nextMsg.amazon[i].ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
+              }
+              else if (nextMsg.amazon[i].altImage){
+                  imageURL = nextMsg.amazon[i].altImage;
+              }
+              else {
+                  console.log('NO IMAGE FOUND ',item);
+                  imageURL = 'http://kipthis.com/img/kip-cart.png'; 
+              }
+              item.img = imageURL
             } catch(err) {
               console.log('Could not get image for item: ',i)
             }
             nextItems.push(item)
           } 
+            // console.log('Checking if state items transferred CPanel175: ',firstMsg, nextItems)
+          //Load lastAction for next channel
+          // if (nextMsg.lastAction) {
+            self.setState({ lastAction: nextMsg.lastAction, rawAmazonResults: nextMsg.amazon })
+          // }
         } catch(err) {
           console.log('CPanel Error 169 Could not get results :',err)
           return
         } 
+
      }
 
-    if (nextItems.length > 0) {
-         // console.log(0)
+    if (nextMsg && nextItems.length > 0) {
         self.setState({ items: nextItems })
       } else {
-        // console.log(1)
         self.setState({items: [{
         id: 'product-0',
         name: 'Product 0',
@@ -256,9 +280,9 @@ class ControlPanel extends Component {
       }
 
      //-Reset local state params as necessary
-      self.state.msg =  firstMsg.msg
-      self.state.bucket =  firstMsg.bucket
-      self.state.action =  firstMsg.action
+      self.state.msg =  nextMsg.msg
+      self.state.bucket =  nextMsg.bucket
+      self.state.action =  nextMsg.action
       self.state.spinnerloading = false
       self.setState({modifier: { color: null, size: null}})
       self.state.color = false
@@ -266,6 +290,8 @@ class ControlPanel extends Component {
       self.state.searchParam = ''
       self.state.focusInfo = null
       self.state.count = 0
+      self.state.lastAction = nextMsg.lastAction;
+      self.forceUpdate()
     })
   //---------------------------------------------------------//
 
@@ -329,6 +355,7 @@ class ControlPanel extends Component {
       action: 'initial'
     })
     socket.emit('new message', newQuery);
+    self.setState({lastAction: newQuery.action})
     setTimeout(function(){
       if (self.state.spinnerloading === true) {
          self.setState({
@@ -373,6 +400,7 @@ class ControlPanel extends Component {
     this.setState({
       spinnerloading: true
     })
+    self.setState({lastAction: newQuery.action})
     setTimeout(function(){
       if (self.state.spinnerloading === true) {
          self.setState({
@@ -458,6 +486,7 @@ class ControlPanel extends Component {
     this.setState({
       spinnerloading: true
     })
+    self.setState({lastAction: newQuery.action})
     setTimeout(function(){
       if (self.state.spinnerloading === true) {
          self.setState({
@@ -501,6 +530,7 @@ class ControlPanel extends Component {
     this.setState({
       spinnerloading: true
     })
+    self.setState({lastAction: newQuery.action})
     setTimeout(function(){
       if (self.state.spinnerloading === true) {
          self.setState({
@@ -528,11 +558,11 @@ class ControlPanel extends Component {
     newQuery.bucket = 'search'
     newQuery.action = 'focus'
     newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory =  { amazon: lastSeen}
+    newQuery.recallHistory =  { amazon: lastSeen.slice(0)}
     UserAPIUtils.urlShorten({url: lastSeen[selected-1].DetailPageURL[0]}).then(function(res){
       newQuery.recallHistory.urlShorten = [res.body]
       // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
-      newQuery.amazon =  lastSeen
+      newQuery.amazon =  lastSeen.slice(0)
       newQuery.searchSelect = [selected]
       newQuery.flags = {}
       newQuery.flags.toCinna = true
@@ -545,6 +575,7 @@ class ControlPanel extends Component {
       self.setState({
         spinnerloading: true
       })
+      self.setState({lastAction: newQuery.action})
       setTimeout(function(){
         if (self.state.spinnerloading === true) {
            self.setState({
@@ -594,6 +625,7 @@ class ControlPanel extends Component {
     this.setState({
       spinnerloading: true
     })
+    self.setState({lastAction: newQuery.action})
     setTimeout(function(){
       if (self.state.spinnerloading === true) {
          self.setState({
@@ -821,10 +853,9 @@ class ControlPanel extends Component {
           let lastSeen = [];
           rawAmazonResults.forEach(function(item){
             let temp = Object.assign({},item)
-            console.log('IS TEMP REAL: ',temp)
             lastSeen.push(temp)
           })
-          this.setState({lastSeen: lastSeen})
+          this.setState({lastSeen: lastSeen.slice(0)})
         } else {
             for (var i = 0; i < searchSelect.length; i++) {
               let selectedItem = rawAmazonResults[searchSelect[i]-1]
@@ -832,11 +863,10 @@ class ControlPanel extends Component {
               newMessage.amazon[i] = selectedItem
               newMessage.amazon[searchSelect[i]-1] = residentItem
             }
-         self.setState({lastSeen: newMessage.amazon})
+         self.setState({lastSeen: newMessage.amazon.slice(0)})
         } 
       }
 
-      
       // let itemOneOld = Object.assign({},items[0])
       // let itemTwoOld = Object.assign({}, items[1])
       // let itemThreeOld = Object.assign({}, items[2])
@@ -1016,7 +1046,7 @@ class ControlPanel extends Component {
                    <h5 style={{textAlign: 'center'}}>Last seen by client: </h5>
                <div className='flexbox-container'>
                    <div>
-                     <img width='75' height='75' src={this.state.lastSeen ? this.state.lastSeen[0].SmallImage[0].URL[0] : null}  />  
+                     <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[0]) ? this.state.lastSeen[0].SmallImage[0].URL[0] : null}  />  
                    </div>  
                    <div style={{padding:'0', marginLeft:'20%'}}>  
                      <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(1) } >
@@ -1029,7 +1059,7 @@ class ControlPanel extends Component {
               </div>
              <div className='flexbox-container'>    
                <div>
-                <img width='75' height='75' src={this.state.lastSeen ? this.state.lastSeen[1].SmallImage[0].URL[0] : null}  />
+                <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[1])  ? this.state.lastSeen[1].SmallImage[0].URL[0] : null}  />
                </div> 
                <div style={{padding:'0', marginLeft:'20%'}}>  
                  <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(2)} >
@@ -1042,7 +1072,7 @@ class ControlPanel extends Component {
               </div>
             <div className='flexbox-container'>    
                 <div>
-                 <img width='75' height='75' src={this.state.lastSeen ? this.state.lastSeen[2].SmallImage[0].URL[0] : null}  />
+                 <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[2])  ? this.state.lastSeen[2].SmallImage[0].URL[0] : null}  />
                 </div>
                  <div style={{padding:'0', marginLeft:'20%'}}>  
                    <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(3)} >
@@ -1055,7 +1085,7 @@ class ControlPanel extends Component {
                </div>
             </div>
               <Button block bsSize = "large" style={{ position: 'fixed', bottom:'10%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
-              SEND TO CLIENT
+              SEND TO CLIENT: { self.state.lastAction ? self.state.lastAction.toUpperCase() : '' } 
             </Button>
           </div>
 

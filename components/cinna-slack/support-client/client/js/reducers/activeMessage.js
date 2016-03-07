@@ -37,7 +37,8 @@ const initialState = {
             }
         },
     urlShorten: null,
-    searchSelect: []
+    searchSelect: [],
+    lastAction: ''
 };
 
 export default function activeMessage(state = initialState, action) {
@@ -78,7 +79,8 @@ export default function activeMessage(state = initialState, action) {
                 },
                 urlShorten: action.message.thread.urlShorten,
                 flags: action.message.flags ? action.message.flags : {},
-                searchSelect: action.message.searchSelect ? action.message.searchSelect : []
+                searchSelect: action.message.searchSelect ? action.message.searchSelect : [],
+                lastAction: action.message.lastAction ? action.message.lastAction : null
             };
         case LOAD_MESSAGE:
             return {...state,

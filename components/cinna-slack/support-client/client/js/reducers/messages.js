@@ -50,7 +50,8 @@ export default function messages(state = initialState, action) {
                     },
                     urlShorten: action.message.thread.urlShorten,
                     flags: action.message.flags ? action.message.flags : {},
-                    searchSelect: action.message.searchSelect ? action.message.searchSelect : []
+                    searchSelect: action.message.searchSelect ? action.message.searchSelect : [],
+                    lastAction: action.message.lastAction ? action.message.lastAction : null
                 }]
             };
         case RECEIVE_MESSAGE:
@@ -92,7 +93,8 @@ export default function messages(state = initialState, action) {
                     },
                     urlShorten: action.message.thread.urlShorten,
                     flags: action.message.flags ? action.message.flags : {},
-                    searchSelect: action.message.searchSelect ? action.message.searchSelect : []
+                    searchSelect: action.message.searchSelect ? action.message.searchSelect : [],
+                    lastAction: action.message.lastAction ? action.message.lastAction : null
                 }]
             };
         case LOAD_MESSAGES:

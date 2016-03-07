@@ -23,7 +23,7 @@ class MessageListItem extends Component {
     let messageToDisplay =  (message.client_res && message.client_res[0] && !message.flags.toCinna) ?  message.client_res[0] : message.msg
     this.setState({ displayMsg: messageToDisplay })
     function checkImgURL (msg) {
-        return(msg.match(/\.(jpeg|jpg|gif|png)$/) != null);
+        return ((typeof msg == 'string') && (msg.match(/\.(jpeg|jpg|gif|png)$/) != null));
     }
     if (messageToDisplay && checkImgURL(messageToDisplay)) {
       this.setState({ isImage : 'true'  })
@@ -121,7 +121,7 @@ class MessageListItem extends Component {
                   return (
                     <div>
                         <div style={messageStyle}> 
-                            <img width='170' src={message.client_res[imgIndex2]} />
+                            <img width='170' height='260' src={message.client_res[imgIndex2]} />
                         </div>
                     </div>
                     )

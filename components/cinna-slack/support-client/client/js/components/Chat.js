@@ -43,9 +43,9 @@ class Chat extends Component {
     this.setState({ resolved: null });
     const self = this
     socket.on('new bc message', function(msg) {   
-     // console.log('Chat64 msg: ',msg)   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
+      console.log('Chat64: incoming msg: ',msg)   
       // msg.parent = (filtered.length > 0) ?  false : true
       // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
       // console.log('Chat67:', filtered, self.props.messages,msg)
@@ -291,7 +291,7 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
-              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
             </div>
           </div>
         
