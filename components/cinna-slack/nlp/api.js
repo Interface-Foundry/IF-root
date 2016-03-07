@@ -47,6 +47,11 @@ var parse = module.exports.parse = function(data, callback) {
   var text = data.msg;
   debug('parsing:' + text)
 
+  // testing supervisor
+  if (text.indexOf('kipsupervisor') > -1) {
+    return callback(null, {supervisor: true})
+  }
+
   // First do some global hacks
   text = text.replace(' but blue', ' but in blue').replace(/[^\w\s,.$!]/gi, '')
 

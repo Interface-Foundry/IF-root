@@ -56,6 +56,8 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
+    } else if (env === 'development') {
+      console.log('oh hey developer, i hope you are having a good day')
     }
     else {
         console.log('retrieving slackbots from mongo');
@@ -382,9 +384,18 @@ function routeNLP(data){
 
         function continueNLP(){
             nlp.parse(data, function(e, res) {
-                if (e){console.log('NLP error ',e)}
-                else {
+                if (e){
+                  console.log('NLP error ',e)
+                  // Route to supervisor
+                  data.flags.toSupervisor = true;
+                  incomingAction(data)
+                } else {
                     console.log('NLP RES ',res);
+
+                    if (res.supervisor) {
+                      data.flags.toSupervisor = true;
+                      return incomingAction(data);
+                    }
 
                     if(res.execute && res.execute.length > 0){
 
