@@ -1,0 +1,37 @@
+{
+  "private": true,
+  "name": "kip-testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bessbd/kip-testing.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bessbd/kip-testing/issues"
+  },
+  "homepage": "https://github.com/bessbd/kip-testing#readme",
+  "dependencies": {
+    "WNdb": "^3.1.2",
+    "async": "^1.5.2",
+    "bottleneck": "^1.10.2",
+    "english3kdata": "^0.1.0",
+    "feedparser": "^1.1.4",
+    "glob": "^7.0.0",
+    "lodash": "^4.3.0",
+    "natural": "^0.2.1",
+    "node-wordnet": "^0.1.11",
+    "request": "^2.69.0",
+    "request-json": "^0.5.5",
+    "speakeasy-nlp": "^0.2.2",
+    "sqlite3": "^3.1.1",
+    "walmart": "0.0.4",
+    "wndb-with-exceptions": "^3.0.1"
+  }
+}
