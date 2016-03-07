@@ -1,7 +1,10 @@
 var async = require('async');
 var request = require('request');
+const vision = require('node-cloud-vision-api')
+
 
 var Bot = require('../slackbots_modified'); //load slack api
+// var Slack = require('slack-node');
 
 var banter = require("./banter.js");
 var history = require("./history.js");
@@ -196,8 +199,90 @@ function loadSlackUsers(users){
                 //     console.log('CHANGEGEE ',doneata);
                 //     slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
                 // }
+
+                
+
+                // // init with auth
+                // vision.init({auth: 'AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk'})
+
+                // // construct parameters
+                // const req = new vision.Request({
+                //   image: new vision.Image('./phone.jpg'),
+                //   features: [
+                //     new vision.Feature('FACE_DETECTION', 1),
+                //     new vision.Feature('LOGO_DETECTION', 2),
+                //     new vision.Feature('TEXT_DETECTION', 4),
+                //     new vision.Feature('LABEL_DETECTION', 20),
+                //   ]
+                // })
+
+                // // send single request
+                // vision.annotate(req).then((res) => {
+                //   // handling response
+                //   console.log(JSON.stringify(res.responses))
+                // }, (e) => {
+                //   console.log('Error: ', e)
+                // })
+
+                //data type == 'file_shared'
                 
                 if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){ //settings.name = kip's slack username
+
+                    //console.log(data);
+
+                    if (data.subtype && data.subtype  == 'file_share'){
+                        if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'){
+
+                            // var slack = new Slack(apiToken);
+
+                            // slack.api("users.list", function(err, response) {
+                            //   console.log(response);
+                            // });
+
+                            // var authToken = 'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG';
+
+                            // request('https://files.slack.com/files-pri/T0H72FMNK-F0Q6Y5Z8A/citrus.png?token='+authToken+'', function(err, res, body) {
+
+                            // request('https://slack.com/api/files.info?token='+authToken+'', function(err, res, body) {
+                            //   if(err){
+                            //     console.log('requesting new team user list error: ',err);
+                            //   }
+                            //   else {
+                            //     body = JSON.parse(body);
+
+                            //     if (body.ok && body.ims.length > 0){
+                            //         //loop through members, commence welcome!
+                            //         async.eachSeries(body.ims, function(member, callback) {
+
+                            //             if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
+                            //                 var hello = {
+                            //                     msg: 'welcome'
+                            //                 }
+                            //                 hello.source = {
+                            //                     'origin':'slack',
+                            //                     'channel':member.id,
+                            //                     'org':user.team_id,
+                            //                     'id':user.team_id + "_" + member.id //for retrieving chat history in node memory
+                            //                 }
+                            //                 banter.welcomeMessage(hello,function(res){
+                            //                     sendTxtResponse(hello,res);
+                            //                 });
+                            //             }
+                            //             callback();
+                            //         }, function done(){
+                            //             console.log('finished sending out welcome messages to new team');
+                            //         });
+                            //     }
+                            //     else {
+                            //         console.log('error: something happened, a ghost slack team emerged');
+                            //     }
+                            //   }
+                            // });
+
+                        }
+                    }
+    
+
                     //public channel
                     if (data.channel && data.channel.charAt(0) == 'C'){
                         //if contains bot user id, i.e. if bot is @ mentioned in channel (example user id: U0H6YHBNZ) 
@@ -679,38 +764,83 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
     if (action == 'stitch'){
-        picstitch.stitchResults(data,source,function(url){
+        picstitch.stitchResults(data,source,function(urlArr){
             //sending out stitched image response
             data.client_res = [];
             data.urlShorten = [];
-            data.client_res.push(url); //add image results to response
 
-            //send extra item URLs with image responses
-            if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
-                processData.urlShorten(data,function(res){
-                    var count = 0;
-                    //put all result URLs into arr
-                    async.eachSeries(res, function(i, callback) {
-                        data.urlShorten.push(i);//save shortened URLs
-                        processData.getNumEmoji(data,count+1,function(emoji){
-                            res[count] = res[count].trim(); 
-                            if (data.source.origin == 'slack'){
-                                data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-                            }else if (data.source.origin == 'socket.io'){
-                                data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
-                            }
+            console.log('URLARTT ',urlArr);
 
-                            count++;                           
-                            callback();
-                        });
-                    }, function done(){
-                        checkOutgoingBanter(data);
+            processData.urlShorten(data,function(res){
+                var count = 0;
+                //put all result URLs into arr
+                async.eachSeries(res, function(i, callback) {
+                    data.urlShorten.push(i);//save shortened URLs
+
+                    processData.getNumEmoji(data,count+1,function(emoji){
+                        res[count] = res[count].trim(); 
+                        if (data.source.origin == 'slack'){
+
+                            var attachObj = {};
+
+                            attachObj.image_url = urlArr[count];
+                            attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            attachObj.title_link = res[count];
+                            attachObj.color = "#45a5f4";
+                            attachObj.fallback = 'Here are some options you might like';
+                            data.client_res.push(attachObj);
+                            
+                            // '<'++' | ' + +'>';
+
+                        }else if (data.source.origin == 'socket.io'){
+                            data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                        }
+
+                        count++;                           
+                        callback();
                     });
+
+
+                }, function done(){
+                    checkOutgoingBanter(data);
                 });
-            }
-            else {
-                checkOutgoingBanter(data);
-            }
+            });
+
+
+            // function compileResults(){
+
+            // }
+
+
+
+            // data.client_res.push(url); //add image results to response
+
+            // //send extra item URLs with image responses
+            // if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
+            //     processData.urlShorten(data,function(res){
+            //         var count = 0;
+            //         //put all result URLs into arr
+            //         async.eachSeries(res, function(i, callback) {
+            //             data.urlShorten.push(i);//save shortened URLs
+            //             processData.getNumEmoji(data,count+1,function(emoji){
+            //                 res[count] = res[count].trim(); 
+            //                 if (data.source.origin == 'slack'){
+            //                     data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
+            //                 }else if (data.source.origin == 'socket.io'){
+            //                     data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+            //                 }
+
+            //                 count++;                           
+            //                 callback();
+            //             });
+            //         }, function done(){
+            //             checkOutgoingBanter(data);
+            //         });
+            //     });
+            // }
+            // else {
+            //     checkOutgoingBanter(data);
+            // }
         });
     }
 
@@ -749,6 +879,21 @@ var checkOutgoingBanter = function(data){
 //send back msg to user, based on source.origin
 var sendResponse = function(data){
 
+    //SAVE OUTGOING MESSAGES TO MONGO
+    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
+        console.log('SAVING OUTGOING RESPONSE');
+        //history.newMessage(data, function(newMsg){
+        history.saveHistory(data,false,function(res){
+            //whatever
+        }); //saving outgoing message
+        //});        
+    }
+    else {
+        console.log('error: cant save outgoing response, missing bucket or action');
+    }
+    /// / / / / / / / / / / 
+
+
     if (data.source.channel && data.source.origin == 'socket.io'){
         //check if socket user exists        
         if (io.sockets.connected[data.source.channel]){
@@ -781,45 +926,100 @@ var sendResponse = function(data){
 
             if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
 
+                console.log('ZZ ',data.client_res);
+
                 var message = data.client_res[0]; //use first item in client_res array as text message
-                var attachments = [
-                    {
-                        "color": "#45a5f4"
-                    },
-                    {
-                        "color": "#45a5f4", 
-                        "fields":[]  
-                    }
-                ];
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
                 attachThis.shift(); 
 
-                attachments[0].image_url = attachThis[0]; //add image search results to attachment 
-                attachments[0].fallback = 'Here are some options you might like'; //fallback for search result
+                attachThis = JSON.stringify(attachThis);
 
-                attachThis.shift(); //remove image from array
-
-                attachments[1].fallback = 'Here are some options you might like';
-
-                //put in attachment fields
-                async.eachSeries(attachThis, function(attach, callback) {
-                    var field = {
-                        "value": attach,
-                        "short":false
-                    }
-                    attachments[1].fields.push(field);
+                slackUsers[data.source.org].postAttachment(data.source.channel, message, attachThis, params).then(function(res) {
                     callback();
-
-                }, function done(){
-
-                    attachments = JSON.stringify(attachments);
-
-                    slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
-                        callback();
-                    });
                 });
+
+                // //put in attachment fields
+                // async.eachSeries(attachThis, function(attach, callback) {
+
+                //     console.log('title ',attach.title);
+                //     console.log('url ',attach.image_url);
+
+                //     var objAttach = {
+                //         fallback:'',
+                //         title: attach.title,
+                //         title_link: attach.title_link,
+
+                //     }
+
+                //     attachments.push();
+                //     {
+                //         "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //         "title": ":one: Product Name",
+                //         "title_link": "https://datadog.com/path/to/event",
+                //         "image_url": "http://kipthis.com/img/kip-icon.png",
+                //         "color": "#764FA5"
+                //     },
+                //     // var field = {
+                //     //     "value": attach,
+                //     //     "short":false
+                //     // }
+                //     // attachments[1].fields.push(field);
+                //     // callback();
+
+                // }, function done(){
+
+                //     attachments = JSON.stringify(attachments);
+
+                //     slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
+                //         callback();
+                //     });
+                // });
+
+
+
+                // var attachments = [
+                //     // {
+                //     //     "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //     //     "title": ":one: Product Name",
+                //     //     "title_link": "https://datadog.com/path/to/event",
+                //     //     "image_url": "http://kipthis.com/img/kip-icon.png",
+                //     //     "color": "#764FA5"
+                //     // },
+                //     // {
+                //     //     "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //     //     "title": ":two: Product Name",
+                //     //     "title_link": "https://datadog.com/path/to/event",
+                //     //     "image_url": "http://kipthis.com/img/kip-icon.png",
+                //     //     "color": "#764FA5"
+                //     // },
+                //     // {
+                //     //     "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //     //     "title": ":three: Product Name",
+                //     //     "title_link": "https://datadog.com/path/to/event",
+                //     //     "image_url": "http://kipthis.com/img/kip-icon.png",
+                //     //     "color": "#764FA5"
+                //     // }
+                //     {
+                //         "color": "#45a5f4"
+                //     },
+                //     {
+                //         "color": "#45a5f4", 
+                //         "fields":[]  
+                //     }
+                // ];
+
+
+
+                // attachments[0].image_url = attachThis[0]; //add image search results to attachment 
+                // attachments[0].fallback = 'Here are some options you might like'; //fallback for search result
+
+                // attachThis.shift(); //remove image from array
+
+                // attachments[1].fallback = 'Here are some options you might like';
+
+
             }
             else if (data.action == 'focus'){
                 var attachments = [
@@ -887,18 +1087,7 @@ var sendResponse = function(data){
         console.log('error: data.source.channel or source.origin missing')
     }
 
-    //SAVE OUTGOING MESSAGES TO MONGO
-    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
-        console.log('SAVING OUTGOING RESPONSE');
-        //history.newMessage(data, function(newMsg){
-        history.saveHistory(data,false,function(res){
-            //whatever
-        }); //saving outgoing message
-        //});        
-    }
-    else {
-        console.log('error: cant save outgoing response, missing bucket or action');
-    }
+
 }
 
 

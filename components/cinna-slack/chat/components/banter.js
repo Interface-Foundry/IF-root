@@ -751,9 +751,10 @@ var checkForCanned = function(input,callback,origin) {
             res = 'Sorry, which item are you interested in saving?';
             break;
 
+        case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.5 Beta (Ginger)';
+            res = 'I\'m a penguin running Kip v0.6 Cardamom';
             break;
 
         case '/':
