@@ -141,7 +141,7 @@ class ControlPanel extends Component {
     const currentMsg = filteredOld[0]
     // console.log('THIS IS PROB IT CPANEL143: ',self.props.activeMsg)
 
-    console.log('Switching channels from: ',currentMsg.source.id,' to: ',nextMsg.source.id)
+    // console.log('Switching channels from: ',currentMsg.source.id,' to: ',nextMsg.source.id)
     //-Emit change state event
     // socket.emit('change state', self.state);
 
@@ -421,7 +421,7 @@ class ControlPanel extends Component {
       return
     }
     let key = Object.keys(modifier)[0]
-    let value = document.querySelector('#modify-color').value ? document.querySelector('#modify-color').value : (document.querySelector('#modify-size').value ? document.querySelector('#modify-size').value : document.querySelector('#modify-price').value )
+    let value = document.querySelector('#modify-color').value ? document.querySelector('#modify-color').value : (document.querySelector('#modify-size').value ? document.querySelector('#modify-size').value : document.querySelector('#modify-generic').value )
     // console.log(key,value)
     switch(key) {
       case 'color': 
@@ -450,19 +450,19 @@ class ControlPanel extends Component {
         ];
         if (findIndex(size_names, function(el) { return el === value })  > -1) {
            dataModify.type = 'size'
-           dataModify.val = value
+           dataModify.val = [value]
         } else {
           return
         }
         break;
-      // case 'price': 
-      //   dataModify = priceModify(value)
-      //   console.log('Cpanel433 dataModify: ', dataModify)
-      //   break;
-      case 'brand': 
+      case 'genericDetail': 
+        dataModify.type = 'genericDetail' 
+        dataModify.val = [value];
         break;
-   
+      case 'brand': 
+        break;   
     }
+    console.log('DATAMODIFY: ', dataModify)
     let newQuery = {}
     newQuery.msg = value
     newQuery.tokens = [value]
@@ -916,6 +916,7 @@ class ControlPanel extends Component {
   handleChange(field, e) {
     const self = this
     if(field.target.value == ''){
+       document.querySelector('#modify-generic').disabled = false
        document.querySelector('#modify-color').disabled = false
        document.querySelector('#modify-size').disabled = false
        self.setState({ modifier: {}})
@@ -923,22 +924,22 @@ class ControlPanel extends Component {
     switch(field.target.id) {
       case 'modify-color':
         document.querySelector('#modify-size').disabled = true
-        // document.querySelector('#modify-price').disabled = true
+        document.querySelector('#modify-generic').disabled = true
         let modifier = {color : document.querySelector('#modify-color').value}
         self.setState({ modifier: modifier })
         break;
       case 'modify-size':
         document.querySelector('#modify-color').disabled = true
-        // document.querySelector('#modify-price').disabled = true
+        document.querySelector('#modify-generic').disabled = true
         let modifier2 = {size : document.querySelector('#modify-size').value}
         self.setState({ modifier: modifier2 })
         break;
-      // case 'modify-price':
-      //   document.querySelector('#modify-color').disabled = true
-      //   document.querySelector('#modify-size').disabled = true
-      //   let modifier3 = {price : document.querySelector('#modify-price').value}
-      //   self.setState({ modifier: modifier3 })
-      //   break;
+      case 'modify-generic':
+        document.querySelector('#modify-color').disabled = true
+        document.querySelector('#modify-size').disabled = true
+        let modifier3 = { genericDetail : document.querySelector('#modify-generic').value}
+        self.setState({ modifier: modifier3 })
+        break;
       }
     }
 
@@ -1011,6 +1012,7 @@ class ControlPanel extends Component {
              <div id="modify-box" style={showModifyBox}>
                   <h3 style={showPrompt}> Please select an item. </h3>
                   <div>
+                     <label>Generic: <input type="text" id="modify-generic" onChange={this.handleChange.bind(this)} /> </label> <br /> <br />
                      <label>Color: <input type="text" id="modify-color" onChange={this.handleChange.bind(this)} /> </label> <br /> <br />
                      <label>Size: <input type="text" id="modify-size" onChange={this.handleChange.bind(this)} />  </label> <br /> <br />
                   </div>

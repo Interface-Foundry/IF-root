@@ -105,7 +105,6 @@ var searchAmazon = function(data, type, query, flag) {
                             }
                         }
                         else {
-                            console.log('INITIAL MODOFY SEARCH FLAGGGGG: ',flag);
                             parseAmazon(productGroup,browseNodes,function(res){
                                 amazonParams.SearchIndex = res.SearchIndex;
                                 amazonParams.BrowseNode = res.BrowseNode;
