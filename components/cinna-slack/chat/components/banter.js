@@ -11,9 +11,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'hi') > 60:
         case textSimilar(input,'hello') > 60:
         case textSimilar(input,'hey') > 60:
-        case textSimilar(input,'hi kip') > 60:
-        case textSimilar(input,'hello kip') > 60:
-        case textSimilar(input,'hey kip') > 60:
+        case textSimilar(input,'hej') > 60:
         case textSimilar(input,'hey you') > 60:
         case textSimilar(input,'hey you muthafucka') > 60:
         case textSimilar(input,'hey there') > 60:
@@ -21,9 +19,18 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'basic';
             res = input + ', what can I do for you? Tell me the thing you\'re looking for, or use help for more options 😊';
             break;
+        case textSimilar(input,'hi kip') > 60:
+        case textSimilar(input,'hello kip') > 60:
+        case textSimilar(input,'hey kip') > 60:
+            flag = 'basic';
+            res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use help for more options 😊';
+            break;     
         case textSimilar(input,'what you up to') > 60:
         case textSimilar(input,'whats up') > 60:
         case textSimilar(input,'sup') > 60:
+        case textSimilar(input,'how are you') > 60:
+        case textSimilar(input,'how r you') > 60:
+        case textSimilar(input,'how r u') > 90:
             flag = 'basic';
             res = 'Busy at work, how are you?';
             break;
@@ -394,6 +401,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case textSimilar(input,'what is your favourite type of chocolate?') > 40:
         case textSimilar(input,'whats your favourite') > 40:
+        case textSimilar(input,'whats your favorite food') > 60:
         case textSimilar(input,'what do you like') > 40:
         case textSimilar(input,'recommend something') > 40:
         case textSimilar(input,'recommend') > 90:
@@ -467,6 +475,11 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'basic';
             res = 'Didn\'t you just ask me that? 😶';
             break;
+        case textSimilar(input,'what is love') > 90:
+            flag = 'search.initial';
+            query = 'love';
+            res = 'Love is a variety of different feelings, states, and attitudes that ranges from interpersonal affection to pleasure <3';
+            break;
 
         case textSimilar(input,'i hate you') > 60:
         case textSimilar(input,'hate this') > 90:
@@ -531,7 +544,9 @@ var checkForCanned = function(input,callback,origin) {
             res = 'Say hi at hello@kipthis.com! Thanks for your feedback! We appreciate any thoughts you have to improve our service :)';
             break;
 
-        case textSimilar(input,'help') > 60:
+        case textSimilar(input,'help') > 70:
+        case textSimilar(input,'he#p') > 90:
+        case textSimilar(input,'what does kip do') > 80:
         case textSimilar(input,'?') > 50:
         case textSimilar(input,'???') > 50:
         case textSimilar(input,'what?') > 90:
@@ -608,10 +623,12 @@ var checkForCanned = function(input,callback,origin) {
             break;
 
         case textSimilar(input,'trending now') > 90:
+        case textSimilar(input,'trending') > 90:
         case textSimilar(input,'what\’s new') > 60:
+        case textSimilar(input,'deals') > 90:
         case textSimilar(input,'what\'s good') > 60:
             res = 'Here\'s what\'s trending now';   
-            query = 'trending'; //do this search 
+            query = 'best seller'; //do this search 
             flag = 'search.initial'; //do this action         
             break;
 
@@ -670,7 +687,7 @@ var checkForCanned = function(input,callback,origin) {
             res = 'That\'s me 🐧! find out more at http://kipthis.com'; 
             break;             
     
-        case textSimilar(input,'lame') > 60:
+        case textSimilar(input,'lame') > 90:
         case textSimilar(input,'ugh') > 90:
         case textSimilar(input,'those suck') > 60:
             flag = 'basic';
@@ -751,9 +768,10 @@ var checkForCanned = function(input,callback,origin) {
             res = 'Sorry, which item are you interested in saving?';
             break;
 
+        case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.5 Beta (Ginger)';
+            res = 'I\'m a penguin running Kip v0.6 Cardamom';
             break;
 
         case '/':

@@ -62,6 +62,7 @@
     "natural": "^0.2.1",
     "ngeohash": "^0.6.0",
     "nightmare": "^2.0.7",
+    "node-cloud-vision-api": "^0.2.0",
     "nodemailer": "^1.4.0",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "ntwitter": "~0.5.0",
