@@ -384,6 +384,7 @@ function routeNLP(data){
 
     //sanitize msg before sending to NLP
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
+    data.flags = data.flags || {};
 
     if (data.msg){
 
