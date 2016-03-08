@@ -35,7 +35,7 @@ function emitMsg(data) {
 //This function is used for new messages/channels
 function emitBoth(data) {
   //Prevent the dreaded infinite loop
-  if (data.flags && data.flags.toCinna) return
+  if (data.flags && data.flags !== {} && data.flags.toCinna) return
   
   // console.log('\n\n\nEmitting both\n\n\n')
   
@@ -46,7 +46,7 @@ function emitBoth(data) {
     resolved: resolved
   })
   var action = data.action ? data.action : ''
-  var flags = data.flags ? data.flags : {toSupervisor: true};
+  var flags = (data.flags && data.flags !== {}) ? data.flags : {toSupervisor: true};
   // var thread = {
   //               id: data.thread.id,
   //               sequence: data.thread.sequence,
@@ -65,8 +65,8 @@ function emitBoth(data) {
   ioClient.emit('new message', {
     id: null,
     incoming: true,
-    msg: data.msg,
-    tokens: [data.msg.split()],
+    msg: (data.msg ? data.msg : ''),
+    tokens: (data.msg ? data.msg.split() : []),
     bucket: data.bucket,
     action: action,
     amazon: [],

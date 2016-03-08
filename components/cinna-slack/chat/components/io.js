@@ -517,14 +517,14 @@ function routeNLP(data){
 
 //sentence breakdown incoming from python
 function incomingAction(data){
-
+console.log('INCOMING ACTION DATA:', data)
 //------------------------supervisor stuff-----------------------------------//
       if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
                 if (data.bucket === 'response' || data.action === 'focus') {
                     return sendResponse(data)
                 } else {
                     if (data.action === 'checkout') {
-                        console.log('Mitsuio504: ',data)
+                        // console.log('Mitsuio504: ',data)
                         return outgoingResponse(data,'txt');
                     } else {
                     // console.log('Mitsuio507: ',JSON.stringify(data.amazon[0]),JSON.stringify(data.amazon[1]),JSON.stringify(data.amazon[2]))
@@ -532,11 +532,15 @@ function incomingAction(data){
                     }
                 }
              }
-    if (data.flags && data.flags.toSupervisor) {
+    // if (data.flags && data.flags.toSupervisor) {
+        // console.log('GETTING HEREEEEE: ',data)
+        // data.flags = {};
+        data.flags.toSupervisor = true;
         history.saveHistory(data,false,function(res){
             supervisor.emit(res, true)
         }); 
-    }
+        delete data.flags.toSupervisor
+    // }
 //---------------------------------------------------------------------------//        
 
 
@@ -609,8 +613,9 @@ function searchBucket(data){
             }
             break;
         case 'focus':
+            console.log('iojs615: DATA: ',data)
           //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flags && data.flags.recalled) {
+            if (data.flags && (data.flags.recalled)) {
                     search.searchFocus(data);
             }
             //-----------------------------------------------------------------//

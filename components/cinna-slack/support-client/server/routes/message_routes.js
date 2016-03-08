@@ -14,7 +14,7 @@ module.exports = function(router) {
       resolved: false
     }, function(err, data) {
       if (err) {
-        console.log(err);
+        console.log('huhhhhhh',err);
         return res.status(500).json({
           msg: 'internal server error'
         });
@@ -78,7 +78,7 @@ module.exports = function(router) {
       'msg': req.body.msg
     }, function(err, data) {
       if (err) {
-        console.log(err);
+        console.log('huhhh2',err);
         return res.status(500).json({
           msg: 'internal server error'
         });
@@ -200,13 +200,13 @@ module.exports = function(router) {
    //fetch processed message
   router.post('/urlshorten', function(req, res) {
     // var url = new URL('http://kipbubble.com/product/'+req.body.url+'&format=txt')
-    // console.log('messageroutes 201: req', querystring.escape('http://kipbubble.com/product/'+req.body.url)+'&format=txt')
+    console.log('messageroutes 201: req', req.body)
     request({
       method: 'GET',
       url: 'https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl=http://kipbubble.com/product/'+req.body.url+'&format=txt',
       }, function(e, r, b) {
       if (e) {
-        console.log('message_routes/urlshorten: ',err)
+        console.log('message_routes/urlshorten: ',e,b,r)
         res.send(e)
       } else {
         res.json(r);

@@ -919,6 +919,7 @@ var searchModify = function(data,flag){
 }
 
 var searchFocus = function(data) {
+                        console.log('SEARCHKS 922 lol: ',data)
 
     if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
         if(data.recallHistory && data.recallHistory.amazon){
