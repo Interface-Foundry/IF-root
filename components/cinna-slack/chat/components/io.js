@@ -129,18 +129,6 @@ function loadSlackUsers(users){
 
                 //* * * * send welcome message
                 //get list of users in team
-
-                // request('https://slack.com/api/users.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
-                //     if(err){
-                //       console.log('requesting users.list error: ',err);
-                      
-                //     }
-                //     else {
-                //       console.log('USERS.LIST ',body);
-                //       body = JSON.parse(body);
-                //     }
-                // });
-
                 request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
                   if(err){
                     console.log('requesting new team user list error: ',err);
@@ -167,7 +155,11 @@ function loadSlackUsers(users){
                                     sendTxtResponse(hello,res);
                                 });
                             }
-                            callback();
+                            //delay callback due to high volume flooding of slack API
+                            setTimeout(function(){ 
+                                callback(); 
+                            }, 20);
+                            
                         }, function done(){
                             console.log('finished sending out welcome messages to new team');
                         });
@@ -239,7 +231,8 @@ function loadSlackUsers(users){
 
                 //data type == 'file_shared'
                 
-                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){ //settings.name = kip's slack username
+                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
+
                     //someone sent an image to Kip
                     if (data.subtype && data.subtype  == 'file_share'){
                         if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'){
@@ -386,6 +379,10 @@ function preProcess(data){
 
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
+
+        console.log('CANNED RES ',res);
+        console.log('CANNED FLAG ',flag);
+        console.log('CANNED QUERY ',query);
         //found canned response
         if(flag){
             data.client_res = [];
@@ -394,6 +391,9 @@ function preProcess(data){
                     //send message
                     data.client_res = [];
                     data.client_res.push(res);
+                    console.log('CANNED RES ',res);
+                    console.log('CANNED FLAG ',flag);
+                    console.log('CANNED QUERY ',query);
                     cannedBanter(data);
                     break;
                 case 'search.initial':
@@ -564,19 +564,19 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
+
 //------------------------supervisor stuff-----------------------------------//
       if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
-                if (data.bucket === 'response') {
-                    return sendResponse(data)
-                } else {
-                    return outgoingResponse(data,'stitch','amazon');
-                }
-             }
+            if (data.bucket === 'response') {
+                return sendResponse(data)
+            } else {
+                return outgoingResponse(data,'stitch','amazon');
+            }
+         }
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
     }); 
 //---------------------------------------------------------------------------//        
-
 
     
     //sort context bucket (search vs. banter vs. purchase)
@@ -603,7 +603,7 @@ function searchBucket(data){
 
     //* * * * typing event
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
-        if (data.source.origin == 'slack'){
+        if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].postTyping(data.source.channel);
         }
     }
@@ -631,6 +631,15 @@ function searchBucket(data){
             break;
         case 'modify':
         case 'modified': //because the nlp json is wack
+
+            //fix NLP bug
+            if (data.dataModify && data.dataModify.val && Array.isArray(data.dataModify.val)){
+                if (data.dataModify.val[0] == 'cheeper' || data.dataModify.val[0] == 'cheper' || data.dataModify.val[0] == 'chiper' || data.dataModify.val[0] == 'chaper' || data.dataModify.val[0] == 'chaeper'){
+                    data.dataModify.type = 'price';
+                    data.dataModify.param = 'less';                     
+                }
+            }
+
             //----supervisor: flag to skip history.recallHistory step below ---//
             if (data.flags && data.flags.recalled) { 
                  search.searchModify(data);
@@ -767,6 +776,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
 
                         }else if (data.source.origin == 'socket.io'){
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                            data.client_res.push(urlArr[count]);
                         }
 
                         count++;                           
@@ -818,13 +828,13 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
     }
 
     else if (action == 'txt'){  
-        sendResponse(data);
         banter.getCinnaResponse(data,function(res){
             if(res && res !== 'null'){
-                data.client_res = [];
-                data.client_res.push(res);
-                sendResponse(data);
+                // data.client_res = [];
+                // data.client_res.push(res);
+                data.client_res.unshift(res);
             }
+            sendResponse(data);
         });
     }
     //no cinna response check
@@ -1097,12 +1107,28 @@ function saveToCart(data){
                 }
                 callback();
             }, function done(){
-                purchase.outputCart(data,messageHistory[data.source.id],function(res){ 
-                    processData.urlShorten(res, function(res2){
-                        res.client_res = [];
-                        res.client_res.push(res2);
-                        outgoingResponse(res,'txt');
-                    });
+                purchase.outputCart(data,messageHistory[data.source.id],function(res,err){ 
+                    if(err){
+                        sendTxtResponse(data,err);
+
+                        //send email about this issue
+                        var mailOptions = {
+                            to: 'Kip Server <hello@kipthis.com>',
+                            from: 'Kip save tp cart broke <server@kipthis.com>',
+                            subject: 'Kip save tp cart broke',
+                            text: 'Fix this ok thx'
+                        };
+                        mailerTransport.sendMail(mailOptions, function(err) {
+                            if (err) console.log(err);
+                        });
+                    }else {
+                        processData.urlShorten(res, function(res2){
+                            res.client_res = [];
+                            res.client_res.push('<'+res2.trim()+'|» View Cart>');
+                            outgoingResponse(res,'txt');
+                        });                        
+                    }
+
                 });
             });            
         }
