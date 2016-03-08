@@ -24,7 +24,7 @@ app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
 CHAT_WIDTH = 400
-CHAT_HEIGHT = 166
+CHAT_HEIGHT = 175
 # MOBILE_WIDTH = 0 # TODO
 # MOBILE_HEIGHT = 800 # TODO
 
@@ -143,11 +143,17 @@ def index():
         for z in im[u'name']:  
 
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-
+            countLines = 0
             for line in textwrap.wrap(z, width=30):
-                draw.text((x, last_y), line, font=font2, fill="#2d70c1")
-                last_y += font2.getsize(line)[1]
-                last_y = last_y + 2
+                countLines += 1
+                if countLines < 4:
+                    filler = ''
+                    if countLines == 3:
+                        filler = '...'
+                    draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
+                    last_y += font2.getsize(line)[1]
+                    last_y = last_y + 2
+                
                 # last_y = y
             # y += font.getsize(line)[1]
             # last_y = y      

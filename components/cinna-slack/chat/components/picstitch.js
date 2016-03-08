@@ -143,9 +143,9 @@ var stitchResults = function(data,source,callback) {
                       if (attribs.Year){
                           cString.push("Year: " + attribs.Year[0]);
                       }
-                      if (attribs.Model){
-                          cString.push(truncate("Model: " + attribs.Model[0]));
-                      }
+                      // if (attribs.Model){
+                      //     cString.push(truncate("Model: " + attribs.Model[0]));
+                      // }
 
                       if (attribs.Platform){
                           cString.push(truncate("Platform: " + attribs.Platform[0]));
@@ -178,7 +178,7 @@ var stitchResults = function(data,source,callback) {
                           cString.push(truncate("Type: " + attribs.MediaType[0]));
                       }
                       if (attribs.Color){
-                          cString.push(truncate("Color: " + attribs.Color[0]));
+                          cString.push(truncate("Color: " + attribs.Color[0],21));
                       }
 
                       if (attribs.Quantity){
@@ -228,7 +228,8 @@ var stitchResults = function(data,source,callback) {
 
                 }
                 else {
-                    console.log('IMAGE MISSING!',data.amazon[i]);
+                    console.log('ERROR: IMAGE MISSING in Amazon result: ',data.amazon);
+                    callback();
                 }
                 
             }, function done(){
@@ -255,9 +256,12 @@ var stitchResults = function(data,source,callback) {
 /////////// tools /////////////
 
 //trim a string to char #
-function truncate(string){
-   if (string.length > 80)
-      return string.substring(0,80)+'...';
+function truncate(string,count){
+    if(!count){
+      count = 94;
+    }
+   if (string.length > count)
+      return string.substring(0,count)+'...';
    else
       return string;
 };

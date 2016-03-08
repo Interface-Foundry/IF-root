@@ -22,6 +22,7 @@ var mailerTransport = require('../../../IF_mail/IF_mail.js');
 //load mongoose models
 var db = require('db');
 var Message = db.Message;
+var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
 
 var slackUsers = {};
@@ -128,6 +129,18 @@ function loadSlackUsers(users){
 
                 //* * * * send welcome message
                 //get list of users in team
+
+                // request('https://slack.com/api/users.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
+                //     if(err){
+                //       console.log('requesting users.list error: ',err);
+                      
+                //     }
+                //     else {
+                //       console.log('USERS.LIST ',body);
+                //       body = JSON.parse(body);
+                //     }
+                // });
+
                 request('https://slack.com/api/im.list?token='+user.bot.bot_access_token+'', function(err, res, body) {
                   if(err){
                     console.log('requesting new team user list error: ',err);
@@ -140,6 +153,7 @@ function loadSlackUsers(users){
                         async.eachSeries(body.ims, function(member, callback) {
 
                             if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
+                                console.log('sending welcome to: ',member.id);
                                 var hello = {
                                     msg: 'welcome'
                                 }
@@ -200,7 +214,6 @@ function loadSlackUsers(users){
                 //     slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
                 // }
 
-                
 
                 // // init with auth
                 // vision.init({auth: 'AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk'})
@@ -227,64 +240,24 @@ function loadSlackUsers(users){
                 //data type == 'file_shared'
                 
                 if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){ //settings.name = kip's slack username
-
-                    //console.log(data);
-
+                    //someone sent an image to Kip
                     if (data.subtype && data.subtype  == 'file_share'){
                         if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'){
-
-                            // var slack = new Slack(apiToken);
-
-                            // slack.api("users.list", function(err, response) {
-                            //   console.log(response);
-                            // });
-
-                            // var authToken = 'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG';
-
-                            // request('https://files.slack.com/files-pri/T0H72FMNK-F0Q6Y5Z8A/citrus.png?token='+authToken+'', function(err, res, body) {
-
-                            // request('https://slack.com/api/files.info?token='+authToken+'', function(err, res, body) {
-                            //   if(err){
-                            //     console.log('requesting new team user list error: ',err);
-                            //   }
-                            //   else {
-                            //     body = JSON.parse(body);
-
-                            //     if (body.ok && body.ims.length > 0){
-                            //         //loop through members, commence welcome!
-                            //         async.eachSeries(body.ims, function(member, callback) {
-
-                            //             if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
-                            //                 var hello = {
-                            //                     msg: 'welcome'
-                            //                 }
-                            //                 hello.source = {
-                            //                     'origin':'slack',
-                            //                     'channel':member.id,
-                            //                     'org':user.team_id,
-                            //                     'id':user.team_id + "_" + member.id //for retrieving chat history in node memory
-                            //                 }
-                            //                 banter.welcomeMessage(hello,function(res){
-                            //                     sendTxtResponse(hello,res);
-                            //                 });
-                            //             }
-                            //             callback();
-                            //         }, function done(){
-                            //             console.log('finished sending out welcome messages to new team');
-                            //         });
-                            //     }
-                            //     else {
-                            //         console.log('error: something happened, a ghost slack team emerged');
-                            //     }
-                            //   }
-                            // });
-
+                            console.log('Warning: Slack connection closed: ',res);
+                            var mailOptions = {
+                                to: 'Kip Server <hello@kipthis.com>',
+                                from: 'User tried sending image to Kip <server@kipthis.com>',
+                                subject: 'User tried sending image to Kip',
+                                text: 'User tried sending image to Kip'
+                            };
+                            mailerTransport.sendMail(mailOptions, function(err) {
+                                if (err) console.log(err);
+                            });
                         }
                     }
-    
-
+                     
                     //public channel
-                    if (data.channel && data.channel.charAt(0) == 'C'){
+                    if (data.channel && data.channel.charAt(0) == 'C' || data.channel.charAt(0) == 'G'){
                         //if contains bot user id, i.e. if bot is @ mentioned in channel (example user id: U0H6YHBNZ) 
                         if (data.text && data.text.indexOf(slackUsers[user.team_id].botId) > -1){ 
                             data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
@@ -301,7 +274,7 @@ function loadSlackUsers(users){
                         incomingSlack(data);
                     }    
                     else {
-                        console.log('error: not handling slack channel type hmm',data.channel);
+                        console.log('error: not handling slack channel type ',data.channel);
                     }
                 }
                 function incomingSlack(data){
@@ -728,7 +701,7 @@ function purchaseBucket(data){
             removeAllCart(data);
             break;
         case 'list':
-            listCart(data);
+            viewCart(data);
             break;
         case 'checkout':
             saveToCart(data);
@@ -1139,49 +1112,72 @@ function saveToCart(data){
 
 function viewCart(data){
     db.Metrics.log('cart.view', data);
+
+    sendTxtResponse(data,'View cart is coming soon! :)');
+
+    var mailOptions = {
+        to: 'Kip Server <hello@kipthis.com>',
+        from: 'Kip View Cart Fired! <server@kipthis.com>',
+        subject: 'woah ok',
+        text: 'Fix this ok thx'
+    };
+    mailerTransport.sendMail(mailOptions, function(err) {
+        if (err) console.log(err);
+    });
+
 }
 
 //get user history
 function recallHistory(data,callback,steps){
+
+    console.log(steps);
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 3');
     }
 
-    //if # of steps to recall
-    if (!steps){
-        var steps = 1;
+    if(!messageHistory[data.source.id]){
+        callback();
     }
-    //get by bucket type
-    switch (data.bucket) {
-        case 'search':
-            //console.log(data);
+    else {
 
-            switch(data.action){
-                //if action is focus, find lastest 'initial' item
-                case 'focus':
-                    var result = messageHistory[data.source.id].search.filter(function( obj ) {
-                      return obj.action == 'initial';
-                    });
-                    var arrLength = result.length - steps;
-                    callback(result[arrLength]);
-                    break;
+        //if # of steps to recall
+        if (!steps){
+            var steps = 1;
+        }
+        //get by bucket type
+        switch (data.bucket) {
+            case 'search':
+                //console.log(data);
 
-                default:
-                    var arrLength = messageHistory[data.source.id].search.length - steps; //# of steps to reverse. default is 1
-                    callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
-                    break;
-            }
+                switch(data.action){
+                    //if action is focus, find lastest 'initial' item
+                    case 'focus':
+                        var result = messageHistory[data.source.id].search.filter(function( obj ) {
+                          return obj.action == 'initial';
+                        });
+                        var arrLength = result.length - steps;
+                        callback(result[arrLength]);
+                        break;
 
-            break;
-        case 'banter':
-            var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.id].banter[arrLength]); //get last item in arr
-            break;
-        case 'purchase':
-            var arrLength = messageHistory[data.source.id].purchase.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.id].purchase[arrLength]); //get last item in arr
-        default:
+                    default:
+                        var arrLength = messageHistory[data.source.id].search.length - steps; //# of steps to reverse. default is 1
+                        callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
+                        break;
+                }
+
+                break;
+            case 'banter':
+                var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1
+                callback(messageHistory[data.source.id].banter[arrLength]); //get last item in arr
+                break;
+            case 'purchase':
+                var arrLength = messageHistory[data.source.id].purchase.length - steps; //# of steps to reverse. default is 1
+                callback(messageHistory[data.source.id].purchase[arrLength]); //get last item in arr
+            default:
+        }    
+            
     }
+
 
 }
 
