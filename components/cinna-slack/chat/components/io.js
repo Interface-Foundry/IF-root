@@ -520,9 +520,11 @@ function incomingAction(data){
                     }
                 }
              }
-    history.saveHistory(data,false,function(res){
-        supervisor.emit(res, true)
-    }); 
+    if (data.flags && data.flags.toSupervisor) {
+        history.saveHistory(data,false,function(res){
+            supervisor.emit(res, true)
+        }); 
+    }
 //---------------------------------------------------------------------------//        
 
 
