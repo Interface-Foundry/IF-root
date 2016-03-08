@@ -24,7 +24,7 @@ app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
 CHAT_WIDTH = 400
-CHAT_HEIGHT = 500
+CHAT_HEIGHT = 175
 # MOBILE_WIDTH = 0 # TODO
 # MOBILE_HEIGHT = 800 # TODO
 
@@ -83,25 +83,21 @@ def index():
         x = PIC_COORDS[i][u'x']
         y = PIC_COORDS[i][u'y']
         img.paste(im, (x, y))
-        #add numbers
-        x = CHOICE_COORDS[i][u'x']
-        y = CHOICE_COORDS[i][u'y']
-        img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
+        # #add numbers
+        # x = CHOICE_COORDS[i][u'x']
+        # y = CHOICE_COORDS[i][u'y']
+        # img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
     #add names, text wrapped
-    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 14)
+    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 15)
+    font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
+
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x']
         y = TEXTBOX_COORDS[i][u'y']
         draw = ImageDraw.Draw(img)
 
-        #add product names
-        for line in textwrap.wrap(im[u'name'], width=31):
-            draw.text((x, y), line, font=font, fill="#2d70c1")
-            y += font.getsize(line)[1]
-            last_y = y
-
-        last_y = last_y + 10
+        last_y = 10
 
         #add price
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
@@ -138,7 +134,38 @@ def index():
             img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
             #add review count
             if 'reviewCount' in im[u'reviews']:  
-                draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font,fill="#2d70c1")
+                draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font2,fill="#2d70c1")
+
+            last_y = last_y + 20
+
+        last_y = last_y + 5
+
+        for z in im[u'name']:  
+
+            # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
+            countLines = 0
+            for line in textwrap.wrap(z, width=30):
+                countLines += 1
+                if countLines < 4:
+                    filler = ''
+                    if countLines == 3:
+                        filler = '...'
+                    draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
+                    last_y += font2.getsize(line)[1]
+                    last_y = last_y + 2
+                
+                # last_y = y
+            # y += font.getsize(line)[1]
+            # last_y = y      
+            
+
+        # #add product names
+        # for line in textwrap.wrap(im[u'name'], width=30):
+        #     draw.text((x, last_y), line, font=font2, fill="#2d70c1")
+        #     y += font.getsize(line)[1]
+        #     last_y = y
+
+        # last_y = last_y + 10
 
     cStringImg = cStringIO.StringIO()
     img.save(cStringImg, 'PNG', quality=90)

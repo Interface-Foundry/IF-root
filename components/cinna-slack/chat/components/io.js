@@ -1,7 +1,10 @@
 var async = require('async');
 var request = require('request');
+const vision = require('node-cloud-vision-api')
+
 
 var Bot = require('../slackbots_modified'); //load slack api
+// var Slack = require('slack-node');
 
 var banter = require("./banter.js");
 var history = require("./history.js");
@@ -19,6 +22,7 @@ var mailerTransport = require('../../../IF_mail/IF_mail.js');
 //load mongoose models
 var db = require('db');
 var Message = db.Message;
+var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
 
 var slackUsers = {};
@@ -47,7 +51,7 @@ var initSlackUsers = function(env){
     }else if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0HLZP09L',
-            bot: { 
+            bot: { 
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
@@ -56,7 +60,7 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
-    } else if (env === 'development') {
+    }else if (env === 'development') {
       console.log('oh hey developer, i hope you are having a good day')
     }
     else {
@@ -79,7 +83,7 @@ var initSlackUsers = function(env){
             else {
                 loadSlackUsers(users);
             }
-        });
+        });        
     }
 }
 
@@ -95,7 +99,7 @@ var newSlack = function(){
             console.log('DEBUG: new slack team added with this data: ',users);
             res.send('slack user added');
         }
-    });
+    });   
 }
 
 //load slack users into memory, adds them as slack bots
@@ -139,6 +143,7 @@ function loadSlackUsers(users){
                         async.eachSeries(body.ims, function(member, callback) {
 
                             if (member.is_user_deleted == false && member.is_im == true && member.user !== 'USLACKBOT'){
+                                console.log('sending welcome to: ',member.id);
                                 var hello = {
                                     msg: 'welcome'
                                 }
@@ -152,7 +157,11 @@ function loadSlackUsers(users){
                                     sendTxtResponse(hello,res);
                                 });
                             }
-                            callback();
+                            //delay callback due to high volume flooding of slack API
+                            setTimeout(function(){ 
+                                callback(); 
+                            }, 20);
+                            
                         }, function done(){
                             console.log('finished sending out welcome messages to new team');
                         });
@@ -162,7 +171,7 @@ function loadSlackUsers(users){
                     }
                   }
                 });
-
+                
                 //* * * * * POST PROCESSING * * * * * * //
                 //find all bots not added to our system yet
                 Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
@@ -199,11 +208,53 @@ function loadSlackUsers(users){
                 //     slackUsers[user.team_id].botId = data.user; //get bot user id for slack team
                 // }
 
-                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true){ //settings.name = kip's slack username
+
+                // // init with auth
+                // vision.init({auth: 'AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk'})
+
+                // // construct parameters
+                // const req = new vision.Request({
+                //   image: new vision.Image('./phone.jpg'),
+                //   features: [
+                //     new vision.Feature('FACE_DETECTION', 1),
+                //     new vision.Feature('LOGO_DETECTION', 2),
+                //     new vision.Feature('TEXT_DETECTION', 4),
+                //     new vision.Feature('LABEL_DETECTION', 20),
+                //   ]
+                // })
+
+                // // send single request
+                // vision.annotate(req).then((res) => {
+                //   // handling response
+                //   console.log(JSON.stringify(res.responses))
+                // }, (e) => {
+                //   console.log('Error: ', e)
+                // })
+
+                //data type == 'file_shared'
+                
+                if (data.type == 'message' && data.username !== settings.name && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
+
+                    //someone sent an image to Kip
+                    if (data.subtype && data.subtype  == 'file_share'){
+                        if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'){
+                            console.log('Warning: Slack connection closed: ',res);
+                            var mailOptions = {
+                                to: 'Kip Server <hello@kipthis.com>',
+                                from: 'User tried sending image to Kip <server@kipthis.com>',
+                                subject: 'User tried sending image to Kip',
+                                text: 'User tried sending image to Kip'
+                            };
+                            mailerTransport.sendMail(mailOptions, function(err) {
+                                if (err) console.log(err);
+                            });
+                        }
+                    }
+                     
                     //public channel
-                    if (data.channel && data.channel.charAt(0) == 'C'){
-                        //if contains bot user id, i.e. if bot is @ mentioned in channel (example user id: U0H6YHBNZ)
-                        if (data.text && data.text.indexOf(slackUsers[user.team_id].botId) > -1){
+                    if (data.channel && data.channel.charAt(0) == 'C' || data.channel.charAt(0) == 'G'){
+                        //if contains bot user id, i.e. if bot is @ mentioned in channel (example user id: U0H6YHBNZ) 
+                        if (data.text && data.text.indexOf(slackUsers[user.team_id].botId) > -1){ 
                             data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
                             if (data.text.charAt(0) == ':'){
                                 data.text = data.text.substr(1); //remove : from beginning of string
@@ -216,9 +267,9 @@ function loadSlackUsers(users){
                     else if (data.channel && data.channel.charAt(0) == 'D'){
                         data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
                         incomingSlack(data);
-                    }
+                    }    
                     else {
-                        console.log('error: not handling slack channel type hmm',data.channel);
+                        console.log('error: not handling slack channel type ',data.channel);
                     }
                 }
                 function incomingSlack(data){
@@ -233,7 +284,7 @@ function loadSlackUsers(users){
                             'msg':data.text
                         }
                         preProcess(newSl);
-                    }
+                    }                    
                 }
             });
 
@@ -283,7 +334,7 @@ var loadSocketIO = function(server){
             sendTxtResponse(hello,res);
         });
        // * * * * * * * * * * //
-
+        
         socket.on("msgToClient", function(data) {
             data.source = {
                 'origin':'socket.io',
@@ -302,7 +353,7 @@ var loadSocketIO = function(server){
             console.log('\n\n\nReceived message from supervisor: ',data.flags,'\n\n\n')
             incomingAction(data);
         })
-    });
+    }); 
 }
 
 //- - - - - - //
@@ -330,6 +381,7 @@ function preProcess(data){
 
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
+
         //found canned response
         if(flag){
             data.client_res = [];
@@ -383,7 +435,7 @@ function preProcess(data){
 function routeNLP(data){
 
     //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
     data.flags = data.flags || {};
 
     if (data.msg){
@@ -395,18 +447,19 @@ function routeNLP(data){
         });
 
         function continueNLP(){
+
             nlp.parse(data, function(e, res) {
                 if (e){
-                  console.log('NLP error ',e)
+                  console.log('NLP error ',e);
                   // Route to supervisor
                   data.flags.toSupervisor = true;
-                  incomingAction(data)
-                } else {
+                  incomingAction(data);
+                } 
+                else {
                     console.log('NLP RES ',res);
 
                     if (res.supervisor) {
                       data.flags.toSupervisor = true;
-                      return incomingAction(data);
                     }
 
                     if(res.execute && res.execute.length > 0){
@@ -442,7 +495,7 @@ function routeNLP(data){
                     else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
                         //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
 
-                        //looking for modifier search
+                        //looking for modifier search 
                         if (res.tokens && res.tokens[0].indexOf('but') > -1){
                             var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
                             modDetail = modDetail.replace('but','').trim();
@@ -504,8 +557,8 @@ function routeNLP(data){
 
                     }
                 }
-            })
-        }
+            }) 
+        }       
     }
     else {
         //we get this if we killed the whole user request (i.e. they sent a URL)
@@ -518,21 +571,21 @@ function routeNLP(data){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
+
 //------------------------supervisor stuff-----------------------------------//
       if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
-                if (data.bucket === 'response') {
-                    return sendResponse(data)
-                } else {
-                    return outgoingResponse(data,'stitch','amazon');
-                }
-             }
+            if (data.bucket === 'response') {
+                return sendResponse(data)
+            } else {
+                return outgoingResponse(data,'stitch','amazon');
+            }
+         }
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
-    });
-//---------------------------------------------------------------------------//
+    }); 
+//---------------------------------------------------------------------------//        
 
-
-
+    
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
         case 'search':
@@ -557,7 +610,7 @@ function searchBucket(data){
 
     //* * * * typing event
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
-        if (data.source.origin == 'slack'){
+        if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].postTyping(data.source.channel);
         }
     }
@@ -569,9 +622,9 @@ function searchBucket(data){
             break;
         case 'similar':
             //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flags && data.flags.recalled) {
+            if (data.flags && data.flags.recalled) { 
                  search.searchSimilar(data);
-            }
+            } 
             //-----------------------------------------------------------------//
             else {
                 history.recallHistory(data, function(res){
@@ -581,14 +634,23 @@ function searchBucket(data){
                 search.searchSimilar(data);
                 });
             }
-
+     
             break;
         case 'modify':
         case 'modified': //because the nlp json is wack
-            //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flags && data.flags.recalled) {
-                 search.searchModify(data);
+
+            //fix NLP bug
+            if (data.dataModify && data.dataModify.val && Array.isArray(data.dataModify.val)){
+                if (data.dataModify.val[0] == 'cheeper' || data.dataModify.val[0] == 'cheper' || data.dataModify.val[0] == 'chiper' || data.dataModify.val[0] == 'chaper' || data.dataModify.val[0] == 'chaeper'){
+                    data.dataModify.type = 'price';
+                    data.dataModify.param = 'less';                     
+                }
             }
+
+            //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flags && data.flags.recalled) { 
+                 search.searchModify(data);
+            } 
             //-----------------------------------------------------------------//
             else {
                 history.recallHistory(data, function(res){
@@ -601,9 +663,9 @@ function searchBucket(data){
             break;
         case 'focus':
           //----supervisor: flag to skip history.recallHistory step below ---//
-            if (data.flags && data.flags.recalled) {
+            if (data.flags && data.flags.recalled) { 
                     search.searchFocus(data);
-            }
+            } 
             //-----------------------------------------------------------------//
             else {
             history.recallHistory(data, function(res){
@@ -655,7 +717,7 @@ function purchaseBucket(data){
             removeAllCart(data);
             break;
         case 'list':
-            listCart(data);
+            viewCart(data);
             break;
         case 'checkout':
             saveToCart(data);
@@ -687,53 +749,99 @@ var sendTxtResponse = function(data,msg){
 }
 
 //Constructing reply to user
-var outgoingResponse = function(data,action,source){ //what we're replying to user with
+var outgoingResponse = function(data,action,source){ //what we're replying to user with 
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
     if (action == 'stitch'){
-        picstitch.stitchResults(data,source,function(url){
+        picstitch.stitchResults(data,source,function(urlArr){
             //sending out stitched image response
             data.client_res = [];
             data.urlShorten = [];
-            data.client_res.push(url); //add image results to response
 
-            //send extra item URLs with image responses
-            if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
-                processData.urlShorten(data,function(res){
-                    var count = 0;
-                    //put all result URLs into arr
-                    async.eachSeries(res, function(i, callback) {
-                        data.urlShorten.push(i);//save shortened URLs
-                        processData.getNumEmoji(data,count+1,function(emoji){
-                            res[count] = res[count].trim();
-                            if (data.source.origin == 'slack'){
-                                data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-                            }else if (data.source.origin == 'socket.io'){
-                                data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
-                            }
+            console.log('URLARTT ',urlArr);
 
-                            count++;
-                            callback();
-                        });
-                    }, function done(){
-                        checkOutgoingBanter(data);
+            processData.urlShorten(data,function(res){
+                var count = 0;
+                //put all result URLs into arr
+                async.eachSeries(res, function(i, callback) {
+                    data.urlShorten.push(i);//save shortened URLs
+
+                    processData.getNumEmoji(data,count+1,function(emoji){
+                        res[count] = res[count].trim(); 
+                        if (data.source.origin == 'slack'){
+
+                            var attachObj = {};
+
+                            attachObj.image_url = urlArr[count];
+                            attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            attachObj.title_link = res[count];
+                            attachObj.color = "#45a5f4";
+                            attachObj.fallback = 'Here are some options you might like';
+                            data.client_res.push(attachObj);
+                            
+                            // '<'++' | ' + +'>';
+
+                        }else if (data.source.origin == 'socket.io'){
+                            data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                            data.client_res.push(urlArr[count]);
+                        }
+
+                        count++;                           
+                        callback();
                     });
+
+
+                }, function done(){
+                    checkOutgoingBanter(data);
                 });
-            }
-            else {
-                checkOutgoingBanter(data);
-            }
+            });
+
+
+            // function compileResults(){
+
+            // }
+
+
+
+            // data.client_res.push(url); //add image results to response
+
+            // //send extra item URLs with image responses
+            // if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
+            //     processData.urlShorten(data,function(res){
+            //         var count = 0;
+            //         //put all result URLs into arr
+            //         async.eachSeries(res, function(i, callback) {
+            //             data.urlShorten.push(i);//save shortened URLs
+            //             processData.getNumEmoji(data,count+1,function(emoji){
+            //                 res[count] = res[count].trim(); 
+            //                 if (data.source.origin == 'slack'){
+            //                     data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
+            //                 }else if (data.source.origin == 'socket.io'){
+            //                     data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+            //                 }
+
+            //                 count++;                           
+            //                 callback();
+            //             });
+            //         }, function done(){
+            //             checkOutgoingBanter(data);
+            //         });
+            //     });
+            // }
+            // else {
+            //     checkOutgoingBanter(data);
+            // }
         });
     }
 
-    else if (action == 'txt'){
-        sendResponse(data);
+    else if (action == 'txt'){  
         banter.getCinnaResponse(data,function(res){
             if(res && res !== 'null'){
-                data.client_res = [];
-                data.client_res.push(res);
-                sendResponse(data);
+                // data.client_res = [];
+                // data.client_res.push(res);
+                data.client_res.unshift(res);
             }
+            sendResponse(data);
         });
     }
     //no cinna response check
@@ -742,7 +850,7 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
     }
 }
 
-//check for extra banter to send with message.
+//check for extra banter to send with message. 
 var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
@@ -755,20 +863,35 @@ var checkOutgoingBanter = function(data){
              console.log('mitsu7', res)
             sendResponse(data);
         }
-    });
+    });            
 }
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data){
 
+    //SAVE OUTGOING MESSAGES TO MONGO
+    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
+        console.log('SAVING OUTGOING RESPONSE');
+        //history.newMessage(data, function(newMsg){
+        history.saveHistory(data,false,function(res){
+            //whatever
+        }); //saving outgoing message
+        //});        
+    }
+    else {
+        console.log('error: cant save outgoing response, missing bucket or action');
+    }
+    /// / / / / / / / / / / 
+
+
     if (data.source.channel && data.source.origin == 'socket.io'){
-        //check if socket user exists
+        //check if socket user exists        
         if (io.sockets.connected[data.source.channel]){
             // console.log('io625: getting here')
             //loop through responses in order
-            for (var i = 0; i < data.client_res.length; i++) {
+            for (var i = 0; i < data.client_res.length; i++) { 
                 io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
-            }
+            }            
         }
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
@@ -787,51 +910,106 @@ var sendResponse = function(data){
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
-        }
+        }   
         //check if slackuser exists
         if (slackUsers[data.source.org]){
 
             if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
 
+                console.log('ZZ ',data.client_res);
+
                 var message = data.client_res[0]; //use first item in client_res array as text message
-                var attachments = [
-                    {
-                        "color": "#45a5f4"
-                    },
-                    {
-                        "color": "#45a5f4",
-                        "fields":[]
-                    }
-                ];
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
-                attachThis.shift();
+                attachThis.shift(); 
 
-                attachments[0].image_url = attachThis[0]; //add image search results to attachment
-                attachments[0].fallback = 'Here are some options you might like'; //fallback for search result
+                attachThis = JSON.stringify(attachThis);
 
-                attachThis.shift(); //remove image from array
-
-                attachments[1].fallback = 'Here are some options you might like';
-
-                //put in attachment fields
-                async.eachSeries(attachThis, function(attach, callback) {
-                    var field = {
-                        "value": attach,
-                        "short":false
-                    }
-                    attachments[1].fields.push(field);
+                slackUsers[data.source.org].postAttachment(data.source.channel, message, attachThis, params).then(function(res) {
                     callback();
-
-                }, function done(){
-
-                    attachments = JSON.stringify(attachments);
-
-                    slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
-                        callback();
-                    });
                 });
+
+                // //put in attachment fields
+                // async.eachSeries(attachThis, function(attach, callback) {
+
+                //     console.log('title ',attach.title);
+                //     console.log('url ',attach.image_url);
+
+                //     var objAttach = {
+                //         fallback:'',
+                //         title: attach.title,
+                //         title_link: attach.title_link,
+
+                //     }
+
+                //     attachments.push();
+                //     {
+                //         "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //         "title": ":one: Product Name",
+                //         "title_link": "https://datadog.com/path/to/event",
+                //         "image_url": "http://kipthis.com/img/kip-icon.png",
+                //         "color": "#764FA5"
+                //     },
+                //     // var field = {
+                //     //     "value": attach,
+                //     //     "short":false
+                //     // }
+                //     // attachments[1].fields.push(field);
+                //     // callback();
+
+                // }, function done(){
+
+                //     attachments = JSON.stringify(attachments);
+
+                //     slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
+                //         callback();
+                //     });
+                // });
+
+
+
+                // var attachments = [
+                //     // {
+                //     //     "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //     //     "title": ":one: Product Name",
+                //     //     "title_link": "https://datadog.com/path/to/event",
+                //     //     "image_url": "http://kipthis.com/img/kip-icon.png",
+                //     //     "color": "#764FA5"
+                //     // },
+                //     // {
+                //     //     "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //     //     "title": ":two: Product Name",
+                //     //     "title_link": "https://datadog.com/path/to/event",
+                //     //     "image_url": "http://kipthis.com/img/kip-icon.png",
+                //     //     "color": "#764FA5"
+                //     // },
+                //     // {
+                //     //     "fallback": "Network traffic (kb/s): How does this look? @slack-ops - Sent by Julie Dodd - https://datadog.com/path/to/event",
+                //     //     "title": ":three: Product Name",
+                //     //     "title_link": "https://datadog.com/path/to/event",
+                //     //     "image_url": "http://kipthis.com/img/kip-icon.png",
+                //     //     "color": "#764FA5"
+                //     // }
+                //     {
+                //         "color": "#45a5f4"
+                //     },
+                //     {
+                //         "color": "#45a5f4", 
+                //         "fields":[]  
+                //     }
+                // ];
+
+
+
+                // attachments[0].image_url = attachThis[0]; //add image search results to attachment 
+                // attachments[0].fallback = 'Here are some options you might like'; //fallback for search result
+
+                // attachThis.shift(); //remove image from array
+
+                // attachments[1].fallback = 'Here are some options you might like';
+
+
             }
             else if (data.action == 'focus'){
                 var attachments = [
@@ -839,15 +1017,15 @@ var sendResponse = function(data){
                         "color": "#45a5f4"
                     },
                     {
-                        "color": "#45a5f4",
-                        "fields":[]
+                        "color": "#45a5f4", 
+                        "fields":[]  
                     }
                 ];
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
-
-                attachments[0].image_url = attachThis[0]; //add image search results to attachment
+   
+                attachments[0].image_url = attachThis[0]; //add image search results to attachment 
                 attachments[0].fallback = 'More information'; //fallback for search result
 
                 attachThis.shift(); //remove image from array
@@ -870,7 +1048,7 @@ var sendResponse = function(data){
                     slackUsers[data.source.org].postAttachment(data.source.channel, message, attachments, params).then(function(res) {
                         callback();
                     });
-                });
+                });         
             }
             else {
                 //loop through responses in order
@@ -899,18 +1077,7 @@ var sendResponse = function(data){
         console.log('error: data.source.channel or source.origin missing')
     }
 
-    //SAVE OUTGOING MESSAGES TO MONGO
-    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
-        console.log('SAVING OUTGOING RESPONSE');
-        //history.newMessage(data, function(newMsg){
-        history.saveHistory(data,false,function(res){
-            //whatever
-        }); //saving outgoing message
-        //});
-    }
-    else {
-        console.log('error: cant save outgoing response, missing bucket or action');
-    }
+
 }
 
 
@@ -947,14 +1114,30 @@ function saveToCart(data){
                 }
                 callback();
             }, function done(){
-                purchase.outputCart(data,messageHistory[data.source.id],function(res){
-                    processData.urlShorten(res, function(res2){
-                        res.client_res = [];
-                        res.client_res.push(res2);
-                        outgoingResponse(res,'txt');
-                    });
+                purchase.outputCart(data,messageHistory[data.source.id],function(res,err){ 
+                    if(err){
+                        sendTxtResponse(data,err);
+
+                        //send email about this issue
+                        var mailOptions = {
+                            to: 'Kip Server <hello@kipthis.com>',
+                            from: 'Kip save tp cart broke <server@kipthis.com>',
+                            subject: 'Kip save tp cart broke',
+                            text: 'Fix this ok thx'
+                        };
+                        mailerTransport.sendMail(mailOptions, function(err) {
+                            if (err) console.log(err);
+                        });
+                    }else {
+                        processData.urlShorten(res, function(res2){
+                            res.client_res = [];
+                            res.client_res.push('<'+res2.trim()+'|» View Cart>');
+                            outgoingResponse(res,'txt');
+                        });                        
+                    }
+
                 });
-            });
+            });            
         }
 
     });
@@ -962,49 +1145,72 @@ function saveToCart(data){
 
 function viewCart(data){
     db.Metrics.log('cart.view', data);
+
+    sendTxtResponse(data,'View cart is coming soon! :)');
+
+    var mailOptions = {
+        to: 'Kip Server <hello@kipthis.com>',
+        from: 'Kip View Cart Fired! <server@kipthis.com>',
+        subject: 'woah ok',
+        text: 'Fix this ok thx'
+    };
+    mailerTransport.sendMail(mailOptions, function(err) {
+        if (err) console.log(err);
+    });
+
 }
 
 //get user history
 function recallHistory(data,callback,steps){
+
+    console.log(steps);
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 3');
     }
 
-    //if # of steps to recall
-    if (!steps){
-        var steps = 1;
+    if(!messageHistory[data.source.id]){
+        callback();
     }
-    //get by bucket type
-    switch (data.bucket) {
-        case 'search':
-            //console.log(data);
+    else {
 
-            switch(data.action){
-                //if action is focus, find lastest 'initial' item
-                case 'focus':
-                    var result = messageHistory[data.source.id].search.filter(function( obj ) {
-                      return obj.action == 'initial';
-                    });
-                    var arrLength = result.length - steps;
-                    callback(result[arrLength]);
-                    break;
+        //if # of steps to recall
+        if (!steps){
+            var steps = 1;
+        }
+        //get by bucket type
+        switch (data.bucket) {
+            case 'search':
+                //console.log(data);
 
-                default:
-                    var arrLength = messageHistory[data.source.id].search.length - steps; //# of steps to reverse. default is 1
-                    callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
-                    break;
-            }
+                switch(data.action){
+                    //if action is focus, find lastest 'initial' item
+                    case 'focus':
+                        var result = messageHistory[data.source.id].search.filter(function( obj ) {
+                          return obj.action == 'initial';
+                        });
+                        var arrLength = result.length - steps;
+                        callback(result[arrLength]);
+                        break;
 
-            break;
-        case 'banter':
-            var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.id].banter[arrLength]); //get last item in arr
-            break;
-        case 'purchase':
-            var arrLength = messageHistory[data.source.id].purchase.length - steps; //# of steps to reverse. default is 1
-            callback(messageHistory[data.source.id].purchase[arrLength]); //get last item in arr
-        default:
+                    default:
+                        var arrLength = messageHistory[data.source.id].search.length - steps; //# of steps to reverse. default is 1
+                        callback(messageHistory[data.source.id].search[arrLength]); //get last item in arr
+                        break;
+                }
+
+                break;
+            case 'banter':
+                var arrLength = messageHistory[data.source.id].banter.length - steps; //# of steps to reverse. default is 1
+                callback(messageHistory[data.source.id].banter[arrLength]); //get last item in arr
+                break;
+            case 'purchase':
+                var arrLength = messageHistory[data.source.id].purchase.length - steps; //# of steps to reverse. default is 1
+                callback(messageHistory[data.source.id].purchase[arrLength]); //get last item in arr
+            default:
+        }    
+            
     }
+
 
 }
 

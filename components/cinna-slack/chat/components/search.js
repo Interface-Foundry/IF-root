@@ -107,33 +107,33 @@ var searchAmazon = function(data, type, query, flag) {
                         else {
                             console.log('INITIAL MODOFY SEARCH FLAGGGGG: ',flag);
                             parseAmazon(productGroup,browseNodes,function(res){
-                                amazonParams.SearchIndex = res.SearchIndex;
-                                amazonParams.BrowseNode = res.BrowseNode;
-                                // var modder;
-
-                                // if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material'){
-                                //     modder = flag.type;
-                                // }
-
-
-                                if (flag.val instanceof Array){
-                                    console.log('IS ARRAY');
-                                    // if (flag.val[0].name == 'lime' || flag.val[0].name == 'Lime'){
-                                    //     flag.val[0].name = 'green';
-                                    // }
-                                    amazonParams.Keywords = flag.val[0].name; //!\!\!\!\ remove so we query by browsenode
+                                if(!res.BrowseNode){
+                                    ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
+      
                                 }else {
-                                    if (flag.val.name){
-                                        // if (flag.val.name == 'lime' || flag.val.name == 'Lime'){
-                                        //     flag.val.name = 'green';
+                                    amazonParams.SearchIndex = res.SearchIndex;
+                                    amazonParams.BrowseNode = res.BrowseNode;
+       
+                                    if (flag.val instanceof Array){
+                                        console.log('IS ARRAY');
+                                        // if (flag.val[0].name == 'lime' || flag.val[0].name == 'Lime'){
+                                        //     flag.val[0].name = 'green';
                                         // }
-                                        amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
+                                        amazonParams.Keywords = flag.val[0].name; //!\!\!\!\ remove so we query by browsenode
                                     }else {
-                                        amazonParams.Keywords = flag.val; //!\!\!\!\ remove so we query by browsenode
+                                        if (flag.val.name){
+                                            // if (flag.val.name == 'lime' || flag.val.name == 'Lime'){
+                                            //     flag.val.name = 'green';
+                                            // }
+                                            amazonParams.Keywords = flag.val.name; //!\!\!\!\ remove so we query by browsenode
+                                        }else {
+                                            amazonParams.Keywords = flag.val; //!\!\!\!\ remove so we query by browsenode
+                                        }
                                     }
+                                    console.log('KEYWORDS ',amazonParams.Keywords);
+                                    doSearch();
                                 }
-                                console.log('KEYWORDS ',amazonParams.Keywords);
-                                doSearch();
+
                             });
                         }
 
@@ -1925,7 +1925,7 @@ function traverseNodes(nodeList,findMe,callbackMM){
         }
         else {
             console.log('error: no browseNodes found');
-            ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
+            callbackMM(); 
         }                                          
     });                                  
 }

@@ -13,7 +13,7 @@ process.on('uncaughtException', function (err) {
 
 
 var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
-
+   
     ///// CREATING THREAD //////
     if (data.bucket == 'search'){
         if (data.action == 'initial'){
@@ -125,6 +125,7 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
 
     function continueSaving(){
 
+
         if (!data.source.id){
             console.log('error: missing source.id');
         }
@@ -138,7 +139,8 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
 
             //new message mongo obj
             newMessage(data, function(msg){
-                
+
+
                 if (msg.amazon){
                     msg.amazon = [];
                     async.eachSeries(data.amazon, function(item, callback) {
@@ -283,6 +285,11 @@ var recallContext = function(data,callback){
 
 //create new mongo Message obj
 var newMessage = function(data,callback){
+    //umm...fuck duplicates in DB
+    if(data._id){
+        data['_id'] = undefined;
+        data['_id'] = mongoose.Types.ObjectId();
+    }
     data = new Message(data);
     callback(data);
 };
