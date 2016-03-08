@@ -51,7 +51,7 @@ var initSlackUsers = function(env){
     }else if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0HLZP09L',
-            bot: { 
+            bot: { 
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
             },
@@ -60,6 +60,8 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
+    }else if (env === 'development') {
+      console.log('oh hey developer, i hope you are having a good day')
     }
     else {
         console.log('retrieving slackbots from mongo');
@@ -380,9 +382,6 @@ function preProcess(data){
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
 
-        console.log('CANNED RES ',res);
-        console.log('CANNED FLAG ',flag);
-        console.log('CANNED QUERY ',query);
         //found canned response
         if(flag){
             data.client_res = [];
@@ -391,9 +390,6 @@ function preProcess(data){
                     //send message
                     data.client_res = [];
                     data.client_res.push(res);
-                    console.log('CANNED RES ',res);
-                    console.log('CANNED FLAG ',flag);
-                    console.log('CANNED QUERY ',query);
                     cannedBanter(data);
                     break;
                 case 'search.initial':
@@ -440,6 +436,7 @@ function routeNLP(data){
 
     //sanitize msg before sending to NLP
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
+    data.flags = data.flags || {};
 
     if (data.msg){
 
@@ -450,10 +447,20 @@ function routeNLP(data){
         });
 
         function continueNLP(){
-            nlp.parse(data.msg, function(e, res) {
-                if (e){console.log('NLP error ',e)}
+
+            nlp.parse(data, function(e, res) {
+                if (e){
+                  console.log('NLP error ',e);
+                  // Route to supervisor
+                  data.flags.toSupervisor = true;
+                  incomingAction(data);
+                } 
                 else {
                     console.log('NLP RES ',res);
+
+                    if (res.supervisor) {
+                      data.flags.toSupervisor = true;
+                    }
 
                     if(res.execute && res.execute.length > 0){
 

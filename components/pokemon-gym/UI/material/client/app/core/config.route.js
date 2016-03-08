@@ -13,6 +13,7 @@
                 'status/servers',
                 'query/test',
                 'errors/node','errors/front-end','errors/processing',
+                'tests/nlp',
                 'form/elements', 'form/layouts', 'form/validation', 'form/wizard',
                 'chart/charts', 'chart/flot', 'chart/chartjs',
                 'page/404', 'page/500', 'page/blank', 'page/forgot-password', 'page/invoice', 'page/lock-screen', 'page/profile', 'page/signin', 'page/signup',
@@ -47,4 +48,4 @@
         }]
     );
 
-})(); 
+})();

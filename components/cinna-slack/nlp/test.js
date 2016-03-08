@@ -3,10 +3,6 @@ var should = require('should')
 var config = require('config')
 var nlp = require('./api')
 
-        type: 'price',
-        param: 'less' //or 'more'
-
-
 var messages = [
   {
     m: 'cheapest 32" monitor with good reviews',
@@ -15,12 +11,12 @@ var messages = [
       action: 'aggregate',
       tokens: ['cheapest 32" monitor with good reviews'],
       execute: [ //will fire commands in arr order
-        { 
+        {
           bucket: 'search', //initial search
           action:'initial',
           val: '32" monitor'
         },
-        { 
+        {
           bucket: 'search', //sorts cheapest
           action:'modify',
           dataModify: {
@@ -42,11 +38,11 @@ var messages = [
   {
     m: '32" monitor with best reviews',
     r: {
-      bucket: 'search', 
+      bucket: 'search',
       action: 'aggregate',
       tokens: ['32" monitor with best reviews'],
       execute: [ //will fire commands in arr order
-        { 
+        {
           bucket: 'search', //initial search
           action:'initial',
           val: '32" monitor'
@@ -63,18 +59,18 @@ var messages = [
     }
   },
   {
-    m: 'best 32" monitor', 
+    m: 'best 32" monitor',
     r: {
-      bucket: 'search', 
+      bucket: 'search',
       action: 'aggregate',
       tokens: ['best 32" monitor'],
       execute: [ //will fire commands in arr order
-        { 
+        {
           bucket: 'search', //initial search
           action:'initial',
           val: '32" monitor'
         },
-        { 
+        {
           bucket: 'search', //sorts cheapest
           action:'modify',
           dataModify: {
@@ -96,16 +92,16 @@ var messages = [
   {
     m: 'cheapest 32" monitor',
     r: {
-      bucket: 'search', 
+      bucket: 'search',
       action: 'aggregate',
       tokens: ['cheapest 32" monitor'],
       execute: [ //will fire commands in arr order
-        { 
+        {
           bucket: 'search', //initial search
           action:'initial',
           val: '32" monitor'
         },
-        { 
+        {
           bucket: 'search', //sorts cheapest
           action:'modify',
           dataModify: {
@@ -234,7 +230,7 @@ var messages = [
 
   //* * * * review related queries * * * *//
   {
-    m: '1 but best', 
+    m: '1 but best',
     r: {
       bucket: 'search',
       action: 'modify',
@@ -247,7 +243,7 @@ var messages = [
     }
   },
   {
-    m: '1 but best reviews', 
+    m: '1 but best reviews',
     r: {
       bucket: 'search',
       action: 'modify',
@@ -260,7 +256,7 @@ var messages = [
     }
   },
   {
-    m: '1 but good reviews', 
+    m: '1 but good reviews',
     r: {
       bucket: 'search',
       action: 'modify',
@@ -273,13 +269,13 @@ var messages = [
     }
   },
   {
-    m: '1 but cheapest and best', 
+    m: '1 but cheapest and best',
     r: {
       bucket: 'search',
       action: 'aggregate',
       tokens: ['1 but cheapest and best'],
       execute: [ //will fire commands in arr order
-        { 
+        {
           bucket: 'search', //sorts cheapest
           action:'modify',
           searchSelect: [1],
@@ -466,7 +462,7 @@ describe('test messages on ' + config.nlp, function() {
       return console.log('skipping', o.m);
     }
     it(o.m, function(done) {
-      nlp.parse(o.m, function(e, r) {
+      nlp.parse({msg: o.m}, function(e, r) {
         r.should.deepEqual(o.r);
         done();
       })

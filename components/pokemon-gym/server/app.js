@@ -472,6 +472,11 @@ app.get('/errors/processing', function(req, res) {
   }])
 })
 
+app.get('/tests/nlp', function(req, res) {
+  res.send('NLP tests not in place yet')
+  // this is what the code will look like
+})
+
 var port = 9999;
 app.listen(port, function(err) {
   if (err) {
