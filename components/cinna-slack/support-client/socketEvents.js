@@ -8,20 +8,20 @@ exports = module.exports = function(io, cinnaio) {
         socket.on('new message', function(msg) {
             msg.ts = new Date().toISOString();
             var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
-            console.log('\nI/O: raw msg:', msg)
+            // console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
-                    console.log('\nI/O: routed to  --> incoming msg:\n')
+                    // console.log('\nI/O: routed to  --> incoming msg:\n')
                     socket.broadcast.emit('new bc message', msg)
                     break;
                 case 'outgoing':
-                    console.log('I/O: routed to --> outgoing msg',msg,'\n')
+                    // console.log('I/O: routed to --> outgoing msg',msg,'\n')
                     if (msg.bucket === 'response') { socket.broadcast.emit('new bc message', msg) }
                     else { socket.emit('new bc message', msg) }
                     ioClient.emit("msgFromSever", msg);
                     break;
                 case 'searchResults':
-                    console.log('I/O: routed to --> incoming results',msg,'\n')
+                    // console.log('I/O: routed to --> incoming results',msg,'\n')
                     socket.broadcast.emit('results', msg)
                     break;
                 default:

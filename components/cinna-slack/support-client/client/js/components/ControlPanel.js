@@ -559,7 +559,7 @@ class ControlPanel extends Component {
     newQuery.action = 'focus'
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: lastSeen.slice(0)}
-    UserAPIUtils.urlShorten({url: lastSeen[selected-1].DetailPageURL[0]}).then(function(res){
+    UserAPIUtils.urlShorten({array: [lastSeen[selected-1].DetailPageURL[0]]}).then(function(res){
       newQuery.recallHistory.urlShorten = [res.body]
       // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
       newQuery.amazon =  lastSeen.slice(0)
@@ -705,11 +705,138 @@ class ControlPanel extends Component {
                 delete item.reviews;
               }
               if (item && item.ItemAttributes && item.ItemAttributes[0].Title){
+
+
+              let cString = [];
+              let attribs = item.ItemAttributes[0];
+
+                      console.log(attribs);
+                      ///// build product details string //////
+                      //get size
+                      if (attribs.ClothingSize){
+                        cString.push("Size: " + attribs.Size[0]);
+                      }
+                      else if (attribs.Size){
+                        cString.push("Size: " + attribs.Size[0]);
+                      }
+
+                      //get artist
+                      if (attribs.Artist){
+                        cString.push("Artist: " + attribs.Artist[0]);
+                      }
+
+                      // //get brand or manfacturer
+                      // if (attribs.Studio){
+                      //     cString.push(truncate("Studio: " + attribs.Studio[0]));
+                      // }
+                      // if (attribs.Publisher){
+                      //     cString.push(truncate("Publisher: " + attribs.Publisher[0]));
+                      // }
+
+
+                      if (attribs.Brand){
+                          cString.push(attribs.Brand[0]);
+                      }
+                      // else if (attribs.Manufacturer){
+                      //     cString.push(truncate("Manufacturer: " + attribs.Manufacturer[0]));
+                      // }
+
+                      if (attribs.Author){
+                          cString.push("Author: " + attribs.Author[0]);
+                      }
+
+                      // if (attribs.Binding){
+                      //     cString.push(truncate("Binding: " + attribs.Binding[0]));
+                      // }
+                      if (attribs.NumberOfPages){
+                          cString.push("Pages: " + attribs.NumberOfPages[0]);
+                      }
+
+                      if (attribs.Director){
+                          cString.push("Director: " + attribs.Director[0]);
+                      }
+                      // if (attribs.Creator){
+                      //     cString.push(truncate("Creator: " + attribs.Creator[0]));
+                      // }
+                      if (attribs.Edition){
+                          cString.push(attribs.Edition[0]);
+                      }
+                      if (attribs.Feature){
+                          cString.push(attribs.Feature[0]);
+                      }
+                      if (attribs.Genre){
+                          cString.push("Genre: " + attribs.Genre[0]);
+                      }
+                      if (attribs.Year){
+                          cString.push("Year: " + attribs.Year[0]);
+                      }
+                      // if (attribs.Model){
+                      //     cString.push(truncate("Model: " + attribs.Model[0]));
+                      // }
+
+                      if (attribs.Platform){
+                          cString.push("Platform: " + attribs.Platform[0]);
+                      }else if (attribs.OperatingSystem){
+                          cString.push("OS: " + attribs.OperatingSystem[0]);
+                      }
+
+                      if (attribs.HardwarePlatform){
+                          cString.push("Platform: " + attribs.HardwarePlatform[0]);
+                      }
+                      // if (attribs.Languages){
+                      //     cString.push(truncate("Languages: " + attribs.Languages[0]));
+                      // }
+                      if (attribs.Length){
+                          cString.push("Length: " + attribs.Length[0]);
+                      }
+                      if (attribs.Width){
+                          cString.push("Width: " + attribs.Width[0]);
+                      }
+                      if (attribs.Weight){
+                          cString.push("Weight: " + attribs.Weight[0]);
+                      }
+                      if (attribs.MaterialType){
+                          cString.push("Material: " + attribs.MaterialType[0]);
+                      }
+                      if (attribs.Format){
+                          cString.push("Format: " + attribs.Format[0]);
+                      }
+                      if (attribs.MediaType){
+                          cString.push("Type: " + attribs.MediaType[0]);
+                      }
+                      if (attribs.Color){
+                          cString.push("Color: " + attribs.Color[0]);
+                      }
+
+                      if (attribs.Quantity){
+                          cString.push("Quantity: " + attribs.Quantity[0]);
+                      }
+                      // else if(attribs.PackageQuantity){
+                      //     cString.push("PackageQuantity: " + attribs.PackageQuantity[0]);
+                      // }
+
+                      if (attribs.EpisodeSequence){
+                          cString.push("Episode: " + attribs.EpisodeSequence[0]);
+                      }
+                      if (attribs.ESRBAgeRating){
+                          cString.push("ESRB Rating: " + attribs.ESRBAgeRating[0]);
+                      }
+                      if (attribs.HazardousMaterialType){
+                          cString.push("Hazardous Type: " + attribs.HazardousMaterialType[0]);
+                      }
+
+                      // console.log('cString ',cString);
+
+                      if(cString.length < 1){
+                        cString.push('');
+                      }
+
+
                 toStitch.push({
                     url: imageURL,
                     price: price,
                     prime: primeAvail, //is prime available?
-                    name: item.ItemAttributes[0].Title[0].trim(),
+                    name: cString,
                     reviews: item.reviews
                 });                      
               }
@@ -728,7 +855,7 @@ class ControlPanel extends Component {
           }
         })
         UserAPIUtils.stitch(toStitch).then(function(res){
-           return resolve(res.body);
+           return resolve(res);
         }).catch(function(err){
           return resolve();
         })
@@ -798,7 +925,7 @@ class ControlPanel extends Component {
           self.setState({sendingToClient: false})
         }, 1500)
       } else if (newMessage.action == 'checkout') {
-          UserAPIUtils.urlShorten({url: this.state.client_res[0]}).then(function(res){
+          UserAPIUtils.urlShorten({array: [this.state.client_res[0]]}).then(function(res){
             newMessage.client_res = [res.body]
             socket.emit('new message', newMessage);
             self.setState({
@@ -811,13 +938,11 @@ class ControlPanel extends Component {
                   })
               }
              },8000)
-          }).catch(function(err){
-              console.log('Cpanel511: urlShorten error: ',err)
-          })
-
+          }).catch(function(err){ console.log('Cpanel511: urlShorten error: ',err)})
       } else {
-         this.picStitch(toStitch).then(function(url){
-            if (url && self.state.client_res) {
+         this.picStitch(toStitch).then(function(toShorten){
+            // console.log('PICSTITCH RETURN! ', toShorten)
+            // if (toShorten && self.state.client_res) {
               let text = ''
              switch (newMessage.action){
               case 'initial':
@@ -834,14 +959,36 @@ class ControlPanel extends Component {
                 text = 'Hmm, something went wrong.'          
              } 
               newMessage.client_res.push(text)
-              newMessage.client_res.push(url)
-            }
-            console.log('Cpanel649: Send Command: ', newMessage)
-            socket.emit('new message', newMessage);
-            self.setState({sendingToClient: true})
-            setTimeout(function(){
-              self.setState({sendingToClient: false})
-            }, 1500)
+              toShorten.push(item1.DetailPageURL[0])
+              toShorten.push(item2.DetailPageURL[0])
+              toShorten.push(item3.DetailPageURL[0])
+              //Create shortened links
+              UserAPIUtils.urlShorten({array: toShorten}).then(function(urlArr){
+                console.log('URLSHORTEN RETURN!', toShorten, urlArr)
+                   toStitch.forEach(function(item, i){
+                    console.log('mmmkay', i)
+                      try { 
+                        let attachObj = {};
+                        attachObj.image_url = urlArr[i]
+                        attachObj.title = ((i === 0) ? ':one:' : ((i === 1) ? ':two:' : ((i === 2) ? ':three:' : '') ) ) + ' ' + item.ItemAttributes[0].Title[0];
+                        attachObj.title_link = urlArr[i+3];
+                        attachObj.color = "#45a5f4";
+                        attachObj.fallback = 'Here are some options you might like';
+                        newMessage.client_res.push(attachObj)
+                      } catch(err) {
+                        console.log('ERRRRRRR FUCK', err)
+                      }
+                   })
+                    console.log('Cpanel649: Send Command: ', newMessage)
+                    socket.emit('new message', newMessage);
+                    self.setState({sendingToClient: true})
+                    setTimeout(function(){
+                      self.setState({sendingToClient: false})
+                    }, 1500)
+              }).catch(function(err) {
+                  console.log('***Cpanel984: ERROR: urlShorten FAILED: ',err)
+                })
+            // }
         }).catch(function(err) {
           console.log('***Cpanel653: ERROR: Picstitch FAILED: ',err)
         })

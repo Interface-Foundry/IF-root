@@ -452,6 +452,7 @@ function routeNLP(data){
                 if (e){
                   console.log('NLP error ',e);
                   // Route to supervisor
+                  
                   data.flags.toSupervisor = true;
                   incomingAction(data);
                 } 
@@ -588,7 +589,7 @@ console.log('INCOMING ACTION DATA:', data)
              }
     // if (data.flags && data.flags.toSupervisor) {
         // console.log('GETTING HEREEEEE: ',data)
-        // data.flags = {};
+        data.flags = data.flags ? data.flags : {};
         data.flags.toSupervisor = true;
         history.saveHistory(data,false,function(res){
             supervisor.emit(res, true)
