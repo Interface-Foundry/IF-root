@@ -72,6 +72,7 @@ class MessageListItem extends Component {
               switch(message.action) {
                 case 'initial': 
                 case 'similar':
+                case 'modify':
                 case 'more':
                   // console.log('case 1')
                   // message.client_res.unshift(text)
@@ -88,7 +89,16 @@ class MessageListItem extends Component {
                             {message.client_res[0]}
                         </div>
                          <div style={messageStyle}> 
-                            <img width='170' src={message.client_res[1]} />
+                            <a href={message.client_res[1].title_link}>{'➊' + message.client_res[1].title.split(':')[2]}</a> <br />
+                            <img width='170' src={message.client_res[1].image_url} />
+                        </div>
+                         <div style={messageStyle}> 
+                            <a href={message.client_res[2].title_link}>{'➋' + message.client_res[2].title.split(':')[2]}</a> <br />
+                            <img width='170' src={message.client_res[2].image_url} />
+                        </div>
+                         <div style={messageStyle}> 
+                            <a href={message.client_res[3].title_link}>{'➌' + message.client_res[3].title.split(':')[2]}</a> <br />
+                            <img width='170' src={message.client_res[3].image_url} />
                         </div>
                     </div>
                     )

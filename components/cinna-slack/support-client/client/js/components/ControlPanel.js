@@ -560,8 +560,8 @@ class ControlPanel extends Component {
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: lastSeen.slice(0)}
     UserAPIUtils.urlShorten({array: [lastSeen[selected-1].DetailPageURL[0]]}).then(function(res){
-      newQuery.recallHistory.urlShorten = [res.body]
-      // console.log('Cpanel490: ',newQuery.recallHistory.urlShorten)
+      newQuery.recallHistory.urlShorten = res
+      console.log('Cpanel490: ',newQuery.recallHistory.urlShorten,[res.body],[lastSeen[selected-1].DetailPageURL[0]])
       newQuery.amazon =  lastSeen.slice(0)
       newQuery.searchSelect = [selected]
       newQuery.flags = {}
@@ -705,133 +705,86 @@ class ControlPanel extends Component {
                 delete item.reviews;
               }
               if (item && item.ItemAttributes && item.ItemAttributes[0].Title){
-
-
-              let cString = [];
-              let attribs = item.ItemAttributes[0];
-
-                      console.log(attribs);
-                      ///// build product details string //////
-                      //get size
-                      if (attribs.ClothingSize){
-                        cString.push("Size: " + attribs.Size[0]);
-                      }
-                      else if (attribs.Size){
-                        cString.push("Size: " + attribs.Size[0]);
-                      }
-
-                      //get artist
-                      if (attribs.Artist){
-                        cString.push("Artist: " + attribs.Artist[0]);
-                      }
-
-                      // //get brand or manfacturer
-                      // if (attribs.Studio){
-                      //     cString.push(truncate("Studio: " + attribs.Studio[0]));
-                      // }
-                      // if (attribs.Publisher){
-                      //     cString.push(truncate("Publisher: " + attribs.Publisher[0]));
-                      // }
-
-
-                      if (attribs.Brand){
-                          cString.push(attribs.Brand[0]);
-                      }
-                      // else if (attribs.Manufacturer){
-                      //     cString.push(truncate("Manufacturer: " + attribs.Manufacturer[0]));
-                      // }
-
-                      if (attribs.Author){
-                          cString.push("Author: " + attribs.Author[0]);
-                      }
-
-                      // if (attribs.Binding){
-                      //     cString.push(truncate("Binding: " + attribs.Binding[0]));
-                      // }
-                      if (attribs.NumberOfPages){
-                          cString.push("Pages: " + attribs.NumberOfPages[0]);
-                      }
-
-                      if (attribs.Director){
-                          cString.push("Director: " + attribs.Director[0]);
-                      }
-                      // if (attribs.Creator){
-                      //     cString.push(truncate("Creator: " + attribs.Creator[0]));
-                      // }
-                      if (attribs.Edition){
-                          cString.push(attribs.Edition[0]);
-                      }
-                      if (attribs.Feature){
-                          cString.push(attribs.Feature[0]);
-                      }
-                      if (attribs.Genre){
-                          cString.push("Genre: " + attribs.Genre[0]);
-                      }
-                      if (attribs.Year){
-                          cString.push("Year: " + attribs.Year[0]);
-                      }
-                      // if (attribs.Model){
-                      //     cString.push(truncate("Model: " + attribs.Model[0]));
-                      // }
-
-                      if (attribs.Platform){
-                          cString.push("Platform: " + attribs.Platform[0]);
-                      }else if (attribs.OperatingSystem){
-                          cString.push("OS: " + attribs.OperatingSystem[0]);
-                      }
-
-                      if (attribs.HardwarePlatform){
-                          cString.push("Platform: " + attribs.HardwarePlatform[0]);
-                      }
-                      // if (attribs.Languages){
-                      //     cString.push(truncate("Languages: " + attribs.Languages[0]));
-                      // }
-                      if (attribs.Length){
-                          cString.push("Length: " + attribs.Length[0]);
-                      }
-                      if (attribs.Width){
-                          cString.push("Width: " + attribs.Width[0]);
-                      }
-                      if (attribs.Weight){
-                          cString.push("Weight: " + attribs.Weight[0]);
-                      }
-                      if (attribs.MaterialType){
-                          cString.push("Material: " + attribs.MaterialType[0]);
-                      }
-                      if (attribs.Format){
-                          cString.push("Format: " + attribs.Format[0]);
-                      }
-                      if (attribs.MediaType){
-                          cString.push("Type: " + attribs.MediaType[0]);
-                      }
-                      if (attribs.Color){
-                          cString.push("Color: " + attribs.Color[0]);
-                      }
-
-                      if (attribs.Quantity){
-                          cString.push("Quantity: " + attribs.Quantity[0]);
-                      }
-                      // else if(attribs.PackageQuantity){
-                      //     cString.push("PackageQuantity: " + attribs.PackageQuantity[0]);
-                      // }
-
-                      if (attribs.EpisodeSequence){
-                          cString.push("Episode: " + attribs.EpisodeSequence[0]);
-                      }
-                      if (attribs.ESRBAgeRating){
-                          cString.push("ESRB Rating: " + attribs.ESRBAgeRating[0]);
-                      }
-                      if (attribs.HazardousMaterialType){
-                          cString.push("Hazardous Type: " + attribs.HazardousMaterialType[0]);
-                      }
-
-                      // console.log('cString ',cString);
-
-                      if(cString.length < 1){
-                        cString.push('');
-                      }
-
-
+                let cString = [];
+                let attribs = item.ItemAttributes[0];
+                console.log(attribs);
+                if (attribs.ClothingSize){
+                  cString.push("Size: " + attribs.Size[0]);
+                }
+                else if (attribs.Size){
+                  cString.push("Size: " + attribs.Size[0]);
+                }
+                if (attribs.Artist){
+                  cString.push("Artist: " + attribs.Artist[0]);
+                }
+                if (attribs.Brand){
+                    cString.push(attribs.Brand[0]);
+                }
+                if (attribs.Author){
+                    cString.push("Author: " + attribs.Author[0]);
+                }
+                if (attribs.NumberOfPages){
+                    cString.push("Pages: " + attribs.NumberOfPages[0]);
+                }
+                if (attribs.Director){
+                    cString.push("Director: " + attribs.Director[0]);
+                }
+                if (attribs.Edition){
+                    cString.push(attribs.Edition[0]);
+                }
+                if (attribs.Feature){
+                    cString.push(attribs.Feature[0]);
+                }
+                if (attribs.Genre){
+                    cString.push("Genre: " + attribs.Genre[0]);
+                }
+                if (attribs.Year){
+                    cString.push("Year: " + attribs.Year[0]);
+                }
+                if (attribs.Platform){
+                    cString.push("Platform: " + attribs.Platform[0]);
+                }else if (attribs.OperatingSystem){
+                    cString.push("OS: " + attribs.OperatingSystem[0]);
+                }
+                if (attribs.HardwarePlatform){
+                    cString.push("Platform: " + attribs.HardwarePlatform[0]);
+                }
+                if (attribs.Length){
+                    cString.push("Length: " + attribs.Length[0]);
+                }
+                if (attribs.Width){
+                    cString.push("Width: " + attribs.Width[0]);
+                }
+                if (attribs.Weight){
+                    cString.push("Weight: " + attribs.Weight[0]);
+                }
+                if (attribs.MaterialType){
+                    cString.push("Material: " + attribs.MaterialType[0]);
+                }
+                if (attribs.Format){
+                    cString.push("Format: " + attribs.Format[0]);
+                }
+                if (attribs.MediaType){
+                    cString.push("Type: " + attribs.MediaType[0]);
+                }
+                if (attribs.Color){
+                    cString.push("Color: " + attribs.Color[0]);
+                }
+                if (attribs.Quantity){
+                    cString.push("Quantity: " + attribs.Quantity[0]);
+                }
+                if (attribs.EpisodeSequence){
+                    cString.push("Episode: " + attribs.EpisodeSequence[0]);
+                }
+                if (attribs.ESRBAgeRating){
+                    cString.push("ESRB Rating: " + attribs.ESRBAgeRating[0]);
+                }
+                if (attribs.HazardousMaterialType){
+                    cString.push("Hazardous Type: " + attribs.HazardousMaterialType[0]);
+                }
+                if(cString.length < 1){
+                  cString.push('');
+                }
                 toStitch.push({
                     url: imageURL,
                     price: price,
@@ -926,7 +879,7 @@ class ControlPanel extends Component {
         }, 1500)
       } else if (newMessage.action == 'checkout') {
           UserAPIUtils.urlShorten({array: [this.state.client_res[0]]}).then(function(res){
-            newMessage.client_res = [res.body]
+            newMessage.client_res = res
             socket.emit('new message', newMessage);
             self.setState({
               spinnerloading: true
@@ -950,13 +903,13 @@ class ControlPanel extends Component {
                 text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
                 break;
               case 'similar':
-                text = 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                text = (searchSelect[0] && searchSelect[0] < 4 ) ? 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options' : 'We found some similar options, would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
                 break;
               case 'checkout':
                 text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
                 break;
               default:
-                text = 'Hmm, something went wrong.'          
+                text = "Here are some more choices, which do you like best?"        
              } 
               newMessage.client_res.push(text)
               toShorten.push(item1.DetailPageURL[0])
@@ -1133,6 +1086,7 @@ class ControlPanel extends Component {
      const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
      const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.9em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
      const selectedStyle = this.state.lastSeen ? {} : { display: 'none'}
+    
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
@@ -1195,7 +1149,7 @@ class ControlPanel extends Component {
                    <h5 style={{textAlign: 'center'}}>Last seen by client: </h5>
                <div className='flexbox-container'>
                    <div>
-                     <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[0]) ? this.state.lastSeen[0].SmallImage[0].URL[0] : null}  />  
+                     <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[0] && this.state.lastSeen[0].SmallImage ) ? this.state.lastSeen[0].SmallImage[0].URL[0] :  (this.state.lastSeen && this.state.lastSeen[0] ? this.state.lastSeen[0].altImage : null)}  />  
                    </div>  
                    <div style={{padding:'0', marginLeft:'20%'}}>  
                      <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(1) } >
@@ -1208,7 +1162,7 @@ class ControlPanel extends Component {
               </div>
              <div className='flexbox-container'>    
                <div>
-                <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[1])  ? this.state.lastSeen[1].SmallImage[0].URL[0] : null}  />
+                <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[1] && this.state.lastSeen[1].SmallImage ) ? this.state.lastSeen[1].SmallImage[0].URL[0] : (this.state.lastSeen && this.state.lastSeen[1] ? this.state.lastSeen[1].altImage : null)}   />
                </div> 
                <div style={{padding:'0', marginLeft:'20%'}}>  
                  <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(2)} >
@@ -1221,7 +1175,7 @@ class ControlPanel extends Component {
               </div>
             <div className='flexbox-container'>    
                 <div>
-                 <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[2])  ? this.state.lastSeen[2].SmallImage[0].URL[0] : null}  />
+                 <img width='75' height='75' src={(this.state.lastSeen && this.state.lastSeen[2] && this.state.lastSeen[2].SmallImage ) ? this.state.lastSeen[2].SmallImage[0].URL[0] : (this.state.lastSeen && this.state.lastSeen[2] ? this.state.lastSeen[2].altImage : null)}   />
                 </div>
                  <div style={{padding:'0', marginLeft:'20%'}}>  
                    <Button bsSize='xsmall' bsStyle='info' className="form-button" style={selectedStyle} onClick = { () => this.searchFocus(3)} >
