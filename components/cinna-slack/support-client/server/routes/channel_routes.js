@@ -43,13 +43,11 @@ module.exports = function(router) {
 
   // get a specific channel
   router.get('/channels/:id', function(req, res) {
-
     Channel.find({name: req.params.id}, function(err, data) {
       if(err) {
         console.log(err);
         return res.status(500).json({msg: 'internal server error'});
       }
-
       res.json(data)
     })
   })

@@ -958,8 +958,8 @@ class ControlPanel extends Component {
           this.setState({lastSeen: lastSeen.slice(0)})
         } else {
             for (var i = 0; i < searchSelect.length; i++) {
-              let selectedItem = rawAmazonResults[searchSelect[i]-1]
-              let residentItem = rawAmazonResults[i]
+              let selectedItem = Object.assign({},rawAmazonResults[searchSelect[i]-1])
+              let residentItem = Object.assign({},rawAmazonResults[i])
               newMessage.amazon[i] = selectedItem
               newMessage.amazon[searchSelect[i]-1] = residentItem
             }

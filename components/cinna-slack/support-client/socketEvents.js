@@ -2,17 +2,56 @@ var ioClient = require('socket.io-client').connect("http://localhost:8000");
 ioClient.on('connect', function() {
     console.log('Connected to cinna-slack client.')
 })
+var Channel = require('./server/models/Channel');
+var shortid = require('shortid');
+
 exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
+             console.log(-1)
             msg.ts = new Date().toISOString();
             var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
-            // console.log('\nI/O: raw msg:', msg)
+            console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
-                    // console.log('\nI/O: routed to  --> incoming msg:\n')
-                    socket.broadcast.emit('new bc message', msg)
+                    console.log('\nI/O: routed to  --> incoming msg:\n')
+                    Channel.findOne({id: msg.source.id}, function(err, chan) {
+                      if(err) {
+                        console.log('socket events err - 21: ',err);
+                      }
+                      console.log(0)
+                      //If Channel does not exist yet and entering supervisor
+                      if (!chan &&  msg.msg == 'kipsupervisor') {
+                         console.log(1)
+                         if (!msg.thread.ticket || !msg.thread.ticket.id || !msg.thread.ticket.isOpen){
+                             msg.thread.ticket = {}
+                             msg.thread.ticket.id = shortid.generate();
+                             msg.thread.ticket.isOpen = true
+                         }
+                        socket.broadcast.emit('new bc message', msg)
+                      }
+                      //If Channel exists and entering supervisor
+                      else if (chan && chan.resolved || msg.msg == 'kipsupervisor') {
+                        console.log(2)
+                        chan.resolved = false;
+                        chan.save(function(err, saved){
+                            if(err) {
+                                console.log('socket events err - 38: ',err);
+                              }
+                            if (!msg.thread.ticket || !msg.thread.ticket.id || !msg.thread.ticket.isOpen){
+                                 msg.thread.ticket = {}
+                                 msg.thread.ticket.id = shortid.generate();
+                                 msg.thread.ticket.isOpen = true
+                             }
+                            socket.broadcast.emit('new bc message', msg)
+                        })
+                      }
+                      //Otherwise take no action. 
+                      else {
+                        console.log('Foregoing supervisor.')
+                      }
+                    })
                     break;
                 case 'outgoing':
                     // console.log('I/O: routed to --> outgoing msg',msg,'\n')

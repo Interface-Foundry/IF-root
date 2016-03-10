@@ -1,6 +1,7 @@
 var bodyparser = require('body-parser');
 var async = require('async');
 var Message = require('../models/Message');
+var Channel = require('../models/Channel');
 var request = require('request')
 var querystring = require('querystring');
 
@@ -24,7 +25,6 @@ module.exports = function(router) {
         console.log('No data found.')
         return
       }
-
       async.eachSeries(data, function(message, callback1) {
         // console.log('Backend: message routes: flags : ',message.flags)
         if (message.amazon && message.amazon.length > 0) {
@@ -71,14 +71,37 @@ module.exports = function(router) {
 
   //post a new message to db
   router.post('/newmessage', function(req, res) {
-    // console.log('message_routes saving msg', req.body)
+
+    //Check if message is 'kipsupervisor' if so unresolve channel
+    if(req.body.msg && req.body.msg.trim() == 'kipsupervisor') {
+        Channel.findOne({id: req.body.source.id}, function(err, chan) {
+        if(err) {
+          console.log(err);
+          return res.status(500).json({msg: 'internal server error'});
+        }
+        if (!chan) {
+          console.log(err);
+          return res.status(500).json({msg: 'internal server error'});
+        }
+        if(chan) {
+          chan.resolved = false
+          chan.save(function(err, saved) {
+            if(err) {
+                console.log(err);
+                return res.status(500).json({msg: 'internal server error'});
+              }
+              console.log('Channel ',chan.id, ' opened.')
+          })
+        }
+      })
+    }
+
     Message.findOne({
       'source.channel': req.body.source.channel,
       'source.id': req.body.source.id,
       'msg': req.body.msg
     }, function(err, data) {
       if (err) {
-        console.log('huhhh2',err);
         return res.status(500).json({
           msg: 'internal server error'
         });
@@ -127,6 +150,7 @@ module.exports = function(router) {
         res.json(data)
       }
     })
+
   })
 
   //resolve existing message in db

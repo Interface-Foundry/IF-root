@@ -45,7 +45,12 @@ class Chat extends Component {
     socket.on('new bc message', function(msg) {   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
-      console.log('Chat64: incoming msg: ',msg)   
+      if (msg.msg == 'kipsupervisor') {
+        //change resolved status of channel
+         let tempChannel = {name : msg.source.channel, id: msg.source.id, resolved: false}
+         actions.resolveChannel(tempChannel)
+         this.refs.channelsref.forceUpdate()
+      }
       // msg.parent = (filtered.length > 0) ?  false : true
       // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
       // console.log('Chat67:', filtered, self.props.messages,msg)
