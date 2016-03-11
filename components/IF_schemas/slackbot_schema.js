@@ -32,6 +32,7 @@ var slackbotSchema = mongoose.Schema({
             type: Date,
             default: Date.now
         },
+        addedBy: String,
         initialized: {
             type: Boolean,
             default: false

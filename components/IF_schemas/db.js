@@ -46,6 +46,10 @@ var schemas = [{
     single: 'AnonUser',
     plural: 'AnonUsers'
 }, {
+    filename: 'chatuser_schema',
+    single: 'Chatuser',
+    plural: 'Chatusers'
+}, {
     filename: 'contest_schema',
     single: 'Contest',
     plural: 'Contests'
