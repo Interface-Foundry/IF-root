@@ -12,6 +12,8 @@ import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
 import shortid from 'shortid';
 import uniq from 'lodash/array/uniq';
+import * as UserAPIUtils from '../utils/UserAPIUtils';
+
 
 
 class Chat extends Component {
@@ -49,7 +51,7 @@ class Chat extends Component {
         //change resolved status of channel
          let tempChannel = {name : msg.source.channel, id: msg.source.id, resolved: false}
          actions.resolveChannel(tempChannel)
-         this.refs.channelsref.forceUpdate()
+         self.refs.channelsref.forceUpdate()
       }
       // msg.parent = (filtered.length > 0) ?  false : true
       // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
@@ -198,11 +200,11 @@ class Chat extends Component {
        activeMsg.thread.ticket = (activeMsg.thread.ticket && activeMsg.thread.ticket.isOpen) ? { id: activeMsg.thread.ticket.id, isOpen: false } :{ id: (activeMsg.thread.ticket && activeMsg.thread.ticket.id ? activeMsg.thread.ticket.id : shortid.generate()), isOpen: true };
        var identifier = {id: activeChannel.id, properties: [{thread: activeMsg.thread }]}
        actions.setMessageProperty(identifier)
-       
        //change resolved status of channel
        let tempChannel = activeChannel
        tempChannel.resolved = !tempChannel.resolved
        actions.resolveChannel(tempChannel)
+       UserAPIUtils.resolveChannel(tempChannel)
        this.refs.channelsref.forceUpdate()
   }
 

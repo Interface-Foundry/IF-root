@@ -39,7 +39,7 @@ function emitBoth(data) {
   
   // console.log('\n\n\nEmitting both\n\n\n')
   
-  var resolved = (data.bucket === 'supervisor') ? false : true
+  var resolved = (data.msg === 'kipsupervisor') ? false : true
   ioClient.emit('new channel', {
     name: data.source.channel,
     id: data.source.id,
@@ -47,21 +47,6 @@ function emitBoth(data) {
   })
   var action = data.action ? data.action : ''
   var flags = (data.flags && data.flags !== {}) ? data.flags : {toSupervisor: true};
-  // var thread = {
-  //               id: data.thread.id,
-  //               sequence: data.thread.sequence,
-  //               isOpen: data.thread.isOpen,
-  //               ticket: {
-  //                   id: data.thread.ticket.id ? data.thread.ticket.id : ,
-  //                   isOpen: action.message.thread.ticket.isOpen
-  //               },
-  //               parent: {
-  //                   isParent: action.message.thread.parent.isParent,
-  //                   id: action.message.parent.id
-  //               }
-  //             }
-  //Resolved = false only if this is a supervisor flagged message
-  var resolved = (data.bucket === 'supervisor') ? false : true
   ioClient.emit('new message', {
     id: null,
     incoming: true,

@@ -75,14 +75,63 @@ module.exports = function(router) {
     //Check if message is 'kipsupervisor' if so unresolve channel
     if(req.body.msg && req.body.msg.trim() == 'kipsupervisor') {
         Channel.findOne({id: req.body.source.id}, function(err, chan) {
-        if(err) {
-          console.log(err);
-          return res.status(500).json({msg: 'internal server error'});
-        }
+          if(err) {
+            return res.status(500).json({msg: 'internal server error: /newmessage route.'});
+          }
+        //If Channel not found create it here, I know there's a separate channels routes for that but just trust me
         if (!chan) {
-          console.log(err);
-          return res.status(500).json({msg: 'internal server error'});
+
+          console.log('MESSAGEROUTES: NO CHANNEL FOUND!')
+          // var newChannel = new Channel({name: req.body.source.channel, id: req.body.source.id,resolved: false});
+          // newChannel.save(function(err, saved) {
+          //        if (err) {
+          //          console.log(err);
+          //           return res.status(500).json({
+          //           msg: 'internal server error'
+          //          });
+          //         }
+          //       console.log('Channel ',saved.id, ' opened.')
+          //  });
+          // var channelFound;
+          // var count = 0;
+          // async.whilst(
+          //     function () { return (!channelFound && count < 6) },
+          //     function (callback) {
+          //         Channel.findOne({id: req.body.source.id}, function(err, data) {
+          //           if(err) {
+          //             return res.status(500).json({msg: 'internal server error: /newmessage route.'});
+          //           }
+          //           if(!data) {
+          //             count++;
+          //             console.log(count)
+          //             setTimeout(function () {
+          //               callback(null, count);
+          //             }, 1000);
+          //           }
+          //           else if (data) {
+          //             console.log('Channel found!')
+          //             channelFound = data
+          //             callback(null);
+          //           }
+          //         }
+          //     },
+          //     function (err, n) {
+          //       if (err || !channelFound) {
+          //         return res.status(500).json({msg: 'internal server error'});
+          //       }
+          //       console.log('async loop finished',channelFound)
+          //       channelFound.resolved = false
+          //       channelFound.save(function(err, saved) {
+          //         if(err) {
+          //             console.log(err);
+          //             return res.status(500).json({msg: 'internal server error'});
+          //           }
+          //           console.log('Channel ',channelFound.id, ' opened.')
+          //       })
+          //     });
         }
+
+        //If Channel found
         if(chan) {
           chan.resolved = false
           chan.save(function(err, saved) {
@@ -93,6 +142,7 @@ module.exports = function(router) {
               console.log('Channel ',chan.id, ' opened.')
           })
         }
+
       })
     }
 

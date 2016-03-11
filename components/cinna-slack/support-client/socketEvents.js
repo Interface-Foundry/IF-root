@@ -9,7 +9,7 @@ exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
-             console.log(-1)
+             // console.log('RECEIVED NEW MESSAGE', msg.thread)
             msg.ts = new Date().toISOString();
             var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
             console.log('\nI/O: raw msg:', msg)
@@ -32,7 +32,7 @@ exports = module.exports = function(io, cinnaio) {
                         socket.broadcast.emit('new bc message', msg)
                       }
                       //If Channel exists and entering supervisor
-                      else if (chan && chan.resolved || msg.msg == 'kipsupervisor') {
+                      else if (chan && chan.resolved && msg.msg == 'kipsupervisor') {
                         console.log(2)
                         chan.resolved = false;
                         chan.save(function(err, saved){
@@ -47,6 +47,10 @@ exports = module.exports = function(io, cinnaio) {
                             socket.broadcast.emit('new bc message', msg)
                         })
                       }
+                      //If channel exists and is not resolved
+                      else if (chan && !chan.resolved){
+                        socket.broadcast.emit('new bc message', msg)
+                      }
                       //Otherwise take no action. 
                       else {
                         console.log('Foregoing supervisor.')
@@ -54,7 +58,7 @@ exports = module.exports = function(io, cinnaio) {
                     })
                     break;
                 case 'outgoing':
-                    // console.log('I/O: routed to --> outgoing msg',msg,'\n')
+                    console.log('I/O: routed to --> outgoing msg',msg,'\n')
                     if (msg.bucket === 'response') { socket.broadcast.emit('new bc message', msg) }
                     else { socket.emit('new bc message', msg) }
                     ioClient.emit("msgFromSever", msg);
@@ -68,7 +72,10 @@ exports = module.exports = function(io, cinnaio) {
             }
         });
         socket.on('new channel', function(channel) { 
-            socket.broadcast.emit('new channel', channel)
+                         // console.log('RECEIVED NEW CHANNEL', channel)
+            if (!channel.resolved) {
+                socket.broadcast.emit('new channel', channel)
+            }
         }); 
         socket.on('typing', function() {
             socket.broadcast.emit('typing bc', socket.username);

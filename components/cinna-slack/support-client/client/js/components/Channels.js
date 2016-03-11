@@ -203,12 +203,13 @@ class Channels extends Component {
               }).length} channel={channel} key={channel.id} {...actions} onClick={::this.handleChangeChannel} />
               )}
           </ul>
-          {moreChannelsBoolean && <a onClick={::this.openMoreChannelsModal} style={{'cursor': 'pointer', 'color': '#85BBE9'}}> + {restOfTheChannels.length} un-supervised channels...</a>}
           {moreChannelsModal}
         </div>
       </section>
     );
   }
 }
+          // {moreChannelsBoolean && <a onClick={::this.openMoreChannelsModal} style={{'cursor': 'pointer', 'color': '#85BBE9'}}> + {restOfTheChannels.length} un-supervised channels...</a>}
+    
 
 export default Channels
