@@ -9,6 +9,7 @@ var debug = require('debug')('chat')
 module.exports = function(bot, cb) {
   cb = cb || function() {};
 
+
   scrape_team_info(bot, function(err, users) {
     if (err || !users) {
       console.error('Could not scrape users for slackbot ' + bot._id);

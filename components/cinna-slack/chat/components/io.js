@@ -12,6 +12,7 @@ var search = require("./search.js");
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
+var onboard = require("./onboard.js");
 
 var nlp = require('../../nlp/api');
 
@@ -39,6 +40,7 @@ var initSlackUsers = function(env){
     if (env === 'development_alyx') {
         var testUser = [{
             team_id:'T0H72FMNK',
+            dm:'D0H6X6TA8',
             bot: {
                 bot_user_id: 'U0H6YHBNZ',
                 bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
@@ -150,21 +152,19 @@ function loadSlackUsers(users){
                     //
                     // Onboarding conversation
                     //
-                    hello = {
+                    var hello = {
                         msg: 'welcome',
                         source: {
                           origin: 'slack',
                           channel: addedBy.dm,
                           org: user.team_id,
-                          id: user.team_id + '_' + addedBy.id
+                          id: user.team_id + '_' + addedBy.dm
                         }
                     };
 
                     banter.welcomeMessage(hello, function(res) {
                         sendTxtResponse(hello, res);
                     })
-
-                    setTimeout(callback, 20);
 
                 })
             }
