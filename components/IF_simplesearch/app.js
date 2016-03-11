@@ -28,6 +28,10 @@ app.use(require('prerender-node').set('protocol', 'https'));
 //     maxAge: oneDay
 // }));
 
+app.get('/testslack', function(req, res) {
+  res.send(fs.readFileSync(__dirname + '/test-button.html', 'utf8'))
+})
+
 app.get('/newslack', function(req, res) {
     console.log('new slack integration request');
     // TODO post in our slack #dev channel
