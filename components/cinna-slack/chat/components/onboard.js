@@ -52,7 +52,11 @@ var scrape_team_info = function(bot, callback) {
       }
 
       bot.meta.addedBy = r.body.user_id;
-      bot.save();
+      if (typeof bot.save === 'function') {
+        bot.save();
+      } else {
+        console.error('Could not save addedBy as ' + r.body.user_id + ' for bot ' + bot._id);
+      }
 
       request('https://slack.com/api/users.list?token=' + bot.bot.bot_access_token, function(e, r, b) {
         if (kip.error(e)) return;
