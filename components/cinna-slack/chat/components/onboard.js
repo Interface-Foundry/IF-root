@@ -6,7 +6,9 @@ var debug = require('debug')('chat')
 // Needs scopes 'identify,team:read,users:read,im:read,bot'
 // (bot+users%3Aread+im%3Aread+team%3Aread)
 
-module.exports = function(bot) {
+module.exports = function(bot, cb) {
+  cb = cb || function() {};
+
   scrape_team_info(bot, function(err, users) {
     if (err || !users) {
       console.error('Could not scrape users for slackbot ' + bot._id);
@@ -31,8 +33,7 @@ module.exports = function(bot) {
     //
     // Onboarding conversation start
     //
-
-
+    cb(null, addedBy);
   })
 }
 
@@ -52,7 +53,7 @@ var scrape_team_info = function(bot, callback) {
       bot.meta.addedBy = r.body.user_id;
       bot.save();
 
-      request('https://slack.com/api/users.list?token=' + bot.access_token, function(e, r, b) {
+      request('https://slack.com/api/users.list?token=' + bot.bot.bot_access_token, function(e, r, b) {
         if (kip.error(e)) return;
 
         r.body = JSON.parse(r.body)
@@ -66,7 +67,7 @@ var scrape_team_info = function(bot, callback) {
           return userhash[u.id];
         })
 
-        request('https://slack.com/api/im.list?token=' + bot.access_token, function(e, r, b) {
+        request('https://slack.com/api/im.list?token=' + bot.bot.bot_access_token, function(e, r, b) {
           if (kip.error(e)) return;
 
           r.body = JSON.parse(r.body)
