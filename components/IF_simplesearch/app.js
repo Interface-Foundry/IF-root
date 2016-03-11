@@ -46,8 +46,11 @@ app.get('/newslack', function(req, res) {
       redirect_uri: 'https://kipsearch.com/newslack'
     }
 
+    var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : '2804113073.26284712467';
+    var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : 'b69ba0ea3b4a951facc77962c49a1228';
+
     request({
-      url: 'https://2804113073.14708197459:d4c324bf9caa887a66870abacb3d7cb5@slack.com/api/oauth.access',
+      url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
       method: 'POST',
       form: body
     }, function(e, r, b) {
