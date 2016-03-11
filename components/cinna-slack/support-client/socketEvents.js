@@ -10,13 +10,13 @@ exports = module.exports = function(io, cinnaio) {
         console.log('connected to socket')
         socket.on('new message', function(msg) {
              // console.log('RECEIVED NEW MESSAGE', msg.thread)
+          Channel.findOne({id: msg.source.id}, function(err, chan) {
             msg.ts = new Date().toISOString();
             var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
-            console.log('\nI/O: raw msg:', msg)
+            // console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
                     console.log('\nI/O: routed to  --> incoming msg:\n')
-                    Channel.findOne({id: msg.source.id}, function(err, chan) {
                       if(err) {
                         console.log('socket events err - 21: ',err);
                       }
@@ -48,14 +48,14 @@ exports = module.exports = function(io, cinnaio) {
                         })
                       }
                       //If channel exists and is not resolved
-                      else if (chan && !chan.resolved){
+                      else if (chan){
+                        console.log(3,chan)
                         socket.broadcast.emit('new bc message', msg)
                       }
                       //Otherwise take no action. 
                       else {
-                        console.log('Foregoing supervisor.')
+                        console.log(4,msg.msg)
                       }
-                    })
                     break;
                 case 'outgoing':
                     console.log('I/O: routed to --> outgoing msg',msg,'\n')
@@ -68,8 +68,12 @@ exports = module.exports = function(io, cinnaio) {
                     socket.broadcast.emit('results', msg)
                     break;
                 default:
-                    console.log('I/O: Could not determine message type.')
+                   if (chan && !chan.resolved) {
+                     console.log(5,msg.msg)
+                     socket.broadcast.emit('new bc message', msg)
+                   }
             }
+          })
         });
         socket.on('new channel', function(channel) { 
                          // console.log('RECEIVED NEW CHANNEL', channel)

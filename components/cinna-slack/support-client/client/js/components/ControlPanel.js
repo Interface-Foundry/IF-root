@@ -818,6 +818,9 @@ class ControlPanel extends Component {
   sendCommand() {
     const { activeChannel, actions, activeMsg, messages } = this.props
     const { rawAmazonResults, searchSelect, bucket, action, items} = this.state
+    if ((action == 'initial' || action == 'similar' || action == 'modify' || action == 'more') && !rawAmazonResults[0]) {
+      return console.log('Please do an initial search first.')
+    }
     let newMessage = { client_res: []}
     newMessage.bucket = bucket
     newMessage.action = action
@@ -879,7 +882,7 @@ class ControlPanel extends Component {
         }, 1500)
       } else if (newMessage.action == 'checkout') {
           UserAPIUtils.urlShorten({array: [this.state.client_res[0]]}).then(function(res){
-            newMessage.client_res = res
+            newMessage.client_res = [decodeURIComponent(res[0])]
             socket.emit('new message', newMessage);
             self.setState({
               spinnerloading: true
@@ -919,7 +922,7 @@ class ControlPanel extends Component {
               UserAPIUtils.urlShorten({array: toShorten}).then(function(urlArr){
                 console.log('URLSHORTEN RETURN!', toShorten, urlArr)
                    toStitch.forEach(function(item, i){
-                    console.log('mmmkay', i)
+                    // console.log('mmmkay', i)
                       try { 
                         let attachObj = {};
                         attachObj.image_url = urlArr[i]

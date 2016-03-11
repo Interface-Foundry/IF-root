@@ -51,7 +51,7 @@ function emitBoth(data) {
     id: null,
     incoming: true,
     msg: (data.msg ? data.msg : ''),
-    tokens: (data.msg ? data.msg.split() : []),
+    tokens: ((data.msg && typeof data.msg == 'string') ? data.msg.split() : []),
     bucket: data.bucket,
     action: action,
     amazon: [],

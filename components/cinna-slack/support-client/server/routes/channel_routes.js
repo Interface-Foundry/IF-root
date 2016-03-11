@@ -79,6 +79,7 @@ module.exports = function(router) {
 
   // resolve channel issue
   router.post('/channels/resolve_channel', function(req, res) {
+    console.log('resolve channel backend : req.body: ', req.body)
     Channel.findOne({id: req.body.id}, function(err, data) {
         if(err) {
           console.log(err);

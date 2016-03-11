@@ -72,15 +72,16 @@ module.exports = function(router) {
   //post a new message to db
   router.post('/newmessage', function(req, res) {
 
+    if (!req.body) { console.log('/newmessage error : WTF? ',req) }
+
     //Check if message is 'kipsupervisor' if so unresolve channel
-    if(req.body.msg && req.body.msg.trim() == 'kipsupervisor') {
+    if(req.body && typeof req.body.msg == 'string' && req.body.msg && req.body.msg.trim() == 'kipsupervisor') {
         Channel.findOne({id: req.body.source.id}, function(err, chan) {
           if(err) {
             return res.status(500).json({msg: 'internal server error: /newmessage route.'});
           }
         //If Channel not found create it here, I know there's a separate channels routes for that but just trust me
         if (!chan) {
-
           console.log('MESSAGEROUTES: NO CHANNEL FOUND!')
           // var newChannel = new Channel({name: req.body.source.channel, id: req.body.source.id,resolved: false});
           // newChannel.save(function(err, saved) {
@@ -157,6 +158,10 @@ module.exports = function(router) {
         });
       }
       if (!data) {
+        if (req.body.flags && req.body.flags.toCinna) {
+          return
+          // return console.log('Not saving preview message.')
+        }
         // console.log('message_routes: req.body: ',req.body)
         if (req.body.amazon && req.body.amazon.length > 0) {
           var stringifiedItems = []
