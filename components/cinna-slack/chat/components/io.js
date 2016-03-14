@@ -75,13 +75,10 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
-    }else if (env === 'development') {
-      console.log('oh hey developer, i hope you are having a good day')
-    }
-    else {
-        console.log('retrieving slackbots from mongo');
+    }else{
+        console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
         Slackbots.find().exec(function(err, users) {
-            if(err){
+            if(err && process.env.NODE_ENV === 'production'){
                 console.log('saved slack bot retrieval error');
                 var mailOptions = {
                     to: 'Kip Server <hello@kipthis.com>',
