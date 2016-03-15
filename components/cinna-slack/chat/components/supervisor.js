@@ -56,6 +56,7 @@ function emitBoth(data) {
     action: action,
     amazon: [],
     source: {
+      //chnge to data.source.origin
       origin: 'socket.io',
       channel: data.source.channel,
       org: data.source.id.split('_')[0],

@@ -27,14 +27,14 @@ var messageSchema = mongoose.Schema({
         default: Date.now
     },
     //Delete dis
-    resolved: {
-        type: Boolean,
-        default: false
-    },
+    // resolved: {
+    //     type: Boolean,
+    //     default: false
+    // },
     //Delete dis 
-    parent:{
-        id: String
-    },
+    // parent:{
+    //     id: String
+    // },
     thread: {
         id: String,
         sequence: Number,
@@ -54,7 +54,8 @@ var messageSchema = mongoose.Schema({
             toClient: Boolean, //messages going from supervisor to cinna to client
             toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
             searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
-            recalled: Boolean //flag to bypass history function in cinna
+            recalled: Boolean, //flag to bypass history function in cinna
+            toTrain: Boolean //flag to mark for later training if supervisor is AFK mode
         }
 });
 

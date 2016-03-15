@@ -89,7 +89,7 @@ export function createMessage(message) {
     .send(message)
     .end((err, res) => {
       if (err) {
-        reject(res.body || err);
+        reject(err);
       } else {
         resolve(res.body);
       }
@@ -133,7 +133,7 @@ export function resolveChannel(channel) {
     .end((err, res) => {
       if (err) {
         console.log('resovle channel err: ',err)
-        reject(res.body || err);
+        reject(err);
       } else {
         resolve();
       }

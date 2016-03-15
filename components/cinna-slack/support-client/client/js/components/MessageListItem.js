@@ -35,7 +35,7 @@ class MessageListItem extends Component {
   renderMsg() {
      const {message,index} = this.props
      const msgType = (this.state.isImage === 'true') ? 'image' 
-         : (message.flags.toClient ? 'toClient' 
+         : (message.flags && message.flags.toClient ? 'toClient' 
               : (message.flags && message.flags.toCinna) ? 'toCinna' : 'message')
                   // : (message.flags && message.flags.response) ? 'response' : 'message')
      const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
@@ -183,7 +183,7 @@ class MessageListItem extends Component {
   render() {
     var self = this;
     const { message, index } = this.props;
-    const displayName = (index !== 0 && (message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify' || message.action  === 'focus' || message.action  === 'checkout' || message.action === 'more' )) ? 'Console:' : (index !== 0 && (message.bucket === 'response' || message.flags.toClient) ? 'Cinna' : message.source.id)
+    const displayName = (index !== 0 && (message.flags && message.flags.toCinna) && (message.action === 'initial' || message.action === 'similar' || message.action  === 'modify' || message.action  === 'focus' || message.action  === 'checkout' || message.action === 'more' )) ? 'Console:' : (index !== 0 && (message.bucket === 'response' || (message.flags && message.flags.toClient)) ? 'Cinna' : message.source.id)
     const nameStyle = (index !== 0 && message.flags && message.flags.toCinna) ? {color: '#e57373'} : {color: '#66c'}
     return (
       <li>

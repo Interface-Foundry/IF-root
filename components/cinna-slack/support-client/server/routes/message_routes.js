@@ -15,7 +15,7 @@ module.exports = function(router) {
       resolved: false
     }, function(err, data) {
       if (err) {
-        console.log('huhhhhhh',err);
+        console.log('/messages route err: ',err);
         return res.status(500).json({
           msg: 'internal server error'
         });
@@ -72,6 +72,7 @@ module.exports = function(router) {
   //post a new message to db
   router.post('/newmessage', function(req, res) {
 
+    // console.log('/newmessage getting here~',req.body.client_res);
     if (!req.body) { console.log('/newmessage error : WTF? ',req) }
 
     //Check if message is 'kipsupervisor' if so unresolve channel
@@ -93,43 +94,43 @@ module.exports = function(router) {
           //         }
           //       console.log('Channel ',saved.id, ' opened.')
           //  });
-          // var channelFound;
-          // var count = 0;
-          // async.whilst(
-          //     function () { return (!channelFound && count < 6) },
-          //     function (callback) {
-          //         Channel.findOne({id: req.body.source.id}, function(err, data) {
-          //           if(err) {
-          //             return res.status(500).json({msg: 'internal server error: /newmessage route.'});
-          //           }
-          //           if(!data) {
-          //             count++;
-          //             console.log(count)
-          //             setTimeout(function () {
-          //               callback(null, count);
-          //             }, 1000);
-          //           }
-          //           else if (data) {
-          //             console.log('Channel found!')
-          //             channelFound = data
-          //             callback(null);
-          //           }
-          //         }
-          //     },
-          //     function (err, n) {
-          //       if (err || !channelFound) {
-          //         return res.status(500).json({msg: 'internal server error'});
-          //       }
-          //       console.log('async loop finished',channelFound)
-          //       channelFound.resolved = false
-          //       channelFound.save(function(err, saved) {
-          //         if(err) {
-          //             console.log(err);
-          //             return res.status(500).json({msg: 'internal server error'});
-          //           }
-          //           console.log('Channel ',channelFound.id, ' opened.')
-          //       })
-          //     });
+          var channelFound;
+          var count = 0;
+          async.whilst(function() { return (!channelFound && count < 6) },
+              function (callback) {
+                  Channel.findOne({id: req.body.source.id}, function(err, data) {
+                    if(err) {
+                      return res.status(500).json({msg: 'internal server error: /newmessage route.'});
+                    }
+                    if(!data) {
+                      count++;
+                      console.log(count)
+                      setTimeout(function () {
+                        callback(null, count);
+                      }, 1000);
+                    }
+                    else if (data) {
+                      console.log('Channel found!')
+                      channelFound = data
+                      callback(null);
+                    }
+                  })
+              },
+              function (err, n) {
+                if (err || !channelFound) {
+                  return res.status(500).json({msg: 'internal server error'});
+                }
+                console.log('async loop finished',channelFound)
+                channelFound.resolved = false
+                channelFound.save(function(err, saved) {
+                  if(err) {
+                      console.log(err);
+                      return res.status(500).json({msg: 'internal server error'});
+                    }
+                    console.log('Channel ',channelFound.id, ' opened.')
+                  })
+              });
+       
         }
 
         //If Channel found
@@ -147,20 +148,19 @@ module.exports = function(router) {
       })
     }
 
-    Message.findOne({
-      'source.channel': req.body.source.channel,
-      'source.id': req.body.source.id,
-      'msg': req.body.msg
+    Message.find({'source.channel': req.body.source.channel,
+                  'source.id': req.body.source.id,
+                  'msg': req.body.msg
     }, function(err, data) {
       if (err) {
+        console.log('messages 157 err: ',err)
         return res.status(500).json({
           msg: 'internal server error'
         });
       }
-      if (!data) {
+      if (!data[0]) {
         if (req.body.flags && req.body.flags.toCinna) {
-          return
-          // return console.log('Not saving preview message.')
+          // return console.log('Not saving preview message.',req.body.flags)
         }
         // console.log('message_routes: req.body: ',req.body)
         if (req.body.amazon && req.body.amazon.length > 0) {
@@ -184,6 +184,7 @@ module.exports = function(router) {
                   msg: 'internal server error'
                 });
               }
+              console.log('/messages 188 SAVED!',saved.client_res)
               res.json(saved);
             })
           })
@@ -196,17 +197,59 @@ module.exports = function(router) {
                 msg: 'internal server error'
               });
             }
-            res.json(saved);
+            // console.log('/messages 200 SAVED!',saved.client_res)
+            return res.json(saved);
           })
         }
       }
-      if (data) {
-        // console.log('Message doubled up!')
-        res.json(data)
-      }
-    })
+      else if (data[0] && data[0].msg !== undefined) {
+        console.log('Message doubled up!')
+        return res.json(data[0])
+      } 
+      else {
+             if (req.body.amazon && req.body.amazon.length > 0) {
+              var stringifiedItems = []
+              async.eachSeries(req.body.amazon, function(item, callback) {
+                stringifiedItems.push(JSON.stringify(item));
+                callback();
+              }, function done(err) {
+                if (err) {
+                  console.log(err);
+                  return res.status(500).json({
+                    msg: 'internal server error'
+                  });
+                }
+                req.body.amazon = stringifiedItems
+                var newMessage = new Message(req.body);
+                newMessage.save(function(err, saved) {
+                  if (err) {
+                    console.log(err);
+                    return res.status(500).json({
+                      msg: 'internal server error'
+                    });
+                  }
+                  // console.log('/messages 188 SAVED!',saved.client_res)
+                  res.json(saved);
+                })
+              })
+            } else {
+            var newMessage = new Message(req.body);
+              newMessage.save(function(err, saved) {
+                if (err) {
+                  console.log(err, req.body);
+                  return res.status(500).json({
+                    msg: 'internal server error'
+                  });
+                }
+                // console.log('/messages 200 SAVED!',saved.client_res)
+                return res.json(saved);
+              })
+          }
+    }
 
   })
+
+})
 
   //resolve existing message in db
   router.post('/resolve', function(req, res) {

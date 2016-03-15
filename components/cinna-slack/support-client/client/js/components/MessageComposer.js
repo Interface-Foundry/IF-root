@@ -73,7 +73,7 @@ class MessageComposer extends Component {
   }
   
   render() {
-    const disabled = this.props.resolved ? true : false
+    const disabled = (this.props.resolved || this.props.AFK) ? true : false
     return (
       <div style={{
         zIndex: '52',

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react/addons';
+import React, { Component, PropTypes } from 'react';
 import { Button, ButtonGroup, DropdownButton, MenuItem } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import Spinner from 'react-spinner';
@@ -707,7 +707,7 @@ class ControlPanel extends Component {
               if (item && item.ItemAttributes && item.ItemAttributes[0].Title){
                 let cString = [];
                 let attribs = item.ItemAttributes[0];
-                console.log(attribs);
+                // console.log(attribs);
                 if (attribs.ClothingSize){
                   cString.push("Size: " + attribs.Size[0]);
                 }
@@ -816,18 +816,19 @@ class ControlPanel extends Component {
   }
 
   sendCommand() {
-    const { activeChannel, actions, activeMsg, messages } = this.props
+    const { activeChannel, actions, activeMsg, messages, AFK } = this.props
     const { rawAmazonResults, searchSelect, bucket, action, items} = this.state
     if ((action == 'initial' || action == 'similar' || action == 'modify' || action == 'more') && !rawAmazonResults[0]) {
       return console.log('Please do an initial search first.')
     }
-    let newMessage = { client_res: []}
+    let newMessage = { client_res: [] }
     newMessage.bucket = bucket
     newMessage.action = action
     newMessage.source = activeMsg.source
     newMessage.source.org = activeChannel.id.split('_')[0]
     newMessage.id = messages.length
     newMessage.flags = {toClient: true}
+    if (AFK)  { newMessage.flags.toTrain = true}
     newMessage.amazon = rawAmazonResults ? rawAmazonResults : null
     newMessage.source.origin = 'slack'
     let thread = activeMsg.thread
@@ -920,7 +921,7 @@ class ControlPanel extends Component {
               toShorten.push(item3.DetailPageURL[0])
               //Create shortened links
               UserAPIUtils.urlShorten({array: toShorten}).then(function(urlArr){
-                console.log('URLSHORTEN RETURN!', toShorten, urlArr)
+                // console.log('URLSHORTEN RETURN!', toShorten, urlArr)
                    toStitch.forEach(function(item, i){
                     // console.log('mmmkay', i)
                       try { 
@@ -932,7 +933,7 @@ class ControlPanel extends Component {
                         attachObj.fallback = 'Here are some options you might like';
                         newMessage.client_res.push(attachObj)
                       } catch(err) {
-                        console.log('ERRRRRRR FUCK', err)
+                        console.log('Cpanel: urlShorten err: ', err)
                       }
                    })
                     console.log('Cpanel649: Send Command: ', newMessage)
@@ -1071,13 +1072,13 @@ class ControlPanel extends Component {
     }
 
   render() {
-     const { activeMsg, activeControl, activeChannel, messages,actions,changeMode} = this.props;
+     const { activeMsg, activeControl, activeChannel, messages,actions,changeMode, AFK} = this.props;
      // const fields  = ['msg','bucket','action']
      const self = this;
      const { items,searchSelect,rawAmazonResults } = this.state;
      const list = (this.state.mounted)? <ReactList itemRenderer={::this.renderItem} length={this.state.items.length} type='simple' /> : null
-     const statusText = activeChannel.resolved ? 'CLOSED' : 'OPEN'
-     const statusStyle = activeChannel.resolved ?  { fontSize:'3em' ,color: 'green'} : { fontSize:'3em',color: 'red'}
+     const statusText = activeChannel.resolved ? 'TICKET CLOSED' : 'TICKET OPEN'
+     const statusStyle = activeChannel.resolved ?  { fontSize:'1.5em' ,color: 'green', marginLeft:'4.4em'} : { fontSize:'1.5em',color: 'red', marginLeft:'4.4em'}
      const sendDisabled = activeChannel.resolved || this.state.sendingToClient ? true : false
      const showSearchBox = this.state.action === 'initial' ? {textAlign: 'center', marginTop: '5em'} : {display: 'none'};
      const showSimilarBox = this.state.action === 'similar' ? { textAlign: 'center', marginTop: '5em'} : {display: 'none'};
@@ -1089,7 +1090,7 @@ class ControlPanel extends Component {
      const spinnerStyle = (this.state.spinnerloading === true) ? {backgroundColor: 'orange',color: 'black'} : {backgroundColor: 'orange',color: 'orange',display: 'none'}
      const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.9em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
      const selectedStyle = this.state.lastSeen ? {} : { display: 'none'}
-    
+     const sendCommandText = AFK ? 'SEND TO DB' : 'SEND TO CLIENT'
      return ( 
          <div className="flexbox-container">
           <div id="second-column">
@@ -1191,18 +1192,18 @@ class ControlPanel extends Component {
                </div>
             </div>
               <Button block bsSize = "large" style={{ position: 'fixed', bottom:'10%',maxWidth: '15em',textAlign: 'center', backgroundColor: '#1de9b6' }} bsStyle = "danger" onClick = { () => this.sendCommand(activeMsg)} disabled={sendDisabled} >
-              SEND TO CLIENT: { self.state.lastAction ? self.state.lastAction.toUpperCase() : '' } 
+              {sendCommandText}: { self.state.lastAction ? self.state.lastAction.toUpperCase() : '' } 
             </Button>
           </div>
 
           <div id="third-column" style= {{ padding: 0}}>
-                <label>
+              <div style={{marginTop: '-2em'}}>
                   <Toggle
                     ref='toggle'
                     defaultChecked={this.props.resolved}
                     onChange={ () => { changeMode(activeChannel) }} />
                     <span style={statusStyle}>  {statusText}</span>
-                </label>
+              </div>
                 <form ref='form1' onSubmit={::this.handleSubmit}>
                     <div style={{ display: 'flexbox', textAlign:'center',marginTop: '0.8em' }}>
                       <ButtonGroup bsSize = "medium" bsStyle = "primary"  style={{margin: '0.2em'}}>

@@ -29,14 +29,15 @@ class Chat extends Component {
     activeControl: PropTypes.object.isRequired,
     activeMessage: PropTypes.object.isRequired
   };
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
+  // static contextTypes = {
+  //   router: PropTypes.object.isRequired
+  // };
      constructor (props, context) {
       super(props, context)
       this.state = {
         autoToggled: false,
-        stream: false
+        stream: false,
+        AFK: false
       }
     }
 
@@ -53,9 +54,9 @@ class Chat extends Component {
          actions.resolveChannel(tempChannel)
          self.refs.channelsref.forceUpdate()
       }
-      // msg.parent = (filtered.length > 0) ?  false : true
-      // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
-      // console.log('Chat67:', filtered, self.props.messages,msg)
+      if (self.state.AFK) {
+        msg.flags.toTrain = true
+      }
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>
@@ -64,9 +65,12 @@ class Chat extends Component {
     socket.on('stop typing bc', username =>
       actions.stopTyping(username)
     );
-    socket.on('new channel', channel =>
+    socket.on('new channel', function(channel) {  
+      if (self.state.AFK) {
+        channel.AFK = true
+      }
       actions.receiveRawChannel(channel)
-    );
+    });
      socket.on('disconnect bc', socket =>
       console.log('user disconnected! ',socket)
     );
@@ -85,7 +89,7 @@ class Chat extends Component {
         // console.log('Case 3:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
       }
 
-      let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
+      let resolved = (nextmsg && nextmsg.thread && nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
 
       self.setState({ resolved: channels.next.resolved })
       // console.log('Chat84',channels, self.state)
@@ -250,6 +254,11 @@ class Chat extends Component {
         )
   }
 
+
+  toggleAFK() {
+    this.setState({AFK: !this.state.AFK})
+  }
+
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
     const filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
@@ -273,8 +282,11 @@ class Chat extends Component {
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
+            <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none'}} onClick = { () => { this.toggleAFK() } } >
               <div className="kipicon">
               </div>
+            </Button>
+             
             <section style={{order: '2', marginTop: '1.5em'}}>
               <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
             </section>
@@ -298,7 +310,7 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
-              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange} AFK={this.state.AFK} />
             </div>
           </div>
         
@@ -306,7 +318,7 @@ class Chat extends Component {
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
         <div style= {streamDisplay}>
-          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved}/>
+          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} AFK={this.state.AFK} />
         </div>  
           {typers.length === 1 &&
             <div>
