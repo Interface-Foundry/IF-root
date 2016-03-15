@@ -136,7 +136,7 @@ function loadSlackUsers(users){
 
         slackUsers[user.team_id].start();
 
-        //on slack auth 
+        //on slack auth
         slackUsers[user.team_id].on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
             console.log('DEBUG: checking meta initialized: ', user.meta);
             //* * * * Welcome message * * * //
@@ -144,7 +144,7 @@ function loadSlackUsers(users){
 
             if (rtmStartData.self){
                 slackUsers[user.team_id].botId = rtmStartData.self.id;
-                slackUsers[user.team_id].botName = rtmStartData.self.name;                
+                slackUsers[user.team_id].botName = rtmStartData.self.name;
             }
 
             //this if here for dev testing
@@ -162,8 +162,8 @@ function loadSlackUsers(users){
                     },
                     action:'sendAttachment',
                     client_res: [],
-                    botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot 
-                    botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot 
+                    botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                    botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
                 };
 
                 banter.welcomeMessage(hello, function(res) {
@@ -192,8 +192,8 @@ function loadSlackUsers(users){
                         },
                         action:'sendAttachment',
                         client_res: [],
-                        botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot 
-                        botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot 
+                        botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                        botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
                     };
 
                     banter.welcomeMessage(hello, function(res) {
@@ -217,9 +217,9 @@ function loadSlackUsers(users){
             };
             mailerTransport.sendMail(mailOptions, function(err) {
                 if (err) console.log(err);
-            });        
+            });
         });
-        
+
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
 
@@ -249,7 +249,7 @@ function loadSlackUsers(users){
                         // }, (e) => {
                         //   console.log('Error: ', e)
                         // })
-                        console.log('Warning: Slack connection closed: ',res);
+                        console.log('TODO: handle images sent to kip');
                         var mailOptions = {
                             to: 'Kip Server <hello@kipthis.com>',
                             from: 'User tried sending image to Kip <server@kipthis.com>',
@@ -1158,7 +1158,7 @@ var sendResponse = function(data){
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
                         callback();
                     });
-                    
+
 
                 }, function done(){
                 });
