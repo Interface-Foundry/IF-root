@@ -57,7 +57,7 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 app.use(express.static(__dirname + '/static'))
-app.get('/healthcheck', function () {
+app.get('/healthcheck', function (req, res) {
   res.send('💬 🌏')
 })
 server.listen(8000, function(e) {

@@ -23,7 +23,9 @@ module.exports = function(router) {
 
       if (data && data.length === 0) {
         console.log('No data found.')
-        return
+        return res.status(404).json({
+          msg: 'internal server error'
+        });
       }
       async.eachSeries(data, function(message, callback1) {
         // console.log('Backend: message routes: flags : ',message.flags)

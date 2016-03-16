@@ -28,6 +28,10 @@ app.use(require('prerender-node').set('protocol', 'https'));
 //     maxAge: oneDay
 // }));
 
+app.get('/testslack', function(req, res) {
+  res.send(fs.readFileSync(__dirname + '/test-button.html', 'utf8'))
+})
+
 app.get('/newslack', function(req, res) {
     console.log('new slack integration request');
     // TODO post in our slack #dev channel
@@ -41,13 +45,19 @@ app.get('/newslack', function(req, res) {
         return;
     }
 
+
+    var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : '2804113073.26284712467';
+    var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : 'b69ba0ea3b4a951facc77962c49a1228';
+    var redirect_uri = process.env.NODE_ENV === 'production' ? 'https://kipsearch.com/newslack' : 'http://yak.kipapp.co/newslack';
+    var slackbot_reload_url = process.env.NODE_ENV === 'production' ? 'http://chat.kipapp.co/newslack' : 'http://localhost:8000/newslack';
+
     var body = {
       code: req.query.code,
-      redirect_uri: 'https://kipsearch.com/newslack'
+      redirect_uri: redirect_uri
     }
 
     request({
-      url: 'https://2804113073.14708197459:d4c324bf9caa887a66870abacb3d7cb5@slack.com/api/oauth.access',
+      url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
       method: 'POST',
       form: body
     }, function(e, r, b) {
@@ -76,7 +86,7 @@ app.get('/newslack', function(req, res) {
         var bot = new db.Slackbot(b)
         bot.save(function(e) {
             kip.err(e);
-            request('http://chat.kipapp.co/newslack', function(e, r, b) {
+            request(slackbot_reload_url, function(e, r, b) {
                 if (e) {
                     console.error('error triggering chat server slackbot update')
                 }

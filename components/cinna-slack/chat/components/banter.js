@@ -5,8 +5,14 @@ var checkForCanned = function(input,callback,origin) {
     var flag;
     var query;
 
+    //prevents people from copy pasting onboard message into pub channel to @kip
+    if(input.indexOf('I just enabled') > -1){
+        flag = 'cancel';
+    }
+
     //pre-sort canned banter
     switch (true) {
+
         //basic weight system for percentage similarity for string matching
         case textSimilar(input,'hi') > 60:
         case textSimilar(input,'hello') > 60:
@@ -17,13 +23,13 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'hey there') > 60:
         case textSimilar(input,'salutations') > 60:
             flag = 'basic';
-            res = input + ', what can I do for you? Tell me the thing you\'re looking for, or use help for more options 😊';
+            res = input + ', what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
             break;
         case textSimilar(input,'hi kip') > 60:
         case textSimilar(input,'hello kip') > 60:
         case textSimilar(input,'hey kip') > 60:
             flag = 'basic';
-            res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use help for more options 😊';
+            res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
             break;     
         case textSimilar(input,'what you up to') > 60:
         case textSimilar(input,'whats up') > 60:
@@ -771,7 +777,7 @@ var checkForCanned = function(input,callback,origin) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.6 Cardamom';
+            res = 'I\'m a penguin running Kip v0.6.1 Cardamom';
             break;
 
         case '/':
@@ -883,21 +889,28 @@ var welcomeMessage = function(data,callback){
     var res;
 
     if (data.source.origin == 'slack'){
-        res = 'Hi I\'m Kip, your personal shopper!\n'+
-        'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n\n\n'+
-        
-        'Check for product details for item :three: by chatting `3`\n'+
-        'See more results with `more`. Search more items like :two: with `more like 2`\n\n\n'+
-        // 'You can buy item :one: by chatting `buy 1`\n\n'+
 
-        'See more ways to chat with Kip by typing `help`\n'+
-        'Try it now! Maybe you need new headphones? Type `headphones` to start.'
+        res = {
+            "fallback": "Well done! *Kip* has been enabled for your team. \n If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+            "color": "#45a5f4",
+            "mrkdwn_in": ["pretext","fields"],
+            "link_names":1,
+            "parse":"full",
+            "pretext": "Well done! *Kip* has been enabled for your team. \n If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+            "fields": [
+                {
+                    "value": "Hey <@channel>, I just enabled <@"+data.botId+"|"+data.botName+"> for our team, so you can search for things you want to buy. \n\n\n Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:\n\n Check product details for item :three: by chatting `3`\n\n See more results with `more`. Search more items like :two: with `more like 2`\n\n Type `help` to <@"+data.botId+"|"+data.botName+"> for more info.",
+                    "short": false
+                }
+            ]
+        }
+
     }
     else if (data.source.origin == 'socket.io'){
         res = 'Hi I\'m Kip, your personal shopper!<br>'+
         'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br><br><br>'+
         
-        'Check for product details for item <span class="selector">➌</span> by chatting <span class="typer">3</span><br>'+
+        'Check product details for item <span class="selector">➌</span> by chatting <span class="typer">3</span><br>'+
         'See more results with <span class="typer">more</span>. Search more items like <span class="selector">➋</span> with <span class="typer">more like 2</span><br><br><br>'+
         // 'You can buy item <span class="selector">➊</span> by chatting <span class="typer">buy 1</span><br><br>'+
 
