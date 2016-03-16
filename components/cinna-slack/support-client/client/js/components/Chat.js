@@ -285,7 +285,7 @@ class Chat extends Component {
               <div className={this.state.AFK ? 'kipiconsleep' : 'kipicon'}>
               </div>
             </Button>
-             
+          <label style={{ margin: '0 auto'}}> { this.state.AFK ? 'TRAINING MODE' : 'LIVE MODE' }</label>
             <section style={{order: '2', marginTop: '1.5em'}}>
               <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
             </section>
