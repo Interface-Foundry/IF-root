@@ -84,13 +84,22 @@ app.get('/newslack', function(req, res) {
         console.log('body was', body)
         console.log('response was', b)
         var bot = new db.Slackbot(b)
-        bot.save(function(e) {
-            kip.err(e);
-            request(slackbot_reload_url, function(e, r, b) {
-                if (e) {
-                    console.error('error triggering chat server slackbot update')
-                }
+        db.Slackbots.find({team_id: b.team_id}, function(e, bots) {
+          if (e) { console.error(e) }
+
+          if (bots && bots.length > 0) {
+            console.log('already have a bot for this team')
+            return;  
+          } else {
+            bot.save(function(e) {
+                kip.err(e);
+                request(slackbot_reload_url, function(e, r, b) {
+                    if (e) {
+                        console.error('error triggering chat server slackbot update')
+                    }
+                })
             })
+          }
         })
     })
 
