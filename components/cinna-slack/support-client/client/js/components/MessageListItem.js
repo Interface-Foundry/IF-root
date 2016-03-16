@@ -39,21 +39,6 @@ class MessageListItem extends Component {
               : (message.flags && message.flags.toCinna) ? 'toCinna' : 'message')
                   // : (message.flags && message.flags.response) ? 'response' : 'message')
      const messageStyle = (message.flags && message.flags.toCinna) ? {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em', fontStyle: 'italic'} : {clear: 'both', paddingTop: '0.1em', marginTop: '-1px', paddingBottom: '0.3em'}
-     // let text = ''
-     // switch (message.action){
-     //  case 'initial':
-     //  case 'more':
-     //    text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
-     //    break;
-     //  case 'similar':
-     //    text = 'We found some options similar to '+message.searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
-     //    break;
-     //  case 'checkout':
-     //    text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
-     //    break;
-     //  default:
-     //    text = message.client_res[0]          
-     // }
      switch (msgType){
       case 'image' : 
         return (

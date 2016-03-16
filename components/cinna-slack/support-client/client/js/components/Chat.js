@@ -1,6 +1,5 @@
 import React, { Component, PropTypes, Image } from 'react';
 import ReactDOM from 'react-dom';
-import TopPanel from './TopPanel';
 import ControlPanel from './ControlPanel';
 import MessageComposer from './MessageComposer';
 import MessageListItem from './MessageListItem';
@@ -231,7 +230,7 @@ class Chat extends Component {
      let filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
      let displayMessages = this.state.stream ?   
        messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor).map(message =>
-            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
+            <MessageListItem message={message}  key={message.source.id.concat(message.ts)}  />
            )
            :  
         filteredMessages.map(function(message,index) {
@@ -266,7 +265,7 @@ class Chat extends Component {
     const username = this.props.user.username;
     const resolved = activeChannel.resolved
     const displayMessages = filteredMessages.map(function(message,index) {
-                            return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
+                            return <MessageListItem message={message} key={message.source.id.concat(message.ts).concat(index)} index={index}/>
                           })
     const elHeights = [] 
     filteredMessages.forEach(function(msg) {

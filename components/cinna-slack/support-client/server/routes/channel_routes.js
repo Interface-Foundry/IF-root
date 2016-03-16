@@ -90,11 +90,11 @@ module.exports = function(router) {
           data.save(function(err, res) {
             if (err) {return console.log(err)}
             console.log('Channel ',res.id, ' closed.')
-            // return res.send(res)
+            return res.status(200)
           })
           } else {
              console.log('Channel Routes: Channel does not exist. ')
-            res.json({});
+            return res.status(404).json({msg: 'internal server error'});
            }
       })
   });

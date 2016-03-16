@@ -74,9 +74,6 @@ module.exports = function(router) {
   //post a new message to db
   router.post('/newmessage', function(req, res) {
 
-    // console.log('/newmessage getting here~',req.body.client_res);
-    if (!req.body) { console.log('/newmessage error : WTF? ',req) }
-
     //Check if message is 'kipsupervisor' if so unresolve channel
     if(req.body && typeof req.body.msg == 'string' && req.body.msg && req.body.msg.trim() == 'kipsupervisor') {
         Channel.findOne({id: req.body.source.id}, function(err, chan) {
@@ -85,17 +82,7 @@ module.exports = function(router) {
           }
         //If Channel not found create it here, I know there's a separate channels routes for that but just trust me
         if (!chan) {
-          console.log('MESSAGEROUTES: NO CHANNEL FOUND!')
-          // var newChannel = new Channel({name: req.body.source.channel, id: req.body.source.id,resolved: false});
-          // newChannel.save(function(err, saved) {
-          //        if (err) {
-          //          console.log(err);
-          //           return res.status(500).json({
-          //           msg: 'internal server error'
-          //          });
-          //         }
-          //       console.log('Channel ',saved.id, ' opened.')
-          //  });
+          // console.log('MESSAGEROUTES: NO CHANNEL FOUND!')
           var channelFound;
           var count = 0;
           async.whilst(function() { return (!channelFound && count < 6) },
@@ -188,7 +175,7 @@ module.exports = function(router) {
                 });
               }
               console.log('/messages 188 SAVED!',saved.client_res)
-              res.json(saved);
+              return res.json(saved);
             })
           })
         } else {
@@ -210,32 +197,34 @@ module.exports = function(router) {
         return res.json(data[0])
       } 
       else {
-             if (req.body.amazon && req.body.amazon.length > 0) {
-              var stringifiedItems = []
-              async.eachSeries(req.body.amazon, function(item, callback) {
-                stringifiedItems.push(JSON.stringify(item));
-                callback();
-              }, function done(err) {
-                if (err) {
-                  console.log(err);
-                  return res.status(500).json({
-                    msg: 'internal server error'
-                  });
-                }
-                req.body.amazon = stringifiedItems
-                var newMessage = new Message(req.body);
-                newMessage.save(function(err, saved) {
+               if (req.body.amazon && req.body.amazon.length > 0) {
+                var stringifiedItems = []
+                async.eachSeries(req.body.amazon, function(item, callback) {
+                  stringifiedItems.push(JSON.stringify(item));
+                  callback();
+                }, function done(err) {
                   if (err) {
                     console.log(err);
                     return res.status(500).json({
                       msg: 'internal server error'
                     });
                   }
-                  // console.log('/messages 188 SAVED!',saved.client_res)
-                  res.json(saved);
+                  req.body.amazon = stringifiedItems
+                  var newMessage = new Message(req.body);
+                  newMessage.save(function(err, saved) {
+                    if (err) {
+                      console.log(err);
+                      return res.status(500).json({
+                        msg: 'internal server error'
+                      });
+                    }
+                    // console.log('/messages 188 SAVED!',saved.client_res)
+                    res.json(saved);
+                  })
                 })
-              })
-            } else {
+            } 
+            else {
+
             var newMessage = new Message(req.body);
               newMessage.save(function(err, saved) {
                 if (err) {
@@ -247,11 +236,10 @@ module.exports = function(router) {
                 // console.log('/messages 200 SAVED!',saved.client_res)
                 return res.json(saved);
               })
+              
           }
     }
-
   })
-
 })
 
   //resolve existing message in db

@@ -903,12 +903,14 @@ class ControlPanel extends Component {
               let text = ''
              switch (newMessage.action){
               case 'initial':
+              case 'similar':
+              case 'modify':
               case 'more':
                 text = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊'
                 break;
-              case 'similar':
-                text = (searchSelect[0] && searchSelect[0] < 4 ) ? 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options' : 'We found some similar options, would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
-                break;
+              // case 'similar':
+              //   text = (searchSelect[0] && searchSelect[0] < 4 ) ? 'We found some options similar to '+ searchSelect[0] +', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options' : 'We found some similar options, would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+              //   break;
               case 'checkout':
                 text = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
                 break;

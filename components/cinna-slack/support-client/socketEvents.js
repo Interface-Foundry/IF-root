@@ -15,7 +15,7 @@ exports = module.exports = function(io, cinnaio) {
             // console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
-                    console.log('\nI/O: routed to  --> incoming msg\n')
+                    console.log('\nI/O: routed to  --> incoming msg',msg.client_res,'\n')
                       if(err) {
                         console.log('socket events err - 21: ',err);
                       }
@@ -59,17 +59,24 @@ exports = module.exports = function(io, cinnaio) {
                     break;
                 case 'outgoing':
                     console.log('I/O: routed to --> outgoing msg\n')
-                    if (msg.bucket === 'response') {console.log('Broadcasting new bc message.'); socket.broadcast.emit('new bc message', msg) }
-                    else { console.log('Emitting new bc message'); socket.emit('new bc message', msg) }
+                    
+                    if (msg.bucket === 'response') {
+                      // console.log('Broadcasting new bc message.'); 
+                      socket.broadcast.emit('new bc message', msg) }
+                    else { 
+                      // console.log('Emitting new bc message'); 
+                      socket.emit('new bc message', msg) 
+                    }
+
                     if(!(msg.flags && msg.flags.toTrain)) {
-                      console.log('Sending results to client.', msg.flags,msg.client_res)
+                      console.log('Sending results to client.')
                       ioClient.emit("msgFromSever", msg);
                     } else {
-                      console.log('Sending results to DB.', msg.flags,msg.client_res)
+                      console.log('Sending results to DB.')
                     } 
                     break;
                 case 'searchResults':
-                    // console.log('I/O: routed to --> incoming results',msg,'\n')
+                    console.log('I/O: routed to --> incoming results',msg.client_res,'\n')
                     socket.broadcast.emit('results', msg)
                     break;
                 default:
