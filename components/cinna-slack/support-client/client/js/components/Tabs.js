@@ -21,7 +21,7 @@ class Tabs extends Component {
         <li key={index} style={{display: 'inline', marginRight: '1em'}}>
           <a href="#" 
             className={activeClass}
-            onClick={this.handleClick.bind(this, index)} style={{color: 'white'}}>
+            onClick={this.handleClick.bind(this, index)} style={this.state.selected === index ? { color: 'orange'} : { color: 'white' }}>
             {child.props.label}
           </a>
         </li>

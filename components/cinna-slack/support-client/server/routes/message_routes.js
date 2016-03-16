@@ -161,6 +161,7 @@ module.exports = function(router) {
       if (!data[0]) {
         if (req.body.flags && req.body.flags.toCinna) {
           // return console.log('Not saving preview message.',req.body.flags)
+           return res.status(200)
         }
         // console.log('message_routes: req.body: ',req.body)
         if (req.body.amazon && req.body.amazon.length > 0) {

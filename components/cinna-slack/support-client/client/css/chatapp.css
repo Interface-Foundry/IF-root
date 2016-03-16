@@ -37,6 +37,14 @@ body {
   margin: 0 auto;
 }
 
+.kipiconsleep {
+  content: url("/static/kip-iconsleep.png");
+  width: 3.5em;
+  height: 3.5em;
+  margin: 0 auto;
+}
+
+
 .product-box {
   box-sizing: border-box;
       background: #fff;

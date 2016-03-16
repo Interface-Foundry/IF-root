@@ -283,7 +283,7 @@ class Chat extends Component {
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
             <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none'}} onClick = { () => { this.toggleAFK() } } >
-              <div className="kipicon">
+              <div className={this.state.AFK ? 'kipiconsleep' : 'kipicon'}>
               </div>
             </Button>
              
