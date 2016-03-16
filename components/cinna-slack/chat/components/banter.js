@@ -51,11 +51,11 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.initial'; //do this action
             res = 'If the meaning of life is happiness, then you can definitely buy some here 😉';
             break;
-        case textSimilar(input,'i\'m great') > 60:
-        case textSimilar(input,'i\'m good') > 60:
-        case textSimilar(input,'i\'m awesome') > 60:
-        case textSimilar(input,'i\'m doing well') > 60:
-        case textSimilar(input,'i\'m fine') > 60:
+        case textSimilar(input,'i\'m great') > 80:
+        case textSimilar(input,'i\'m good') > 80:
+        case textSimilar(input,'i\'m awesome') > 80:
+        case textSimilar(input,'i\'m doing well') > 80:
+        case textSimilar(input,'i\'m fine') > 80:
         case textSimilar(input,'i\'m ok') > 90:
             query = 'today\'s deals on amazon';
             flag = 'search.initial'; //do this action
@@ -284,8 +284,10 @@ var checkForCanned = function(input,callback,origin) {
             break;
 
         case textSimilar(input,'i\'m tired') > 60:
+        case textSimilar(input,'im tired') > 60:
         case textSimilar(input,'tired') > 90:
         case textSimilar(input,'i\'m sleepy') > 60:
+        case textSimilar(input,'im sleepy') > 60:
         case textSimilar(input,'zzz') > 70:
             flag = 'search.initial';
             query = 'coffee';
@@ -347,6 +349,9 @@ var checkForCanned = function(input,callback,origin) {
 
         case textSimilar(input,'thx') > 80:
         case textSimilar(input,'thanks') > 80:
+        case textSimilar(input,'thanks kip') > 80:
+        case textSimilar(input,'thank you kip') > 80:
+        case textSimilar(input,'thx kip') > 80:
         case textSimilar(input,'thank you') > 70:
             flag = 'basic';
             res = 'You\'re welcome 😊';
@@ -491,6 +496,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'hate this') > 90:
         case textSimilar(input,'kip sucks') > 90:
         case textSimilar(input,'this sucks') > 90:
+        case textSimilar(input,'you suck') > 90:
         case textSimilar(input,'what a waste of time') > 90:
         case textSimilar(input,'useless bot') > 90:
         case textSimilar(input,'die') > 90:
