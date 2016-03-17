@@ -15,7 +15,7 @@ exports = module.exports = function(io, cinnaio) {
             // console.log('\nI/O: raw msg:', msg)
             switch(type) {
                 case 'incoming':
-                    console.log('\nI/O: routed to  --> incoming msg',msg.client_res,'\n')
+                    console.log('\nI/O: routed to  --> incoming msg',msg,'\n')
                       if(err) {
                         console.log('socket events err - 21: ',err);
                       }
@@ -69,7 +69,7 @@ exports = module.exports = function(io, cinnaio) {
                     }
 
                     if(!(msg.flags && msg.flags.toTrain)) {
-                      console.log('Sending results to client.')
+                      console.log('Sending results to client.', msg)
                       ioClient.emit("msgFromSever", msg);
                     } else {
                       console.log('Sending results to DB.')

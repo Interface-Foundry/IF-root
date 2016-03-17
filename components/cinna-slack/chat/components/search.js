@@ -737,13 +737,15 @@ var searchModify = function(data,flag){
                 //unsortable modifier
                 case 'genericDetail':
                     //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                    if (data.dataModify.val == 'buy'){
+                    if (data.dataModify.val[0] == 'buy'){
+                        console.log('\n\n\n\n\n1I mean is it getting here even?', data)
                         data.bucket = 'purchase';
                         data.action = 'save';
                         ioKip.saveToCart(data);
                     }
                     //normal action here
                     else {
+                        console.log('\n\n\n\n\n1 Or is it getting here even?', data)
                         console.log('genericDetail FIRED!!!');
                         console.log('genericDetail type: ',data.dataModify.type);
                         console.log('genericDetail param: ',data.dataModify.param);
@@ -899,13 +901,15 @@ var searchModify = function(data,flag){
             //unsortable modifier
             case 'genericDetail':
                 //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                if (data.dataModify.val == 'buy'){
+                if (data.dataModify.val[0] == 'buy'){
+                    console.log('\n\n\n\n\nI mean is it getting here even?', data)
                     data.bucket = 'purchase';
                     data.action = 'save';
-                    saveToCart(data);
+                    ioKip.saveToCart(data);
                 }
                 //normal action here
                 else {
+                    console.log('\n\n\n\n\nOr is it getting here even?', data)
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj

@@ -136,7 +136,7 @@ class Chat extends Component {
 
    changeActiveMessage(channel) {
     const { actions, messages, activeChannel} = this.props;
-    const activeMessages = messages.filter(message => message.source.channel === channel.name);
+    const activeMessages = messages.filter(message => message.source.id === channel.id);
     const firstMsg = activeMessages[0]
     // console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
@@ -144,7 +144,7 @@ class Chat extends Component {
     if (firstMsg) {
       actions.changeMessage(firstMsg);
     } else {
-      console.log('There is no previous channel: ',channel, activeMessages)
+      // console.log('There is no previous channel: ',channel, activeMessages)
     }
   }
 

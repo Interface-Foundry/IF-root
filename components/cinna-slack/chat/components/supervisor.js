@@ -1,4 +1,8 @@
 var ioClient = require('socket.io-client').connect("http://localhost:3000");
+var newParentItem = require('./history.js').newParentItem
+var newChildItem = require('./history.js').newChildItem
+var recallHistory = require('./history.js').recallHistory
+
 ioClient.on('connect', function() {
   console.log('Connected to support client.')
 })
@@ -36,17 +40,15 @@ function emitMsg(data) {
 function emitBoth(data) {
   //Prevent the dreaded infinite loop
   if (data.flags && data.flags !== {} && data.flags.toCinna) return
-  
-  // console.log('\n\n\nEmitting both\n\n\n')
-  
   var resolved = (data.msg === 'kipsupervisor') ? false : true
   ioClient.emit('new channel', {
     name: data.source.channel,
     id: data.source.id,
     resolved: resolved
   })
-  var action = data.action ? data.action : ''
+  var action = data.action ? data.action : '';
   var flags = (data.flags && data.flags !== {}) ? data.flags : {toSupervisor: true};
+
   ioClient.emit('new message', {
     id: null,
     incoming: true,
@@ -66,6 +68,7 @@ function emitBoth(data) {
     ts: Date.now,
     thread: data.thread,
     urlShorten:data.urlShorten,
+    thread: data.thread,
     flags: flags
   })
 }

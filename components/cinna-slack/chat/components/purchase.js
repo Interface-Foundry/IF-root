@@ -15,7 +15,7 @@ var outputCart = function(data,cartHistory,callback) {
 
         //async push items to cart
         async.eachSeries(cartHistory.cart, function(item, callback) {
-
+            console.log('\n\n\npurchase.js : item: ',item)
             cartItems.push({
                 ASIN: item.ASIN,
                 Quantity: 1

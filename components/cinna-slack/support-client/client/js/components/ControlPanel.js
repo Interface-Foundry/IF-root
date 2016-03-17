@@ -170,7 +170,7 @@ class ControlPanel extends Component {
      
      //Load redux state into local state for next channel
      let nextItems = []
-     if (nextMsg) {
+     if (nextMsg && nextMsg.amazon && nextMsg.amazon.length > 0) {
       //Load items into state for next channel 
        try {
            for (var i = 0; i < nextMsg.amazon.length; i++) {
@@ -207,7 +207,6 @@ class ControlPanel extends Component {
           // }
         } catch(err) {
           console.log('CPanel Error 169 Could not get results :',err)
-          return
         } 
 
      }
@@ -560,7 +559,7 @@ class ControlPanel extends Component {
     newQuery.source.origin = 'supervisor';
     newQuery.recallHistory =  { amazon: lastSeen.slice(0)}
     UserAPIUtils.urlShorten({array: [lastSeen[selected-1].DetailPageURL[0]]}).then(function(res){
-      newQuery.recallHistory.urlShorten = res
+      newQuery.recallHistory.urlShorten = shortUrl
       console.log('Cpanel490: ',newQuery.recallHistory.urlShorten,[res.body],[lastSeen[selected-1].DetailPageURL[0]])
       newQuery.amazon =  lastSeen.slice(0)
       newQuery.searchSelect = [selected]
@@ -595,7 +594,7 @@ class ControlPanel extends Component {
       return
     }
     const self = this;
-    console.log('checkOut(), selected: ',selected)
+    // console.log('checkOut(), selected: ',selected)
     this.setField('checkout')
     let newQuery = {}
     newQuery.msg = 'more'
@@ -825,7 +824,9 @@ class ControlPanel extends Component {
     newMessage.bucket = bucket
     newMessage.action = action
     newMessage.source = activeMsg.source
-    newMessage.source.org = activeChannel.id.split('_')[0]
+    newMessage.source.channel = activeChannel.name
+    newMessage.source.id = activeChannel.id;
+    newMessage.source.org = activeChannel.id.split('_')[0];
     newMessage.id = messages.length
     newMessage.flags = {toClient: true}
     if (AFK)  { newMessage.flags.toTrain = true}
@@ -882,8 +883,9 @@ class ControlPanel extends Component {
           self.setState({sendingToClient: false})
         }, 1500)
       } else if (newMessage.action == 'checkout') {
-          UserAPIUtils.urlShorten({array: [this.state.client_res[0]]}).then(function(res){
-            newMessage.client_res = [decodeURIComponent(res[0])]
+          UserAPIUtils.urlShorten({array: [this.state.client_res[1]]}).then(function(res){
+            let shortUrl  = (typeof res[0] == 'undefined') ? self.state.client_res[1] : decodeURIComponent(res[0])
+            newMessage.client_res = [shortUrl]
             socket.emit('new message', newMessage);
             self.setState({
               spinnerloading: true
