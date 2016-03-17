@@ -201,6 +201,13 @@ function loadSlackUsers(users){
                         hello.client_res.push(res);
                         //send attachment!
                         sendResponse(hello, res);
+
+                        user.conversations = user.conversations || {};
+                        user.conversations[addedBy.dm] = 'onboard';
+                        return conversation_botkit.onboard(user, addedBy.id, function() {
+                          console.log('done with onboarding conversation')
+                          user.conversations[addedBy.dm] = false;
+                        });
                     })
 
                 })
