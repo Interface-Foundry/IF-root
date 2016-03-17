@@ -1,7 +1,6 @@
 var botkit = require('botkit')
-
 var controller = botkit.slackbot();
-
+var db = require('db')
 
 /*
 slackbot: slackbot_schema
@@ -13,7 +12,7 @@ message: slack message { type: 'message',
   team: 'T0R6J00JW' }
 */
 module.exports = {}
-module.exports.onboard = function(slackbot, user_id) {
+module.exports.onboard = function(slackbot, user_id, done) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   })
@@ -23,7 +22,15 @@ module.exports.onboard = function(slackbot, user_id) {
       throw new Error('Could not connect to Slack');
     }
 
-    bot.startPrivateConversation({user: user_id}, askWhoManagesPurchases);
+    bot.startPrivateConversation({user: user_id}, function(response, convo) {
+      // inject the slackbot into the convo so that we can save it in the db
+      convo.slackbot = slackbot;
+      convo.on('end', function() {
+        bot.closeRTM();
+        done();
+      })
+      askWhoManagesPurchases(response, convo);
+    });
   });
 }
 
@@ -40,10 +47,54 @@ the admin then should be able to add, remove, modify executive assistants
 function askWhoManagesPurchases(response, convo) {
   convo.ask('Who manages the office purchases?', function(response, convo) {
     console.log(response);
-    convo.say('Great.  This person now has one more thing to keep on top of every week, I hope you\'re happy.')
-    convo.next();
+
+    // check for "skip"
+    if (response.text.toLowerCase().trim() === 'skip') {
+      // by default put the user in charge of everything
+      convo.slackbot.meta.office_assistants = [response.user];
+    }
+
+    // check for "me" or "i do"
+    if (response.text.toLowerCase().match(/^(me|i do)/)) {
+      convo.slackbot.meta.office_assistants = [response.user];
+      convo.say("Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart.")
+    }
+
+    // check for something like "nobody"
+    if (response.text.toLowerCase().match(/^(no one|nobody|noone)/)) {
+      convo.slackbot.meta.office_assistants = [response.user];
+      convo.say("Well, I'll put you in charge of me, then!")
+    }
+
+    // check for mentioned users
+    // for a typed message like "that would be @dan"
+    // the response.text would be like  "that would be <@U0R6H9BKN>"
+    var office_gremlins = response.text.match(/\<\@[^\s]+\>/g);
+    if (office_gremlins && office_gremlins.length > 0) {
+      convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
+        return handle.replace(/\<\@\>/g, '');
+      })
+
+      convo.say('Great.  They now has one more thing to keep on top of every week, I hope you\'re happy.')
+    }
+
+    // check if we didn't get it
+    if (!convo.slackbot.meta.office_assistants || convo.slackbot.meta.office_assistants.length === 0) {
+      // we didn't get it... ask again.
+      convo.say('I didn\'t quite understand that.  Type "skip" to skip')
+      askWhoManagesPurchases(response, convo);
+      return convo.next();
+    }
+
+    db.Slackbots.update({_id: convo.slackbot._id}, {$set: {'meta.office_assistants': convo.slackbot.meta.office_assistants}}, function(e) {
+      if (e) { console.error(e) }
+
+      convo.next()
+    })
   })
 }
+
+
 
 // TODO do these even matter?
 function askLocation(response, convo) {

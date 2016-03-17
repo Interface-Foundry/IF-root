@@ -223,8 +223,12 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
+            console.log('🔥')
+            console.log(data);
+
             // don't talk to urself
             if (data.user === user.bot.bot_user_id) {
+              console.log("don't talk to urself")
               return;
             }
 
@@ -237,18 +241,20 @@ function loadSlackUsers(users){
             // don't perform searches if ur having a convo with a bot
             // let botkit handle it
             if (user.conversations[data.channel]) {
+              console.log('in a conversation: ' + user.conversations[data.channel])
               return;
             }
 
-            console.log('🔥')
-            console.log(data);
 
             // TESTING PURPOSES, here is how you would trigger a conversation
             if (data.text === 'onboard') {
               user.conversations[data.channel] = 'onboard';
               // "user" is actually the slackbot here
               // "data.user" is the user having the convo
-              return conversation_botkit.onboard(user, data.user);
+              return conversation_botkit.onboard(user, data.user, function() {
+                console.log('done with onboarding conversation')
+                user.conversations[data.channel] = false;
+              });
             }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
