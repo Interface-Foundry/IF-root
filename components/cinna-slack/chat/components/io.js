@@ -17,7 +17,8 @@ var search = require("./search.js");
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
-var onboard = require("./onboard.js");
+var init_team = require("./init_team.js");
+var conversation_botkit = require('./conversation_botkit');
 
 var nlp = require('../../nlp/api');
 
@@ -173,7 +174,7 @@ function loadSlackUsers(users){
                 })
             }
             else if (user.meta && user.meta.initialized == false){
-                onboard(user, function(e, addedBy) {
+                init_team(user, function(e, addedBy) {
                     user.meta.initialized = true;
                     if (typeof user.save === 'function') {
                       user.save();
@@ -222,6 +223,33 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
+            // don't talk to urself
+            if (data.user === user.bot.bot_user_id) {
+              return;
+            }
+
+
+            // welp it would be nice to get the history in context here but fuck it
+            // idk how and i don't care this ship gonna burn before we scale out anyway
+            user.conversations = user.conversations || {};
+
+
+            // don't perform searches if ur having a convo with a bot
+            // let botkit handle it
+            if (user.conversations[data.channel]) {
+              return;
+            }
+
+            console.log('🔥')
+            console.log(data);
+
+            // TESTING PURPOSES, here is how you would trigger a conversation
+            if (data.text === 'onboard') {
+              user.conversations[data.channel] = 'onboard';
+              // "user" is actually the slackbot here
+              // "data.user" is the user having the convo
+              return conversation_botkit.onboard(user, data.user);
+            }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 

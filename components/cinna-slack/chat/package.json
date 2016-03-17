@@ -13,7 +13,9 @@
   "author": "Dinesh Rawat && Kip",
   "license": "ISC",
   "dependencies": {
+    "@slack/client": "^2.2.1",
     "WNdb": "^3.1.1",
+    "botkit": "0.0.11",
     "es6-promise": "^3.0.2",
     "extend": "^3.0.0",
     "forever-agent": "^0.6.1",

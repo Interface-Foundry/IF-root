@@ -37,7 +37,10 @@ var slackbotSchema = mongoose.Schema({
             type: Boolean,
             default: false
         }
-    }
+    },
+
+    // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
+    conversaitons: {}
 });
 
 var Slackbot = mongoose.model('Slackbot', slackbotSchema, 'slackbots');
