@@ -75,7 +75,7 @@ function askWhoManagesPurchases(response, convo) {
         return handle.replace(/\<\@\>/g, '');
       })
 
-      convo.say('Great.  They now has one more thing to keep on top of every week, I hope you\'re happy.')
+      convo.say('Great.  They now have one more thing to keep on top of every week, I hope you\'re happy.')
     }
 
     // check if we didn't get it
