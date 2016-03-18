@@ -764,8 +764,8 @@ function incomingAction(data){
                 }
             }
    }
-    data.flags = data.flags ? data.flags : {};
-    delete data.flags.toSupervisor
+data.flags = data.flags ? data.flags : {};
+delete data.flags.toSupervisor
 //---------------------------------------------------------------------------//     
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)

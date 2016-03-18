@@ -139,7 +139,7 @@ module.exports = function(router) {
 
     Message.find({'source.channel': req.body.source.channel,
                   'source.id': req.body.source.id,
-                  'msg': req.body.msg
+                  $and: [{'msg': req.body.msg}, {'client_res':req.body.client_res}, {'bucket':req.body.bucket}, {'action':req.body.action}, {'ts':req.body.ts}]
     }, function(err, data) {
       if (err) {
         console.log('messages 157 err: ',err)
