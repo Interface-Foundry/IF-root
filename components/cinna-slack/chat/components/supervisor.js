@@ -1,4 +1,4 @@
-var ioClient = require('socket.io-client').connect("http://localhost:3000");
+var ioClient = require('socket.io-client').connect("http://dragonair.kipapp.co:5100"");
 var newParentItem = require('./history.js').newParentItem
 var newChildItem = require('./history.js').newChildItem
 var recallHistory = require('./history.js').recallHistory
