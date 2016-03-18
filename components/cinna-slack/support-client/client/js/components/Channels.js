@@ -4,6 +4,8 @@ import ChannelListModalItem from './ChannelListModalItem';
 import { Modal, Glyphicon, Input, Button } from 'react-bootstrap';
 const socket = io();
 import * as UserAPIUtils from '../utils/UserAPIUtils';
+import Tabs from './Tabs';
+import Pane from './Pane';
 // const img = document.createElement('img');
 // img.src = require('./kip-icon.png');
 
@@ -124,9 +126,11 @@ class Channels extends Component {
     }
   }
 
+
   render() {
     const { channels, actions, messages, chanIndex } = this.props;
-    const filteredChannels = channels.filter(channel => (!channel.resolved) || (channel.name === 'Lobby'))
+    const liveChannels = channels.filter(channel => (!channel.resolved && !channel.AFK) || (channel.name === 'Lobby'))
+    const trainChannels = channels.filter(channel => (!channel.resolved && channel.AFK) || (channel.name === 'Lobby'))
     const moreChannelsBoolean = true;
     const restOfTheChannels = channels.filter(channel => (channel.resolved) && (channel.name !== 'Lobby'))
     // console.log('Channels136: ',filteredChannels,restOfTheChannels)
@@ -188,27 +192,38 @@ class Channels extends Component {
       <section>
         <div>
           <span style={{paddingLeft: '0.8em', fontSize: '1.5em'}}>
-            Channels
-            <button onClick={::this.openAddChannelModal} style={{fontSize: '0.8em', 'background': 'Transparent', marginLeft: '2.8em', 'backgroundRepeat': 'noRepeat', 'border': 'none', 'cursor': 'pointer', 'overflow': 'hidden', 'outline': 'none'}}>
-              <Glyphicon glyph="plus" />
-            </button>
+            <Tabs selected={0}>
+              <Pane label="LIVE">
+                <div>
+                  <ul style={{display: 'flex', flexDirection: 'column', listStyle: 'none', margin: '0', overflowY: 'auto', padding: '0'}}>
+                    {liveChannels.map(channel =>
+                      <ChannelListItem  chanIndex={chanIndex} actions={actions} channels={channels} messages={messages} style={{paddingLeft: '0.8em', backgroundColor: '#45a5f4', height: '0.7em'}} messageCount={messages.filter(msg => {
+                        return msg.channelID === channel.name;
+                      }).length} channel={channel} key={channel.id} {...actions} onClick={::this.handleChangeChannel} />
+                      )}
+                  </ul>
+                </div>
+              </Pane>
+              <Pane label="TRAIN">
+                 {trainChannels.map(channel =>
+                      <ChannelListItem  chanIndex={chanIndex} actions={actions} channels={channels} messages={messages} style={{paddingLeft: '0.8em', backgroundColor: '#45a5f4', height: '0.7em'}} messageCount={messages.filter(msg => {
+                        return msg.channelID === channel.name;
+                      }).length} channel={channel} key={channel.id} {...actions} onClick={::this.handleChangeChannel} />
+                      )}
+              </Pane>
+            </Tabs>
           </span>
         </div>
-          {newChannelModal}
         <div>
-          <ul style={{display: 'flex', flexDirection: 'column', listStyle: 'none', margin: '0', overflowY: 'auto', padding: '0'}}>
-            {filteredChannels.map(channel =>
-              <ChannelListItem  chanIndex={chanIndex} actions={actions} channels={channels} messages={messages} style={{paddingLeft: '0.8em', backgroundColor: '#45a5f4', height: '0.7em'}} messageCount={messages.filter(msg => {
-                return msg.channelID === channel.name;
-              }).length} channel={channel} key={channel.id} {...actions} onClick={::this.handleChangeChannel} />
-              )}
-          </ul>
-          {moreChannelsBoolean && <a onClick={::this.openMoreChannelsModal} style={{'cursor': 'pointer', 'color': '#85BBE9'}}> + {restOfTheChannels.length} un-supervised channels...</a>}
-          {moreChannelsModal}
+          
         </div>
       </section>
     );
   }
 }
+          // {moreChannelsBoolean && <a onClick={::this.openMoreChannelsModal} style={{'cursor': 'pointer', 'color': '#85BBE9'}}> + {restOfTheChannels.length} un-supervised channels...</a>}
+   // <button onClick={::this.openAddChannelModal} style={{fontSize: '0.8em', 'background': 'Transparent', marginLeft: '2.8em', 'backgroundRepeat': 'noRepeat', 'border': 'none', 'cursor': 'pointer', 'overflow': 'hidden', 'outline': 'none'}}>
+   //            <Glyphicon glyph="plus" />
+            // </button> 
 
 export default Channels

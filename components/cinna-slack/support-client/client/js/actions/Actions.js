@@ -13,8 +13,10 @@ export function addMessage(message) {
 }
 
 export function receiveRawMessage(message) {
-    console.log('Raw message in Actions: ', message)
-    UserAPIUtils.createMessage(message);
+    // console.log('Raw message in Actions: ', message)
+    UserAPIUtils.createMessage(message).catch(function(err) {
+     console.log('Actions: receiveRawMessage err: ',err)
+    });
     return {
         type: types.RECEIVE_MESSAGE,
         message
@@ -23,11 +25,13 @@ export function receiveRawMessage(message) {
 
 export function receiveRawChannel(channel) {
     // console.log('Raw channel in Actions: ', channel)
-    UserAPIUtils.createChannel(channel)
-        return {
-            type: types.RECEIVE_CHANNEL,
-            channel
-        };
+    UserAPIUtils.createChannel(channel).catch(function(err) {
+     console.log('Actions: receiveRawChannel err: ',err)
+    });
+    return {
+        type: types.RECEIVE_CHANNEL,
+        channel
+    };
 }
 
 export function addChannel(channel) {

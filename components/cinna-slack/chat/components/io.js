@@ -61,6 +61,7 @@ var initSlackUsers = function(env){
     }else if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0HLZP09L',
+            dm:'D0HLZLBDM',
             bot: {
                 bot_user_id: 'cinnatest',
                 bot_access_token:'xoxb-17713691239-K7W7AQNH6lheX2AktxSc6NQX'
@@ -159,6 +160,29 @@ function loadSlackUsers(users){
                       channel: 'D0H6X6TA8',
                       org: user.team_id,
                       id: user.team_id + '_' + 'D0H6X6TA8'
+                    },
+                    action:'sendAttachment',
+                    client_res: [],
+                    botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                    botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
+                };
+
+                banter.welcomeMessage(hello, function(res) {
+                    hello.client_res.push(res);
+                    //send attachment!
+                    sendResponse(hello);
+                })
+            } else if (cinnaEnv === 'development_mitsu'){
+                //
+                // Onboarding conversation
+                //
+                var hello = {
+                    msg: 'welcome',
+                    source: {
+                      origin: 'slack',
+                      channel: 'D0HLZLBDM',
+                      org: user.team_id,
+                      id: user.team_id + '_' + 'D0HLZLBDM'
                     },
                     action:'sendAttachment',
                     client_res: [],
@@ -590,8 +614,9 @@ function preProcess(data){
 function routeNLP(data){
 
     //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
-    data.flags = data.flags || {};
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
+    data.flags = data.flags ? data.flags : {};
+
 
     if (data.msg){
 
@@ -607,6 +632,7 @@ function routeNLP(data){
                 if (e){
                   console.log('NLP error ',e);
                   // Route to supervisor
+                  
                   data.flags.toSupervisor = true;
                   incomingAction(data);
                 }
@@ -725,22 +751,25 @@ function routeNLP(data){
 
 //sentence breakdown incoming from python
 function incomingAction(data){
-
-
 //------------------------supervisor stuff-----------------------------------//
-      if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
-            if (data.bucket === 'response') {
+  if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
+
+            if (data.bucket === 'response' || data.action === 'focus') {
                 return sendResponse(data)
             } else {
-                return outgoingResponse(data,'stitch','amazon');
+                if (data.action === 'checkout') {
+                    return outgoingResponse(data,'txt');
+                } else {
+                    return outgoingResponse(data,'txt','amazon');
+                }
             }
-         }
+   }
+data.flags = data.flags ? data.flags : {};
+delete data.flags.toSupervisor
+//---------------------------------------------------------------------------//     
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
     });
-//---------------------------------------------------------------------------//
-
-
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
         case 'search':
@@ -778,6 +807,7 @@ function searchBucket(data){
         case 'similar':
             //----supervisor: flag to skip history.recallHistory step below ---//
             if (data.flags && data.flags.recalled) {
+                 // console.log('Flagged "recalled", skipping recallHistory...')
                  search.searchSimilar(data);
             }
             //-----------------------------------------------------------------//
@@ -804,6 +834,7 @@ function searchBucket(data){
 
             //----supervisor: flag to skip history.recallHistory step below ---//
             if (data.flags && data.flags.recalled) {
+                 // console.log('Flagged "recalled", skipping recallHistory...')
                  search.searchModify(data);
             }
             //-----------------------------------------------------------------//
@@ -819,6 +850,7 @@ function searchBucket(data){
         case 'focus':
           //----supervisor: flag to skip history.recallHistory step below ---//
             if (data.flags && data.flags.recalled) {
+                    // console.log('Flagged "recalled", skipping recallHistory...')
                     search.searchFocus(data);
             }
             //-----------------------------------------------------------------//
@@ -835,6 +867,12 @@ function searchBucket(data){
             //search.searchBack(data);
             break;
         case 'more':
+            //----supervisor: flag to skip history.recallHistory step below ---//
+            if (data.flags && data.flags.recalled) {
+                    // console.log('Flagged "recalled", skipping recallHistory...') 
+                    search.searchMore(data);
+            } 
+            //-----------------------------------------------------------------//
             history.recallHistory(data, function(res){
                 if (res){
                     data.recallHistory = res;
@@ -912,9 +950,6 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
             //sending out stitched image response
             data.client_res = [];
             data.urlShorten = [];
-
-            console.log('URLARTT ',urlArr);
-
             processData.urlShorten(data,function(res){
                 var count = 0;
                 //put all result URLs into arr
@@ -988,8 +1023,8 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
             // }
         });
     }
-
     else if (action == 'txt'){
+
         banter.getCinnaResponse(data,function(res){
             if(res && res !== 'null'){
                 // data.client_res = [];
@@ -1010,12 +1045,12 @@ var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
             data.client_res.unshift(res); // add to beginning of message
-             console.log('mitsu6')
+             // console.log('mitsu6')
 
             sendResponse(data);
         }
         else {
-             console.log('mitsu7', res)
+             // console.log('mitsu7', res)
             sendResponse(data);
         }
     });
@@ -1027,7 +1062,6 @@ var sendResponse = function(data){
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE');
-        //history.newMessage(data, function(newMsg){
         history.saveHistory(data,false,function(res){
             //whatever
         }); //saving outgoing message
@@ -1051,7 +1085,8 @@ var sendResponse = function(data){
         //---supervisor: relay search result previews back to supervisor---//
         else if (data.source.channel && data.source.origin == 'supervisor') {
                data.flags = {searchResults: true}
-                // console.log('Supervisor: 610 ',data)
+               var proxy = data
+               delete proxy.amazon
                supervisor.emit(data)
         }
         //----------------------------------------------------------------//
@@ -1171,9 +1206,9 @@ var sendResponse = function(data){
     }
      //---supervisor: relay search result previews back to supervisor---//
     else if (data.source.channel && data.source.origin == 'supervisor'){
-        console.log('Sending results back to supervisor')
+        console.log('Sending results back to supervisor..')
        data.flags = {searchResults: true}
-        // console.log('Supervisor: 728', data)
+        // console.log('Supervisor: 728 emitting', data)
         supervisor.emit(data)
     }
     //----------------------------------------------------------------//
@@ -1194,30 +1229,67 @@ var sendResponse = function(data){
 //save amazon item to cart
 var saveToCart = function(data){
 
+       //----supervisor: flag to skip history.recallHistory step below ---//
+        if (data.flags && data.flags.recalled) { 
+            // console.log('\n\n\nDATA.FLAGS RECALLED!!!', data.flags)
+            var cartHistory = { cart: [] }
+              //async push items to cart
+            // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                // if (item.recallHistory && item.recallHistory.amazon){
+                    // proxy.cart.push(data.amazon[data.searchSelect - 1]); //add selected items to cart
+                // }else {
+                   cartHistory.cart.push(data.amazon[data.searchSelect[0] - 1]); //add selected items to cart
+                // }
+                // callback();
+            // }, function done(){
+            console.log('\n\n\nio930: SUPERVISOR cartHistory: ', cartHistory,'\n\n\n')
+              if (cartHistory.cart.length == 0) { 
+                console.log('No items in proxy cart: io.js : Line 933', cartHistory) 
+                return 
+            } else {
+                 // console.log('\n\n\n\n\n I mean brah it shouldnt be coming here....',data.source.id,messageHistory,'\n\n\n\n\n\n')
+                  purchase.outputCart(data, cartHistory,function(res){ 
+                    // processData.urlShorten(res, function(res2){
+                        res.client_res = [res.client_res];
+                        // res.client_res.push(res2);
+                        // console.log('Mitsu937ios: res2 = :',res2)
+                        // var proxy = res
+                        // delete proxy.amazon
+                        // console.log('Mitsu iojs935: ', JSON.stringify(res.client_res))
+                       
+                        outgoingResponse(res,'txt');
+                    });
+                // });
+            // });    
+            return
+            } 
+        } 
+        //-----------------------------------------------------------------//
 
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
 
     history.recallHistory(data, function(item){
-
         data.bucket = 'purchase'; //modifying bucket. a hack for now
-
+        console.log('\n\n\nio1288 ok for real doe whats item: ',item)
         //no saved history search object
         if (!item){
-            console.log('warning: NO ITEMS TO SAVE TO CART from data.amazon');
+            console.log('\n\n\n\nwarning: NO ITEMS TO SAVE TO CART from data.amazon\n\n\n');
             //cannedBanter(data,'Oops sorry, I\'m not sure which item you\'re referring to');
             sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
         else {
-
+             console.log('\n\n\nYO LOWWWWWW item: ',item,'\n\n\n\n\n\n')
             //async push items to cart
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
                 if (item.recallHistory && item.recallHistory.amazon){
                     messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
                 }else {
+                     console.log('\n\n\n\n\n checking item.recallHistory',item.amazon[searchSelect - 1],'\n\n\n\n\n\n')
                     messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
                 }
                 callback();
             }, function done(){
+                 // console.log('\n\n\n\n\n somethingwrong here....',data.source.id,JSON.stringify(messageHistory),'\n\n\n\n\n\n')
                 purchase.outputCart(data,messageHistory[data.source.id],function(res,err){
                     if(err){
                         sendTxtResponse(data,err);

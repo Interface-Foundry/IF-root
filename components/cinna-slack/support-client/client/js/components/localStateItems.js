@@ -4,30 +4,35 @@ module.exports.localState = [{
         index: 0,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-1',
         name: 'Product 1',
         index: 1,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-2',
         name: 'Product 2',
         index: 2,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-3',
         name: 'Product 3',
         index: 3,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-4',
         name: 'Product 4',
         index: 4,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },
       {
         id: 'product-5',
@@ -35,30 +40,35 @@ module.exports.localState = [{
         index: 5,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-6',
         name: 'Product 6',
         index: 6,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-7',
         name: 'Product 7',
         index: 7,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-8',
         name: 'Product 8',
         index: 8,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-9',
         name: 'Product 9',
         index: 9,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
         }
       //   ,
       //   {
@@ -131,30 +141,35 @@ module.exports.defaultState = [{
         index: 0,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-1',
         name: 'Product 1',
         index: 1,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-2',
         name: 'Product 2',
         index: 2,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-3',
         name: 'Product 3',
         index: 3,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-4',
         name: 'Product 4',
         index: 4,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },
       {
         id: 'product-5',
@@ -162,30 +177,35 @@ module.exports.defaultState = [{
         index: 5,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-6',
         name: 'Product 6',
         index: 6,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-7',
         name: 'Product 7',
         index: 7,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-8',
         name: 'Product 8',
         index: 8,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
       },{
         id: 'product-9',
         name: 'Product 9',
         index: 9,
         img: 'http://kipthis.com/img/kip-cart.png',
         changed: false
+        ,price: '$0.00'
         }
       //   ,
       //   {

@@ -140,11 +140,11 @@ app.use(express.static(__dirname + '/app/dist', {
 app.use(morgan('dev')); // log every request to the console
 
 app.use(bodyParser.urlencoded({
-    extended: true, limit:'5mb'
+    extended: true, limit:'50mb'
 })); // get information from html forms
 
 app.use(bodyParser.json({
-    extended: true, limit:'5mb'
+    extended: true, limit:'50mb'
 }));
 
 

@@ -11,6 +11,10 @@ var channelSchema = mongoose.Schema({
     resolved: {
         type: Boolean,
         default: false
+    },
+    AFK: {
+        type: Boolean,
+        default: false
     }
 });
 

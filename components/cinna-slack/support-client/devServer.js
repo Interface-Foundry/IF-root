@@ -3,6 +3,9 @@
 var express = require('express');
 var path = require('path');
 var app = express();
+var bodyParser  = require('body-parser');
+app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.urlencoded({limit: '100mb', extended: true}));
 var http = require('http').Server(app);
 var mongoose = require('mongoose');
 var session = require('express-session');
@@ -17,7 +20,8 @@ require('./config/passport')(passport);
 
 var User = require('./server/models/User');
 //set env vars
-process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
+process.env.MONGOLAB_URI = 'mongodb://localhost/chat_dev';
+// process.env.MONGOLAB_URI || 
 process.env.PORT = process.env.PORT || 3000;
 
 // connect our DB
