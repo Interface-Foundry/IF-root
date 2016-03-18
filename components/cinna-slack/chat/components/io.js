@@ -209,15 +209,15 @@ function loadSlackUsers(users){
 
         //on socket disconnect, but it should handle reconnect properly
         slackUsers[user.team_id].on(CLIENT_EVENTS.DISCONNECT, function () {
-            var mailOptions = {
-                to: 'Kip Server <hello@kipthis.com>',
-                from: 'kip disconnected, but should be fine <server@kipthis.com>',
-                subject: 'kip disconnected, but should be fine',
-                text: 'kip disconnected, but should be fine'
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
-                if (err) console.log(err);
-            });        
+            // var mailOptions = {
+            //     to: 'Kip Server <hello@kipthis.com>',
+            //     from: 'kip disconnected, but should be fine <server@kipthis.com>',
+            //     subject: 'kip disconnected, but should be fine',
+            //     text: 'kip disconnected, but should be fine'
+            // };
+            // mailerTransport.sendMail(mailOptions, function(err) {
+            //     if (err) console.log(err);
+            // });        
         });
         
         //on messages sent to Slack

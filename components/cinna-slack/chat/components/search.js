@@ -903,7 +903,7 @@ var searchModify = function(data,flag){
                 if (data.dataModify.val == 'buy'){
                     data.bucket = 'purchase';
                     data.action = 'save';
-                    saveToCart(data);
+                    ioKip.saveToCart(data);
                 }
                 //normal action here
                 else {

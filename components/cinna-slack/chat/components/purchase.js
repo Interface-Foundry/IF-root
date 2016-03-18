@@ -49,7 +49,7 @@ var outputCart = function(data,cartHistory,callback) {
                 }else {
                     //add fix for this amazon error: ["AWS.ECommerceService.ItemNotEligibleForCart"]
                     console.log('Error: create cart failed: ',JSON.stringify(results));
-                    callback(data,'Oops, I had trouble adding this item to your cart');    
+                    callback(data,'Oops, I had trouble adding this item to your cart, try clicking the link name to add to cart directly on Amazon');    
                 }
 
 
