@@ -1,5 +1,19 @@
 import superagent from 'superagent';
 
+export function stitch(toStitch) {
+  return new Promise((resolve, reject) => {
+    superagent
+    .post('/api/stitch')
+    .send(toStitch)
+    .end((err, res) => {
+      if (err) {
+        Promise.reject(err);
+      } else {
+        resolve(res.body);
+      }
+    });
+  });
+}
 export function loadAuth() {
   return new Promise((resolve, reject) => {
     superagent
@@ -75,7 +89,7 @@ export function createMessage(message) {
     .send(message)
     .end((err, res) => {
       if (err) {
-        reject(res.body || err);
+        reject(err);
       } else {
         resolve(res.body);
       }
@@ -119,7 +133,7 @@ export function resolveChannel(channel) {
     .end((err, res) => {
       if (err) {
         console.log('resovle channel err: ',err)
-        reject(res.body || err);
+        reject(err);
       } else {
         resolve();
       }
@@ -154,3 +168,23 @@ export function loadInitialChannels() {
     });
   });
 }
+
+export function urlShorten(body) {
+  return new Promise((resolve, reject) => {
+    superagent
+    .post('/api/urlshorten')
+    .send(body)
+    .end((err, res) => {
+      if (err) {
+        reject(res.body || err);
+      } else {
+        const url = res.body;
+        resolve(url);
+      }
+    });
+  });
+}
+
+
+
+

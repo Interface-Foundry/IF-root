@@ -1,6 +1,5 @@
 import React, { Component, PropTypes, Image } from 'react';
 import ReactDOM from 'react-dom';
-import TopPanel from './TopPanel';
 import ControlPanel from './ControlPanel';
 import MessageComposer from './MessageComposer';
 import MessageListItem from './MessageListItem';
@@ -11,6 +10,8 @@ const socket = io();
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap';
 import Infinite from 'react-infinite';
 import shortid from 'shortid';
+import uniq from 'lodash/array/uniq';
+import * as UserAPIUtils from '../utils/UserAPIUtils';
 
 
 
@@ -27,14 +28,15 @@ class Chat extends Component {
     activeControl: PropTypes.object.isRequired,
     activeMessage: PropTypes.object.isRequired
   };
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  };
+  // static contextTypes = {
+  //   router: PropTypes.object.isRequired
+  // };
      constructor (props, context) {
       super(props, context)
       this.state = {
         autoToggled: false,
-        stream: false
+        stream: false,
+        AFK: false
       }
     }
 
@@ -42,30 +44,18 @@ class Chat extends Component {
     const { actions, messages, activeChannel,activeMessage } = this.props;
     this.setState({ resolved: null });
     const self = this
-     socket.on('change state bc', function (state) {
-      console.log('change state event received', state)
-       var identifier = {id: state.id, properties: []}
-      for (var key in state) {
-        if ((key === 'msg' || key === 'bucket' || key === 'action' || key === 'thread' || key == 'amazon') && state[key] !== '' ) {
-          identifier.properties.push({ [key] : state[key]})
-        }
-      }  
-      // console.log('identifier: ', identifier)
-      //if no fields were updated on form take no action
-      if (identifier.properties.length === 0 ) {
-        return
-      } else if (activeChannel.name === 'Lobby' || activeMessage.source.channel === 'Lobby') {
-        return
-      }else {
-        actions.setMessageProperty(identifier)
-      }
-    })   
-    socket.on('new bc message', function(msg) {      
+    socket.on('new bc message', function(msg) {   
       //Set parent boolean of incoming msg here
       let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
-      // msg.parent = (filtered.length > 0) ?  false : true
-      // msg.resolved = (filtered.length > 0) ? (filtered[0].thread.ticket && filtered[0].thread.ticket.isOpen) : ((msg.bucket === 'supervisor') ? false : true) 
-      // console.log('Chat67:', filtered, self.props.messages,msg)
+      if (msg.msg == 'kipsupervisor') {
+        //change resolved status of channel
+         let tempChannel = {name : msg.source.channel, id: msg.source.id, resolved: false}
+         actions.resolveChannel(tempChannel)
+         self.refs.channelsref.forceUpdate()
+      }
+      if (self.state.AFK) {
+        msg.flags.toTrain = true
+      }
       actions.receiveRawMessage(msg) 
     });
     socket.on('typing bc', username =>
@@ -74,9 +64,12 @@ class Chat extends Component {
     socket.on('stop typing bc', username =>
       actions.stopTyping(username)
     );
-    socket.on('new channel', channel =>
+    socket.on('new channel', function(channel) {  
+      if (self.state.AFK) {
+        channel.AFK = true
+      }
       actions.receiveRawChannel(channel)
-    );
+    });
      socket.on('disconnect bc', socket =>
       console.log('user disconnected! ',socket)
     );
@@ -95,7 +88,7 @@ class Chat extends Component {
         // console.log('Case 3:  nextchan: ',channels.next.resolved ,'toggle:' , self.refs.cpanel.refs.child.refs.toggle.state.checked)
       }
 
-      let resolved = (nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
+      let resolved = (nextmsg && nextmsg.thread && nextmsg.thread.ticket && nextmsg.thread.ticket.id) ? nextmsg.thread.ticket.isOpen : false;
 
       self.setState({ resolved: channels.next.resolved })
       // console.log('Chat84',channels, self.state)
@@ -143,7 +136,7 @@ class Chat extends Component {
 
    changeActiveMessage(channel) {
     const { actions, messages, activeChannel} = this.props;
-    const activeMessages = messages.filter(message => message.source.channel === channel.name);
+    const activeMessages = messages.filter(message => message.source.id === channel.id);
     const firstMsg = activeMessages[0]
     // console.log('Chat.js 80: channel: ',channel, ' firstMsg: ',firstMsg)
     // firstMsg.id = firstMsg.id ? firstMsg.id : messages.length
@@ -151,7 +144,7 @@ class Chat extends Component {
     if (firstMsg) {
       actions.changeMessage(firstMsg);
     } else {
-      console.log('There is no previous channel: ',channel, activeMessages)
+      // console.log('There is no previous channel: ',channel, activeMessages)
     }
   }
 
@@ -210,11 +203,11 @@ class Chat extends Component {
        activeMsg.thread.ticket = (activeMsg.thread.ticket && activeMsg.thread.ticket.isOpen) ? { id: activeMsg.thread.ticket.id, isOpen: false } :{ id: (activeMsg.thread.ticket && activeMsg.thread.ticket.id ? activeMsg.thread.ticket.id : shortid.generate()), isOpen: true };
        var identifier = {id: activeChannel.id, properties: [{thread: activeMsg.thread }]}
        actions.setMessageProperty(identifier)
-       
        //change resolved status of channel
        let tempChannel = activeChannel
        tempChannel.resolved = !tempChannel.resolved
        actions.resolveChannel(tempChannel)
+       UserAPIUtils.resolveChannel(tempChannel)
        this.refs.channelsref.forceUpdate()
   }
 
@@ -222,7 +215,6 @@ class Chat extends Component {
     // console.log('hangleToggleChange fired')
     this.setState({autoToggled: true})
     this.refs.cpanel.refs.child.refs.toggle.handleClick('forced')
-    
   }
 
 
@@ -232,32 +224,68 @@ class Chat extends Component {
      // window.scrollTo(0, window.innerHeight);
   }
 
+  renderMessages() {
+     let { messages, activeChannel } = this.props;
+     let relevantMessages = this.state.stream ?  messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor) : messages.filter(message => (message.source && message.source.id === activeChannel.id))
+     let filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
+     let displayMessages = this.state.stream ?   
+       messages.slice(messages.length-15,messages.length).filter(message => message.flags.toSupervisor).map(message =>
+            <MessageListItem message={message}  key={message.source.id.concat(message.ts)}  />
+           )
+           :  
+        filteredMessages.map(function(message,index) {
+                    message.client_res = uniq(message.client_res)
+            return <MessageListItem message={message} key={message.source.id.concat(message.ts)} index={index}/>
+          })
+      let elHeights = [] 
+      relevantMessages.forEach(function(msg) {
+            let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 360.313
+             elHeights.push(elHeight)
+      })
+      // console.log('Chat252: elHeights: ',elHeights)
+      return (
+           <Infinite 
+                elementHeight={elHeights}
+                 containerHeight={window.innerHeight-90}
+                 displayBottomUpwards>
+                  { displayMessages }
+            </Infinite>
+        )
+  }
+
+
+  toggleAFK() {
+    this.setState({AFK: !this.state.AFK})
+  }
+
   render() {
     const { messages, channels, actions, activeChannel, typers, activeControl, activeMessage} = this.props;
-    const filteredMessages = messages.filter(message => (message.source && message.source.channel === activeChannel.name)).filter(message => (message.bucket === 'response' || (message.flags && message.flags.toSupervisor)))
-    const activeMsg =  messages.filter(message => (message.source && message.source.channel === activeChannel.name))[0]
+    const filteredMessages = messages.filter(message => (message.source && message.source.id === activeChannel.id))
+    const activeMsg =  filteredMessages[0]
     const username = this.props.user.username;
     const resolved = activeChannel.resolved
-    const stream = this.state.stream
-    const displayMessages = this.state.stream ?   
-                       messages.slice(messages.length-15,messages.length).map(message =>
-                            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
-                           )
-                           :  
-                        filteredMessages.map(message =>
-                            <MessageListItem message={message} key={message.source.id.concat(message.ts)} />
-                          )
-    const chatDisplay = !this.state.stream ? <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>current channel: {activeChannel.name} <br/></div> : <div style={{backgroundColor: '#F5F8FF', color: 'red'}}> Live Feed </div>             
-    const streamDisplay = !this.state.stream ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
+    const displayMessages = filteredMessages.map(function(message,index) {
+                            return <MessageListItem message={message} key={message.source.id.concat(message.ts).concat(index)} index={index}/>
+                          })
+    const elHeights = [] 
+    filteredMessages.forEach(function(msg) {
+      // console.log('msg : ',msg)
+            let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 260
+             elHeights.push(elHeight)
+      })
+    // console.log('EL HEIGHTS: ',elHeights)
+    const chatDisplay = <div style={{backgroundColor: '#F5F8FF', color: 'orange'}}>Origin: {activeMsg ? activeMsg.source.origin: ''} <br/>Received: {activeMsg ? activeMsg.ts : ''}</div>
+    const streamDisplay = {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'}
     const lobbyDisplay = !(activeChannel.name === 'Lobby') ? {opacity: '1', visibility: 'visible',transition: 'visibility 0.3s, opacity 0.3s', padding: '0'} :  { opacity: 0, visibility: 'hidden', transition: 'visibility 0.3s, opacity 0.3s', padding: '0' }
-    const chatStyle = this.state.stream ? {background: '#fff', color: '#000'} : {background: '#45a5f4', color:'red'}
+    const chatStyle = {background: '#45a5f4', color:'red'}
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
         <div className="nav" style={{backgroundColor: '#45a5f4'}}>
-            <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none' }} disabled={this.state.spinnerloading} onClick = { () => { this.toggleStream() } } >
-              <div className="kipicon">
+            <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none'}} onClick = { () => { this.toggleAFK() } } >
+              <div className={this.state.AFK ? 'kipiconsleep' : 'kipicon'}>
               </div>
-            </Button> 
+            </Button>
+          <label style={{ margin: '0 auto'}}> { this.state.AFK ? 'TRAINING MODE' : 'LIVE MODE' }</label>
             <section style={{order: '2', marginTop: '1.5em'}}>
               <Channels ref='channelsref' onClick={::this.changeActiveChannel} channels={channels} messages={messages} actions={actions}  chanIndex={channels.length}/>
             </section>
@@ -273,7 +301,7 @@ class Chat extends Component {
           <div className="flexbox-container">
              <div>
                <ul style={{wordWrap: 'break-word', margin: '0', overflowY: 'auto', padding: '0', width: '100%', flexGrow: '1', order: '1'}} ref="messageList">
-                <Infinite elementHeight={44.5781}
+                  <Infinite elementHeight={elHeights}
                  containerHeight={window.innerHeight-90}
                  displayBottomUpwards>
                   { displayMessages }
@@ -281,7 +309,7 @@ class Chat extends Component {
               </ul>
             </div>
             <div style= {(activeChannel.name === 'Lobby') ? lobbyDisplay : streamDisplay} >
-              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange}/>
+              <ControlPanel ref="cpanel" actions={actions} activeControl={activeControl} activeChannel={activeChannel} activeMsg={activeMessage} messages={messages} resolved={resolved} onSubmit={::this.handleSubmit} changeMode={::this.handleModeChange} changeToggle={::this.handleToggleChange} AFK={this.state.AFK} />
             </div>
           </div>
         
@@ -289,7 +317,7 @@ class Chat extends Component {
         </div>
         <footer style={{fontSize: '0.9em', position: 'fixed', bottom: '0.2em', left: '21.5rem', color: '#000000', width: '100%', opacity: '0.5'}}>
         <div style= {streamDisplay}>
-          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} stream={stream} />
+          <MessageComposer activeChannel={activeChannel} activeMsg={activeMsg} messages={messages} user={username} onSave={::this.handleSave} messages={messages} resolved={resolved} AFK={this.state.AFK} />
         </div>  
           {typers.length === 1 &&
             <div>

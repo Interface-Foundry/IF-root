@@ -15,7 +15,7 @@ var outputCart = function(data,cartHistory,callback) {
 
         //async push items to cart
         async.eachSeries(cartHistory.cart, function(item, callback) {
-
+            console.log('\n\n\npurchase.js : item: ',item)
             cartItems.push({
                 ASIN: item.ASIN,
                 Quantity: 1
@@ -40,11 +40,13 @@ var outputCart = function(data,cartHistory,callback) {
                 options[propQuan] = items[i].Quantity;
             }
             client.createCart(options).then(function(results) {
+
                 
                 console.log('cart results ',JSON.stringify(results));
 
                 if(results && results.PurchaseURL){
                     data.client_res = results.PurchaseURL[0];
+                    // console.log('Mitsu purchase47: ', JSON.stringify(results))
                     callback(data);                    
                 }else {
                     //add fix for this amazon error: ["AWS.ECommerceService.ItemNotEligibleForCart"]

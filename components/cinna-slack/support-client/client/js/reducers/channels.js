@@ -21,7 +21,8 @@ export default function channels(state = initialState, action) {
                 data: [...state.data, {
                     name: action.channel.name,
                     id: action.channel.id,
-                    resolved: action.channel.resolved
+                    resolved: action.channel.resolved,
+                    AFK: action.channel.AFK
                     // (state.data.length === 0) ? 0 : state.data[state.data.length - 1].id + 1
                 }]
             };
@@ -33,7 +34,8 @@ export default function channels(state = initialState, action) {
                 data: [...state.data, {
                     name: action.channel.name,
                     id: action.channel.id,
-                    resolved: action.channel.resolved
+                    resolved: action.channel.resolved,
+                    AFK: action.channel.AFK
                 }]
             };
         case LOAD_CHANNELS:

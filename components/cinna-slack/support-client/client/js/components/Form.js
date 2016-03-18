@@ -22,23 +22,16 @@ class DynamicForm extends Component {
     super(props, context)
     this.state = {
       filteredMessages: null,
-      channel: '',
       msg: '',
       bucket: '',
       action: '',
-      // bucketOptions: {
-      //   initial: false,
-      //   purchase: false,
-      //   banter: false
-      // },
       searchParam: '',
       dirty: false,
       spinnerloading: false,
       modifier: {},
       color: false,
-      size: false,
-      resolved: ''
-    };
+      size: false
+      };
   }
 
   componentDidMount() {
@@ -61,8 +54,10 @@ class DynamicForm extends Component {
         // }
       }
       //store focus info
-      if (msg.action === 'focus' && msg.focusInfo) {
+      if (msg.focusInfo && msg.client_res && msg.client_res.length > 0) {
         self.setState({focusInfo: msg.focusInfo})
+      } else if (msg.action !== 'focus'){
+        self.setState({focusInfo: null})
       }
     })
 
@@ -152,12 +147,15 @@ class DynamicForm extends Component {
     const {
       fields, dirty
     } = this.props;
+    let bucket = ''
+    if (choice === 'checkout') {
+      bucket = 'purchase'
+    }
     this.setState({
-        bucket: 'search',
+        bucket: choice === 'checkout' ? 'purchase' : 'search',
         action: choice,
         dirty: true
       })
-      // fields['bucket'].value = choice;
   }
 
   searchAmazon(query) {
@@ -278,9 +276,7 @@ class DynamicForm extends Component {
     newQuery.action = 'modify'
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor'
-    newQuery.recallHistory = {
-      amazon: this.state.recallHistory ? this.state.recallHistory : this.state.rawAmazonResults
-    }
+    newQuery.recallHistory =  this.state.recallHistory
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
     newQuery.flags = {}
@@ -367,11 +363,74 @@ class DynamicForm extends Component {
     newQuery.action = 'focus'
     newQuery.tokens = newQuery.msg.split()
     newQuery.source.origin = 'supervisor';
-    newQuery.recallHistory = {
-      amazon: this.state.recallHistory ? this.state.recallHistory : this.state.rawAmazonResults
-    }
+    newQuery.recallHistory =  this.state.recallHistory
     newQuery.searchSelect = []
     newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.flags = {}
+    newQuery.flags.toCinna = true
+    newQuery.flags.recalled = true
+    socket.emit('new message', newQuery);
+    this.setState({
+      spinnerloading: true
+    })
+    resetForm()
+    setTimeout(function(){
+              if (self.state.spinnerloading === true) {
+                 self.setState({
+                    spinnerloading: false
+                  })
+              }
+             },8000)
+  }
+
+  searchMore() {
+   const {
+    activeMsg, resetForm, selected
+  } = this.props
+  const newQuery = activeMsg;
+  const self = this
+    if (newQuery._id) {
+            delete newQuery._id
+          }
+  newQuery.bucket = 'search'
+  newQuery.action = 'more'
+  newQuery.tokens = newQuery.msg.split()
+  newQuery.source.origin = 'supervisor';
+  newQuery.recallHistory =  this.state.recallHistory
+  newQuery.flags = {}
+  newQuery.flags.toCinna = true
+  newQuery.flags.recalled = true
+  socket.emit('new message', newQuery);
+  this.setState({
+    spinnerloading: true
+  })
+  resetForm()
+  setTimeout(function(){
+            if (self.state.spinnerloading === true) {
+               self.setState({
+                  spinnerloading: false
+                })
+            }
+           },8000)
+  }
+
+  checkOut() {
+    const {
+        activeMsg, resetForm, selected
+      } = this.props
+    const newQuery = activeMsg;
+    const self = this
+        if (newQuery._id) {
+            delete newQuery._id
+          }
+    newQuery.bucket = 'purchase'
+    newQuery.action = 'checkout'
+    newQuery.tokens = newQuery.msg.split()
+    newQuery.source.origin = 'supervisor';
+    newQuery.recallHistory =  this.state.recallHistory
+    newQuery.searchSelect = []
+    newQuery.searchSelect.push(parseInt(selected.index) + 1)
+    newQuery.msg = 'buy ' + newQuery.searchSelect.toString(); 
     newQuery.flags = {}
     newQuery.flags.toCinna = true
     newQuery.flags.recalled = true
@@ -420,46 +479,32 @@ class DynamicForm extends Component {
 
   render() {
     const {
-      fields, saveState, messages, activeChannel, selected
+      fields, messages, activeChannel, selected
     } = this.props;
     const filtered = messages.filter(message => message.source).filter(message => message.source.channel === activeChannel.name)
     const showSearchBox = this.state.action === 'initial' ? {
       textAlign: 'center',
       marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+    } : {display: 'none'};
     const showSimilarBox = this.state.action === 'similar' ? {
       textAlign: 'center',
       marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+    } : {display: 'none'};
     const showModifyBox = this.state.action === 'modify' ? {
       textAlign: 'center',
       marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+    } : {display: 'none'};
     const showFocusBox = this.state.action === 'focus' ? {
-      textAlign: 'center',
-      marginTop: '5em'
-    } : {
-      textAlign: 'center',
-      marginTop: '5em',
-      display: 'none'
-    };
+      textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
+    const showMoreBox = this.state.action === 'more' ? {
+      textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
     const showPrompt = (!selected || !selected.name) ? {
       color: 'black'
     } : {
       color: 'white'
     }
+    const showCheckoutBox = this.state.action === 'checkout' ? {
+      textAlign: 'center', marginTop:'0.4em'} : { display: 'none'};
     var self = this
     const spinnerStyle = (this.state.spinnerloading === true) ? {
       backgroundColor: 'orange',
@@ -469,7 +514,7 @@ class DynamicForm extends Component {
       color: 'orange',
       display: 'none'
     }
-    const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0} : { display: 'none'}
+    const focusInfoStyle = this.state.focusInfo ? { fontSize: '0.6em', textAlign: 'left', margin: 0, padding: 0, border: '1px solid black'} : { display: 'none'}
     return (
       <div className='flexbox-container' style={{ height: '40em', width: '100%'}}>
           <form ref='form1' onSubmit={::this.handleSubmit}>
@@ -572,6 +617,28 @@ class DynamicForm extends Component {
                     </Button>
                 </div>
 
+                 <div id="more-box" style={showMoreBox}>
+                    <Button bsSize = "large" disabled={this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.searchMore()} >
+                      Search More
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
+                    </Button>
+                 </div>
+
+                  <div id="checkout-box" style={showCheckoutBox}>
+                              <div style={focusInfoStyle}> 
+                                 
+                              </div>
+                                
+                    <h3 style={showPrompt}> Please select an item. </h3>
+                    <Button bsSize = "large" disabled={(!this.props.selected || !this.props.selected.name) || this.state.spinnerloading} style={{ marginTop: '1em', backgroundColor: 'orange'}} bsStyle = "primary" onClick = { () => this.checkOut()} >
+                      Checkout Item
+                        <div style={spinnerStyle}>
+                        <Spinner />
+                       </div>
+                    </Button>
+                </div>
 
             </div>
 

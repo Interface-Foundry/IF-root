@@ -27,7 +27,7 @@ var searchSimilar = function(data){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);
     }
-    else if ((data.recallHistory && data.recallHistory.amazon) || data.flags.recalled){
+    else if ((data.recallHistory && data.recallHistory.amazon) || (data.flags && data.flags.recalled)){
         searchAmazon(data,'similar','none','null');
     }
     else {
@@ -105,7 +105,6 @@ var searchAmazon = function(data, type, query, flag) {
                             }
                         }
                         else {
-                            console.log('INITIAL MODOFY SEARCH FLAGGGGG: ',flag);
                             parseAmazon(productGroup,browseNodes,function(res){
                                 if(!res.BrowseNode){
                                     ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
@@ -738,13 +737,15 @@ var searchModify = function(data,flag){
                 //unsortable modifier
                 case 'genericDetail':
                     //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                    if (data.dataModify.val == 'buy'){
+                    if (data.dataModify.val[0] == 'buy'){
+                        console.log('\n\n\n\n\n1I mean is it getting here even?', data)
                         data.bucket = 'purchase';
                         data.action = 'save';
                         ioKip.saveToCart(data);
                     }
                     //normal action here
                     else {
+                        console.log('\n\n\n\n\n1 Or is it getting here even?', data)
                         console.log('genericDetail FIRED!!!');
                         console.log('genericDetail type: ',data.dataModify.type);
                         console.log('genericDetail param: ',data.dataModify.param);
@@ -900,13 +901,15 @@ var searchModify = function(data,flag){
             //unsortable modifier
             case 'genericDetail':
                 //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
-                if (data.dataModify.val == 'buy'){
+                if (data.dataModify.val[0] == 'buy'){
+                    console.log('\n\n\n\n\nI mean is it getting here even?', data)
                     data.bucket = 'purchase';
                     data.action = 'save';
                     ioKip.saveToCart(data);
                 }
                 //normal action here
                 else {
+                    console.log('\n\n\n\n\nOr is it getting here even?', data)
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
@@ -919,6 +922,7 @@ var searchModify = function(data,flag){
 }
 
 var searchFocus = function(data) {
+                        console.log('SEARCHKS 922 lol: ',data)
 
     if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
         if(data.recallHistory && data.recallHistory.amazon){
@@ -945,6 +949,8 @@ var searchFocus = function(data) {
                     //data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
                     if (data.source.origin !== 'supervisor') {
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
+                    } else {
+                     data.client_res.push(res +' <'+ data.recallHistory.urlShorten[0].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
                     }
                     dumbFunction(); //fire after get
                 })
@@ -1023,7 +1029,7 @@ var searchFocus = function(data) {
                         if (attribs.Manufacturer) data.focusInfo.manufacturer = attribs.Manufacturer
                         if (attribs.Feature) data.focusInfo.feature = attribs.Feature
                         if (data.recallHistory && data.recallHistory.amazon[searchSelect] && data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating && reviewCounts) data.focusInfo.reviews = data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts   
-                        
+                        data.focusInfo.client_res = data.client_res
                       } 
                       //--------------------------------------------------------------//
 
@@ -1048,7 +1054,7 @@ var searchFocus = function(data) {
 
 
 var searchMore = function(data){
-
+    console.log('FIRING SEARCHMORE')
     if (data.recallHistory && data.recallHistory.amazon){
 
         var moreHist = data;
@@ -1061,6 +1067,12 @@ var searchMore = function(data){
         data.action = moreHist.recallHistory.action;
         data.msg = moreHist.recallHistory.msg;
         data.tokens = moreHist.recallHistory.tokens;
+         //----supervisor: reading flags ---//
+         if (moreHist.flags) {
+             data.flags = moreHist.flags
+             data.source = moreHist.source
+         }
+         //----------------------------------//
 
         if (data.amazon.length > 3){ //only trim down in thirds for now
             data.amazon.splice(0, 3);

@@ -55,7 +55,7 @@
     "mongo-sanitize": "^1.0.0",
     "mongodb-wrapper": "0.4.x",
     "mongojs": "*",
-    "mongoose": "~4.x",
+    "mongoose": "^4.4.5",
     "mongoose-hook-ensure-indexes": "^0.1.4",
     "mongoose-text-search": "~0.0.2",
     "monguurl": "~0.1.0",

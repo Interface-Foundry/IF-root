@@ -14,6 +14,9 @@ process.on('uncaughtException', function (err) {
 
 var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
    
+    //Dont save preview searches from supervisor
+    if (data.flags && data.flags.toCinna) { return }
+
     ///// CREATING THREAD //////
     if (data.bucket == 'search'){
         if (data.action == 'initial'){
@@ -59,7 +62,8 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
                     callbackZZ(data);
                     continueSaving();
                 });
-            }else {
+            } else {
+
                 //data.recallHistory not found getting new recall
                 recallHistory(data,function(recalled){
 
@@ -86,7 +90,6 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
             }
         }
     }else {
-
 
         // switch (data.bucket) {
         //     case 'banter':
@@ -124,8 +127,6 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
 
 
     function continueSaving(){
-
-
         if (!data.source.id){
             console.log('error: missing source.id');
         }
@@ -200,6 +201,7 @@ var recallHistory = function(data,callback){
                                 console.log('Error: Cannot find initial search for recallHistory');
                             }   
                             else {
+                                
                                 if (msg && msg.amazon){
                                     var tempArr = msg.amazon; //lmao amazon 
                                     msg.amazon = [];
@@ -359,7 +361,9 @@ function newChildItem(data,callback){
     }
     else {
         console.log('error: data.thread missing in newChildItem(), geenrating random new one');
+        data.thread = {}
         data.thread.id = shortid.generate(); //gen new idea for this item in thread
+        data.thread.parent = {}
         data.thread.parent.id = shortid.generate();
         data.thread.sequence = 1;
         data.thread.parent.isParent = false;
@@ -385,3 +389,5 @@ module.exports.saveHistory = saveHistory;
 module.exports.recallHistory = recallHistory;
 module.exports.recallContext = recallContext;
 module.exports.newMessage = newMessage;
+module.exports.newParentItem = newParentItem;
+module.exports.newChildItem= newChildItem;

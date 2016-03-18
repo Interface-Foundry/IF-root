@@ -60,13 +60,13 @@ const cardTarget = {
     }
 
     // Time to actually perform the action
-    props.moveCard(dragIndex, hoverIndex);
+    // props.moveCard(dragIndex, hoverIndex);
 
     // Note: we're mutating the monitor item here!
     // Generally it's better to avoid mutations,
     // but it's good here for the sake of performance
     // to avoid expensive index searches.
-    monitor.getItem().index = hoverIndex;
+    // monitor.getItem().index = hoverIndex;
   }
 };
 
@@ -85,20 +85,27 @@ export default class Card extends Component {
     isDragging: PropTypes.bool.isRequired,
     id: PropTypes.any.isRequired,
     text: PropTypes.string.isRequired,
-    img: PropTypes.string.isRequired,
-    moveCard: PropTypes.func.isRequired
+    img: PropTypes.string.isRequired
+    // ,moveCard: PropTypes.func.isRequired
   };
 
   render() {
     const { text, img, index, isDragging, connectDragSource, connectDropTarget } = this.props;
     const opacity = isDragging ? 0 : 1;
 
-    return connectDragSource(connectDropTarget(
-    <div style={{ display: 'flexbox', marginRight: '57%'}}>
-      <img width='120' width='150' style={{ margin: '0.2em', border:'0.3em solid orange'}} src={img} />
+    return (
+    <div className='flexbox-container' style={{height:'100', overflow: 'hidden'}}>
+      <div>
+        <img style={{ maxWidth: '100', height: 'auto'}} src={img} />
+      </div>
+      <div style={{padding:0, margin: '0.2em',fontSize: '10px', textAlign: 'left'}}>
+        {this.props.text.slice(0,40)}
+        <br />
+        <br />
+        {this.props.price}
+      </div>
     </div>
-  
-    ));
+    );
   }
 }
 

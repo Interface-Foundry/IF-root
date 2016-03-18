@@ -43,13 +43,11 @@ module.exports = function(router) {
 
   // get a specific channel
   router.get('/channels/:id', function(req, res) {
-
     Channel.find({name: req.params.id}, function(err, data) {
       if(err) {
         console.log(err);
         return res.status(500).json({msg: 'internal server error'});
       }
-
       res.json(data)
     })
   })
@@ -62,7 +60,7 @@ module.exports = function(router) {
           return res.status(500).json({msg: 'internal server error'});
         }
         if (data) {
-          console.log('Channel exists: ',data)
+          // console.log('Channel exists: ',data)
           return res.json(data)
         } else if (!data){
               var newChannel = new Channel(req.body);
@@ -81,6 +79,7 @@ module.exports = function(router) {
 
   // resolve channel issue
   router.post('/channels/resolve_channel', function(req, res) {
+    // console.log('resolve channel backend : req.body: ', req.body)
     Channel.findOne({id: req.body.id}, function(err, data) {
         if(err) {
           console.log(err);
@@ -89,13 +88,13 @@ module.exports = function(router) {
         if (data) {
           data.resolved = true;
           data.save(function(err, res) {
-            if (err) console.log(err)
-            console.log('Resolved channel: ',res)
-            return res.json(res)
+            if (err) {return console.log(err)}
+            console.log('Channel ',res.id, ' closed.')
+            return res.status(200)
           })
           } else {
              console.log('Channel Routes: Channel does not exist. ')
-            res.json({});
+            return res.status(404).json({msg: 'internal server error'});
            }
       })
   });

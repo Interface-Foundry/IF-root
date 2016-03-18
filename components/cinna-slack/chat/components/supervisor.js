@@ -1,4 +1,8 @@
 var ioClient = require('socket.io-client').connect("http://localhost:3000");
+var newParentItem = require('./history.js').newParentItem
+var newChildItem = require('./history.js').newChildItem
+var recallHistory = require('./history.js').recallHistory
+
 ioClient.on('connect', function() {
   console.log('Connected to support client.')
 })
@@ -35,42 +39,26 @@ function emitMsg(data) {
 //This function is used for new messages/channels
 function emitBoth(data) {
   //Prevent the dreaded infinite loop
-  if (data.flags && data.flags.toCinna) return
-  
-  // console.log('\n\n\nEmitting both\n\n\n')
-  
-  var resolved = (data.bucket === 'supervisor') ? false : true
+  if (data.flags && data.flags !== {} && data.flags.toCinna) return
+  var resolved = (data.msg === 'kipsupervisor') ? false : true
   ioClient.emit('new channel', {
     name: data.source.channel,
     id: data.source.id,
     resolved: resolved
   })
-  var action = data.action ? data.action : ''
-  var flags = data.flags ? data.flags : {toSupervisor: true};
-  // var thread = {
-  //               id: data.thread.id,
-  //               sequence: data.thread.sequence,
-  //               isOpen: data.thread.isOpen,
-  //               ticket: {
-  //                   id: data.thread.ticket.id ? data.thread.ticket.id : ,
-  //                   isOpen: action.message.thread.ticket.isOpen
-  //               },
-  //               parent: {
-  //                   isParent: action.message.thread.parent.isParent,
-  //                   id: action.message.parent.id
-  //               }
-  //             }
-  //Resolved = false only if this is a supervisor flagged message
-  var resolved = (data.bucket === 'supervisor') ? false : true
+  var action = data.action ? data.action : '';
+  var flags = (data.flags && data.flags !== {}) ? data.flags : {toSupervisor: true};
+
   ioClient.emit('new message', {
     id: null,
     incoming: true,
-    msg: data.msg,
-    tokens: [data.msg.split()],
+    msg: (data.msg ? data.msg : ''),
+    tokens: ((data.msg && typeof data.msg == 'string') ? data.msg.split() : []),
     bucket: data.bucket,
     action: action,
     amazon: [],
     source: {
+      //chnge to data.source.origin
       origin: 'socket.io',
       channel: data.source.channel,
       org: data.source.id.split('_')[0],
@@ -80,6 +68,7 @@ function emitBoth(data) {
     ts: Date.now,
     thread: data.thread,
     urlShorten:data.urlShorten,
+    thread: data.thread,
     flags: flags
   })
 }
