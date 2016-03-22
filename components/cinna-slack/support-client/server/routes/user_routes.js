@@ -31,35 +31,6 @@ module.exports = function loadUserRoutes(router, passport) {
     res.end();
   });
 
-  router.post('/stitch', function(req, res) {
-
-    // console.log('/stitch req.body',req.body)
-    var results = [];
-    async.eachSeries(req.body, function iterator(item, callback){
-      request({
-        method: 'POST',
-        url: 'http://chat.kipapp.co:5000',
-        json: true,
-        body: [item]
-      }, function(e, r, b) {
-        if (e) {
-          callback(e)
-        } else {
-          // console.log('user routes 48 r:', r)
-          results.push(b)
-          callback()
-        }
-      })
-    }, function(err) {
-      if (err) {
-        console.log('user_routes/stitch err: ',err)
-        return res.send(err)
-      } 
-      // console.log('user routes 57: results: ',results)
-      res.json(results);      
-    })
-  });
-
   //get auth credentials from server
   router.get('/load_auth_into_state', function(req, res) {
     res.json(req.user);

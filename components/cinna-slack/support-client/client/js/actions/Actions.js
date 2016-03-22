@@ -13,7 +13,7 @@ export function addMessage(message) {
 }
 
 export function receiveRawMessage(message) {
-    // console.log('Raw message in Actions: ', message)
+    // console.log('\n\nSaving new message:  ', message)
     UserAPIUtils.createMessage(message).catch(function(err) {
      console.log('Actions: receiveRawMessage err: ',err)
     });

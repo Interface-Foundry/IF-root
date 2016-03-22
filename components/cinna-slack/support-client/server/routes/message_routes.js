@@ -11,9 +11,7 @@ module.exports = function(router) {
 
   //query db for messages
   router.get('/messages', function(req, res) {
-    Message.find({
-      resolved: false
-    }, function(err, data) {
+    Message.find({'thread.ticket.isOpen': false}, function(err, data) {
       if (err) {
         console.log('/messages route err: ',err);
         return res.status(500).json({
@@ -78,18 +76,19 @@ module.exports = function(router) {
     if(req.body && typeof req.body.msg == 'string' && req.body.msg && req.body.msg.trim() == 'kipsupervisor') {
         Channel.findOne({id: req.body.source.id}, function(err, chan) {
           if(err) {
-            return res.status(500).json({msg: 'internal server error: /newmessage route.'});
+            console.log('/newmessage channelfindOne error 79: ',err)
+            // return res.status(500).json({msg: 'internal server error: /newmessage route.'});
           }
         //If Channel not found create it here, I know there's a separate channels routes for that but just trust me
         if (!chan) {
-          // console.log('MESSAGEROUTES: NO CHANNEL FOUND!')
           var channelFound;
           var count = 0;
           async.whilst(function() { return (!channelFound && count < 6) },
               function (callback) {
                   Channel.findOne({id: req.body.source.id}, function(err, data) {
                     if(err) {
-                      return res.status(500).json({msg: 'internal server error: /newmessage route.'});
+                        console.log('/newmessage channelfindOne error 90: ',err)
+                      // return res.status(500).json({msg: 'internal server error: /newmessage route.'});
                     }
                     if(!data) {
                       count++;
@@ -106,29 +105,29 @@ module.exports = function(router) {
                   })
               },
               function (err, n) {
-                if (err || !channelFound) {
-                  return res.status(500).json({msg: 'internal server error'});
+                if (err) {
+                    console.log('/newmessage channelfindOne error 109: ',err)
+                  // return res.status(500).json({msg: 'internal server error'});
                 }
                 console.log('async loop finished',channelFound)
                 channelFound.resolved = false
                 channelFound.save(function(err, saved) {
                   if(err) {
-                      console.log(err);
-                      return res.status(500).json({msg: 'internal server error'});
+                        console.log('/newmessage channelfindOne error 116: ',err)
+                      // return res.status(500).json({msg: 'internal server error'});
                     }
                     console.log('Channel ',channelFound.id, ' opened.')
                   })
               });
        
         }
-
         //If Channel found
         if(chan) {
           chan.resolved = false
           chan.save(function(err, saved) {
             if(err) {
-                console.log(err);
-                return res.status(500).json({msg: 'internal server error'});
+                 console.log('/newmessage channelfindOne error 129: ',err)
+                // return res.status(500).json({msg: 'internal server error'});
               }
               console.log('Channel ',chan.id, ' opened.')
           })
@@ -148,52 +147,51 @@ module.exports = function(router) {
         });
       }
       if (!data[0]) {
+        // console.log('message/newmessage: message not found..')
         if (req.body.flags && req.body.flags.toCinna) {
-          // return console.log('Not saving preview message.',req.body.flags)
+          return console.log('Not saving preview message.',req.body.flags)
            return res.status(200)
         }
         // console.log('message_routes: req.body: ',req.body)
-        if (req.body.amazon && req.body.amazon.length > 0) {
+        else if (req.body.amazon && req.body.amazon.length > 0) {
           var stringifiedItems = []
           async.eachSeries(req.body.amazon, function(item, callback) {
             stringifiedItems.push(JSON.stringify(item));
             callback();
           }, function done(err) {
             if (err) {
-              console.log(err);
-              return res.status(500).json({
-                msg: 'internal server error'
-              });
+              console.log('/newmessage 163: ',err);
             }
             req.body.amazon = stringifiedItems
             var newMessage = new Message(req.body);
             newMessage.save(function(err, saved) {
               if (err) {
-                console.log(err);
+                console.log('/newmessage 169: ',err);
                 return res.status(500).json({
                   msg: 'internal server error'
                 });
               }
-              console.log('/messages 188 SAVED!',saved.client_res)
+              // console.log('/messages 188 SAVED!',saved.msg)
               return res.json(saved);
             })
           })
-        } else {
+        } 
+        else {
           var newMessage = new Message(req.body);
           newMessage.save(function(err, saved) {
             if (err) {
-              console.log(err);
+              console.log('/newmessage 183: ',err);
               return res.status(500).json({
                 msg: 'internal server error'
               });
             }
-            // console.log('/messages 200 SAVED!',saved.client_res)
+            // console.log('/messages 200 SAVED!',saved.msg)
             return res.json(saved);
           })
         }
       }
       else if (data[0] && data[0].msg !== undefined) {
-        console.log('Message doubled up!')
+        // console.log('Message doubled up!')
         return res.json(data[0])
       } 
       else {
@@ -218,7 +216,7 @@ module.exports = function(router) {
                         msg: 'internal server error'
                       });
                     }
-                    // console.log('/messages 188 SAVED!',saved.client_res)
+                    // console.log('/messages 188 SAVED!',saved.msg)
                     res.json(saved);
                   })
                 })
@@ -233,7 +231,7 @@ module.exports = function(router) {
                     msg: 'internal server error'
                   });
                 }
-                // console.log('/messages 200 SAVED!',saved.client_res)
+                // console.log('/messages 232 SAVED!',saved.msg)
                 return res.json(saved);
               })
               
@@ -262,9 +260,10 @@ module.exports = function(router) {
         });
       }
       if (data) {
-
         async.eachSeries(data, function iteratior(msg, callback){ 
-              msg.resolved = true
+
+          if(msg && msg.thread && msg.thread.ticket) {
+            msg.thread.ticket.isOpen = false
               if (req.body.amazon && req.body.amazon.length > 0) {
                 var stringifiedItems = []
                 async.eachSeries(req.body.amazon, function(item, callback) {
@@ -301,6 +300,14 @@ module.exports = function(router) {
                   callback()
                 })
               }
+          } 
+          else {
+            console.log('message/resolve route: msg.thread or msg.thread.ticket missing, did not resolve.')
+            callback()
+          }
+              
+
+
         }, function done(){
           res.json({});
         })
@@ -339,4 +346,40 @@ module.exports = function(router) {
         }
       })
   })
+
+  
+  router.post('/stitch', function(req, res) {
+
+    console.log('/stitch req.body',req.body)
+    var results = [];
+    async.eachSeries(req.body, function iterator(item, callback){
+      request({
+        method: 'POST',
+        url: 'http://54.164.59.227:5000',
+        json: true,
+        body: [item]
+      }, function(e, r, b) {
+        if (e) {
+          console.log('picStitch error: ',e)
+          callback(e)
+        } else {
+          // console.log('user routes 49 r:', r)
+          results.push(b)
+          callback()
+        }
+      })
+    }, function(err) {
+      if (err) {
+        console.log('user_routes/stitch err: ',err)
+        return res.send(err)
+      } 
+      // console.log('user routes 57: results: ',results)
+      res.json(results);      
+    })
+  });
+
+
+
+
+  
 }

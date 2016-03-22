@@ -21,15 +21,29 @@ class MessageComposer extends Component {
   }
   handleSubmit(event) {
     const {
-        user, activeChannel, activeMsg, messages, resolved
+        user, activeChannel, messages, resolved
     } = this.props;
+    if (activeChannel.name === 'Lobby') { 
+      console.log('activeChannel name is Lobby'); 
+      return 
+    }
     const text = event.target.value.trim();
+    let activeMsg = this.props.activeMsg ? this.props.activeMsg : messages.filter(message => (message.source && message.source.id === activeChannel.id))[0]
+    console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
     if (event.which === 13 && !resolved) {
         event.preventDefault();
-        let thread = activeMsg.thread
-        thread.parent.id = activeMsg.thread.id
-        thread.parent.isParent = false;
-        thread.sequence = parseInt(activeMsg.thread + 1)
+        let thread;
+        if (activeMsg && activeMsg.thread) {
+          thread = activeMsg.thread
+          thread.parent.id = activeMsg.thread.id
+          thread.parent.isParent = false;
+          thread.sequence = parseInt(activeMsg.thread.sequence) + 1
+        } 
+        if (!thread) { 
+          console.log('thread is not defined!')
+          console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
+          return
+        }
         var newMessage = {
             id: messages.length,
             msg: text,

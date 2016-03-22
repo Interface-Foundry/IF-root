@@ -1,27 +1,29 @@
-var ioClient = require('socket.io-client').connect("http://54.164.59.227:8000");
+// var ioClient = require('socket.io-client').connect("http://localhost:8000");
+var ioClient = require('socket.io-client').connect("http://54.173.166.189:8000");
 ioClient.on('connect', function() {
-    console.log('Connected to cinna-slack client.')
+    console.log('\n\nConnected to cinna-slack client.\n\n')
 })
 var Channel = require('./server/models/Channel');
+var Message = require('./server/models/Message');
 var shortid = require('shortid');
 
 exports = module.exports = function(io, cinnaio) {
     io.on('connection', function(socket) {
-        console.log('connected to socket')
-        socket.on('new message', function(msg) {
-          Channel.findOne({id: msg.source.id}, function(err, chan) {
+      socket.on('new message', function(msg) {
+        Channel.findOne({id: msg.source.id}, function(err, chan) {
+          Message.findOne({'source.id': msg.source.id, 'thread.ticket.isOpen': true}).sort({'_id':-1}).exec(function(err, latestMsg){
             msg.ts = new Date().toISOString();
-            var type =  (msg.flags && msg.flags.toSupervisor) ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
-            // console.log('\nI/O: raw msg:', msg)
+            var type =  ((msg.flags && msg.flags.toSupervisor) || (typeof msg.msg == 'string' && msg.msg.trim() == 'kipsupervisor'))  ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
+            console.log('\nI/O: type:', type)
             switch(type) {
                 case 'incoming':
-                    console.log('\nI/O: routed to  --> incoming msg',msg,'\n')
+                    console.log('\nI/O: routed to  --> incoming msg\n')
                       if(err) {
                         console.log('socket events err - 21: ',err);
                       }
                       //If Channel does not exist yet and entering supervisor
-                      if (!chan &&  msg.msg == 'kipsupervisor') {
-                         // console.log(1)
+                      if (!chan &&  typeof msg.msg == 'string' && msg.msg.trim() == 'kipsupervisor') {
+                         console.log(1)
                          if (!msg.thread.ticket || !msg.thread.ticket.id || !msg.thread.ticket.isOpen){
                              msg.thread.ticket = {}
                              msg.thread.ticket.id = shortid.generate();
@@ -30,8 +32,8 @@ exports = module.exports = function(io, cinnaio) {
                         socket.broadcast.emit('new bc message', msg)
                       }
                       //If Channel exists and entering supervisor
-                      else if (chan && chan.resolved && msg.msg == 'kipsupervisor') {
-                        // console.log(2)
+                      else if (chan && msg.msg == 'kipsupervisor') {
+                        console.log(2)
                         chan.resolved = false;
                         chan.save(function(err, saved){
                             if(err) {
@@ -47,11 +49,17 @@ exports = module.exports = function(io, cinnaio) {
                       }
                       //If channel exists and is not resolved
                       else if (chan){
-                        // console.log(3,chan)
+                        // console.log(3)
+                        // if (latestMsg) {
+                        //   msg.thread = latestMsg.thread;
+                        //   msg.thread.sequence = parseInt(msg.thread.sequence) + 1
+                        //   console.log('sockEvents 54 should be hitting here: ',msg)
+                        // }
                         socket.broadcast.emit('new bc message', msg)
                       }
                       //Otherwise take no action. 
                       else {
+                        // console.log(4)
                         if (msg.msg) {
                           console.log(msg.msg)
                         }
@@ -61,7 +69,7 @@ exports = module.exports = function(io, cinnaio) {
                     console.log('I/O: routed to --> outgoing msg\n')
                     
                     if (msg.bucket === 'response') {
-                      // console.log('Broadcasting new bc message.'); 
+                      console.log('Sending text message to client.', msg); 
                       socket.broadcast.emit('new bc message', msg) }
                     else { 
                       // console.log('Emitting new bc message'); 
@@ -85,7 +93,8 @@ exports = module.exports = function(io, cinnaio) {
                      socket.broadcast.emit('new bc message', msg)
                    }
             }
-          })
+          }) // end of Message.findOne
+         })//end of Channel.findOne
         });
         socket.on('new channel', function(channel) { 
                          // console.log('RECEIVED NEW CHANNEL', channel)
@@ -112,6 +121,6 @@ exports = module.exports = function(io, cinnaio) {
         // socket.on('disconnect', function(socket) {
         //     socket.emit('disconnect bc', socket);
         // });
-
+      
     });
 }
