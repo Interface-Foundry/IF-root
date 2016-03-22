@@ -45,7 +45,7 @@ the admin then should be able to add, remove, modify executive assistants
 // Apparently we are plunging headlong into the dark black void of enterprise
 // organizational structure and authorization. welp, gotta make money somehow.
 function askWhoManagesPurchases(response, convo) {
-  convo.ask('Who manages the office purchases?', function(response, convo) {
+  convo.ask('Who manages the office purchases? You can say something like "me" or "me and @jane".', function(response, convo) {
     console.log(response);
 
     // check for "skip"
@@ -55,7 +55,7 @@ function askWhoManagesPurchases(response, convo) {
     }
 
     // check for "me" or "i do"
-    if (response.text.toLowerCase().match(/^(me|i do)/)) {
+    if (response.text.toLowerCase().match(/(\bme\b|\bi do\b)/) && response.text.toLowerCase().indexOf('and') < 0) {
       convo.slackbot.meta.office_assistants = [response.user];
       convo.say("Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart.")
     }
@@ -69,13 +69,32 @@ function askWhoManagesPurchases(response, convo) {
     // check for mentioned users
     // for a typed message like "that would be @dan"
     // the response.text would be like  "that would be <@U0R6H9BKN>"
-    var office_gremlins = response.text.match(/\<\@[^\s]+\>/g);
+    var office_gremlins = response.text.match(/(\<\@[^\s]+\>|\bme\b)/ig);
     if (office_gremlins && office_gremlins.length > 0) {
       convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
-        return handle.replace(/\<\@\>/g, '');
+        if (handle.toLowerCase() === 'me') {
+          return response.user;
+        } else {
+          return handle.replace(/\<\@\>/g, '');
+        }
       })
 
-      convo.say('Great.  They now have one more thing to keep on top of every week, I hope you\'re happy.')
+      console.log(office_gremlins)
+      office_gremlins = office_gremlins.map(function(handle) {
+        if (handle.toLowerCase() === 'me') {
+          return 'you';
+        } else {
+          return handle;
+        }
+      });
+      console.log(office_gremlins)
+
+      if (office_gremlins.length > 1) {
+        var last = office_gremlins.pop();
+        office_gremlins[office_gremlins.length-1] += ' and ' + last;
+      }
+
+      convo.say('Great.  I have added ' + office_gremlins.join(', ') + ' to the list of office admins.  I keep all the office admins up-to-date on what team members are adding to the office shopping cart.')
     }
 
     // check if we didn't get it
