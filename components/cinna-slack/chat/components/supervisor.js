@@ -1,7 +1,9 @@
-var ioClient = require('socket.io-client').connect("http://localhost:3000");
+// var ioClient = require('socket.io-client').connect("http://localhost:5100");
+var ioClient = require('socket.io-client').connect("http://52.90.122.209:5100");
 var newParentItem = require('./history.js').newParentItem
 var newChildItem = require('./history.js').newChildItem
 var recallHistory = require('./history.js').recallHistory
+var shortid = require('shortid');
 
 ioClient.on('connect', function() {
   console.log('Connected to support client.')
@@ -12,12 +14,7 @@ function emit(data, newmessage) {
   if (!ioClient.connected) {
     ioClient.on('connect', function() {
       if (newmessage) {
-      //    if (data.bucket === 'results') {
-      //       console.log('supervisor.js --> 12',data)
             emitBoth(data)
-         // } else {
-         //    emitBoth(data) 
-         // }
       } else {
         emitMsg(data)
       }
@@ -41,6 +38,13 @@ function emitBoth(data) {
   //Prevent the dreaded infinite loop
   if (data.flags && data.flags !== {} && data.flags.toCinna) return
   var resolved = (data.msg === 'kipsupervisor') ? false : true
+  if (data.msg && (data.msg.trim() === 'kipsupervisor') && data.thread && data.thread.ticket) {
+    data.thread.ticket.isOpen = true
+   } else if (data.msg && (data.msg.trim() === 'kipsupervisor') && !data.thread.ticket) {
+     data.thread.ticket = {}
+     data.thread.ticket.id = shortid.generate();
+     data.thread.ticket.isOpen = true
+   }
   ioClient.emit('new channel', {
     name: data.source.channel,
     id: data.source.id,
@@ -59,7 +63,7 @@ function emitBoth(data) {
     amazon: [],
     source: {
       //chnge to data.source.origin
-      origin: 'socket.io',
+      origin: data.source.origin,
       channel: data.source.channel,
       org: data.source.id.split('_')[0],
       id: data.source.id

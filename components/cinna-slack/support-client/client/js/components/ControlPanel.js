@@ -823,7 +823,7 @@ class ControlPanel extends Component {
     let newMessage = { client_res: [] }
     newMessage.bucket = bucket
     newMessage.action = action
-    newMessage.source = activeMsg.source
+    newMessage.source = {}
     newMessage.source.channel = activeChannel.name
     newMessage.source.id = activeChannel.id;
     newMessage.source.org = activeChannel.id.split('_')[0];

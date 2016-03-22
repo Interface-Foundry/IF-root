@@ -45,8 +45,6 @@ class Chat extends Component {
     this.setState({ resolved: null });
     const self = this
     socket.on('new bc message', function(msg) {   
-      //Set parent boolean of incoming msg here
-      let filtered = self.props.messages.filter(message => message.source.id === msg.source.id);
       if (msg.msg == 'kipsupervisor') {
         //change resolved status of channel
          let tempChannel = {name : msg.source.channel, id: msg.source.id, resolved: false}
@@ -280,7 +278,7 @@ class Chat extends Component {
     const chatStyle = {background: '#45a5f4', color:'red'}
     return (
       <div style={{margin: '0', padding: '0', height: '100%', width: '100%', display: '-webkit-box'}}>
-        <div className="nav" style={{backgroundColor: '#45a5f4'}}>
+        <div className="nav" style={{backgroundColor: '#45a5f4', width: '15.5%'}}>
             <Button bsSize = "large" style={{backgroundColor: '#45a5f4', border: 'none'}} onClick = { () => { this.toggleAFK() } } >
               <div className={this.state.AFK ? 'kipiconsleep' : 'kipicon'}>
               </div>
