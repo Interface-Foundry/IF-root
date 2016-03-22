@@ -36,8 +36,12 @@ var slackbotSchema = mongoose.Schema({
         initialized: {
             type: Boolean,
             default: false
-        }
-    }
+        },
+        office_assistants: [String] // user ids of the office assistants, like U0R6H9BKN
+    },
+
+    // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
+    conversaitons: {}
 });
 
 var Slackbot = mongoose.model('Slackbot', slackbotSchema, 'slackbots');
