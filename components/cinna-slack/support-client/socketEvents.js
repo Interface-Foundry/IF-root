@@ -1,6 +1,5 @@
 // var ioClient = require('socket.io-client').connect("http://localhost:8000");
 var ioClient = require('socket.io-client').connect("http://54.173.166.189:8000");
-
 ioClient.on('connect', function() {
     console.log('\n\nConnected to cinna-slack client.\n\n')
 })

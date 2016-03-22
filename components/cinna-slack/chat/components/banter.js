@@ -51,11 +51,11 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.initial'; //do this action
             res = 'If the meaning of life is happiness, then you can definitely buy some here 😉';
             break;
-        case textSimilar(input,'i\'m great') > 60:
-        case textSimilar(input,'i\'m good') > 60:
-        case textSimilar(input,'i\'m awesome') > 60:
-        case textSimilar(input,'i\'m doing well') > 60:
-        case textSimilar(input,'i\'m fine') > 60:
+        case textSimilar(input,'i\'m great') > 80:
+        case textSimilar(input,'i\'m good') > 80:
+        case textSimilar(input,'i\'m awesome') > 80:
+        case textSimilar(input,'i\'m doing well') > 80:
+        case textSimilar(input,'i\'m fine') > 80:
         case textSimilar(input,'i\'m ok') > 90:
             query = 'today\'s deals on amazon';
             flag = 'search.initial'; //do this action
@@ -158,7 +158,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'wtv') > 90:
         case textSimilar(input,'whatever') > 60:
             flag = 'basic'; //do this action
-            if (origin == 'slack'){
+            if (origin == 'slack' || data.source.origin == 'telegram'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -284,8 +284,10 @@ var checkForCanned = function(input,callback,origin) {
             break;
 
         case textSimilar(input,'i\'m tired') > 60:
+        case textSimilar(input,'im tired') > 60:
         case textSimilar(input,'tired') > 90:
         case textSimilar(input,'i\'m sleepy') > 60:
+        case textSimilar(input,'im sleepy') > 60:
         case textSimilar(input,'zzz') > 70:
             flag = 'search.initial';
             query = 'coffee';
@@ -347,6 +349,9 @@ var checkForCanned = function(input,callback,origin) {
 
         case textSimilar(input,'thx') > 80:
         case textSimilar(input,'thanks') > 80:
+        case textSimilar(input,'thanks kip') > 80:
+        case textSimilar(input,'thank you kip') > 80:
+        case textSimilar(input,'thx kip') > 80:
         case textSimilar(input,'thank you') > 70:
             flag = 'basic';
             res = 'You\'re welcome 😊';
@@ -491,6 +496,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'hate this') > 90:
         case textSimilar(input,'kip sucks') > 90:
         case textSimilar(input,'this sucks') > 90:
+        case textSimilar(input,'you suck') > 90:
         case textSimilar(input,'what a waste of time') > 90:
         case textSimilar(input,'useless bot') > 90:
         case textSimilar(input,'die') > 90:
@@ -522,11 +528,22 @@ var checkForCanned = function(input,callback,origin) {
             res = '11m/s, but you\'re probably looking for this 👍';
             break;
 
-        case textSimilar(input,'asdf') > 60:
+        case textSimilar(input,'asdf') > 80:
             flag = 'basic';
             res = 'qwerty';
             break;
 
+        case textSimilar(input,'<3') > 80:
+            flag = 'basic';
+            res = '<3';
+            break;
+
+        case textSimilar(input,'¯\\_(ツ)_/¯') > 80:
+            flag = 'basic';
+            res = '¯\\_(ツ)_/¯ idk';
+            break;
+
+        
         case textSimilar(input,'nice going') > 80:
         case textSimilar(input,'nice going kip') > 80:
         case textSimilar(input,'good job') > 80:
@@ -582,7 +599,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'wut') > 70:
         case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            if (origin == 'slack'){
+            if (origin == 'slack' || origin == 'telegram'){
                 res = 'I\'m Kip, your personal shopper.\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -787,7 +804,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'top kek':
             flag = 'basic'; //do this action
-            if (origin == 'slack'){
+            if (origin == 'slack' || origin == 'telegram'){
                 res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
@@ -872,7 +889,7 @@ var checkForCanned = function(input,callback,origin) {
         case '9':
         case '0':
             flag = 'basic'; //do this action
-            if (origin == 'slack'){
+            if (origin == 'slack' || origin == 'telegram'){
                 res = 'I\'m not very smart, did you mean :one:, :two: or :three:?';
             }
             else if (origin = 'socket.io'){
@@ -935,7 +952,7 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➊</span>';
                 }
-                else if (data.source.origin == 'slack'){
+                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                     numEmoji = ':one:';
                 }
                 break;
@@ -943,7 +960,7 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➋</span>';
                 }
-                else if (data.source.origin == 'slack'){
+                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                     numEmoji = ':two:';
                 }
                 break;
@@ -951,7 +968,7 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➌</span>';
                 }
-                else if (data.source.origin == 'slack'){
+                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                     numEmoji = ':three:';
                 }
                 break;
@@ -961,7 +978,7 @@ var getCinnaResponse = function(data,callback){
         case 'search':
             switch (data.action) {
                 case 'initial':
-                    if (data.source.origin == 'slack'){
+                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                         res = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
                     }
                     else if (data.source.origin == 'socket.io'){
