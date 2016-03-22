@@ -1,6 +1,8 @@
+/*eslint-env es6*/
 var async = require('async');
 var request = require('request');
 const vision = require('node-cloud-vision-api')
+var co = require('co')
 
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
@@ -19,7 +21,7 @@ var processData = require("./process.js");
 var purchase = require("./purchase.js");
 var init_team = require("./init_team.js");
 var conversation_botkit = require('./conversation_botkit');
-var cart = require('./cart');
+var kipcart = require('./cart');
 
 var nlp = require('../../nlp/api');
 
@@ -654,7 +656,7 @@ function routeNLP(data){
                   incomingAction(data);
                 }
                 else {
-                    console.log('NLP RES ',res);
+                    // console.log('NLP RES ',res);
 
                     if (res.supervisor) {
                       data.flags.toSupervisor = true;
@@ -1252,50 +1254,58 @@ var saveToCart = function(data){
         }
         else {
 
-            //async push items to cart
-            async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-                debugger;
-                if (item.recallHistory && item.recallHistory.amazon){
-                    console.log('adding item recallHistory')
-                    console.log(item.recallHistory.amazon[searchSelect - 1])
-                    console.log(data);
-                    cart.addToTeamCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
-                    messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
-                }else {
-                    console.log('adding item amazon')
-                    console.log(item.amazon[searchSelect - 1])
-                    console.log(data)
-                    messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                    cart.addToTeamCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
-                }
-                callback();
-            }, function done(){
-                purchase.outputCart(data,messageHistory[data.source.id],function(res,err){
-                    if(err){
-                        sendTxtResponse(data,err);
+            // co lets us use "yield" to with promises to untangle async shit
+            co(function*() {
+              for (var index = 0; index < data.searchSelect.length; index++) {
+                  var searchSelect = data.searchSelect[index];
+                  console.log('adding searchSelect ' + searchSelect);
+                  if (item.recallHistory && item.recallHistory.amazon){
+                      // console.log('adding item recallHistory')
+                      // console.log(item.recallHistory.amazon[searchSelect - 1])
+                      // console.log(data);
+                      messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
+                      yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                  } else {
+                      // console.log('adding item amazon')
+                      // console.log(item.amazon[searchSelect - 1])
+                      // console.log(data)
+                      messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                      yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                  }
+              }
 
-                        //send email about this issue
-                        var mailOptions = {
-                            to: 'Kip Server <hello@kipthis.com>',
-                            from: 'Kip save tp cart broke <server@kipthis.com>',
-                            subject: 'Kip save tp cart broke',
-                            text: 'Fix this ok thx'
-                        };
-                        mailerTransport.sendMail(mailOptions, function(err) {
-                            if (err) console.log(err);
-                        });
-                    }else {
-                        processData.urlShorten(res, function(res2){
-                            res.client_res = [];
-                            res.client_res.push('<'+res2.trim()+'|» View Cart>');
-                            outgoingResponse(res,'txt');
-                        });
-                    }
+              console.log('retrieving cart')
+              var cart = yield kipcart.getCart(data.source.org);
+              console.log(cart);
+              return cart;
 
+              // console.log(JSON.stringify(res, null, 2))
+              // console.log('😱')
+              // return;
+              // processData.urlShorten(res, function(res2){
+              //     res.client_res = [];
+              //     res.client_res.push('<'+res2.trim()+'|» View Cart>');
+              //     outgoingResponse(res,'txt');
+              // });
+
+            }).then(function(){}).catch(function(err) {
+                console.log(err);
+                console.log(err.stack)
+                return;
+                sendTxtResponse(data, err);
+
+                //send email about this issue
+                var mailOptions = {
+                    to: 'Kip Server <hello@kipthis.com>',
+                    from: 'Kip save tp cart broke <server@kipthis.com>',
+                    subject: 'Kip save tp cart broke',
+                    text: 'Fix this ok thx'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) console.log(err);
                 });
-            });
+            })
         }
-
     });
 }
 
@@ -1319,7 +1329,7 @@ function viewCart(data){
 //get user history
 function recallHistory(data,callback,steps){
 
-    console.log(steps);
+    // console.log(steps);
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 3');
     }

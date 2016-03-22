@@ -1,106 +1,165 @@
+/*eslint-env es6*/
 var db = require('db')
 var _ = require('lodash')
+var co = require('co')
+var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var client = amazon.createClient({
+  awsId: "AKIAILD2WZTCJPBMK66A",
+  awsSecret: "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",
+  awsTag: "bubboorev-20"
+});
 
 module.exports = {};
 
 //
 // Add an item to the db
+// slack_id: either the team id or the user id if a personal cart
+// user_id: the user who added the item
+// item: the item from amazon result i guess
 //
-module.exports.addToTeamCart = function(team_id, user_id, item) {
-  console.log('adding item to team cart ' + team_id)
-  console.log(item);
-  console.log(item.ItemLinks[0].ItemLink)
-  var i = new db.Item({
-    ASIN: item.ASIN[0],
-    title: item.ItemAttributes[0].Title,
-    link: item.ItemLinks[0].ItemLink[0].URL[0], // so obviously converted to json from xml
-    image: item.altImage,
-    price: item.realPrice,
-    rating: item.reviews.rating,
-    review_count: item.reviews.reviewCount,
-    added_by: user_id,
-    team: team_id,
-    source_json: JSON.stringify(item)
-  });
+module.exports.addToCart = function(slack_id, user_id, item) {
+  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id)
 
-  i.save(function(e) {
-    if (e) {
-      console.log('error saving item to database:')
-      console.log(JSON.stringify(item, null, 2));
-      console.log(e);
-    }
+  return co(function*() {
+    var cart = yield getCart(slack_id);
+    console.log(cart);
+
+    console.log('creating item in database')
+    var i = yield (new db.Item({
+      cart_id: cart._id,
+      ASIN: item.ASIN[0],
+      title: item.ItemAttributes[0].Title,
+      link: item.ItemLinks[0].ItemLink[0].URL[0], // so obviously converted to json from xml
+      image: item.altImage,
+      price: item.realPrice,
+      rating: item.reviews.rating,
+      review_count: item.reviews.reviewCount,
+      added_by: user_id,
+      slack_id: slack_id,
+      source_json: JSON.stringify(item)
+    })).save();
+
+    console.log('adding item ' + i._id + ' to cart ' + cart._id);
+    cart.items.push(i._id);
+    yield cart.save();
+
+    console.log('calling getCart again to rebuild amazon cart')
+    return getCart(slack_id);
   })
 }
 
 //
 // Syncs cart with amazon and returns a nicely formatted object
+// Right now there is no saved amazon cart, so if they delete something from
+// amazon,
+// Returns a promise for yieldy things
 //
-module.exports.getTeamCart = function(team_id, cb) {
-  console.log('getting team cart for ' + team_id)
-  console.log('syncing mongodb with amazon cart')
-  /*
-  example amazon cart
-  {"Request":[{"IsValid":["True"],"CartCreateRequest":[{"Items":[{"Item":[{"ASIN":["B0060E6CVG"],"Quantity":["1"]}]}]}]}],"CartId":["182-3610389-1151221"],"HMAC":["ao4WghbjnDwYstiGU3bN7fAnMds="],"URLEncodedHMAC":["ao4WghbjnDwYstiGU3bN7fAnMds%3D"],"PurchaseURL":["https://www.amazon.com/gp/cart/aws-merge.html?cart-id=182-3610389-1151221%26associate-id=bubboorev-20%26hmac=ao4WghbjnDwYstiGU3bN7fAnMds%3D%26SubscriptionId=AKIAILD2WZTCJPBMK66A%26MergeCart=False"],"SubTotal":[{"Amount":["1201"],"CurrencyCode":["USD"],"FormattedPrice":["$12.01"]}],"CartItems":[{"SubTotal":[{"Amount":["1201"],"CurrencyCode":["USD"],"FormattedPrice":["$12.01"]}],"CartItem":[{"CartItemId":["C3KBVCVTT4SOOJ"],"ASIN":["B0060E6CVG"],"SellerNickname":["Amazon.com"],"Quantity":["1"],"Title":["Perfect Point RC-1793B Throwing Knife Set with Three Knives, Black Blades, Steel Handles, 8-Inch Overall"],"ProductGroup":["Sports"],"Price":[{"Amount":["1201"],"CurrencyCode":["USD"],"FormattedPrice":["$12.01"]}],"ItemTotal":[{"Amount":["1201"],"CurrencyCode":["USD"],"FormattedPrice":["$12.01"]}]}]}]}
-  */
-  db.items.find({
-    team: team_id,
-    purchased: false,
-    deleted: false
-  }).exec(function(e, items) {
-    if (e) { return cb(e) }
-    // get cart from amazon.com somehow
-
-
-    // Create the actual cart
-    var cart = {
-      team: team_id,
-      individual_items: items,
-
-      // amazon stuff
-      amazon: amazon
-    };
-
-    // var aggregated_items = amazon.CartItems.CartItem.reduce(function(hash, i) {
-    //   if (typeof hash[i.ASIN] === 'undefined') {
-    //     // make sure there is a price
-    //     if (typeof i.Price === 'undefined' || typeof i.Price[0] === 'undefined') {
-    //       console.log('No price for item in amazon cart.  probably an error.  TODO')
-    //       i.Price = [{FormattedPrice: ''}]
-    //     }
+var getCart = module.exports.getCart = function(slack_id) {
+  return co(function*() {
     //
-    //     hash[i.ASIN] = {
-    //       ASIN: i.ASIN,
-    //       title: i.Title,
-    //       price: i.Price[0].FormattedPrice,
+    // Get the Kip mongodb cart first (amazon cart next)
     //
-    //       // stuff we will get from mongo db
-    //       quantity: 0,
-    //       added_by: []
-    //     };
-    //   }
+    var cart;
+    console.log('getting team cart for ' + slack_id)
+    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items', '-source_json').exec();
+
+    if (!team_carts || team_carts.length === 0) {
+      // create a new cart
+      console.log('no carts found, creating new cart for ' + slack_id)
+      cart = new db.Cart({
+        amazon: amazonCart,
+        slack_id: slack_id,
+        items: []
+      })
+    } else {
+      // yay already have a cart
+      cart = team_carts[0];
+    }
+
+
     //
-    //   return hash;
+    // get the amazon cart for this Kip cart
     //
-    // }, {})
 
-    var aggregated_items = items.reduce(function(hash, i) {
-      if (typeof hash[i.ASIN] === 'undefined') {
-        hash[i.ASIN] = _.merge({}, i, {
-          quantity: 0,
-          added_by: []
-        })
-      }
+    // can't have an empty amazon cart
+    if (cart.items.length === 0) {
+      return cart;
+    }
 
-      hash[i.ASIN].quantity++;
-      hash[i.ASIN].added_by.push(i.added_by)
+    // ugh items/quanitites XML/json nastiness
+    var cart_items = cart.aggregate_items.reduce(function(cart_items, item, index) {
+      cart_items['Item.' + index + '.ASIN'] = item.ASIN;
+      cart_items['Item.' + index + '.Quantity'] = item.quantity;
+      return cart_items;
+    }, {})
 
-      return hash;
+    // create a new cart if they don't have one
+    if (!cart.amazon) {
+      console.log('creating new cart in amazon')
+      var amazonCart = yield client.createCart(cart_items)
+      console.log(JSON.stringify(amazonCart, null, 2))
+      cart.amazon = amazonCart;
+      yield cart.save();
+      return cart;
+    }
+
+
+    // otherwize rebuild their current cart
+    // make sure the cart has not been checked out (purchased) yet
+    var amazonCart = yield client.getCart({
+      'CartId': cart.amazon.CartId[0],
+      'HMAC': cart.amazon.HMAC[0]
     })
 
-    cart.items = items;
+    // console.log(JSON.stringify(amazonCart, null, 2))
+    console.log('got amazon cart')
+    console.log(amazonCart);
 
-    cb(null, items);
+    // if the cart is not there, then i guess it has been purchased
+    // mark cart as purchased and create a new one
+    if (!amazonCart.Request[0].IsValid[0] || amazonCart.Request[0].Errors) {
+      console.log('cart has already been purchased')
+      cart.purchased = true;
+      cart.purchased_date = new Date();
+      yield cart.save();
+
+      console.log('creating a new cart for ' + slack_id)
+      cart = new db.Cart({
+        slack_id: slack_id,
+        items: []
+      })
+      yield cart.save()
+      return cart;
+    }
+
+    // rebuild amazon cart off of the contents we have in the db
+    console.log('clearing cart for rebuild ' + cart.amazon.CartId)
+    yield client.clearCart({
+      'CartId': cart.amazon.CartId[0],
+      'HMAC': cart.amazon.HMAC[0]
+    })
+
+    console.log('rebuilding cart ' + cart.amazon.CartId)
+    yield client.addCart(_.merge({}, cart_items, {
+      CartId: cart.amazon.CartId[0],
+      HMAC: cart.amazon.HMAC[0],
+    }))
+
+    yield cart.save()
+    return cart;
+  })
+}
 
 
+//
+// Testing
+//
+if (!module.parent) {
+  getCart('peter').then(function(r) {
+    console.log(r);
+  }).catch(function(e) {
+    console.log('error')
+    console.error(e)
+    console.log(e.stack)
   })
 }
