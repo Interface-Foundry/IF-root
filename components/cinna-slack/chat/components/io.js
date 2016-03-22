@@ -37,8 +37,38 @@ var messageHistory = {}; //fake database, stores all users and their chat histor
 var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
+// var BufferList = require('bufferlist').BufferList
 
 /////////// LOAD INCOMING ////////////////
+
+
+var telegram = require('telegram-bot-api');
+ 
+var tg = new telegram({
+        token: '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ',
+        updates: {
+            enabled: true
+    }
+});
+ 
+tg.on('message', function(msg){
+    console.log(msg);
+
+    var newTg = {
+        source: {
+            'origin':'telegram',
+            'channel':msg.from.id.toString(),
+            'org':'telegram',
+            'id':'telegram' + "_" + msg.from.id, //for retrieving chat history in node memory,
+        },
+        'msg':msg.text
+    }
+
+    //console.log('asdf ',newTg);
+    preProcess(newTg);
+});
+
+
 
 //get stored slack users from mongo
 var initSlackUsers = function(env){
@@ -273,6 +303,20 @@ function loadSlackUsers(users){
                         // }, (e) => {
                         //   console.log('Error: ', e)
                         // })
+
+                        // var options = {
+                        //    uri : this.data['url_private'],
+                        //    followRedirect: true,
+                        //    headers: {
+                        //        'Authorization': 'Bearer ' + token.token
+                        //    }
+                        // };
+
+                        // request(options, function(error, response, body) { 
+                            
+                        // });
+
+
                         console.log('TODO: handle images sent to kip');
                         var mailOptions = {
                             to: 'Kip Server <hello@kipthis.com>',
@@ -975,6 +1019,15 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             data.client_res.push(urlArr[count]);
                         }
+                        else if (data.source.origin == 'telegram'){
+                            var attachObj = {};
+
+                            attachObj.photo = urlArr[count];
+                            attachObj.message = emoji + ' [' + truncate(data.amazon[count].ItemAttributes[0].Title[0]) + ']('+ res[count] +')';
+
+                            data.client_res.push(attachObj);
+
+                        }
 
                         count++;
                         callback();
@@ -1094,6 +1147,185 @@ var sendResponse = function(data){
             console.log('error: socket io channel missing', data);
         }
     }
+    else if (data.source.channel && data.source.origin == 'telegram'){
+
+
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
+            var message = data.client_res[0]; //use first item in client_res array as text message
+            console.log('attachthis ',message);
+
+            tg.sendMessage({
+                chat_id: data.source.channel,
+                text: message
+                // parse_mode: 'Markdown',
+                // disable_web_page_preview: false
+            })
+
+
+            //remove first message from res arr
+            var attachThis = data.client_res;
+            attachThis.shift();
+
+            //attachThis = JSON.stringify(attachThis);
+
+            //console.log('attachthis ',attachThis);
+
+            async.eachSeries(attachThis, function(attach, callback) {
+
+                console.log('photo ',attach.photo);
+                console.log('message ',attach.message);
+
+                tg.sendMessage({
+                    chat_id: data.source.channel,
+                    text: attach.message,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: false
+                });
+
+
+                // request(attach.photo, function(err, response, buffer) {
+                //     // Do something
+
+                //     console.log('res ',response);
+                //     console.log('buffer ',buffer);
+                // });
+
+                // var url = c;
+                // var bl = new BufferList();
+                // request({uri:url, responseBodyStream: bl}, function (error, response, body) {
+                //   if (!error && response.statusCode == 200) {
+
+                //     // console.log(response.headers["content-type"]);
+
+                //     // var data_uri_prefix = "data:" + response.headers["content-type"] + ";base64,";
+                //     // var image = new Buffer(bl.toString(), 'binary').toString('base64');                                                                                                                                                                 
+                //     // image = data_uri_prefix + image;
+
+                //     // console.log('z z ',image);
+
+                //     // tg.sendPhoto({
+                //     //     chat_id: data.source.channel,
+                //     //     photo: image
+                //     // });
+
+                //     callback();
+
+                //   }
+                // }); 
+
+
+
+
+                
+
+            //     // tg.sendMessage({
+            //     //     chat_id: data.source.channel,
+            //     //     text: message
+            //     //     // caption: 'This is my test image',
+                 
+            //     //     // // you can also send file_id here as string (as described in telegram bot api documentation)
+            //     //     // photo: '/path/to/file/test.jpg'
+            //     // })
+
+            //     // //attach = attach.replace('\\n','');
+            //     // var field = {
+            //     //     "value": attach,
+            //     //     "short":false
+            //     // }
+            //     // attachments[1].fields.push(field);
+
+            //     // callback();
+
+            }, function done(){
+
+
+            });
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        else if (data.action == 'focus'){
+            // var attachments = [
+            //     {
+            //         "color": "#45a5f4"
+            //     },
+            //     {
+            //         "color": "#45a5f4",
+            //         "fields":[]
+            //     }
+            // ];
+
+            // //remove first message from res arr
+            // var attachThis = data.client_res;
+
+            // attachments[0].image_url = attachThis[0]; //add image search results to attachment
+            // attachments[0].fallback = 'More information'; //fallback for search result
+
+            // attachThis.shift(); //remove image from array
+
+            // attachments[1].fallback = 'More information';
+            // //put in attachment fields
+            // async.eachSeries(attachThis, function(attach, callback) {
+            //     //attach = attach.replace('\\n','');
+            //     var field = {
+            //         "value": attach,
+            //         "short":false
+            //     }
+            //     attachments[1].fields.push(field);
+            //     callback();
+
+            // }, function done(){
+
+            //     attachments = JSON.stringify(attachments);
+
+            //     var msgData = {
+            //       // attachments: [...],
+            //         icon_url:'http://kipthis.com/img/kip-icon.png',
+            //         username:'Kip',
+            //         attachments: attachments
+            //     };
+            //     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+            // });
+        }else if (data.action == 'sendAttachment'){
+
+            // //remove first message from res arr
+            // var attachThis = data.client_res;
+            // attachThis = JSON.stringify(attachThis);
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        else {
+            //loop through responses in order
+            async.eachSeries(data.client_res, function(message, callback) {
+                tg.sendMessage({
+                    chat_id: data.source.channel,
+                    text: message
+                    // caption: 'This is my test image',
+                 
+                    // // you can also send file_id here as string (as described in telegram bot api documentation)
+                    // photo: '/path/to/file/test.jpg'
+                })
+                callback();
+            }, function done(){
+            });
+        }
+
+    }
     else if (data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
 
@@ -1166,7 +1398,7 @@ var sendResponse = function(data){
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
 
                 });
-            }else if (data.action == 'sendAttachment'){
+            }else if (data.action == 'sendAttachment' || data.bucket == 'purchase' && data.action == 'list'){
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
@@ -1322,17 +1554,88 @@ var saveToCart = function(data){
 function viewCart(data){
     db.Metrics.log('cart.view', data);
 
-    sendTxtResponse(data,'View cart is coming soon! :)');
+    // async.eachSeries(res, function(item, callback) {
 
-    var mailOptions = {
-        to: 'Kip Server <hello@kipthis.com>',
-        from: 'Kip View Cart Fired! <server@kipthis.com>',
-        subject: 'woah ok',
-        text: 'Fix this ok thx'
-    };
-    mailerTransport.sendMail(mailOptions, function(err) {
-        if (err) console.log(err);
-    });
+    //     data.urlShorten.push(i);//save shortened URLs
+    //     processData.getNumEmoji(data,count+1,function(emoji){
+    //         res[count] = res[count].trim();
+    //         if (data.source.origin == 'slack'){
+    //             data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
+    //         }else if (data.source.origin == 'socket.io'){
+    //             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+    //         }
+
+    //         count++;
+    //         callback();
+    //     });
+    // }, function done(){
+    //     checkOutgoingBanter(data);
+    // });
+
+
+
+    var cartObj = [
+        {
+            "text": ":one: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$60.00* total – $19.99 each \n Quantity: 3 \n _Added by:  <http://asdf.com|@steph>, <http://asdf.com|@zoe>_",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
+        },
+        {
+            "text": ":two: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$19.99* total – $19.99 each \n Quantity: 1 \n _Added by:  <http://asdf.com|@steph>_",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
+        },
+        {
+            "text": ":three: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$100.00* total – $19.99 each \n Quantity: 5 \n _Added by:  <http://asdf.com|@cat>_",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
+        },
+        {
+            "text": ":four: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$100.00* total – $19.99 each \n Quantity: 5 \n _Added by:  <http://asdf.com|@steph>, <http://asdf.com|@rinna>, <http://asdf.com|@dillon>_",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
+        },
+        {
+            "text":"_Summary: Team Kip_ \n Last Purchase: $200.50 \n Total: *$203.50* \n <http://asdf.com|» Purchase Items >",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#45a5f4"
+        }
+    ];
+    
+
+    data.client_res = cartObj;
+    //data.client_res.push(cartObj);
+
+    sendResponse(data);
+
+
+
+    // sendTxtResponse(data,'View cart is coming soon! :)');
+
+    // var mailOptions = {
+    //     to: 'Kip Server <hello@kipthis.com>',
+    //     from: 'Kip View Cart Fired! <server@kipthis.com>',
+    //     subject: 'woah ok',
+    //     text: 'Fix this ok thx'
+    // };
+    // mailerTransport.sendMail(mailOptions, function(err) {
+    //     if (err) console.log(err);
+    // });
 
 }
 

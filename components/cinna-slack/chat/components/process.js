@@ -2,6 +2,8 @@ var async = require('async');
 var request = require('request');
 var querystring = require('querystring');
 
+var googl = require('goo.gl');
+googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk');
 
 var urlShorten = function(data,callback2) {
 
@@ -11,14 +13,26 @@ var urlShorten = function(data,callback2) {
         if (data.client_res){
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var escapeAmazon = querystring.escape(data.client_res);
-            request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
-              if(err){
-                console.log('URL SHORTEN error ',err);
-              }
-              else {
-                callback2(body);
-              }
+
+            // request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
+            //   if(err){
+            //     console.log('URL SHORTEN error ',err);
+            //   }
+            //   else {
+            //     callback2(body);
+            //   }
+            // });
+
+
+            googl.shorten('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+            .then(function (shortUrl) {
+                callback2(shortUrl);
+            })
+            .catch(function (err) {
+                console.error(err.message);
+                callback2();
             });
+
         }
         else {
             console.log('error: client_res missing from urlShorten')
@@ -33,16 +47,17 @@ var urlShorten = function(data,callback2) {
             if (data.amazon[i]){
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
-                request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])+'&format=txt', function(err, res, body) {
-                  if(err){
-                    console.log(err);
+               
+                googl.shorten('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                .then(function (shortUrl) {
+                    urlArr.push(shortUrl);
                     callback();
-                  }
-                  else {
-                    urlArr.push(body);
+                })
+                .catch(function (err) {
+                    console.error(err.message);
                     callback();
-                  }
                 });
+
             }
             else{
                 callback();
