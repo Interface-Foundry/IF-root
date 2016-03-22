@@ -3,7 +3,11 @@ var request = require('request');
 var querystring = require('querystring');
 
 var googl = require('goo.gl');
-googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk');
+if (process.env.NODE_ENV === 'development') {
+    googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
+} else {
+    googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk');
+}
 
 var urlShorten = function(data,callback2) {
 
@@ -47,7 +51,7 @@ var urlShorten = function(data,callback2) {
             if (data.amazon[i]){
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
-               
+
                 googl.shorten('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
                 .then(function (shortUrl) {
                     urlArr.push(shortUrl);
@@ -100,6 +104,38 @@ function getNumEmoji(data,number,callback){
     callback(numEmoji);
 }
 
+var emoji = {
+  1: { slack: ':one:', html: '<div class="number">①</div>' },
+  2: { slack: ':two:', html: '<div class="number">②</div>' },
+  3: { slack: ':three:', html: '<div class="number">③</div>' },
+  4: { slack: ':four:', html: '<div class="number">④</div>' },
+  5: { slack: ':five:', html: '<div class="number">⑤</div>' },
+  6: { slack: ':six:', html: '<div class="number">⑥</div>' },
+  7: { slack: ':seven:', html: '<div class="number">⑦</div>' },
+  8: { slack: ':eight:', html: '<div class="number">⑧</div>' },
+  9: { slack: ':nine:', html: '<div class="number">⑨</div>' },
+  10: { slack: '10.', html: '<div class="number">⑩</div>' },
+  11: { slack: '11.', html: '<div class="number">⑪</div>' },
+  12: { slack: '12.', html: '<div class="number">⑫</div>' },
+  13: { slack: '13.', html: '<div class="number">⑬</div>' },
+  14: { slack: '14.', html: '<div class="number">⑭</div>' },
+  15: { slack: '15.', html: '<div class="number">⑮</div>' },
+  16: { slack: '16.', html: '<div class="number">⑯</div>' },
+  17: { slack: '17.', html: '<div class="number">⑰</div>' },
+  18: { slack: '18.', html: '<div class="number">⑱</div>' },
+  19: { slack: '19.', html: '<div class="number">⑲</div>' },
+  20: { slack: '20.', html: '<div class="number">⑳</div>' },
+
+}
+
+
+//
+// Shortens a url for a cart object.  I'm not super sure about the id right now.
+//
+function getCartLink(url, cart_id) {
+  return googl.shorten('http://kipbubble.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
+}
+
 
 /////////// tools /////////////
 
@@ -108,3 +144,5 @@ function getNumEmoji(data,number,callback){
 /// exports
 module.exports.urlShorten = urlShorten;
 module.exports.getNumEmoji = getNumEmoji;
+module.exports.getCartLink = getCartLink;
+module.exports.emoji = emoji;

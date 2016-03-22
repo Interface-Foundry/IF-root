@@ -3,6 +3,7 @@ var async = require('async');
 var request = require('request');
 const vision = require('node-cloud-vision-api')
 var co = require('co')
+var _ = require('lodash')
 
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
@@ -1562,15 +1563,9 @@ var saveToCart = function(data){
                   var searchSelect = data.searchSelect[index];
                   console.log('adding searchSelect ' + searchSelect);
                   if (item.recallHistory && item.recallHistory.amazon){
-                      // console.log('adding item recallHistory')
-                      // console.log(item.recallHistory.amazon[searchSelect - 1])
-                      // console.log(data);
                       messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
                       yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
                   } else {
-                      // console.log('adding item amazon')
-                      // console.log(item.amazon[searchSelect - 1])
-                      // console.log(data)
                       messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
                       yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
                   }
@@ -1580,20 +1575,8 @@ var saveToCart = function(data){
               var cart = yield kipcart.getCart(data.source.org);
               console.log(cart);
 
-              data.client_res = cart.amazon.PurchaseURL[0]
-              processData.urlShorten(data, function(shortUrl) {
-                data.client_res = ['<' + shortUrl.trim() + '|» View Cart>']
-                outgoingResponse(data, 'txt');
-              })
-
-              // console.log(JSON.stringify(res, null, 2))
-              // console.log('😱')
-              // return;
-              // processData.urlShorten(res, function(res2){
-              //     res.client_res = [];
-              //     res.client_res.push('<'+res2.trim()+'|» View Cart>');
-              //     outgoingResponse(res,'txt');
-              // });
+              data.client_res = ['<' + cart.link + '|» View Cart>']
+              outgoingResponse(data, 'txt');
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
@@ -1617,27 +1600,36 @@ var saveToCart = function(data){
 }
 
 function viewCart(data){
+
     db.Metrics.log('cart.view', data);
 
-    // async.eachSeries(res, function(item, callback) {
+    kipcart.getCart(data.source.org).then(function(cart) {
+      var cartObj = cart.aggregate_items.map(function(item, index) {
 
-    //     data.urlShorten.push(i);//save shortened URLs
-    //     processData.getNumEmoji(data,count+1,function(emoji){
-    //         res[count] = res[count].trim();
-    //         if (data.source.origin == 'slack'){
-    //             data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-    //         }else if (data.source.origin == 'socket.io'){
-    //             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
-    //         }
+        var userString = item.added_by.map(function(u) {
+          return '<@' + u + '>';
+        }).join(', ')
 
-    //         count++;
-    //         callback();
-    //     });
-    // }, function done(){
-    //     checkOutgoingBanter(data);
-    // });
+        return {
+          text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
+          mrkdwn_in: ['text', 'pretext'],
+          thumb_url: item.image
+        }
+      })
 
+      cartObj.push({
+        text: `_Summary: Team Cart_ \n Total: *${cart.total}* \n <${cart.link}|» Purchase Items >`,
+        mrkdwn_in: ['text', 'pretext'],
+        color: '#45a5f4'
+      })
 
+      data.client_res = cartObj;
+      sendResponse(data);
+
+    }).catch(function(e) {
+      console.log('error retriving cart for view cart')
+      console.log(e.stack);
+    })
 
     var cartObj = [
         {
@@ -1681,12 +1673,6 @@ function viewCart(data){
             "color":"#45a5f4"
         }
     ];
-
-
-    data.client_res = cartObj;
-    //data.client_res.push(cartObj);
-
-    sendResponse(data);
 
 
 

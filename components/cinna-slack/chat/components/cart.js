@@ -8,6 +8,7 @@ var client = amazon.createClient({
   awsSecret: "aR0IgLL0vuTllQ6HJc4jBPffdsmshLjDYCVanSCN",
   awsTag: "bubboorev-20"
 });
+var getCartLink = require('./process').getCartLink;
 
 module.exports = {};
 
@@ -145,6 +146,7 @@ var getCart = module.exports.getCart = function(slack_id) {
       HMAC: cart.amazon.HMAC[0],
     }))
 
+    cart.link = yield getCartLink(cart.amazon.PurchaseURL[0], cart._id)
     yield cart.save()
     return cart;
   })
