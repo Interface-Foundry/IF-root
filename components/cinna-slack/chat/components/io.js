@@ -19,6 +19,7 @@ var processData = require("./process.js");
 var purchase = require("./purchase.js");
 var init_team = require("./init_team.js");
 var conversation_botkit = require('./conversation_botkit');
+var cart = require('./cart');
 
 var nlp = require('../../nlp/api');
 
@@ -332,6 +333,7 @@ function loadSlackUsers(users){
                             'channel':data.channel,
                             'org':data.team,
                             'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                            user: data.user
                         },
                         'msg':data.text
                     }
@@ -1252,10 +1254,19 @@ var saveToCart = function(data){
 
             //async push items to cart
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+                debugger;
                 if (item.recallHistory && item.recallHistory.amazon){
+                    console.log('adding item recallHistory')
+                    console.log(item.recallHistory.amazon[searchSelect - 1])
+                    console.log(data);
+                    cart.addToTeamCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
                     messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
                 }else {
+                    console.log('adding item amazon')
+                    console.log(item.amazon[searchSelect - 1])
+                    console.log(data)
                     messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                    cart.addToTeamCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
                 }
                 callback();
             }, function done(){
