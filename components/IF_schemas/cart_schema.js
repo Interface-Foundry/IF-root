@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var accounting = require('accounting');
 
 /**
  * cart and cart status stuff
@@ -62,6 +63,14 @@ cart.virtual('aggregate_items').get(function() {
   })
 })
 
+//
+// Total is the cart total price (since amazon's subtotal is buggy)
+//
+cart.virtual('total').get(function() {
+  return accounting.formatMoney(this.items.reduce(function(total, i) {
+    return total + accounting.parse(i.price);
+  }, 0))
+})
 
 var Cart = mongoose.model('Cart', cart);
 
