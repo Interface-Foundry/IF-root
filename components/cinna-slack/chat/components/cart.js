@@ -9,6 +9,7 @@ var client = amazon.createClient({
   awsTag: "bubboorev-20"
 });
 var getCartLink = require('./process').getCartLink;
+var fs = require('fs')
 
 module.exports = {};
 
@@ -31,7 +32,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
       ASIN: item.ASIN[0],
       title: item.ItemAttributes[0].Title,
       link: item.ItemLinks[0].ItemLink[0].URL[0], // so obviously converted to json from xml
-      image: item.altImage,
+      image: item.altImage || item.SmallImage[0].URL[0],
       price: item.realPrice,
       rating: item.reviews.rating,
       review_count: item.reviews.reviewCount,
