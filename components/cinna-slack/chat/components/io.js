@@ -1630,64 +1630,6 @@ function viewCart(data){
       console.log('error retriving cart for view cart')
       console.log(e.stack);
     })
-
-    var cartObj = [
-        {
-            "text": ":one: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$60.00* total – $19.99 each \n Quantity: 3 \n _Added by:  <http://asdf.com|@steph>, <http://asdf.com|@zoe>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text": ":two: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$19.99* total – $19.99 each \n Quantity: 1 \n _Added by:  <http://asdf.com|@steph>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text": ":three: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$100.00* total – $19.99 each \n Quantity: 5 \n _Added by:  <http://asdf.com|@cat>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text": ":four: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$100.00* total – $19.99 each \n Quantity: 5 \n _Added by:  <http://asdf.com|@steph>, <http://asdf.com|@rinna>, <http://asdf.com|@dillon>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text":"_Summary: Team Kip_ \n Last Purchase: $200.50 \n Total: *$203.50* \n <http://asdf.com|» Purchase Items >",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "color":"#45a5f4"
-        }
-    ];
-
-
-
-    // sendTxtResponse(data,'View cart is coming soon! :)');
-
-    // var mailOptions = {
-    //     to: 'Kip Server <hello@kipthis.com>',
-    //     from: 'Kip View Cart Fired! <server@kipthis.com>',
-    //     subject: 'woah ok',
-    //     text: 'Fix this ok thx'
-    // };
-    // mailerTransport.sendMail(mailOptions, function(err) {
-    //     if (err) console.log(err);
-    // });
-
 }
 
 //get user history
