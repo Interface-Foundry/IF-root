@@ -29,13 +29,13 @@ module.exports.addToCart = function(slack_id, user_id, item) {
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
-      ASIN: item.ASIN[0],
-      title: item.ItemAttributes[0].Title,
-      link: item.ItemLinks[0].ItemLink[0].URL[0], // so obviously converted to json from xml
-      image: item.altImage || item.SmallImage[0].URL[0],
+      ASIN: _.get(item, 'ASIN[0]'),
+      title: _.get(item, 'ItemAttributes[0].Title'),
+      link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
+      image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
       price: item.realPrice,
-      rating: item.reviews.rating,
-      review_count: item.reviews.reviewCount,
+      rating: _.get(item, 'reviews.rating'),
+      review_count: _.get(item, 'reviews.reviewCount'),
       added_by: user_id,
       slack_id: slack_id,
       source_json: JSON.stringify(item)
@@ -130,8 +130,8 @@ var getCart = module.exports.getCart = function(slack_id) {
     // otherwize rebuild their current cart
     // make sure the cart has not been checked out (purchased) yet
     var amazonCart = yield client.getCart({
-      'CartId': cart.amazon.CartId[0],
-      'HMAC': cart.amazon.HMAC[0]
+      'CartId': _.get(cart, 'amazon.CartId.0'),
+      'HMAC': _.get(cart, "amazon.HMAC[0]")
     })
 
     // console.log(JSON.stringify(amazonCart, null, 2))
@@ -174,7 +174,7 @@ var getCart = module.exports.getCart = function(slack_id) {
       HMAC: cart.amazon.HMAC[0],
     }))
 
-    cart.link = yield getCartLink(cart.amazon.PurchaseURL[0], cart._id)
+    cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
     yield cart.save()
     return cart;
   })
