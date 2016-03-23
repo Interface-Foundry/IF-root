@@ -1,6 +1,9 @@
+/*eslint-env es6*/
 var async = require('async');
 var request = require('request');
 const vision = require('node-cloud-vision-api')
+var co = require('co')
+var _ = require('lodash')
 
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
@@ -17,7 +20,9 @@ var search = require("./search.js");
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
-var onboard = require("./onboard.js");
+var init_team = require("./init_team.js");
+var conversation_botkit = require('./conversation_botkit');
+var kipcart = require('./cart');
 
 var nlp = require('../../nlp/api');
 
@@ -43,14 +48,14 @@ var cinnaEnv;
 
 
 var telegram = require('telegram-bot-api');
- 
+
 var tg = new telegram({
         token: '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ',
         updates: {
             enabled: true
     }
 });
- 
+
 tg.on('message', function(msg){
     console.log(msg);
 
@@ -227,7 +232,7 @@ function loadSlackUsers(users){
                 })
             }
             else if (user.meta && user.meta.initialized == false){
-                onboard(user, function(e, addedBy) {
+                init_team(user, function(e, addedBy) {
                     user.meta.initialized = true;
                     if (typeof user.save === 'function') {
                       user.save();
@@ -254,6 +259,13 @@ function loadSlackUsers(users){
                         hello.client_res.push(res);
                         //send attachment!
                         sendResponse(hello, res);
+
+                        user.conversations = user.conversations || {};
+                        user.conversations[addedBy.dm] = 'onboard';
+                        return conversation_botkit.onboard(user, addedBy.id, function() {
+                          console.log('done with onboarding conversation')
+                          user.conversations[addedBy.dm] = false;
+                        });
                     })
 
                 })
@@ -271,11 +283,44 @@ function loadSlackUsers(users){
             // };
             // mailerTransport.sendMail(mailOptions, function(err) {
             //     if (err) console.log(err);
-            // });        
+            // });
         });
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
+            console.log('🔥')
+            console.log(data);
+
+            // don't talk to urself
+            if (data.user === user.bot.bot_user_id) {
+              console.log("don't talk to urself")
+              return;
+            }
+
+
+            // welp it would be nice to get the history in context here but fuck it
+            // idk how and i don't care this ship gonna burn before we scale out anyway
+            user.conversations = user.conversations || {};
+
+
+            // don't perform searches if ur having a convo with a bot
+            // let botkit handle it
+            if (user.conversations[data.channel]) {
+              console.log('in a conversation: ' + user.conversations[data.channel])
+              return;
+            }
+
+
+            // TESTING PURPOSES, here is how you would trigger a conversation
+            if (data.text === 'onboard') {
+              user.conversations[data.channel] = 'onboard';
+              // "user" is actually the slackbot here
+              // "data.user" is the user having the convo
+              return conversation_botkit.onboard(user, data.user, function() {
+                console.log('done with onboarding conversation')
+                user.conversations[data.channel] = false;
+              });
+            }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 
@@ -312,8 +357,8 @@ function loadSlackUsers(users){
                         //    }
                         // };
 
-                        // request(options, function(error, response, body) { 
-                            
+                        // request(options, function(error, response, body) {
+
                         // });
 
 
@@ -359,6 +404,7 @@ function loadSlackUsers(users){
                             'channel':data.channel,
                             'org':data.team,
                             'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                            user: data.user
                         },
                         'msg':data.text
                     }
@@ -658,7 +704,7 @@ function preProcess(data){
 function routeNLP(data){
 
     //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); 
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
     data.flags = data.flags ? data.flags : {};
 
 
@@ -676,12 +722,12 @@ function routeNLP(data){
                 if (e){
                   console.log('NLP error ',e);
                   // Route to supervisor
-                  
+
                   data.flags.toSupervisor = true;
                   incomingAction(data);
                 }
                 else {
-                    console.log('NLP RES ',res);
+                    // console.log('NLP RES ',res);
 
                     if (res.supervisor) {
                       data.flags.toSupervisor = true;
@@ -913,9 +959,9 @@ function searchBucket(data){
         case 'more':
             //----supervisor: flag to skip history.recallHistory step below ---//
             if (data.flags && data.flags.recalled) {
-                    // console.log('Flagged "recalled", skipping recallHistory...') 
+                    // console.log('Flagged "recalled", skipping recallHistory...')
                     search.searchMore(data);
-            } 
+            }
             //-----------------------------------------------------------------//
             history.recallHistory(data, function(res){
                 if (res){
@@ -1199,7 +1245,7 @@ var sendResponse = function(data){
                 //     // console.log(response.headers["content-type"]);
 
                 //     // var data_uri_prefix = "data:" + response.headers["content-type"] + ";base64,";
-                //     // var image = new Buffer(bl.toString(), 'binary').toString('base64');                                                                                                                                                                 
+                //     // var image = new Buffer(bl.toString(), 'binary').toString('base64');
                 //     // image = data_uri_prefix + image;
 
                 //     // console.log('z z ',image);
@@ -1212,18 +1258,18 @@ var sendResponse = function(data){
                 //     callback();
 
                 //   }
-                // }); 
+                // });
 
 
 
 
-                
+
 
             //     // tg.sendMessage({
             //     //     chat_id: data.source.channel,
             //     //     text: message
             //     //     // caption: 'This is my test image',
-                 
+
             //     //     // // you can also send file_id here as string (as described in telegram bot api documentation)
             //     //     // photo: '/path/to/file/test.jpg'
             //     // })
@@ -1316,7 +1362,7 @@ var sendResponse = function(data){
                     chat_id: data.source.channel,
                     text: message
                     // caption: 'This is my test image',
-                 
+
                     // // you can also send file_id here as string (as described in telegram bot api documentation)
                     // photo: '/path/to/file/test.jpg'
                 })
@@ -1462,7 +1508,7 @@ var sendResponse = function(data){
 var saveToCart = function(data){
 
        //----supervisor: flag to skip history.recallHistory step below ---//
-        if (data.flags && data.flags.recalled) { 
+        if (data.flags && data.flags.recalled) {
             // console.log('\n\n\nDATA.FLAGS RECALLED!!!', data.flags)
             var cartHistory = { cart: [] }
               //async push items to cart
@@ -1475,12 +1521,12 @@ var saveToCart = function(data){
                 // callback();
             // }, function done(){
             console.log('\n\n\nio930: SUPERVISOR cartHistory: ', cartHistory,'\n\n\n')
-              if (cartHistory.cart.length == 0) { 
-                console.log('No items in proxy cart: io.js : Line 933', cartHistory) 
-                return 
+              if (cartHistory.cart.length == 0) {
+                console.log('No items in proxy cart: io.js : Line 933', cartHistory)
+                return
             } else {
                  // console.log('\n\n\n\n\n I mean brah it shouldnt be coming here....',data.source.id,messageHistory,'\n\n\n\n\n\n')
-                  purchase.outputCart(data, cartHistory,function(res){ 
+                  purchase.outputCart(data, cartHistory,function(res){
                     // processData.urlShorten(res, function(res2){
                         res.client_res = [res.client_res];
                         // res.client_res.push(res2);
@@ -1488,14 +1534,14 @@ var saveToCart = function(data){
                         // var proxy = res
                         // delete proxy.amazon
                         // console.log('Mitsu iojs935: ', JSON.stringify(res.client_res))
-                       
+
                         outgoingResponse(res,'txt');
                     });
                 // });
-            // });    
+            // });
             return
-            } 
-        } 
+            }
+        }
         //-----------------------------------------------------------------//
 
     data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
@@ -1510,139 +1556,86 @@ var saveToCart = function(data){
             sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
         else {
-             console.log('\n\n\nYO LOWWWWWW item: ',item,'\n\n\n\n\n\n')
-            //async push items to cart
-            async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-                if (item.recallHistory && item.recallHistory.amazon){
-                    messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
-                }else {
-                     console.log('\n\n\n\n\n checking item.recallHistory',item.amazon[searchSelect - 1],'\n\n\n\n\n\n')
-                    messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                }
-                callback();
-            }, function done(){
-                 // console.log('\n\n\n\n\n somethingwrong here....',data.source.id,JSON.stringify(messageHistory),'\n\n\n\n\n\n')
-                purchase.outputCart(data,messageHistory[data.source.id],function(res,err){
-                    if(err){
-                        sendTxtResponse(data,err);
 
-                        //send email about this issue
-                        var mailOptions = {
-                            to: 'Kip Server <hello@kipthis.com>',
-                            from: 'Kip save tp cart broke <server@kipthis.com>',
-                            subject: 'Kip save tp cart broke',
-                            text: 'Fix this ok thx'
-                        };
-                        mailerTransport.sendMail(mailOptions, function(err) {
-                            if (err) console.log(err);
-                        });
-                    }else {
-                        processData.urlShorten(res, function(res2){
-                            res.client_res = [];
-                            res.client_res.push('<'+res2.trim()+'|» View Cart>');
-                            outgoingResponse(res,'txt');
-                        });
-                    }
+            // co lets us use "yield" to with promises to untangle async shit
+            co(function*() {
+              for (var index = 0; index < data.searchSelect.length; index++) {
+                  var searchSelect = data.searchSelect[index];
+                  console.log('adding searchSelect ' + searchSelect);
+                  if (item.recallHistory && item.recallHistory.amazon){
+                      messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
+                      yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                  } else {
+                      messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
+                      yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                  }
+              }
 
+              console.log('retrieving cart')
+              var cart = yield kipcart.getCart(data.source.org);
+              console.log(cart);
+
+              data.client_res = ['<' + cart.link + '|» View Cart>']
+              outgoingResponse(data, 'txt');
+
+            }).then(function(){}).catch(function(err) {
+                console.log(err);
+                console.log(err.stack)
+                return;
+                sendTxtResponse(data, err);
+
+                //send email about this issue
+                var mailOptions = {
+                    to: 'Kip Server <hello@kipthis.com>',
+                    from: 'Kip save tp cart broke <server@kipthis.com>',
+                    subject: 'Kip save tp cart broke',
+                    text: 'Fix this ok thx'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) console.log(err);
                 });
-            });
+            })
         }
-
     });
 }
 
 function viewCart(data){
+
     db.Metrics.log('cart.view', data);
 
-    // async.eachSeries(res, function(item, callback) {
+    kipcart.getCart(data.source.org).then(function(cart) {
+      var cartObj = cart.aggregate_items.map(function(item, index) {
 
-    //     data.urlShorten.push(i);//save shortened URLs
-    //     processData.getNumEmoji(data,count+1,function(emoji){
-    //         res[count] = res[count].trim();
-    //         if (data.source.origin == 'slack'){
-    //             data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-    //         }else if (data.source.origin == 'socket.io'){
-    //             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
-    //         }
+        var userString = item.added_by.map(function(u) {
+          return '<@' + u + '>';
+        }).join(', ')
 
-    //         count++;
-    //         callback();
-    //     });
-    // }, function done(){
-    //     checkOutgoingBanter(data);
-    // });
-
-
-
-    var cartObj = [
-        {
-            "text": ":one: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$60.00* total – $19.99 each \n Quantity: 3 \n _Added by:  <http://asdf.com|@steph>, <http://asdf.com|@zoe>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text": ":two: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$19.99* total – $19.99 each \n Quantity: 1 \n _Added by:  <http://asdf.com|@steph>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text": ":three: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$100.00* total – $19.99 each \n Quantity: 5 \n _Added by:  <http://asdf.com|@cat>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text": ":four: <http://kipthis.com|Columbia Cathedral Peak Front-Zip Fleece Vest> \n *$100.00* total – $19.99 each \n Quantity: 5 \n _Added by:  <http://asdf.com|@steph>, <http://asdf.com|@rinna>, <http://asdf.com|@dillon>_",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "thumb_url":"http://ecx.images-amazon.com/images/I/61biOKzFxpL._UY695_.jpg"
-        },
-        {
-            "text":"_Summary: Team Kip_ \n Last Purchase: $200.50 \n Total: *$203.50* \n <http://asdf.com|» Purchase Items >",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
-            ],
-            "color":"#45a5f4"
+        return {
+          text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
+          mrkdwn_in: ['text', 'pretext'],
+          thumb_url: item.image
         }
-    ];
-    
+      })
 
-    data.client_res = cartObj;
-    //data.client_res.push(cartObj);
+      cartObj.push({
+        text: `_Summary: Team Cart_ \n Total: *${cart.total}* \n <${cart.link}|» Purchase Items >`,
+        mrkdwn_in: ['text', 'pretext'],
+        color: '#45a5f4'
+      })
 
-    sendResponse(data);
+      data.client_res = cartObj;
+      sendResponse(data);
 
-
-
-    // sendTxtResponse(data,'View cart is coming soon! :)');
-
-    // var mailOptions = {
-    //     to: 'Kip Server <hello@kipthis.com>',
-    //     from: 'Kip View Cart Fired! <server@kipthis.com>',
-    //     subject: 'woah ok',
-    //     text: 'Fix this ok thx'
-    // };
-    // mailerTransport.sendMail(mailOptions, function(err) {
-    //     if (err) console.log(err);
-    // });
-
+    }).catch(function(e) {
+      console.log('error retriving cart for view cart')
+      console.log(e.stack);
+    })
 }
 
 //get user history
 function recallHistory(data,callback,steps){
 
-    console.log(steps);
+    // console.log(steps);
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 3');
     }

@@ -1,5 +1,6 @@
 var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
+mongoose.Promise = global.Promise;
 var ensureIndexes = require('mongoose-hook-ensure-indexes')
 var config = require('config');
 var log = require('../IF_logging/if_logger')();
@@ -46,6 +47,10 @@ var schemas = [{
     single: 'AnonUser',
     plural: 'AnonUsers'
 }, {
+    filename: 'cart_schema',
+    single: 'Cart',
+    plural: 'Carts'
+}, {
     filename: 'chatuser_schema',
     single: 'Chatuser',
     plural: 'Chatusers'
@@ -61,6 +66,10 @@ var schemas = [{
     filename: 'instagram_schema',
     single: 'Instagram',
     plural: 'Instagrams'
+}, {
+    filename: 'item_schema',
+    single: 'Item',
+    plural: 'Items'
 }, {
     filename: 'job_schema',
     single: 'Job',
