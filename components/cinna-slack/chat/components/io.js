@@ -1003,7 +1003,8 @@ function purchaseBucket(data){
             viewCart(data);
             break;
         case 'checkout':
-            saveToCart(data);
+            viewCart(data);
+            break;
         default:
             console.log('error: no purchase bucket action selected');
     }
@@ -1374,7 +1375,6 @@ var sendResponse = function(data){
     }
     else if (data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
-
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
@@ -1444,7 +1444,7 @@ var sendResponse = function(data){
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
 
                 });
-            }else if (data.action == 'sendAttachment' || data.bucket == 'purchase' && data.action == 'list'){
+            }else if (data.action == 'sendAttachment' || data.bucket == 'purchase' && (data.action == 'list' || data.action == 'checkout')){
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
@@ -1601,7 +1601,10 @@ var saveToCart = function(data){
 
 function viewCart(data){
 
+    console.log('view cart')
     db.Metrics.log('cart.view', data);
+
+    console.log(data.source)
 
     kipcart.getCart(data.source.org).then(function(cart) {
       var cartObj = cart.aggregate_items.map(function(item, index) {
