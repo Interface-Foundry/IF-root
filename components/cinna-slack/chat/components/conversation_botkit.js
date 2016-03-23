@@ -135,7 +135,6 @@ function askWhoManagesPurchases(response, convo) {
             convo.slackbot = slackbot;
             convo.on('end', function() {
               bot.closeRTM();
-              done();
             })
             convo.say("Hi! I'm Kip, your office shopping helper bot! <@$user> told me to make you an admin for the team, so I'll keep you up-to-date on what team members are adding to the office shopping cart.".replace('$user', user_id))
             welcomeVid(response, convo);
