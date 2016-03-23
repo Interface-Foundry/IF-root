@@ -809,11 +809,11 @@ function incomingAction(data){
             }
    }
 data.flags = data.flags ? data.flags : {};
-delete data.flags.toSupervisor
 //---------------------------------------------------------------------------//     
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
     });
+    delete data.flags.toSupervisor
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
         case 'search':

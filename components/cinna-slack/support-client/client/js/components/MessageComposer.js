@@ -29,7 +29,7 @@ class MessageComposer extends Component {
     }
     const text = event.target.value.trim();
     let activeMsg = this.props.activeMsg ? this.props.activeMsg : messages.filter(message => (message.source && message.source.id === activeChannel.id))[0]
-    console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
+    // console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
     if (event.which === 13 && !resolved) {
         event.preventDefault();
         let thread;
@@ -41,7 +41,7 @@ class MessageComposer extends Component {
         } 
         if (!thread) { 
           console.log('thread is not defined!')
-          console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
+          // console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
           return
         }
         var newMessage = {
