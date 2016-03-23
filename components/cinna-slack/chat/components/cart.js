@@ -51,6 +51,27 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 }
 
 //
+// Removes one item from the cart at a time
+//
+module.exports.removeFromCart = function(item) {
+  return co(function*() {
+    if (!item instanceof db.Item) {
+      console.error("can only remove mongoose models of type db.Item")
+      throw new Error('Cannot remove item - must be a db.Item model')
+    }
+    var cart = yield db.Carts.findById(item.cart_id).exec();
+    item.deleted = true;
+    cart.items = cart.items.filter(function(i) {
+      return i.toString() !== item._id.toString();
+    })
+    yield [cart.save(), item.save()]
+
+    // rebuild the cart
+    return getCart(cart.slack_id);
+  })
+}
+
+//
 // Syncs cart with amazon and returns a nicely formatted object
 // Right now there is no saved amazon cart, so if they delete something from
 // amazon,
@@ -118,12 +139,18 @@ var getCart = module.exports.getCart = function(slack_id) {
     console.log(amazonCart);
 
     // if the cart is not there, then i guess it has been purchased
+    // Although maybe the cart has expired? TODO
     // mark cart as purchased and create a new one
     if (!amazonCart.Request[0].IsValid[0] || amazonCart.Request[0].Errors) {
       console.log('cart has already been purchased')
       cart.purchased = true;
       cart.purchased_date = new Date();
       yield cart.save();
+      yield cart.items.map(function(i) {
+        i.purchased = true;
+        i.purchased_date = cart.purchased_date;
+        return i.save();
+      })
 
       console.log('creating a new cart for ' + slack_id)
       cart = new db.Cart({
@@ -158,11 +185,10 @@ var getCart = module.exports.getCart = function(slack_id) {
 // Testing
 //
 if (!module.parent) {
-  getCart('peter').then(function(r) {
-    console.log(r);
-  }).catch(function(e) {
-    console.log('error')
-    console.error(e)
-    console.log(e.stack)
+  co(function*() {
+    var item = yield db.Items.findById('56f2c006d045b96c1eb14acb').select('-source_json');
+    var cart = yield module.exports.removeFromCart(item)
+    console.log(item);
+    console.log(cart);
   })
 }
