@@ -81,6 +81,21 @@ var initSlackUsers = function(env){
     cinnaEnv = env;
     //load kip-pepper for testing
     if (env === 'development_alyx') {
+
+        //new
+        // var testUser = [{
+        //     team_id:'T02PN3B25',
+        //     dm:'D0H6X6TA8',
+        //     bot: {
+        //         bot_user_id: 'U0GRJ9BJS',
+        //         bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
+        //     },
+        //     meta: {
+        //         initialized: true
+        //     }
+        // }];
+
+        //old
         var testUser = [{
             team_id:'T0H72FMNK',
             dm:'D0H6X6TA8',
@@ -92,6 +107,8 @@ var initSlackUsers = function(env){
                 initialized: false
             }
         }];
+
+
         loadSlackUsers(testUser);
     }else if (env === 'development_mitsu'){
         var testUser = [{
@@ -682,6 +699,13 @@ function preProcess(data){
                     data.action = 'more';
                     incomingAction(data);
                     break;
+                case 'purchase.remove':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'purchase';
+                    data.action = 'remove';
+                    incomingAction(data);
+                    break;
                 case 'cancel': //just respond, no actions
                     //send message
                     console.log('Kip response cancelled');
@@ -994,7 +1018,7 @@ function purchaseBucket(data){
             saveToCart(data);
             break;
         case 'remove':
-            removeFromCart(data);
+            removeCartItem(data);
             break;
         case 'removeAll':
             removeAllCart(data);
@@ -1003,7 +1027,8 @@ function purchaseBucket(data){
             viewCart(data);
             break;
         case 'checkout':
-            saveToCart(data);
+            viewCart(data);
+            break;
         default:
             console.log('error: no purchase bucket action selected');
     }
@@ -1374,7 +1399,6 @@ var sendResponse = function(data){
     }
     else if (data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
-
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
@@ -1444,7 +1468,7 @@ var sendResponse = function(data){
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
 
                 });
-            }else if (data.action == 'sendAttachment' || data.bucket == 'purchase' && data.action == 'list'){
+            }else if (data.action == 'sendAttachment' || data.bucket == 'purchase' && (data.action == 'list' || data.action == 'checkout')){
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
@@ -1460,6 +1484,57 @@ var sendResponse = function(data){
 
             }
             else {
+
+                // var sryObj = [
+                //     {
+                //       "text": "I would like six pens for my creation station please.",
+                //       "fallback": "Pen request",
+                //       "title": "Request approval",
+                //       "callback_id": "approval_2715",
+                //       "color": "#8A2BE2",
+                //       "attachment_type": "default",
+                //       "actions": [
+                //         {
+                //           "name": "approve",
+                //           "text": ":thumbsup: Approve",
+                //           "style": "primary",
+                //           "type": "button",
+                //           "value": "yes",
+                //           "confirm": {
+                //             "title": "Are you sure?",
+                //             "text": "This will approve the request.",
+                //             "ok_text": "Yes",
+                //             "dismiss_text": "No"
+                //           }
+                //         },
+                //         {
+                //           "name": "decline",
+                //           "text": ":thumbsdown: Decline",
+                //           "style": "danger",
+                //           "type": "button",
+                //           "value": "no"
+                //         }
+                //       ]
+                //     }
+                //   ]
+                
+
+                // var attachThis = sryObj;
+                // attachThis = JSON.stringify(attachThis);
+
+                // var msgData = {
+                //   // attachments: [...],
+                //     icon_url:'http://kipthis.com/img/kip-icon.png',
+                //     username:'Kip',
+                //     text: 'You have a new request to approve.',
+                //     attachments: attachThis
+                // };
+
+                // console.log('message ',message);
+                // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+
+
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
 
@@ -1599,9 +1674,38 @@ var saveToCart = function(data){
     });
 }
 
+function removeCartItem(data){
+
+    if (data.searchSelect && data.searchSelect.length > 0 ){
+        kipcart.removeFromCart(data.searchSelect[0]); //remove the item by number 
+    }
+
+    // co lets us use "yield" to with promises to untangle async shit
+    co(function*() {
+      for (var index = 0; index < data.searchSelect.length; index++) {
+          var searchSelect = data.searchSelect[index];
+          console.log('removing searchSelect ' + searchSelect);
+
+          yield kipcart.removeFromCart(data.source.org,searchSelect - 1);
+      }
+
+      data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart. Type `view cart` to see your updated cart']
+      outgoingResponse(data, 'txt');
+
+    }).then(function(){}).catch(function(err) {
+        console.log(err);
+        console.log(err.stack)
+        return;
+        sendTxtResponse(data, err);
+    })
+}
+
 function viewCart(data){
 
+    console.log('view cart')
     db.Metrics.log('cart.view', data);
+
+    console.log(data.source)
 
     kipcart.getCart(data.source.org).then(function(cart) {
       var cartObj = cart.aggregate_items.map(function(item, index) {

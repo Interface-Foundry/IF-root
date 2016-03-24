@@ -29,13 +29,13 @@ module.exports.addToCart = function(slack_id, user_id, item) {
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
-      ASIN: item.ASIN[0],
-      title: item.ItemAttributes[0].Title,
-      link: item.ItemLinks[0].ItemLink[0].URL[0], // so obviously converted to json from xml
-      image: item.altImage || item.SmallImage[0].URL[0],
+      ASIN: _.get(item, 'ASIN[0]'),
+      title: _.get(item, 'ItemAttributes[0].Title'),
+      link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
+      image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
       price: item.realPrice,
-      rating: item.reviews.rating,
-      review_count: item.reviews.reviewCount,
+      rating: _.get(item, 'reviews.rating'),
+      review_count: _.get(item, 'reviews.reviewCount'),
       added_by: user_id,
       slack_id: slack_id,
       source_json: JSON.stringify(item)
@@ -51,9 +51,34 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 }
 
 //
+
+// Remove item from the db
+// slack_id: either the team id or the user id if a personal cart
+// number: the item to remove in cart array
+//
+module.exports.removeFromCart = function(slack_id, number) {
+  console.log('removing item #'+number+' from cart for')
+
+  return co(function*() {
+    var cart = yield getCart(slack_id);
+
+    if (number + 1 <= cart.items.length){
+      cart.items.splice(number, 1);
+      yield cart.save();
+    }
+    else {
+      console.log('ITEM DOESNT EXIST');
+    }
+
+    console.log('calling getCart again to rebuild amazon cart')
+    return getCart(slack_id);
+  })
+}    
+
+
 // Removes one item from the cart at a time
 //
-module.exports.removeFromCart = function(item) {
+module.exports.removeFromCartByItem = function(item) {
   return co(function*() {
     if (!item instanceof db.Item) {
       console.error("can only remove mongoose models of type db.Item")
@@ -130,8 +155,8 @@ var getCart = module.exports.getCart = function(slack_id) {
     // otherwize rebuild their current cart
     // make sure the cart has not been checked out (purchased) yet
     var amazonCart = yield client.getCart({
-      'CartId': cart.amazon.CartId[0],
-      'HMAC': cart.amazon.HMAC[0]
+      'CartId': _.get(cart, 'amazon.CartId.0'),
+      'HMAC': _.get(cart, "amazon.HMAC[0]")
     })
 
     // console.log(JSON.stringify(amazonCart, null, 2))
@@ -174,7 +199,7 @@ var getCart = module.exports.getCart = function(slack_id) {
       HMAC: cart.amazon.HMAC[0],
     }))
 
-    cart.link = yield getCartLink(cart.amazon.PurchaseURL[0], cart._id)
+    cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
     yield cart.save()
     return cart;
   })

@@ -794,7 +794,7 @@ var checkForCanned = function(input,callback,origin) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.6.1 Cardamom';
+            res = 'I\'m a penguin running Kip v0.6.3 Cardamom';
             break;
 
         case '/':
@@ -880,6 +880,149 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.focus';
             query = 3;
             break;
+
+        //CART REMOVE ITEM # 
+        case 'remove':
+            flag = 'basic'; //do this action
+            res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
+            break;
+        case 'remove all':
+            flag = 'basic'; //do this action
+            res = 'Sorry, this is my fault, `remove all` cart items is not supported yet :(';
+            break;
+        case 'remove 0':
+            flag = 'basic'; //do this action
+            res = 'Sorry, I can\'t find an Item :zero: in cart to remove';
+            break;
+        case 'remove 1':
+            flag = 'purchase.remove';
+            query = 1;
+            break;
+        case 'remove 2':
+            flag = 'purchase.remove';
+            query = 2;
+            break;
+        case 'remove 3':
+            flag = 'purchase.remove';
+            query = 3;
+            break;
+        case 'remove 4':
+            flag = 'purchase.remove';
+            query = 4;
+            break;
+        case 'remove 5':
+            flag = 'purchase.remove';
+            query = 5;
+            break;
+        case 'remove 6':
+            flag = 'purchase.remove';
+            query = 6;
+            break;
+        case 'remove 7':
+            flag = 'purchase.remove';
+            query = 7;
+            break;
+        case 'remove 8':
+            flag = 'purchase.remove';
+            query = 8;
+            break;
+        case 'remove 9':
+            flag = 'purchase.remove';
+            query = 9;
+            break;
+        case 'remove 10':
+            flag = 'purchase.remove';
+            query = 10;
+            break;
+        case 'remove 11':
+            flag = 'purchase.remove';
+            query = 11;
+            break;
+        case 'remove 12':
+            flag = 'purchase.remove';
+            query = 12;
+            break;
+        case 'remove 13':
+            flag = 'purchase.remove';
+            query = 13;
+            break;
+        case 'remove 14':
+            flag = 'purchase.remove';
+            query = 14;
+            break;
+        case 'remove 15':
+            flag = 'purchase.remove';
+            query = 15;
+            break;
+        case 'remove 16':
+            flag = 'purchase.remove';
+            query = 16;
+            break;
+        case 'remove 17':
+            flag = 'purchase.remove';
+            query = 17;
+            break;
+        case 'remove 18':
+            flag = 'purchase.remove';
+            query = 18;
+            break;
+        case 'remove 19':
+            flag = 'purchase.remove';
+            query = 19;
+            break;
+        case 'remove 20':
+            flag = 'purchase.remove';
+            query = 20;
+            break;
+        case 'remove 21':
+            flag = 'purchase.remove';
+            query = 21;
+            break;
+        case 'remove 22':
+            flag = 'purchase.remove';
+            query = 22;
+            break;
+        case 'remove 23':
+            flag = 'purchase.remove';
+            query = 23;
+            break;
+        case 'remove 24':
+            flag = 'purchase.remove';
+            query = 24;
+            break;
+        case 'remove 25':
+            flag = 'purchase.remove';
+            query = 25;
+            break;
+        case 'remove 26':
+            flag = 'purchase.remove';
+            query = 26;
+            break;
+        case 'remove 27':
+            flag = 'purchase.remove';
+            query = 27;
+            break;
+        case 'remove 28':
+            flag = 'purchase.remove';
+            query = 28;
+            break;
+        case 'remove 29':
+            flag = 'purchase.remove';
+            query = 29;
+            break;
+        case 'remove 30':
+            flag = 'purchase.remove';
+            query = 30;
+            break;
+        case 'remove 31':
+            flag = 'purchase.remove';
+            query = 31;
+            break;
+        case 'remove 32':
+            flag = 'purchase.remove';
+            query = 32;
+            break;
+
 
         case '4':
         case '5':

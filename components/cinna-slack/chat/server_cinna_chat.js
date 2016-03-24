@@ -76,3 +76,14 @@ ioKip.loadSocketIO(server);
 app.get('/newslack', function(req, res) {
     ioKip.newSlack();
 });
+
+//incoming new slack user
+app.get('/slackaction', function(req, res) {
+    // ioKip.newSlack();
+});	
+
+//incoming new slack user
+app.get('/kikincoming', function(req, res) {
+    // ioKip.newSlack();
+});
+
