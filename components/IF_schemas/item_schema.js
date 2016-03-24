@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
  */
 var item = mongoose.Schema({
   cart_id: mongoose.Schema.ObjectId,
-  
+
   title: String,
 
   link: String,
@@ -31,6 +31,10 @@ var item = mongoose.Schema({
   purchased: {
     type: Boolean,
     default: false
+  },
+
+  purchased_date: {
+    type: Date
   },
 
   deleted: {
