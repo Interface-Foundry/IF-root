@@ -1,6 +1,6 @@
 // var ioClient = require('socket.io-client').connect("http://localhost:8000");
 // var ioClient = require('socket.io-client').connect("http://54.173.166.189:8000"); //production
-var ioClient = require('socket.io-client').connect("http://52.90.184.217:8000"); //goku
+var ioClient = require('socket.io-client').connect("http://54.175.231.162:8000"); //yak
 ioClient.on('connect', function() {
     console.log('\n\nConnected to cinna-slack client.\n\n')
 })
