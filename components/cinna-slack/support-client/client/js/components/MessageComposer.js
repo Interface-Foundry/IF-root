@@ -31,7 +31,7 @@ class MessageComposer extends Component {
     let activeMsg = this.props.activeMsg ? this.props.activeMsg : messages.filter(message => (message.source && message.source.id === activeChannel.id))[0]
     // console.log('activeChannel: ',activeChannel,'activeMsg: ',activeMsg, ' this.props.activeMsg: ', this.props.activeMsg, ' messages.filer: ', messages.filter(message => (message.source && message.source.id === activeChannel.id))[0] )
     if (event.which === 13 && !resolved) {
-        event.preventDefault();
+        // event.preventDefault();
         let thread;
         if (activeMsg && activeMsg.thread) {
           thread = activeMsg.thread

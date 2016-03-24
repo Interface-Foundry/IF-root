@@ -20,7 +20,7 @@ var express = require('express'),
     Promise = require('bluebird');
 
 module.exports = {
-    uploadPicture: function(str, image, quality) {
+    uploadPicture: function(str, image, quality, bot) {
         var qual = quality ? quality : 82
         return new Promise(function(resolve, reject) {
             function convertBase64(image) {
@@ -31,7 +31,7 @@ module.exports = {
                         resolve(image)
                     } else {
                         request({
-                            url: image,
+                            url: image.toString(),
                             encoding: 'base64'
                         }, function(err, res, body) {
                             if (!err && res.statusCode == 200) {
@@ -60,10 +60,34 @@ module.exports = {
                                 dstPath: outputPath,
                                 strip: true,
                                 quality: qual,
-                                width: 450
+                                width: 290
                             }, function(err, stdout, stderr) {
                                 if (err) console.log(err.lineNumber + err)
+
                                 fs.readFile(outputPath, function(err, buffer) {
+                                    //If bot boolean true, skip upload to AWS and resolve saved image, then delete
+                                    if (bot) {
+                                        // console.log('upload module 69: getting to if-->bot', outputPath,buffer,image)
+                                        return resolve(outputPath)
+                                        //  if (outputPath) {
+                                        //     // console.log('OUTPUT PATH: ', outputPath)
+                                        //     wait(function() {
+                                        //         fs.unlink(outputPath, function(err, res) {
+                                        //             if (err) console.log('fs error: ', err)
+                                        //         })
+                                        //     }, 10000);
+                                        // }
+                                        // if (inputPath) {
+                                        //     // console.log('INPUT PATH: ', inputPath)
+                                        //     wait(function() {
+                                        //         fs.unlink(inputPath, function(err, res) {
+                                        //             // if (err) console.log('fs error: ', err)
+                                        //         })
+                                        //     }, 10000);
+                                        // }
+                                        // return
+                                    }
+                                    console.log('upload.js. 90 should not be getting here/')
                                     var object_key = crypto.createHash('md5').update(str).digest('hex');
                                     var awsKey = object_key + ".png";
                                     var s3 = new AWS.S3();
@@ -119,7 +143,7 @@ module.exports = {
                                                 // console.log('OUTPUT PATH: ', outputPath)
                                                 wait(function() {
                                                     fs.unlink(outputPath, function(err, res) {
-                                                        // if (err) console.log('fs error: ', err)
+                                                        if (err) console.log('fs error: ', err)
                                                     })
                                                 }, 500);
                                             }

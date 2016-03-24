@@ -18,7 +18,7 @@ var User = require('./server/models/User');
 //set env vars
 process.env.MONGOLAB_URI = process.env.MONGOLAB_URI || 'mongodb://localhost/chat_dev';
 // process.env.MONGOLAB_URI || 
-process.env.PORT =  process.env.MONGOLAB_URI || 5100;
+process.env.PORT =  process.env.PORT || 5100;
 
 // connect our DB
 mongoose.connect(process.env.MONGOLAB_URI);
@@ -51,9 +51,9 @@ app.use('/api', usersRouter);
 app.use('/api', channelRouter);
 
 app.use('/', express.static(path.join(__dirname)));
-var webpackServer = http.listen(process.env.PORT, 
-// 'localhost'
-  ,function(err) {
+var webpackServer = http.listen(process.env.PORT 
+// 'localhost',
+,function(err) {
   if (err) {
     console.log(err);
     return;

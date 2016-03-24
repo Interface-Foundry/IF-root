@@ -1,5 +1,5 @@
 // var ioClient = require('socket.io-client').connect("http://localhost:8000");
-// var ioClient = require('socket.io-client').connect("http://54.173.166.189:8000"); //production
+// var ioClient = require('socket.io-client').connect("http://54.164.59.227:8000"); //production
 var ioClient = require('socket.io-client').connect("http://54.175.231.162:8000"); //yak
 ioClient.on('connect', function() {
     console.log('\n\nConnected to cinna-slack client.\n\n')
@@ -74,7 +74,6 @@ exports = module.exports = function(io, cinnaio) {
                       // console.log('Emitting new bc message'); 
                       socket.emit('new bc message', msg) 
                     }
-
                     if(!(msg.flags && msg.flags.toTrain)) {
                       console.log('Sending results to client.', msg)
                       ioClient.emit("msgFromSever", msg);

@@ -43,14 +43,15 @@ var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
 // var BufferList = require('bufferlist').BufferList
-
+var upload = require('../../../../IF_services/upload.js');
 /////////// LOAD INCOMING ////////////////
 
 
 var telegram = require('telegram-bot-api');
+var telegramToken = (process.env.NODE_ENV == 'development_alyx')  ?  '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ' : '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
 
 var tg = new telegram({
-        token: '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ',
+        token: telegramToken,
         updates: {
             enabled: true
     }
@@ -1254,6 +1255,45 @@ var sendResponse = function(data){
                     disable_web_page_preview: false
                 });
 
+                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(buffer) {
+                     // console.log('image: ',attach.photo, buffer, data.source.channel)
+
+                     function encode_utf8(s) {
+                      return unescape(encodeURIComponent(s));
+                    }
+
+                     tg.sendPhoto({
+                        chat_id: encode_utf8(data.source.channel),
+                        photo: encode_utf8(buffer)
+                     }).then(function(datum){
+                            // tg.sendMessage({
+                            //     chat_id: data.source.channel,
+                            //     text: message
+                            //     // caption: 'This is my test image',
+
+                            //     // // you can also send file_id here as string (as described in telegram bot api documentation)
+                            //     // photo: '/path/to/file/test.jpg'
+                            // }).then(function(datum){ 
+                            //     attach = attach.replace('\\n','');
+                            //     var field = {
+                            //         "value": attach,
+                            //         "short":false
+                            //     }
+                            //     attachments[1].fields.push(field);
+                                callback();
+                            // })
+                        }).catch(function(err){
+                            if (err) {
+                                console.log('\n\n\ntg.sendPhoto error: ',err)
+                            }
+                        })
+
+                
+                    }).catch(function(err) {
+                        if (err)  console.log('\n\n\niojs image upload error: ',err,'\n\n\n')
+                        
+                    })
+
 
                 // request(attach.photo, function(err, response, buffer) {
                 //     // Do something
@@ -1290,23 +1330,6 @@ var sendResponse = function(data){
 
 
 
-            //     // tg.sendMessage({
-            //     //     chat_id: data.source.channel,
-            //     //     text: message
-            //     //     // caption: 'This is my test image',
-
-            //     //     // // you can also send file_id here as string (as described in telegram bot api documentation)
-            //     //     // photo: '/path/to/file/test.jpg'
-            //     // })
-
-            //     // //attach = attach.replace('\\n','');
-            //     // var field = {
-            //     //     "value": attach,
-            //     //     "short":false
-            //     // }
-            //     // attachments[1].fields.push(field);
-
-            //     // callback();
 
             }, function done(){
 
