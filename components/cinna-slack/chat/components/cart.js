@@ -50,6 +50,31 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 }
 
 //
+// Remove item from the db
+// slack_id: either the team id or the user id if a personal cart
+// number: the item to remove in cart array
+//
+module.exports.removeFromCart = function(slack_id, number) {
+  console.log('removing item #'+number+' from cart for')
+
+  return co(function*() {
+    var cart = yield getCart(slack_id);
+
+    if (number + 1 <= cart.items.length){
+      cart.items.splice(number, 1);
+      yield cart.save();
+    }
+    else {
+      console.log('ITEM DOESNT EXIST');
+    }
+
+    console.log('calling getCart again to rebuild amazon cart')
+    return getCart(slack_id);
+
+  })
+}
+
+//
 // Syncs cart with amazon and returns a nicely formatted object
 // Right now there is no saved amazon cart, so if they delete something from
 // amazon,

@@ -59,6 +59,7 @@ var urlShorten = function(data,callback2) {
                 })
                 .catch(function (err) {
                     console.error(err.message);
+                    urlArr.push('http://kipthis.com');
                     callback();
                 });
 
