@@ -1122,7 +1122,12 @@ var getCinnaResponse = function(data,callback){
             switch (data.action) {
                 case 'initial':
                     if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
-                        res = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                        if (data.imageTags){
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                        }
+                        else {
+                            res = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                        }
                     }
                     else if (data.source.origin == 'socket.io'){
                         res = 'Hi, here are some options you might like. Use <span class="typer">more</span> to see more options or <span class="typer">buy 1</span>, <span class="typer">2</span> or <span class="typer">3</span> to get it now 😊';
