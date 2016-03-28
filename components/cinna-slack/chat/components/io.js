@@ -95,7 +95,7 @@ var initSlackUsers = function(env){
         //     }
         // }];
 
-        //CINNA-PEPPER 
+        //CINNA-PEPPER
         // var testUser = [{
         //     team_id:'T0H72FMNK',
         //     dm:'D0H6X6TA8',
@@ -327,7 +327,7 @@ function loadSlackUsers(users){
               return;
             }
 
-            
+
             // welp it would be nice to get the history in context here but fuck it
             // idk how and i don't care this ship gonna burn before we scale out anyway
             user.conversations = user.conversations || {};
@@ -366,12 +366,12 @@ function loadSlackUsers(users){
                             //get team id from private URL cause team id left out of API in file share (ugh wtf slack...)
                             if (data.file && data.file.url_private){
                                 var teamParse = data.file.url_private.replace('https://files.slack.com/files-pri/','');
-                                data.team = teamParse.substr(0, teamParse.indexOf('-')); 
+                                data.team = teamParse.substr(0, teamParse.indexOf('-'));
                             }
 
                             //it's an image, let's process it
                             if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'||data.file.filetype == 'svg'){
-                                //send typing event 
+                                //send typing event
                                 if (slackUsers[data.team]){
                                     slackUsers[data.team].sendTyping(data.channel);
                                 }
@@ -405,7 +405,7 @@ function loadSlackUsers(users){
                                 data.text = data.text.substr(1); //remove : from beginning of string
                             }
                             data.text = data.text.trim(); //remove extra spaces on edges of string
-                            incomingSlack(data);                
+                            incomingSlack(data);
                         }
 
                     }
@@ -419,12 +419,12 @@ function loadSlackUsers(users){
                         //get team id from private URL cause team id left out of API in file share (ugh wtf slack...)
                         if (data.file && data.file.url_private){
                             var teamParse = data.file.url_private.replace('https://files.slack.com/files-pri/','');
-                            data.team = teamParse.substr(0, teamParse.indexOf('-')); 
+                            data.team = teamParse.substr(0, teamParse.indexOf('-'));
                         }
-                        
+
                         //it's an image, let's process it
                         if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'||data.file.filetype == 'svg'){
-                            //send typing event 
+                            //send typing event
                             if (slackUsers[data.team]){
                                 slackUsers[data.team].sendTyping(data.channel);
                             }
@@ -454,7 +454,7 @@ function loadSlackUsers(users){
                     //not a file share, process normally
                     else {
                         data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-                        incomingSlack(data);              
+                        incomingSlack(data);
                     }
                 }
                 else {
@@ -473,7 +473,7 @@ function loadSlackUsers(users){
                         },
                         'msg':data.text
                     }
-                    //carry image tags over 
+                    //carry image tags over
                     if (data.imageTags){
                         newSl.imageTags = data.imageTags;
                     }
@@ -787,10 +787,10 @@ var incomingSlackAction = function(data){
       "response_url": "https://hooks.dev.slack.com/actions/T021BE7LD/6204672533/x7ZLaiVMoECAW50GwtZYAXEM"
     }
 
-    //incoming action -> add `callback_id` to msg queue? 
+    //incoming action -> add `callback_id` to msg queue?
     //nahhhhh
 
-    //treat it like incomingslack 
+    //treat it like incomingslack
 
 
 }
@@ -1158,9 +1158,9 @@ var sendResponse = function(data){
     }
     /// / / / / / / / / / /
 
-    //* * * * * * * * 
+    //* * * * * * * *
     // Socket.io Outgoing
-    //* * * * * * * * 
+    //* * * * * * * *
     if (data.source && data.source.channel && data.source.origin == 'socket.io'){
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){
@@ -1182,9 +1182,9 @@ var sendResponse = function(data){
             console.log('error: socket io channel missing', data);
         }
     }
-    //* * * * * * * * 
+    //* * * * * * * *
     // Telegram Outgoing
-    //* * * * * * * * 
+    //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'telegram'){
 
 
@@ -1371,9 +1371,9 @@ var sendResponse = function(data){
         }
 
     }
-    //* * * * * * * * 
+    //* * * * * * * *
     // Slack Outgoing
-    //* * * * * * * * 
+    //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
         //eventually cinna can change emotions in this pic based on response type
@@ -1511,7 +1511,7 @@ var sendResponse = function(data){
                 //       ]
                 //     }
                 //   ]
-                
+
 
                 // var attachThis = sryObj;
                 // attachThis = JSON.stringify(attachThis);
@@ -1645,6 +1645,9 @@ var saveToCart = function(data){
               data.client_res = ['<' + cart.link + '|» View Cart>']
               outgoingResponse(data, 'txt');
 
+              // View cart after adding item TODO doesn't display for some reason
+              viewCart(data, true);
+
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
@@ -1669,7 +1672,7 @@ var saveToCart = function(data){
 function removeCartItem(data){
 
     if (data.searchSelect && data.searchSelect.length > 0 ){
-        kipcart.removeFromCart(data.searchSelect[0]); //remove the item by number 
+        kipcart.removeFromCart(data.searchSelect[0]); //remove the item by number
     }
 
     // co lets us use "yield" to with promises to untangle async shit
@@ -1692,7 +1695,7 @@ function removeCartItem(data){
     })
 }
 
-function viewCart(data){
+function viewCart(data, show_added_item){
 
     console.log('view cart')
     db.Metrics.log('cart.view', data);
@@ -1700,16 +1703,32 @@ function viewCart(data){
     console.log(data.source)
 
     kipcart.getCart(data.source.org).then(function(cart) {
+
+      // get the latest added item if we need to highlight it
+      if (show_added_item) {
+        var added_item = cart.items[cart.items.length - 1];
+        var added_asin = added_item.ASIN;
+      }
+
       var cartObj = cart.aggregate_items.map(function(item, index) {
 
         var userString = item.added_by.map(function(u) {
           return '<@' + u + '>';
         }).join(', ')
 
-        return {
-          text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-          mrkdwn_in: ['text', 'pretext'],
-          thumb_url: item.image
+        if (item.ASIN === added_asin) {
+          return {
+            text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
+            mrkdwn_in: ['text', 'pretext'],
+            thumb_url: item.image
+          }
+        } else {
+          return {
+            text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
+            mrkdwn_in: ['text', 'pretext'],
+            color: '#45a5f4',
+            thumb_url: item.image
+          }
         }
       })
 
