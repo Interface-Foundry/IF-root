@@ -1,9 +1,9 @@
 var debug = require('debug')('nlp')
 
-var checkout = ['get', 'checkout', 'buy']
+var checkout = ['get', 'checkout']
 var remove = ['remove', 'delete', 'cancel']
 var list = ['view', 'show', 'list']
-var save = ['save']
+var save = ['save', 'buy', 'add']
 var focus = ['focus', 'info']
 var search = ['need', 'want']
 
