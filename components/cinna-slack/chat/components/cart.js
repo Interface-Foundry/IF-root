@@ -55,24 +55,28 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 
 // Remove item from the db
 // slack_id: either the team id or the user id if a personal cart
-// number: the item to remove in cart array
+// number: the item to remove in cart array, as listed in View Carts
 //
 module.exports.removeFromCart = function(slack_id, number) {
-  console.log('removing item #'+number+' from cart for')
+  console.log(`removing item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
 
-    if (number + 1 <= cart.items.length){
-      cart.items.splice(number, 1);
-      yield cart.save();
-    }
-    else {
-      console.log('ITEM DOESNT EXIST');
+    // need to watch out for items that have multiple quantities
+    // check to make sure this item exists
+    var ASIN_to_remove = _.get(cart, `aggregate_items[${number - 1}].ASIN`);
+
+    if (!ASIN_to_remove) {
+      return cart;
     }
 
-    console.log('calling getCart again to rebuild amazon cart')
-    return getCart(slack_id);
+    // remove the last item that matched this one
+    var matching_items = cart.items.filter(function(i) {
+      return i.ASIN === ASIN_to_remove;
+    })
+
+    module.exports.removeFromCartByItem(matching_items.pop());
   })
 }
 
@@ -188,7 +192,7 @@ var getCart = module.exports.getCart = function(slack_id) {
       var amazonCart = yield client.createCart(cart_items)
 
       console.log(amazonCart.Request[0].Errors[0].Message[0]);
-      
+
       //ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
       if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Message && amazonCart.Request[0].Errors[0].Message[0].indexOf(' is not eligible to be added to the cart') > -1){
 
@@ -198,10 +202,10 @@ var getCart = module.exports.getCart = function(slack_id) {
         console.log('# cart ',cart);
         //console.log('# amz ',cart.amazon);
 
-        //cart.link = 
+        //cart.link =
         //cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         //yield cart.save()
-        return cart;    
+        return cart;
 
       }
       //no error adding item to cart
@@ -210,7 +214,7 @@ var getCart = module.exports.getCart = function(slack_id) {
         cart.amazon = amazonCart;
         cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         yield cart.save()
-        return cart;    
+        return cart;
       }
 
     }

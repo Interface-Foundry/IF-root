@@ -811,7 +811,7 @@ function incomingAction(data){
             }
    }
 data.flags = data.flags ? data.flags : {};
-//---------------------------------------------------------------------------//     
+//---------------------------------------------------------------------------//
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
     });
@@ -1209,7 +1209,7 @@ var sendResponse = function(data){
 
             // console.log('attachthis ',attachThis);
 
-          
+
 
             async.eachSeries(attachThis, function(attach, callback) {
                 console.log('photo ',attach.photo);
@@ -1221,12 +1221,12 @@ var sendResponse = function(data){
                                 text: attach.message,
                                 parse_mode: 'Markdown',
                                 disable_web_page_preview: 'true'
-                   
+
                      }).then(function(datum){
                               tg.sendPhoto({
                         chat_id: encode_utf8(data.source.channel),
                         photo: encode_utf8(buffer)
-                            }).then(function(datum){ 
+                            }).then(function(datum){
                                 // var field = {
                                 //     "value": attach,
                                 //     "short":false
@@ -1671,17 +1671,13 @@ var saveToCart = function(data){
 
 function removeCartItem(data){
 
-    if (data.searchSelect && data.searchSelect.length > 0 ){
-        kipcart.removeFromCart(data.searchSelect[0]); //remove the item by number
-    }
-
     // co lets us use "yield" to with promises to untangle async shit
     co(function*() {
       for (var index = 0; index < data.searchSelect.length; index++) {
           var searchSelect = data.searchSelect[index];
           console.log('removing searchSelect ' + searchSelect);
 
-          yield kipcart.removeFromCart(data.source.org,searchSelect - 1);
+          yield kipcart.removeFromCart(data.source.org, searchSelect);
       }
 
       data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart. Type `view cart` to see your updated cart']
