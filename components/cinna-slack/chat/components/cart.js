@@ -20,7 +20,8 @@ module.exports = {};
 // item: the item from amazon result i guess
 //
 module.exports.addToCart = function(slack_id, user_id, item) {
-  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id)
+  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
+  console.log(item)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
@@ -73,14 +74,14 @@ module.exports.removeFromCart = function(slack_id, number) {
     console.log('calling getCart again to rebuild amazon cart')
     return getCart(slack_id);
   })
-}    
+}
 
 
 // Removes one item from the cart at a time
 //
 module.exports.removeFromCartByItem = function(item) {
   return co(function*() {
-    if (!item instanceof db.Item) {
+    if (!(item instanceof db.Item)) {
       console.error("can only remove mongoose models of type db.Item")
       throw new Error('Cannot remove item - must be a db.Item model')
     }
@@ -115,7 +116,6 @@ var getCart = module.exports.getCart = function(slack_id) {
       // create a new cart
       console.log('no carts found, creating new cart for ' + slack_id)
       cart = new db.Cart({
-        amazon: amazonCart,
         slack_id: slack_id,
         items: []
       })
@@ -147,7 +147,9 @@ var getCart = module.exports.getCart = function(slack_id) {
       var amazonCart = yield client.createCart(cart_items)
       console.log(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
+      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
+
       return cart;
     }
 
@@ -182,8 +184,35 @@ var getCart = module.exports.getCart = function(slack_id) {
         slack_id: slack_id,
         items: []
       })
-      yield cart.save()
-      return cart;
+      console.log('creating new cart in amazon')
+      var amazonCart = yield client.createCart(cart_items)
+
+      console.log(amazonCart.Request[0].Errors[0].Message[0]);
+      
+      //ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
+      if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Message && amazonCart.Request[0].Errors[0].Message[0].indexOf(' is not eligible to be added to the cart') > -1){
+
+        console.log('ERR: Amazon item is not eligible to be added to the cart');
+        //cart.amazon = amazonCart;
+
+        console.log('# cart ',cart);
+        //console.log('# amz ',cart.amazon);
+
+        //cart.link = 
+        //cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        //yield cart.save()
+        return cart;    
+
+      }
+      //no error adding item to cart
+      else {
+        console.log(JSON.stringify(amazonCart, null, 2))
+        cart.amazon = amazonCart;
+        cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        yield cart.save()
+        return cart;    
+      }
+
     }
 
     // rebuild amazon cart off of the contents we have in the db
@@ -199,7 +228,6 @@ var getCart = module.exports.getCart = function(slack_id) {
       HMAC: cart.amazon.HMAC[0],
     }))
 
-    cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
     yield cart.save()
     return cart;
   })
