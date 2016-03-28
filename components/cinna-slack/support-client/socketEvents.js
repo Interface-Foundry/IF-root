@@ -1,5 +1,6 @@
 // var ioClient = require('socket.io-client').connect("http://localhost:8000");
-var ioClient = require('socket.io-client').connect("http://54.173.166.189:8000");
+// var ioClient = require('socket.io-client').connect("http://54.164.59.227:8000"); //production
+var ioClient = require('socket.io-client').connect("http://54.175.231.162:8000"); //yak
 ioClient.on('connect', function() {
     console.log('\n\nConnected to cinna-slack client.\n\n')
 })
@@ -14,8 +15,7 @@ exports = module.exports = function(io, cinnaio) {
           Message.findOne({'source.id': msg.source.id, 'thread.ticket.isOpen': true}).sort({'_id':-1}).exec(function(err, latestMsg){
             msg.ts = new Date().toISOString();
             var type =  ((msg.flags && msg.flags.toSupervisor) || (typeof msg.msg == 'string' && msg.msg.trim() == 'kipsupervisor'))  ? 'incoming' :  ((msg.flags && (msg.flags.toCinna || msg.flags.toClient)) ? 'outgoing' : ((msg.flags && msg.flags.searchResults) ? 'searchResults' : null) )
-            console.log('\nI/O: type:', type)
-            switch(type) {
+              switch(type) {
                 case 'incoming':
                     console.log('\nI/O: routed to  --> incoming msg\n')
                       if(err) {
@@ -67,7 +67,6 @@ exports = module.exports = function(io, cinnaio) {
                     break;
                 case 'outgoing':
                     console.log('I/O: routed to --> outgoing msg\n')
-                    
                     if (msg.bucket === 'response') {
                       console.log('Sending text message to client.', msg); 
                       socket.broadcast.emit('new bc message', msg) }
@@ -75,7 +74,6 @@ exports = module.exports = function(io, cinnaio) {
                       // console.log('Emitting new bc message'); 
                       socket.emit('new bc message', msg) 
                     }
-
                     if(!(msg.flags && msg.flags.toTrain)) {
                       console.log('Sending results to client.', msg)
                       ioClient.emit("msgFromSever", msg);
@@ -89,9 +87,10 @@ exports = module.exports = function(io, cinnaio) {
                     break;
                 default:
                    if (chan && !chan.resolved) {
-                     // console.log(5,msg.msg)
                      socket.broadcast.emit('new bc message', msg)
-                   }
+                   } else {
+                     console.log(5,msg.msg)
+                   } 
             }
           }) // end of Message.findOne
          })//end of Channel.findOne

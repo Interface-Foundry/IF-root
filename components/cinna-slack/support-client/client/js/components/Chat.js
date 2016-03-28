@@ -237,7 +237,7 @@ class Chat extends Component {
           })
       let elHeights = [] 
       relevantMessages.forEach(function(msg) {
-            let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 360.313
+            let elHeight = (msg.flags && (msg.flags.toSupervisor || msg.flags.toCinna)) ? 44.5781 : 451
              elHeights.push(elHeight)
       })
       // console.log('Chat252: elHeights: ',elHeights)

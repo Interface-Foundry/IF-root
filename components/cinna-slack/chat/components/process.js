@@ -85,6 +85,9 @@ function getNumEmoji(data,number,callback){
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':one:';
+            } 
+            else if (data.source.origin == 'telegram'){
+                numEmoji = '1️⃣';
             }
             break;
         case 2: //emoji #2
@@ -94,6 +97,9 @@ function getNumEmoji(data,number,callback){
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':two:';
             }
+            else if (data.source.origin == 'telegram'){
+                numEmoji = '2️⃣';
+            }
             break;
         case 3: //emoji #3
             if (data.source.origin == 'socket.io'){
@@ -101,6 +107,9 @@ function getNumEmoji(data,number,callback){
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':three:';
+            }
+            else if (data.source.origin == 'telegram'){
+                numEmoji = '3️⃣';
             }
             break;
     }

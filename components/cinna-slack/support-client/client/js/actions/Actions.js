@@ -5,7 +5,7 @@ import fetch from 'isomorphic-fetch';
 // NOTE:Chat actions
 
 export function addMessage(message) {
-    console.log('new message: ', message)
+    // console.log('new message: ', message)
     return {
         type: types.ADD_MESSAGE,
         message

@@ -42,14 +42,15 @@ var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
 // var BufferList = require('bufferlist').BufferList
-
+var upload = require('../../../../IF_services/upload.js');
 /////////// LOAD INCOMING ////////////////
 
 
 var telegram = require('telegram-bot-api');
+var telegramToken = (process.env.NODE_ENV == 'development_alyx')  ?  '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ' : '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
 
 var tg = new telegram({
-        token: '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ',
+        token: telegramToken,
         updates: {
             enabled: true
     }
@@ -624,7 +625,6 @@ function routeNLP(data){
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
     data.flags = data.flags ? data.flags : {};
 
-
     if (data.msg){
 
         //passing a context (last 10 items in DB to NLP)
@@ -811,11 +811,11 @@ function incomingAction(data){
             }
    }
 data.flags = data.flags ? data.flags : {};
-delete data.flags.toSupervisor
-//---------------------------------------------------------------------------//
+//---------------------------------------------------------------------------//     
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
     });
+    delete data.flags.toSupervisor
     //sort context bucket (search vs. banter vs. purchase)
     switch (data.bucket) {
         case 'search':
@@ -989,7 +989,7 @@ var sendTxtResponse = function(data,msg){
 }
 
 //Constructing reply to user
-var outgoingResponse = function(data,action,source){ //what we're replying to user with
+var outgoingResponse = function(data,action,source) { //what we're replying to user with
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
     if (action == 'stitch'){
@@ -1006,8 +1006,8 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                     processData.getNumEmoji(data,count+1,function(emoji){
                         res[count] = res[count].trim();
                         if (data.source.origin == 'slack'){
-
                             var attachObj = {};
+
 
                             // var actionObj = [
                             //     {
@@ -1060,42 +1060,27 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
                             attachObj.color = "#45a5f4";
                             attachObj.fallback = 'Here are some options you might like';
                             data.client_res.push(attachObj);
-
                             // '<'++' | ' + +'>';
-
                         }else if (data.source.origin == 'socket.io'){
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             data.client_res.push(urlArr[count]);
                         }
                         else if (data.source.origin == 'telegram'){
                             var attachObj = {};
-
                             attachObj.photo = urlArr[count];
-                            attachObj.message = emoji + ' [' + truncate(data.amazon[count].ItemAttributes[0].Title[0]) + ']('+ res[count] +')';
-
+                            attachObj.message =  emoji + '[' + truncate(data.amazon[count].ItemAttributes[0].Title[0]) + ']('+ res[count] +')';
                             data.client_res.push(attachObj);
-
                         }
-
                         count++;
                         callback();
                     });
-
-
                 }, function done(){
                     checkOutgoingBanter(data);
                 });
             });
-
-
             // function compileResults(){
-
             // }
-
-
-
             // data.client_res.push(url); //add image results to response
-
             // //send extra item URLs with image responses
             // if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
             //     processData.urlShorten(data,function(res){
@@ -1222,74 +1207,46 @@ var sendResponse = function(data){
 
             //attachThis = JSON.stringify(attachThis);
 
-            //console.log('attachthis ',attachThis);
+            // console.log('attachthis ',attachThis);
+
+          
 
             async.eachSeries(attachThis, function(attach, callback) {
-
                 console.log('photo ',attach.photo);
                 console.log('message ',attach.message);
-
-                tg.sendMessage({
-                    chat_id: data.source.channel,
-                    text: attach.message,
-                    parse_mode: 'Markdown',
-                    disable_web_page_preview: false
-                });
-
-
-                // request(attach.photo, function(err, response, buffer) {
-                //     // Do something
-
-                //     console.log('res ',response);
-                //     console.log('buffer ',buffer);
-                // });
-
-                // var url = c;
-                // var bl = new BufferList();
-                // request({uri:url, responseBodyStream: bl}, function (error, response, body) {
-                //   if (!error && response.statusCode == 200) {
-
-                //     // console.log(response.headers["content-type"]);
-
-                //     // var data_uri_prefix = "data:" + response.headers["content-type"] + ";base64,";
-                //     // var image = new Buffer(bl.toString(), 'binary').toString('base64');
-                //     // image = data_uri_prefix + image;
-
-                //     // console.log('z z ',image);
-
-                //     // tg.sendPhoto({
-                //     //     chat_id: data.source.channel,
-                //     //     photo: image
-                //     // });
-
-                //     callback();
-
-                //   }
-                // });
-
-
-
-
-
-
-            //     // tg.sendMessage({
-            //     //     chat_id: data.source.channel,
-            //     //     text: message
-            //     //     // caption: 'This is my test image',
-
-            //     //     // // you can also send file_id here as string (as described in telegram bot api documentation)
-            //     //     // photo: '/path/to/file/test.jpg'
-            //     // })
-
-            //     // //attach = attach.replace('\\n','');
-            //     // var field = {
-            //     //     "value": attach,
-            //     //     "short":false
-            //     // }
-            //     // attachments[1].fields.push(field);
-
-            //     // callback();
-
+                console.log('client_res', data.client_res)
+                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(buffer) {
+                     tg.sendMessage({
+                                chat_id: data.source.channel,
+                                text: attach.message,
+                                parse_mode: 'Markdown',
+                                disable_web_page_preview: 'true'
+                   
+                     }).then(function(datum){
+                              tg.sendPhoto({
+                        chat_id: encode_utf8(data.source.channel),
+                        photo: encode_utf8(buffer)
+                            }).then(function(datum){ 
+                                // var field = {
+                                //     "value": attach,
+                                //     "short":false
+                                // }
+                                // attachments[1].fields.push(field);
+                                callback();
+                            }).catch(function(err){
+                                if (err) { console.log('ios.js1285: err',err) }
+                                callback();
+                            })
+                        }).catch(function(err){
+                            if (err) {
+                                // console.log('\n\n\ntg.sendPhoto error: ',err)
+                            }
+                            callback();
+                        })
+                    }).catch(function(err) {
+                        if (err)  console.log('\n\n\niojs image upload error: ',err,'\n\n\n')
+                        callback();
+                    })
             }, function done(){
 
 
@@ -1305,6 +1262,41 @@ var sendResponse = function(data){
 
         }
         else if (data.action == 'focus'){
+
+               console.log('client_res', data.client_res)
+
+               try {
+                 var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
+                 formatted = formatted.slice(0,-1)
+                 formatted = formatted + ')'
+               } catch(err) {
+                 console.log('\n\n\n\n\n DOFLAMINGO',err)
+                 return
+               }
+              data.client_res[1] = formatted ? formatted : data.client_res[1]
+              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + data.client_res[4]
+               console.log('formatted : ',formatted)
+               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(buffer) {
+                 tg.sendPhoto({
+                    chat_id: encode_utf8(data.source.channel),
+                    photo: encode_utf8(buffer)
+                  }).then(function(datum){
+                    tg.sendMessage({
+                        chat_id: data.source.channel,
+                        text: toSend,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: 'true'
+                    })
+                  })
+                }).catch(function(err){
+                    if (err) { console.log('ios.js1285: err',err) }
+
+                })
+
+              // console.log('photo ',attach.photo);
+              //   console.log('message ',attach.message);
+
+
             // var attachments = [
             //     {
             //         "color": "#45a5f4"
@@ -1623,7 +1615,7 @@ var saveToCart = function(data){
 
     history.recallHistory(data, function(item){
         data.bucket = 'purchase'; //modifying bucket. a hack for now
-        console.log('\n\n\nio1288 ok for real doe whats item: ',item)
+        // console.log('\n\n\nio1288 ok for real doe whats item: ',item)
         //no saved history search object
         if (!item){
             console.log('\n\n\n\nwarning: NO ITEMS TO SAVE TO CART from data.amazon\n\n\n');
@@ -1800,7 +1792,9 @@ function truncate(string){
       return string;
 };
 
-
+function encode_utf8(s) {
+  return unescape(encodeURIComponent(s));
+}
 
 /// exports
 module.exports.initSlackUsers = initSlackUsers;

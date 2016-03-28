@@ -1,5 +1,5 @@
-// var ioClient = require('socket.io-client').connect("http://localhost:5100");
-var ioClient = require('socket.io-client').connect("http://52.90.122.209:5100");
+var ioClient = require('socket.io-client').connect("http://localhost:5100");
+// var ioClient = require('socket.io-client').connect("http://52.90.122.209:5100"); //dragonair
 var newParentItem = require('./history.js').newParentItem
 var newChildItem = require('./history.js').newChildItem
 var recallHistory = require('./history.js').recallHistory

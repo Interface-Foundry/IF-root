@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+ var mongoose = require('mongoose');
 // connect our DB
 var db = require('db');
 var Message = db.Message;
