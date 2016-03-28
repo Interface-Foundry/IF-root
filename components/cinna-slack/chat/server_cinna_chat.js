@@ -80,6 +80,8 @@ app.get('/newslack', function(req, res) {
 //incoming new slack user
 app.get('/slackaction', function(req, res) {
     // ioKip.newSlack();
+    console.log('incoming Slack action: ',req);
+    ioKip.incomingSlackAction(req.body);
 });	
 
 //incoming new slack user

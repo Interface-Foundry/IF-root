@@ -186,11 +186,33 @@ var getCart = module.exports.getCart = function(slack_id) {
       })
       console.log('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
-      console.log(JSON.stringify(amazonCart, null, 2))
-      cart.amazon = amazonCart;
-      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
-      yield cart.save()
-      return cart;
+
+      console.log(amazonCart.Request[0].Errors[0].Message[0]);
+      
+      //ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
+      if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Message && amazonCart.Request[0].Errors[0].Message[0].indexOf(' is not eligible to be added to the cart') > -1){
+
+        console.log('ERR: Amazon item is not eligible to be added to the cart');
+        //cart.amazon = amazonCart;
+
+        console.log('# cart ',cart);
+        //console.log('# amz ',cart.amazon);
+
+        //cart.link = 
+        //cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        //yield cart.save()
+        return cart;    
+
+      }
+      //no error adding item to cart
+      else {
+        console.log(JSON.stringify(amazonCart, null, 2))
+        cart.amazon = amazonCart;
+        cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        yield cart.save()
+        return cart;    
+      }
+
     }
 
     // rebuild amazon cart off of the contents we have in the db

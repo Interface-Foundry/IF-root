@@ -81,7 +81,7 @@ var initSlackUsers = function(env){
     //load kip-pepper for testing
     if (env === 'development_alyx') {
 
-        //new
+        //KIP on Slack
         // var testUser = [{
         //     team_id:'T02PN3B25',
         //     dm:'D0H6X6TA8',
@@ -94,16 +94,29 @@ var initSlackUsers = function(env){
         //     }
         // }];
 
-        //old
+        //CINNA-PEPPER 
+        // var testUser = [{
+        //     team_id:'T0H72FMNK',
+        //     dm:'D0H6X6TA8',
+        //     bot: {
+        //         bot_user_id: 'U0H6YHBNZ',
+        //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+        //     },
+        //     meta: {
+        //         initialized: false
+        //     }
+        // }];
+
+        //KIP-PAPRIKA
         var testUser = [{
-            team_id:'T0H72FMNK',
+            team_id:'T02PN3B25',
             dm:'D0H6X6TA8',
             bot: {
                 bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+                bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
             },
             meta: {
-                initialized: false
+                initialized: true
             }
         }];
 
@@ -313,7 +326,7 @@ function loadSlackUsers(users){
               return;
             }
 
-
+            
             // welp it would be nice to get the history in context here but fuck it
             // idk how and i don't care this ship gonna burn before we scale out anyway
             user.conversations = user.conversations || {};
@@ -631,7 +644,7 @@ function routeNLP(data){
                   incomingAction(data);
                 }
                 else {
-                    // console.log('NLP RES ',res);
+                    console.log('NLP RES ',res);
 
                     if (res.supervisor) {
                       data.flags.toSupervisor = true;
@@ -739,6 +752,45 @@ function routeNLP(data){
         //we get this if we killed the whole user request (i.e. they sent a URL)
         sendTxtResponse(data,'Oops sorry, I didn\'t understand your request');
     }
+
+}
+
+//incoming action responses from Slack buttons
+var incomingSlackAction = function(data){
+
+    console.log('incoming Slack action req.body ', data);
+
+    var fakeAction = {
+      "actions": [
+        {
+          "name": "approve",
+          "value": "yes"
+        }
+      ],
+      "callback_id": "approval_2715",
+      "team": {
+        "id": "2147563693",
+        "domain": "igloohat"
+      },
+      "channel": {
+        "id": "C065W1189",
+        "name": "solipsistic-slide"
+      },
+      "user": {
+        "id": "U045VRZFT",
+        "name": "episod"
+      },
+      "action_ts": "1458170917.164398",
+      "message_ts": "1458170866.000004",
+      "attachment_id": "1",
+      "token": "xAB3yVzGS4BQ3O9FACTa8Ho4",
+      "response_url": "https://hooks.dev.slack.com/actions/T021BE7LD/6204672533/x7ZLaiVMoECAW50GwtZYAXEM"
+    }
+
+    //incoming action -> add `callback_id` to msg queue? 
+    //nahhhhh
+
+    //treat it like incomingslack 
 
 
 }
@@ -957,7 +1009,52 @@ var outgoingResponse = function(data,action,source){ //what we're replying to us
 
                             var attachObj = {};
 
+                            // var actionObj = [
+                            //     {
+                            //       "name": "AddCart",
+                            //       "text": ":thumbsup: Add to Cart",
+                            //       "style": "primary",
+                            //       "type": "button",
+                            //       "value": "yes",
+                            //       "confirm": {
+                            //         "title": "Are you sure?",
+                            //         "text": "This will approve the request.",
+                            //         "ok_text": "Yes",
+                            //         "dismiss_text": "No"
+                            //       }
+                            //     },
+                            //     {
+                            //       "name": "Buy",
+                            //       "text": ":thumbsdown: Buy",
+                            //       "style": "danger",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     },
+                            //     {
+                            //       "name": "Similar",
+                            //       "text": ":heart: Similar",
+                            //       "style": "success",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     },
+                            //     {
+                            //       "name": "Cheaper",
+                            //       "text": ":money_with_wings: Cheaper",
+                            //       "style": "default",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     },
+                            //     {
+                            //       "name": "Moreinfo",
+                            //       "text": ":thumbsdown: More Info",
+                            //       "style": "success",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     }
+                            // ];
+
                             attachObj.image_url = urlArr[count];
+                            //attachObj.actions = actionObj;
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
                             attachObj.title_link = res[count];
                             attachObj.color = "#45a5f4";
@@ -1076,7 +1173,9 @@ var sendResponse = function(data){
     }
     /// / / / / / / / / / /
 
-
+    //* * * * * * * * 
+    // Socket.io Outgoing
+    //* * * * * * * * 
     if (data.source && data.source.channel && data.source.origin == 'socket.io'){
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){
@@ -1098,6 +1197,9 @@ var sendResponse = function(data){
             console.log('error: socket io channel missing', data);
         }
     }
+    //* * * * * * * * 
+    // Telegram Outgoing
+    //* * * * * * * * 
     else if (data.source && data.source.channel && data.source.origin == 'telegram'){
 
 
@@ -1277,6 +1379,9 @@ var sendResponse = function(data){
         }
 
     }
+    //* * * * * * * * 
+    // Slack Outgoing
+    //* * * * * * * * 
     else if (data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
         //eventually cinna can change emotions in this pic based on response type
@@ -1321,6 +1426,23 @@ var sendResponse = function(data){
 
                 attachments[0].image_url = attachThis[0]; //add image search results to attachment
                 attachments[0].fallback = 'More information'; //fallback for search result
+
+                // var actionObj = [
+                //     {
+                //       "name": "AddCart",
+                //       "text": ":thumbsup: Add to Cart",
+                //       "style": "primary",
+                //       "type": "button",
+                //       "value": "yes",
+                //       "confirm": {
+                //         "title": "Are you sure?",
+                //         "text": "This will approve the request.",
+                //         "ok_text": "Yes",
+                //         "dismiss_text": "No"
+                //       }
+                //     }
+                // ];
+                // attachments[0].actions = actionObj;
 
                 attachThis.shift(); //remove image from array
 
@@ -1417,7 +1539,6 @@ var sendResponse = function(data){
 
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
-
                     var msgData = {
                       // attachments: [...],
                         icon_url:'http://kipthis.com/img/kip-icon.png',
@@ -1426,10 +1547,9 @@ var sendResponse = function(data){
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
                         callback();
                     });
-
-
                 }, function done(){
                 });
+
             }
 
 
@@ -1685,6 +1805,7 @@ function truncate(string){
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
 module.exports.newSlack = newSlack;
+module.exports.incomingSlackAction = incomingSlackAction;
 module.exports.loadSocketIO = loadSocketIO;
 
 module.exports.sendTxtResponse = sendTxtResponse;
