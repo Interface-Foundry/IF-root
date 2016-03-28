@@ -1621,7 +1621,10 @@ var saveToCart = function(data){
               outgoingResponse(data, 'txt');
 
               // View cart after adding item TODO doesn't display for some reason
-              //viewCart(data, true);
+              // Even after adding in 500 ms which solves any amazon rate limiting problems
+              // setTimeout(function() {
+              //   viewCart(data, true);
+              // }, 500)
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
