@@ -152,7 +152,7 @@ function getCartLink(url, cart_id) {
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink(url, user_id, item_id) {
-  return googl.shorten('http://kipbubble.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
+  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
 }
 
 //
