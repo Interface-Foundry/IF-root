@@ -1462,7 +1462,7 @@ var sendResponse = function(data){
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
 
                 });
-            }else if (data.action == 'sendAttachment' || data.bucket == 'purchase' && (data.action == 'list' || data.action == 'checkout')){
+            }else if (data.action == 'sendAttachment'){
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
@@ -1478,67 +1478,42 @@ var sendResponse = function(data){
 
             }
             else {
-
-                // var sryObj = [
-                //     {
-                //       "text": "I would like six pens for my creation station please.",
-                //       "fallback": "Pen request",
-                //       "title": "Request approval",
-                //       "callback_id": "approval_2715",
-                //       "color": "#8A2BE2",
-                //       "attachment_type": "default",
-                //       "actions": [
-                //         {
-                //           "name": "approve",
-                //           "text": ":thumbsup: Approve",
-                //           "style": "primary",
-                //           "type": "button",
-                //           "value": "yes",
-                //           "confirm": {
-                //             "title": "Are you sure?",
-                //             "text": "This will approve the request.",
-                //             "ok_text": "Yes",
-                //             "dismiss_text": "No"
-                //           }
-                //         },
-                //         {
-                //           "name": "decline",
-                //           "text": ":thumbsdown: Decline",
-                //           "style": "danger",
-                //           "type": "button",
-                //           "value": "no"
-                //         }
-                //       ]
-                //     }
-                //   ]
-
-
-                // var attachThis = sryObj;
-                // attachThis = JSON.stringify(attachThis);
-
-                // var msgData = {
-                //   // attachments: [...],
-                //     icon_url:'http://kipthis.com/img/kip-icon.png',
-                //     username:'Kip',
-                //     text: 'You have a new request to approve.',
-                //     attachments: attachThis
-                // };
-
-                // console.log('message ',message);
-                // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
-
-
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
-                    var msgData = {
-                      // attachments: [...],
-                        icon_url:'http://kipthis.com/img/kip-icon.png',
-                        username:'Kip'
-                    };
-                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
-                        callback();
-                    });
+
+                    //item is a string, send message
+                    if (typeof message === 'string'){
+                        var msgData = {
+                          // attachments: [...],
+                            icon_url:'http://kipthis.com/img/kip-icon.png',
+                            username:'Kip'
+                        };
+                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
+                            callback();
+                        });
+                    }
+                    //item is an attachment object, send attachment
+                    else if (message !== null && typeof message === 'object' || message instanceof Array){
+
+                        var attachThis = message;
+                        attachThis = JSON.stringify(attachThis);
+
+                        var msgData = {
+                            icon_url:'http://kipthis.com/img/kip-icon.png',
+                            username:'Kip',
+                            attachments: attachThis
+                        };
+                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {});
+                    }
+
+                    // var msgData = {
+                    //   // attachments: [...],
+                    //     icon_url:'http://kipthis.com/img/kip-icon.png',
+                    //     username:'Kip'
+                    // };
+                    // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
+                    //     callback();
+                    // });
                 }, function done(){
                 });
 
@@ -1646,7 +1621,7 @@ var saveToCart = function(data){
               outgoingResponse(data, 'txt');
 
               // View cart after adding item TODO doesn't display for some reason
-              viewCart(data, true);
+              //viewCart(data, true);
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
@@ -1734,8 +1709,16 @@ function viewCart(data, show_added_item){
         color: '#45a5f4'
       })
 
-      data.client_res = cartObj;
-      sendResponse(data);
+        data.client_res = [];
+        data.client_res.push(cartObj);
+
+        banter.getCinnaResponse(data,function(res){
+            if(res && res !== 'null'){
+                data.client_res.unshift(res);
+            }
+            sendResponse(data);
+        });
+      // sendResponse(data);
 
     }).catch(function(e) {
       console.log('error retriving cart for view cart')

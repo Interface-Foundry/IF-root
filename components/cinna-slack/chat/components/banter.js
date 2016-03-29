@@ -175,6 +175,7 @@ var checkForCanned = function(input,callback,origin) {
 
                 '`buy 1` : to buy item :one:\n'+
                 '`save 2` : save item :two: to cart\n'+
+                '`view cart` : see all items in the cart\n'+
                 '`remove 3` : to remove item :three: from cart\n\n'+
 
                 '`help` : view guidelines\n'+
@@ -198,6 +199,7 @@ var checkForCanned = function(input,callback,origin) {
 
                 '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
                 '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br>'+
+                '<span class="typer">view cart</span> : see all items in the cart <br>'+
                 '<span class="typer">remove 3</span> : remove item <span class="selector">➌</span> from cart<br><br>'+
 
                 '<span class="typer">help</span> : view guidelines<br>'+
@@ -618,6 +620,7 @@ var checkForCanned = function(input,callback,origin) {
 
                 '`buy 1` : to buy item :one:\n'+
                 '`save 2` : save item :two: to cart\n'+
+                '`view cart` : see all items in the cart\n'+
                 '`remove 3` : to remove item :three: from cart\n\n'+
 
 
@@ -642,6 +645,7 @@ var checkForCanned = function(input,callback,origin) {
 
                 '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
                 '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br>'+
+                '<span class="typer">view cart</span> : view all items in cart <br>'+
                 '<span class="typer">remove 3</span> : remove item <span class="selector">➌</span> from cart<br><br>'+
 
                 '<span class="typer">help</span> : view guidelines<br>'+
@@ -835,6 +839,7 @@ var checkForCanned = function(input,callback,origin) {
         case 'moew':
         case ':3':
         case 'pussy':
+        case 'view cat':
             flag = 'search.initial'; //do this action
             res = 'meow 🐈';
             query = 'neko atsume'; //what we're going to search for
@@ -893,7 +898,7 @@ var checkForCanned = function(input,callback,origin) {
             break;
         case 'remove all':
             flag = 'basic'; //do this action
-            res = 'Sorry, this is my fault, `remove all` cart items is not supported yet :(';
+            res = 'Sorry, this is my fault, `remove all` cart items is not supported yet :( Type: `remove 1` to remove item :one: from cart';
             break;
         case 'remove 0':
             flag = 'basic'; //do this action
@@ -1192,7 +1197,7 @@ var getCinnaResponse = function(data,callback){
                         res = 'All items removed from your cart. To start a new search just chat me the item you\'re looking for';
                         break;
                     case 'list':
-                        res = 'Here\'s everything you have in your cart 😊 Use, for example `remove 1` to remove item :one: or `help` for more options';
+                        res = 'Here\'s everything you have in your cart 😊 Use `remove 1` to remove item :one: or `help` for more options';
                         break;
                     case 'checkout':
                         res = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
