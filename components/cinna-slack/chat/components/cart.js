@@ -1,6 +1,7 @@
 /*eslint-env es6*/
 var db = require('db')
 var _ = require('lodash')
+var moment = require('moment')
 var co = require('co')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var client = amazon.createClient({
@@ -234,6 +235,25 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     yield cart.save()
     return cart;
+  })
+}
+
+//
+// Get the summary of all the things ppl ordered on slack in the past week
+//
+function weeklySummary(slack_id) {
+  return co(function*() {
+    var last_week = moment().subtract(1, 'week');
+    var carts = yield db.Carts.find({
+      slack_id: slack_id,
+      deleted: false,
+      $or: [
+        {purchased_date: {$exists: false}}, // all open carts
+        {purchased_date: {$gt: last_week}} // carts purchased in the last week
+      ]
+    })
+
+    // TODO format the weekly summary somehow
   })
 }
 
