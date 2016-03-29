@@ -15,7 +15,7 @@ var urlShorten = function(data,callback2) {
 
     //single url for checkouts
     if (data.bucket == 'purchase' && data.action == 'checkout' || data.bucket == 'purchase' && data.action == 'save'){
-        console.log('Mitsuprocess10: ',data.client_res)
+        // console.log('Mitsuprocess10: ',data.client_res)
         if (data.client_res){
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var escapeAmazon = querystring.escape(data.client_res);

@@ -1187,7 +1187,6 @@ var sendResponse = function(data){
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'telegram'){
 
-
         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
 
             var message = data.client_res[0]; //use first item in client_res array as text message
@@ -1216,9 +1215,9 @@ var sendResponse = function(data){
                                 disable_web_page_preview: 'true'
 
                      }).then(function(datum){
-                              tg.sendPhoto({
-                        chat_id: encode_utf8(data.source.channel),
-                        photo: encode_utf8(buffer)
+                          tg.sendPhoto({
+                            chat_id: encode_utf8(data.source.channel),
+                            photo: encode_utf8(buffer)
                             }).then(function(datum){
                                 // var field = {
                                 //     "value": attach,
@@ -1256,16 +1255,16 @@ var sendResponse = function(data){
         }
         else if (data.action == 'focus'){
 
-               console.log('client_res', data.client_res)
+               // console.log('client_res', data.client_res)
 
-               try {
-                 var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
-                 formatted = formatted.slice(0,-1)
-                 formatted = formatted + ')'
-               } catch(err) {
-                 console.log('\n\n\n\n\n DOFLAMINGO',err)
-                 return
-               }
+           try {
+             var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
+             formatted = formatted.slice(0,-1)
+             formatted = formatted + ')'
+           } catch(err) {
+             console.log('\n\n\n\n\n DOFLAMINGO',err)
+             return
+           }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
               var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : null)
                // console.log('formatted : ',formatted)
@@ -1285,76 +1284,111 @@ var sendResponse = function(data){
                     if (err) { console.log('ios.js1285: err',err) }
 
                 })
-
-              // console.log('photo ',attach.photo);
-              //   console.log('message ',attach.message);
-
-
-            // var attachments = [
-            //     {
-            //         "color": "#45a5f4"
-            //     },
-            //     {
-            //         "color": "#45a5f4",
-            //         "fields":[]
-            //     }
-            // ];
-
-            // //remove first message from res arr
-            // var attachThis = data.client_res;
-
-            // attachments[0].image_url = attachThis[0]; //add image search results to attachment
-            // attachments[0].fallback = 'More information'; //fallback for search result
-
-            // attachThis.shift(); //remove image from array
-
-            // attachments[1].fallback = 'More information';
-            // //put in attachment fields
-            // async.eachSeries(attachThis, function(attach, callback) {
-            //     //attach = attach.replace('\\n','');
-            //     var field = {
-            //         "value": attach,
-            //         "short":false
-            //     }
-            //     attachments[1].fields.push(field);
-            //     callback();
-
-            // }, function done(){
-
-            //     attachments = JSON.stringify(attachments);
-
-            //     var msgData = {
-            //       // attachments: [...],
-            //         icon_url:'http://kipthis.com/img/kip-icon.png',
-            //         username:'Kip',
-            //         attachments: attachments
-            //     };
-            //     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
-            // });
         } 
-        else if (data.action == 'checkout') {
-          console.log('telegram checkout _ data: ', data)
+         else if (data.action == 'save') {
+            console.log('\n\n\nSAVE: ',data.client_res)
           try {
-             var formatted = '[' + data.client_res[0].text.split('|')[0].split('<')[1] + '](View Cart)'
+             var formatted = '[View Cart](' + data.client_res[1].split('|')[0].split('<')[1] + ')'
               // + data.client_res[0].text.split('>>')[1].split('>')[0]
              // formatted = formatted.slice(0,-1)
              // formatted = formatted + ')'
            } catch(err) {
-             console.log('\n\n\n\n\n DOFLAMINGO',err)
+             console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
              return
            }
-          var toSend = formatted ? formatted : data.client_res[0].text
-          console.log('toSend', toSend,'formatted: ',formatted)
+          // console.log('toSend:', toSend,'formatted: ',formatted)
           tg.sendMessage({
                 chat_id: data.source.channel,
-                text: toSend,
+                text: 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.',
                 parse_mode: 'Markdown',
                 disable_web_page_preview: 'true'
             })
+            .then(function() {
+              if (formatted) {
+                console.log('\n\n\nFORMATTED: ', formatted)
+                tg.sendMessage({
+                    chat_id: data.source.channel,
+                    text: formatted,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: 'true'
+                })
+              }  
+            })
+            .catch(function(err) {
+                console.log('io.js 1307 err',err)
+            }) 
+        }
+        else if (data.action == 'checkout') {
+          console.log('\n\n\nCHECKOUT: ', data.client_res)
+             async.eachSeries(data.client_res[1], function iterator(item, callback) { 
+                console.log('ITEM LEL: ',item)
+                if (item.text.indexOf('_Summary') > -1) {
+                    return callback(item)
+                } 
+                 var itemLink = ''
+                  try {
+                    itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
+                    itemLink = encode_utf8(itemLink)
+                   } catch(err) {
+                     console.log('io.js 1296 err:',err)
+                     return callback(null)
+                   }
+                   tg.sendMessage({
+                        chat_id: data.source.channel,
+                        text: itemLink,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: 'true'
+                    }).then(function(){
+                       callback(null)
+                    })
+              }, function done(thing) {
+                if (thing.text) {
+                    // console.log('\n\n DONESKI!', thing)
+                    var itemLink = ''
+                      try {
+                        itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
+                        itemLink = encode_utf8(itemLink)
+                        tg.sendMessage({
+                            chat_id: data.source.channel,
+                            text: '_Summary: Team Cart_ \n Total: *$691.37* \n' + itemLink,
+                            parse_mode: 'Markdown',
+                            disable_web_page_preview: 'true'
+                        }).catch(function(err) {
+                         console.log('io.js 1353 err:',err)
+                       })
+                       } catch(err) {
+                         console.log('io.js 1356 err:',err)
+                       }
+                } else {
+                    // console.log('wtf is thing: ',thing)
+                }
+              })
+          
+         
+           // // var extraInfo = data.client_res[1][0].text.split('$')[1]
+           // // extraInfo = '\n $' + extraInfo
+           // // var finalSend = itemLink + extraInfo
+           // //      tg.sendMessage({
+           // //          chat_id: data.source.channel,
+           // //          text: data.client_res[0],
+           // //          parse_mode: 'Markdown',
+           // //          disable_web_page_preview: 'true'
+           // //      }).then(function(){
+           //         console.log('finalSend: ', itemLink)
+           //          tg.sendMessage({
+           //              chat_id: data.source.channel,
+           //              text: itemLink,
+           //              parse_mode: 'Markdown',
+           //              disable_web_page_preview: 'true'
+           //          }).then(function(){
+
+           //          // })
+           //      }).catch(function(err) {
+           //          console.log('io.js 1338 err',err)
+           //      }) 
         }
         else if (data.action == 'sendAttachment'){
-
+          console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
             // //remove first message from res arr
             // var attachThis = data.client_res;
             // attachThis = JSON.stringify(attachThis);
@@ -1369,15 +1403,12 @@ var sendResponse = function(data){
 
         }
         else {
+              console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
             //loop through responses in order
             async.eachSeries(data.client_res, function(message, callback) {
                 tg.sendMessage({
                     chat_id: data.source.channel,
                     text: message
-                    // caption: 'This is my test image',
-
-                    // // you can also send file_id here as string (as described in telegram bot api documentation)
-                    // photo: '/path/to/file/test.jpg'
                 })
                 callback();
             }, function done(){
