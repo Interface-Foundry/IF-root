@@ -85,7 +85,7 @@ function getNumEmoji(data,number,callback){
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':one:';
-            } 
+            }
             else if (data.source.origin == 'telegram'){
                 numEmoji = '1️⃣';
             }
@@ -149,6 +149,13 @@ function getCartLink(url, cart_id) {
 }
 
 //
+// Shortens a url for an item in the view cart thing.
+//
+function getItemLink(url, user_id, item_id) {
+  return googl.shorten('http://kipbubble.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
+}
+
+//
 // Downloads slack file and runs through google vision for image to text search
 // Token: pass auth token for slack team to get private url
 //
@@ -199,9 +206,9 @@ var imageSearch = function(data,token,callback){
               textEx = textEx.replace(/(\r\n|\n|\r)/gm," "); //remove line breaks
               textEx = textEx.replace(/[\u0250-\ue007]/g, ''); //remove non-latin characters
               textEx = textEx.replace(/^(.{30}[^\s]*).*/, "$1"); //limit # of words
-              searchTerms.push(textEx);          
+              searchTerms.push(textEx);
             }
-          } 
+          }
 
           //label detection
           if (searchTerms.length < 1){
@@ -228,7 +235,7 @@ var imageSearch = function(data,token,callback){
             //lol this code is awful
             if(res.responses && res.responses[0].labelAnnotations && res.responses[0].labelAnnotations[4]){
               searchTerms.push(res.responses[0].labelAnnotations[4].description);
-            }            
+            }
           }
 
           // check for search terms
@@ -266,5 +273,6 @@ var imageSearch = function(data,token,callback){
 module.exports.urlShorten = urlShorten;
 module.exports.getNumEmoji = getNumEmoji;
 module.exports.getCartLink = getCartLink;
+module.exports.getItemLink = getItemLink;
 module.exports.emoji = emoji;
 module.exports.imageSearch = imageSearch;

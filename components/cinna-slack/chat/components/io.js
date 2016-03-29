@@ -57,7 +57,6 @@ var tg = new telegram({
 });
 
 tg.on('message', function(msg){
-    console.log(msg);
 
     var newTg = {
         source: {
@@ -70,7 +69,12 @@ tg.on('message', function(msg){
     }
 
     //console.log('asdf ',newTg);
-    preProcess(newTg);
+    if (process.env.NODE_ENV !== 'development') {
+      console.log("incoming telegram message");
+      console.log(msg);
+      console.log(newTg);
+      preProcess(newTg);
+    }
 });
 
 
@@ -1676,7 +1680,8 @@ function viewCart(data, show_added_item){
 
     console.log(data.source)
 
-    kipcart.getCart(data.source.org).then(function(cart) {
+    co(function*() {
+      var cart = yield kipcart.getCart(data.source.org);
 
       // get the latest added item if we need to highlight it
       if (show_added_item) {
@@ -1684,28 +1689,32 @@ function viewCart(data, show_added_item){
         var added_asin = added_item.ASIN;
       }
 
-      var cartObj = cart.aggregate_items.map(function(item, index) {
-
+      var cartObj = [];
+      for (var i = 0; i < cart.aggregate_items.length; i++) {
+        var item = cart.aggregate_items[i];
         var userString = item.added_by.map(function(u) {
           return '<@' + u + '>';
-        }).join(', ')
+        }).join(', ');
+
+        var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
+        console.log(link);
 
         if (item.ASIN === added_asin) {
-          return {
-            text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
+          cartObj.push({
+            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
             color: '#7bd3b6',
             thumb_url: item.image
-          }
+          })
         } else {
-          return {
-            text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
+          cartObj.push({
+            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
             color: '#45a5f4',
             thumb_url: item.image
-          }
+          })
         }
-      })
+      }
 
       cartObj.push({
         text: `_Summary: Team Cart_ \n Total: *${cart.total}* \n <${cart.link}|» Purchase Items >`,
@@ -1713,15 +1722,16 @@ function viewCart(data, show_added_item){
         color: '#45a5f4'
       })
 
-        data.client_res = [];
-        data.client_res.push(cartObj);
+      data.client_res = [];
+      data.client_res.push(cartObj);
+      console.log('done with cartObj');
 
-        banter.getCinnaResponse(data,function(res){
-            if(res && res !== 'null'){
-                data.client_res.unshift(res);
-            }
-            sendResponse(data);
-        });
+      banter.getCinnaResponse(data,function(res){
+          if(res && res !== 'null'){
+              data.client_res.unshift(res);
+          }
+          sendResponse(data);
+      });
       // sendResponse(data);
 
     }).catch(function(e) {
