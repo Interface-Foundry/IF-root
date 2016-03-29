@@ -152,7 +152,7 @@ function askWhoManagesPurchases(response, convo) {
 // welcome video
 function welcomeVid(response, convo) {
   // TODO
-  convo.say('Check out this 🔥 vid the squad made')
+  // convo.say('Check out this 🔥 vid the squad made')
   convo.next()
 }
 
