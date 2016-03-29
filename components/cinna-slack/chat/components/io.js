@@ -1617,14 +1617,14 @@ var saveToCart = function(data){
               var cart = yield kipcart.getCart(data.source.org);
               console.log(cart);
 
-              data.client_res = ['<' + cart.link + '|» View Cart>']
-              outgoingResponse(data, 'txt');
+              // data.client_res = ['<' + cart.link + '|» View Cart>']
+              // outgoingResponse(data, 'txt');
 
               // View cart after adding item TODO doesn't display for some reason
               // Even after adding in 500 ms which solves any amazon rate limiting problems
-              // setTimeout(function() {
-              //   viewCart(data, true);
-              // }, 500)
+              setTimeout(function() {
+                viewCart(data, true);
+              }, 500)
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
@@ -1694,6 +1694,7 @@ function viewCart(data, show_added_item){
           return {
             text: `${processData.emoji[index+1].slack} <${item.link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
+            color: '#7bd3b6',
             thumb_url: item.image
           }
         } else {
