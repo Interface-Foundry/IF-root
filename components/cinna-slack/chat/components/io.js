@@ -1193,14 +1193,7 @@ var sendResponse = function(data){
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
 
-            tg.sendMessage({
-                chat_id: data.source.channel,
-                text: message
-                // parse_mode: 'Markdown',
-                // disable_web_page_preview: false
-            })
-
-
+         
             //remove first message from res arr
             var attachThis = data.client_res;
             attachThis.shift();
@@ -1274,8 +1267,8 @@ var sendResponse = function(data){
                  return
                }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
-              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + data.client_res[4]
-               console.log('formatted : ',formatted)
+              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : null)
+               // console.log('formatted : ',formatted)
                upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(buffer) {
                  tg.sendPhoto({
                     chat_id: encode_utf8(data.source.channel),
@@ -1339,7 +1332,28 @@ var sendResponse = function(data){
             //     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
 
             // });
-        }else if (data.action == 'sendAttachment'){
+        } 
+        else if (data.action == 'checkout') {
+          console.log('telegram checkout _ data: ', data)
+          try {
+             var formatted = '[' + data.client_res[0].text.split('|')[0].split('<')[1] + '](View Cart)'
+              // + data.client_res[0].text.split('>>')[1].split('>')[0]
+             // formatted = formatted.slice(0,-1)
+             // formatted = formatted + ')'
+           } catch(err) {
+             console.log('\n\n\n\n\n DOFLAMINGO',err)
+             return
+           }
+          var toSend = formatted ? formatted : data.client_res[0].text
+          console.log('toSend', toSend,'formatted: ',formatted)
+          tg.sendMessage({
+                chat_id: data.source.channel,
+                text: toSend,
+                parse_mode: 'Markdown',
+                disable_web_page_preview: 'true'
+            })
+        }
+        else if (data.action == 'sendAttachment'){
 
             // //remove first message from res arr
             // var attachThis = data.client_res;
