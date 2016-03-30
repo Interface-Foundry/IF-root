@@ -1292,7 +1292,7 @@ var sendResponse = function(data){
          else if (data.action == 'save') {
             console.log('\n\n\nSAVE: ',data.client_res)
           try {
-             var formatted = '[View Cart](' + data.client_res[1].split('|')[0].split('<')[1] + ')'
+             var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
               // + data.client_res[0].text.split('>>')[1].split('>')[0]
              // formatted = formatted.slice(0,-1)
              // formatted = formatted + ')'
