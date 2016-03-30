@@ -21,7 +21,7 @@ var express = require('express'),
 
 module.exports = {
     uploadPicture: function(str, image, quality, bot) {
-        var qual = quality ? quality : 82
+        var qual = quality ? quality : 100
         return new Promise(function(resolve, reject) {
             function convertBase64(image) {
                 return new Promise(function(resolve, reject) {
@@ -59,8 +59,8 @@ module.exports = {
                                 srcPath: inputPath,
                                 dstPath: outputPath,
                                 strip: true,
-                                quality: qual,
-                                width: 290
+                                quality: qual
+                                ,width: 290
                             }, function(err, stdout, stderr) {
                                 if (err) console.log(err.lineNumber + err)
 
