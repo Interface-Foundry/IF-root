@@ -1266,7 +1266,7 @@ var sendResponse = function(data){
              formatted = formatted.slice(0,-1)
              formatted = formatted + ')'
            } catch(err) {
-             console.log('\n\n\n\n\n DOFLAMINGO',err)
+             console.log('io.js 1269 err: ',err)
              return
            }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
