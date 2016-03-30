@@ -1279,7 +1279,7 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
-                  })
+                  }) 
                 }).catch(function(err){
                     if (err) { console.log('ios.js1285: err',err) }
 
@@ -1339,7 +1339,22 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     }).then(function(){
-                       callback(null)
+                         var extraInfo = item.text.split('$')[1]
+                         extraInfo = '\n $' + extraInfo
+                         extraInfo = extraInfo.replace('*','').replace('@','').replace('<','').replace('>','')
+                         tg.sendMessage({
+                            chat_id: data.source.channel,
+                            text: encode_utf8(extraInfo),
+                            parse_mode: 'Markdown',
+                                disable_web_page_preview: 'true'
+                            })
+                            .then(function(){
+                                callback(null)
+                            })
+                            .catch(function(err) {
+                                console.log('io.js 1354 err: ',err)
+                                callback(null)
+                            })
                     })
               }, function done(thing) {
                 if (thing.text) {
