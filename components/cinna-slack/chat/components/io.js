@@ -295,11 +295,11 @@ function loadSlackUsers(users){
                         sendResponse(hello, res);
 
                         user.conversations = user.conversations || {};
-                        user.conversations[addedBy.dm] = 'onboard';
-                        return conversation_botkit.onboard(user, addedBy.id, function() {
-                          console.log('done with onboarding conversation')
-                          user.conversations[addedBy.dm] = false;
-                        });
+                        // user.conversations[addedBy.dm] = 'onboard';
+                        // return conversation_botkit.onboard(user, addedBy.id, function() {
+                        //   console.log('done with onboarding conversation')
+                        //   user.conversations[addedBy.dm] = false;
+                        // });
                     })
 
                 })
@@ -1196,7 +1196,7 @@ var sendResponse = function(data){
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
 
-         
+
             //remove first message from res arr
             var attachThis = data.client_res;
             attachThis.shift();
@@ -1283,12 +1283,12 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
-                  }) 
+                  })
                 }).catch(function(err){
                     if (err) { console.log('ios.js1285: err',err) }
 
                 })
-        } 
+        }
          else if (data.action == 'save') {
             console.log('\n\n\nSAVE: ',data.client_res)
           try {
@@ -1316,19 +1316,19 @@ var sendResponse = function(data){
                     parse_mode: 'Markdown',
                     disable_web_page_preview: 'true'
                 })
-              }  
+              }
             })
             .catch(function(err) {
                 console.log('io.js 1307 err',err)
-            }) 
+            })
         }
         else if (data.action == 'checkout') {
           console.log('\n\n\nCHECKOUT: ', data.client_res)
-             async.eachSeries(data.client_res[1], function iterator(item, callback) { 
+             async.eachSeries(data.client_res[1], function iterator(item, callback) {
                 console.log('ITEM LEL: ',item)
                 if (item.text.indexOf('_Summary') > -1) {
                     return callback(item)
-                } 
+                }
                  var itemLink = ''
                   try {
                     itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
@@ -1382,8 +1382,8 @@ var sendResponse = function(data){
                     // console.log('wtf is thing: ',thing)
                 }
               })
-          
-         
+
+
            // // var extraInfo = data.client_res[1][0].text.split('$')[1]
            // // extraInfo = '\n $' + extraInfo
            // // var finalSend = itemLink + extraInfo
@@ -1404,7 +1404,7 @@ var sendResponse = function(data){
            //          // })
            //      }).catch(function(err) {
            //          console.log('io.js 1338 err',err)
-           //      }) 
+           //      })
         }
         else if (data.action == 'sendAttachment'){
           console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
