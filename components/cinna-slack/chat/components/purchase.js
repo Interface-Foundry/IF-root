@@ -1,9 +1,14 @@
 var async = require('async');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+// var client = amazon.createClient({
+//   awsId: "AKIAILD2WZTCJPBMK66A",
+//   awsSecret: "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",
+//   awsTag: "bubboorev-20"
+// });
 var client = amazon.createClient({
-  awsId: "AKIAILD2WZTCJPBMK66A",
-  awsSecret: "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",
-  awsTag: "bubboorev-20"
+  awsId: "AKIAIYTURL6C5PID2GZA",
+  awsSecret: "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",
+  awsTag: "krista08-20"
 });
 
 //pass in data, user chat history

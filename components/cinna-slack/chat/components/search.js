@@ -11,12 +11,17 @@ var processData = require("./process.js");
 var ioKip = require("./io.js");
 var kip = require('kip')
 
-var client = amazon.createClient({
-  awsId: "AKIAILD2WZTCJPBMK66A",
-  awsSecret: "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",
-  awsTag: "bubboorev-20"
-});
+// var client = amazon.createClient({
+//   awsId: "AKIAILD2WZTCJPBMK66A",
+//   awsSecret: "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",
+//   awsTag: "bubboorev-20"
+// });
 
+var client = amazon.createClient({
+  awsId: "AKIAIYTURL6C5PID2GZA",
+  awsSecret: "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",
+  awsTag: "krista08-20"
+});
 
 var searchInitial = function(data,flag){
     searchAmazon(data,data.action,'none',flag);
@@ -1125,13 +1130,34 @@ var searchMore = function(data){
 
 var getReviews = function(ASIN,callback) {
     //get reviews in circumvention manner (amazon not allowing anymore officially)
-    request('http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+ASIN+'', function(err, res, body) {
+
+      //add request headers
+      var options = {
+          url: 'http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+ASIN+'',
+          headers: {
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              //'Accept-Encoding':'gzip, deflate, sdch',
+              'Accept-Language':'en-US,en;q=0.8',
+              'Cache-Control':'no-cache',
+              'Connection':'keep-alive',
+              'Cookie': 'x-wl-uid=1pueisgHxMYKWT0rswq5JqfnPdFseLZ/OxR7UupM9FY0RLpoyRkASv5p0aqDde7UxdAH0ye/4HGk=; ubid-main=184-9837454-1099037; session-id-time=2082787201l; session-id=189-6797902-2253123',
+              'Host':'www.amazon.com',
+              'Origin':'http://www.amazon.com',
+              'Pragma':'no-cache',
+              'Upgrade-Insecure-Requests':'1',
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
+              'Referer':'http://www.amazon.com/gp/customer-reviews/widgets/average-customer-review/popover/ref=dpx_acr_pop_?contextId=dpx&asin='+ASIN+''
+          }
+      };
+
+    request(options, function(err, res, body) {
       if(err){
         console.log('getReviews error: ',err);
         callback();
       }
       else {
         $ = cheerio.load(body);
+        console.log('BODY',body);
         callback(( $('.a-size-base').text()
           .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
           .map(function (v) {return +v;}).shift(),( $('.a-link-emphasis').text()
@@ -1198,6 +1224,8 @@ var getAmazonStuff = function(data,results,callback3){
     //!\\ //!\\ NOTE!!! Add timeout here, fire callback if parallel doesnt fire callback!!
 
     async.parallel([
+
+
         //* * item 1 * * *//
         //get review
         function(callback){
@@ -1207,6 +1235,7 @@ var getAmazonStuff = function(data,results,callback3){
                     rating:rating,
                     reviewCount:count
                 }
+                console.log('1 review 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1220,6 +1249,7 @@ var getAmazonStuff = function(data,results,callback3){
                 if (altImage){
                     obj.altImage = altImage;
                 }
+                console.log('1 price 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1233,6 +1263,7 @@ var getAmazonStuff = function(data,results,callback3){
                     rating:rating,
                     reviewCount:count
                 }
+                console.log('2 review 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1245,6 +1276,7 @@ var getAmazonStuff = function(data,results,callback3){
                 if (altImage){
                     obj.altImage = altImage;
                 }
+                console.log('2 price 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1258,6 +1290,7 @@ var getAmazonStuff = function(data,results,callback3){
                     rating:rating,
                     reviewCount:count
                 }
+                console.log('3 review 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1270,6 +1303,7 @@ var getAmazonStuff = function(data,results,callback3){
                 if (altImage){
                     obj.altImage = altImage;
                 }
+                console.log('3 price 😅, ',obj);
                 callback(null,obj);
             });
         }

@@ -803,7 +803,7 @@ var checkForCanned = function(input,callback,origin) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.6.3 Cardamom';
+            res = 'I\'m a penguin running Kip v0.6.4 Cardamom';
             break;
 
         case '/':

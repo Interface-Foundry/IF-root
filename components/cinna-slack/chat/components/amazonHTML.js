@@ -6,6 +6,7 @@ var kip = require('kip')
 var debug = require('debug')('amazon')
 var memcache = require('memory-cache');
 var fs = require('fs')
+var mailerTransport = require('../../../IF_mail/IF_mail.js');
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
@@ -38,6 +39,7 @@ module.exports.basic = function basic(url, callback) {
 
     //remove referral info just in case
     url = url.replace('%26tag%3Dbubboorev-20','');
+    url = url.replace('%26tag%3Dkrista08-20','');
 
     // check cache
     cache.get(url, function(err, product) {
@@ -118,6 +120,25 @@ module.exports.basic = function basic(url, callback) {
             amazonSitePrice = $('.buybox-price').text().trim();
             amazonSitePrice = amazonSitePrice.split("\n");
             amazonSitePrice = amazonSitePrice[0];
+        }
+        else if ($('#priceblock_saleprice').text()){
+            console.log('😊 kk');
+            amazonSitePrice = $('#priceblock_saleprice').text().trim();
+            amazonSitePrice = amazonSitePrice.split("\n");
+            amazonSitePrice = amazonSitePrice[0];
+        }
+        else {
+          console.log('NO PRICE FOUND 😊😊😊😊😊😊😊 ',url);
+          //send email about this issue
+          // var mailOptions = {
+          //     to: 'Kip Server <hello@kipthis.com>',
+          //     from: 'cant find real amazon price <server@kipthis.com>',
+          //     subject: 'cant find real amazon price',
+          //     text: url
+          // };
+          // mailerTransport.sendMail(mailOptions, function(err) {
+          //     if (err) console.log(err);
+          // });
         }
         //* * * * * * * * * *//
 

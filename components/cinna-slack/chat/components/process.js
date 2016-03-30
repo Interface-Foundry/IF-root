@@ -30,7 +30,7 @@ var urlShorten = function(data,callback2) {
             // });
 
 
-            googl.shorten('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+            googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
             .then(function (shortUrl) {
                 callback2(shortUrl);
             })
@@ -54,7 +54,7 @@ var urlShorten = function(data,callback2) {
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
 
-                googl.shorten('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
                 .then(function (shortUrl) {
                     urlArr.push(shortUrl);
                     callback();
@@ -145,7 +145,7 @@ var emoji = {
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink(url, cart_id) {
-  return googl.shorten('http://kipbubble.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
+  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
 }
 
 //
