@@ -79,6 +79,7 @@
   "dependencies": {
     "babel": "^6.3.26",
     "babel-plugin-typecheck": "3.6.0",
+    "basic-auth-connect": "^1.0.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.13.0",
     "classnames": "^2.1.2",

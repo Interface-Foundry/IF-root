@@ -13,6 +13,7 @@ var cors = require('cors');
 var webpack = require('webpack');
 var config = require('./webpack.config.dev');
 var compiler = webpack(config);
+var auth = require('basic-auth-connect')
 
 var User = require('./server/models/User');
 //set env vars
@@ -39,6 +40,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { maxAge: 600000000 }
 }));
+app.use(auth('kip', 'vampirecat1200'))
 
 //load routers
 var messageRouter = express.Router();
