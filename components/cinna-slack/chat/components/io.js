@@ -1691,35 +1691,43 @@ var saveToCart = function(data){
 
             // co lets us use "yield" to with promises to untangle async shit
             co(function*() {
+              var cart;
               for (var index = 0; index < data.searchSelect.length; index++) {
                   var searchSelect = data.searchSelect[index];
                   console.log('adding searchSelect ' + searchSelect);
                   if (item.recallHistory && item.recallHistory.amazon){
                       messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
-                      yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                        .catch(function(reason) {
+                          // could not add item to cart, make kip say something nice
+                          console.log(reason);
+                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        })
                   } else {
                       messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                      yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                        .catch(function(reason) {
+                          // could not add item to cart, make kip say something nice
+                          console.log(reason);
+                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        })
                   }
               }
-
-              console.log('retrieving cart')
-              var cart = yield kipcart.getCart(data.source.org);
-              console.log(cart);
 
               // data.client_res = ['<' + cart.link + '|» View Cart>']
               // outgoingResponse(data, 'txt');
 
               // View cart after adding item TODO doesn't display for some reason
               // Even after adding in 500 ms which solves any amazon rate limiting problems
-              setTimeout(function() {
-                viewCart(data, true);
-              }, 500)
+              if (cart) {
+                setTimeout(function() {
+                  viewCart(data, true);
+                }, 500)
+              }
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
-                return;
                 sendTxtResponse(data, err);
 
                 //send email about this issue
