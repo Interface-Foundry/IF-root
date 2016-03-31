@@ -47,7 +47,15 @@ var upload = require('../../../../IF_services/upload.js');
 
 
 var telegram = require('telegram-bot-api');
-var telegramToken = (process.env.NODE_ENV == 'development_alyx')  ?  '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ' : '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+
+var telegramToken;
+if (process.env.NODE_ENV == 'development_alyx'){
+    telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+}else if (process.env.NODE_ENV == 'development_mitsu'){
+    telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+}else{
+    telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
+}
 
 var tg = new telegram({
         token: telegramToken,
@@ -100,30 +108,30 @@ var initSlackUsers = function(env){
         // }];
 
         //CINNA-PEPPER
+        var testUser = [{
+            team_id:'T0H72FMNK',
+            dm:'D0H6X6TA8',
+            bot: {
+                bot_user_id: 'U0H6YHBNZ',
+                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+            },
+            meta: {
+                initialized: false
+            }
+        }];
+
+        //KIP-PAPRIKA
         // var testUser = [{
-        //     team_id:'T0H72FMNK',
+        //     team_id:'T02PN3B25',
         //     dm:'D0H6X6TA8',
         //     bot: {
         //         bot_user_id: 'U0H6YHBNZ',
-        //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+        //         bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
         //     },
         //     meta: {
         //         initialized: false
         //     }
         // }];
-
-        //KIP-PAPRIKA
-        var testUser = [{
-            team_id:'T02PN3B25',
-            dm:'D0H6X6TA8',
-            bot: {
-                bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
-            },
-            meta: {
-                initialized: true
-            }
-        }];
 
 
         loadSlackUsers(testUser);
@@ -295,11 +303,11 @@ function loadSlackUsers(users){
                         sendResponse(hello, res);
 
                         user.conversations = user.conversations || {};
-                        user.conversations[addedBy.dm] = 'onboard';
-                        return conversation_botkit.onboard(user, addedBy.id, function() {
-                          console.log('done with onboarding conversation')
-                          user.conversations[addedBy.dm] = false;
-                        });
+                        // user.conversations[addedBy.dm] = 'onboard';
+                        // return conversation_botkit.onboard(user, addedBy.id, function() {
+                        //   console.log('done with onboarding conversation')
+                        //   user.conversations[addedBy.dm] = false;
+                        // });
                     })
 
                 })
@@ -846,6 +854,10 @@ function searchBucket(data){
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
+        }else if (data.source.origin == 'socket.io'){
+            var searcher = {};
+            searcher.source = data.source;
+            sendTxtResponse(searcher,'Searching...');
         }
     }
 
@@ -1168,10 +1180,24 @@ var sendResponse = function(data){
     if (data.source && data.source.channel && data.source.origin == 'socket.io'){
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){
-            // console.log('io625: getting here')
+
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) {
-                io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+
+                    if (typeof data.client_res[i] === 'string'){
+                        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+                    }
+                    //item is an attachment object, send attachment
+                    else if (data.client_res[i] instanceof Array){
+
+                        for (var z = 0; z < data.client_res[i].length; z++) {
+                            io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i][z].thumb_url});
+                            io.sockets.connected[data.source.channel].emit("msgFromSever", {message: '<b>Please use Slack for "view cart"</b>: '+ data.client_res[i][z].text});
+                        }
+
+                    }else {
+                        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+                    }
             }
         }
         //---supervisor: relay search result previews back to supervisor---//
@@ -1196,7 +1222,7 @@ var sendResponse = function(data){
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
 
-         
+
             //remove first message from res arr
             var attachThis = data.client_res;
             attachThis.shift();
@@ -1283,12 +1309,12 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
-                  }) 
+                  })
                 }).catch(function(err){
                     if (err) { console.log('ios.js1285: err',err) }
 
                 })
-        } 
+        }
          else if (data.action == 'save') {
             console.log('\n\n\nSAVE: ',data.client_res)
           try {
@@ -1316,19 +1342,19 @@ var sendResponse = function(data){
                     parse_mode: 'Markdown',
                     disable_web_page_preview: 'true'
                 })
-              }  
+              }
             })
             .catch(function(err) {
                 console.log('io.js 1307 err',err)
-            }) 
+            })
         }
         else if (data.action == 'checkout') {
           console.log('\n\n\nCHECKOUT: ', data.client_res)
-             async.eachSeries(data.client_res[1], function iterator(item, callback) { 
+             async.eachSeries(data.client_res[1], function iterator(item, callback) {
                 console.log('ITEM LEL: ',item)
                 if (item.text.indexOf('_Summary') > -1) {
                     return callback(item)
-                } 
+                }
                  var itemLink = ''
                   try {
                     itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
@@ -1382,8 +1408,8 @@ var sendResponse = function(data){
                     // console.log('wtf is thing: ',thing)
                 }
               })
-          
-         
+
+
            // // var extraInfo = data.client_res[1][0].text.split('$')[1]
            // // extraInfo = '\n $' + extraInfo
            // // var finalSend = itemLink + extraInfo
@@ -1404,7 +1430,7 @@ var sendResponse = function(data){
            //          // })
            //      }).catch(function(err) {
            //          console.log('io.js 1338 err',err)
-           //      }) 
+           //      })
         }
         else if (data.action == 'sendAttachment'){
           console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
@@ -1665,35 +1691,43 @@ var saveToCart = function(data){
 
             // co lets us use "yield" to with promises to untangle async shit
             co(function*() {
+              var cart;
               for (var index = 0; index < data.searchSelect.length; index++) {
                   var searchSelect = data.searchSelect[index];
                   console.log('adding searchSelect ' + searchSelect);
                   if (item.recallHistory && item.recallHistory.amazon){
                       messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
-                      yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                        .catch(function(reason) {
+                          // could not add item to cart, make kip say something nice
+                          console.log(reason);
+                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        })
                   } else {
                       messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                      yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                        .catch(function(reason) {
+                          // could not add item to cart, make kip say something nice
+                          console.log(reason);
+                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        })
                   }
               }
-
-              console.log('retrieving cart')
-              var cart = yield kipcart.getCart(data.source.org);
-              console.log(cart);
 
               // data.client_res = ['<' + cart.link + '|» View Cart>']
               // outgoingResponse(data, 'txt');
 
               // View cart after adding item TODO doesn't display for some reason
               // Even after adding in 500 ms which solves any amazon rate limiting problems
-              setTimeout(function() {
-                viewCart(data, true);
-              }, 500)
+              if (cart) {
+                setTimeout(function() {
+                  viewCart(data, true);
+                }, 500)
+              }
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
-                return;
                 sendTxtResponse(data, err);
 
                 //send email about this issue

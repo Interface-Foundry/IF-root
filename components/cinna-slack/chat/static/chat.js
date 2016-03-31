@@ -85,7 +85,7 @@ socket.on("msgFromSever", function(data) {
     var msgP = "<a target='_blank' href=' " + data.message + "'>" + data.message + "</a><br>";
 
   } else { //else
-    var msgP = "<p> " + data.message + "</p>";
+    var msgP = data.message;
 
   }
 

@@ -4,11 +4,17 @@ var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+// var client = amazon.createClient({
+//   awsId: "AKIAILD2WZTCJPBMK66A",
+//   awsSecret: "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",
+//   awsTag: "bubboorev-20"
+// });
 var client = amazon.createClient({
-  awsId: "AKIAILD2WZTCJPBMK66A",
-  awsSecret: "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",
-  awsTag: "bubboorev-20"
+  awsId: "AKIAIYTURL6C5PID2GZA",
+  awsSecret: "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",
+  awsTag: "krista08-20"
 });
+
 var getCartLink = require('./process').getCartLink;
 var fs = require('fs')
 
@@ -23,6 +29,16 @@ module.exports = {};
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log(item)
+
+  // Handle the case where the search api returns items that we can't add to cart
+  var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
+  if (total_offers === 0) {
+    // This item is not available.  According to the amazon documentation, the search
+    // api can and will return items that you cannot buy.  So we have to just
+    // ignore these things.
+    // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
+    return Promise.reject('Item not available');
+  }
 
   return co(function*() {
     var cart = yield getCart(slack_id);
@@ -192,10 +208,12 @@ var getCart = module.exports.getCart = function(slack_id) {
       console.log('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
 
-      console.log(amazonCart.Request[0].Errors[0].Message[0]);
+      // console.log(amazonCart.Request[0].Errors[0].Message[0]);
+
+      //console.log(JSON.stringify(amazonCart.Request[0]));
 
       //ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
-      if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Message && amazonCart.Request[0].Errors[0].Message[0].indexOf(' is not eligible to be added to the cart') > -1){
+      if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Error && amazonCart.Request[0].Errors[0].Error[0].Message && amazonCart.Request[0].Errors[0].Error[0].Message[0].indexOf('not eligible to be added to the cart') > -1){
 
         console.log('ERR: Amazon item is not eligible to be added to the cart');
         //cart.amazon = amazonCart;
