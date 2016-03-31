@@ -1,6 +1,8 @@
-var botkit = require('botkit')
+/*eslint-env es6*/
+var botkit = require('botkit');
 var controller = botkit.slackbot();
-var db = require('db')
+var db = require('db');
+var co = require('co');
 
 /*
 slackbot: slackbot_schema
@@ -11,7 +13,7 @@ message: slack message { type: 'message',
   ts: '1458243631.000011',
   team: 'T0R6J00JW' }
 */
-module.exports = {}
+module.exports = {};
 module.exports.onboard = function(slackbot, user_id, done) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
@@ -32,6 +34,32 @@ module.exports.onboard = function(slackbot, user_id, done) {
       askWhoManagesPurchases(response, convo);
     });
   });
+}
+
+module.exports.settings = function(slackbot, user_id, done) {
+  var bot = controller.spawn({
+    token: slackbot.bot.bot_access_token
+  });
+
+
+  bot.startRTM(function(err, bot, payload) {
+    if (err) {
+      throw new Error('Could not connect to Slack');
+    }
+
+    bot.startPrivateConversation({user: user_id}, function(response, convo) {
+      // inject the slackbot into the convo so that we can save it in the db
+      convo.slackbot = slackbot;
+      convo.user_id = user_id;
+      convo.on('end', function() {
+        bot.closeRTM();
+        done();
+      })
+      console.log('showing settings');
+      showSettings(response, convo);
+    });
+  });
+
 }
 
 /*
@@ -156,6 +184,138 @@ function welcomeVid(response, convo) {
   convo.next()
 }
 
+// Show the user their settings
+function showSettings(response, convo) {
+  console.log('showing settings');
+  co(function*() {
+    var chatuser = yield db.Chatusers.findOne({id: convo.user_id});
+    convo.chatuser = chatuser;
+    console.log(chatuser);
+    console.log(convo.slackbot)
+
+    var attachments = [];
+
+    //
+    // Last call alerts personal settings
+    //
+    if (chatuser.settings.last_call_alerts) {
+      attachments.push({
+        text: 'You are receiving last-call alerts for company orders.  Say `no last call` to stop this.'
+      })
+    } else {
+      attachments.push({text: 'You are not receiving last-call alerts before the company order closes. Say `yes last call` to receive them.'})
+    }
+
+    //
+    // Admins
+    //
+    var office_gremlins = convo.slackbot.meta.office_assistants.map(function(user_id) {
+      return '<@' + user_id + '>';
+    })
+    if (office_gremlins.length >= 1) {
+      var last = office_gremlins.pop();
+      office_gremlins[office_gremlins.length-1] += ' and ' + last;
+    }
+    attachments.push({text: 'I am moderated by ' + office_gremlins.join(', ') + '.'})
+
+    //
+    // Admin-only settings
+    //
+    if (convo.slackbot.meta.office_assistants.indexOf(convo.user_id) < 0) {
+      return convo.next();
+    }
+    if (convo.slackbot.meta.weekly_status_enabled) {
+      attachments.push({text: 'You are receiving weekly cart status updates every ' + convo.slackbot.meta.weekly_status_day + ' at ' + convo.slackbot.meta.weekly_status_time
+        + '\nYou can turn this off by saying `no weekly status`'
+        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 AM`'})
+    } else {
+      attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
+    }
+
+    console.log(attachments);
+
+    // make all the attachments markdown
+    attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    })
+
+    convo.say({
+      username: 'Kip',
+      text: 'Settings',
+      attachments: attachments
+    })
+
+    convo.ask({
+      username: 'Kip',
+      text: 'Have any changes?'
+    }, handleSettingsChange);
+
+  }).catch(function(e) {
+    console.log('error finding the user');
+    console.log(e)
+  })
+}
+
+function handleSettingsChange(response, convo) {
+
+  console.log(response.text);
+  co(function*() {
+    //
+    // Deal with the most complicated changes first, and finish up with the easy stuff
+    //
+    if (response.text.toLowerCase().trim().match(/^(change|update) weekly (status|update)/)) {
+      // TODO
+    }
+
+    switch (response.text.toLowerCase().trim()) {
+      case 'yes weekly status':
+      case 'yes weekly update':
+        convo.slackbot.meta.weekly_status_enabled = true;
+        yield convo.slackbot.save();
+        break;
+
+      case 'yes weekly status':
+      case 'yes weekly update':
+        convo.slackbot.meta.weekly_status_enabled = true;
+        yield convo.slackbot.save();
+        break;
+
+      case 'yes last call':
+        convo.chatuser.settings.last_call_alerts = true;
+        yield convo.chatuser.save();
+        break;
+
+      case 'no last call':
+        convo.chatuser.settings.last_call_alerts = false;
+        yield convo.chatuser.save();
+        break;
+
+      default:
+
+        // the question was something like "Do you have any settings changes?"
+        // so we need to allow the user to say "yes" or "no"
+        if (response.text.match(convo.task.botkit.utterances.yes)) {
+          convo.ask('Go ahead, I\'m listening.', handleSettingsChange)
+          return convo.next();
+        } else if (response.text.match(convo.task.botkit.utterances.no)) {
+          convo.say('Ok thanks.');
+          return convo.next();
+        }
+
+        return convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+    }
+
+    convo.say('Ok I have updated your settings.')
+    showSettings(response, convo);
+    convo.next();
+
+  }).catch(function(e) {
+    console.log('error handling settings change')
+    console.log(resopnse)
+    console.log(e)
+  })
+}
 
 
 // TODO do these even matter?

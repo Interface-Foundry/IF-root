@@ -364,6 +364,14 @@ function loadSlackUsers(users){
               });
             }
 
+            if (data.text === 'settings') {
+              user.conversations[data.channel] = 'settings';
+              return conversation_botkit.settings(user, data.user, function() {
+                console.log('done with settings conversation')
+                user.conversations[data.channel] = false;
+              })
+            }
+
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 
                 //public channel
