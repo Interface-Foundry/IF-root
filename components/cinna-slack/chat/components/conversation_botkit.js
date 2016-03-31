@@ -266,6 +266,8 @@ function handleSettingsChange(response, convo) {
     //
     if (response.text.toLowerCase().trim().match(/^(change|update) weekly (status|update)/)) {
       // TODO
+      convo.say('Peter is working on this');
+      convo.next();
     }
 
     switch (response.text.toLowerCase().trim()) {
