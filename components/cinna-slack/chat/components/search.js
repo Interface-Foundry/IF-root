@@ -1157,7 +1157,6 @@ var getReviews = function(ASIN,callback) {
       }
       else {
         $ = cheerio.load(body);
-        console.log('BODY',body);
         callback(( $('.a-size-base').text()
           .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
           .map(function (v) {return +v;}).shift(),( $('.a-link-emphasis').text()
@@ -1235,7 +1234,6 @@ var getAmazonStuff = function(data,results,callback3){
                     rating:rating,
                     reviewCount:count
                 }
-                console.log('1 review 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1249,7 +1247,6 @@ var getAmazonStuff = function(data,results,callback3){
                 if (altImage){
                     obj.altImage = altImage;
                 }
-                console.log('1 price 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1263,7 +1260,6 @@ var getAmazonStuff = function(data,results,callback3){
                     rating:rating,
                     reviewCount:count
                 }
-                console.log('2 review 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1276,7 +1272,6 @@ var getAmazonStuff = function(data,results,callback3){
                 if (altImage){
                     obj.altImage = altImage;
                 }
-                console.log('2 price 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1290,7 +1285,6 @@ var getAmazonStuff = function(data,results,callback3){
                     rating:rating,
                     reviewCount:count
                 }
-                console.log('3 review 😅, ',obj);
                 callback(null,obj);
             });
         },
@@ -1303,7 +1297,6 @@ var getAmazonStuff = function(data,results,callback3){
                 if (altImage){
                     obj.altImage = altImage;
                 }
-                console.log('3 price 😅, ',obj);
                 callback(null,obj);
             });
         }

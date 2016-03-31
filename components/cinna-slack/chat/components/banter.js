@@ -1191,7 +1191,7 @@ var getCinnaResponse = function(data,callback){
         case 'purchase':
                 switch (data.action) {
                     case 'save':
-                        res = 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.';
+                        res = 'Awesome! I\'ve saved your item for you 😊 Use `view cart` to see your cart, `checkout` to checkout or `help` for more options.';
                         break;
                     case 'removeAll':
                         res = 'All items removed from your cart. To start a new search just chat me the item you\'re looking for';

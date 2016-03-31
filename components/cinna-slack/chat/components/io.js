@@ -47,7 +47,15 @@ var upload = require('../../../../IF_services/upload.js');
 
 
 var telegram = require('telegram-bot-api');
-var telegramToken = (process.env.NODE_ENV == 'development_alyx')  ?  '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ' : '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+
+var telegramToken;
+if (process.env.NODE_ENV == 'development_alyx'){
+    telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+}else if (process.env.NODE_ENV == 'development_mitsu'){
+    telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+}else{
+    telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
+}
 
 var tg = new telegram({
         token: telegramToken,
@@ -846,6 +854,10 @@ function searchBucket(data){
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
+        }else if (data.source.origin == 'socket.io'){
+            var searcher = {};
+            searcher.source = data.source;
+            sendTxtResponse(searcher,'Searching...');
         }
     }
 
@@ -1168,10 +1180,24 @@ var sendResponse = function(data){
     if (data.source && data.source.channel && data.source.origin == 'socket.io'){
         //check if socket user exists
         if (io.sockets.connected[data.source.channel]){
-            // console.log('io625: getting here')
+
             //loop through responses in order
             for (var i = 0; i < data.client_res.length; i++) {
-                io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+
+                    if (typeof data.client_res[i] === 'string'){
+                        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+                    }
+                    //item is an attachment object, send attachment
+                    else if (data.client_res[i] instanceof Array){
+
+                        for (var z = 0; z < data.client_res[i].length; z++) {
+                            io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i][z].thumb_url});
+                            io.sockets.connected[data.source.channel].emit("msgFromSever", {message: '<b>Please use Slack for "view cart"</b>: '+ data.client_res[i][z].text});
+                        }
+
+                    }else {
+                        io.sockets.connected[data.source.channel].emit("msgFromSever", {message: data.client_res[i]});
+                    }
             }
         }
         //---supervisor: relay search result previews back to supervisor---//
