@@ -5,6 +5,7 @@ var db = require('db');
 var co = require('co');
 var datejs = require('./date');
 var momenttz = require('moment-timezone');
+var weeklyUpdate = require('./weekly_updates');
 
 /*
 slackbot: slackbot_schema
@@ -192,8 +193,8 @@ function showSettings(response, convo) {
   co(function*() {
     var chatuser = yield db.Chatusers.findOne({id: convo.user_id});
     convo.chatuser = chatuser;
-    console.log(chatuser);
-    console.log(convo.slackbot)
+    // console.log(chatuser);
+    // console.log(convo.slackbot)
 
     var attachments = [];
 
@@ -309,6 +310,7 @@ function handleSettingsChange(response, convo) {
       convo.slackbot.meta.weekly_status_timezone = convo.chatuser.tz;
       console.log(convo.slackbot.meta);
       yield convo.slackbot.save();
+      yield weeklyUpdate.updateJob(convo.slackbot.team_id);
 
       convo.say('Ok I have updated your settings.')
       showSettings(response, convo);
