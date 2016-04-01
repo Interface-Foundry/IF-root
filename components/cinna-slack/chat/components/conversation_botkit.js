@@ -3,7 +3,7 @@ var botkit = require('botkit');
 var controller = botkit.slackbot();
 var db = require('db');
 var co = require('co');
-
+var datejs = require('./date');
 /*
 slackbot: slackbot_schema
 message: slack message { type: 'message',
@@ -264,10 +264,42 @@ function handleSettingsChange(response, convo) {
     //
     // Deal with the most complicated changes first, and finish up with the easy stuff
     //
-    if (response.text.toLowerCase().trim().match(/^(change|update) weekly (status|update)/)) {
-      // TODO
-      convo.say('Peter is working on this');
-      convo.next();
+    var change_weekly_regex = /^(change|update) weekly (status|update)/;
+    if (response.text.toLowerCase().trim().match(change_weekly_regex)) {
+      // make the text nice
+      var text = response.text.replace(/^(change|update) weekly (status|update)/, '').trim();
+      text = text.replace('days', 'day');
+      text = text.replace(/(to|every|\bat\b)/g, '');
+      text = text.trim();
+      // text = text.replace(/ [\d]+/)
+      console.log(text);
+      var date = Date.parse(text);
+      console.log(date);
+      var dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+      console.log(dayOfWeek)
+      var hour = date.getHours();
+
+      // if they type Tuesdays at 4 they probably mean 4 pm
+      if (hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
+        hour = hour + 12;
+      } else if (hour > 18 && !text.match(/(\bam\b|\bpm\b)/i)) {
+        hour = hour - 12;
+      }
+      var minute = date.getMinutes();
+      var am_pm = 'AM';
+      if (hour > 12) {
+        hour = hour - 12; // bc americans don't do 24 hour times.
+        am_pm = 'PM';
+      }
+
+      convo.slackbot.meta.weekly_status_day = dayOfWeek;
+      convo.slackbot.meta.weekly_status_time = hour + ':' + ('00' + minute).substr(-2) + ' ' + am_pm;
+      console.log(convo.slackbot.meta)
+      yield convo.slackbot.save();
+
+      convo.say('Ok I have updated your settings.')
+      showSettings(response, convo);
+      return convo.next();
     }
 
     switch (response.text.toLowerCase().trim()) {
@@ -314,8 +346,10 @@ function handleSettingsChange(response, convo) {
 
   }).catch(function(e) {
     console.log('error handling settings change')
-    console.log(resopnse)
+    console.log(response)
     console.log(e)
+    convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+    convo.next();
   })
 }
 
