@@ -51,6 +51,13 @@ var slackbotSchema = mongoose.Schema({
         weekly_status_time: {
           type: String,
           default: '4:00 PM'
+        },
+        weekly_status_timezone: {
+          type: String,
+          default: 'America/New_York'
+        },
+        city: {
+          type: String
         }
     },
 

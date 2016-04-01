@@ -4,6 +4,8 @@ var controller = botkit.slackbot();
 var db = require('db');
 var co = require('co');
 var datejs = require('./date');
+var momenttz = require('moment-timezone');
+
 /*
 slackbot: slackbot_schema
 message: slack message { type: 'message',
@@ -225,9 +227,19 @@ function showSettings(response, convo) {
       return convo.next();
     }
     if (convo.slackbot.meta.weekly_status_enabled) {
-      attachments.push({text: 'You are receiving weekly cart status updates every ' + convo.slackbot.meta.weekly_status_day + ' at ' + convo.slackbot.meta.weekly_status_time
+      // TODO convert time to the correct timezone for this user.
+      // 1. Date.parse() returns something in eastern, not the job's timezone
+      // 2. momenttz.tz('2016-04-01 HH:mm', meta.weekly_status_timezone) is the correct date for the job
+      // 3. .tz(chatuser.tz) will convert the above to the user's timezone. whew
+      var date = Date.parse(convo.slackbot.meta.weekly_status_day + ' ' + convo.slackbot.meta.weekly_status_time);
+      var job_time_eastern = momenttz.tz(date, 'America/New_York');
+      var job_time_bot_tz = momenttz.tz(job_time_eastern.format('YYYY-MM-DD HH:mm'), convo.slackbot.meta.weekly_status_timezone);
+      var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
+      console.log('job time in bot timezone', job_time_bot_tz.format())
+      console.log('job time in user timzone', job_time_user_tz.format())
+      attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a')
         + '\nYou can turn this off by saying `no weekly status`'
-        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 AM`'})
+        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
     } else {
       attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
     }
@@ -294,7 +306,8 @@ function handleSettingsChange(response, convo) {
 
       convo.slackbot.meta.weekly_status_day = dayOfWeek;
       convo.slackbot.meta.weekly_status_time = hour + ':' + ('00' + minute).substr(-2) + ' ' + am_pm;
-      console.log(convo.slackbot.meta)
+      convo.slackbot.meta.weekly_status_timezone = convo.chatuser.tz;
+      console.log(convo.slackbot.meta);
       yield convo.slackbot.save();
 
       convo.say('Ok I have updated your settings.')
