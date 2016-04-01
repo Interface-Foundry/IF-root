@@ -1,14 +1,17 @@
+/*eslint-env es6*/
 var db = require('db');
 var co = require('co');
 var cron = require('cron');
 var datejs = require('./date');
 var momenttz = require('moment-timezone');
+var botkit = require('botkit');
+var controller = botkit.slackbot();
 
 //
 // In-memory hash of jobs so we can stop and start them
-// According to the internet, cron jobs are commonly referred to as "jrbs"
+// According to the internet, cron jobs are commonly referred to as "jerbs"
 //
-var jrbs = {};
+var jerbs = {};
 
 //
 // Initialize the jobs for each team on server startup
@@ -47,14 +50,14 @@ var updateJob = module.exports.updateJob = function(team_id) {
     //
     // Stop the old jrb if it exists
     //
-    if (jrbs[team_id]) {
-      jrbs[team_id].stop();
+    if (jerbs[team_id]) {
+      jerbs[team_id].stop();
     }
 
     //
     // Start the new jrb!
     //
-    jrbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
+    jerbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
       console.log('starting weekly update for team ' + team_id + ' ' + slackbot.team_name);
     }, function() {
       console.log('just finished the weekly update thing for team ' + team_id + ' ' + slackbot.team_name);
