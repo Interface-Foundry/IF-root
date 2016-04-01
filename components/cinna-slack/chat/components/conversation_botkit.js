@@ -232,8 +232,8 @@ function showSettings(response, convo) {
       // 2. momenttz.tz('2016-04-01 HH:mm', meta.weekly_status_timezone) is the correct date for the job
       // 3. .tz(chatuser.tz) will convert the above to the user's timezone. whew
       var date = Date.parse(convo.slackbot.meta.weekly_status_day + ' ' + convo.slackbot.meta.weekly_status_time);
-      var job_time_eastern = momenttz.tz(date, 'America/New_York');
-      var job_time_bot_tz = momenttz.tz(job_time_eastern.format('YYYY-MM-DD HH:mm'), convo.slackbot.meta.weekly_status_timezone);
+      var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
+      var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), convo.slackbot.meta.weekly_status_timezone);
       var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
       console.log('job time in bot timezone', job_time_bot_tz.format())
       console.log('job time in user timzone', job_time_user_tz.format())
