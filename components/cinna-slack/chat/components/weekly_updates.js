@@ -39,7 +39,7 @@ var updateJob = module.exports.updateJob = function(team_id) {
     console.log('updating weekly job for team ' + team_id);
     var slackbot = yield db.Slackbots.findOne({
       team_id: team_id
-    }).select('meta team_name').exec();
+    }).exec();
 
     var date = Date.parse(slackbot.meta.weekly_status_day + ' ' + slackbot.meta.weekly_status_time);
     var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
@@ -59,6 +59,28 @@ var updateJob = module.exports.updateJob = function(team_id) {
     //
     jerbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
       console.log('starting weekly update for team ' + team_id + ' ' + slackbot.team_name);
+
+      var bot = controller.spawn({
+        token: slackbot.bot.bot_access_token
+      })
+
+      bot.startRTM(function(err, bot, payload) {
+        if (err) {
+          throw new Error('Could not connect to Slack');
+        }
+
+        slackbot.meta.office_assistants.map(function(assistant) {
+          bot.startPrivateConversation({user: assistant}, function(response, convo) {
+            // inject the slackbot into the convo so that we can save it in the db
+            convo.slackbot = slackbot;
+            convo.on('end', function() {
+              bot.closeRTM();
+            })
+            convo.say('Hi, this is your weekly update');
+            convo.next();
+          });
+        });
+      });
     }, function() {
       console.log('just finished the weekly update thing for team ' + team_id + ' ' + slackbot.team_name);
     },
