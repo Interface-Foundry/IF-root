@@ -1025,50 +1025,50 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                             var attachObj = {};
 
-                            var actionObj = [
-                                {
-                                  "name": "AddCart",
-                                  "text": ":thumbsup: Add to Cart",
-                                  "style": "primary",
-                                  "type": "button",
-                                  "value": "yes",
-                                  "confirm": {
-                                    "title": "Are you sure?",
-                                    "text": "This will approve the request.",
-                                    "ok_text": "Yes",
-                                    "dismiss_text": "No"
-                                  }
-                                },
-                                {
-                                  "name": "Buy",
-                                  "text": ":thumbsdown: Buy",
-                                  "style": "danger",
-                                  "type": "button",
-                                  "value": "no"
-                                },
-                                {
-                                  "name": "Similar",
-                                  "text": ":heart: Similar",
-                                  "style": "success",
-                                  "type": "button",
-                                  "value": "no"
-                                },
-                                {
-                                  "name": "Cheaper",
-                                  "text": ":money_with_wings: Cheaper",
-                                  "style": "default",
-                                  "type": "button",
-                                  "value": "no"
-                                },
-                                {
-                                  "name": "Moreinfo",
-                                  "text": ":thumbsdown: More Info",
-                                  "style": "success",
-                                  "type": "button",
-                                  "value": "no"
-                                }
-                            ];
-                            attachObj.actions = actionObj;
+                            // var actionObj = [
+                            //     {
+                            //       "name": "AddCart",
+                            //       "text": ":thumbsup: Add to Cart",
+                            //       "style": "primary",
+                            //       "type": "button",
+                            //       "value": "yes",
+                            //       "confirm": {
+                            //         "title": "Are you sure?",
+                            //         "text": "This will approve the request.",
+                            //         "ok_text": "Yes",
+                            //         "dismiss_text": "No"
+                            //       }
+                            //     },
+                            //     {
+                            //       "name": "Buy",
+                            //       "text": ":thumbsdown: Buy",
+                            //       "style": "danger",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     },
+                            //     {
+                            //       "name": "Similar",
+                            //       "text": ":heart: Similar",
+                            //       "style": "success",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     },
+                            //     {
+                            //       "name": "Cheaper",
+                            //       "text": ":money_with_wings: Cheaper",
+                            //       "style": "default",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     },
+                            //     {
+                            //       "name": "Moreinfo",
+                            //       "text": ":thumbsdown: More Info",
+                            //       "style": "success",
+                            //       "type": "button",
+                            //       "value": "no"
+                            //     }
+                            // ];
+                            // attachObj.actions = actionObj;
 
                             attachObj.image_url = urlArr[count];
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
@@ -1593,18 +1593,59 @@ var sendResponse = function(data){
                             username:'Kip',
                             attachments: attachThis
                         };
-                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {});
+                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
+                            callback();
+                        });
                     }
 
-                    // var msgData = {
-                    //   // attachments: [...],
-                    //     icon_url:'http://kipthis.com/img/kip-icon.png',
-                    //     username:'Kip'
-                    // };
-                    // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
-                    //     callback();
-                    // });
                 }, function done(){
+
+                    var attachThis = [
+                        {
+                          "text": "I would like six pens for my creation station please.",
+                          "fallback": "Pen request",
+                          "title": "Request approval",
+                          "callback_id": "approval_2700",
+                          "color": "#8A2BE2",
+                          "attachment_type": "default",
+                          "actions": [
+                            {
+                              "name": "approve3",
+                              "text": ":thumbsup: Approve",
+                              "style": "primary",
+                              "type": "button",
+                              "value": "yes",
+                              "confirm": {
+                                "title": "Are you sure?",
+                                "text": "This will approve the request.",
+                                "ok_text": "Yes",
+                                "dismiss_text": "No"
+                              }
+                            },
+                            {
+                              "name": "decline3",
+                              "text": ":thumbsdown: Decline",
+                              "style": "danger",
+                              "type": "button",
+                              "value": "no"
+                            }
+                          ]
+                        }
+                    ];
+                    
+
+                    attachThis = JSON.stringify(attachThis);
+
+                    var msgData = {
+                        icon_url:'http://kipthis.com/img/kip-icon.png',
+                        username:'Kip',
+                        attachments: attachThis
+                    };
+                    console.log('ASSADSAD ',msgData);
+                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
+
+                    });
+
                 });
 
             }
