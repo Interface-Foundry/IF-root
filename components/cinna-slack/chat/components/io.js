@@ -108,30 +108,30 @@ var initSlackUsers = function(env){
         // }];
 
         //CINNA-PEPPER
-        var testUser = [{
-            team_id:'T0H72FMNK',
-            dm:'D0H6X6TA8',
-            bot: {
-                bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
-            },
-            meta: {
-                initialized: false
-            }
-        }];
-
-        //KIP-PAPRIKA
         // var testUser = [{
-        //     team_id:'T02PN3B25',
+        //     team_id:'T0H72FMNK',
         //     dm:'D0H6X6TA8',
         //     bot: {
         //         bot_user_id: 'U0H6YHBNZ',
-        //         bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
+        //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
         //     },
         //     meta: {
         //         initialized: false
         //     }
         // }];
+
+        //KIP-PAPRIKA
+        var testUser = [{
+            team_id:'T02PN3B25',
+            dm:'D0H6X6TA8',
+            bot: {
+                bot_user_id: 'U0H6YHBNZ',
+                bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
+            },
+            meta: {
+                initialized: true
+            }
+        }];
 
 
         loadSlackUsers(testUser);
@@ -330,8 +330,8 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
-            console.log('🔥')
-            console.log(data);
+            // console.log('🔥')
+            // console.log(data);
 
             // don't talk to urself
             if (data.user === user.bot.bot_user_id) {
@@ -1022,55 +1022,55 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                     processData.getNumEmoji(data,count+1,function(emoji){
                         res[count] = res[count].trim();
                         if (data.source.origin == 'slack'){
+
                             var attachObj = {};
 
-
-                            // var actionObj = [
-                            //     {
-                            //       "name": "AddCart",
-                            //       "text": ":thumbsup: Add to Cart",
-                            //       "style": "primary",
-                            //       "type": "button",
-                            //       "value": "yes",
-                            //       "confirm": {
-                            //         "title": "Are you sure?",
-                            //         "text": "This will approve the request.",
-                            //         "ok_text": "Yes",
-                            //         "dismiss_text": "No"
-                            //       }
-                            //     },
-                            //     {
-                            //       "name": "Buy",
-                            //       "text": ":thumbsdown: Buy",
-                            //       "style": "danger",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     },
-                            //     {
-                            //       "name": "Similar",
-                            //       "text": ":heart: Similar",
-                            //       "style": "success",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     },
-                            //     {
-                            //       "name": "Cheaper",
-                            //       "text": ":money_with_wings: Cheaper",
-                            //       "style": "default",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     },
-                            //     {
-                            //       "name": "Moreinfo",
-                            //       "text": ":thumbsdown: More Info",
-                            //       "style": "success",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     }
-                            // ];
+                            var actionObj = [
+                                {
+                                  "name": "AddCart",
+                                  "text": ":thumbsup: Add to Cart",
+                                  "style": "primary",
+                                  "type": "button",
+                                  "value": "yes",
+                                  "confirm": {
+                                    "title": "Are you sure?",
+                                    "text": "This will approve the request.",
+                                    "ok_text": "Yes",
+                                    "dismiss_text": "No"
+                                  }
+                                },
+                                {
+                                  "name": "Buy",
+                                  "text": ":thumbsdown: Buy",
+                                  "style": "danger",
+                                  "type": "button",
+                                  "value": "no"
+                                },
+                                {
+                                  "name": "Similar",
+                                  "text": ":heart: Similar",
+                                  "style": "success",
+                                  "type": "button",
+                                  "value": "no"
+                                },
+                                {
+                                  "name": "Cheaper",
+                                  "text": ":money_with_wings: Cheaper",
+                                  "style": "default",
+                                  "type": "button",
+                                  "value": "no"
+                                },
+                                {
+                                  "name": "Moreinfo",
+                                  "text": ":thumbsdown: More Info",
+                                  "style": "success",
+                                  "type": "button",
+                                  "value": "no"
+                                }
+                            ];
+                            attachObj.actions = actionObj;
 
                             attachObj.image_url = urlArr[count];
-                            //attachObj.actions = actionObj;
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
                             attachObj.title_link = res[count];
                             attachObj.color = "#45a5f4";
@@ -1509,22 +1509,22 @@ var sendResponse = function(data){
                 attachments[0].image_url = attachThis[0]; //add image search results to attachment
                 attachments[0].fallback = 'More information'; //fallback for search result
 
-                // var actionObj = [
-                //     {
-                //       "name": "AddCart",
-                //       "text": ":thumbsup: Add to Cart",
-                //       "style": "primary",
-                //       "type": "button",
-                //       "value": "yes",
-                //       "confirm": {
-                //         "title": "Are you sure?",
-                //         "text": "This will approve the request.",
-                //         "ok_text": "Yes",
-                //         "dismiss_text": "No"
-                //       }
-                //     }
-                // ];
-                // attachments[0].actions = actionObj;
+                var actionObj = [
+                    {
+                      "name": "AddCart",
+                      "text": ":thumbsup: Add to Cart",
+                      "style": "primary",
+                      "type": "button",
+                      "value": "yes",
+                      "confirm": {
+                        "title": "Are you sure?",
+                        "text": "This will approve the request.",
+                        "ok_text": "Yes",
+                        "dismiss_text": "No"
+                      }
+                    }
+                ];
+                attachments[0].actions = actionObj;
 
                 attachThis.shift(); //remove image from array
 
