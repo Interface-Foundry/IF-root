@@ -3,7 +3,7 @@ var async = require('async');
 var request = require('request');
 var co = require('co')
 var _ = require('lodash')
-
+var fs = require('fs')
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
@@ -1240,29 +1240,43 @@ var sendResponse = function(data){
 
 
             async.eachSeries(attachThis, function(attach, callback) {
-                console.log('photo ',attach.photo);
-                console.log('message ',attach.message);
-                console.log('client_res', data.client_res)
-                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(buffer) {
+                // console.log('photo ',attach.photo);
+                // console.log('message ',attach.message);
+                // console.log('client_res', data.client_res)
+                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(uploaded) {
                      tg.sendMessage({
-                                chat_id: data.source.channel,
-                                text: attach.message,
-                                parse_mode: 'Markdown',
-                                disable_web_page_preview: 'true'
-
+                        chat_id: data.source.channel,
+                        text: attach.message,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: 'true'
                      }).then(function(datum){
                           tg.sendPhoto({
                             chat_id: encode_utf8(data.source.channel),
-                            photo: encode_utf8(buffer)
+                            photo: encode_utf8(uploaded.outputPath)
                             }).then(function(datum){
-                                // var field = {
-                                //     "value": attach,
-                                //     "short":false
-                                // }
-                                // attachments[1].fields.push(field);
+                                if (uploaded.outputPath) {     
+                                    fs.unlink(uploaded.outputPath, function(err, res) {
+                                        // if (err) console.log('fs error: ', err)
+                                    })
+                                }
+                                if (uploaded.inputPath) {
+                                    fs.unlink(uploaded.inputPath, function(err, res) {
+                                            // if (err) console.log('fs error: ', err)
+                                    })
+                                }
                                 callback();
                             }).catch(function(err){
                                 if (err) { console.log('ios.js1259: err',err) }
+                                if (uploaded.outputPath) {     
+                                    fs.unlink(outputPath, function(err, res) {
+                                        if (err) console.log('fs error: ', err)
+                                    })
+                                }
+                                if (uploaded.inputPath) {
+                                    fs.unlink(inputPath, function(err, res) {
+                                            if (err) console.log('fs error: ', err)
+                                    })
+                                }
                                 callback();
                             })
                         }).catch(function(err){

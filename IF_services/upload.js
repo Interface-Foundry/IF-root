@@ -20,7 +20,7 @@ var express = require('express'),
     Promise = require('bluebird');
 
 module.exports = {
-    uploadPicture: function(str, image, quality, bot) {
+    uploadPicture: function(str, image, quality, bot, cb) {
         var qual = quality ? quality : 100
         return new Promise(function(resolve, reject) {
             function convertBase64(image) {
@@ -68,24 +68,7 @@ module.exports = {
                                     //If bot boolean true, skip upload to AWS and resolve saved image, then delete
                                     if (bot) {
                                         // console.log('upload module 69: getting to if-->bot', outputPath,buffer,image)
-                                        return resolve(outputPath)
-                                        //  if (outputPath) {
-                                        //     // console.log('OUTPUT PATH: ', outputPath)
-                                        //     wait(function() {
-                                        //         fs.unlink(outputPath, function(err, res) {
-                                        //             if (err) console.log('fs error: ', err)
-                                        //         })
-                                        //     }, 10000);
-                                        // }
-                                        // if (inputPath) {
-                                        //     // console.log('INPUT PATH: ', inputPath)
-                                        //     wait(function() {
-                                        //         fs.unlink(inputPath, function(err, res) {
-                                        //             // if (err) console.log('fs error: ', err)
-                                        //         })
-                                        //     }, 10000);
-                                        // }
-                                        // return
+                                        return resolve({outputPath: outputPath, inputPath: inputPath})
                                     }
                                     console.log('upload.js. 90 should not be getting here/')
                                     var object_key = crypto.createHash('md5').update(str).digest('hex');
