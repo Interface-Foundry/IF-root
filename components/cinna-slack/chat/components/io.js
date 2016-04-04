@@ -1316,12 +1316,12 @@ var sendResponse = function(data){
              return
            }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
-              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : null)
+              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
                // console.log('formatted : ',formatted)
-               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(buffer) {
+               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
                  tg.sendPhoto({
                     chat_id: encode_utf8(data.source.channel),
-                    photo: encode_utf8(buffer)
+                    photo: encode_utf8(uploaded.outputPath)
                   }).then(function(datum){
                     tg.sendMessage({
                         chat_id: data.source.channel,
@@ -1329,6 +1329,16 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
+                    if (uploaded.outputPath) {     
+                        fs.unlink(uploaded.outputPath, function(err, res) {
+                            // if (err) console.log('fs error: ', err)
+                        })
+                    }
+                    if (uploaded.inputPath) {
+                        fs.unlink(uploaded.inputPath, function(err, res) {
+                                // if (err) console.log('fs error: ', err)
+                        })
+                    }
                   })
                 }).catch(function(err){
                     if (err) { console.log('ios.js1285: err',err) }
