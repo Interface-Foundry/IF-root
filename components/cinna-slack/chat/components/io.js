@@ -43,6 +43,7 @@ var supervisor = require('./supervisor');
 var cinnaEnv;
 // var BufferList = require('bufferlist').BufferList
 var upload = require('../../../../IF_services/upload.js');
+
 /////////// LOAD INCOMING ////////////////
 
 
@@ -330,7 +331,7 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
-            console.log('🔥')
+            console.log('🔥');
             console.log(data);
 
             // don't talk to urself
@@ -1230,8 +1231,6 @@ var sendResponse = function(data){
             //attachThis = JSON.stringify(attachThis);
 
             // console.log('attachthis ',attachThis);
-
-
 
             async.eachSeries(attachThis, function(attach, callback) {
                 console.log('photo ',attach.photo);

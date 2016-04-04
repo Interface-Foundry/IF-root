@@ -1,6 +1,8 @@
 var botkit = require('botkit')
 var controller = botkit.slackbot();
 var db = require('db')
+// var builder = require('botbuilder')
+// var dialog = require('./dialog')
 
 /*
 slackbot: slackbot_schema
@@ -16,6 +18,10 @@ module.exports.onboard = function(slackbot, user_id, done) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   })
+   // var microsoftBot = new builder.SlackBot(controller, bot);
+   //      microsoftBot.add('/', dialog);
+   //      microsoftBot.listenForMentions();
+
 
   bot.startRTM(function(err, bot, payload) {
     if (err) {
@@ -125,6 +131,10 @@ function askWhoManagesPurchases(response, convo) {
           token: slackbot.bot.bot_access_token
         })
 
+        // var microsoftBot = new builder.SlackBot(controller, bot);
+        // microsoftBot.add('/', index);
+        // microsoftBot.listenForMentions();
+
         bot.startRTM(function(err, bot, payload) {
           if (err) {
             throw new Error('Could not connect to Slack');
@@ -173,3 +183,5 @@ function askBudget(response, convo) {
 
   })
 }
+
+// module.exports = { builder: builder } 

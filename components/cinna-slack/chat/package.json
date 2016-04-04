@@ -15,7 +15,9 @@
   "dependencies": {
     "@slack/client": "^2.2.1",
     "WNdb": "^3.1.1",
+    "botbuilder": "^0.6.1",
     "botkit": "0.0.11",
+    "busboy": "^0.2.13",
     "co": "^4.6.0",
     "es6-promise": "^3.0.2",
     "extend": "^3.0.0",

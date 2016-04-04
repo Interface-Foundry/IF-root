@@ -40,6 +40,26 @@
 var http = require('http');
 var request = require('request');
 var async = require('async');
+var skype = require('./skype-sdk');
+var builder = require('botbuilder');
+
+
+// Initialize the BotService
+var botService = new skype.BotService({
+    messaging: {
+        botId: "28:kip",
+        serverUrl : "https://apis.skype.com",
+        requestTimeout : 15000,
+        appId: 'kip',
+        appSecret: 'ac55e0b47d0e4e939aab4bbe44ea942a'
+    }
+});
+
+// Create bot and add dialogs
+var bot = new builder.SkypeBot(botService);
+bot.add('/', function (session) {
+   session.send('Hello World'); 
+});
 
 //set env vars
 var config = require('config');
@@ -60,6 +80,7 @@ app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function (req, res) {
   res.send('💬 🌏')
 })
+
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
   console.log('chat app listening on port 8000 🌏 💬')
@@ -88,4 +109,6 @@ app.get('/slackaction', function(req, res) {
 app.get('/kikincoming', function(req, res) {
     // ioKip.newSlack();
 });
+
+app.post('https://cc91ceca.ngrok.io/v1/chat', skype.messagingHandler(botService));
 

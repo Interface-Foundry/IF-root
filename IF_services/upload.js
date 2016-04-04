@@ -67,7 +67,7 @@ module.exports = {
                                 fs.readFile(outputPath, function(err, buffer) {
                                     //If bot boolean true, skip upload to AWS and resolve saved image, then delete
                                     if (bot) {
-                                        // console.log('upload module 69: getting to if-->bot', outputPath,buffer,image)
+                                        console.log('upload module 69: getting to if-->bot', outputPath,buffer,image)
                                         return resolve(outputPath)
                                         //  if (outputPath) {
                                         //     // console.log('OUTPUT PATH: ', outputPath)
@@ -86,6 +86,23 @@ module.exports = {
                                         //     }, 10000);
                                         // }
                                         // return
+                                         if (outputPath) {
+                                                // console.log('OUTPUT PATH: ', outputPath)
+                                                wait(function() {
+                                                    fs.unlink(outputPath, function(err, res) {
+                                                        if (err) console.log('fs error: ', err)
+                                                    })
+                                                }, 10000);
+                                            }
+                                            if (inputPath) {
+                                                // console.log('INPUT PATH: ', inputPath)
+                                                wait(function() {
+                                                    fs.unlink(inputPath, function(err, res) {
+                                                        // if (err) console.log('fs error: ', err)
+                                                    })
+                                                }, 10000);
+                                            }
+
                                     }
                                     console.log('upload.js. 90 should not be getting here/')
                                     var object_key = crypto.createHash('md5').update(str).digest('hex');
