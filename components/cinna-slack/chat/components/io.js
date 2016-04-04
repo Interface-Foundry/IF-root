@@ -66,6 +66,12 @@ var tg = new telegram({
 
 tg.on('message', function(msg){
 
+    //if user sends sticker msg.msg will be undefined
+    if (msg.sticker) {
+        console.log('Telegram message is a sticker: ',msg)
+        return
+    }
+
     var newTg = {
         source: {
             'origin':'telegram',
@@ -1256,12 +1262,12 @@ var sendResponse = function(data){
                                 // attachments[1].fields.push(field);
                                 callback();
                             }).catch(function(err){
-                                if (err) { console.log('ios.js1285: err',err) }
+                                if (err) { console.log('ios.js1259: err',err) }
                                 callback();
                             })
                         }).catch(function(err){
                             if (err) {
-                                // console.log('\n\n\ntg.sendPhoto error: ',err)
+                                console.log('ios.js1264: err',err)
                             }
                             callback();
                         })
