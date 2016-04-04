@@ -40,6 +40,9 @@ module.exports.basic = function basic(url, callback) {
     //remove referral info just in case
     url = url.replace('%26tag%3Dbubboorev-20','');
     url = url.replace('%26tag%3Dkrista08-20','');
+    url = url.replace('%26tag%3Dkrista03-20','');
+
+
 
     // check cache
     cache.get(url, function(err, product) {
