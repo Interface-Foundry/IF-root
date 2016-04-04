@@ -336,8 +336,8 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
-            console.log('🔥')
-            console.log(data);
+            // console.log('🔥')
+            // console.log(data);
 
             // don't talk to urself
             if (data.user === user.bot.bot_user_id) {
