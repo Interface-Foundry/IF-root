@@ -40,6 +40,9 @@ module.exports.basic = function basic(url, callback) {
     //remove referral info just in case
     url = url.replace('%26tag%3Dbubboorev-20','');
     url = url.replace('%26tag%3Dkrista08-20','');
+    url = url.replace('%26tag%3Dkrista03-20','');
+
+
 
     // check cache
     cache.get(url, function(err, product) {
@@ -53,26 +56,34 @@ module.exports.basic = function basic(url, callback) {
 
       debug('miss cache for url ' + url)
 
-      //add request headers
-      var options = {
-          url: url,
-          headers: {
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-              //'Accept-Encoding':'gzip, deflate, sdch',
-              'Accept-Language':'en-US,en;q=0.8',
-              'Cache-Control':'no-cache',
-              'Connection':'keep-alive',
-              'Cookie': 'x-wl-uid=1pueisgHxMYKWT0rswq5JqfnPdFseLZ/OxR7UupM9FY0RLpoyRkASv5p0aqDde7UxdAH0ye/4HGk=; ubid-main=184-9837454-1099037; session-id-time=2082787201l; session-id=189-6797902-2253123',
-              'Host':'www.amazon.com',
-              'Origin':'http://www.amazon.com',
-              'Pragma':'no-cache',
-              'Upgrade-Insecure-Requests':'1',
-              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
-              'Referer':url
-          }
-      };
+      //PROXY SERVICE STUFF
+      var user = 'alyx';
+      var password = '9fSvNH@aB4Hs2s>qcatsoupkanyecandle';
+      var hostArr = ['us-dc.proxymesh.com','us-fl.proxymesh.com']; //avail proxies
+      var host = hostArr[Math.floor(Math.random()*hostArr.length)]; //get random host from array
+      var port = '31280';
+      var proxyUrl = "http://" + user + ":" + password + "@" + host + ":" + port;
 
-      request(options, function(err, response, body) {
+      var proxiedRequest = request.defaults({
+        proxy: proxyUrl,
+        headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            //'Accept-Encoding':'gzip, deflate, sdch',
+            'Accept-Language':'en-US,en;q=0.8',
+            'Avail-Dictionary':'qHs1hh9Q',
+            'Cache-Control':'max-age=0',
+            'Connection':'keep-alive',
+            'Cookie': 'x-wl-uid=1QzHcFaAi0nVvunUqsj2QM0aovhwKKa4/z/21QI5ffBtLYVQLyjBJO3g1oE2VXPT9NoEbSMLVwys=; session-token=Gm7LWvhq6XEXLZeKKU42xgF4vP+qspqT1cuuZtgDHBkJJlA3nVQgKQEiHCqTz3i+yy+0wmGd2gTa1mVMwTZlMxlSa2kFxTqaLyMVxw6BKlniNKztf8KYMpxDWuYQdF77DmOJaaWTtl6BbgNhSIQOqVbygqWy1T5JC0iIS6E6Rp0mum33Q3HTTTGo4u+5kmPAbUUDlhGXTmR5EA9d6ygJrFPZAOg+DhSKk1KukwwVmTkSPNGwnOM2bRin7ccXTbiG; csm-hit=03RP10K71JQAZRCBH9VN+s-03RP10K71JQAZRCBH9VN|1459801392100; ubid-main=181-9413107-8193525; session-id-time=2082787201l; session-id=187-3438060-7120357',
+            'Host':'www.amazon.com',
+            'Origin':'http://www.amazon.com',
+            //'Pragma':'no-cache',
+            'Upgrade-Insecure-Requests':'1',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36',
+            'Referer':url
+        }
+      });
+
+      proxiedRequest.get(url, function(err, response, body) {
         if (kip.error(err)) {
           console.error('error amazon get url ' + url)
           callback(err);

@@ -10,9 +10,9 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 //   awsTag: "bubboorev-20"
 // });
 var client = amazon.createClient({
-  awsId: "AKIAIYTURL6C5PID2GZA",
-  awsSecret: "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",
-  awsTag: "krista08-20"
+  awsId: "AKIAIM4IKQAE2WF4MJUQ",
+  awsSecret: "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",
+  awsTag: "krista03-20"
 });
 
 var getCartLink = require('./process').getCartLink;
@@ -29,6 +29,16 @@ module.exports = {};
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log(item)
+
+  // Handle the case where the search api returns items that we can't add to cart
+  var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
+  if (total_offers === 0) {
+    // This item is not available.  According to the amazon documentation, the search
+    // api can and will return items that you cannot buy.  So we have to just
+    // ignore these things.
+    // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
+    return Promise.reject('Item not available');
+  }
 
   return co(function*() {
     var cart = yield getCart(slack_id);

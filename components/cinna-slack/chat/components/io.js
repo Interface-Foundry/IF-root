@@ -3,7 +3,7 @@ var async = require('async');
 var request = require('request');
 var co = require('co')
 var _ = require('lodash')
-
+var fs = require('fs')
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
@@ -65,6 +65,12 @@ var tg = new telegram({
 });
 
 tg.on('message', function(msg){
+
+    //if user sends sticker msg.msg will be undefined
+    if (msg.sticker) {
+        console.log('Telegram message is a sticker: ',msg)
+        return
+    }
 
     var newTg = {
         source: {
@@ -1234,34 +1240,48 @@ var sendResponse = function(data){
 
 
             async.eachSeries(attachThis, function(attach, callback) {
-                console.log('photo ',attach.photo);
-                console.log('message ',attach.message);
-                console.log('client_res', data.client_res)
-                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(buffer) {
+                // console.log('photo ',attach.photo);
+                // console.log('message ',attach.message);
+                // console.log('client_res', data.client_res)
+                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(uploaded) {
                      tg.sendMessage({
-                                chat_id: data.source.channel,
-                                text: attach.message,
-                                parse_mode: 'Markdown',
-                                disable_web_page_preview: 'true'
-
+                        chat_id: data.source.channel,
+                        text: attach.message,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: 'true'
                      }).then(function(datum){
                           tg.sendPhoto({
                             chat_id: encode_utf8(data.source.channel),
-                            photo: encode_utf8(buffer)
+                            photo: encode_utf8(uploaded.outputPath)
                             }).then(function(datum){
-                                // var field = {
-                                //     "value": attach,
-                                //     "short":false
-                                // }
-                                // attachments[1].fields.push(field);
+                                if (uploaded.outputPath) {     
+                                    fs.unlink(uploaded.outputPath, function(err, res) {
+                                        // if (err) console.log('fs error: ', err)
+                                    })
+                                }
+                                if (uploaded.inputPath) {
+                                    fs.unlink(uploaded.inputPath, function(err, res) {
+                                            // if (err) console.log('fs error: ', err)
+                                    })
+                                }
                                 callback();
                             }).catch(function(err){
-                                if (err) { console.log('ios.js1285: err',err) }
+                                if (err) { console.log('ios.js1259: err',err) }
+                                if (uploaded.outputPath) {     
+                                    fs.unlink(outputPath, function(err, res) {
+                                        if (err) console.log('fs error: ', err)
+                                    })
+                                }
+                                if (uploaded.inputPath) {
+                                    fs.unlink(inputPath, function(err, res) {
+                                            if (err) console.log('fs error: ', err)
+                                    })
+                                }
                                 callback();
                             })
                         }).catch(function(err){
                             if (err) {
-                                // console.log('\n\n\ntg.sendPhoto error: ',err)
+                                console.log('ios.js1264: err',err)
                             }
                             callback();
                         })
@@ -1296,12 +1316,12 @@ var sendResponse = function(data){
              return
            }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
-              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : null)
+              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
                // console.log('formatted : ',formatted)
-               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(buffer) {
+               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
                  tg.sendPhoto({
                     chat_id: encode_utf8(data.source.channel),
-                    photo: encode_utf8(buffer)
+                    photo: encode_utf8(uploaded.outputPath)
                   }).then(function(datum){
                     tg.sendMessage({
                         chat_id: data.source.channel,
@@ -1309,6 +1329,16 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
+                    if (uploaded.outputPath) {     
+                        fs.unlink(uploaded.outputPath, function(err, res) {
+                            // if (err) console.log('fs error: ', err)
+                        })
+                    }
+                    if (uploaded.inputPath) {
+                        fs.unlink(uploaded.inputPath, function(err, res) {
+                                // if (err) console.log('fs error: ', err)
+                        })
+                    }
                   })
                 }).catch(function(err){
                     if (err) { console.log('ios.js1285: err',err) }
@@ -1732,35 +1762,43 @@ var saveToCart = function(data){
 
             // co lets us use "yield" to with promises to untangle async shit
             co(function*() {
+              var cart;
               for (var index = 0; index < data.searchSelect.length; index++) {
                   var searchSelect = data.searchSelect[index];
                   console.log('adding searchSelect ' + searchSelect);
                   if (item.recallHistory && item.recallHistory.amazon){
                       messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
-                      yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
+                        .catch(function(reason) {
+                          // could not add item to cart, make kip say something nice
+                          console.log(reason);
+                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        })
                   } else {
                       messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                      yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
+                        .catch(function(reason) {
+                          // could not add item to cart, make kip say something nice
+                          console.log(reason);
+                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        })
                   }
               }
-
-              console.log('retrieving cart')
-              var cart = yield kipcart.getCart(data.source.org);
-              console.log(cart);
 
               // data.client_res = ['<' + cart.link + '|» View Cart>']
               // outgoingResponse(data, 'txt');
 
               // View cart after adding item TODO doesn't display for some reason
               // Even after adding in 500 ms which solves any amazon rate limiting problems
-              setTimeout(function() {
-                viewCart(data, true);
-              }, 500)
+              if (cart) {
+                setTimeout(function() {
+                  viewCart(data, true);
+                }, 500)
+              }
 
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
-                return;
                 sendTxtResponse(data, err);
 
                 //send email about this issue
