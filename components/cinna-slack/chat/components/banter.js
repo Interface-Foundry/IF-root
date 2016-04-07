@@ -813,7 +813,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'top kek':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'skype'){
                 res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
@@ -1131,7 +1131,7 @@ var getCinnaResponse = function(data,callback){
         case 'search':
             switch (data.action) {
                 case 'initial':
-                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'  || data.source.origin == 'skype'){
                         if (data.imageTags){
                             res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
                         }

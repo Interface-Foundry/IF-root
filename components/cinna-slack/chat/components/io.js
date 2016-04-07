@@ -110,8 +110,6 @@ dialog.on('Search', [
     function (session, args, next) {
         session.userData.io.bucket = 'search'
         session.userData.io.action = 'initial'
-       
-        // session.message.to.text
         console.log('Action Search: ', session.userData)
         var object = builder.EntityRecognizer.findEntity(args.entities, 'object');
         if (!object) {
@@ -128,23 +126,19 @@ dialog.on('Search', [
             session.userData.io.msg = object.entity
             session.userData.io.tokens = [object.entity]
              skypeSession = session;
-            // Pass object to next step.
             next({ response: object.entity });
         }
     },
     function (session, results) {
-        console.log('You searched for: ',results.response)
+        console.log('LUIS yielded: ',results.response)
         if (results.response) {
             if (!session.userData.objects) {
                 session.userData.objects = [results.response];
             } else {
                 session.userData.objects.push(results.response);
             }
-            // session.sendMessage(prompts.objectFound, { object: results.response });
              preProcess(session.userData.io)
         } else {
-            console.log('ufwiuahuihewiusgiu')
-             preProcess(session.userData.io)
             session.sendMessage(prompts.canceled);
         }
     }
@@ -154,42 +148,44 @@ dialog.on('Search', [
 dialog.on('Modify', [
     function (session, args, next) {
         console.log('Action Modify: ', session.userData)
+        session.userData.io.msg = session.message.text;
+        session.userData.io.bucket = 'search';
+        session.userData.io.action = 'modify';
+        session.userData.io.tokens = [session.message.text];
         var modifier = builder.EntityRecognizer.findEntity(args.entities, 'modifier');
         var object = builder.EntityRecognizer.findEntity(args.entities, 'object');
         if (!object && !session.userData.objects) {
-            // console.log(1)
+             console.log('Intent - Modify: LUIS did not find object')
+             session.userData.io.msg = session.message.text
             // Prompt user to enter a product
-            builder.Prompts.text(session, prompts.objectMissing);    
-        } 
-        if (!modifier) {
-            // console.log(2)
-            // Prompt user to enter a product
-            builder.Prompts.text(session, prompts.modifierMissing);    
-        } 
-        if(!object) {
+            // builder.Prompts.text(session, prompts.objectMissing);    
+        } else if (session.userData.objects && session.userData.objects.length > 0) {
             object = {} 
             object.entity = session.userData.objects[session.userData.objects.length-1]
         }
-        // Pass object to next step.
+        if (modifier) {
+             session.userData.io.dataModify = {
+                    type:'genericDetail',
+                    val:[modifier]
+              };
+        }  else {
+          console.log('Intent - Search: LUIS did not find a modifier.')
+          return
+        }
+        skypeSession = session;
         next({ response: {object: object.entity, modifier: modifier.entity}});
-            
     },
     function (session, results) {
-        // console.log('Next stage of modifier: ',results.response)
+        console.log('LUIS yielded: ',results.response)
         if (results.response) {
-            if (!session.userData.modifiers) {
-                session.userData.modifiers = [results.response.modifier];
-            } else {
-                session.userData.modifiers.push(results.response.modifier);
-            }
             if (!session.userData.objects) {
                 session.userData.objects = [results.response.object];
             } else {
                 session.userData.objects.push(results.response.object);
             }
-            session.send(prompts.modifySuccess, { object: results.response.object, modifier: results.response.modifier  });
+             preProcess(session.userData.io)
         } else {
-            session.send(prompts.canceled);
+            session.sendMessage(prompts.canceled);
         }
     }
 ]);
@@ -197,10 +193,16 @@ dialog.on('Modify', [
 dialog.on('Focus', [
     function (session, args, next) {
         console.log('Action Focus: ', session.userData)
+        session.userData.io.msg = session.message.text;
+        session.userData.io.bucket = 'search';
+        session.userData.io.action = 'focus';
+        session.userData.io.tokens = [session.message.text];
         var number= builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
         if (!number) {
+            var number = {}
+            number.entity = session.message.text;
             // Prompt user to enter a choice
-            builder.Prompts.text(session, prompts.focusMissing);    
+            // builder.Prompts.text(session, prompts.focusMissing);    
         } else {
             // Pass number to next step.
             next({ response: number.entity });
@@ -208,8 +210,12 @@ dialog.on('Focus', [
     },
     function (session, results) {
         if (results.response) {
-            console.log('You chose to focus on: ',results.response)
+             skypeSession = session;
+             preProcess(session.userData.io)
+        } else {
+            session.sendMessage(prompts.canceled);
         }
+
     }
 ]);
 
@@ -729,7 +735,7 @@ function preProcess(data){
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
     }
-    if (!messageHistory[data.source.id]){ //new user, set up chat states
+    if (!messageHistory[data.source.id]) { //new user, set up chat states
         messageHistory[data.source.id] = {};
         messageHistory[data.source.id].search = []; //random chats
         messageHistory[data.source.id].banter = []; //search
@@ -1395,7 +1401,6 @@ var sendResponse = function(data){
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
 
-
             //remove first message from res arr
             var attachThis = data.client_res;
             attachThis.shift();
@@ -1661,13 +1666,12 @@ var sendResponse = function(data){
     // Skype Outgoing
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'skype'){
-        console.log('Skype data: ',data)
+        console.log('Skype data: ',data.action)
         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
-
+            console.log('INITIAL DATA : ', JSON.stringify(data))
             var message = data.client_res[0]; //use first item in client_res array as text message
-            skypeSession.send(message)
+            skypeSession.send(message);
             console.log('attachthis ',message);
-
 
             //remove first message from res arr
             var attachThis = data.client_res;
@@ -1678,11 +1682,12 @@ var sendResponse = function(data){
             // console.log('attachthis ',attachThis);
 
             async.eachSeries(attachThis, function(attach, callback) {
-                console.log('photo ',attach.photo);
+                console.log('photo',attach.photo);
                 console.log('message ',attach.message);
                 console.log('client_res', data.client_res)
-                skypeSession.send(attach.message)
-                //  upload.uploadPicture('skype', attach.photo, 100, true).then(function(buffer) {
+                skypeSession.send(attach.message + '\n' + attach.photo)
+                // skypeSession.send()
+                callback()
                 //      tg.sendMessage({
                 //                 chat_id: data.source.channel,
                 //                 text: attach.message,
@@ -1729,6 +1734,10 @@ var sendResponse = function(data){
 
         }
         else if (data.action == 'focus'){
+            if (data.client_res[0]) {
+                 skypeSession.send(data.client_res[0])
+            }
+
 
                // console.log('client_res', data.client_res)
 
@@ -1893,8 +1902,10 @@ var sendResponse = function(data){
 
         }
         else {
-            console.log('***',skypeSession)
-            skypeSession.send('YOLOOOOO')
+            console.log('Hitting Skype ELSE')
+            if (data.client_res[0]) {
+                 skypeSession.send(data.client_res[0])
+            }
             //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
             // //loop through responses in order
             // async.eachSeries(data.client_res, function(message, callback) {
