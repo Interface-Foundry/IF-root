@@ -42,24 +42,60 @@ var request = require('request');
 var async = require('async');
 var skype = require('./skype-sdk');
 var builder = require('botbuilder');
+var dialog = require('./components/io').dialog;
 
 
 // Initialize the BotService
 var botService = new skype.BotService({
     messaging: {
-        botId: "28:kip",
+        botId: "28:DbvPeqOxe3ChrhwcMZbLLS7",
         serverUrl : "https://apis.skype.com",
         requestTimeout : 15000,
-        appId: 'kip',
-        appSecret: 'ac55e0b47d0e4e939aab4bbe44ea942a'
+        appId: '8bd4c38f-10a9-4ebe-a34d-d2f6f57789e6',
+        appSecret: 'DbvPeqOxe3ChrhwcMZbLLS7'
     }
 });
 
 // Create bot and add dialogs
 var bot = new builder.SkypeBot(botService);
-bot.add('/', function (session) {
-   session.send('Hello World'); 
+
+// Install First Run middleware and dialog
+bot.use(function (session, next) {
+    if (!session.userData.firstRun) {
+        console.log('session: ',session)
+        session.userData.firstRun = true;
+        session.userData.io = {
+            source: {
+                'origin':'skype',
+                'channel':session.message.from.address.toString(),
+                'org':'skype',
+                'id':'skype' + "_" + session.message.from.address.toString() //for retrieving chat history in node memory,
+            },
+            'msg': session.message.text
+        }
+        session.replaceDialog('/'); 
+    } else {
+        session.replaceDialog('/'); 
+    }
 });
+
+bot.add('/', dialog);
+
+// bot.add('/firstRun', [
+//     function (session) {
+//         builder.Prompts.text(session, "Hello... What's your name?");
+//     },
+//     function (session, results) {
+//         // We'll save the prompts result and return control to main through
+//         // a call to replaceDialog(). We need to use replaceDialog() because
+//         // we intercepted the original call to main and we want to remove the
+//         // /firstRun dialog from the callstack. If we called endDialog() here
+//         // the conversation would end since the /firstRun dialog is the only 
+//         // dialog on the stack.
+//         session.userData.name = results.response;
+//         session.replaceDialog('/'); 
+//     }
+// ]);
 
 //set env vars
 var config = require('config');
@@ -110,5 +146,5 @@ app.get('/kikincoming', function(req, res) {
     // ioKip.newSlack();
 });
 
-app.post('https://cc91ceca.ngrok.io/v1/chat', skype.messagingHandler(botService));
+app.post('/skype', skype.messagingHandler(botService));
 

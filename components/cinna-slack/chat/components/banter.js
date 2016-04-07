@@ -158,7 +158,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'wtv') > 90:
         case textSimilar(input,'whatever') > 60:
             flag = 'basic'; //do this action
-            if (origin == 'slack' || data.source.origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'skype'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -603,7 +603,7 @@ var checkForCanned = function(input,callback,origin) {
         case textSimilar(input,'wut') > 70:
         case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'skype'){
                 res = 'I\'m Kip, your personal shopper.\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -813,7 +813,7 @@ var checkForCanned = function(input,callback,origin) {
 
         case 'top kek':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'telegram'){
                 res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
@@ -1042,7 +1042,7 @@ var checkForCanned = function(input,callback,origin) {
         case '9':
         case '0':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'skype'){
                 res = 'I\'m not very smart, did you mean :one:, :two: or :three:?';
             }
             else if (origin = 'socket.io'){

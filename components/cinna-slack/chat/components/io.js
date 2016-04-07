@@ -41,8 +41,16 @@ var messageHistory = {}; //fake database, stores all users and their chat histor
 var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
-// var BufferList = require('bufferlist').BufferList
 var upload = require('../../../../IF_services/upload.js');
+
+//---skype stuff---//
+var builder = require('botbuilder');
+var prompts = require('../skype_bot/prompts');
+var model = process.env.model || 'https://api.projectoxford.ai/luis/v1/application?id=529c8e29-06fe-4342-8bed-59d07b4216f6&subscription-key=f1e70f11452b4b53b73473d3dbb487c4';
+var dialog = new builder.LuisDialog(model);
+//-----------------//
+
+
 
 /////////// LOAD INCOMING ////////////////
 
@@ -86,7 +94,165 @@ tg.on('message', function(msg){
     }
 });
 
+//------------------------------------Skype stuff----------------------------------------//
 
+
+//Creating var to hold session so we can use session.send in other functions such as sendResponse further
+var skypeSession;
+
+dialog.on('Search', [
+    function (session, args, next) {
+        session.userData.io.bucket = 'search'
+        session.userData.io.action = 'initial'
+       
+        // session.message.to.text
+        console.log('Action Search: ', session.userData)
+        var object = builder.EntityRecognizer.findEntity(args.entities, 'object');
+        if (!object) {
+            console.log('Intent - Search: LUIS did not find object')
+             session.userData.io.msg = session.message.text
+             session.userData.io.tokens = [session.message.text]
+             skypeSession = session;
+            next({ response: session.message.text});
+            // Prompt user to enter a product
+            // builder.Prompts.text(session, prompts.objectMissing);    
+        } else {
+            console.log('Intent - Search: LUIS found an object: ',object)
+            session.userData.io.msg = object.entity
+            session.userData.io.msg = object.entity
+            session.userData.io.tokens = [object.entity]
+             skypeSession = session;
+            // Pass object to next step.
+            next({ response: object.entity });
+        }
+    },
+    function (session, results) {
+        console.log('You searched for: ',results.response)
+        if (results.response) {
+            if (!session.userData.objects) {
+                session.userData.objects = [results.response];
+            } else {
+                session.userData.objects.push(results.response);
+            }
+            // session.sendMessage(prompts.objectFound, { object: results.response });
+             preProcess(session.userData.io)
+        } else {
+            console.log('ufwiuahuihewiusgiu')
+             preProcess(session.userData.io)
+            session.sendMessage(prompts.canceled);
+        }
+    }
+]);
+
+//Drop to modify action
+dialog.on('Modify', [
+    function (session, args, next) {
+        console.log('Action Modify: ', session.userData)
+        var modifier = builder.EntityRecognizer.findEntity(args.entities, 'modifier');
+        var object = builder.EntityRecognizer.findEntity(args.entities, 'object');
+        if (!object && !session.userData.objects) {
+            // console.log(1)
+            // Prompt user to enter a product
+            builder.Prompts.text(session, prompts.objectMissing);    
+        } 
+        if (!modifier) {
+            // console.log(2)
+            // Prompt user to enter a product
+            builder.Prompts.text(session, prompts.modifierMissing);    
+        } 
+        if(!object) {
+            object = {} 
+            object.entity = session.userData.objects[session.userData.objects.length-1]
+        }
+        // Pass object to next step.
+        next({ response: {object: object.entity, modifier: modifier.entity}});
+            
+    },
+    function (session, results) {
+        // console.log('Next stage of modifier: ',results.response)
+        if (results.response) {
+            if (!session.userData.modifiers) {
+                session.userData.modifiers = [results.response.modifier];
+            } else {
+                session.userData.modifiers.push(results.response.modifier);
+            }
+            if (!session.userData.objects) {
+                session.userData.objects = [results.response.object];
+            } else {
+                session.userData.objects.push(results.response.object);
+            }
+            session.send(prompts.modifySuccess, { object: results.response.object, modifier: results.response.modifier  });
+        } else {
+            session.send(prompts.canceled);
+        }
+    }
+]);
+
+dialog.on('Focus', [
+    function (session, args, next) {
+        console.log('Action Focus: ', session.userData)
+        var number= builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        if (!number) {
+            // Prompt user to enter a choice
+            builder.Prompts.text(session, prompts.focusMissing);    
+        } else {
+            // Pass number to next step.
+            next({ response: number.entity });
+        }
+    },
+    function (session, results) {
+        if (results.response) {
+            console.log('You chose to focus on: ',results.response)
+        }
+    }
+]);
+
+dialog.on('Save', [
+    function (session, args, next) {
+        // See if got the tasks title from our LUIS model.
+        console.log('Action Save: ', session.userData, args.entities)
+        var number = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        if (!number) {
+            // Prompt user to enter a product
+            builder.Prompts.text(session, prompts.saveMissing);    
+        } else {
+            next({ response: number.entity });
+        }
+    },
+    function (session, results) {
+        console.log('You added: ',results.response, ' to cart.')
+        if (results.response) {
+            if (!session.userData.cart) {
+                session.userData.cart = [results.response];
+            } else {
+                session.userData.cart.push(results.response);
+            }
+            session.send(prompts.saveSuccess, { object: results.response });
+        } else {
+            session.send(prompts.canceled);
+        }
+    }
+]);
+
+dialog.on('Checkout', [
+    function (session, results) {
+        console.log('Action Checkout: ', session.userData)
+        if (!session.userData.cart || (session.userData.cart && session.userData.cart.length == 0)) {
+            session.send(prompts.cartEmpty);
+        } else {
+            session.send(prompts.checkoutSuccessful, { object: results.response });
+        }
+    }
+]);
+
+dialog.onDefault(
+    function (session, results) {
+        console.log('Default Reponse: ', session.userData)
+        builder.DialogAction.send("Oops sorry, I didn\'t understand your request")
+        // session.send(prompts.defaultResponse);
+});
+
+//----------------------------------------------------------------------------------//
 
 //get stored slack users from mongo
 var initSlackUsers = function(env){
@@ -162,7 +328,7 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
-    }else{
+    } else {
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
         Slackbots.find().exec(function(err, users) {
             if(err && process.env.NODE_ENV === 'production'){
@@ -622,8 +788,10 @@ function preProcess(data){
             }
         }
         //proceed to NLP instead
-        else {
+        else if (data.source.origin !== 'skype'){
             routeNLP(data);
+        } else {
+            incomingAction(data)
         }
     },data.source.origin);
 
@@ -695,13 +863,11 @@ function routeNLP(data){
                     }
                     else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
                         //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
-
                         //looking for modifier search
                         if (res.tokens && res.tokens[0].indexOf('but') > -1){
                             var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
                             modDetail = modDetail.replace('but','').trim();
                             console.log('mod string ',modDetail);
-
                             data.tokens = res.tokens;
                             data.searchSelect = res.searchSelect;
                             data.bucket = 'search';
@@ -886,7 +1052,6 @@ function searchBucket(data){
             break;
         case 'modify':
         case 'modified': //because the nlp json is wack
-
             //fix NLP bug
             if (data.dataModify && data.dataModify.val && Array.isArray(data.dataModify.val)){
                 if (data.dataModify.val[0] == 'cheeper' || data.dataModify.val[0] == 'cheper' || data.dataModify.val[0] == 'chiper' || data.dataModify.val[0] == 'chaper' || data.dataModify.val[0] == 'chaeper'){
@@ -1460,6 +1625,269 @@ var sendResponse = function(data){
         }
 
     }
+
+    //* * * * * * * *
+    // Skype Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'skype'){
+        console.log('Skype data: ',data)
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
+            var message = data.client_res[0]; //use first item in client_res array as text message
+            skypeSession.send(message)
+            console.log('attachthis ',message);
+
+
+            //remove first message from res arr
+            var attachThis = data.client_res;
+            attachThis.shift();
+
+            //attachThis = JSON.stringify(attachThis);
+
+            // console.log('attachthis ',attachThis);
+
+            async.eachSeries(attachThis, function(attach, callback) {
+                console.log('photo ',attach.photo);
+                console.log('message ',attach.message);
+                console.log('client_res', data.client_res)
+                skypeSession.send(attach.message)
+                //  upload.uploadPicture('skype', attach.photo, 100, true).then(function(buffer) {
+                //      tg.sendMessage({
+                //                 chat_id: data.source.channel,
+                //                 text: attach.message,
+                //                 parse_mode: 'Markdown',
+                //                 disable_web_page_preview: 'true'
+
+                //      }).then(function(datum){
+                //           tg.sendPhoto({
+                //             chat_id: encode_utf8(data.source.channel),
+                //             photo: encode_utf8(buffer)
+                //             }).then(function(datum){
+                //                 // var field = {
+                //                 //     "value": attach,
+                //                 //     "short":false
+                //                 // }
+                //                 // attachments[1].fields.push(field);
+                //                 callback();
+                //             }).catch(function(err){
+                //                 if (err) { console.log('ios.js1285: err',err) }
+                //                 callback();
+                //             })
+                //         }).catch(function(err){
+                //             if (err) {
+                //                 // console.log('\n\n\ntg.sendPhoto error: ',err)
+                //             }
+                //             callback();
+                //         })
+                // }).catch(function(err) {
+                //     if (err)  console.log('\n\n\niojs image upload error: ',err,'\n\n\n')
+                //     callback();
+                // })
+            }, function done(){
+
+
+            });
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        else if (data.action == 'focus'){
+
+               // console.log('client_res', data.client_res)
+
+           // try {
+           //   var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
+           //   formatted = formatted.slice(0,-1)
+           //   formatted = formatted + ')'
+           // } catch(err) {
+           //   console.log('io.js 1269 err: ',err)
+           //   return
+           // }
+           //    data.client_res[1] = formatted ? formatted : data.client_res[1]
+           //    var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : null)
+           //     // console.log('formatted : ',formatted)
+           //     upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(buffer) {
+           //       tg.sendPhoto({
+           //          chat_id: encode_utf8(data.source.channel),
+           //          photo: encode_utf8(buffer)
+           //        }).then(function(datum){
+           //          tg.sendMessage({
+           //              chat_id: data.source.channel,
+           //              text: toSend,
+           //              parse_mode: 'Markdown',
+           //              disable_web_page_preview: 'true'
+           //          })
+           //        })
+           //      }).catch(function(err){
+           //          if (err) { console.log('ios.js1285: err',err) }
+
+           //      })
+        }
+         else if (data.action == 'save') {
+          //   console.log('\n\n\nSAVE: ',data.client_res)
+          // try {
+          //    var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
+          //     // + data.client_res[0].text.split('>>')[1].split('>')[0]
+          //    // formatted = formatted.slice(0,-1)
+          //    // formatted = formatted + ')'
+          //  } catch(err) {
+          //    console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
+          //    return
+          //  }
+          // // console.log('toSend:', toSend,'formatted: ',formatted)
+          // tg.sendMessage({
+          //       chat_id: data.source.channel,
+          //       text: 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.',
+          //       parse_mode: 'Markdown',
+          //       disable_web_page_preview: 'true'
+          //   })
+          //   .then(function() {
+          //     if (formatted) {
+          //       console.log('\n\n\nFORMATTED: ', formatted)
+          //       tg.sendMessage({
+          //           chat_id: data.source.channel,
+          //           text: formatted,
+          //           parse_mode: 'Markdown',
+          //           disable_web_page_preview: 'true'
+          //       })
+          //     }
+          //   })
+          //   .catch(function(err) {
+          //       console.log('io.js 1307 err',err)
+          //   })
+        }
+        else if (data.action == 'checkout') {
+          // console.log('\n\n\nCHECKOUT: ', data.client_res)
+          //    async.eachSeries(data.client_res[1], function iterator(item, callback) {
+          //       console.log('ITEM LEL: ',item)
+          //       if (item.text.indexOf('_Summary') > -1) {
+          //           return callback(item)
+          //       }
+          //        var itemLink = ''
+          //         try {
+          //           itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
+          //           itemLink = encode_utf8(itemLink)
+          //          } catch(err) {
+          //            console.log('io.js 1296 err:',err)
+          //            return callback(null)
+          //          }
+          //          tg.sendMessage({
+          //               chat_id: data.source.channel,
+          //               text: itemLink,
+          //               parse_mode: 'Markdown',
+          //               disable_web_page_preview: 'true'
+          //           }).then(function(){
+          //                var extraInfo = item.text.split('$')[1]
+          //                extraInfo = '\n $' + extraInfo
+          //                extraInfo = extraInfo.replace('*','').replace('@','').replace('<','').replace('>','')
+          //                tg.sendMessage({
+          //                   chat_id: data.source.channel,
+          //                   text: encode_utf8(extraInfo),
+          //                   parse_mode: 'Markdown',
+          //                       disable_web_page_preview: 'true'
+          //                   })
+          //                   .then(function(){
+          //                       callback(null)
+          //                   })
+          //                   .catch(function(err) {
+          //                       console.log('io.js 1354 err: ',err)
+          //                       callback(null)
+          //                   })
+          //           })
+          //     }, function done(thing) {
+          //       if (thing.text) {
+          //           // console.log('\n\n DONESKI!', thing)
+          //           var itemLink = ''
+          //             try {
+          //               itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
+          //               itemLink = encode_utf8(itemLink)
+          //               tg.sendMessage({
+          //                   chat_id: data.source.channel,
+          //                   text: '_Summary: Team Cart_ \n Total: *$691.37* \n' + itemLink,
+          //                   parse_mode: 'Markdown',
+          //                   disable_web_page_preview: 'true'
+          //               }).catch(function(err) {
+          //                console.log('io.js 1353 err:',err)
+          //              })
+          //              } catch(err) {
+          //                console.log('io.js 1356 err:',err)
+          //              }
+          //       } else {
+          //           // console.log('wtf is thing: ',thing)
+          //       }
+          //     })
+
+
+           // // var extraInfo = data.client_res[1][0].text.split('$')[1]
+           // // extraInfo = '\n $' + extraInfo
+           // // var finalSend = itemLink + extraInfo
+           // //      tg.sendMessage({
+           // //          chat_id: data.source.channel,
+           // //          text: data.client_res[0],
+           // //          parse_mode: 'Markdown',
+           // //          disable_web_page_preview: 'true'
+           // //      }).then(function(){
+           //         console.log('finalSend: ', itemLink)
+           //          tg.sendMessage({
+           //              chat_id: data.source.channel,
+           //              text: itemLink,
+           //              parse_mode: 'Markdown',
+           //              disable_web_page_preview: 'true'
+           //          }).then(function(){
+
+           //          // })
+           //      }).catch(function(err) {
+           //          console.log('io.js 1338 err',err)
+           //      })
+        }
+        else if (data.action == 'sendAttachment'){
+          // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
+          //   // //remove first message from res arr
+            // var attachThis = data.client_res;
+            // attachThis = JSON.stringify(attachThis);
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        else {
+            console.log('***',skypeSession)
+            skypeSession.send('YOLOOOOO')
+            //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
+            // //loop through responses in order
+            // async.eachSeries(data.client_res, function(message, callback) {
+            //     tg.sendMessage({
+            //         chat_id: data.source.channel,
+            //         text: message
+            //     })
+            //     callback();
+            // }, function done(){
+            // });
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
     //* * * * * * * *
     // Slack Outgoing
     //* * * * * * * *
@@ -1687,7 +2115,6 @@ var saveToCart = function(data){
             sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
         else {
-
             // co lets us use "yield" to with promises to untangle async shit
             co(function*() {
               var cart;
@@ -1912,3 +2339,4 @@ module.exports.cannedBanter = cannedBanter;
 module.exports.outgoingResponse = outgoingResponse;
 module.exports.checkOutgoingBanter = checkOutgoingBanter;
 module.exports.saveToCart = saveToCart;
+module.exports.dialog = dialog;
