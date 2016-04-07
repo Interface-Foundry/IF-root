@@ -37,7 +37,28 @@ var slackbotSchema = mongoose.Schema({
             type: Boolean,
             default: false
         },
-        office_assistants: [String] // user ids of the office assistants, like U0R6H9BKN
+        office_assistants: [String], // user ids of the office assistants, like U0R6H9BKN
+
+        weekly_status_enabled: {
+          type: Boolean,
+          default: true
+        },
+        weekly_status_day: {
+          type: String,
+          enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+          default: 'Friday'
+        },
+        weekly_status_time: {
+          type: String,
+          default: '4:00 PM'
+        },
+        weekly_status_timezone: {
+          type: String,
+          default: 'America/New_York'
+        },
+        city: {
+          type: String
+        }
     },
 
     // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
