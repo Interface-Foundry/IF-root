@@ -3,7 +3,7 @@ var async = require('async');
 var request = require('request');
 var co = require('co')
 var _ = require('lodash')
-
+var fs = require('fs')
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
@@ -74,6 +74,12 @@ var tg = new telegram({
 });
 
 tg.on('message', function(msg){
+
+    //if user sends sticker msg.msg will be undefined
+    if (msg.sticker) {
+        console.log('Telegram message is a sticker: ',msg)
+        return
+    }
 
     var newTg = {
         source: {
@@ -497,8 +503,9 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
-            console.log('🔥');
-            console.log(data);
+
+            // console.log('🔥')
+            // console.log(data);
 
             // don't talk to urself
             if (data.user === user.bot.bot_user_id) {
@@ -1398,34 +1405,48 @@ var sendResponse = function(data){
             // console.log('attachthis ',attachThis);
 
             async.eachSeries(attachThis, function(attach, callback) {
-                console.log('photo ',attach.photo);
-                console.log('message ',attach.message);
-                console.log('client_res', data.client_res)
-                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(buffer) {
+                // console.log('photo ',attach.photo);
+                // console.log('message ',attach.message);
+                // console.log('client_res', data.client_res)
+                 upload.uploadPicture('telegram', attach.photo, 100, true).then(function(uploaded) {
                      tg.sendMessage({
-                                chat_id: data.source.channel,
-                                text: attach.message,
-                                parse_mode: 'Markdown',
-                                disable_web_page_preview: 'true'
-
+                        chat_id: data.source.channel,
+                        text: attach.message,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: 'true'
                      }).then(function(datum){
                           tg.sendPhoto({
                             chat_id: encode_utf8(data.source.channel),
-                            photo: encode_utf8(buffer)
+                            photo: encode_utf8(uploaded.outputPath)
                             }).then(function(datum){
-                                // var field = {
-                                //     "value": attach,
-                                //     "short":false
-                                // }
-                                // attachments[1].fields.push(field);
+                                if (uploaded.outputPath) {     
+                                    fs.unlink(uploaded.outputPath, function(err, res) {
+                                        // if (err) console.log('fs error: ', err)
+                                    })
+                                }
+                                if (uploaded.inputPath) {
+                                    fs.unlink(uploaded.inputPath, function(err, res) {
+                                            // if (err) console.log('fs error: ', err)
+                                    })
+                                }
                                 callback();
                             }).catch(function(err){
-                                if (err) { console.log('ios.js1285: err',err) }
+                                if (err) { console.log('ios.js1259: err',err) }
+                                if (uploaded.outputPath) {     
+                                    fs.unlink(outputPath, function(err, res) {
+                                        if (err) console.log('fs error: ', err)
+                                    })
+                                }
+                                if (uploaded.inputPath) {
+                                    fs.unlink(inputPath, function(err, res) {
+                                            if (err) console.log('fs error: ', err)
+                                    })
+                                }
                                 callback();
                             })
                         }).catch(function(err){
                             if (err) {
-                                // console.log('\n\n\ntg.sendPhoto error: ',err)
+                                console.log('ios.js1264: err',err)
                             }
                             callback();
                         })
@@ -1460,12 +1481,12 @@ var sendResponse = function(data){
              return
            }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
-              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : null)
+              var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
                // console.log('formatted : ',formatted)
-               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(buffer) {
+               upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
                  tg.sendPhoto({
                     chat_id: encode_utf8(data.source.channel),
-                    photo: encode_utf8(buffer)
+                    photo: encode_utf8(uploaded.outputPath)
                   }).then(function(datum){
                     tg.sendMessage({
                         chat_id: data.source.channel,
@@ -1473,6 +1494,16 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
+                    if (uploaded.outputPath) {     
+                        fs.unlink(uploaded.outputPath, function(err, res) {
+                            // if (err) console.log('fs error: ', err)
+                        })
+                    }
+                    if (uploaded.inputPath) {
+                        fs.unlink(uploaded.inputPath, function(err, res) {
+                                // if (err) console.log('fs error: ', err)
+                        })
+                    }
                   })
                 }).catch(function(err){
                     if (err) { console.log('ios.js1285: err',err) }
