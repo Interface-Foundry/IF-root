@@ -91,8 +91,6 @@ tg.on('message', function(msg){
     }
 });
 
-
-
 //get stored slack users from mongo
 var initSlackUsers = function(env){
     console.log('loading with env: ',env);
@@ -336,8 +334,8 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
-            // console.log('🔥')
-            // console.log(data);
+            console.log('🔥')
+            console.log(data);
 
             // don't talk to urself
             if (data.user === user.bot.bot_user_id) {
@@ -488,6 +486,7 @@ function loadSlackUsers(users){
                 }
             }
             function incomingSlack(data){
+                console.log('incoming slack 📬')
                 if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
                     var newSl = {
                         source: {
@@ -1268,7 +1267,7 @@ var sendResponse = function(data){
                             chat_id: encode_utf8(data.source.channel),
                             photo: encode_utf8(uploaded.outputPath)
                             }).then(function(datum){
-                                if (uploaded.outputPath) {     
+                                if (uploaded.outputPath) {
                                     fs.unlink(uploaded.outputPath, function(err, res) {
                                         // if (err) console.log('fs error: ', err)
                                     })
@@ -1281,7 +1280,7 @@ var sendResponse = function(data){
                                 callback();
                             }).catch(function(err){
                                 if (err) { console.log('ios.js1259: err',err) }
-                                if (uploaded.outputPath) {     
+                                if (uploaded.outputPath) {
                                     fs.unlink(outputPath, function(err, res) {
                                         if (err) console.log('fs error: ', err)
                                     })
@@ -1343,7 +1342,7 @@ var sendResponse = function(data){
                         parse_mode: 'Markdown',
                         disable_web_page_preview: 'true'
                     })
-                    if (uploaded.outputPath) {     
+                    if (uploaded.outputPath) {
                         fs.unlink(uploaded.outputPath, function(err, res) {
                             // if (err) console.log('fs error: ', err)
                         })
@@ -1743,23 +1742,33 @@ var saveToCart = function(data){
               for (var index = 0; index < data.searchSelect.length; index++) {
                   var searchSelect = data.searchSelect[index];
                   console.log('adding searchSelect ' + searchSelect);
+
+                  // i am not sure what this does
                   if (item.recallHistory && item.recallHistory.amazon){
-                      messageHistory[data.source.id].cart.push(item.recallHistory.amazon[searchSelect - 1]); //add selected items to cart
-                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.recallHistory.amazon[searchSelect - 1])
-                        .catch(function(reason) {
-                          // could not add item to cart, make kip say something nice
-                          console.log(reason);
-                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
-                        })
+                      var itemToAdd = item.recallHistory.amazon[searchSelect - 1];
                   } else {
-                      messageHistory[data.source.id].cart.push(item.amazon[searchSelect - 1]); //add selected items to cart
-                      cart = yield kipcart.addToCart(data.source.org, data.source.user, item.amazon[searchSelect - 1])
-                        .catch(function(reason) {
-                          // could not add item to cart, make kip say something nice
-                          console.log(reason);
-                          sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
-                        })
+                      itemToAdd = item.amazon[searchSelect - 1];
                   }
+
+                  // Check for that pesky situation where we can't add to cart
+                  // because the user needs to choose size or color options
+                  if (itemToAdd.mustSelectSize) {
+                    return processData.getItemLink(_.get(itemToAdd, 'DetailPageURL[0]'), data.source.user, 'ASIN-' + _get(itemToAdd, 'ASIN[0]')).then(function(url) {
+                      sendTxtResponse(data, 'Hi, please goto Amazon so you can choose your size and style: ' + url);
+                    }).catch(function(e) {
+                      console.log('could not get link for item')
+                      console.log(e.stack)
+                      sendTxtResponse(data, 'Hi, it looks like you have to order this particular item directly from Amazon, not me. ');
+                    })
+                  }
+
+                  messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
+                  cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
+                      .catch(function(reason) {
+                        // could not add item to cart, make kip say something nice
+                        console.log(reason);
+                        sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                      })
               }
 
               // data.client_res = ['<' + cart.link + '|» View Cart>']

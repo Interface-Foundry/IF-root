@@ -162,6 +162,10 @@ var getCart = module.exports.getCart = function(slack_id) {
       return cart_items;
     }, {})
 
+    // Check in with the amazon cart to see if they click-throughed to purchase,
+    // which removes the items from the Kip-generated cart and puts them in
+    // a real cart in their browser, where they are logged in or something.
+
     // create a new cart if they don't have one
     if (!cart.amazon) {
       console.log('creating new cart in amazon')
@@ -184,7 +188,9 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     // console.log(JSON.stringify(amazonCart, null, 2))
     console.log('got amazon cart')
-    console.log(amazonCart);
+    console.log(amazonCart)
+
+    // If the amazon cart is empty but
 
     // if the cart is not there, then i guess it has been purchased
     // Although maybe the cart has expired? TODO

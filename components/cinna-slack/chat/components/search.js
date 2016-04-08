@@ -42,6 +42,7 @@ var searchSimilar = function(data){
 }
 
 var searchAmazon = function(data, type, query, flag) {
+    console.log('searching amazon');
 
     //* * * * * * * * *  NN CLASSIFICATION NEEDED * * * * * * * * //
     // & & & & & & & & & & & & & & & & & & & & & & & & & & & & & &//
@@ -333,9 +334,15 @@ var searchAmazon = function(data, type, query, flag) {
                 }
 
                 client.itemSearch(amazonParams).then(function(results,err){
-                    // results = results.filter(function(r) {
-                    //   return (_.get(r, 'Offers[0].TotalOffers[0]') || '0') !== '0';
-                    // })
+                    console.log('got search')
+                    console.log(results.length);
+                    if (err) { console.log(err); }
+
+                    results.map(function(r) {
+                      if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
+                        r.mustSelectSize = true;
+                      }
+                    })
 
                     data.amazon = results;
 
@@ -397,6 +404,7 @@ var searchAmazon = function(data, type, query, flag) {
                     }
 
                 }).catch(function(err){
+                    console.error(err);
 
                     //handle err codes. do stuff.
                     if (err[0].Error[0].Code[0]){
