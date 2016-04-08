@@ -72,13 +72,16 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 
 // Remove item from the db
 // slack_id: either the team id or the user id if a personal cart
+// user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, number) {
+module.exports.removeFromCart = function(slack_id, user_id, number) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
+    var team = yield db.slackbots.findOne({team_id: slack_id});
+    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
@@ -88,16 +91,26 @@ module.exports.removeFromCart = function(slack_id, number) {
       return cart;
     }
 
-    // remove the last item that matched this one
+
+    // first just try to remove one item that this user added
     var matching_items = cart.items.filter(function(i) {
+      return i.ASIN === ASIN_to_remove && i.added_by === user_id;
+    })
+
+    if (matching_items.length >= 1) {
+        return module.exports.removeFromCartByItem(matching_items.pop());
+    }
+
+    // if no items matching the user_id were found, an admin can still remove any item
+    matching_items = cart.items.filter(function(i) {
       return i.ASIN === ASIN_to_remove;
     })
 
-    module.exports.removeFromCartByItem(matching_items.pop());
+    return module.exports.removeFromCartByItem(matching_items.pop());
   })
 }
 
-
+//
 // Removes one item from the cart at a time
 //
 module.exports.removeFromCartByItem = function(item) {

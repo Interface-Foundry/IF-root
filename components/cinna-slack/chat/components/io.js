@@ -1810,7 +1810,7 @@ function removeCartItem(data){
           var searchSelect = data.searchSelect[index];
           console.log('removing searchSelect ' + searchSelect);
 
-          yield kipcart.removeFromCart(data.source.org, searchSelect);
+          yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect);
       }
 
       data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart. Type `view cart` to see your updated cart']
