@@ -114,30 +114,30 @@ var initSlackUsers = function(env){
         // }];
 
         //CINNA-PEPPER
-        var testUser = [{
-            team_id:'T0H72FMNK',
-            dm:'D0H6X6TA8',
-            bot: {
-                bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
-            },
-            meta: {
-                initialized: false
-            }
-        }];
-
-        //KIP-PAPRIKA
         // var testUser = [{
-        //     team_id:'T02PN3B25',
+        //     team_id:'T0H72FMNK',
         //     dm:'D0H6X6TA8',
         //     bot: {
         //         bot_user_id: 'U0H6YHBNZ',
-        //         bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
+        //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
         //     },
         //     meta: {
         //         initialized: false
         //     }
         // }];
+
+        //KIP-PAPRIKA
+        var testUser = [{
+            team_id:'T02PN3B25',
+            dm:'D0H6X6TA8',
+            bot: {
+                bot_user_id: 'U0H6YHBNZ',
+                bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
+            },
+            meta: {
+                initialized: true
+            }
+        }];
 
 
         loadSlackUsers(testUser);
