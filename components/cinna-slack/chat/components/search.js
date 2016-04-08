@@ -333,9 +333,9 @@ var searchAmazon = function(data, type, query, flag) {
                 }
 
                 client.itemSearch(amazonParams).then(function(results,err){
-                    results = results.filter(function(r) {
-                      return (_.get(r, 'Offers[0].TotalOffers[0]') || '0') !== '0';
-                    })
+                    // results = results.filter(function(r) {
+                    //   return (_.get(r, 'Offers[0].TotalOffers[0]') || '0') !== '0';
+                    // })
 
                     data.amazon = results;
 
