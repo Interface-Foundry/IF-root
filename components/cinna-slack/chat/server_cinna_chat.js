@@ -40,6 +40,7 @@
 var http = require('http');
 var request = require('request');
 var async = require('async');
+var bodyParser = require('body-parser');
 
 //set env vars
 var config = require('config');
@@ -60,6 +61,11 @@ app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function (req, res) {
   res.send('💬 🌏')
 })
+
+//parse incoming body
+app.use(bodyParser.json());         
+app.use(bodyParser.urlencoded({ extended: true }));                                
+
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
   console.log('chat app listening on port 8000 🌏 💬')
@@ -80,13 +86,15 @@ app.get('/newslack', function(req, res) {
 //incoming new slack user
 app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
-    console.log('incoming Slack action: ',req);
     console.log('incoming Slack action BODY: ',req.body);
+    res.sendStatus(200);
     //ioKip.incomingSlackAction(req.body);
 });	
 
 //incoming new slack user
 app.post('/kikincoming', function(req, res) {
+    console.log('incoming Kik BODY: ',req.body);
+    res.sendStatus(200);
     // ioKip.newSlack();
 });
 

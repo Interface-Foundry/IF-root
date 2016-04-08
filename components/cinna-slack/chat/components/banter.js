@@ -1,12 +1,12 @@
 
-var checkForCanned = function(input,callback,origin) {
+var checkForCanned = function(input,callback,origin,source) {
    
     var res;
     var flag;
     var query;
 
     //prevents people from copy pasting onboard message into pub channel to @kip
-    if(input.indexOf('I just enabled') > -1){
+    if(input.indexOf('I just enabled') > -1){ 
         flag = 'cancel';
     }
 
@@ -891,6 +891,7 @@ var checkForCanned = function(input,callback,origin) {
             query = 3;
             break;
 
+
         //CART REMOVE ITEM # 
         case 'remove':
             flag = 'basic'; //do this action
@@ -1033,7 +1034,6 @@ var checkForCanned = function(input,callback,origin) {
             query = 32;
             break;
 
-
         case '4':
         case '5':
         case '6':
@@ -1049,6 +1049,40 @@ var checkForCanned = function(input,callback,origin) {
                 res = 'I\'m not very smart, did you mean <span class="selector">➊</span>, <span class="selector">➋</span> or <span class="selector">➌</span>?';
             }
             break;
+    }
+
+    //PAPRIKA ACTION BUTTON TESTING
+    if (source.org == 'T02PN3B25'){
+
+        switch(input){
+
+            //add to cart
+            case 'add1cart':
+                flag = 'slack.initial'; //do this action
+                res = 'meow 🐈';
+                query = 'neko atsume'; //what we're going to search for
+                break;
+            case 'add2cart':
+                flag = 'basic'; //do this action
+                res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
+                break;
+            case 'add3cart':
+                flag = 'basic'; //do this action
+                res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
+                break;
+
+            //cheaper
+
+            //similar
+
+            //modify
+
+            //info
+
+
+            //- - - - -  END TESTING - - - - - -//
+
+        }
     }
 
     callback(res,flag,query);

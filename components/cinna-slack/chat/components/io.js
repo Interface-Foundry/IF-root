@@ -101,17 +101,17 @@ var initSlackUsers = function(env){
     if (env === 'development_alyx') {
 
         //KIP on Slack
-        // var testUser = [{
-        //     team_id:'T02PN3B25',
-        //     dm:'D0H6X6TA8',
-        //     bot: {
-        //         bot_user_id: 'U0GRJ9BJS',
-        //         bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
-        //     },
-        //     meta: {
-        //         initialized: true
-        //     }
-        // }];
+        var testUser = [{
+            team_id:'T02PN3B25',
+            dm:'D0H6X6TA8',
+            bot: {
+                bot_user_id: 'U0GRJ9BJS',
+                bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
+            },
+            meta: {
+                initialized: true
+            }
+        }];
 
         //CINNA-PEPPER
         // var testUser = [{
@@ -127,17 +127,17 @@ var initSlackUsers = function(env){
         // }];
 
         //KIP-PAPRIKA
-        var testUser = [{
-            team_id:'T02PN3B25',
-            dm:'D0H6X6TA8',
-            bot: {
-                bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
-            },
-            meta: {
-                initialized: true
-            }
-        }];
+        // var testUser = [{
+        //     team_id:'T02PN3B25',
+        //     dm:'D0H6X6TA8',
+        //     bot: {
+        //         bot_user_id: 'U0H6YHBNZ',
+        //         bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
+        //     },
+        //     meta: {
+        //         initialized: true
+        //     }
+        // }];
 
 
         loadSlackUsers(testUser);
@@ -638,7 +638,7 @@ function preProcess(data){
         else {
             routeNLP(data);
         }
-    },data.source.origin);
+    },data.source.origin,data.source);
 
   //  });
 
@@ -1039,56 +1039,62 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                             var attachObj = {};
 
-                            // var actionObj = [
-                            //     {
-                            //       "name": "AddCart",
-                            //       "text": ":thumbsup: Add to Cart",
-                            //       "style": "primary",
-                            //       "type": "button",
-                            //       "value": "yes",
-                            //       "confirm": {
-                            //         "title": "Are you sure?",
-                            //         "text": "This will approve the request.",
-                            //         "ok_text": "Yes",
-                            //         "dismiss_text": "No"
-                            //       }
-                            //     },
-                            //     {
-                            //       "name": "Buy",
-                            //       "text": ":thumbsdown: Buy",
-                            //       "style": "danger",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     },
-                            //     {
-                            //       "name": "Similar",
-                            //       "text": ":heart: Similar",
-                            //       "style": "success",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     },
-                            //     {
-                            //       "name": "Cheaper",
-                            //       "text": ":money_with_wings: Cheaper",
-                            //       "style": "default",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     },
-                            //     {
-                            //       "name": "Moreinfo",
-                            //       "text": ":thumbsdown: More Info",
-                            //       "style": "success",
-                            //       "type": "button",
-                            //       "value": "no"
-                            //     }
-                            // ];
-                            // attachObj.actions = actionObj;
+                            var actionObj = [
+                                {
+                                  "name": "AddCart11"+count,
+                                  "text": "⭐ add to cart",
+                                  "style": "primary",
+                                  "type": "button",
+                                  "value": "yes",
+                                  "confirm": {
+                                    "title": "Are you sure?",
+                                    "text": "This will approve the request.",
+                                    "ok_text": "Yes",
+                                    "dismiss_text": "No"
+                                  }
+                                }
+                                // {
+                                //   "name": "Cheaper",
+                                //   "text": "💸 cheaper",
+                                //   "style": "default",
+                                //   "type": "button",
+                                //   "value": "no"
+                                // },
+                                // {
+                                //   "name": "Similar",
+                                //   "text": "➰ similar",
+                                //   "style": "default",
+                                //   "type": "button",
+                                //   "value": "no"
+                                // },
+                                // {
+                                //   "name": "Modify",
+                                //   "text": "🌀 modify",
+                                //   "style": "default",
+                                //   "type": "button",
+                                //   "value": "no"
+                                // },
+                                // {
+                                //   "name": "Moreinfo",
+                                //   "text": "💬 info",
+                                //   "style": "default",
+                                //   "type": "button",
+                                //   "value": "no"
+                                // }
+                            ];
+                            attachObj.actions = actionObj;
+                            attachObj.callback_id = 'zz7d883777'+count;
+
+                            console.log('CALLBACK: ',attachObj.callback_id);
 
                             attachObj.image_url = urlArr[count];
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
                             attachObj.title_link = res[count];
                             attachObj.color = "#45a5f4";
                             attachObj.fallback = 'Here are some options you might like';
+
+                            console.log('ATTACH OBJ: ',attachObj);
+
                             data.client_res.push(attachObj);
                             // '<'++' | ' + +'>';
                         }else if (data.source.origin == 'socket.io'){
@@ -1638,48 +1644,11 @@ var sendResponse = function(data){
 
                 }, function done(){
 
-                    var attachThis = [
-                        {
-                          "text": "I would like six pens for my creation station please.",
-                          "fallback": "Pen request",
-                          "title": "Request approval",
-                          "callback_id": "approval_2700",
-                          "color": "#8A2BE2",
-                          "attachment_type": "default",
-                          "actions": [
-                            {
-                              "name": "approve3",
-                              "text": ":thumbsup: Approve",
-                              "style": "primary",
-                              "type": "button",
-                              "value": "yes",
-                              "confirm": {
-                                "title": "Are you sure?",
-                                "text": "This will approve the request.",
-                                "ok_text": "Yes",
-                                "dismiss_text": "No"
-                              }
-                            },
-                            {
-                              "name": "decline3",
-                              "text": ":thumbsdown: Decline",
-                              "style": "danger",
-                              "type": "button",
-                              "value": "no"
-                            }
-                          ]
-                        }
-                    ];
-                    
-
-                    attachThis = JSON.stringify(attachThis);
-
                     var msgData = {
                         icon_url:'http://kipthis.com/img/kip-icon.png',
                         username:'Kip',
                         attachments: attachThis
                     };
-                    console.log('ASSADSAD ',msgData);
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
 
                     });
@@ -1872,19 +1841,44 @@ function viewCart(data, show_added_item){
         var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
         console.log(link);
 
+        var actionObj = [
+            {
+              "name": "AddItem",
+              "text": "➕",
+              "style": "primary",
+              "type": "button",
+              "value": "yes"
+            },
+            {
+              "name": "RemoveItem",
+              "text": "➖",
+              "style": "danger",
+              "type": "button",
+              "value": "no",
+              "confirm": {
+                "title": "Are you sure?",
+                "text": "This will approve the request.",
+                "ok_text": "Yes",
+                "dismiss_text": "No"
+              }
+            }
+        ];
+
         if (item.ASIN === added_asin) {
           cartObj.push({
             text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
             color: '#7bd3b6',
-            thumb_url: item.image
+            thumb_url: item.image,
+            actions: actionObj
           })
         } else {
           cartObj.push({
             text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
             color: '#45a5f4',
-            thumb_url: item.image
+            thumb_url: item.image,
+            actions: actionObj
           })
         }
       }
