@@ -31,7 +31,7 @@ co(function*() {
 })
 
 //
-// Sets up a job for a particular team_id
+// Function to set up a job (jerb?) for a particular team_id using whatever is in the DB right now
 //
 var updateJob = module.exports.updateJob = function(team_id) {
   return co(function*() {
@@ -48,35 +48,43 @@ var updateJob = module.exports.updateJob = function(team_id) {
     console.log('setting weekly job for team ' + team_id + ' ' + slackbot.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + slackbot.meta.weekly_status_timezone);
 
     //
-    // Stop the old jrb if it exists
+    // Stop the old jerb if it exists
     //
     if (jerbs[team_id]) {
       jerbs[team_id].stop();
     }
 
     //
-    // Start the new jrb!
+    // Start the new jerb!
     //
     jerbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
       console.log('starting weekly update for team ' + team_id + ' ' + slackbot.team_name);
 
-      var bot = controller.spawn({
-        token: slackbot.bot.bot_access_token
-      })
 
-      bot.startRTM(function(err, bot, payload) {
-        if (err) {
-          throw new Error('Could not connect to Slack');
-        }
+      slackbot.meta.office_assistants.map(function(assistant) {
 
-        slackbot.meta.office_assistants.map(function(assistant) {
+        //
+        // Set up the bot
+        //
+        var bot = controller.spawn({
+          token: slackbot.bot.bot_access_token
+        })
+
+        bot.startRTM(function(err, bot, payload) {
+          if (err) {
+            throw new Error('Could not connect to Slack');
+          }
+
           bot.startPrivateConversation({user: assistant}, function(response, convo) {
             // inject the slackbot into the convo so that we can save it in the db
             convo.slackbot = slackbot;
+            convo.bot = bot;
+            convo.user_id = assistant;
             convo.on('end', function() {
               bot.closeRTM();
             })
             convo.say('Hi, this is your weekly update');
+            convo.ask('Would you like me to send an last call message to all your employees?', lastCall)
             convo.next();
           });
         });
@@ -92,4 +100,52 @@ var updateJob = module.exports.updateJob = function(team_id) {
     console.log('error settings up job for team ' + team_id);
     console.log(e);
   })
+}
+
+//
+// Sends a "last call" message to everyone who has not shut Kip up about messages like this
+//
+function lastCall(response, convo) {
+  if (response.text.match(convo.bot.utterances.yes)) {
+    console.log('sending last call message to everybody woooo');
+    convo.say('You got it, boss');
+
+    co(function*() {
+      // maybe i should update the team roster here???
+      var users = yield db.Chatusers.find({
+        team_id: convo.slackbot.team_id,
+        is_bot: false,
+        id: { '$ne': 'USLACKBOT' }, // because slackbot is not marked as a bot?
+        'meta.last_call_alerts': { '$ne': false }
+      }).exec();
+
+      var admin = convo.user_id;
+
+      console.log(users);
+
+      yield users.map(function(u) {
+        return new Promise(function(resolve, reject) {
+          console.log('sending message to user ' + u.id);
+          convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
+            debugger;
+            console.log('wow come on ' + u.id)
+            convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!');
+            resolve();
+          })
+        })
+      })
+
+      // continue the admin's conversation if there's anything left to say.
+      convo.next();
+    }).catch((e) => {
+      console.log(e);
+    })
+  } else if (response.text.match(convo.bot.utterances.no)) {
+    console.log('no last call');
+    convo.ask('OK, you can `checkout` whenever you\'re ready');
+    convo.next();
+  } else {
+    convo.ask("I'm sorry I couldn't understand that.  Should I send out a last call message?", lastCall)
+    convo.next();
+  }
 }
