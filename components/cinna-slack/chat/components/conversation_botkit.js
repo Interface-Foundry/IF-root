@@ -40,6 +40,7 @@ module.exports.onboard = function(slackbot, user_id, done) {
 }
 
 module.exports.settings = function(slackbot, user_id, done) {
+  console.log('wow such settings');
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   });
@@ -49,8 +50,17 @@ module.exports.settings = function(slackbot, user_id, done) {
     if (err) {
       throw new Error('Could not connect to Slack');
     }
+    console.log('started RTM')
 
+    // um i think we're getting double callbacks here for some reason?
+    // only do the settings thing once!
+    var started = false;
     bot.startPrivateConversation({user: user_id}, function(response, convo) {
+      if (!started) {
+        started = true;
+      } else {
+        return; // escape if already started.
+      }
       // inject the slackbot into the convo so that we can save it in the db
       convo.slackbot = slackbot;
       convo.user_id = user_id;
@@ -190,6 +200,7 @@ function welcomeVid(response, convo) {
 // Show the user their settings
 function showSettings(response, convo) {
   console.log('showing settings');
+  var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
   co(function*() {
     var chatuser = yield db.Chatusers.findOne({id: convo.user_id});
     convo.chatuser = chatuser;
@@ -215,34 +226,38 @@ function showSettings(response, convo) {
     var office_gremlins = convo.slackbot.meta.office_assistants.map(function(user_id) {
       return '<@' + user_id + '>';
     })
-    if (office_gremlins.length >= 1) {
+    if (office_gremlins.length > 1) {
       var last = office_gremlins.pop();
       office_gremlins[office_gremlins.length-1] += ' and ' + last;
     }
-    attachments.push({text: 'I am moderated by ' + office_gremlins.join(', ') + '.'})
+    console.log(office_gremlins);
+    var adminText = 'I am moderated by ' + office_gremlins.join(', ') + '.';
+    if (isAdmin) {
+      adminText += '  You can add and remove admins with `add @user` and `remove @user`.'
+    }
+    attachments.push({text: adminText})
 
     //
     // Admin-only settings
     //
-    if (convo.slackbot.meta.office_assistants.indexOf(convo.user_id) < 0) {
-      return convo.next();
-    }
-    if (convo.slackbot.meta.weekly_status_enabled) {
-      // TODO convert time to the correct timezone for this user.
-      // 1. Date.parse() returns something in eastern, not the job's timezone
-      // 2. momenttz.tz('2016-04-01 HH:mm', meta.weekly_status_timezone) is the correct date for the job
-      // 3. .tz(chatuser.tz) will convert the above to the user's timezone. whew
-      var date = Date.parse(convo.slackbot.meta.weekly_status_day + ' ' + convo.slackbot.meta.weekly_status_time);
-      var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
-      var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), convo.slackbot.meta.weekly_status_timezone);
-      var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
-      console.log('job time in bot timezone', job_time_bot_tz.format())
-      console.log('job time in user timzone', job_time_user_tz.format())
-      attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a')
-        + '\nYou can turn this off by saying `no weekly status`'
-        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
-    } else {
-      attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
+    if (isAdmin) {
+      if (convo.slackbot.meta.weekly_status_enabled) {
+        // TODO convert time to the correct timezone for this user.
+        // 1. Date.parse() returns something in eastern, not the job's timezone
+        // 2. momenttz.tz('2016-04-01 HH:mm', meta.weekly_status_timezone) is the correct date for the job
+        // 3. .tz(chatuser.tz) will convert the above to the user's timezone. whew
+        var date = Date.parse(convo.slackbot.meta.weekly_status_day + ' ' + convo.slackbot.meta.weekly_status_time);
+        var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
+        var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), convo.slackbot.meta.weekly_status_timezone);
+        var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
+        console.log('job time in bot timezone', job_time_bot_tz.format())
+        console.log('job time in user timzone', job_time_user_tz.format())
+        attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a')
+          + '\nYou can turn this off by saying `no weekly status`'
+          + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
+      } else {
+        attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
+      }
     }
 
     console.log(attachments);
@@ -272,10 +287,14 @@ function showSettings(response, convo) {
 
 function handleSettingsChange(response, convo) {
 
+  // we'll need to know if the user is an admin or not.
+  var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
+
   console.log(response.text);
   co(function*() {
     //
     // Deal with the most complicated changes first, and finish up with the easy stuff
+    // Start with the date changes, yikes
     //
     var change_weekly_regex = /^(change|update) weekly (status|update)/;
     if (response.text.toLowerCase().trim().match(change_weekly_regex)) {
@@ -317,6 +336,51 @@ function handleSettingsChange(response, convo) {
       return convo.next();
     }
 
+    //
+    // Add/remove admins
+    //
+    if (response.text.indexOf('<@') >= 0 && isAdmin) {
+      var tokens = response.text.trim().split(' ');
+      var userIds = tokens.filter((t) => {
+        return t.indexOf('<@') === 0;
+      }).map((u) => {
+        return u.replace(/(\<\@|\>)/g, '');
+      })
+
+      if (tokens[0].toLowerCase() === 'add' && userIds.length > 0) {
+        // add all the users they specified.
+        userIds.map(function(id) {
+          if (convo.slackbot.meta.office_assistants.indexOf(id) < 0) {
+            convo.slackbot.meta.office_assistants.push(id);
+          }
+        });
+
+      } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
+        // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
+        userIds.map(function(id) {
+          if (id == convo.user_id) {
+            convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
+            return convo.next();
+          }
+          var index = convo.slackbot.meta.office_assistants.indexOf(id);
+          if (index >= 0) {
+            convo.slackbot.meta.office_assistants.splice(index, 1);
+          }
+        })
+      } else {
+        convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+        return convo.next();
+      }
+
+      yield convo.slackbot.save();
+      convo.say('Ok, I have updated your settings');
+      showSettings(response, convo);
+      return convo.next();
+    }
+
+    //
+    // Simple commands to change settings
+    //
     switch (response.text.toLowerCase().trim()) {
       case 'yes weekly status':
       case 'yes weekly update':
