@@ -188,6 +188,33 @@ var recallHistory = function(data,callback){
 
     if (!data.source.id){
         console.log('error: missing source.id');
+    } 
+    //recall using callback_id from third party messenger Kip button tap
+    else if (data.slackData && data.slackData.callback_id){
+
+        console.log('YAY!!!!! !!!!!!! ',data.slackData.callback_id);
+        
+        Message.findById(data.slackData.callback_id, function (err, msg) { 
+            if(err){
+                console.log('Error: Cannot find initial search for recallHistory');
+            }   
+            else {                
+                if (msg && msg.amazon){
+                    var tempArr = msg.amazon; //lmao amazon 
+                    msg.amazon = [];
+                    async.eachSeries(tempArr, function(item, callback2) {
+                        msg.amazon.push(JSON.parse(item)); //ughhhh
+                        callback2();
+                    }, function done(){
+                        callback(msg); 
+                    });
+                }
+                else {
+                    callback(msg);
+                }
+            }
+        });
+
     }
     else {
         //get by bucket type
@@ -291,6 +318,11 @@ var newMessage = function(data,callback){
     if(data._id){
         data['_id'] = undefined;
         data['_id'] = mongoose.Types.ObjectId();
+    }
+    //message was created for searching in slack. mongo id = callback_id in slack action button
+    if(data.searchId){
+        data['_id'] = undefined;
+        data['_id'] = data.searchId;
     }
     data = new Message(data);
     callback(data);

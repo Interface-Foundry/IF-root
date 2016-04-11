@@ -30,6 +30,7 @@ var config = require('config');
 var mailerTransport = require('../../../IF_mail/IF_mail.js');
 
 //load mongoose models
+var mongoose = require('mongoose');
 var db = require('db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
@@ -625,6 +626,21 @@ function preProcess(data){
                     data.action = 'remove';
                     incomingAction(data);
                     break;
+
+                //for testing in PAPRIKA
+                case 'slack.search':
+                    data.searchSelect = [];
+                    data.bucket = 'search';
+                    if (res == 'cheaper'){
+                        data.action = 'modify';
+                        data.searchSelect.push(query);
+                        data.dataModify = {
+                            type: 'price',
+                            param: 'less' 
+                        };
+                    }
+                    incomingMsgAction(data); 
+                    break;
                 case 'cancel': //just respond, no actions
                     //send message
                     console.log('Kip response cancelled');
@@ -781,42 +797,109 @@ function routeNLP(data){
 }
 
 //incoming action responses from Slack buttons
-var incomingSlackAction = function(data){
+var incomingMsgAction = function(data,origin){
 
     console.log('incoming Slack action req.body ', data);
 
-    var fakeAction = {
-      "actions": [
-        {
-          "name": "approve",
-          "value": "yes"
+    var incomingData = { payload: '{"actions":[{"name":"cheaper","value":"1"}],"callback_id":"57081aeed625bc9f8a359926","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460148983.486353","message_ts":"1460148974.000406","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/ZM0ZP8V7RNXDY81DH4L1HQ7S.png","image_width":400,"image_height":175,"image_bytes":34155,"callback_id":"57081aeed625bc9f8a359926","title":":one: Women\'s Military Up Buckle Combat Boots Mid Knee High E...","id":1,"title_link":"http:\\/\\/goo.gl\\/VgkoLs","color":"45a5f4","actions":[{"id":"1","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"Similar","text":"\\u27b0 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/CPY561LDJDMINVXX6OI1ICNM.png","image_width":400,"image_height":175,"image_bytes":26562,"callback_id":"57081aeed625bc9f8a359926","title":":two: COCO 1 Womens Buckle Riding Knee High Boots,Coco-01v4.0...","id":2,"title_link":"http:\\/\\/goo.gl\\/u8EY7U","color":"45a5f4","actions":[{"id":"6","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"Similar","text":"\\u27b0 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WQSCP0BWTPXYHBTXR7E2PIPS.png","image_width":400,"image_height":175,"image_bytes":22442,"callback_id":"57081aeed625bc9f8a359926","title":":three: Forever Mango-21 Women\'s Winkle Back Shaft Side Zip Kne...","id":3,"title_link":"http:\\/\\/goo.gl\\/teZTD5","color":"45a5f4","actions":[{"id":"11","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"Similar","text":"\\u27b0 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460148974.000406"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33282428390\\/2Sq4RdP8qAJKRp5JrXfNoGP1"}' };
+
+    //"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33282428390\\/2Sq4RdP8qAJKRp5JrXfNoGP1";
+
+    if (!origin){
+        origin = 'slack';
+    }
+    var parsedIn = JSON.parse(incomingData.payload);
+
+    if (!parsedIn.callback_id){
+        console.error('Slack callback_id missing from Slack response');
+        return;
+    }
+    console.log('PARSED INCOMONG ',parsedIn);
+
+    //build new incoming Kip obj
+    var kipObj = {
+        client_res: [],
+        slackData: {
+            callback_id: parsedIn.callback_id
+        },
+        tokens: ['kipfix'] //bad code check later on, hot fix here for now
+    };
+
+    //let's try to build a universal action button i/o for all platforms 
+    //deal with first action in action arr...more will happen later?
+    if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value){
+
+        //get bucket/action
+        switch (parsedIn.actions[0].name){
+
+            case 'cheaper':
+                kipObj.bucket = 'search';
+                kipObj.action = 'modify';
+                kipObj.dataModify = { type: 'price', param: 'less' };
+            break;
+
+            case 'similar':
+            case 'modify':
+            break;
+
+            case 'moreinfo':
+            break;
+
+            case 'addcart':
+            break;
+        }        
+
+        //get searchSelect
+        var parseVal = parseInt(parsedIn.actions[0].value); //parse
+        if (!isNaN(parseVal) && parseVal > -1){ //check if real select number
+            console.log('real number!');
+            kipObj.searchSelect = [];
+            kipObj.searchSelect.push(parseVal);
         }
-      ],
-      "callback_id": "approval_2715",
-      "team": {
-        "id": "2147563693",
-        "domain": "igloohat"
-      },
-      "channel": {
-        "id": "C065W1189",
-        "name": "solipsistic-slide"
-      },
-      "user": {
-        "id": "U045VRZFT",
-        "name": "episod"
-      },
-      "action_ts": "1458170917.164398",
-      "message_ts": "1458170866.000004",
-      "attachment_id": "1",
-      "token": "xAB3yVzGS4BQ3O9FACTa8Ho4",
-      "response_url": "https://hooks.dev.slack.com/actions/T021BE7LD/6204672533/x7ZLaiVMoECAW50GwtZYAXEM"
+
+        //build source
+        kipObj.source = {
+            origin: origin,
+            channel: parsedIn.channel.id,
+            org: parsedIn.team.id,
+            id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+            user: parsedIn.user.id
+        }
+
+        console.log('KIPOBJ ',kipObj);
+
+        incomingAction(kipObj);
+
+    }else {
+        console.error('Incoming Slack ERROR: missing actions[0].name or actions[0].value ',parsedIn);
     }
 
-    //incoming action -> add `callback_id` to msg queue?
-    //nahhhhh
-
-    //treat it like incomingslack
-
+    // var fakeAction = {
+    //   "actions": [
+    //     {
+    //       "name": "approve",
+    //       "value": "yes"
+    //     }
+    //   ],
+    //   "callback_id": "approval_2715",
+    //   "team": {
+    //     "id": "2147563693",
+    //     "domain": "igloohat"
+    //   },
+    //   "channel": {
+    //     "id": "C065W1189",
+    //     "name": "solipsistic-slide"
+    //   },
+    //   "user": {
+    //     "id": "U045VRZFT",
+    //     "name": "episod"
+    //   },
+    //   "action_ts": "1458170917.164398",
+    //   "message_ts": "1458170866.000004",
+    //   "attachment_id": "1",
+    //   "token": "xAB3yVzGS4BQ3O9FACTa8Ho4",
+    //   "response_url": "https://hooks.dev.slack.com/actions/T021BE7LD/6204672533/x7ZLaiVMoECAW50GwtZYAXEM"
+    // }
 
 }
 
@@ -1028,6 +1111,12 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
             data.urlShorten = [];
             processData.urlShorten(data,function(res){
                 var count = 0;
+
+                if (data.source.origin == 'slack'){
+                    //store a new mongo ID to pass in Slack callback
+                    data.searchId = mongoose.Types.ObjectId(); 
+                }
+
                 //put all result URLs into arr
                 async.eachSeries(res, function(i, callback) {
                     data.urlShorten.push(i);//save shortened URLs
@@ -1040,51 +1129,49 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                             var actionObj = [
                                 {
-                                  "name": "AddCart11"+count,
+                                  "name": "addcart",
                                   "text": "⭐ add to cart",
                                   "style": "primary",
                                   "type": "button",
-                                  "value": "yes",
-                                  "confirm": {
-                                    "title": "Are you sure?",
-                                    "text": "This will approve the request.",
-                                    "ok_text": "Yes",
-                                    "dismiss_text": "No"
-                                  }
+                                  "value": count
+                                  // "confirm": {
+                                  //   "title": "Are you sure?",
+                                  //   "text": "This will approve the request.",
+                                  //   "ok_text": "Yes",
+                                  //   "dismiss_text": "No"
+                                  // }
+                                },
+                                {
+                                  "name": "cheaper",
+                                  "text": "💸 cheaper",
+                                  "style": "default",
+                                  "type": "button",
+                                  "value": count
+                                },
+                                {
+                                  "name": "similar",
+                                  "text": "➰ similar",
+                                  "style": "default",
+                                  "type": "button",
+                                  "value": count
+                                },
+                                {
+                                  "name": "modify",
+                                  "text": "🌀 modify",
+                                  "style": "default",
+                                  "type": "button",
+                                  "value": count
+                                },
+                                {
+                                  "name": "moreinfo",
+                                  "text": "💬 info",
+                                  "style": "default",
+                                  "type": "button",
+                                  "value": count
                                 }
-                                // {
-                                //   "name": "Cheaper",
-                                //   "text": "💸 cheaper",
-                                //   "style": "default",
-                                //   "type": "button",
-                                //   "value": "no"
-                                // },
-                                // {
-                                //   "name": "Similar",
-                                //   "text": "➰ similar",
-                                //   "style": "default",
-                                //   "type": "button",
-                                //   "value": "no"
-                                // },
-                                // {
-                                //   "name": "Modify",
-                                //   "text": "🌀 modify",
-                                //   "style": "default",
-                                //   "type": "button",
-                                //   "value": "no"
-                                // },
-                                // {
-                                //   "name": "Moreinfo",
-                                //   "text": "💬 info",
-                                //   "style": "default",
-                                //   "type": "button",
-                                //   "value": "no"
-                                // }
                             ];
                             attachObj.actions = actionObj;
-                            attachObj.callback_id = 'zz7d883777'+count;
-
-                            console.log('CALLBACK: ',attachObj.callback_id);
+                            attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
 
                             attachObj.image_url = urlArr[count];
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
@@ -1987,7 +2074,7 @@ function encode_utf8(s) {
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
 module.exports.newSlack = newSlack;
-module.exports.incomingSlackAction = incomingSlackAction;
+module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;
 
 module.exports.sendTxtResponse = sendTxtResponse;

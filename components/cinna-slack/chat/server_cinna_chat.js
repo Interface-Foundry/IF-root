@@ -35,7 +35,7 @@
 // ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
 // ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
 // ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
-//Cinna 0.6 (Cardamom)
+//Cinna 0.7 (Paprika)
 
 var http = require('http');
 var request = require('request');
@@ -88,7 +88,9 @@ app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
     console.log('incoming Slack action BODY: ',req.body);
     res.sendStatus(200);
-    //ioKip.incomingSlackAction(req.body);
+
+    //SEND REQ.BODY: { payload: }
+    ioKip.incomingMsgAction(req.body,'slack');
 });	
 
 //incoming new slack user
@@ -96,5 +98,6 @@ app.post('/kikincoming', function(req, res) {
     console.log('incoming Kik BODY: ',req.body);
     res.sendStatus(200);
     // ioKip.newSlack();
+    ioKip.incomingMsgAction(req.body,'kik');
 });
 

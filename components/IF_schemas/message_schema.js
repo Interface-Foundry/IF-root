@@ -59,6 +59,9 @@ var messageSchema = mongoose.Schema({
         url: String,
         IP: String,
         headers:String
+    },
+    slackData: {
+        callback_id: String
     }
 });
 

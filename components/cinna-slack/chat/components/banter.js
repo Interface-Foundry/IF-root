@@ -1057,19 +1057,19 @@ var checkForCanned = function(input,callback,origin,source) {
         switch(input){
 
             //add to cart
-            case 'add1cart':
-                flag = 'slack.initial'; //do this action
-                res = 'meow 🐈';
-                query = 'neko atsume'; //what we're going to search for
+            case '1cheaper':
+                flag = 'slack.search'; //do this action
+                res = 'cheaper';
+                query = 1; 
                 break;
-            case 'add2cart':
-                flag = 'basic'; //do this action
-                res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
-                break;
-            case 'add3cart':
-                flag = 'basic'; //do this action
-                res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
-                break;
+            // case 'add2cart':
+            //     flag = 'basic'; //do this action
+            //     res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
+            //     break;
+            // case 'add3cart':
+            //     flag = 'basic'; //do this action
+            //     res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
+            //     break;
 
             //cheaper
 
