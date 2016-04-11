@@ -60,21 +60,20 @@ var updateJob = module.exports.updateJob = function(team_id) {
     jerbs[team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
       console.log('starting weekly update for team ' + team_id + ' ' + slackbot.team_name);
 
+      //
+      // Set up the bot
+      //
+      var bot = controller.spawn({
+        token: slackbot.bot.bot_access_token
+      })
 
-      slackbot.meta.office_assistants.map(function(assistant) {
 
-        //
-        // Set up the bot
-        //
-        var bot = controller.spawn({
-          token: slackbot.bot.bot_access_token
-        })
+      bot.startRTM(function(err, bot, payload) {
+        if (err) {
+          throw new Error('Could not connect to Slack');
+        }
 
-        bot.startRTM(function(err, bot, payload) {
-          if (err) {
-            throw new Error('Could not connect to Slack');
-          }
-
+        slackbot.meta.office_assistants.map(function(assistant) {
           bot.startPrivateConversation({user: assistant}, function(response, convo) {
             // inject the slackbot into the convo so that we can save it in the db
             convo.slackbot = slackbot;
@@ -108,7 +107,6 @@ var updateJob = module.exports.updateJob = function(team_id) {
 function lastCall(response, convo) {
   if (response.text.match(convo.bot.utterances.yes)) {
     console.log('sending last call message to everybody woooo');
-    convo.say('You got it, boss');
 
     co(function*() {
       // maybe i should update the team roster here???
@@ -121,8 +119,6 @@ function lastCall(response, convo) {
 
       var admin = convo.user_id;
 
-      console.log(users);
-
       yield users.map(function(u) {
         return new Promise(function(resolve, reject) {
           console.log('sending message to user ' + u.id);
@@ -130,7 +126,7 @@ function lastCall(response, convo) {
             debugger;
             console.log('wow come on ' + u.id)
             convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!');
-            resolve();
+            convo.on('end', resolve);
           })
         })
       })
@@ -142,10 +138,10 @@ function lastCall(response, convo) {
     })
   } else if (response.text.match(convo.bot.utterances.no)) {
     console.log('no last call');
-    convo.ask('OK, you can `checkout` whenever you\'re ready');
+    convo.say('OK, you can `checkout` whenever you\'re ready');
     convo.next();
   } else {
-    convo.ask("I'm sorry I couldn't understand that.  Should I send out a last call message?", lastCall)
+    convo.say("I'm sorry I couldn't understand that.  Should I send out a last call message?", lastCall)
     convo.next();
   }
 }
