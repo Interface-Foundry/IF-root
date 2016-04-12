@@ -191,8 +191,6 @@ var recallHistory = function(data,callback){
     } 
     //recall using callback_id from third party messenger Kip button tap
     else if (data.slackData && data.slackData.callback_id){
-
-        console.log('YAY!!!!! !!!!!!! ',data.slackData.callback_id);
         
         Message.findById(data.slackData.callback_id, function (err, msg) { 
             if(err){

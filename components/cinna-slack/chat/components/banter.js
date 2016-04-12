@@ -803,7 +803,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.6.4 Cardamom';
+            res = 'I\'m a penguin running Kip v0.6.5 Cardamom';
             break;
 
         case '/':
@@ -1057,28 +1057,26 @@ var checkForCanned = function(input,callback,origin,source) {
         switch(input){
 
             //add to cart
-            case '1cheaper':
+            case 'kip_cheaper':
                 flag = 'slack.search'; //do this action
                 res = 'cheaper';
-                query = 1; 
                 break;
-            // case 'add2cart':
-            //     flag = 'basic'; //do this action
-            //     res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
-            //     break;
-            // case 'add3cart':
-            //     flag = 'basic'; //do this action
-            //     res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
-            //     break;
-
-            //cheaper
-
-            //similar
-
-            //modify
-
-            //info
-
+            case 'kip_addcart':
+                flag = 'slack.search'; //do this action
+                res = 'addcart';
+                break;
+            case 'kip_moreinfo':
+                flag = 'slack.search'; //do this action
+                res = 'moreinfo';
+                break;
+            case 'kip_similar':
+                flag = 'slack.search'; //do this action
+                res = 'similar';
+                break;
+            case 'kip_modify':
+                flag = 'slack.search'; //do this action
+                res = 'modify';
+                break;
 
             //- - - - -  END TESTING - - - - - -//
 

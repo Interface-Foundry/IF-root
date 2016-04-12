@@ -946,8 +946,15 @@ var searchFocus = function(data) {
     if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
         if(data.recallHistory && data.recallHistory.amazon){
 
-            var searchSelect = data.searchSelect[0] - 1;
+            // if (data.source.flag && data.source.flag == 'buttonAction'){
+            //     var searchSelect = data.searchSelect[0];
+            // }
+            // else {
+                
+            // }
 
+            var searchSelect = data.searchSelect[0] - 1;
+            
             if (data.recallHistory.amazon[searchSelect]){
 
                 var attribs = data.recallHistory.amazon[searchSelect].ItemAttributes[0];
