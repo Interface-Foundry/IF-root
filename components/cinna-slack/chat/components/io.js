@@ -2101,8 +2101,8 @@ function recallHistory(data,callback,steps){
 
 //trim a string to char #
 function truncate(string){
-   if (string.length > 95)
-      return string.substring(0,95)+'...';
+   if (string.length > 80)
+      return string.substring(0,80)+'...';
    else
       return string;
 };
