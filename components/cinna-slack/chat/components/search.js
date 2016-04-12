@@ -18,9 +18,9 @@ var kip = require('kip')
 // });
 
 var client = amazon.createClient({
-  awsId: "AKIAIM4IKQAE2WF4MJUQ",
-  awsSecret: "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",
-  awsTag: "krista03-20"
+  awsId: "AKIAIKMXJTAV2ORZMWMQ",
+  awsSecret: "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",
+  awsTag: "quic0b-20"
 });
 
 var searchInitial = function(data,flag){
