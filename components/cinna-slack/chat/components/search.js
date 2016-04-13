@@ -18,9 +18,9 @@ var kip = require('kip')
 // });
 
 var client = amazon.createClient({
-  awsId: "AKIAIM4IKQAE2WF4MJUQ",
-  awsSecret: "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",
-  awsTag: "krista03-20"
+  awsId: "AKIAIKMXJTAV2ORZMWMQ",
+  awsSecret: "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",
+  awsTag: "quic0b-20"
 });
 
 var searchInitial = function(data,flag){
@@ -333,9 +333,9 @@ var searchAmazon = function(data, type, query, flag) {
                 }
 
                 client.itemSearch(amazonParams).then(function(results,err){
-                    results = results.filter(function(r) {
-                      return (_.get(r, 'Offers[0].TotalOffers[0]') || '0') !== '0';
-                    })
+                    // results = results.filter(function(r) {
+                    //   return (_.get(r, 'Offers[0].TotalOffers[0]') || '0') !== '0';
+                    // })
 
                     data.amazon = results;
 

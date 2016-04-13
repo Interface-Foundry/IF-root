@@ -40,10 +40,10 @@
 var http = require('http');
 var request = require('request');
 var async = require('async');
+var bodyParser = require('body-parser');
 var skype = require('./skype-sdk');
 var builder = require('botbuilder');
 var dialog = require('./components/io').dialog;
-
 
 // Initialize the BotService
 var botService = new skype.BotService({
@@ -117,6 +117,13 @@ app.get('/healthcheck', function (req, res) {
   res.send('💬 🌏')
 })
 
+<<<<<<< HEAD
+=======
+//parse incoming body
+app.use(bodyParser.json());         
+app.use(bodyParser.urlencoded({ extended: true }));                                
+
+>>>>>>> f79f3e404286e477dc7890f3037575abdf56a25e
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
   console.log('chat app listening on port 8000 🌏 💬')
@@ -137,13 +144,15 @@ app.get('/newslack', function(req, res) {
 //incoming new slack user
 app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
-    console.log('incoming Slack action: ',req);
     console.log('incoming Slack action BODY: ',req.body);
+    res.sendStatus(200);
     //ioKip.incomingSlackAction(req.body);
-});	
+}); 
 
 //incoming new slack user
-app.get('/kikincoming', function(req, res) {
+app.post('/kikincoming', function(req, res) {
+    console.log('incoming Kik BODY: ',req.body);
+    res.sendStatus(200);
     // ioKip.newSlack();
 });
 
