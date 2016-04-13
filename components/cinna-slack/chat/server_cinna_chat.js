@@ -117,13 +117,10 @@ app.get('/healthcheck', function (req, res) {
   res.send('💬 🌏')
 })
 
-<<<<<<< HEAD
-=======
 //parse incoming body
 app.use(bodyParser.json());         
 app.use(bodyParser.urlencoded({ extended: true }));                                
 
->>>>>>> f79f3e404286e477dc7890f3037575abdf56a25e
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
   console.log('chat app listening on port 8000 🌏 💬')
