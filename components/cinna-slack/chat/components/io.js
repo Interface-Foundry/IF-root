@@ -51,7 +51,6 @@ var dialog = new builder.LuisDialog(model);
 //-----------------//
 
 
-
 /////////// LOAD INCOMING ////////////////
 
 
