@@ -352,7 +352,6 @@ function loadSlackUsers(users){
             // idk how and i don't care this ship gonna burn before we scale out anyway
             user.conversations = user.conversations || {};
 
-
             // don't perform searches if ur having a convo with a bot
             // let botkit handle it
             if (user.conversations[data.channel]) {
@@ -374,6 +373,7 @@ function loadSlackUsers(users){
 
             if (data.text === 'settings') {
               user.conversations[data.channel] = 'settings';
+              // here "user" is the slackbot, and "data.user" is the person i guess
               return conversation_botkit.settings(user, data.user, function() {
                 console.log('done with settings conversation')
                 user.conversations[data.channel] = false;

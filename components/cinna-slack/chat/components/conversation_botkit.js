@@ -39,6 +39,8 @@ module.exports.onboard = function(slackbot, user_id, done) {
   });
 }
 
+var settingsConvos = {};
+
 module.exports.settings = function(slackbot, user_id, done) {
   console.log('wow such settings');
   var bot = controller.spawn({
@@ -64,6 +66,7 @@ module.exports.settings = function(slackbot, user_id, done) {
       // inject the slackbot into the convo so that we can save it in the db
       convo.slackbot = slackbot;
       convo.user_id = user_id;
+      settingsConvos[user_id] = convo;
       convo.on('end', function() {
         bot.closeRTM();
         done();
@@ -73,6 +76,15 @@ module.exports.settings = function(slackbot, user_id, done) {
     });
   });
 
+}
+
+
+module.exports.settings_stop = function(user_id) {
+  console.log('stopping settings convo for user ' + user_id);
+  if (settingsConvos[user_id]) {
+    settingsConvos[user_id].say('Ok thanks, done with settings.');
+    settingsConvos[user_id].next();
+  }
 }
 
 /*
@@ -411,8 +423,10 @@ function handleSettingsChange(response, convo) {
         if (response.text.match(convo.task.botkit.utterances.yes)) {
           convo.ask('Go ahead, I\'m listening.', handleSettingsChange)
           return convo.next();
-        } else if (response.text.match(convo.task.botkit.utterances.no)) {
-          convo.say('Ok thanks.');
+        } else if (response.text.match(convo.task.botkit.utterances.no)
+            || response.text.match(/^(end|exit|finish|done|quit|settings exit)/)
+            || response.text === 'stop') {
+          convo.say('Ok thanks.  Done with settings.');
           return convo.next();
         }
 
