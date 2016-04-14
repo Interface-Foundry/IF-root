@@ -6,6 +6,7 @@ var datejs = require('./date');
 var momenttz = require('moment-timezone');
 var botkit = require('botkit');
 var controller = botkit.slackbot();
+var promisify = require('promisify-node');
 
 //
 // In-memory hash of jobs so we can stop and start them
@@ -67,6 +68,8 @@ var updateJob = module.exports.updateJob = function(team_id) {
         token: slackbot.bot.bot_access_token
       })
 
+      promisify
+
 
       bot.startRTM(function(err, bot, payload) {
         if (err) {
@@ -101,30 +104,52 @@ var updateJob = module.exports.updateJob = function(team_id) {
   })
 }
 
-module.exports.collect = function(team_id, admin_id) {
+module.exports.collect = function(team_id, person_id) {
   co(function*() {
-    // get all the team members for this
-    var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
+    // um let's refresh the slackbot just in case...
+    var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
+
+    console.log(slackbot.meta.office_assistants);
+    console.log(person_id);
+    if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
+      // oh no the person is not an admin, whatever will we do???
+      console.log('cannot do this b/c the person is def not an admin');
+
+      return;
+    }
 
     //
     // Set up the bot
     //
     var bot = controller.spawn({
-      token: team.bot.bot_access_token
-    })
+      token: slackbot.bot.bot_access_token
+    });
 
+    // whee!  cannot promisify botkit, soooooo here we go!
+    bot.startRTM(function(e, bot, payload) {
+      bot.startPrivateConversation({user: person_id}, function(response, convo) {
+        convo.slackbot = slackbot;
+        convo.bot = bot;
+        convo.user_id = person_id;
+        convo.on('end', function() {
+          bot.closeRTM();
+        })
+        convo.ask('Would you like me to send the last call for 60 minutes from now?', lastCall);
+      })
+    })
     //
-    bot.startRTM(function(err, bot, payload) {
-      if (err) {
-        throw new Error('Could not connect to Slack');
-      }
+    // var bot2 = yield promisify(bot.startRTM)();
+    //
+    // promisify(bot2);// maybe this will work?
+    //
+    // console.log('wooooo');
+    // var convo = yield promisify(bot2.startPrivateConversation)({user: person_id});
 
-      // um okay now what?
-    })
 
 
   }).catch((e) => {
     console.log(e);
+    console.log(e.stack);
   })
 }
 
@@ -150,7 +175,6 @@ function lastCall(response, convo) {
         return new Promise(function(resolve, reject) {
           console.log('sending message to user ' + u.id);
           convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
-            debugger;
             console.log('wow come on ' + u.id)
             convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!');
             convo.on('end', resolve);

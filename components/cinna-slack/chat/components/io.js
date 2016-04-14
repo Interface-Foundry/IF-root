@@ -21,6 +21,7 @@ var processData = require("./process.js");
 var purchase = require("./purchase.js");
 var init_team = require("./init_team.js");
 var conversation_botkit = require('./conversation_botkit');
+var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
 
 var nlp = require('../../nlp/api');
@@ -345,8 +346,9 @@ function loadSlackUsers(users){
             }
 
 
-            // welp it would be nice to get the history in context here but fuck it
-            // idk how and i don't care this ship gonna burn before we scale out anyway
+            // Less cyncical comment: might be useful to have history here,
+            // but idk how and we'll probably rewrite this segment to handle
+            // multiple chat platforms sooner rather than later anyway.
             user.conversations = user.conversations || {};
 
 
@@ -371,15 +373,16 @@ function loadSlackUsers(users){
 
             if (data.text === 'settings') {
               user.conversations[data.channel] = 'settings';
+              // user is slackbot, data.user is the person
               return conversation_botkit.settings(user, data.user, function() {
                 console.log('done with settings conversation')
                 user.conversations[data.channel] = false;
               })
             }
 
-            if (data.text.match(/\bcollect\b/) {
+            if (data.text.match(/\bcollect\b/)) {
               console.log('triggering kip collect, maybe if the person is an admin?')
-              return weekly_updates.collect(user, data,user, function() {
+              return weekly_updates.collect(data.team, data.user, function() {
                 console.log('done collecting orders i guess');
               })
             }
