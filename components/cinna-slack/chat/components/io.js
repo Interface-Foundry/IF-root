@@ -21,6 +21,7 @@ var processData = require("./process.js");
 var purchase = require("./purchase.js");
 var init_team = require("./init_team.js");
 var conversation_botkit = require('./conversation_botkit');
+var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
 
 var nlp = require('../../nlp/api');
@@ -348,8 +349,9 @@ function loadSlackUsers(users){
             }
 
 
-            // welp it would be nice to get the history in context here but fuck it
-            // idk how and i don't care this ship gonna burn before we scale out anyway
+            // Less cyncical comment: might be useful to have history here,
+            // but idk how and we'll probably rewrite this segment to handle
+            // multiple chat platforms sooner rather than later anyway.
             user.conversations = user.conversations || {};
 
             // don't perform searches if ur having a convo with a bot
@@ -373,10 +375,16 @@ function loadSlackUsers(users){
 
             if (data.text === 'settings') {
               user.conversations[data.channel] = 'settings';
-              // here "user" is the slackbot, and "data.user" is the person i guess
               return conversation_botkit.settings(user, data.user, function() {
                 console.log('done with settings conversation')
                 user.conversations[data.channel] = false;
+              })
+            }
+
+            if (data.text.match(/\bcollect\b/)) {
+              console.log('triggering kip collect, maybe if the person is an admin?')
+              return weekly_updates.collect(data.team, data.user, function() {
+                console.log('done collecting orders i guess');
               })
             }
 
@@ -1883,7 +1891,7 @@ var saveToCart = function(data){
                   // Check for that pesky situation where we can't add to cart
                   // because the user needs to choose size or color options
                   if (itemToAdd.mustSelectSize) {
-                    return processData.getItemLink(_.get(itemToAdd, 'DetailPageURL[0]'), data.source.user, 'ASIN-' + _get(itemToAdd, 'ASIN[0]')).then(function(url) {
+                    return processData.getItemLink(_.get(itemToAdd, 'DetailPageURL[0]'), data.source.user, 'ASIN-' + _.get(itemToAdd, 'ASIN[0]')).then(function(url) {
                       sendTxtResponse(data, 'Hi, please goto Amazon so you can choose your size and style: ' + url);
                     }).catch(function(e) {
                       console.log('could not get link for item')
