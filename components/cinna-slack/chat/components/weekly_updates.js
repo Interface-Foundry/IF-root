@@ -137,16 +137,6 @@ module.exports.collect = function(team_id, person_id) {
         convo.ask('Would you like me to send the last call for 60 minutes from now?', lastCall);
       })
     })
-    //
-    // var bot2 = yield promisify(bot.startRTM)();
-    //
-    // promisify(bot2);// maybe this will work?
-    //
-    // console.log('wooooo');
-    // var convo = yield promisify(bot2.startPrivateConversation)({user: person_id});
-
-
-
   }).catch((e) => {
     console.log(e);
     console.log(e.stack);
@@ -171,18 +161,29 @@ function lastCall(response, convo) {
 
       var admin = convo.user_id;
 
+      var clocks = [];
+
       yield users.map(function(u) {
         return new Promise(function(resolve, reject) {
-          console.log('sending message to user ' + u.id);
-          convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
-            console.log('wow come on ' + u.id)
-            convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!');
-            convo.on('end', resolve);
+          convo.bot.say({
+            text: 'Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!',
+            channel: u.dm
+          });
+          convo.bot.say({
+            text: 'The clock\'s ticking! You have *60* minutes.',
+            channel: u.dm
+            // username: 'Kip' // specifying username here forces botkit to use the web api, which returns the message ts in the response.
+          }, function(e, r) {
+            if (e) {
+              console.log(e);
+            }
           })
         })
       })
 
       // continue the admin's conversation if there's anything left to say.
+
+      // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
       convo.next();
     }).catch((e) => {
       console.log(e);
