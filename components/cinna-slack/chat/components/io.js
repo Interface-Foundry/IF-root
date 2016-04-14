@@ -44,10 +44,17 @@ var cinnaEnv;
 var upload = require('../../../../IF_services/upload.js');
 
 //---skype stuff---//
+skypeSession = {};
 var builder = require('botbuilder');
 var prompts = require('../skype_bot/prompts');
 var model = process.env.model || 'https://api.projectoxford.ai/luis/v1/application?id=529c8e29-06fe-4342-8bed-59d07b4216f6&subscription-key=f1e70f11452b4b53b73473d3dbb487c4';
 var dialog = new builder.LuisDialog(model);
+//-----------------//
+
+//---bot connector stuff---//
+var credentials = new msRest.BasicAuthenticationCredentials('KipTest', '10d5ae7a86204287972c7fc98b21dbe3');
+var botConnector = new builder.BotConnectorBot({appId: 'KipTest', appSecret: '10d5ae7a86204287972c7fc98b21dbe3'})
+var msRest = require('ms-rest');
 //-----------------//
 
 
@@ -102,9 +109,17 @@ tg.on('message', function(msg){
 //------------------------------------Skype stuff----------------------------------------//
 
 
-//Creating var to hold session so we can use session.send in other functions such as sendResponse further
-var skypeSession;
+//NON LUIS
+tempGlobal = preProcess;
+function processSkypeSession(session) {
+    console.log('\n\n\nDORAEMON',session);
+    session.userData.io.msg = session.message.text;
+    session.userData.io.tokens = [session.message.text];
+    skypeSession = session;
+    tempGlobal(session.userData.io);
+}
 
+//LUIS
 dialog.on('Search', [
     function (session, args, next) {
         session.userData.io.bucket = 'search'
@@ -122,9 +137,8 @@ dialog.on('Search', [
         } else {
             console.log('Intent - Search: LUIS found an object: ',object)
             session.userData.io.msg = object.entity
-            session.userData.io.msg = object.entity
             session.userData.io.tokens = [object.entity]
-             skypeSession = session;
+            skypeSession = session;
             next({ response: object.entity });
         }
     },
@@ -729,7 +743,6 @@ var loadSocketIO = function(server){
 
 //pre process incoming messages for canned responses
 function preProcess(data){
-
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
@@ -800,10 +813,12 @@ function preProcess(data){
             }
         }
         //proceed to NLP instead
-        else if (data.source.origin !== 'skype'){
+        // else if (data.source.origin !== 'skype'){
+            // routeNLP(data);
+        // } 
+        else {
+            // incomingAction(data)
             routeNLP(data);
-        } else {
-            incomingAction(data)
         }
     },data.source.origin);
 
@@ -1259,10 +1274,18 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             data.client_res.push(urlArr[count]);
                         }
+                        //LE ATTACHMENT AREA
                         else if (data.source.origin == 'telegram'){
                             var attachObj = {};
                             attachObj.photo = urlArr[count];
                             attachObj.message =  emoji + '[' + truncate(data.amazon[count].ItemAttributes[0].Title[0]) + ']('+ res[count] +')';
+                            data.client_res.push(attachObj);
+                        }
+                        else if (data.source.origin == 'skype'){
+                            var attachObj = {};
+                            attachObj.photo = urlArr[count];
+                            attachObj.messageText =  emoji + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            attachObj.messageLink = res[count];
                             data.client_res.push(attachObj);
                         }
                         count++;
@@ -1443,7 +1466,7 @@ var sendResponse = function(data){
                                 }
                                 if (uploaded.inputPath) {
                                     fs.unlink(inputPath, function(err, res) {
-                                            if (err) console.log('fs error: ', err)
+                                        if (err) console.log('fs error: ', err)
                                     })
                                 }
                                 callback();
@@ -1665,72 +1688,94 @@ var sendResponse = function(data){
     // Skype Outgoing
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'skype'){
-        console.log('Skype data: ',data.action)
+        
+       
+        // var sendSkype = co.wrap(function* (skypeSession, data) {
+        //   var returnData = skypeSession.send(data)
+        //   // if (!returnData.msgSent) {
+        //   //   var count = 0
+        //   //   async.whilst(
+        //   //       function () { return count < 5; },
+        //   //       function (callback) {
+        //   //           count++;
+        //   //           setTimeout(function () {
+        //   //               callback(null, count);
+        //   //           }, 1000);
+        //   //       },
+        //   //       function (err, n) {
+        //   //           console.log('TIMED THE FUCK OUT')
+        //   //       });
+        //   // } else {
+        //      setTimeout(function () {
+        //           // callback(null, count);
+        //       }, 1000);
+        //     var result = yield Promise.resolve(true);
+        //     return result;
+        //   // } 
+        // })
+
+        // // .then(function (value) {
+        // //   console.log(value);
+        // // }, function (err) {
+        // //   console.error(err.stack);
+        // // });
+
+
+        // console.log('Skype data: ',data.action)
         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
-            console.log('INITIAL DATA : ', JSON.stringify(data))
+            //**Hacking for testing botConnector wtf microsoft 
+            // skypeSession.message.from = { channelId: 'skype', address: '8:live:mitsuaki_40' };
+            // skypeSession.message.to =  { channelId: 'skype', address: '28:4932ef13-bf90-425d-99b7-aebc66ed85c5' };
+            // skypeSession.message.channelData.Message.from = '8:live:mitsuaki_40';
+            // skypeSession.message.channelData.Message.to = '28:4932ef13-bf90-425d-99b7-aebc66ed85c5';
+            
+            // skypeSession.message = { type: 'Message',
+            //  id: '0',
+            //  from: { channelId: 'skype', address: '8:live:mitsuaki_40' },
+            //  to:
+            //   { channelId: 'skype',
+            //     address: '28:4932ef13-bf90-425d-99b7-aebc66ed85c5' },
+            //  text: 'Jacket',
+            //  channelData: {
+            //   Message: {
+            //     from: '8:live:mitsuaki_40',
+            //     to: '28:4932ef13-bf90-425d-99b7-aebc66ed85c5',
+            //     type: undefined,
+            //     content: 'Jacket',
+            //     contentType: 'text',
+            //     messageId: '0',
+            //     eventTime: '2016-04-06T20:57:14.409Z' } }
+            // }
+            console.log('SKYPE SESSION', skypeSession);
+
             var message = data.client_res[0]; //use first item in client_res array as text message
             skypeSession.send(message);
-            console.log('attachthis ',message);
+            setTimeout(function () { 
+                var attachThis = data.client_res;
+                attachThis.shift();
+                console.log('attachthis ',attachThis);
+                async.eachSeries(attachThis, function(attach, callback) {
+                    var reply = new builder.Message()
+                           .setText(skypeSession, attach.messageText)
+                           .addAttachment({contenttype: 'image/png', contentUrl: attach.photo});
+                    var reply2 = '[' + attach.messageText + '('+ 'http://creativecommons.org/licenses/by-sa/3.0'+')]'
+                    
+                    skypeSession.send(reply)
 
-            //remove first message from res arr
-            var attachThis = data.client_res;
-            attachThis.shift();
-
-            //attachThis = JSON.stringify(attachThis);
-
-            // console.log('attachthis ',attachThis);
-
-            async.eachSeries(attachThis, function(attach, callback) {
-                console.log('photo',attach.photo);
-                console.log('message ',attach.message);
-                console.log('client_res', data.client_res)
-                skypeSession.send(attach.message + '\n' + attach.photo)
-                // skypeSession.send()
-                callback()
-                //      tg.sendMessage({
-                //                 chat_id: data.source.channel,
-                //                 text: attach.message,
-                //                 parse_mode: 'Markdown',
-                //                 disable_web_page_preview: 'true'
-
-                //      }).then(function(datum){
-                //           tg.sendPhoto({
-                //             chat_id: encode_utf8(data.source.channel),
-                //             photo: encode_utf8(buffer)
-                //             }).then(function(datum){
-                //                 // var field = {
-                //                 //     "value": attach,
-                //                 //     "short":false
-                //                 // }
-                //                 // attachments[1].fields.push(field);
-                //                 callback();
-                //             }).catch(function(err){
-                //                 if (err) { console.log('ios.js1285: err',err) }
-                //                 callback();
-                //             })
-                //         }).catch(function(err){
-                //             if (err) {
-                //                 // console.log('\n\n\ntg.sendPhoto error: ',err)
-                //             }
-                //             callback();
-                //         })
-                // }).catch(function(err) {
-                //     if (err)  console.log('\n\n\niojs image upload error: ',err,'\n\n\n')
-                //     callback();
-                // })
-            }, function done(){
-
-
-            });
-
-            // var msgData = {
-            //   // attachments: [...],
-            //     icon_url:'http://kipthis.com/img/kip-icon.png',
-            //     username:'Kip',
-            //     attachments: attachThis
-            // };
-            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
+                    // skypeSession.send(attach.messageText + '\n' + 'Link: '+ attach.messageLink)
+                        // + '\n' + attach.photo)
+                    setTimeout(function () {
+                     skypeSession.send(attach.photo)
+                         setTimeout(function () {
+                            callback() 
+                     }, 600);
+                    }, 1000);
+                }, function done(err){
+                    if (err) {
+                        console.log('io1729:',err)
+                    }
+                });
+            }, 1500);
         }
         else if (data.action == 'focus'){
             if (data.client_res[0]) {
@@ -2381,3 +2426,4 @@ module.exports.outgoingResponse = outgoingResponse;
 module.exports.checkOutgoingBanter = checkOutgoingBanter;
 module.exports.saveToCart = saveToCart;
 module.exports.dialog = dialog;
+module.exports.processSkypeSession = processSkypeSession;

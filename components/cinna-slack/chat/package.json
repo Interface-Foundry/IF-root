@@ -15,7 +15,8 @@
   "dependencies": {
     "@slack/client": "^2.2.1",
     "WNdb": "^3.1.1",
-    "botbuilder": "^0.6.1",
+    "botbuilder": "^0.8.0",
+    "botconnector": "^0.9.6",
     "botkit": "0.0.11",
     "busboy": "^0.2.13",
     "co": "^4.6.0",
@@ -26,6 +27,7 @@
     "goo.gl": "^0.1.4",
     "http": "0.0.0",
     "ms": "^0.7.1",
+    "ms-rest": "^1.12.0",
     "net": "^1.0.2",
     "node-cloud-vision-api": "^0.2.0",
     "os-homedir": "^1.0.1",

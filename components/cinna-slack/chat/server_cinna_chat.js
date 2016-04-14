@@ -44,6 +44,12 @@ var bodyParser = require('body-parser');
 var skype = require('./skype-sdk');
 var builder = require('botbuilder');
 var dialog = require('./components/io').dialog;
+var processSkypeSession = require('./components/io').processSkypeSession;
+var co = require('co');
+
+//Botconnector
+var msRest = require('ms-rest');
+var connector = require('botconnector');
 
 // Initialize the BotService
 var botService = new skype.BotService({
@@ -56,13 +62,17 @@ var botService = new skype.BotService({
     }
 });
 
-// Create bot and add dialogs
+// Skype Bot
 var bot = new builder.SkypeBot(botService);
 
+// Bot Connector Bot
+var credentials = new msRest.BasicAuthenticationCredentials('KipTest', '10d5ae7a86204287972c7fc98b21dbe3');
+var botConnector = new builder.BotConnectorBot({appId: 'KipTest', appSecret: '10d5ae7a86204287972c7fc98b21dbe3'})
+
 // Install First Run middleware and dialog
-bot.use(function (session, next) {
+botConnector.use(function (session, next) {
     if (!session.userData.firstRun) {
-        console.log('session: ',session)
+        // console.log('session: ',session)
         session.userData.firstRun = true;
         session.userData.io = {
             source: {
@@ -79,23 +89,14 @@ bot.use(function (session, next) {
     }
 });
 
-bot.add('/', dialog);
 
-// bot.add('/firstRun', [
-//     function (session) {
-//         builder.Prompts.text(session, "Hello... What's your name?");
-//     },
-//     function (session, results) {
-//         // We'll save the prompts result and return control to main through
-//         // a call to replaceDialog(). We need to use replaceDialog() because
-//         // we intercepted the original call to main and we want to remove the
-//         // /firstRun dialog from the callstack. If we called endDialog() here
-//         // the conversation would end since the /firstRun dialog is the only 
-//         // dialog on the stack.
-//         session.userData.name = results.response;
-//         session.replaceDialog('/'); 
-//     }
-// ]);
+
+botConnector.add('/', processSkypeSession)
+
+var passSessionToIo = co.wrap(function* (session) {
+    var result = yield Promise.resolve(session);
+    return result;
+})
 
 //set env vars
 var config = require('config');
@@ -119,7 +120,9 @@ app.get('/healthcheck', function (req, res) {
 
 //parse incoming body
 app.use(bodyParser.json());         
-app.use(bodyParser.urlencoded({ extended: true }));                                
+app.use(bodyParser.urlencoded({ extended: true }));              
+app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.urlencoded({limit: '100mb', extended: true}));                  
 
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
@@ -153,5 +156,8 @@ app.post('/kikincoming', function(req, res) {
     // ioKip.newSlack();
 });
 
-app.post('/skype', skype.messagingHandler(botService));
+app.post('/skype', 
+    // skype.messagingHandler(botService)
+    botConnector.verifyBotFramework(), botConnector.listen()
+    );
 
