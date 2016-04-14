@@ -58,39 +58,41 @@ if (process.env.NODE_ENV == 'development_alyx'){
     telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
 }
 
-var tg = new telegram({
-        token: telegramToken,
-        updates: {
-            enabled: true
-    }
-});
+if (process.env.NODE_ENV !== 'development') {
+  var tg = new telegram({
+          token: telegramToken,
+          updates: {
+              enabled: true
+      }
+  });
 
-tg.on('message', function(msg){
+  tg.on('message', function(msg){
 
-    //if user sends sticker msg.msg will be undefined
-    if (msg.sticker) {
-        console.log('Telegram message is a sticker: ',msg)
-        return
-    }
+      //if user sends sticker msg.msg will be undefined
+      if (msg.sticker) {
+          console.log('Telegram message is a sticker: ',msg)
+          return
+      }
 
-    var newTg = {
-        source: {
-            'origin':'telegram',
-            'channel':msg.from.id.toString(),
-            'org':'telegram',
-            'id':'telegram' + "_" + msg.from.id, //for retrieving chat history in node memory,
-        },
-        'msg':msg.text
-    }
+      var newTg = {
+          source: {
+              'origin':'telegram',
+              'channel':msg.from.id.toString(),
+              'org':'telegram',
+              'id':'telegram' + "_" + msg.from.id, //for retrieving chat history in node memory,
+          },
+          'msg':msg.text
+      }
 
-    //console.log('asdf ',newTg);
-    if (process.env.NODE_ENV !== 'development') {
-      console.log("incoming telegram message");
-      console.log(msg);
-      console.log(newTg);
-      preProcess(newTg);
-    }
-});
+      //console.log('asdf ',newTg);
+      if (process.env.NODE_ENV !== 'development') {
+        console.log("incoming telegram message");
+        console.log(msg);
+        console.log(newTg);
+        preProcess(newTg);
+      }
+  });
+}
 
 //get stored slack users from mongo
 var initSlackUsers = function(env){
@@ -184,6 +186,7 @@ var initSlackUsers = function(env){
                 });
             }
             else {
+                console.log('found ' + users.length + ' slack teams in the db');
                 loadSlackUsers(users);
             }
         });
@@ -650,7 +653,7 @@ function preProcess(data){
                         slackTester = { payload: '{"actions":[{"name":"moreinfo","value":"0"}],"callback_id":"570c7611d365f919d8e2d433","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434463.610937","message_ts":"1460434449.000488","attachment_id":"1","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/OBIAI1M7VY2U2BGWWAA3VIZB.png","image_width":400,"image_height":175,"image_bytes":52377,"callback_id":"570c7611d365f919d8e2d433","title":":one: Greatest Hits","id":1,"title_link":"http:\\/\\/goo.gl\\/vpf4iz","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Z9RGCV9RBFGATNUWVSRUKT7X.png","image_width":400,"image_height":175,"image_bytes":35445,"callback_id":"570c7611d365f919d8e2d433","title":":two: ZZ Way - Spring ZigZag Craft Game","id":2,"title_link":"http:\\/\\/goo.gl\\/W9si1L","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WOIKXKZKL7JO3J6IR9L8YFJ5.png","image_width":400,"image_height":175,"image_bytes":52322,"callback_id":"570c7611d365f919d8e2d433","title":":three: Til The Casket Drops [Explicit]","id":3,"title_link":"http:\\/\\/goo.gl\\/tDTjNp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434449.000488"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33890435429\\/zRrVRvLmlnN8PEDyvMcQWNIx"}' };
                     }
 
-                    incomingMsgAction(slackTester); 
+                    incomingMsgAction(slackTester);
                     break;
                 case 'cancel': //just respond, no actions
                     //send message
@@ -835,7 +838,7 @@ var incomingMsgAction = function(data,origin){
         tokens: ['kipfix'] //bad code check later on, hot fix here for now
     };
 
-    //let's try to build a universal action button i/o for all platforms 
+    //let's try to build a universal action button i/o for all platforms
     //deal with first action in action arr...more will happen later?
     if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value){
 
@@ -869,7 +872,7 @@ var incomingMsgAction = function(data,origin){
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'save';
                 break;
-        }        
+        }
 
         //get searchSelect
         var parseVal = parseInt(parsedIn.actions[0].value); //parse
@@ -1137,7 +1140,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                 if (data.source.origin == 'slack'){
                     //store a new mongo ID to pass in Slack callback
-                    data.searchId = mongoose.Types.ObjectId(); 
+                    data.searchId = mongoose.Types.ObjectId();
 
                     // var moreObj = {};
                     // moreObj.actions = [{
@@ -1961,6 +1964,14 @@ function viewCart(data, show_added_item){
     co(function*() {
       var cart = yield kipcart.getCart(data.source.org);
 
+      if (cart.items.length < 1) {
+        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet.');
+      }
+
+      var slackbot = yield db.Slackbots.findOne({
+        team_id: data.source.org
+      }).exec();
+
       // get the latest added item if we need to highlight it
       if (show_added_item) {
         var added_item = cart.items[cart.items.length - 1];
@@ -2019,8 +2030,16 @@ function viewCart(data, show_added_item){
         }
       }
 
+      // Only show the purchase link in the summary for office admins.
+      var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
+      if (slackbot.meta.office_assistants.indexOf(data.source.user) >= 0) {
+        summaryText += ` \n <${cart.link}|» Purchase Items >`;
+      } else {
+        summaryText += '>';
+      }
+
       cartObj.push({
-        text: `_Summary: Team Cart_ \n Total: *${cart.total}* \n <${cart.link}|» Purchase Items >`,
+        text: summaryText,
         mrkdwn_in: ['text', 'pretext'],
         color: '#45a5f4'
       })
