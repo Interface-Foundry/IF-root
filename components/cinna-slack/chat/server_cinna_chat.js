@@ -83,14 +83,37 @@ app.get('/newslack', function(req, res) {
     ioKip.newSlack();
 });
 
-//incoming new slack user
+//incoming slack action
 app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
     console.log('incoming Slack action BODY: ',req.body);
-    res.sendStatus(200);
 
-    //SEND REQ.BODY: { payload: }
-    ioKip.incomingMsgAction(req.body,'slack');
+    if (req.body && req.body.payload){
+      var parsedIn = JSON.parse(req.body.payload);
+
+      /// FOR INITIAL SEARCHES
+
+      //sends back original chat
+      if (parsedIn.response_url && parsedIn.original_message){
+        var stringOrig = JSON.stringify(parsedIn.original_message);
+        request.post(
+            parsedIn.response_url,
+            { payload: stringOrig },
+            function (err, res, body) {
+              console.error('post err ',err);
+            }
+        );
+      }else {
+        console.error('slack buttons broke, need a response_url');
+        return;
+      }
+    }else {
+      console.log('nah');
+      res.sendStatus(200);
+    }
+
+    // //SEND REQ.BODY: { payload: }
+    // ioKip.incomingMsgAction(req.body,'slack');
 });	
 
 
