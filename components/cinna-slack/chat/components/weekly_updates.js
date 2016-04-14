@@ -101,6 +101,33 @@ var updateJob = module.exports.updateJob = function(team_id) {
   })
 }
 
+module.exports.collect = function(team_id, admin_id) {
+  co(function*() {
+    // get all the team members for this
+    var team = yield db.Slackbots.findOne({team_id: team_id}).exec();
+
+    //
+    // Set up the bot
+    //
+    var bot = controller.spawn({
+      token: team.bot.bot_access_token
+    })
+
+    //
+    bot.startRTM(function(err, bot, payload) {
+      if (err) {
+        throw new Error('Could not connect to Slack');
+      }
+
+      // um okay now what?
+    })
+
+
+  }).catch((e) => {
+    console.log(e);
+  })
+}
+
 //
 // Sends a "last call" message to everyone who has not shut Kip up about messages like this
 //
