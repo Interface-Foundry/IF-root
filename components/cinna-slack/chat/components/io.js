@@ -2042,8 +2042,6 @@ function viewCart(data, show_added_item){
       var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
       if (slackbot.meta.office_assistants.indexOf(data.source.user) >= 0) {
         summaryText += ` \n <${cart.link}|» Purchase Items >`;
-      } else {
-        summaryText += '>';
       }
 
       cartObj.push({
