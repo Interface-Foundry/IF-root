@@ -52,6 +52,7 @@ var dialog = new builder.LuisDialog(model);
 //-----------------//
 
 //---bot connector stuff---//
+var msRest = require('ms-rest');
 var credentials = new msRest.BasicAuthenticationCredentials('KipTest', '10d5ae7a86204287972c7fc98b21dbe3');
 var botConnector = new builder.BotConnectorBot({appId: 'KipTest', appSecret: '10d5ae7a86204287972c7fc98b21dbe3'})
 var msRest = require('ms-rest');

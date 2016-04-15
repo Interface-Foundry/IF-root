@@ -89,8 +89,6 @@ botConnector.use(function (session, next) {
     }
 });
 
-
-
 botConnector.add('/', processSkypeSession)
 
 var passSessionToIo = co.wrap(function* (session) {
@@ -158,6 +156,7 @@ app.post('/kikincoming', function(req, res) {
 
 app.post('/skype', 
     // skype.messagingHandler(botService)
-    botConnector.verifyBotFramework(), botConnector.listen()
+    // botConnector.verifyBotFramework(), 
+    botConnector.listen()
     );
 
