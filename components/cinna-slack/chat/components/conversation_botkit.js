@@ -420,12 +420,12 @@ function handleSettingsChange(response, convo) {
 
         // the question was something like "Do you have any settings changes?"
         // so we need to allow the user to say "yes" or "no"
-        if (response.text.match(convo.task.botkit.utterances.yes)) {
+        if (response.text.toLowerCase().match(convo.task.botkit.utterances.yes)) {
           convo.ask('Go ahead, I\'m listening.', handleSettingsChange)
           return convo.next();
-        } else if (response.text.match(convo.task.botkit.utterances.no)
-            || response.text.match(/^(end|exit|finish|done|quit|settings exit)/)
-            || response.text === 'stop') {
+        } else if (response.text.toLowerCase().match(convo.task.botkit.utterances.no)
+            || response.text.toLowerCase().match(/^(end|exit|finish|done|quit|settings exit)/)
+            || response.text.toLowerCase() === 'stop') {
           convo.say('Ok thanks.  Done with settings.');
           return convo.next();
         }
