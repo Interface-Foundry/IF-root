@@ -315,7 +315,12 @@ function handleSettingsChange(response, convo) {
       text = text.replace('days', 'day');
       text = text.replace(/(to|every|\bat\b)/g, '');
       text = text.trim();
-      // text = text.replace(/ [\d]+/)
+
+      // this date library cannot understand Tuesday at 2
+      // but it does understand Tuesday at 2:00
+      if (text.indexOf(':') < 0) {
+        text = text.replace(/([\d]+)/, '$1:00')
+      }
       console.log(text);
       var date = Date.parse(text);
       console.log(date);
