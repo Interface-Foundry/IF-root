@@ -100,50 +100,51 @@ var initSlackUsers = function(env){
     console.log('loading with env: ',env);
     cinnaEnv = env;
     //load kip-pepper for testing
-    if (env === 'development_alyx') {
+    // if (env === 'development_alyx') {
 
-        //KIP on Slack
-        // var testUser = [{
-        //     team_id:'T02PN3B25',
-        //     dm:'D0H6X6TA8',
-        //     bot: {
-        //         bot_user_id: 'U0GRJ9BJS',
-        //         bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
-        //     },
-        //     meta: {
-        //         initialized: true
-        //     }
-        // }];
+    //     //KIP on Slack
+    //     // var testUser = [{
+    //     //     team_id:'T02PN3B25',
+    //     //     dm:'D0H6X6TA8',
+    //     //     bot: {
+    //     //         bot_user_id: 'U0GRJ9BJS',
+    //     //         bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
+    //     //     },
+    //     //     meta: {
+    //     //         initialized: true
+    //     //     }
+    //     // }];
 
-        //CINNA-PEPPER
-        // var testUser = [{
-        //     team_id:'T0H72FMNK',
-        //     dm:'D0H6X6TA8',
-        //     bot: {
-        //         bot_user_id: 'U0H6YHBNZ',
-        //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
-        //     },
-        //     meta: {
-        //         initialized: false
-        //     }
-        // }];
+    //     //CINNA-PEPPER
+    //     // var testUser = [{
+    //     //     team_id:'T0H72FMNK',
+    //     //     dm:'D0H6X6TA8',
+    //     //     bot: {
+    //     //         bot_user_id: 'U0H6YHBNZ',
+    //     //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+    //     //     },
+    //     //     meta: {
+    //     //         initialized: false
+    //     //     }
+    //     // }];
 
-        //KIP-PAPRIKA
-        var testUser = [{
-            team_id:'T02PN3B25',
-            dm:'D0H6X6TA8',
-            bot: {
-                bot_user_id: 'U0H6YHBNZ',
-                bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
-            },
-            meta: {
-                initialized: true
-            }
-        }];
+    //     //KIP-PAPRIKA
+    //     var testUser = [{
+    //         team_id:'T02PN3B25',
+    //         dm:'D0H6X6TA8',
+    //         bot: {
+    //             bot_user_id: 'U0H6YHBNZ',
+    //             bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
+    //         },
+    //         meta: {
+    //             initialized: true
+    //         }
+    //     }];
 
 
-        loadSlackUsers(testUser);
-    }else if (env === 'development_mitsu'){
+    //     loadSlackUsers(testUser);
+    // }
+    if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0HLZP09L',
             dm:'D0HLZLBDM',
@@ -1221,8 +1222,8 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                                   "value": count
                                 }
                             ];
-                            attachObj.actions = actionObj;
-                            attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
+                            //attachObj.actions = actionObj;
+                            //attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
 
                             attachObj.image_url = urlArr[count];
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
@@ -1705,7 +1706,7 @@ var sendResponse = function(data){
                       }
                     }
                 ];
-                attachments[0].actions = actionObj;
+                //attachments[0].actions = actionObj;
 
                 attachThis.shift(); //remove image from array
 
@@ -2024,16 +2025,16 @@ function viewCart(data, show_added_item){
             text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
             color: '#7bd3b6',
-            thumb_url: item.image,
-            actions: actionObj
+            thumb_url: item.image
+           // actions: actionObj
           })
         } else {
           cartObj.push({
             text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
             mrkdwn_in: ['text', 'pretext'],
             color: '#45a5f4',
-            thumb_url: item.image,
-            actions: actionObj
+            thumb_url: item.image
+            //actions: actionObj
           })
         }
       }

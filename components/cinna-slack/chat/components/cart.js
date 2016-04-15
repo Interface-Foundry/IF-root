@@ -28,7 +28,7 @@ module.exports = {};
 //
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
-  console.log(item)
+  console.log('ITEM ZZZZ ',item)
 
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');

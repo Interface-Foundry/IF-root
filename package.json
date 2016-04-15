@@ -81,6 +81,7 @@
     "phantom": "^0.8.0",
     "phantomjs": "^1.9.18",
     "prerender-node": "^2.1.0",
+    "promisify-node": "^0.4.0",
     "q": "^1.4.1",
     "quickflow": "^1.0.0",
     "react": "^0.14.3",
