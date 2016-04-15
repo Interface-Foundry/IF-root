@@ -104,7 +104,7 @@ var updateJob = module.exports.updateJob = function(team_id) {
   })
 }
 
-module.exports.collect = function(team_id, person_id) {
+module.exports.collect = function(team_id, person_id  ) {
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
@@ -132,6 +132,7 @@ module.exports.collect = function(team_id, person_id) {
         convo.bot = bot;
         convo.user_id = person_id;
         convo.on('end', function() {
+          console.log('ending collection convo');
           bot.closeRTM();
         })
         convo.ask('Would you like me to send the last call for 60 minutes from now?', lastCall);
@@ -176,7 +177,9 @@ function lastCall(response, convo) {
           }, function(e, r) {
             if (e) {
               console.log(e);
+              reject(e);
             }
+            resolve();
           })
         })
       })
@@ -184,9 +187,13 @@ function lastCall(response, convo) {
       // continue the admin's conversation if there's anything left to say.
 
       // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
+      console.log('calling next');
       convo.next();
+
     }).catch((e) => {
+      console.log('error');
       console.log(e);
+      convo.next();
     })
   } else if (response.text.match(convo.bot.utterances.no)) {
     console.log('no last call');
