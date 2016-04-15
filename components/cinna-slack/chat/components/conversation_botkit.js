@@ -374,6 +374,7 @@ function handleSettingsChange(response, convo) {
 
       } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
         // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
+        var should_return = false;
         userIds.map(function(id) {
           if (id == convo.user_id) {
             convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
@@ -382,8 +383,16 @@ function handleSettingsChange(response, convo) {
           var index = convo.slackbot.meta.office_assistants.indexOf(id);
           if (index >= 0) {
             convo.slackbot.meta.office_assistants.splice(index, 1);
+          } else {
+            convo.ask('Looks like <@' + id + '> was not an admin.  Do you have any settings changes?', handleSettingsChange)
+            convo.next();
+            should_return = true;
           }
         })
+
+        if (should_return) {
+          return;
+        }
       } else {
         convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
         return convo.next();
