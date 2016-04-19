@@ -62,6 +62,7 @@ var checkForCanned = function(input,callback,origin,source) {
             res = 'That\'s good to hear. It\'s a hard life being in retail, want to help a bot out and buy something? We have discounts! 😊';
             break;
         case textSimilar(input,'yes') > 90:
+        case textSimilar(input,'yep') > 90:
         case textSimilar(input,'yah') > 90:
         case textSimilar(input,'yeah') > 90:
             flag = 'basic'; //do this action

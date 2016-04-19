@@ -1120,28 +1120,22 @@ var searchMore = function(data){
             var loopLame = [0,1,2];//lol
             async.eachSeries(loopLame, function(i, callback) {
                 if (data.amazon[i]){
-                    //get reviews by ASIN
-                    getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                        //adding scraped reviews to amazon objects
-                        data.amazon[i].reviews = {
-                            rating: rating,
-                            reviewCount: reviewCount
+                    //GET PRICE and review
+                    getPrices(data.amazon[i],function(realPrice,altImage,reviews){
+                        data.amazon[i].realPrice = realPrice;
+                        if (reviews){
+                            data.amazon[i].reviews = reviews;
                         }
-                        //GET PRICE
-                        getPrices(data.amazon[i],function(realPrice,altImage){
-                            data.amazon[i].realPrice = realPrice;
-                            if (altImage){
-                               data.amazon[i].altImage = altImage;
-                            }
-                            callback();
-                        });
+                        if (altImage){
+                           data.amazon[i].altImage = altImage;
+                        }
+                        callback();
                     });
                 }
                 else {
                     callback();
                 }
             }, function done(){
-                console.log('more data',data);
                 ioKip.outgoingResponse(data,'stitch','amazon');
             });
         }
@@ -1208,6 +1202,7 @@ var getPrices = function(item,callback){
     var url = item.DetailPageURL[0];
     var price;  // get price from API
     var altImage;
+    var reviews;
 
     if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
         //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
@@ -1233,6 +1228,12 @@ var getPrices = function(item,callback){
 
     amazonHTML.basic(url, function(err, product) {
       kip.err(err); // print error
+    
+      console.log('& & & & & & & & & & & &PRODUCT OBJ ',product);
+
+      if (product.reviews){
+        reviews = product.reviews;
+      }
 
       if (product && product.price) {
         console.log('returning early with price: ' + product.price);
@@ -1240,17 +1241,19 @@ var getPrices = function(item,callback){
           // if(product.altImage){
           //   altImage = product.altImage;
           // }
-        return callback(product.price,product.altImage)
+        return callback(product.price,product.altImage,reviews)
       }
 
-        console.log('product.price: ' + product.price + ', price: ' + price);
+      console.log('product.price: ' + product.price + ', price: ' + price);
 
       price = product.price || price || '';
       console.log('final price: ' + price);
       if(product.altImage){
         altImage = product.altImage;
       }
-      callback(price,altImage);
+
+
+      callback(price,altImage,reviews);
     })
 }
 
@@ -1259,27 +1262,17 @@ var getAmazonStuff = function(data,results,callback3){
 
     //!\\ //!\\ NOTE!!! Add timeout here, fire callback if parallel doesnt fire callback!!
 
+
+    //getting prices and reviews from same source
     async.parallel([
 
-
         //* * item 1 * * *//
-        //get review
-        function(callback){
-            var id = results[0].ASIN[0];
-            getReviews(id,function(rating,count){
-                var obj = {
-                    rating:rating,
-                    reviewCount:count
-                }
-                callback(null,obj);
-            });
-        },
-        //get real price
         function(callback){
             //GET PRICE
-            getPrices(results[0],function(realPrice,altImage){
+            getPrices(results[0],function(realPrice,altImage,reviews){
                 var obj = {
-                    realPrice:realPrice
+                    realPrice:realPrice,
+                    reviews:reviews
                 }
                 if (altImage){
                     obj.altImage = altImage;
@@ -1289,22 +1282,11 @@ var getAmazonStuff = function(data,results,callback3){
         },
 
         //* * item 2 * * *//
-        //get review
         function(callback){
-            var id = results[1].ASIN[0];
-            getReviews(id,function(rating,count){
+            getPrices(results[1],function(realPrice,altImage,reviews){
                 var obj = {
-                    rating:rating,
-                    reviewCount:count
-                }
-                callback(null,obj);
-            });
-        },
-        //get real price
-        function(callback){
-            getPrices(results[1],function(realPrice,altImage){
-                var obj = {
-                    realPrice:realPrice
+                    realPrice:realPrice,
+                    reviews:reviews
                 }
                 if (altImage){
                     obj.altImage = altImage;
@@ -1314,22 +1296,11 @@ var getAmazonStuff = function(data,results,callback3){
         },
 
         //* * item 3 * * *//
-        //get review
         function(callback){
-            var id = results[2].ASIN[0];
-            getReviews(id,function(rating,count){
+            getPrices(results[2],function(realPrice,altImage,reviews){
                 var obj = {
-                    rating:rating,
-                    reviewCount:count
-                }
-                callback(null,obj);
-            });
-        },
-        //get real price
-        function(callback){
-            getPrices(results[2],function(realPrice,altImage){
-                var obj = {
-                    realPrice:realPrice
+                    realPrice:realPrice,
+                    reviews:reviews
                 }
                 if (altImage){
                     obj.altImage = altImage;
@@ -1343,16 +1314,18 @@ var getAmazonStuff = function(data,results,callback3){
             console.log('Error: parallel getAmazonStuff in search.js ',err);
         }
         var count = 0;
-        var loopLame = [0,0,1,1,2,2];
+        var loopLame = [0,1,2];
         async.eachSeries(loopLame, function(i, callback) {
             if (data.amazon[i]){
 
-                //TEST SCRAPE RESULTS NULL BEORE PROCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                if (rez[count].rating){
+                //add review
+                if (rez[count] && rez[count].reviews){
                     console.log('add rating');
-                    data.amazon[i].reviews = rez[count];
+                    data.amazon[i].reviews = rez[count].reviews;
                 }
-                else if(rez[count].realPrice){
+
+                //add price
+                if(rez[count] && rez[count].realPrice){
                     console.log('add real price');
                     data.amazon[i].realPrice = rez[count].realPrice;
 
@@ -1360,9 +1333,10 @@ var getAmazonStuff = function(data,results,callback3){
                        data.amazon[i].altImage = rez[count].altImage;
                     }
                 }
-                else {
-                    console.log('/!/ Warning: no reviews or real prices found for current item');
-                }
+
+                // else {
+                //     console.log('/!/ Warning: no reviews or real prices found for current item');
+                // }
                 count++;
                 callback();
             }

@@ -23,7 +23,7 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
-CHAT_WIDTH = 400
+CHAT_WIDTH = 355
 CHAT_HEIGHT = 175
 # MOBILE_WIDTH = 0 # TODO
 # MOBILE_HEIGHT = 800 # TODO
@@ -65,7 +65,7 @@ def index():
     biggest_width = 0
     biggest_height = 0
     thumbnails = []
-    PIC_SIZE = 153, 153
+    PIC_SIZE = 140, 140
     PIC_COORDS = [{'x': 24, 'y': 10},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
     TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
@@ -134,7 +134,7 @@ def index():
             img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
             #add review count
             if 'reviewCount' in im[u'reviews']:  
-                draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font2,fill="#2d70c1")
+                draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
 
             last_y = last_y + 20
 

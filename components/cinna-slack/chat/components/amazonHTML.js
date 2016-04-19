@@ -89,6 +89,10 @@ module.exports.basic = function basic(url, callback) {
           callback(err);
           return
         }
+        if(err){
+          console.log('&^&^&^&^&^&^&^&^&^');
+          console.error('^^$%$% ERROR ' + err);
+        }
 
         debug('got reponse for url ' + url)
 
@@ -156,6 +160,20 @@ module.exports.basic = function basic(url, callback) {
         //we have price from website
         if (amazonSitePrice){
             product.price = amazonSitePrice;
+        }
+
+        //Get reviews
+        var reviewCount = $('#acrCustomerReviewText').text().trim();
+        var rating = $('#acrPopover').text().trim();
+        if (rating && reviewCount){
+          product.reviews = {
+            rating: parseFloat(rating.match(/^[0-9.,\s]+/)[0].trim()),
+            reviewCount: reviewCount.match(/^[0-9.,\s]+/)[0].trim()
+          }
+          console.log('& & & &  ',product.reviews);
+        }else {
+          console.error('no match for review ',rating)
+          console.error('no match for review ',reviewCount)
         }
 
         //we found an image alternate for missing item images

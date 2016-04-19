@@ -983,13 +983,19 @@ function searchBucket(data){
 
     //* * * * typing event
     if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more'){
+
+        var searcher = {};
+        searcher.source = data.source;
+        sendTxtResponse(searcher,'Searching...');
+
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
-        }else if (data.source.origin == 'socket.io'){
-            var searcher = {};
-            searcher.source = data.source;
-            sendTxtResponse(searcher,'Searching...');
         }
+        // else if (data.source.origin == 'socket.io' ){
+        //     var searcher = {};
+        //     searcher.source = data.source;
+        //     sendTxtResponse(searcher,'Searching...');
+        // }
     }
 
     //sort search action type
@@ -1893,11 +1899,11 @@ var saveToCart = function(data){
                   // because the user needs to choose size or color options
                   if (itemToAdd.mustSelectSize) {
                     return processData.getItemLink(_.get(itemToAdd, 'DetailPageURL[0]'), data.source.user, 'ASIN-' + _.get(itemToAdd, 'ASIN[0]')).then(function(url) {
-                      sendTxtResponse(data, 'Hi, please goto Amazon so you can choose your size and style: ' + url);
+                      sendTxtResponse(data, 'Please click on this <'+url+'|Amazon link> to choose your size and style, thanks! 😊');
                     }).catch(function(e) {
                       console.log('could not get link for item')
                       console.log(e.stack)
-                      sendTxtResponse(data, 'Hi, it looks like you have to order this particular item directly from Amazon, not me. ');
+                      sendTxtResponse(data, 'Sorry, it looks like you have to order this particular item directly from Amazon, not me! D:');
                     })
                   }
 
@@ -1906,7 +1912,7 @@ var saveToCart = function(data){
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
                         console.log(reason);
-                        sendTxtResponse(data, 'Oops sorry, it looks like that item is not currently available from any sellers.');
+                        sendTxtResponse(data, 'Please click on the item name to add to cart, thanks! 😊');
                       })
               }
 
