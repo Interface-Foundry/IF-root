@@ -116,6 +116,11 @@ app.post('/slackaction', function(req, res) {
     // ioKip.incomingMsgAction(req.body,'slack');
 });	
 
+//incoming slack action
+app.post('/emailincoming', function(req, res) {
+    // ioKip.newEmail();
+    console.log('incoming email BODY: ',req.body);
+})
 
 //incoming new slack user
 app.post('/kikincoming', function(req, res) {
