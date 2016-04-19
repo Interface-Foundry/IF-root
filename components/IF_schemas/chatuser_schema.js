@@ -33,7 +33,11 @@ var chatuserSchema = mongoose.Schema({
     "is_restricted": Boolean,
     "is_ultra_restricted": Boolean,
     "is_bot": Boolean,
-    "has_2fa": Boolean
+    "has_2fa": Boolean,
+    source: {
+        type: String,
+        from: String
+    }
 
 });
 

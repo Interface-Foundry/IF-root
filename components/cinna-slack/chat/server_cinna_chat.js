@@ -49,7 +49,7 @@ var co = require('co');
 
 //Botconnector
 var msRest = require('ms-rest');
-var connector = require('botconnector');
+// var connector = require('botconnector');
 
 // Initialize the BotService
 var botService = new skype.BotService({
@@ -61,7 +61,6 @@ var botService = new skype.BotService({
         appSecret: 'DbvPeqOxe3ChrhwcMZbLLS7'
     }
 });
-
 // Skype Bot
 var bot = new builder.SkypeBot(botService);
 
@@ -70,7 +69,7 @@ var credentials = new msRest.BasicAuthenticationCredentials('KipTest', '10d5ae7a
 var botConnector = new builder.BotConnectorBot({appId: 'KipTest', appSecret: '10d5ae7a86204287972c7fc98b21dbe3'})
 
 // Install First Run middleware and dialog
-botConnector.use(function (session, next) {
+bot.use(function (session, next) {
     if (!session.userData.firstRun) {
         // console.log('session: ',session)
         session.userData.firstRun = true;
@@ -89,12 +88,12 @@ botConnector.use(function (session, next) {
     }
 });
 
-botConnector.add('/', processSkypeSession)
+bot.add('/', processSkypeSession)
 
-var passSessionToIo = co.wrap(function* (session) {
-    var result = yield Promise.resolve(session);
-    return result;
-})
+// var passSessionToIo = co.wrap(function* (session) {
+//     var result = yield Promise.resolve(session);
+//     return result;
+// })
 
 //set env vars
 var config = require('config');
@@ -119,8 +118,7 @@ app.get('/healthcheck', function (req, res) {
 //parse incoming body
 app.use(bodyParser.json());         
 app.use(bodyParser.urlencoded({ extended: true }));              
-app.use(bodyParser.json({limit: '100mb'}));
-app.use(bodyParser.urlencoded({limit: '100mb', extended: true}));                  
+            
 
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
@@ -154,9 +152,17 @@ app.post('/kikincoming', function(req, res) {
     // ioKip.newSlack();
 });
 
+//incoming new email
+app.post('/emailincoming', function(req, res) {
+    console.log('incoming EMAIL BODY: ',req.body);
+    // ioKip.newSlack();
+});
+
 app.post('/skype', 
-    // skype.messagingHandler(botService)
+    skype.messagingHandler(botService)
     // botConnector.verifyBotFramework(), 
-    botConnector.listen()
+    // botConnector.listen()
     );
+
+module.exports.botService = botService;
 

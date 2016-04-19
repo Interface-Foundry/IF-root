@@ -45,17 +45,19 @@ var upload = require('../../../../IF_services/upload.js');
 
 //---skype stuff---//
 skypeSession = {};
+var skype = require('../skype-sdk');
 var builder = require('botbuilder');
 var prompts = require('../skype_bot/prompts');
 var model = process.env.model || 'https://api.projectoxford.ai/luis/v1/application?id=529c8e29-06fe-4342-8bed-59d07b4216f6&subscription-key=f1e70f11452b4b53b73473d3dbb487c4';
 var dialog = new builder.LuisDialog(model);
+var botService = require('../server_cinna_chat');
+var SEND_TO_SKYPE_USER = '8:...';
 //-----------------//
 
 //---bot connector stuff---//
-var msRest = require('ms-rest');
-var credentials = new msRest.BasicAuthenticationCredentials('KipTest', '10d5ae7a86204287972c7fc98b21dbe3');
-var botConnector = new builder.BotConnectorBot({appId: 'KipTest', appSecret: '10d5ae7a86204287972c7fc98b21dbe3'})
-var msRest = require('ms-rest');
+// var msRest = require('ms-rest');
+// var credentials = new msRest.BasicAuthenticationCredentials('KipTest', '10d5ae7a86204287972c7fc98b21dbe3');
+// var botConnector = new builder.BotConnectorBot({appId: 'KipTest', appSecret: '10d5ae7a86204287972c7fc98b21dbe3'})
 //-----------------//
 
 
@@ -110,15 +112,32 @@ tg.on('message', function(msg){
 //------------------------------------Skype stuff----------------------------------------//
 
 
-//NON LUIS
-tempGlobal = preProcess;
+//NON LUIS BOTBUILDER
+globalPreProcess= preProcess;
 function processSkypeSession(session) {
-    console.log('\n\n\nDORAEMON',session);
-    session.userData.io.msg = session.message.text;
-    session.userData.io.tokens = [session.message.text];
-    skypeSession = session;
-    tempGlobal(session.userData.io);
+    //SKYPE SDK
+    botService.botService.on('message', function(bot, message) {
+        console.log('\n\n\nDORAEMON', bot, message);
+        // Message {
+        //   from: '8:live:mitsuaki_40',
+        //   to: '28:4932ef13-bf90-425d-99b7-aebc66ed85c5',
+        //   type: undefined,
+        //   content: 'Shoes',
+        //   contentType: 'text',
+        //   messageId: '0',
+        //   eventTime: '2016-04-15T18:57:46.414Z' }
+        session.userData.io.msg = message.content;
+        session.userData.io.tokens = [message.content];
+        session.message = message;
+        session.bot = bot
+        skypeSession = session;
+        bot.reply('test', true)
+        globalPreProcess(session.userData.io);
+    })
+    
 }
+
+
 
 //LUIS
 dialog.on('Search', [
@@ -380,6 +399,20 @@ var initSlackUsers = function(env){
 
 //fired when server gets /newslack route request
 var newSlack = function(){
+    //find all bots not added to our system yet
+    Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+            console.log('DEBUG: new slack team added with this data: ',users);
+            res.send('slack user added');
+        }
+    });
+}
+
+var newEmail = function(){
     //find all bots not added to our system yet
     Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
         if(err){
@@ -1749,6 +1782,7 @@ var sendResponse = function(data){
             // }
             console.log('SKYPE SESSION', skypeSession);
 
+
             var message = data.client_res[0]; //use first item in client_res array as text message
             skypeSession.send(message);
             setTimeout(function () { 
@@ -1756,21 +1790,55 @@ var sendResponse = function(data){
                 attachThis.shift();
                 console.log('attachthis ',attachThis);
                 async.eachSeries(attachThis, function(attach, callback) {
-                    var reply = new builder.Message()
-                           .setText(skypeSession, attach.messageText)
-                           .addAttachment({contenttype: 'image/png', contentUrl: attach.photo});
-                    var reply2 = '[' + attach.messageText + '('+ 'http://creativecommons.org/licenses/by-sa/3.0'+')]'
+                    // var reply = new builder.Message()
+                    //        .setText(skypeSession, attach.messageText)
+                    //        .addAttachment({contenttype: 'image/png', contentUrl: attach.photo});
+                    // var reply2 = '[' + attach.messageText + '('+ 'http://creativecommons.org/licenses/by-sa/3.0'+')]'
                     
-                    skypeSession.send(reply)
+                    request({
+                        method: 'GET',
+                        url: attach.photo,
+                        encoding: 'binary'
+                    }, function(err, response, data) {
+                        if (err) {
+                            return console.error(err);
+                        }
+                        botService.sendAttachment(SEND_TO_SKYPE_USER, null, 'Image', data.toString('base64'), null, (err, response) => {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            console.log(response);
+                        });
+                    });
 
-                    // skypeSession.send(attach.messageText + '\n' + 'Link: '+ attach.messageLink)
-                        // + '\n' + attach.photo)
-                    setTimeout(function () {
-                     skypeSession.send(attach.photo)
-                         setTimeout(function () {
-                            callback() 
-                     }, 600);
-                    }, 1000);
+
+
+                 // upload.uploadPicture('skype', attach.photo,100, true).then(function(uploaded) {
+                 //     // skypeSession.send(attach.messageText);
+                 //     // var attachment = new skype.Message({from: skypeSession.message.from, to: skypeSession.message.to, content: attach.photo, messageId: skypeSession.message.messageId, contentType: 'Image', eventTime:  new Date().toISOString()})
+                 //     // var smessage = new skype.Attachment()
+                     
+                 //     // skypeSession.bot.reply('yolo swag', true);
+
+                 //     botService.sendAttachment(SEND_TO_SKYPE_USER, uploaded.outputPath, 'Image', data.toString('base64'), null, (err, response) => {
+                 //        console.log(response);
+                 //        if (err) {
+                 //            return console.error(err);
+                 //        }
+                 //    });
+
+                 //    skypeSession.send(attach.messageText + '\n' + 'Link: '+ attach.messageLink)
+                 //        // + '\n' + attach.photo)
+                 //    setTimeout(function () {
+                 //     skypeSession.send(attach.photo);
+                 //         setTimeout(function () {
+                 //            callback() 
+                 //     }, 600);
+                 //    }, 1000);
+
+                 //    }).catch(function(err){
+                 //        if (err) { console.log('ios.js1802: err',err) }
+                 //    })
                 }, function done(err){
                     if (err) {
                         console.log('io1729:',err)
