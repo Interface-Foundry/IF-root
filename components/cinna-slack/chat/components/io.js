@@ -986,7 +986,7 @@ function searchBucket(data){
 
         var searcher = {};
         searcher.source = data.source;
-        sendTxtResponse(searcher,'Searching...');
+        sendTxtResponse(searcher,'Searching...','typing');
 
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
@@ -1130,7 +1130,7 @@ var cannedBanter = function(data){
     incomingAction(data);
 }
 
-var sendTxtResponse = function(data,msg){
+var sendTxtResponse = function(data,msg,flag){
     data.action = 'smallTalk';
     if (!msg){
         console.log('error: no message sent with sendTxtResponse(), using default');
@@ -1138,7 +1138,7 @@ var sendTxtResponse = function(data,msg){
     }
     data.client_res = [];
     data.client_res.push(msg);
-    sendResponse(data);
+    sendResponse(data,flag);
 }
 
 //Constructing reply to user
@@ -1323,7 +1323,7 @@ var checkOutgoingBanter = function(data){
 }
 
 //send back msg to user, based on source.origin
-var sendResponse = function(data){
+var sendResponse = function(data,flag){
 
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
@@ -1767,6 +1767,19 @@ var sendResponse = function(data){
                             username:'Kip'
                         };
                         slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
+
+                            if (flag == 'typing'){
+                                console.log('delete typing event');
+
+                                // var msgData = {
+                                //   // attachments: [...],
+                                //     icon_url:'http://kipthis.com/img/kip-icon.png',
+                                //     username:'Kip',
+                                //     attachments: attachThis
+                                // };
+                                // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+                            }
+
                             callback();
                         });
                     }
