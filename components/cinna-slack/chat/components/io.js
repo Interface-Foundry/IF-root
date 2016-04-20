@@ -172,7 +172,9 @@ var initSlackUsers = function(env){
         loadSlackUsers(testUser);
     }else{
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
-        Slackbots.find().exec(function(err, users) {
+        Slackbots.find({
+          deleted: {$ne: true}
+        }).exec(function(err, users) {
             if(err && process.env.NODE_ENV === 'production'){
                 console.log('saved slack bot retrieval error');
                 var mailOptions = {
@@ -383,10 +385,41 @@ function loadSlackUsers(users){
             }
 
             if (data.text.match(/\bcollect\b/)) {
-              console.log('triggering kip collect, maybe if the person is an admin?')
-              return weekly_updates.collect(data.team, data.user, function() {
-                console.log('done collecting orders i guess');
-              })
+              // a channel might look like this: "collect <#C0R6CJFTK>"
+              if (data.text.indexOf('<#C') >= 0) {
+                console.log('attempting to collect for one or more channels');
+                var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
+                  return markdown.replace('<#', '').replace('>', '');
+                })
+                console.log('channels: ' + channels.join(', '));
+
+
+                // get list of users in all channels
+                return channels.map(function(channel) {
+
+                  request('https://slack.com/api/channels.info?token=' + user.bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
+                    if (e) {
+                      console.log(e);
+                    }
+
+                    var channelInfo = JSON.parse(r.body)
+                    debugger;
+                    if (channelInfo.channel && channelInfo.channel.members) {
+                      // um okay now what?
+
+                      return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, function() {
+                        console.log('um done collecting orders for channel ' + channel)
+                      })
+                    }
+                  });
+
+                })
+              } else {
+                console.log('triggering kip collect, maybe if the person is an admin?')
+                return weekly_updates.collect(data.team, data.user, function() {
+                  console.log('done collecting orders i guess');
+                })
+              }
             }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
