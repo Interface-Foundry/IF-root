@@ -2017,6 +2017,10 @@ function viewCart(data, show_added_item){
         team_id: data.source.org
       }).exec();
 
+      // admins have special rights
+      var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
+      var isP2P = slackbot.meta.office_assistants.length === 0;
+
       // get the latest added item if we need to highlight it
       if (show_added_item) {
         var added_item = cart.items[cart.items.length - 1];
@@ -2030,8 +2034,10 @@ function viewCart(data, show_added_item){
           return '<@' + u + '>';
         }).join(', ');
 
-        var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
-        console.log(link);
+        if (isAdmin || isP2P) {
+          var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
+          console.log(link);
+        }
 
         var actionObj = [
             {
@@ -2056,28 +2062,33 @@ function viewCart(data, show_added_item){
             }
         ];
 
-        if (item.ASIN === added_asin) {
-          cartObj.push({
-            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#7bd3b6',
-            thumb_url: item.image
-           // actions: actionObj
-          })
+        // add title, which is a link for admins/p2p and text otherwise
+        if (isAdmin || isP2P) {
+          var text = [
+            `${processData.emoji[i+1].slack} <${link}|${item.title}>`,
+            `*${item.price}* each`,
+            `Quantity: ${item.quantity}`,
+            `_Added by: ${userString}_`
+          ].join('\n');
         } else {
-          cartObj.push({
-            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#45a5f4',
-            thumb_url: item.image
-            //actions: actionObj
-          })
+          var text = [
+            `${processData.emoji[i+1].slack} *${item.title}*`,
+            `Quantity: ${item.quantity}`
+          ].join('\n');
         }
+
+        cartObj.push({
+          text: text,
+          mrkdwn_in: ['text', 'pretext'],
+          color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
+          thumb_url: item.image
+         // actions: actionObj
+        })
       }
 
       // Only show the purchase link in the summary for office admins.
       var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
-      if (slackbot.meta.office_assistants.indexOf(data.source.user) >= 0) {
+      if (isAdmin) {
         summaryText += ` \n <${cart.link}|» Purchase Items >`;
       }
 
