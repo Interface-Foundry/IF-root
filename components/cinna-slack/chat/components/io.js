@@ -23,7 +23,6 @@ var init_team = require("./init_team.js");
 var conversation_botkit = require('./conversation_botkit');
 var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-
 var nlp = require('../../nlp/api');
 
 //set env vars
@@ -196,9 +195,44 @@ var initSlackUsers = function(env){
 }
 
 //fired when server gets /newslack route request
-var newSlack = function(){
+var newSlack = function() {
     //find all bots not added to our system yet
     Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+            console.log('DEBUG: new slack team added with this data: ',users);
+            res.send('slack user added');
+        }
+    });
+}
+
+//fired when server gets /newEmail route request
+var newEmail= function() {
+     function routeToSlack(data) {
+                console.log('incoming slack 📬')
+                if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
+                    var newSl = {
+                        source: {
+                            'origin':'slack',
+                            'channel':data.channel,
+                            'org':data.team,
+                            'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                            user: data.user
+                        },
+                        'msg':data.text
+                    }
+                    //carry image tags over
+                    if (data.imageTags){
+                        newSl.imageTags = data.imageTags;
+                    }
+                    preProcess(newSl);
+                }
+        }
+    //find matching 
+    Slackbots.find({'meta.initialized': true, 'team_id': 'faketeamid'  }).exec(function(err, users) {
         if(err){
             console.log('saved slack bot retrieval error');
         }

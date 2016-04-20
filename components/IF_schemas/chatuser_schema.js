@@ -4,7 +4,6 @@ var mongoose = require('mongoose');
 var amazonResult = mongoose.Schema;
 var modifyVal = mongoose.Schema;
 var chatuserSchema = mongoose.Schema({
-
     id: String,
     dm: String, // direct message channel id
     team_id: String,
@@ -39,6 +38,10 @@ var chatuserSchema = mongoose.Schema({
         type: Boolean,
         default: true
       }
+    },
+    source: {
+        type: { type: String},
+        from: String
     }
 });
 

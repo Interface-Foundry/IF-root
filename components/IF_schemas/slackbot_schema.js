@@ -23,7 +23,6 @@ var slackbotSchema = mongoose.Schema({
         bot_user_id: String,
         bot_access_token: String
     },
-
     //
     // this is all kip-specific stuff
     //
@@ -60,7 +59,6 @@ var slackbotSchema = mongoose.Schema({
           type: String
         }
     },
-
     // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
     conversaitons: {}
 });
