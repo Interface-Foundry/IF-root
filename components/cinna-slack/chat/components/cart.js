@@ -3,6 +3,7 @@ var db = require('db')
 var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
+var sleep = require('co-sleep')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -29,6 +30,11 @@ module.exports = {};
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',item)
+
+  //fixing bug to convert string to to int
+  if (item.reviews && item.reviews.reviewCount){
+    item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
+  }
 
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
@@ -263,6 +269,8 @@ var getCart = module.exports.getCart = function(slack_id) {
       'CartId': cart.amazon.CartId[0],
       'HMAC': cart.amazon.HMAC[0]
     })
+
+    yield sleep(8); //prevent amazon throttle
 
     console.log('rebuilding cart ' + cart.amazon.CartId)
     yield client.addCart(_.merge({}, cart_items, {
