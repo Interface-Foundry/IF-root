@@ -172,7 +172,9 @@ var initSlackUsers = function(env){
         loadSlackUsers(testUser);
     }else{
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
-        Slackbots.find().exec(function(err, users) {
+        Slackbots.find({
+          deleted: {$ne: true}
+        }).exec(function(err, users) {
             if(err && process.env.NODE_ENV === 'production'){
                 console.log('saved slack bot retrieval error');
                 var mailOptions = {
@@ -383,10 +385,44 @@ function loadSlackUsers(users){
             }
 
             if (data.text && data.text.match(/\bcollect\b/)) {
-              console.log('triggering kip collect, maybe if the person is an admin?')
-              return weekly_updates.collect(data.team, data.user, function() {
-                console.log('done collecting orders i guess');
-              })
+              user.conversations[data.channel] = 'collect';
+              // a channel might look like this: "collect <#C0R6CJFTK>"
+              if (data.text.indexOf('<#C') >= 0) {
+                console.log('attempting to collect for one or more channels');
+                var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
+                  return markdown.replace('<#', '').replace('>', '');
+                })
+                console.log('channels: ' + channels.join(', '));
+
+
+                // get list of users in all channels
+                return channels.map(function(channel) {
+
+                  request('https://slack.com/api/channels.info?token=' + user.bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
+                    if (e) {
+                      console.log(e);
+                    }
+
+                    var channelInfo = JSON.parse(r.body)
+                    debugger;
+                    if (channelInfo.channel && channelInfo.channel.members) {
+                      // um okay now what?
+
+                      return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, function() {
+                        console.log('um done collecting orders for channel ' + channel)
+                        user.conversations[data.channel] = false;
+                      })
+                    }
+                  });
+
+                })
+              } else {
+                console.log('triggering kip collect, maybe if the person is an admin?')
+                return weekly_updates.collect(data.team, data.user, function() {
+                  console.log('done collecting orders i guess');
+                  user.conversations[data.channel] = false;
+                })
+              }
             }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
@@ -991,7 +1027,7 @@ function searchBucket(data){
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
         }
-    }   
+    }
 
     console.log('* * * * * * * * * * * * ',data.bucket);
 
@@ -1670,9 +1706,9 @@ var sendResponse = function(data,flag){
                 //checking for search msg and updating it
                 if(messageHistory[data.source.id] && messageHistory[data.source.id].typing){
                     var msgData = {};
-                    slackUsers_web[data.source.org].chat.update(messageHistory[data.source.id].typing.ts, messageHistory[data.source.id].typing.channel, data.client_res[0], {}, function(err,res) {        
+                    slackUsers_web[data.source.org].chat.update(messageHistory[data.source.id].typing.ts, messageHistory[data.source.id].typing.channel, data.client_res[0], {}, function(err,res) {
                     });
-                    
+
                 }else{
                     var message = data.client_res[0]; //use first item in client_res array as text message
                 }
@@ -1780,7 +1816,7 @@ var sendResponse = function(data,flag){
                         slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
 
                             //store typing message for later to remove it
-                            if (res.ok && flag == 'typing'){                                
+                            if (res.ok && flag == 'typing'){
 
                                 messageHistory[data.source.id].typing = {
                                     ts: res.ts,
@@ -1788,7 +1824,7 @@ var sendResponse = function(data,flag){
                                 }
 
                                 console.log('👹👹👹 ',messageHistory[data.source.id]);
-                               
+
                             }else {
                                 console.log('👹👹👹 delete typing event err ',err);
                             }
@@ -2013,6 +2049,10 @@ function viewCart(data, show_added_item){
         team_id: data.source.org
       }).exec();
 
+      // admins have special rights
+      var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
+      var isP2P = slackbot.meta.office_assistants.length === 0;
+
       // get the latest added item if we need to highlight it
       if (show_added_item) {
         var added_item = cart.items[cart.items.length - 1];
@@ -2026,8 +2066,10 @@ function viewCart(data, show_added_item){
           return '<@' + u + '>';
         }).join(', ');
 
-        var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
-        console.log(link);
+        if (isAdmin || isP2P) {
+          var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
+          console.log(link);
+        }
 
         var actionObj = [
             {
@@ -2052,28 +2094,33 @@ function viewCart(data, show_added_item){
             }
         ];
 
-        if (item.ASIN === added_asin) {
-          cartObj.push({
-            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#7bd3b6',
-            thumb_url: item.image
-           // actions: actionObj
-          })
+        // add title, which is a link for admins/p2p and text otherwise
+        if (isAdmin || isP2P) {
+          var text = [
+            `${processData.emoji[i+1].slack} <${link}|${item.title}>`,
+            `*${item.price}* each`,
+            `Quantity: ${item.quantity}`,
+            `_Added by: ${userString}_`
+          ].join('\n');
         } else {
-          cartObj.push({
-            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#45a5f4',
-            thumb_url: item.image
-            //actions: actionObj
-          })
+          var text = [
+            `${processData.emoji[i+1].slack} *${item.title}*`,
+            `Quantity: ${item.quantity}`
+          ].join('\n');
         }
+
+        cartObj.push({
+          text: text,
+          mrkdwn_in: ['text', 'pretext'],
+          color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
+          thumb_url: item.image
+         // actions: actionObj
+        })
       }
 
       // Only show the purchase link in the summary for office admins.
       var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
-      if (slackbot.meta.office_assistants.indexOf(data.source.user) >= 0) {
+      if (isAdmin) {
         summaryText += ` \n <${cart.link}|» Purchase Items >`;
       }
 

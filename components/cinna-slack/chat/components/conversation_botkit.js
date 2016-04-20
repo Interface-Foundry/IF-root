@@ -315,7 +315,12 @@ function handleSettingsChange(response, convo) {
       text = text.replace('days', 'day');
       text = text.replace(/(to|every|\bat\b)/g, '');
       text = text.trim();
-      // text = text.replace(/ [\d]+/)
+
+      // this date library cannot understand Tuesday at 2
+      // but it does understand Tuesday at 2:00
+      if (text.indexOf(':') < 0) {
+        text = text.replace(/([\d]+)/, '$1:00')
+      }
       console.log(text);
       var date = Date.parse(text);
       console.log(date);
@@ -369,6 +374,7 @@ function handleSettingsChange(response, convo) {
 
       } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
         // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
+        var should_return = false;
         userIds.map(function(id) {
           if (id == convo.user_id) {
             convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
@@ -377,8 +383,16 @@ function handleSettingsChange(response, convo) {
           var index = convo.slackbot.meta.office_assistants.indexOf(id);
           if (index >= 0) {
             convo.slackbot.meta.office_assistants.splice(index, 1);
+          } else {
+            convo.ask('Looks like <@' + id + '> was not an admin.  Do you have any settings changes?', handleSettingsChange)
+            convo.next();
+            should_return = true;
           }
         })
+
+        if (should_return) {
+          return;
+        }
       } else {
         convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
         return convo.next();
@@ -420,12 +434,12 @@ function handleSettingsChange(response, convo) {
 
         // the question was something like "Do you have any settings changes?"
         // so we need to allow the user to say "yes" or "no"
-        if (response.text.match(convo.task.botkit.utterances.yes)) {
+        if (response.text.toLowerCase().match(convo.task.botkit.utterances.yes)) {
           convo.ask('Go ahead, I\'m listening.', handleSettingsChange)
           return convo.next();
-        } else if (response.text.match(convo.task.botkit.utterances.no)
-            || response.text.match(/^(end|exit|finish|done|quit|settings exit)/)
-            || response.text === 'stop') {
+        } else if (response.text.toLowerCase().match(convo.task.botkit.utterances.no)
+            || response.text.toLowerCase().match(/^(end|exit|finish|done|quit|settings exit)/)
+            || response.text.toLowerCase() === 'stop') {
           convo.say('Ok thanks.  Done with settings.');
           return convo.next();
         }
