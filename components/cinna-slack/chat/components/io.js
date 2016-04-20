@@ -382,7 +382,7 @@ function loadSlackUsers(users){
               })
             }
 
-            if (data.text.match(/\bcollect\b/)) {
+            if (data.text && data.text.match(/\bcollect\b/)) {
               console.log('triggering kip collect, maybe if the person is an admin?')
               return weekly_updates.collect(data.team, data.user, function() {
                 console.log('done collecting orders i guess');
@@ -991,11 +991,14 @@ function searchBucket(data){
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
         }
-        // else if (data.source.origin == 'socket.io' ){
-        //     var searcher = {};
-        //     searcher.source = data.source;
-        //     sendTxtResponse(searcher,'Searching...');
-        // }
+    }   
+
+    console.log('* * * * * * * * * * * * ',data.bucket);
+
+    if (data.bucket == 'purchase'){
+        var searcher = {};
+        searcher.source = data.source;
+        sendTxtResponse(searcher,'Thinking...','typing');
     }
 
     //sort search action type
@@ -1663,7 +1666,16 @@ var sendResponse = function(data,flag){
 
             if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
 
-                var message = data.client_res[0]; //use first item in client_res array as text message
+                var message;
+                //checking for search msg and updating it
+                if(messageHistory[data.source.id] && messageHistory[data.source.id].typing){
+                    var msgData = {};
+                    slackUsers_web[data.source.org].chat.update(messageHistory[data.source.id].typing.ts, messageHistory[data.source.id].typing.channel, data.client_res[0], {}, function(err,res) {        
+                    });
+                    
+                }else{
+                    var message = data.client_res[0]; //use first item in client_res array as text message
+                }
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
@@ -1678,7 +1690,6 @@ var sendResponse = function(data,flag){
                     attachments: attachThis
                 };
                 slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
             }
             else if (data.action == 'focus'){
                 var attachments = [
@@ -1766,18 +1777,20 @@ var sendResponse = function(data,flag){
                             icon_url:'http://kipthis.com/img/kip-icon.png',
                             username:'Kip'
                         };
-                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {
+                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
 
-                            if (flag == 'typing'){
-                                console.log('delete typing event');
+                            //store typing message for later to remove it
+                            if (res.ok && flag == 'typing'){                                
 
-                                // var msgData = {
-                                //   // attachments: [...],
-                                //     icon_url:'http://kipthis.com/img/kip-icon.png',
-                                //     username:'Kip',
-                                //     attachments: attachThis
-                                // };
-                                // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+                                messageHistory[data.source.id].typing = {
+                                    ts: res.ts,
+                                    channel: res.channel
+                                }
+
+                                console.log('👹👹👹 ',messageHistory[data.source.id]);
+                               
+                            }else {
+                                console.log('👹👹👹 delete typing event err ',err);
                             }
 
                             callback();
@@ -1925,7 +1938,7 @@ var saveToCart = function(data){
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
                         console.log(reason);
-                        sendTxtResponse(data, 'Please click on the item name to add to cart, thanks! 😊');
+                        sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                       })
               }
 

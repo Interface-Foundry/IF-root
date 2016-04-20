@@ -242,9 +242,9 @@ var stitchResults = function(data,source,callback) {
                 if (attribs.MediaType){
                     cString.push(truncate("Type: " + attribs.MediaType[0]));
                 }
-                if (attribs.Color){
-                    cString.push(truncate("Color: " + attribs.Color[0],21));
-                }
+                // if (attribs.Color){
+                //     cString.push(truncate("Color: " + attribs.Color[0],21));
+                // }
 
                 if (attribs.Quantity){
                     cString.push("Quantity: " + attribs.Quantity[0]);

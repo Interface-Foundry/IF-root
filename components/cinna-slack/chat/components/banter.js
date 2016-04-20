@@ -804,7 +804,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.6.5 Cardamom';
+            res = 'I\'m a penguin running Kip v0.7.0 Paprika';
             break;
 
         case '/':
@@ -825,6 +825,12 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'k':
             flag = 'basic'; //do this action
             res = 'yah';
+            break;
+
+        case 'uh oh':
+            flag = 'search.initial'; //do this action
+            res = '👌';
+            query = 'uh oh'; //what we're going to search for
             break;
 
         case 'hello world':
