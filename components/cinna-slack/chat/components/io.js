@@ -385,6 +385,7 @@ function loadSlackUsers(users){
             }
 
             if (data.text.match(/\bcollect\b/)) {
+              user.conversations[data.channel] = 'collect';
               // a channel might look like this: "collect <#C0R6CJFTK>"
               if (data.text.indexOf('<#C') >= 0) {
                 console.log('attempting to collect for one or more channels');
@@ -409,6 +410,7 @@ function loadSlackUsers(users){
 
                       return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, function() {
                         console.log('um done collecting orders for channel ' + channel)
+                        user.conversations[data.channel] = false;
                       })
                     }
                   });
@@ -418,6 +420,7 @@ function loadSlackUsers(users){
                 console.log('triggering kip collect, maybe if the person is an admin?')
                 return weekly_updates.collect(data.team, data.user, function() {
                   console.log('done collecting orders i guess');
+                  user.conversations[data.channel] = false;
                 })
               }
             }

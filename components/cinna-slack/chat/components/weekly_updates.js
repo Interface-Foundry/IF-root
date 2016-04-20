@@ -201,14 +201,16 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
 function lastCall(response, convo) {
   // Catch message interrupts
   if (response.text.toLowerCase().match(/(wait|stop)/)) {
-    convo.say('Ok, stopping the message.  What\'s up?');
+    convo.say('Ok, stopping the message.'); // What\'s up?  You can say something like `change time limit 30 minutes`', lastCall);
     convo.interrupted = true;
+    return convo.next();
   }
 
   // first check for a specific time change
-  if (response.text.toLowerCase().match('minutes')) {
+  if (response.text.toLowerCase().match(/(minute|hour)/)) {
     //
     console.log('um attempting to change the length of the last call thingy');
+
   } else if (response.text !== '') {
     convo.say("I'm sorry I couldn't understand that.  Sending the last call message.  Say `wait` or `stop` to prevent this.", lastCall)
     convo.next();
