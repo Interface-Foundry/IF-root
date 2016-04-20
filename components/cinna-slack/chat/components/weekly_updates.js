@@ -136,7 +136,11 @@ module.exports.collect = function(team_id, person_id, callback) {
           bot.closeRTM();
           callback();
         })
-        convo.ask('Would you like me to send the last call for 60 minutes from now?', lastCall);
+        convo.interrupted = false;
+        convo.ask('Okay, in 5 seconds I\'ll send the last call message to all users.  Say `wait` or `stop` to prevent this.', lastCall);
+        setTimeout(function() {
+          lastCall({text: ''}, convo);
+        }, 5000)
       })
     })
   }).catch((e) => {
@@ -178,7 +182,11 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
           bot.closeRTM();
           callback();
         })
-        convo.ask('Would you like me to send the last call all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now?', lastCall);
+        convo.interrupted = false;
+        convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
+        setTimeout(function() {
+          lastCall({text: ''}, convo);
+        }, 5000)
       })
     })
   }).catch((e) => {
@@ -191,55 +199,66 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
 // Sends a "last call" message to everyone who has not shut Kip up about messages like this
 //
 function lastCall(response, convo) {
+  // Catch message interrupts
+  if (response.text.toLowerCase().match(/(wait|stop)/)) {
+    convo.say('Ok, stopping the message.  What\'s up?');
+    convo.interrupted = true;
+  }
+
   // first check for a specific time change
   if (response.text.toLowerCase().match('minutes')) {
     //
     console.log('um attempting to change the length of the last call thingy');
-  } else if (response.text.toLowerCase().match(convo.bot.utterances.yes)) {
-    co(function*() {
-      // maybe i should update the team roster here???
-      if (!convo.users) {
-        convo.users = yield db.Chatusers.find({
-          team_id: convo.slackbot.team_id,
-          is_bot: false,
-          id: { '$ne': 'USLACKBOT' }, // because slackbot is not marked as a bot?
-          'meta.last_call_alerts': { '$ne': false }
-        }).exec();
-      }
-
-      var admin = convo.user_id;
-
-      console.log('sending last call to all ' + convo.users.length + ' users');
-      yield convo.users.map(function(u) {
-        return new Promise(function(resolve, reject) {
-          convo.bot.startPrivateConversation({user: u}, function(response, convo) {
-            convo.on('end', function() {
-              resolve();
-            });
-            convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
-            convo.say('The clock\'s ticking! You have *60* minutes.');
-            convo.next();
-          });
-        })
-      })
-
-      // continue the admin's conversation if there's anything left to say.
-
-      // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
-      console.log('calling next');
-      convo.next();
-
-    }).catch((e) => {
-      console.log('error');
-      console.log(e);
-      convo.next();
-    })
-  } else if (response.text.toLowerCase().match(convo.bot.utterances.no)) {
-    console.log('no last call');
-    convo.say('OK, you can `checkout` whenever you\'re ready');
-    convo.next();
-  } else {
-    convo.say("I'm sorry I couldn't understand that.  Should I send out a last call message?", lastCall)
+  } else if (response.text !== '') {
+    convo.say("I'm sorry I couldn't understand that.  Sending the last call message.  Say `wait` or `stop` to prevent this.", lastCall)
     convo.next();
   }
+
+  co(function*() {
+    // maybe i should update the team roster here???
+    if (!convo.users) {
+      // sent to the whole team
+      convo.users = yield db.Chatusers.find({
+        team_id: convo.slackbot.team_id,
+        is_bot: false,
+        id: { '$ne': 'USLACKBOT' }, // because slackbot is not marked as a bot?
+        'meta.last_call_alerts': { '$ne': false }
+      }).exec();
+    } else {
+      // sent to a particular channel
+      // remove all users which have disabled last call alerts
+      convo.users = yield db.Chatusers.find({
+        'id': {$in: convo.users},
+        'meta.last_call_alerts': { '$ne': false },
+        is_bot: false,
+      }).exec();
+    }
+
+    var admin = convo.user_id;
+
+    console.log('sending last call to all ' + convo.users.length + ' users');
+    yield convo.users.map(function(u) {
+      return new Promise(function(resolve, reject) {
+        convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
+          convo.on('end', function() {
+            resolve();
+          });
+          convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
+          convo.say('The clock\'s ticking! You have *60* minutes.');
+          convo.next();
+        });
+      })
+    })
+
+    // continue the admin's conversation if there's anything left to say.
+
+    // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
+    console.log('calling next');
+    convo.next();
+
+  }).catch((e) => {
+    console.log('error');
+    console.log(e);
+    convo.next();
+  });
 }
