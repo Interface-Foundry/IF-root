@@ -365,18 +365,26 @@ function loadSlackUsers(users){
 
             if (data.text === 'report') {
               console.log('report generation');
-              return kipcart.report(user.team_id).then(function(report) {
+              var num_days = 7;
+              return kipcart.report(user.team_id, days).then(function(report) {
                 console.log('found ' + report.aggregate_items.length + ' items');
+
+                var fun_stats = [
+                  `You added *${report.items.length}* to your cart totalling *$${report.total}*`,
+                  `The most items came from the *${report.top_category}* category`,
+                  `You searched for *${report.most_searched}* the most`,
+                  `Other teams did't search for *${report.unique_search}* as much as you did!`
+                ].join('\n');
 
                 // make a nice slacky item report
                 var m = {
                     user: user.bot.bot_user_id,
                     username: "Kip",
-                    "text": "*Cart Overview for the last 7 days*",
+                    "text": `*Cart Overview for the last ${num_days} days*`,
                     "attachments": [
                         {
                             "title": "Summary",
-                            "text": "You added *8* items to your cart totalling *$104.84*\nThe most items came from the *Home and Office* category\nYou searched for *pens* the most\nMost other teams don't search for *Hatsune Miku Alarm Clock* as much as you did!",
+                            "text": fun_stats,
                             "mrkdwn_in": [
                                 "text",
                                 "pretext"

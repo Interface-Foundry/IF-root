@@ -292,8 +292,23 @@ var report = module.exports.report = function(slack_id, days) {
     days = 7;
   }
 
+  // fill in these fields
+  var report = {
+    begin_date: '',
+    end_date: '',
+    generated_date: '',
+    total: '',
+    items: [],
+    top_category: '',
+    most_searched: '',
+    unique_search: ''
+  };
+
   return co(function*() {
-    var begin_date = moment().subtract(days, 'day');
+    report.begin_date = moment().subtract(days, 'day');
+    report.end_date = moment();
+    report.generated_date = moment();
+
     var carts = yield db.Carts.find({
       slack_id: slack_id,
       deleted: false,
@@ -303,15 +318,22 @@ var report = module.exports.report = function(slack_id, days) {
       ]
     }).populate('items').exec();
 
+
+
     // I guess we'll aggregate all the items by creating a new cart object
     var aggregate_cart = new db.Cart();
     aggregate_cart.items = carts.reduce(function(items, cart) {
       return items.concat(cart.items);
     }, [])
 
-    var report = {
-      aggregate_items: aggregate_cart.aggregate_items
-    }
+    report.total = aggregate_cart.total;
+    report.items = aggregate_cart.aggregate_items;
+    // report.top_category = report.items.reduce((cats, i) => {
+    //   // TODO
+    // }, {})
+    report.top_category = 'Office'; // TODO
+    report.most_searched = 'pens'; // TODO
+    report.unique_search = 'Hatsune Miku Alarm Clock'; // TODO
 
     return report;
   })
