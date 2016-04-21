@@ -366,48 +366,63 @@ function loadSlackUsers(users){
             if (data.text === 'report') {
               console.log('report generation');
               var num_days = 7;
-              return kipcart.report(user.team_id, days).then(function(report) {
-                console.log('found ' + report.aggregate_items.length + ' items');
+              return kipcart.report(user.team_id, num_days).then(function(report) {
+                console.log('found ' + report.items.length + ' items');
 
                 var fun_stats = [
-                  `You added *${report.items.length}* to your cart totalling *$${report.total}*`,
+                  `You added *${report.items.length}* to your cart totalling *${report.total}*`,
                   `The most items came from the *${report.top_category}* category`,
                   `You searched for *${report.most_searched}* the most`,
-                  `Other teams did't search for *${report.unique_search}* as much as you did!`
+                  `Most other teams didn't search for *${report.unique_search}* as much as you did!`
                 ].join('\n');
 
                 // make a nice slacky item report
                 var m = {
-                    user: user.bot.bot_user_id,
-                    username: "Kip",
-                    "text": `*Cart Overview for the last ${num_days} days*`,
-                    "attachments": [
-                        {
-                            "title": "Summary",
-                            "text": fun_stats,
-                            "mrkdwn_in": [
-                                "text",
-                                "pretext"
-                            ]
-                        },
-                        {
-                            "text": "<pens.com|100 Pack of Colored Pens!>\n*$15.99* each\nQuantity: 1\nAdded By <@user>\n*Currently in cart*",
-                            "thumb_url": "http://ecx.images-amazon.com/images/I/51OPzvswA-L._SY300_.jpg",
-                            "mrkdwn_in": [
-                                "text"
-                            ],
-                            "color": "#7bd3b6"
-                        },
-                        {
-                            "text": "<pens.com|2009 Honda Civic>\n*$15.99* each\nQuantity: 1\nAdded By <@user>\nNot currently in cart",
-                            "thumb_url": "http://ci.lnwfile.com/_/ci/_resize/64/64/7o/1g/x7.jpg",
-                            "mrkdwn_in": [
-                                "text"
-                            ],
-                            "color": "#45a5f4"
-                        }
-                    ]
+                  user: user.bot.bot_user_id,
+                  username: "Kip",
+                  "text": `*Cart Overview for the last ${num_days} days*`,
+                  "attachments": [
+                    {
+                      "title": "Summary",
+                      "text": fun_stats,
+                      "mrkdwn_in": [
+                        "text",
+                        "pretext"
+                      ]
+                    }
+                  ]
                 };
+
+                m.attachments = m.attachments.concat(report.items
+                  .sort((a, b) => {
+                    if (a.purchased != b.purchased) {
+                      return a.purchased ? 1 : -1;
+                    }
+                    return a.added_date - b.added_date;
+                  })
+                  .map((item) => {
+                  var userString = item.added_by.map(function(u) {
+                    return '<@' + u + '>';
+                  }).join(', ');
+
+                  var text = [
+                    `${item.title}`,
+                    `*${item.price}* each`,
+                    `Quantity: ${item.quantity}`,
+                    `_Added by: ${userString}_`,
+                    item.purchased ? 'Not currently in cart' : '*Current in cart*',
+                  ].join('\n');
+
+                  return {
+                      "text": text,
+                      "thumb_url": item.image,
+                      "mrkdwn_in": [
+                          "text"
+                      ],
+                      "color": item.purchased ? "#45a5f4" : "#7bd3b6"
+                  };
+                }))
+
                 console.log(m);
                 slackUsers_web[user.team_id].chat.postMessage(data.channel, '', m, function() {
                     console.log('um okay posted a message i think?');

@@ -314,7 +314,7 @@ var report = module.exports.report = function(slack_id, days) {
       deleted: false,
       $or: [
         {purchased_date: {$exists: false}}, // all open carts
-        {purchased_date: {$gt: begin_date}}
+        {purchased_date: {$gt: report.begin_date}}
       ]
     }).populate('items').exec();
 
