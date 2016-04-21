@@ -284,21 +284,36 @@ var getCart = module.exports.getCart = function(slack_id) {
 }
 
 //
-// Get the summary of all the things ppl ordered on slack in the past week
+// Get the summary of all the things ppl ordered on slack in the past X days
 //
-function weeklySummary(slack_id) {
+var report = module.exports.report = function(slack_id, days) {
+  // default days to one week, eek!
+  if (typeof days !== 'number' || days < 1) {
+    days = 7;
+  }
+
   return co(function*() {
-    var last_week = moment().subtract(1, 'week');
+    var begin_date = moment().subtract(days, 'day');
     var carts = yield db.Carts.find({
       slack_id: slack_id,
       deleted: false,
       $or: [
         {purchased_date: {$exists: false}}, // all open carts
-        {purchased_date: {$gt: last_week}} // carts purchased in the last week
+        {purchased_date: {$gt: begin_date}}
       ]
-    })
+    }).populate('items').exec();
 
-    // TODO format the weekly summary somehow
+    // I guess we'll aggregate all the items by creating a new cart object
+    var aggregate_cart = new db.Cart();
+    aggregate_cart.items = carts.reduce(function(items, cart) {
+      return items.concat(cart.items);
+    }, [])
+
+    var report = {
+      aggregate_items: aggregate_cart.aggregate_items
+    }
+
+    return report;
   })
 }
 

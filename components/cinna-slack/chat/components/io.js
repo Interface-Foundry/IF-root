@@ -345,12 +345,11 @@ function loadSlackUsers(users){
             console.log('🔥')
             console.log(data);
 
-            // don't talk to urself
-            if (data.user === user.bot.bot_user_id) {
+            // don't talk to urself  TODO why does data sometimes have a bot_id instead of user id?
+            if (data.user === user.bot.bot_user_id || data.username === 'Kip') {
               console.log("don't talk to urself")
               return;
             }
-
 
             // Less cyncical comment: might be useful to have history here,
             // but idk how and we'll probably rewrite this segment to handle
@@ -362,6 +361,55 @@ function loadSlackUsers(users){
             if (user.conversations[data.channel]) {
               console.log('in a conversation: ' + user.conversations[data.channel])
               return;
+            }
+
+            if (data.text === 'report') {
+              console.log('report generation');
+              return kipcart.report(user.team_id).then(function(report) {
+                console.log('found ' + report.aggregate_items.length + ' items');
+
+                // make a nice slacky item report
+                var m = {
+                    user: user.bot.bot_user_id,
+                    username: "Kip",
+                    "text": "*Cart Overview for the last 7 days*",
+                    "attachments": [
+                        {
+                            "title": "Summary",
+                            "text": "You added *8* items to your cart totalling *$104.84*\nThe most items came from the *Home and Office* category\nYou searched for *pens* the most\nMost other teams don't search for *Hatsune Miku Alarm Clock* as much as you did!",
+                            "mrkdwn_in": [
+                                "text",
+                                "pretext"
+                            ]
+                        },
+                        {
+                            "text": "<pens.com|100 Pack of Colored Pens!>\n*$15.99* each\nQuantity: 1\nAdded By <@user>\n*Currently in cart*",
+                            "thumb_url": "http://ecx.images-amazon.com/images/I/51OPzvswA-L._SY300_.jpg",
+                            "mrkdwn_in": [
+                                "text"
+                            ],
+                            "color": "#7bd3b6"
+                        },
+                        {
+                            "text": "<pens.com|2009 Honda Civic>\n*$15.99* each\nQuantity: 1\nAdded By <@user>\nNot currently in cart",
+                            "thumb_url": "http://ci.lnwfile.com/_/ci/_resize/64/64/7o/1g/x7.jpg",
+                            "mrkdwn_in": [
+                                "text"
+                            ],
+                            "color": "#45a5f4"
+                        }
+                    ]
+                };
+                console.log(m);
+                slackUsers_web[user.team_id].chat.postMessage(data.channel, '', m, function() {
+                    console.log('um okay posted a message i think?');
+                });
+
+              }).catch(function(e) {
+                console.log('error generating report');
+                console.log(e);
+                console.log(e.stack);
+              })
             }
 
 
