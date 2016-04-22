@@ -264,8 +264,8 @@ function showSettings(response, convo) {
         var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())
-        attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a')
-          + '\nYou can turn this off by saying `no weekly status`'
+        attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + convo.chatuser.tz.replace(/_/g, ' ')
+          + ')\nYou can turn this off by saying `no weekly status`'
           + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
       } else {
         attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
@@ -321,6 +321,16 @@ function handleSettingsChange(response, convo) {
       if (text.indexOf(':') < 0) {
         text = text.replace(/([\d]+)/, '$1:00')
       }
+      // for some reason, Date.js cannot parse 12:30 pm, but can parse 12:30
+      if (text.indexOf('12:') >= 0) {
+        console.log('text'. text )
+        if (text.match(/(am|a.m.|a m)/i)) {
+          text = text.replace(/(am|a.m.|a m)/i, '')
+          text = text.replace('12:', '00:');
+        } else {
+          text = text.replace(/(pm|p.m.|p m)/i, '')
+        }
+      }
       console.log(text);
       var date = Date.parse(text);
       console.log(date);
@@ -329,7 +339,7 @@ function handleSettingsChange(response, convo) {
       var hour = date.getHours();
 
       // if they type Tuesdays at 4 they probably mean 4 pm
-      if (hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
+      if (hour > 0 && hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
         hour = hour + 12;
       } else if (hour > 18 && !text.match(/(\bam\b|\bpm\b)/i)) {
         hour = hour - 12;
