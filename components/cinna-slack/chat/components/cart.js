@@ -329,7 +329,9 @@ var report = module.exports.report = function(slack_id, days) {
     report.total = aggregate_cart.total;
     report.items = aggregate_cart.aggregate_items;
 
+    //
     // get top category
+    //
     var category_counts = _.countBy(report.items, (i) =>  {
       return _.get(JSON.parse(i.source_json), 'ItemAttributes[0]Binding[0]')
     })
@@ -337,11 +339,45 @@ var report = module.exports.report = function(slack_id, days) {
     var top_count = 0;
     Object.keys(category_counts).map(function(cat) {
       if (category_counts[cat] > top_count) {
+        top_count = category_counts[cat];
         report.top_category = cat;
       }
     })
 
-    report.most_searched = 'pens'; // TODO
+    //
+    // Get most searched term
+    //
+    var messages = yield db.Messages.find({
+      bucket: 'search',
+      action: 'initial',
+      incoming: 'true',
+      'source.org': slack_id,
+      ts: {$gt: report.begin_date}
+    }).select('tokens').exec();
+
+    console.log(messages);
+    var search_terms = messages
+      .map((m) => { return m.tokens[0] })
+      .filter((t) => {
+        return !t.match(/(collect|report)/);
+      });
+    console.log(search_terms);
+    word_counts = {};
+    for(var i = 0; i < search_terms.length; i++) {
+      word_counts["_" + search_terms[i]] = (word_counts["_" + search_terms[i]] || 0) + 1;
+    }
+    top_count = 0;
+    console.log(word_counts);
+    Object.keys(word_counts).map(function(word) {
+      if (word_counts[word] > top_count) {
+        top_count = word_counts[word];
+        report.most_searched = word.substr(1);
+      }
+    })
+
+    //
+    // Get most unique search term
+    //
     report.unique_search = 'Hatsune Miku Alarm Clock'; // TODO
 
     return report;
