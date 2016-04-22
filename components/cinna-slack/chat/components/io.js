@@ -376,6 +376,10 @@ function loadSlackUsers(users){
                   `Most other teams didn't search for *${report.unique_search}* as much as you did!`
                 ].join('\n');
 
+                if (report.items.length === 0) {
+                  fun_stats = 'You have not added anything to your cart.';
+                }
+
                 // make a nice slacky item report
                 var m = {
                   user: user.bot.bot_user_id,

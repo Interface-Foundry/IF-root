@@ -328,10 +328,19 @@ var report = module.exports.report = function(slack_id, days) {
 
     report.total = aggregate_cart.total;
     report.items = aggregate_cart.aggregate_items;
-    // report.top_category = report.items.reduce((cats, i) => {
-    //   // TODO
-    // }, {})
-    report.top_category = 'Office'; // TODO
+
+    // get top category
+    var category_counts = _.countBy(report.items, (i) =>  {
+      return _.get(JSON.parse(i.source_json), 'ItemAttributes[0]Binding[0]')
+    })
+
+    var top_count = 0;
+    Object.keys(category_counts).map(function(cat) {
+      if (category_counts[cat] > top_count) {
+        report.top_category = cat;
+      }
+    })
+
     report.most_searched = 'pens'; // TODO
     report.unique_search = 'Hatsune Miku Alarm Clock'; // TODO
 
