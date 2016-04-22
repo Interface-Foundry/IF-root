@@ -171,7 +171,9 @@ var initSlackUsers = function(env){
         loadSlackUsers(testUser);
     }else{
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
-        Slackbots.find().exec(function(err, users) {
+        Slackbots.find({
+          deleted: {$ne: true}
+        }).exec(function(err, users) {
             if(err && process.env.NODE_ENV === 'production'){
                 console.log('saved slack bot retrieval error');
                 var mailOptions = {
@@ -409,12 +411,14 @@ function loadSlackUsers(users){
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
             console.log('🔥')
 
+
             //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71' 
-            // don't talk to urself
-            if (data.user === user.bot.bot_user_id) {
+            // don't talk to urself  TODO why does data sometimes have a bot_id instead of user id?
+            if (data.user === user.bot.bot_user_id || data.username === 'Kip') {
+              console.log("don't talk to urself")
               return;
-            } 
-            
+            }
+
             // Less cyncical comment: might be useful to have history here,
             // but idk how and we'll probably rewrite this segment to handle
             // multiple chat platforms sooner rather than later anyway.
@@ -425,7 +429,89 @@ function loadSlackUsers(users){
             if (user.conversations[data.channel]) {
               console.log('in a conversation: ' + user.conversations[data.channel])
               return;
-            } 
+
+            }
+
+            if (data.text === 'report') {
+              console.log('report generation');
+
+              var isAdmin = user.meta.office_assistants.indexOf(data.user) >= 0;
+              var isP2P = user.meta.office_assistants.length === 0;
+              var num_days = 7;
+
+              return kipcart.report(user.team_id, num_days).then(function(report) {
+                console.log('found ' + report.items.length + ' items');
+
+                var fun_stats = [
+                  isAdmin || isP2P ? `You added *${report.items.length}* to your cart totalling *${report.total}*` : `You added *${report.items.length}* to your cart`,
+                  `The most items came from the *${report.top_category}* category`,
+                  `You searched for *${report.most_searched}* the most`,
+                  `Most other teams didn't search for *${report.unique_search}* as much as you did!`
+                ].join('\n');
+
+                if (report.items.length === 0) {
+                  fun_stats = 'You have not added anything to your cart.';
+                }
+
+                // make a nice slacky item report
+                var m = {
+                  user: user.bot.bot_user_id,
+                  username: "Kip",
+                  "text": `*Cart Overview for the last ${num_days} days*`,
+                  "attachments": [
+                    {
+                      "title": "Summary",
+                      "text": fun_stats,
+                      "mrkdwn_in": [
+                        "text",
+                        "pretext"
+                      ]
+                    }
+                  ]
+                };
+
+                m.attachments = m.attachments.concat(report.items
+                  .sort((a, b) => {
+                    if (a.purchased != b.purchased) {
+                      return a.purchased ? 1 : -1;
+                    }
+                    return a.added_date - b.added_date;
+                  })
+                  .map((item) => {
+                  var userString = item.added_by.map(function(u) {
+                    return '<@' + u + '>';
+                  }).join(', ');
+
+                  var text = [
+                    `${item.title}`,
+                    isAdmin || isP2P ? `*${item.price}* each` : '',
+                    `Quantity: ${item.quantity}`,
+                    isAdmin || isP2P ? `_Added by: ${userString}_` : '',
+                    item.purchased ? 'Not currently in cart' : '*Currently in cart*',
+                  ].join('\n').replace(/\n+/g, '\n')
+
+                  return {
+                      "text": text,
+                      "thumb_url": item.image,
+                      "mrkdwn_in": [
+                          "text"
+                      ],
+                      "color": item.purchased ? "#45a5f4" : "#7bd3b6"
+                  };
+                }))
+
+                console.log(m);
+                slackUsers_web[user.team_id].chat.postMessage(data.channel, '', m, function() {
+                    console.log('um okay posted a message i think?');
+                });
+
+              }).catch(function(e) {
+                console.log('error generating report');
+                console.log(e);
+                console.log(e.stack);
+              })
+            }
+
 
             // TESTING PURPOSES, here is how you would trigger a conversation
             if (data.text === 'onboard') {
@@ -446,26 +532,54 @@ function loadSlackUsers(users){
               })
             }
 
-            if (data.text && data.text.match(/\bcollect\b/)) {
+             if (data.text && data.text.match(/\badd member\b/)) {
+              user.conversations[data.channel] = 'addmember';
               console.log('triggering kip collect, maybe if the person is an admin?')
-              return weekly_updates.collect(data.team, data.user, function() {
-                console.log('done collecting orders i guess');
-                user.conversations[data.channel] = false;
-              })
-            }
+                return weekly_updates.addMembers(data.team, data.user, data.channel, function() {
+                  console.log('done adding members');
+                  user.conversations[data.channel] = false;
+                })
+             }
 
-            if (data.text && data.text.match(/\badd member\b/)) {
-                user.conversations[data.channel] = 'addmember'
-                // don't talk to urself
-                if (data.user === 'U0HLZLB71') {
-                  console.log("don't talk to urself")
-                  return;
-                }
-              console.log('\n\n\n\n\n\n\n\n\n\n\ndata.user: ', data.user, ' user: ',user.bot.bot_user_id,'\n\n\n\n\n\n\n\n\n\n\n\n\n')
-              return weekly_updates.addMembers(data.team, data.user, data.channel,function() {
-                console.log('done adding users');
-                user.conversations[data.channel] = false;
-              })
+            if (data.text && data.text.match(/\bcollect\b/)) {
+              user.conversations[data.channel] = 'collect';
+              // a channel might look like this: "collect <#C0R6CJFTK>"
+              if (data.text.indexOf('<#C') >= 0) {
+                console.log('attempting to collect for one or more channels');
+                var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
+                  return markdown.replace('<#', '').replace('>', '');
+                })
+                console.log('channels: ' + channels.join(', '));
+
+
+                // get list of users in all channels
+                return channels.map(function(channel) {
+
+                  request('https://slack.com/api/channels.info?token=' + user.bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
+                    if (e) {
+                      console.log(e);
+                    }
+
+                    var channelInfo = JSON.parse(r.body)
+                    debugger;
+                    if (channelInfo.channel && channelInfo.channel.members) {
+                      // um okay now what?
+
+                      return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, function() {
+                        console.log('um done collecting orders for channel ' + channel)
+                        user.conversations[data.channel] = false;
+                      })
+                    }
+                  });
+
+                })
+              } else {
+                console.log('triggering kip collect, maybe if the person is an admin?')
+                return weekly_updates.collect(data.team, data.user, function() {
+                  console.log('done collecting orders i guess');
+                  user.conversations[data.channel] = false;
+                })
+              }
             }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
@@ -1071,7 +1185,7 @@ function searchBucket(data){
         if (data.source.origin == 'slack' && slackUsers[data.source.org]){
             slackUsers[data.source.org].sendTyping(data.source.channel);
         }
-    }   
+    }
 
     console.log('* * * * * * * * * * * * ',data.bucket);
 
@@ -1750,9 +1864,9 @@ var sendResponse = function(data,flag){
                 //checking for search msg and updating it
                 if(messageHistory[data.source.id] && messageHistory[data.source.id].typing){
                     var msgData = {};
-                    slackUsers_web[data.source.org].chat.update(messageHistory[data.source.id].typing.ts, messageHistory[data.source.id].typing.channel, data.client_res[0], {}, function(err,res) {        
+                    slackUsers_web[data.source.org].chat.update(messageHistory[data.source.id].typing.ts, messageHistory[data.source.id].typing.channel, data.client_res[0], {}, function(err,res) {
                     });
-                    
+
                 }else{
                     var message = data.client_res[0]; //use first item in client_res array as text message
                 }
@@ -1860,7 +1974,7 @@ var sendResponse = function(data,flag){
                         slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
 
                             //store typing message for later to remove it
-                            if (res.ok && flag == 'typing'){                                
+                            if (res.ok && flag == 'typing'){
 
                                 messageHistory[data.source.id].typing = {
                                     ts: res.ts,
@@ -1868,7 +1982,7 @@ var sendResponse = function(data,flag){
                                 }
 
                                 console.log('👹👹👹 ',messageHistory[data.source.id]);
-                               
+
                             }else {
                                 console.log('👹👹👹 delete typing event err ',err);
                             }
@@ -2093,6 +2207,10 @@ function viewCart(data, show_added_item){
         team_id: data.source.org
       }).exec();
 
+      // admins have special rights
+      var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
+      var isP2P = slackbot.meta.office_assistants.length === 0;
+
       // get the latest added item if we need to highlight it
       if (show_added_item) {
         var added_item = cart.items[cart.items.length - 1];
@@ -2106,8 +2224,10 @@ function viewCart(data, show_added_item){
           return '<@' + u + '>';
         }).join(', ');
 
-        var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
-        console.log(link);
+        if (isAdmin || isP2P) {
+          var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
+          console.log(link);
+        }
 
         var actionObj = [
             {
@@ -2132,28 +2252,33 @@ function viewCart(data, show_added_item){
             }
         ];
 
-        if (item.ASIN === added_asin) {
-          cartObj.push({
-            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#7bd3b6',
-            thumb_url: item.image
-           // actions: actionObj
-          })
+        // add title, which is a link for admins/p2p and text otherwise
+        if (isAdmin || isP2P) {
+          var text = [
+            `${processData.emoji[i+1].slack} <${link}|${item.title}>`,
+            `*${item.price}* each`,
+            `Quantity: ${item.quantity}`,
+            `_Added by: ${userString}_`
+          ].join('\n');
         } else {
-          cartObj.push({
-            text: `${processData.emoji[i+1].slack} <${link}|${item.title}> \n *${item.price}* each \n Quantity: ${item.quantity} \n _Added by: ${userString}_`,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#45a5f4',
-            thumb_url: item.image
-            //actions: actionObj
-          })
+          var text = [
+            `${processData.emoji[i+1].slack} *${item.title}*`,
+            `Quantity: ${item.quantity}`
+          ].join('\n');
         }
+
+        cartObj.push({
+          text: text,
+          mrkdwn_in: ['text', 'pretext'],
+          color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
+          thumb_url: item.image
+         // actions: actionObj
+        })
       }
 
       // Only show the purchase link in the summary for office admins.
       var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
-      if (slackbot.meta.office_assistants.indexOf(data.source.user) >= 0) {
+      if (isAdmin) {
         summaryText += ` \n <${cart.link}|» Purchase Items >`;
       }
 

@@ -264,8 +264,8 @@ function showSettings(response, convo) {
         var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())
-        attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a')
-          + '\nYou can turn this off by saying `no weekly status`'
+        attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + convo.chatuser.tz.replace(/_/g, ' ')
+          + ')\nYou can turn this off by saying `no weekly status`'
           + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
       } else {
         attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
@@ -315,7 +315,22 @@ function handleSettingsChange(response, convo) {
       text = text.replace('days', 'day');
       text = text.replace(/(to|every|\bat\b)/g, '');
       text = text.trim();
-      // text = text.replace(/ [\d]+/)
+
+      // this date library cannot understand Tuesday at 2
+      // but it does understand Tuesday at 2:00
+      if (text.indexOf(':') < 0) {
+        text = text.replace(/([\d]+)/, '$1:00')
+      }
+      // for some reason, Date.js cannot parse 12:30 pm, but can parse 12:30
+      if (text.indexOf('12:') >= 0) {
+        console.log('text'. text )
+        if (text.match(/(am|a.m.|a m)/i)) {
+          text = text.replace(/(am|a.m.|a m)/i, '')
+          text = text.replace('12:', '00:');
+        } else {
+          text = text.replace(/(pm|p.m.|p m)/i, '')
+        }
+      }
       console.log(text);
       var date = Date.parse(text);
       console.log(date);
@@ -324,7 +339,7 @@ function handleSettingsChange(response, convo) {
       var hour = date.getHours();
 
       // if they type Tuesdays at 4 they probably mean 4 pm
-      if (hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
+      if (hour > 0 && hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
         hour = hour + 12;
       } else if (hour > 18 && !text.match(/(\bam\b|\bpm\b)/i)) {
         hour = hour - 12;
@@ -369,6 +384,7 @@ function handleSettingsChange(response, convo) {
 
       } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
         // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
+        var should_return = false;
         userIds.map(function(id) {
           if (id == convo.user_id) {
             convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
@@ -377,8 +393,16 @@ function handleSettingsChange(response, convo) {
           var index = convo.slackbot.meta.office_assistants.indexOf(id);
           if (index >= 0) {
             convo.slackbot.meta.office_assistants.splice(index, 1);
+          } else {
+            convo.ask('Looks like <@' + id + '> was not an admin.  Do you have any settings changes?', handleSettingsChange)
+            convo.next();
+            should_return = true;
           }
         })
+
+        if (should_return) {
+          return;
+        }
       } else {
         convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
         return convo.next();
@@ -420,12 +444,12 @@ function handleSettingsChange(response, convo) {
 
         // the question was something like "Do you have any settings changes?"
         // so we need to allow the user to say "yes" or "no"
-        if (response.text.match(convo.task.botkit.utterances.yes)) {
+        if (response.text.toLowerCase().match(convo.task.botkit.utterances.yes)) {
           convo.ask('Go ahead, I\'m listening.', handleSettingsChange)
           return convo.next();
-        } else if (response.text.match(convo.task.botkit.utterances.no)
-            || response.text.match(/^(end|exit|finish|done|quit|settings exit)/)
-            || response.text === 'stop') {
+        } else if (response.text.toLowerCase().match(convo.task.botkit.utterances.no)
+            || response.text.toLowerCase().match(/^(end|exit|finish|done|quit|settings exit)/)
+            || response.text.toLowerCase() === 'stop') {
           convo.say('Ok thanks.  Done with settings.');
           return convo.next();
         }

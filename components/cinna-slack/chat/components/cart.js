@@ -4,6 +4,7 @@ var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
 var sleep = require('co-sleep')
+var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -284,21 +285,133 @@ var getCart = module.exports.getCart = function(slack_id) {
 }
 
 //
-// Get the summary of all the things ppl ordered on slack in the past week
+// for the report, we'll need a base corpus of words searched in the last week
 //
-function weeklySummary(slack_id) {
+var term_freq = new natural.TfIdf();
+db.Messages.find({
+  bucket: 'search',
+  action: 'initial',
+  incoming: 'true',
+  ts: {$gt: moment().subtract(7, 'day')}
+}).exec(function(e, messages) {
+  if (e) {
+    console.error('Could not get search terms for report generation statistics');
+  }
+  var all_terms_doc = messages.map((m) => {
+    return m.tokens[0];
+  }).join(' ');
+  term_freq.addDocument(all_terms_doc);
+})
+
+//
+// Get the summary of all the things ppl ordered on slack in the past X days
+//
+var report = module.exports.report = function(slack_id, days) {
+  // default days to one week, eek!
+  if (typeof days !== 'number' || days < 1) {
+    days = 7;
+  }
+
+  // fill in these fields
+  var report = {
+    begin_date: '',
+    end_date: '',
+    generated_date: '',
+    total: '',
+    items: [],
+    top_category: '',
+    most_searched: '',
+    unique_search: ''
+  };
+
   return co(function*() {
-    var last_week = moment().subtract(1, 'week');
+    report.begin_date = moment().subtract(days, 'day');
+    report.end_date = moment();
+    report.generated_date = moment();
+
     var carts = yield db.Carts.find({
       slack_id: slack_id,
       deleted: false,
       $or: [
         {purchased_date: {$exists: false}}, // all open carts
-        {purchased_date: {$gt: last_week}} // carts purchased in the last week
+        {purchased_date: {$gt: report.begin_date}}
       ]
+    }).populate('items').exec();
+
+
+
+    // I guess we'll aggregate all the items by creating a new cart object
+    var aggregate_cart = new db.Cart();
+    aggregate_cart.items = carts.reduce(function(items, cart) {
+      return items.concat(cart.items);
+    }, [])
+
+    report.total = aggregate_cart.total;
+    report.items = aggregate_cart.aggregate_items;
+
+    //
+    // get top category
+    //
+    var category_counts = _.countBy(report.items, (i) =>  {
+      return _.get(JSON.parse(i.source_json), 'ItemAttributes[0]Binding[0]')
     })
 
-    // TODO format the weekly summary somehow
+    var top_count = 0;
+    Object.keys(category_counts).map(function(cat) {
+      if (category_counts[cat] > top_count) {
+        top_count = category_counts[cat];
+        report.top_category = cat;
+      }
+    })
+
+    //
+    // Get most searched term
+    //
+    var messages = yield db.Messages.find({
+      bucket: 'search',
+      action: 'initial',
+      incoming: 'true',
+      'source.org': slack_id,
+      ts: {$gt: report.begin_date}
+    }).select('tokens').exec();
+
+    console.log(messages);
+    var search_terms = messages
+      .map((m) => { return m.tokens[0] })
+      .filter((t) => {
+        return !t.match(/(collect|report|wait|stop|no|yes)/);
+      });
+    console.log(search_terms);
+    word_counts = {};
+    for(var i = 0; i < search_terms.length; i++) {
+      word_counts["_" + search_terms[i]] = (word_counts["_" + search_terms[i]] || 0) + 1;
+    }
+    top_count = 0;
+    console.log(word_counts);
+    Object.keys(word_counts).map(function(word) {
+      if (word_counts[word] > top_count) {
+        top_count = word_counts[word];
+        report.most_searched = word.substr(1);
+      }
+    })
+
+    //
+    // Get most unique search term
+    //
+    var lowest_score = 10;
+    Object.keys(word_counts).map(function(word) {
+      word = word.substr(1);
+      term_freq.tfidfs(word, function(i, measure) {
+        console.log(word, i, measure, word_counts['_' + word], measure/word_counts['_' + word]);
+        measure = measure / word_counts['_' + word];
+        if (measure < lowest_score) {
+          lowest_score = measure;
+          report.unique_search = word;
+        }
+      })
+    });
+
+    return report;
   })
 }
 
