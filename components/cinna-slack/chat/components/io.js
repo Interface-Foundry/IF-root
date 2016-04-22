@@ -209,37 +209,70 @@ var newSlack = function() {
     });
 }
 
-//fired when server gets /newEmail route request
-var newEmail= function() {
-     function routeToSlack(data) {
-                console.log('incoming slack 📬')
-                if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
-                    var newSl = {
-                        source: {
-                            'origin':'slack',
-                            'channel':data.channel,
-                            'org':data.team,
-                            'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
-                            user: data.user
-                        },
-                        'msg':data.text
-                    }
-                    //carry image tags over
-                    if (data.imageTags){
-                        newSl.imageTags = data.imageTags;
-                    }
-                    preProcess(newSl);
-                }
-        }
-    //find matching 
-    Slackbots.find({'meta.initialized': true, 'team_id': 'faketeamid'  }).exec(function(err, users) {
+//fired when user responds via email to an 'add order' request from slackbot 
+var newEmail= function(from_email) {
+    //  function routeToSlack(data) {
+    //     console.log('incoming slack 📬')
+    //     if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
+    //         var newSl = {
+    //             source: {
+    //                 'origin':'slack',
+    //                 'channel':data.channel,
+    //                 'org':data.team,
+    //                 'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+    //                 user: data.user
+    //             },
+    //             'msg':data.text
+    //         }
+    //         //carry image tags over
+    //         if (data.imageTags){
+    //             newSl.imageTags = data.imageTags;
+    //         }
+    //         preProcess(newSl);
+    //     }
+    // }
+    // find matching user
+    // **Question what to do is a user with same email is participating in multiple slackbots?? o em gee
+    Chatuser.find({'profile.email': from_email }).exec(function(err, users) {
         if(err){
-            console.log('saved slack bot retrieval error');
+            console.log('saved chat user retrieval error');
         }
         else {
-            loadSlackUsers(users);
-            console.log('DEBUG: new slack team added with this data: ',users);
-            res.send('slack user added');
+            
+            if (!users || users.length == 0) {
+
+            }
+            if (users.length > 0) {
+
+            }
+            else if (users[0].team_id){
+
+                console.log('This should be the active chat: ', slackUsers[users[0].team_id] )
+
+                //look for keys matching team_id
+                //slackUsers.
+
+  
+                //find relevant slack bot
+                // Slackbots.find({'meta.initialized':  true, 'team_id': users[0].team_id }).exec(function(err, users) {
+                //     if(err){
+                //         console.log('saved slack bot retrieval error');
+                //     }
+                //     else {
+                //         loadSlackUsers(users);
+                //         console.log('DEBUG: new slack team added with this data: ',users);
+                //         res.send('slack user added');
+                //     }
+                // });
+            
+            }
+
+            
+
+
+            // loadSlackUsers(users);
+            // console.log('DEBUG: new slack team added with this data: ',users);
+            // res.send('slack user added');
         }
     });
 }
@@ -375,15 +408,13 @@ function loadSlackUsers(users){
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
             console.log('🔥')
-            console.log(data);
 
+            //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71' 
             // don't talk to urself
             if (data.user === user.bot.bot_user_id) {
-              console.log("don't talk to urself")
               return;
-            }
-
-
+            } 
+            
             // Less cyncical comment: might be useful to have history here,
             // but idk how and we'll probably rewrite this segment to handle
             // multiple chat platforms sooner rather than later anyway.
@@ -394,8 +425,7 @@ function loadSlackUsers(users){
             if (user.conversations[data.channel]) {
               console.log('in a conversation: ' + user.conversations[data.channel])
               return;
-            }
-
+            } 
 
             // TESTING PURPOSES, here is how you would trigger a conversation
             if (data.text === 'onboard') {
@@ -411,7 +441,7 @@ function loadSlackUsers(users){
             if (data.text === 'settings') {
               user.conversations[data.channel] = 'settings';
               return conversation_botkit.settings(user, data.user, function() {
-                console.log('done with settings conversation')
+                console.log('done with settings conversation');
                 user.conversations[data.channel] = false;
               })
             }
@@ -420,6 +450,21 @@ function loadSlackUsers(users){
               console.log('triggering kip collect, maybe if the person is an admin?')
               return weekly_updates.collect(data.team, data.user, function() {
                 console.log('done collecting orders i guess');
+                user.conversations[data.channel] = false;
+              })
+            }
+
+            if (data.text && data.text.match(/\badd member\b/)) {
+                user.conversations[data.channel] = 'addmember'
+                // don't talk to urself
+                if (data.user === 'U0HLZLB71') {
+                  console.log("don't talk to urself")
+                  return;
+                }
+              console.log('\n\n\n\n\n\n\n\n\n\n\ndata.user: ', data.user, ' user: ',user.bot.bot_user_id,'\n\n\n\n\n\n\n\n\n\n\n\n\n')
+              return weekly_updates.addMembers(data.team, data.user, data.channel,function() {
+                console.log('done adding users');
+                user.conversations[data.channel] = false;
               })
             }
 
@@ -742,6 +787,7 @@ function routeNLP(data){
                   incomingAction(data);
                 }
                 else {
+
                     console.log('NLP RES ',res);
 
                     if (res.supervisor) {
@@ -2206,6 +2252,8 @@ function encode_utf8(s) {
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
 module.exports.newSlack = newSlack;
+module.exports.newEmail = newEmail;
+
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;
 

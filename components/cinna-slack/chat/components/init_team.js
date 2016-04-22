@@ -8,8 +8,6 @@ var debug = require('debug')('chat')
 
 module.exports = function(bot, cb) {
   cb = cb || function() {};
-
-
   scrape_team_info(bot, function(err, users) {
     if (err || !users) {
       console.error('Could not scrape users for slackbot ' + bot._id);
@@ -40,7 +38,7 @@ module.exports = function(bot, cb) {
 
 // callback is a team, the list of chatusers for this bot
 var scrape_team_info = function(bot, callback) {
-    console.log('scraping team for bot ' + bot._id)
+    console.log('scraping team for bot ' + bot._id);
     request('https://slack.com/api/auth.test?token=' + bot.access_token, function(e, r, b) {
       if (kip.error(e)) return;
 

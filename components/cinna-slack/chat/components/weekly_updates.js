@@ -1,5 +1,6 @@
 /*eslint-env es6*/
 var db = require('db');
+var Chatuser = db.Chatuser;
 var co = require('co');
 var cron = require('cron');
 var datejs = require('./date');
@@ -108,7 +109,7 @@ module.exports.collect = function(team_id, person_id  ) {
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
-
+    console.log('slackbot: ',slackbot);
     console.log(slackbot.meta.office_assistants);
     console.log(person_id);
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
@@ -138,6 +139,8 @@ module.exports.collect = function(team_id, person_id  ) {
         convo.ask('Would you like me to send the last call for 60 minutes from now?', lastCall);
       })
     })
+
+
   }).catch((e) => {
     console.log(e);
     console.log(e.stack);
@@ -203,4 +206,123 @@ function lastCall(response, convo) {
     convo.say("I'm sorry I couldn't understand that.  Should I send out a last call message?", lastCall)
     convo.next();
   }
+}
+
+module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
+   // um let's refresh the slackbot just in case...
+   co(function*() {
+    console.log('team_id: ',team_id,'person_id: ',person_id, '')
+    var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
+    console.log('slackbot: ',slackbot);
+    if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
+      // oh no the person is not an admin, whatever will we do???
+      console.log('cannot do this b/c the person is def not an admin');
+      return;
+    }
+    // Set up the bot
+    var bot = controller.spawn({ token: slackbot.bot.bot_access_token });
+    bot.startRTM(function(e, bot, payload) {
+      bot.startPrivateConversation({user: person_id}, function(response, convo) {
+        convo.slackbot = slackbot;
+        convo.bot = bot;
+        convo.user_id = person_id;
+        convo.on('end', function() {
+          console.log('ending addmember convo');
+          bot.closeRTM();
+        });
+      startConvo();
+      function startConvo() { 
+          convo.ask('Would you like to add members to this order?', function(response, convo) {
+          if (response.text.match(convo.bot.utterances.yes)) {
+              console.log('k lets add a member mkay');
+              var newUser = { 
+                   id:'U0SM73E5R', //How to generate?
+                   type: 'slack', 
+                   dm:'D0SM74ECT',
+                   team_id: team_id,
+                   is_admin:false,
+                   is_owner:false,
+                   is_primary_owner:false,
+                   is_restricted:false,
+                   is_ultra_restricted:false,
+                   is_bot:false,
+                   profile: {},
+                   settings: { emailNotification: false}
+               };
+              convo.next();
+              convo.ask('What is the name of this member? ', function(response, convo) {
+                if (response.text) {
+                  newUser.name = response.text;
+                }
+                convo.next();
+                convo.ask('Is he/she a slack user?', function(response, convo) {
+                  if (response.text.match(convo.bot.utterances.yes)) {
+                    newUser.type = 'slack';
+                  } 
+                  else {
+                    newUser.type = 'email';
+                    newUser.settings.emailNotification = true;                    
+                  }
+                  convo.next();
+                  convo.ask('What is this members email address?', function(response, convo) {
+                    if (response.text) {
+                      newUser.profile.email = response.text;
+                    }
+                    var user = new db.Chatuser(newUser);
+                    user.save(function(err, saved){
+                      if (err) {
+                        console.log('Could not save new user: ', err)
+                           convo.bot.say({
+                            text: 'Oops! Something went wrong!',
+                            channel: channel_id
+                          });
+                         convo.stop()
+                         cb();
+                      } 
+                      else {
+                         console.log('Saved new user!',saved);
+                         convo.bot.say({
+                            text: 'Great! We added ' + newUser.name + ' to the list!',
+                            channel: channel_id
+                          });
+                         convo.next();
+                          convo.ask('Would you like to add another user?', function(response, convo) {
+                            if (response.text.match(convo.bot.utterances.yes)) {
+                              convo.next();
+                              startConvo();
+                            } 
+                            else if (response.text.match(convo.bot.utterances.no)) {
+                              convo.stop()
+                              cb();
+                            }
+                            else {
+                              convo.stop()
+                              cb();
+                            }
+                          })
+                      }
+                    })//save 
+                  })// email address?
+                }) // slack or email?
+              }) //name?
+            } 
+            else if (response.text.match(convo.bot.utterances.no)) {
+              console.log('no add member');
+              convo.bot.say({text: 'OK, you can `checkout` whenever you\'re ready', channel: channel_id});
+              convo.stop()
+              cb();
+            } 
+            else {
+              convo.say("I'm sorry I couldn't understand that.");
+              convo.repeat();
+              convo.next();
+              }
+        });// add members
+      }//end of startConvo function
+      }); // start private conversation
+    }); //start RTM
+   }).catch((e) => {
+    console.log(e);
+    console.log(e.stack);
+  })
 }
