@@ -4,6 +4,7 @@ var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
 var sleep = require('co-sleep')
+var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -284,6 +285,25 @@ var getCart = module.exports.getCart = function(slack_id) {
 }
 
 //
+// for the report, we'll need a base corpus of words searched in the last week
+//
+var term_freq = new natural.TfIdf();
+db.Messages.find({
+  bucket: 'search',
+  action: 'initial',
+  incoming: 'true',
+  ts: {$gt: moment().subtract(7, 'day')}
+}).exec(function(e, messages) {
+  if (e) {
+    console.error('Could not get search terms for report generation statistics');
+  }
+  var all_terms_doc = messages.map((m) => {
+    return m.tokens[0];
+  }).join(' ');
+  term_freq.addDocument(all_terms_doc);
+})
+
+//
 // Get the summary of all the things ppl ordered on slack in the past X days
 //
 var report = module.exports.report = function(slack_id, days) {
@@ -378,7 +398,17 @@ var report = module.exports.report = function(slack_id, days) {
     //
     // Get most unique search term
     //
-    report.unique_search = 'Hatsune Miku Alarm Clock'; // TODO
+    var lowest_score = 10;
+    Object.keys(word_counts).map(function(word) {
+      word = word.substr(1);
+      term_freq.tfidfs(word, function(i, measure) {
+        console.log(word, i, measure);
+        if (measure < lowest_score) {
+          lowest_score = measure;
+          report.unique_search = word;
+        }
+      })
+    });
 
     return report;
   })
