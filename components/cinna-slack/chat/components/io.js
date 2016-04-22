@@ -365,12 +365,16 @@ function loadSlackUsers(users){
 
             if (data.text === 'report') {
               console.log('report generation');
+
+              var isAdmin = user.meta.office_assistants.indexOf(data.user) >= 0;
+              var isP2P = user.meta.office_assistants.length === 0;
               var num_days = 7;
+
               return kipcart.report(user.team_id, num_days).then(function(report) {
                 console.log('found ' + report.items.length + ' items');
 
                 var fun_stats = [
-                  `You added *${report.items.length}* to your cart totalling *${report.total}*`,
+                  isAdmin || isP2P ? `You added *${report.items.length}* to your cart totalling *${report.total}*` : `You added *${report.items.length}* to your cart`,
                   `The most items came from the *${report.top_category}* category`,
                   `You searched for *${report.most_searched}* the most`,
                   `Most other teams didn't search for *${report.unique_search}* as much as you did!`
@@ -411,11 +415,11 @@ function loadSlackUsers(users){
 
                   var text = [
                     `${item.title}`,
-                    `*${item.price}* each`,
+                    isAdmin || isP2P ? `*${item.price}* each` : '',
                     `Quantity: ${item.quantity}`,
-                    `_Added by: ${userString}_`,
-                    item.purchased ? 'Not currently in cart' : '*Current in cart*',
-                  ].join('\n');
+                    isAdmin || isP2P ? `_Added by: ${userString}_` : '',
+                    item.purchased ? 'Not currently in cart' : '*Currently in cart*',
+                  ].join('\n').replace(/\n+/g, '\n')
 
                   return {
                       "text": text,
