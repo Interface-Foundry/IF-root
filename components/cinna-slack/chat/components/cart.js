@@ -379,7 +379,7 @@ var report = module.exports.report = function(slack_id, days) {
     var search_terms = messages
       .map((m) => { return m.tokens[0] })
       .filter((t) => {
-        return !t.match(/(collect|report)/);
+        return !t.match(/(collect|report|wait|stop|no|yes)/);
       });
     console.log(search_terms);
     word_counts = {};
