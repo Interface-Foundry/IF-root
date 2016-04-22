@@ -128,76 +128,95 @@ function askWhoManagesPurchases(response, convo) {
     // check for mentioned users
     // for a typed message like "that would be @dan"
     // the response.text would be like  "that would be <@U0R6H9BKN>"
-    var office_gremlins = response.text.match(/(\<\@[^\s]+\>|\bme\b)/ig);
-    if (office_gremlins && office_gremlins.length > 0 && !user_is_admin) {
-      convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
-        if (handle.toLowerCase() === 'me') {
-          user_is_admin = true;
-          return response.user;
-        } else {
-          return handle.replace(/(\<\@|\>)/g, '');
+    var office_gremlins = response.text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
+    response.text = response.text.replace(/(\<\@[^\s]+\>|\bme\b)/ig, '');
+
+    // also look for users mentioned by name without the @ symbol
+    db.Chatusers.find({
+      team_id: convo.slackbot.team_id,
+      is_bot: {$ne: true}
+    }).select('id name').exec(function(e, users) {
+
+      users.map((u) => {
+        var re = new RegExp('\\b' + u.name + '\\b', 'i')
+        if (response.text.match(re)) {
+          office_gremlins.push('<@' + u.id + '>');
         }
       })
 
-      console.log(office_gremlins)
-      office_gremlins = office_gremlins.map(function(handle) {
-        if (handle.toLowerCase() === 'me') {
-          return 'you';
-        } else {
-          return handle;
-        }
-      });
-      console.log(office_gremlins)
-
-      if (office_gremlins.length > 1) {
-        var last = office_gremlins.pop();
-        office_gremlins[office_gremlins.length-1] += ' and ' + last;
-      }
-
-      convo.say('Great.  I have added ' + office_gremlins.join(', ') + ' to the list of office admins.  I keep all the office admins up-to-date on what team members are adding to the office shopping cart.')
-    }
-
-    // check if we didn't get it
-    if (!convo.slackbot.meta.office_assistants || convo.slackbot.meta.office_assistants.length === 0) {
-      // we didn't get it... ask again.
-      convo.say('I didn\'t quite understand that.  Type "skip" to skip')
-      askWhoManagesPurchases(response, convo);
-      return convo.next();
-    }
-
-    db.Slackbots.update({_id: convo.slackbot._id}, {$set: {'meta.office_assistants': convo.slackbot.meta.office_assistants}}, function(e) {
-      if (e) { console.error(e) }
-
-      // send the office admins welcome messages and show them all the welcome video
-      convo.slackbot.meta.office_assistants.map(function(id) {
-        if (id === response.user) { return; }
-        console.log('starting admin welcome conversation with ' + id)
-        var slackbot = convo.slackbot;
-
-        var bot = controller.spawn({
-          token: slackbot.bot.bot_access_token
+      if (office_gremlins && office_gremlins.length > 0 && !user_is_admin) {
+        convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
+          if (handle.toLowerCase() === 'me') {
+            user_is_admin = true;
+            return response.user;
+          } else {
+            return handle.replace(/(\<\@|\>)/g, '');
+          }
         })
 
-        bot.startRTM(function(err, bot, payload) {
-          if (err) {
-            throw new Error('Could not connect to Slack');
+        console.log(office_gremlins)
+        office_gremlins = office_gremlins.map(function(handle) {
+          if (handle.toLowerCase() === 'me') {
+            return 'you';
+          } else {
+            return handle;
           }
-
-          bot.startPrivateConversation({user: id}, function(response, convo) {
-            // inject the slackbot into the convo so that we can save it in the db
-            convo.slackbot = slackbot;
-            convo.on('end', function() {
-              bot.closeRTM();
-            })
-            convo.say("Hi! I'm Kip, your office shopping helper bot! <@$user> told me to make you an admin for the team, so I'll keep you up-to-date on what team members are adding to the office shopping cart.".replace('$user', user_id))
-            welcomeVid(response, convo);
-          });
         });
+        console.log(office_gremlins)
 
-      })
+        if (office_gremlins.length > 1) {
+          var last = office_gremlins.pop();
+          office_gremlins[office_gremlins.length-1] += ' and ' + last;
+        }
 
-      // show this user the welcome video
-      welcomeVid(response, convo);
+        convo.say('Great.  I have added ' + office_gremlins.join(', ') + ' to the list of office admins.  I keep all the office admins up-to-date on what team members are adding to the office shopping cart.')
+      }
+
+      // check if we didn't get it
+      if (!convo.slackbot.meta.office_assistants || convo.slackbot.meta.office_assistants.length === 0) {
+        // we didn't get it... ask again.
+        convo.say('I didn\'t quite understand that.  Type "skip" to skip')
+        askWhoManagesPurchases(response, convo);
+        return convo.next();
+      }
+
+      db.Slackbots.update({_id: convo.slackbot._id}, {$set: {'meta.office_assistants': convo.slackbot.meta.office_assistants}}, function(e) {
+        if (e) { console.error(e) }
+
+        // send the office admins welcome messages and show them all the welcome video
+        convo.slackbot.meta.office_assistants.map(function(id) {
+          if (id === response.user) { return; }
+          console.log('starting admin welcome conversation with ' + id)
+          var slackbot = convo.slackbot;
+
+          var bot = controller.spawn({
+            token: slackbot.bot.bot_access_token
+          })
+
+          bot.startRTM(function(err, bot, payload) {
+            if (err) {
+              throw new Error('Could not connect to Slack');
+            }
+
+            bot.startPrivateConversation({user: id}, function(response, convo) {
+              // inject the slackbot into the convo so that we can save it in the db
+              if (!convo) {
+                return; // i guess this user doesn't exist anymore?
+              }
+              convo.slackbot = slackbot;
+              convo.on('end', function() {
+                bot.closeRTM();
+              })
+              convo.say("Hi! I'm Kip, your office shopping helper bot! <@$user> told me to make you an admin for the team, so I'll keep you up-to-date on what team members are adding to the office shopping cart.".replace('$user', user_id))
+              welcomeVid(response, convo);
+            });
+          });
+
+        })
+
+        // show this user the welcome video
+        welcomeVid(response, convo);
+      });
     })
   })
 }
