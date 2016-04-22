@@ -402,7 +402,8 @@ var report = module.exports.report = function(slack_id, days) {
     Object.keys(word_counts).map(function(word) {
       word = word.substr(1);
       term_freq.tfidfs(word, function(i, measure) {
-        console.log(word, i, measure);
+        console.log(word, i, measure, word_counts['_' + word], measure/word_counts['_' + word]);
+        measure = measure / word_counts['_' + word];
         if (measure < lowest_score) {
           lowest_score = measure;
           report.unique_search = word;
