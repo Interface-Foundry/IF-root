@@ -932,9 +932,9 @@ function preProcess(data){
                     kipUser[data.source.id].conversations = 'addmember';
 
                     console.log('triggering kip collect, maybe if the person is an admin?')
-                    return weekly_updates.addMembers(data.team, data.user, data.channel, function() {
+                    return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function() {
                       console.log('done adding members');
-                      kipUser[data.source.id].conversations[data.channel] = false;
+                      kipUser[data.source.id].conversations[data.channel] = 'shopping';
                     })
                     break;
 

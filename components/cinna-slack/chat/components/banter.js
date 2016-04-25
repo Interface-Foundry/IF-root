@@ -773,6 +773,11 @@ var checkForCanned = function(input,callback,origin,source) {
 
         case textSimilar(input,'addmember') > 90:
         case textSimilar(input,'add member') > 90:
+        case textSimilar(input,'add members') > 90:
+        case textSimilar(input,'add email') > 90:
+        case textSimilar(input,'add emails') > 90:
+        case textSimilar(input,'add people') > 90:
+        case textSimilar(input,'add person') > 90:
             flag = 'mode.addmember';
             res = '';
             break;
