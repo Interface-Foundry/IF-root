@@ -581,7 +581,6 @@ var checkForCanned = function(input,callback,origin,source) {
             break;
 
         case textSimilar(input,'feedback') > 60:
-        case textSimilar(input,'report') > 60:
         case textSimilar(input,'contact') > 90:
             flag = 'basic';
             res = 'Say hi at hello@kipthis.com! Thanks for your feedback! We appreciate any thoughts you have to improve our service :)';
@@ -772,6 +771,17 @@ var checkForCanned = function(input,callback,origin,source) {
             res = '';
             break;
 
+        case textSimilar(input,'addmember') > 90:
+        case textSimilar(input,'add member') > 90:
+            flag = 'mode.addmember';
+            res = '';
+            break;
+
+        case textSimilar(input,'report') > 90:
+        case textSimilar(input,'show report') > 90:
+            flag = 'mode.report';
+            res = '';
+            break;
 
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
