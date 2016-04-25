@@ -1,4 +1,19 @@
 
+var checkForModes = function(input,callback,origin,source) {
+
+    //here we will create a master list of commands in Kip so we can check to make sure 
+
+    //COLLECT
+
+    //IF CONTAINS STRING MORE LIKE , 
+    //HELP 
+    //COLLECT
+    //
+
+};
+
+
+
 var checkForCanned = function(input,callback,origin,source) {
    
     var res;
@@ -725,6 +740,36 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'those suck') > 60:
             flag = 'basic';
             res = 'Sorry, I\'ll try to help better next time';
+            break;
+
+
+        //* * * MODES * * * *
+
+        case textSimilar(input,'settings') > 90:
+        case textSimilar(input,'settingss') > 90:
+        case textSimilar(input,'setingss') > 90:
+            flag = 'mode.settings';
+            res = '';
+            break;
+
+        case textSimilar(input,'collect') > 90:
+        case textSimilar(input,'colect') > 90:
+        case textSimilar(input,'coollect') > 90:
+        case textSimilar(input,'collekt') > 90:
+            flag = 'mode.collect';
+            res = '';
+            break;
+
+        case textSimilar(input,'onboarding') > 90:
+        case textSimilar(input,'onboard') > 90:
+            flag = 'mode.onboarding';
+            res = '';
+            break;
+
+        case textSimilar(input,'shopping') > 90:
+        case textSimilar(input,'shop') > 90:
+            flag = 'mode.shopping';
+            res = '';
             break;
 
 

@@ -20,7 +20,8 @@ var messageSchema = mongoose.Schema({
         channel: String,
         org: String,
         id: { type: String, index: true },
-        flag: String
+        flag: String,
+        user: String
     },
     client_res: [mongoose.Schema.Types.Mixed], //outgoing messages, if applicable
     ts: {

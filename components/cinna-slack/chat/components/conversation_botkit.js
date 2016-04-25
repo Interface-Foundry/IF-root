@@ -6,6 +6,7 @@ var co = require('co');
 var datejs = require('./date');
 var momenttz = require('moment-timezone');
 var weeklyUpdate = require('./weekly_updates');
+var history = require("./history.js");
 
 /*
 slackbot: slackbot_schema
@@ -41,8 +42,8 @@ module.exports.onboard = function(slackbot, user_id, done) {
 
 var settingsConvos = {};
 
-module.exports.settings = function(slackbot, user_id, done) {
-  console.log('wow such settings');
+module.exports.settings = function(slackbot, user_id, done, data) {
+  console.log('passing in data 😅😅 ',data);
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   });
@@ -80,11 +81,16 @@ module.exports.settings = function(slackbot, user_id, done) {
 
 
 module.exports.settings_stop = function(user_id) {
+
   console.log('stopping settings convo for user ' + user_id);
+
+  console.log('~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ')
   if (settingsConvos[user_id]) {
+
     settingsConvos[user_id].say('Ok thanks, done with settings.');
     settingsConvos[user_id].next();
   }
+
 }
 
 /*
@@ -115,7 +121,37 @@ function askWhoManagesPurchases(response, convo) {
     if (response.text.toLowerCase().match(/(\bme\b|\bi do\b)/) && response.text.toLowerCase().indexOf('and') < 0) {
       convo.slackbot.meta.office_assistants = [response.user];
       user_is_admin = true;
-      convo.say("Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart.")
+
+
+          var attachments = [
+              {
+                "pretext": "Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart 😊",
+                "image_url":"http://i.imgur.com/PqrtJmD.png",
+                "text":"",
+                "color":"#45a5f4"
+              },
+              {
+                  "text": "Tell me what you're looking for. Or type `settings` for more options",
+                  "mrkdwn_in": [
+                      "text",
+                      "pretext"
+                  ],
+                  "color":"#45a5f4"
+              }
+          ];
+
+          var resStatus = {
+            username: 'Kip',
+            text: "",
+            attachments: attachments,
+            fallback: 'Shopping'
+          };
+
+          convo.say(resStatus);
+
+
+
+      convo.say("")
     }
 
     // check for something like "nobody"
@@ -210,7 +246,7 @@ function welcomeVid(response, convo) {
 }
 
 // Show the user their settings
-function showSettings(response, convo) {
+function showSettings(response, convo, flag, done) {
   console.log('showing settings');
   var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
   co(function*() {
@@ -221,15 +257,24 @@ function showSettings(response, convo) {
 
     var attachments = [];
 
+    //adding settings mode sticker
+    attachments.push({
+      image_url: 'http://i.imgur.com/Z1Cgl7X.png',
+      text: ''
+    })
+
+    //
+    //http://i.imgur.com/wxoZYmI.png
+
     //
     // Last call alerts personal settings
     //
     if (chatuser.settings.last_call_alerts) {
       attachments.push({
-        text: 'You are receiving last-call alerts for company orders.  Say `no last call` to stop this.'
+        text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'
       })
     } else {
-      attachments.push({text: 'You are not receiving last-call alerts before the company order closes. Say `yes last call` to receive them.'})
+      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
     }
 
     //
@@ -245,7 +290,7 @@ function showSettings(response, convo) {
     console.log(office_gremlins);
     var adminText = 'I am moderated by ' + office_gremlins.join(', ') + '.';
     if (isAdmin) {
-      adminText += '  You can add and remove admins with `add @user` and `remove @user`.'
+      adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
     }
     attachments.push({text: adminText})
 
@@ -264,11 +309,11 @@ function showSettings(response, convo) {
         var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())
-        attachments.push({text: 'You are receiving weekly cart status updates every ' + job_time_user_tz.format('dddd[ at] h:mm a')
+        attachments.push({text: 'You are *receiving weekly cart* updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + '*'
           + '\nYou can turn this off by saying `no weekly status`'
           + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
       } else {
-        attachments.push({text: 'You are not receiving weekly cart status updates.  Say `yes weekly status` to receive them.'})
+        attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'})
       }
     }
 
@@ -282,14 +327,21 @@ function showSettings(response, convo) {
 
     convo.say({
       username: 'Kip',
-      text: 'Settings',
-      attachments: attachments
+      text: '',
+      attachments: attachments,
+      fallback: 'Settings'
     })
 
-    convo.ask({
-      username: 'Kip',
-      text: 'Have any changes?'
-    }, handleSettingsChange);
+    if(flag !== 'noAsk'){
+      convo.ask({
+        username: 'Kip',
+        text: 'Have any changes? Type `exit` to quit settings.'
+      }, handleSettingsChange);
+    }
+    if(flag == 'noAsk'){
+      done();
+    }
+
 
   }).catch(function(e) {
     console.log('error finding the user');
@@ -302,7 +354,6 @@ function handleSettingsChange(response, convo) {
   // we'll need to know if the user is an admin or not.
   var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
 
-  console.log(response.text);
   co(function*() {
     //
     // Deal with the most complicated changes first, and finish up with the easy stuff
@@ -343,7 +394,7 @@ function handleSettingsChange(response, convo) {
       yield convo.slackbot.save();
       yield weeklyUpdate.updateJob(convo.slackbot.team_id);
 
-      convo.say('Ok I have updated your settings.')
+      convo.say('Ok I have updated your settings 😊')
       showSettings(response, convo);
       return convo.next();
     }
@@ -380,12 +431,35 @@ function handleSettingsChange(response, convo) {
           }
         })
       } else {
-        convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+
+        // convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+
+
+
+        var attachments = [
+          {
+            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
+          }
+        ];
+
+        var resStatus = {
+          username: 'Kip',
+          text: "",
+          attachments: attachments,
+          fallback: 'Settings'
+        };
+        
+        showSettings(response, convo, 'noAsk', function(){});
+
+        convo.ask(resStatus, handleSettingsChange); 
+
+
+
         return convo.next();
       }
 
       yield convo.slackbot.save();
-      convo.say('Ok, I have updated your settings');
+      convo.say('Ok, I have updated your settings 😊');
       showSettings(response, convo);
       return convo.next();
     }
@@ -421,16 +495,69 @@ function handleSettingsChange(response, convo) {
         // the question was something like "Do you have any settings changes?"
         // so we need to allow the user to say "yes" or "no"
         if (response.text.match(convo.task.botkit.utterances.yes)) {
-          convo.ask('Go ahead, I\'m listening.', handleSettingsChange)
+          convo.ask('Yes? I\'m listening', handleSettingsChange)
           return convo.next();
+
+        //EXITING SETTINGS MODE 
         } else if (response.text.match(convo.task.botkit.utterances.no)
-            || response.text.match(/^(end|exit|finish|done|quit|settings exit)/)
+            || response.text.match(/^(end|exit|finish|done|quit|settings exit|stop|quit|search|shopping|shop|buy)/)
             || response.text === 'stop') {
-          convo.say('Ok thanks.  Done with settings.');
+
+
+          //FUNCTION CHECK FOR STOP WORDS, SEND BACK RESPONSE IN ATTACHMENT FORMAT
+
+          var attachments = [
+              {
+                "pretext": "Ok thanks! Done with settings 😊",
+                "image_url":"http://i.imgur.com/PqrtJmD.png",
+                "text":"",
+                "color":"#45a5f4"
+              },
+              {
+                  "text": "Tell me what you're looking for, or use `help` for more options",
+                  "mrkdwn_in": [
+                      "text",
+                      "pretext"
+                  ],
+                  "color":"#45a5f4"
+              }
+          ];
+
+          var resStatus = {
+            username: 'Kip',
+            text: "",
+            attachments: attachments,
+            fallback: 'Shopping'
+          };
+
+          convo.say(resStatus);
+
+          //FUNCTION IO.JS UPDATE MODE
+
           return convo.next();
         }
 
-        return convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+
+        var attachments = [
+          {
+            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
+          }
+        ];
+
+        var resStatus = {
+          username: 'Kip',
+          text: "",
+          attachments: attachments,
+          fallback: 'Settings'
+        };
+        
+        showSettings(response, convo, 'noAsk', function(){});
+
+        convo.ask(resStatus, handleSettingsChange); 
+
+        return convo.next();    
+
+        
     }
 
     convo.say('Ok I have updated your settings.')
@@ -441,7 +568,68 @@ function handleSettingsChange(response, convo) {
     console.log('error handling settings change')
     console.log(response)
     console.log(e)
-    convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+
+
+    // switch(user.conversations[data.channel]){
+    //       case 'settings':
+
+    //           var attachments = [];
+
+    //           //adding settings mode sticker
+    //           attachments.push({
+    //               image_url: 'http://i.imgur.com/wxoZYmI.png',
+    //               text: ''
+    //           })
+              
+    //           user.conversations[data.channel]
+    //       break;
+    // }
+
+        //IF CANT UNDERSTAND...
+
+        // var attachments = [
+        //   {
+        //     image_url: 'http://i.imgur.com/Z1Cgl7X.png',
+        //     text: ""
+        //   },
+        //   {
+        //     text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
+        //   }
+        // ];
+
+        // var resStatus = {
+        //   username: 'Kip',
+        //   text: "",
+        //   attachments: attachments,
+        //   fallback: 'Settings'
+        // };
+
+        // return convo.ask(resStatus, handleSettingsChange);
+
+
+        var attachments = [
+          {
+            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
+          }
+        ];
+
+        var resStatus = {
+          username: 'Kip',
+          text: "",
+          attachments: attachments,
+          fallback: 'Settings'
+        };
+        
+        showSettings(response, convo, 'noAsk', function(){});
+
+        convo.ask(resStatus, handleSettingsChange); 
+
+        return convo.next();    
+
+
+
+    //convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
+
     convo.next();
   })
 }
@@ -450,7 +638,7 @@ function handleSettingsChange(response, convo) {
 // TODO do these even matter?
 function askLocation(response, convo) {
   convo.ask('What is your office address?', function(response, convo) {
-    convo.say('Ok.')
+    convo.say('Ok')
     askBudget(response, convo)
     convo.next();
   })
@@ -458,7 +646,7 @@ function askLocation(response, convo) {
 
 function askBudget(response, convo) {
   convo.ask('What is your weekly budget?', function(response, convo) {
-    convo.say('Great.')
+    convo.say('Great')
 
   })
 }

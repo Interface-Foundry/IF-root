@@ -11,7 +11,6 @@ var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
 var WEB_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.WEB;
-//* * * * * //
 
 var banter = require("./banter.js");
 var history = require("./history.js");
@@ -39,7 +38,9 @@ var Slackbots = db.Slackbots;
 
 var slackUsers = {};
 var slackUsers_web = {};
+var slackUsers_botkit = {};
 var messageHistory = {}; //fake database, stores all users and their chat histories
+var modeHistory = {};
 var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
@@ -210,6 +211,11 @@ var newSlack = function(){
     });
 }
 
+//updates mode
+
+
+
+
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
     console.log('loading '+users.length+' Slack users');
@@ -223,6 +229,22 @@ function loadSlackUsers(users){
         slackUsers_web[user.team_id] = new WebClient(token);
 
         slackUsers[user.team_id].start();
+
+
+        //* * * Adding Botkit to Kip IO ~ ~ ~//
+        //not reliable framework vs Slack SDK
+
+        // var bot = controller.spawn({
+        //     token: token
+        // });
+        // bot.startRTM(function(err, bot, payload) {
+        //     console.log('ADDED BOTKIT ! ! ! ! ! ! !  ! ! ! ! ! ! ! ! ! ! !  ! ! ! ! ! ! ! ! !  ! ! ! !')
+        //     // console.log('bot ',bot);
+        //     // console.log('payload ',payload)
+        //     slackUsers_botkit[user.team_id] = bot;
+        // });
+
+        // - - - - - - - - - - - - - - - - - //
 
         //on slack auth
         slackUsers[user.team_id].on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
@@ -312,7 +334,6 @@ function loadSlackUsers(users){
                         //send attachment!
                         sendResponse(hello, res);
 
-                        user.conversations = user.conversations || {};
                         // user.conversations[addedBy.dm] = 'onboard';
                         // return conversation_botkit.onboard(user, addedBy.id, function() {
                         //   console.log('done with onboarding conversation')
@@ -353,41 +374,28 @@ function loadSlackUsers(users){
             // Less cyncical comment: might be useful to have history here,
             // but idk how and we'll probably rewrite this segment to handle
             // multiple chat platforms sooner rather than later anyway.
-            user.conversations = user.conversations || {};
 
-            // don't perform searches if ur having a convo with a bot
-            // let botkit handle it
-            if (user.conversations[data.channel]) {
-              console.log('in a conversation: ' + user.conversations[data.channel])
-              return;
+            data.source = {
+                'origin':'slack',
+                'channel':data.channel, //channel id on slack
+                'org':data.team, //team id on slack
+                'id':data.team + "_" + data.channel, //for retrieving chat history in node memory, //this is a kip id for user across message platforms
+                user: data.user //user id on slack
             }
 
+            //console.log('🔥🔥🔥🔥🔥🔥 ',data);
 
-            // TESTING PURPOSES, here is how you would trigger a conversation
-            if (data.text === 'onboard') {
-              user.conversations[data.channel] = 'onboard';
-              // "user" is actually the slackbot here
-              // "data.user" is the user having the convo
-              return conversation_botkit.onboard(user, data.user, function() {
-                console.log('done with onboarding conversation')
-                user.conversations[data.channel] = false;
-              });
-            }
+            user.conversations = user.conversations || 'shopping';
 
-            if (data.text === 'settings') {
-              user.conversations[data.channel] = 'settings';
-              return conversation_botkit.settings(user, data.user, function() {
-                console.log('done with settings conversation')
-                user.conversations[data.channel] = false;
-              })
-            }
 
-            if (data.text && data.text.match(/\bcollect\b/)) {
-              console.log('triggering kip collect, maybe if the person is an admin?')
-              return weekly_updates.collect(data.team, data.user, function() {
-                console.log('done collecting orders i guess');
-              })
-            }
+            console.log('🔥🔥🔥🔥🔥🔥 ',user.conversations);
+
+            modeHistory[data.source.id] = user; //transfer conversation to global
+
+            // modeHistory[data.source.user].conversations[data.source.channel] = user.conversations;  
+
+            console.log('USER🔥🔥🔥 ',modeHistory[data.source.id]);
+
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 
@@ -593,6 +601,31 @@ function preProcess(data){
 
     data.msg = data.msg.trim();
 
+    // don't perform searches if ur having a convo with a bot
+    // let botkit handle it
+    if (modeHistory[data.source.id].conversations && modeHistory[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
+
+
+        //PUT MODE LISTENER HERE TO SWITCH BETWEEN MODES 
+
+        // * * * * IF NOT EQUAL TO HELP OR .... other banter response
+
+        //IF DETECT NLP, switch to shopping mode and process query!!!!!
+
+        // PASS TO NLP, IF TEXT Breaks context, change mode to correct context!!!!
+        // i.e. in settings mode, if user types '2 but cheaper'
+        // run through NLP and check for buckets / actions
+
+        //if input"settings", reshow settings menu
+
+        //---> 
+
+      console.log('in a conversation: ' + modeHistory[data.source.id].conversations)
+
+      return;
+    }
+
+
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
 
@@ -639,6 +672,85 @@ function preProcess(data){
                     incomingAction(data);
                     break;
 
+
+
+                //* * MODES * *
+                case 'mode.settings':
+                    data.bucket = 'mode';
+                    data.action = 'settings';
+                    history.saveHistory(data,true,function(res){});
+
+                    modeHistory[data.source.id].conversations = 'settings';
+
+                    return conversation_botkit.settings(modeHistory[data.source.id], data.source.user, function() {
+                        console.log('💎💎💎💎 done with settings conversation');
+                        modeHistory[data.source.id].conversations = 'shopping';
+                    })
+
+                    break;
+
+                case 'mode.collect':
+                    // data.searchSelect = [];
+                    data.bucket = 'mode';
+                    data.action = 'collect';
+                    history.saveHistory(data,true,function(res){});
+
+                    modeHistory[data.source.id].conversations = "collect";
+
+                    console.log('triggering kip collect, maybe if the person is an admin?')
+                    return weekly_updates.collect(data.source.org, data.source.user, function() {
+                        console.log('done collecting orders');
+                        modeHistory[data.source.id].conversations = 'shopping';
+                    })
+
+                    break;
+
+                case 'mode.onboarding':
+                    data.bucket = 'mode';
+                    data.action = 'onboarding';
+                    history.saveHistory(data,true,function(res){});
+
+                    modeHistory[data.source.id].conversations = 'onboard';
+                    // "user" is actually the slackbot here
+                    // "data.user" is the user having the convo
+                    return conversation_botkit.onboard(modeHistory[data.source.id], data.source.user, function() {
+                        console.log('done with onboarding conversation')
+                        modeHistory[data.source.id].conversations = 'shopping';
+                    });
+                    break;
+
+                case 'mode.shopping':
+                    data.bucket = 'mode';
+                    data.action = 'shopping';
+                    history.saveHistory(data,true,function(res){});
+
+                    data.action = 'sendAttachment';
+
+                    data.client_res = [
+                      {
+                        "image_url":"http://i.imgur.com/PqrtJmD.png",
+                        "text":"",
+                        "color":"#45a5f4"
+                      },
+                      {
+                          "text": "Tell me what you're looking for, or use `help` for more options",
+                          "mrkdwn_in": [
+                              "text",
+                              "pretext"
+                          ],
+                          "color":"#45a5f4"
+                      }
+                    ];
+                    sendResponse(data);
+
+                    break;
+
+                case 'mode.food_ordering':
+
+                    break;
+
+
+
                 //for testing in PAPRIKA
                 case 'slack.search':
                     // data.searchSelect = [];
@@ -672,6 +784,7 @@ function preProcess(data){
                     console.log('error: canned action flag missing');
             }
         }
+
         //proceed to NLP instead
         else {
             routeNLP(data);
@@ -970,6 +1083,9 @@ data.flags = data.flags ? data.flags : {};
         case 'purchase':
             purchaseBucket(data);
             break;
+        case 'mode':
+            modeBucket(data);
+            break;
         case 'supervisor':
             //route to supervisor chat window
         default:
@@ -978,6 +1094,12 @@ data.flags = data.flags ? data.flags : {};
 }
 
 //* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
+
+function modeBucket(data){
+
+
+}
+
 
 function searchBucket(data){
 
@@ -2155,6 +2277,12 @@ function recallHistory(data,callback,steps){
 
 }
 
+
+//MODE HANDLING
+var updateMode = function(){
+    modeHistory[data.source.id].conversations = 'shopping'; 
+}
+
 /////TOOLS
 
 //trim a string to char #
@@ -2171,6 +2299,7 @@ function encode_utf8(s) {
 
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
+module.exports.updateMode = updateMode;
 module.exports.newSlack = newSlack;
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;
