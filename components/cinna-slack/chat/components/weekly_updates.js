@@ -1,5 +1,6 @@
 /*eslint-env es6*/
 var db = require('db');
+var Chatuser = db.Chatuser;
 var co = require('co');
 var cron = require('cron');
 var datejs = require('./date');
@@ -104,11 +105,11 @@ var updateJob = module.exports.updateJob = function(team_id) {
   })
 }
 
-module.exports.collect = function(team_id, person_id  ) {
+module.exports.collect = function(team_id, person_id, callback) {
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
-
+    console.log('slackbot: ',slackbot);
     console.log(slackbot.meta.office_assistants);
     console.log(person_id);
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
@@ -134,10 +135,63 @@ module.exports.collect = function(team_id, person_id  ) {
         convo.on('end', function() {
           console.log('ending collection convo');
           bot.closeRTM();
+          callback();
         })
-        convo.ask('Would you like me to send the last call for 60 minutes from now?', lastCall);
+        convo.interrupted = false;
+        convo.ask('Okay, in 5 seconds I\'ll send the last call message to all users.  Say `wait` or `stop` to prevent this.', lastCall);
+        setTimeout(function() {
+          lastCall({text: ''}, convo);
+        }, 5000)
       })
     })
+  }).catch((e) => {
+    console.log(e);
+    console.log(e.stack);
+  })
+}
+
+// just regular collect except that it restricts the messages to a specific user list
+module.exports.collectFromUsers = function(team_id, person_id, channel, users, callback) {
+  co(function*() {
+    // um let's refresh the slackbot just in case...
+    var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
+
+    console.log(slackbot.meta.office_assistants);
+    console.log(person_id);
+    if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
+      // oh no the person is not an admin, whatever will we do???
+      console.log('cannot do this b/c the person is def not an admin');
+      return;
+    }
+
+    //
+    // Set up the bot
+    //
+    var bot = controller.spawn({
+      token: slackbot.bot.bot_access_token
+    });
+
+    // whee!  cannot promisify botkit, soooooo here we go!
+    bot.startRTM(function(e, bot, payload) {
+      bot.startPrivateConversation({user: person_id}, function(response, convo) {
+        convo.slackbot = slackbot;
+        convo.bot = bot;
+        convo.user_id = person_id;
+        convo.users = users;
+        convo.on('end', function() {
+          console.log('ending collection convo');
+          bot.closeRTM();
+          callback();
+        })
+        convo.interrupted = false;
+        convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
+        setTimeout(function() {
+          lastCall({text: ''}, convo);
+        }, 5000)
+      })
+    })
+
+
   }).catch((e) => {
     console.log(e);
     console.log(e.stack);
@@ -148,59 +202,187 @@ module.exports.collect = function(team_id, person_id  ) {
 // Sends a "last call" message to everyone who has not shut Kip up about messages like this
 //
 function lastCall(response, convo) {
-  if (response.text.match(convo.bot.utterances.yes)) {
-    console.log('sending last call message to everybody woooo');
+  // Catch message interrupts
+  if (response.text.toLowerCase().match(/(wait|stop)/)) {
+    convo.say('Ok, stopping the message.'); // What\'s up?  You can say something like `change time limit 30 minutes`', lastCall);
+    convo.interrupted = true;
+    return convo.next();
+  }
 
-    co(function*() {
-      // maybe i should update the team roster here???
-      var users = yield db.Chatusers.find({
+  // first check for a specific time change
+  if (response.text.toLowerCase().match(/(minute|hour)/)) {
+    //
+    console.log('um attempting to change the length of the last call thingy');
+
+  } else if (response.text !== '') {
+    convo.say("I'm sorry I couldn't understand that.  Sending the last call message.  Say `wait` or `stop` to prevent this.", lastCall)
+    convo.next();
+  }
+
+  co(function*() {
+    // maybe i should update the team roster here???
+    if (!convo.users) {
+      // sent to the whole team
+      convo.users = yield db.Chatusers.find({
         team_id: convo.slackbot.team_id,
         is_bot: false,
         id: { '$ne': 'USLACKBOT' }, // because slackbot is not marked as a bot?
         'meta.last_call_alerts': { '$ne': false }
       }).exec();
+    } else {
+      // sent to a particular channel
+      // remove all users which have disabled last call alerts
+      convo.users = yield db.Chatusers.find({
+        'id': {$in: convo.users},
+        'meta.last_call_alerts': { '$ne': false },
+        is_bot: false,
+      }).exec();
+    }
 
-      var admin = convo.user_id;
+    var admin = convo.user_id;
 
-      var clocks = [];
-
-      yield users.map(function(u) {
-        return new Promise(function(resolve, reject) {
-          convo.bot.say({
-            text: 'Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!',
-            channel: u.dm
-          });
-          convo.bot.say({
-            text: 'The clock\'s ticking! You have *60* minutes.',
-            channel: u.dm
-            // username: 'Kip' // specifying username here forces botkit to use the web api, which returns the message ts in the response.
-          }, function(e, r) {
-            if (e) {
-              console.log(e);
-              reject(e);
-            }
+    console.log('sending last call to all ' + convo.users.length + ' users');
+    yield convo.users.map(function(u) {
+      return new Promise(function(resolve, reject) {
+        convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
+          convo.on('end', function() {
             resolve();
-          })
-        })
+          });
+          convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
+          convo.say('The clock\'s ticking! You have *60* minutes.');
+          convo.next();
+        });
       })
-
-      // continue the admin's conversation if there's anything left to say.
-
-      // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
-      console.log('calling next');
-      convo.next();
-
-    }).catch((e) => {
-      console.log('error');
-      console.log(e);
-      convo.next();
     })
-  } else if (response.text.match(convo.bot.utterances.no)) {
-    console.log('no last call');
-    convo.say('OK, you can `checkout` whenever you\'re ready');
+
+    // continue the admin's conversation if there's anything left to say.
+
+    // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
+    console.log('calling next');
     convo.next();
-  } else {
-    convo.say("I'm sorry I couldn't understand that.  Should I send out a last call message?", lastCall)
+
+  }).catch((e) => {
+    console.log('error');
+    console.log(e);
     convo.next();
-  }
+  });
+}
+
+module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
+   // um let's refresh the slackbot just in case...
+   co(function*() {
+    console.log('team_id: ',team_id,'person_id: ',person_id, '')
+    var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
+    console.log('slackbot: ',slackbot);
+    if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
+      // oh no the person is not an admin, whatever will we do???
+      console.log('cannot do this b/c the person is def not an admin');
+      return;
+    }
+    // Set up the bot
+    var bot = controller.spawn({ token: slackbot.bot.bot_access_token });
+    bot.startRTM(function(e, bot, payload) {
+      bot.startPrivateConversation({user: person_id}, function(response, convo) {
+        convo.slackbot = slackbot;
+        convo.bot = bot;
+        convo.user_id = person_id;
+        convo.on('end', function() {
+          console.log('ending addmember convo');
+          bot.closeRTM();
+        });
+      startConvo();
+      function startConvo() { 
+          convo.ask('Would you like to add members to this order?', function(response, convo) {
+          if (response.text.match(convo.bot.utterances.yes)) {
+              console.log('k lets add a member mkay');
+              var newUser = { 
+                   id:'U0SM73E5R', //How to generate?
+                   type: 'slack', 
+                   dm:'D0SM74ECT',
+                   team_id: team_id,
+                   is_admin:false,
+                   is_owner:false,
+                   is_primary_owner:false,
+                   is_restricted:false,
+                   is_ultra_restricted:false,
+                   is_bot:false,
+                   profile: {},
+                   settings: { emailNotification: false}
+               };
+              convo.next();
+              convo.ask('What is the name of this member? ', function(response, convo) {
+                if (response.text) {
+                  newUser.name = response.text;
+                }
+                convo.next();
+                convo.ask('Is he/she a slack user?', function(response, convo) {
+                  if (response.text.match(convo.bot.utterances.yes)) {
+                    newUser.type = 'slack';
+                  } 
+                  else {
+                    newUser.type = 'email';
+                    newUser.settings.emailNotification = true;                    
+                  }
+                  convo.next();
+                  convo.ask('What is this members email address?', function(response, convo) {
+                    if (response.text) {
+                      newUser.profile.email = response.text;
+                    }
+                    var user = new db.Chatuser(newUser);
+                    user.save(function(err, saved){
+                      if (err) {
+                        console.log('Could not save new user: ', err)
+                           convo.bot.say({
+                            text: 'Oops! Something went wrong!',
+                            channel: channel_id
+                          });
+                         convo.stop()
+                         cb();
+                      } 
+                      else {
+                         console.log('Saved new user!',saved);
+                         convo.bot.say({
+                            text: 'Great! We added ' + newUser.name + ' to the list!',
+                            channel: channel_id
+                          });
+                         convo.next();
+                          convo.ask('Would you like to add another user?', function(response, convo) {
+                            if (response.text.match(convo.bot.utterances.yes)) {
+                              convo.next();
+                              startConvo();
+                            } 
+                            else if (response.text.match(convo.bot.utterances.no)) {
+                              convo.stop()
+                              cb();
+                            }
+                            else {
+                              convo.stop()
+                              cb();
+                            }
+                          })
+                      }
+                    })//save 
+                  })// email address?
+                }) // slack or email?
+              }) //name?
+            } 
+            else if (response.text.match(convo.bot.utterances.no)) {
+              console.log('no add member');
+              convo.bot.say({text: 'OK, you can `checkout` whenever you\'re ready', channel: channel_id});
+              convo.stop()
+              cb();
+            } 
+            else {
+              convo.say("I'm sorry I couldn't understand that.");
+              convo.repeat();
+              convo.next();
+              }
+        });// add members
+      }//end of startConvo function
+      }); // start private conversation
+    }); //start RTM
+   }).catch((e) => {
+    console.log(e);
+    console.log(e.stack);
+  })
 }

@@ -164,76 +164,95 @@ function askWhoManagesPurchases(response, convo) {
     // check for mentioned users
     // for a typed message like "that would be @dan"
     // the response.text would be like  "that would be <@U0R6H9BKN>"
-    var office_gremlins = response.text.match(/(\<\@[^\s]+\>|\bme\b)/ig);
-    if (office_gremlins && office_gremlins.length > 0 && !user_is_admin) {
-      convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
-        if (handle.toLowerCase() === 'me') {
-          user_is_admin = true;
-          return response.user;
-        } else {
-          return handle.replace(/(\<\@|\>)/g, '');
+    var office_gremlins = response.text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
+    response.text = response.text.replace(/(\<\@[^\s]+\>|\bme\b)/ig, '');
+
+    // also look for users mentioned by name without the @ symbol
+    db.Chatusers.find({
+      team_id: convo.slackbot.team_id,
+      is_bot: {$ne: true}
+    }).select('id name').exec(function(e, users) {
+
+      users.map((u) => {
+        var re = new RegExp('\\b' + u.name + '\\b', 'i')
+        if (response.text.match(re)) {
+          office_gremlins.push('<@' + u.id + '>');
         }
       })
 
-      console.log(office_gremlins)
-      office_gremlins = office_gremlins.map(function(handle) {
-        if (handle.toLowerCase() === 'me') {
-          return 'you';
-        } else {
-          return handle;
-        }
-      });
-      console.log(office_gremlins)
-
-      if (office_gremlins.length > 1) {
-        var last = office_gremlins.pop();
-        office_gremlins[office_gremlins.length-1] += ' and ' + last;
-      }
-
-      convo.say('Great.  I have added ' + office_gremlins.join(', ') + ' to the list of office admins.  I keep all the office admins up-to-date on what team members are adding to the office shopping cart.')
-    }
-
-    // check if we didn't get it
-    if (!convo.slackbot.meta.office_assistants || convo.slackbot.meta.office_assistants.length === 0) {
-      // we didn't get it... ask again.
-      convo.say('I didn\'t quite understand that.  Type "skip" to skip')
-      askWhoManagesPurchases(response, convo);
-      return convo.next();
-    }
-
-    db.Slackbots.update({_id: convo.slackbot._id}, {$set: {'meta.office_assistants': convo.slackbot.meta.office_assistants}}, function(e) {
-      if (e) { console.error(e) }
-
-      // send the office admins welcome messages and show them all the welcome video
-      convo.slackbot.meta.office_assistants.map(function(id) {
-        if (id === response.user) { return; }
-        console.log('starting admin welcome conversation with ' + id)
-        var slackbot = convo.slackbot;
-
-        var bot = controller.spawn({
-          token: slackbot.bot.bot_access_token
+      if (office_gremlins && office_gremlins.length > 0 && !user_is_admin) {
+        convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
+          if (handle.toLowerCase() === 'me') {
+            user_is_admin = true;
+            return response.user;
+          } else {
+            return handle.replace(/(\<\@|\>)/g, '');
+          }
         })
 
-        bot.startRTM(function(err, bot, payload) {
-          if (err) {
-            throw new Error('Could not connect to Slack');
+        console.log(office_gremlins)
+        office_gremlins = office_gremlins.map(function(handle) {
+          if (handle.toLowerCase() === 'me') {
+            return 'you';
+          } else {
+            return handle;
           }
-
-          bot.startPrivateConversation({user: id}, function(response, convo) {
-            // inject the slackbot into the convo so that we can save it in the db
-            convo.slackbot = slackbot;
-            convo.on('end', function() {
-              bot.closeRTM();
-            })
-            convo.say("Hi! I'm Kip, your office shopping helper bot! <@$user> told me to make you an admin for the team, so I'll keep you up-to-date on what team members are adding to the office shopping cart.".replace('$user', user_id))
-            welcomeVid(response, convo);
-          });
         });
+        console.log(office_gremlins)
 
-      })
+        if (office_gremlins.length > 1) {
+          var last = office_gremlins.pop();
+          office_gremlins[office_gremlins.length-1] += ' and ' + last;
+        }
 
-      // show this user the welcome video
-      welcomeVid(response, convo);
+        convo.say('Great.  I have added ' + office_gremlins.join(', ') + ' to the list of office admins.  I keep all the office admins up-to-date on what team members are adding to the office shopping cart.')
+      }
+
+      // check if we didn't get it
+      if (!convo.slackbot.meta.office_assistants || convo.slackbot.meta.office_assistants.length === 0) {
+        // we didn't get it... ask again.
+        convo.say('I didn\'t quite understand that.  Type "skip" to skip')
+        askWhoManagesPurchases(response, convo);
+        return convo.next();
+      }
+
+      db.Slackbots.update({_id: convo.slackbot._id}, {$set: {'meta.office_assistants': convo.slackbot.meta.office_assistants}}, function(e) {
+        if (e) { console.error(e) }
+
+        // send the office admins welcome messages and show them all the welcome video
+        convo.slackbot.meta.office_assistants.map(function(id) {
+          if (id === response.user) { return; }
+          console.log('starting admin welcome conversation with ' + id)
+          var slackbot = convo.slackbot;
+
+          var bot = controller.spawn({
+            token: slackbot.bot.bot_access_token
+          })
+
+          bot.startRTM(function(err, bot, payload) {
+            if (err) {
+              throw new Error('Could not connect to Slack');
+            }
+
+            bot.startPrivateConversation({user: id}, function(response, convo) {
+              // inject the slackbot into the convo so that we can save it in the db
+              if (!convo) {
+                return; // i guess this user doesn't exist anymore?
+              }
+              convo.slackbot = slackbot;
+              convo.on('end', function() {
+                bot.closeRTM();
+              })
+              convo.say("Hi! I'm Kip, your office shopping helper bot! <@$user> told me to make you an admin for the team, so I'll keep you up-to-date on what team members are adding to the office shopping cart.".replace('$user', user_id))
+              welcomeVid(response, convo);
+            });
+          });
+
+        })
+
+        // show this user the welcome video
+        welcomeVid(response, convo);
+      });
     })
   })
 }
@@ -309,8 +328,8 @@ function showSettings(response, convo, flag, done) {
         var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())
-        attachments.push({text: 'You are *receiving weekly cart* updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + '*'
-          + '\nYou can turn this off by saying `no weekly status`'
+        attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + convo.chatuser.tz.replace(/_/g, ' ') + '*'
+          + ')\nYou can turn this off by saying `no weekly status`'
           + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
       } else {
         attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'})
@@ -366,7 +385,22 @@ function handleSettingsChange(response, convo) {
       text = text.replace('days', 'day');
       text = text.replace(/(to|every|\bat\b)/g, '');
       text = text.trim();
-      // text = text.replace(/ [\d]+/)
+
+      // this date library cannot understand Tuesday at 2
+      // but it does understand Tuesday at 2:00
+      if (text.indexOf(':') < 0) {
+        text = text.replace(/([\d]+)/, '$1:00')
+      }
+      // for some reason, Date.js cannot parse 12:30 pm, but can parse 12:30
+      if (text.indexOf('12:') >= 0) {
+        console.log('text'. text )
+        if (text.match(/(am|a.m.|a m)/i)) {
+          text = text.replace(/(am|a.m.|a m)/i, '')
+          text = text.replace('12:', '00:');
+        } else {
+          text = text.replace(/(pm|p.m.|p m)/i, '')
+        }
+      }
       console.log(text);
       var date = Date.parse(text);
       console.log(date);
@@ -375,7 +409,7 @@ function handleSettingsChange(response, convo) {
       var hour = date.getHours();
 
       // if they type Tuesdays at 4 they probably mean 4 pm
-      if (hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
+      if (hour > 0 && hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
         hour = hour + 12;
       } else if (hour > 18 && !text.match(/(\bam\b|\bpm\b)/i)) {
         hour = hour - 12;
@@ -420,6 +454,7 @@ function handleSettingsChange(response, convo) {
 
       } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
         // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
+        var should_return = false;
         userIds.map(function(id) {
           if (id == convo.user_id) {
             convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
@@ -428,8 +463,16 @@ function handleSettingsChange(response, convo) {
           var index = convo.slackbot.meta.office_assistants.indexOf(id);
           if (index >= 0) {
             convo.slackbot.meta.office_assistants.splice(index, 1);
+          } else {
+            convo.ask('Looks like <@' + id + '> was not an admin.  Do you have any settings changes?', handleSettingsChange)
+            convo.next();
+            should_return = true;
           }
         })
+
+        if (should_return) {
+          return;
+        }
       } else {
 
         // convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);

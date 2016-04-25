@@ -7,7 +7,6 @@ from flask import (
 )
 import requests
 
-
 app = Flask(__name__)
 
 @app.route('/', methods=['POST'])
@@ -29,7 +28,7 @@ def parser():
   jsonify(res)
   print res
   requests.post('http://localhost:8000/emailincoming', json=res)
-  return "OK"
+  # return "OK"
 
 if __name__ == '__main__':
     print 'running app on port 8091'
