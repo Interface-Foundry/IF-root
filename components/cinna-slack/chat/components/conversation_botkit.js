@@ -7,6 +7,7 @@ var datejs = require('./date');
 var momenttz = require('moment-timezone');
 var weeklyUpdate = require('./weekly_updates');
 var history = require("./history.js");
+var refreshTeam = require('./refresh_team');
 
 /*
 slackbot: slackbot_schema
@@ -22,6 +23,9 @@ module.exports.onboard = function(slackbot, user_id, done) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   })
+
+  // probably time to refresh the team while messages fly back and forth
+  refreshTeam(slackbot.team_id);
 
   bot.startRTM(function(err, bot, payload) {
     if (err) {
@@ -47,6 +51,9 @@ module.exports.settings = function(slackbot, user_id, done, data) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   });
+
+  // probably time to refresh the team while the messages go back and forth
+  refreshTeam(slackbot.team_id);
 
 
   bot.startRTM(function(err, bot, payload) {
@@ -491,10 +498,10 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
+        convo.ask(resStatus, handleSettingsChange);
 
 
 
@@ -541,7 +548,7 @@ function handleSettingsChange(response, convo) {
           convo.ask('Yes? I\'m listening', handleSettingsChange)
           return convo.next();
 
-        //EXITING SETTINGS MODE 
+        //EXITING SETTINGS MODE
         } else if (response.text.match(convo.task.botkit.utterances.no)
             || response.text.match(/^(end|exit|finish|done|quit|settings exit|stop|quit|search|shopping|shop|buy)/)
             || response.text === 'stop') {
@@ -593,14 +600,14 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
+        convo.ask(resStatus, handleSettingsChange);
 
-        return convo.next();    
+        return convo.next();
 
-        
+
     }
 
     convo.say('Ok I have updated your settings.')
@@ -623,7 +630,7 @@ function handleSettingsChange(response, convo) {
     //               image_url: 'http://i.imgur.com/wxoZYmI.png',
     //               text: ''
     //           })
-              
+
     //           user.conversations[data.channel]
     //       break;
     // }
@@ -662,12 +669,12 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
+        convo.ask(resStatus, handleSettingsChange);
 
-        return convo.next();    
+        return convo.next();
 
 
 
