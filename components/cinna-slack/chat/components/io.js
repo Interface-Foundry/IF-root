@@ -661,7 +661,7 @@ function preProcess(data){
 
     // don't perform searches if ur having a convo with a bot
     // let botkit handle it
-    if (kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
+    if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
 
 
         //PUT MODE LISTENER HERE TO SWITCH BETWEEN MODES 
