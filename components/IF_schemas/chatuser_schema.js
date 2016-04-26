@@ -42,6 +42,10 @@ var chatuserSchema = mongoose.Schema({
       emailNotification: {
         type: Boolean,
         default: false
+      },
+      awaiting_email_response: {
+        type: Boolean,
+        default: false
       }
     }
 });

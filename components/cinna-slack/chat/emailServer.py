@@ -16,9 +16,11 @@ def parser():
   envelope = json.loads(request.form.get('envelope'))
   res.to_address = envelope['to'][0]
   res.from_address = envelope['from']
-  res.text = request.form.get('text')
+  text = request.form.get('text')
   res.html = request.form.get('html')
   res.subject = request.form.get('subject')
+  res.text = [int(s) for s in text.split() if s.isdigit()][0]
+  print res.text
   # res.num_attachments = int(request.form.get('attachments', 0))
   # res.attachments = []
   # if res.num_attachments > 0:

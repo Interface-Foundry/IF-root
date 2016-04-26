@@ -8,6 +8,9 @@ var momenttz = require('moment-timezone');
 var botkit = require('botkit');
 var controller = botkit.slackbot();
 var promisify = require('promisify-node');
+var validator = require('validator');
+var mailerTransport = require('../../../IF_mail/IF_mail.js');
+var async = require('async');
 
 //
 // In-memory hash of jobs so we can stop and start them
@@ -105,7 +108,7 @@ var updateJob = module.exports.updateJob = function(team_id) {
   })
 }
 
-module.exports.collect = function(team_id, person_id, callback) {
+module.exports.collect = function(team_id, person_id, emailUsers,callback) {
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
@@ -115,7 +118,6 @@ module.exports.collect = function(team_id, person_id, callback) {
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
       // oh no the person is not an admin, whatever will we do???
       console.log('cannot do this b/c the person is def not an admin');
-
       return;
     }
 
@@ -140,7 +142,7 @@ module.exports.collect = function(team_id, person_id, callback) {
         convo.interrupted = false;
         convo.ask('Okay, in 5 seconds I\'ll send the last call message to all users.  Say `wait` or `stop` to prevent this.', lastCall);
         setTimeout(function() {
-          lastCall({text: ''}, convo);
+          lastCall({text: ''}, convo, emailUsers);
         }, 5000)
       })
     })
@@ -151,7 +153,7 @@ module.exports.collect = function(team_id, person_id, callback) {
 }
 
 // just regular collect except that it restricts the messages to a specific user list
-module.exports.collectFromUsers = function(team_id, person_id, channel, users, callback) {
+module.exports.collectFromUsers = function(team_id, person_id, channel, users, emailUsers,callback) {
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
@@ -186,7 +188,7 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
         convo.interrupted = false;
         convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
         setTimeout(function() {
-          lastCall({text: ''}, convo);
+          lastCall({text: ''}, convo, emailUsers);
         }, 5000)
       })
     })
@@ -201,7 +203,7 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
 //
 // Sends a "last call" message to everyone who has not shut Kip up about messages like this
 //
-function lastCall(response, convo) {
+function lastCall(response, convo, emailUsers) {
   // Catch message interrupts
   if (response.text.toLowerCase().match(/(wait|stop)/)) {
     convo.say('Ok, stopping the message.'); // What\'s up?  You can say something like `change time limit 30 minutes`', lastCall);
@@ -217,6 +219,37 @@ function lastCall(response, convo) {
   } else if (response.text !== '') {
     convo.say("I'm sorry I couldn't understand that.  Sending the last call message.  Say `wait` or `stop` to prevent this.", lastCall)
     convo.next();
+  }
+
+  if (emailUsers && emailUsers.length > 0) {
+    // async repeat
+    async.eachSeries(emailUsers, function iterator(user, callback) {
+       var mailOptions = {
+            to: user.profile.email.split('mailto:')[1].split('|')[0],
+            from: 'Kip Bot <hello@kip.ai>',
+            subject: 'Reminder from Kip Bot!',
+            text: 'Hi!  <@' + convo.user_id + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! Simply respond to this email with your choice ( 1, 2, or 3).'
+        };
+        mailerTransport.sendMail(mailOptions, function(err) {
+            if (err) {
+              console.log('weekly_updates: ~234: err: ', err);
+              callback();
+            } else{ 
+              user.settings.awaiting_email_response = true;
+              user.save(function(err, saved) {
+                if (err) console.log('weekly_updates: err: '. err)
+                callback();
+              })
+            }
+        });
+    }, function finished(err, result){
+      if (err) { 
+          console.log('weekly_updates: ~239: err: ', err) 
+      }
+      else { 
+          console.log('Finished sending collect emails!') 
+      }
+    }) 
   }
 
   co(function*() {
@@ -315,54 +348,63 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
                   newUser.name = response.text;
                 }
                 convo.next();
-                convo.ask('Is he/she a slack user?', function(response, convo) {
-                  if (response.text.match(convo.bot.utterances.yes)) {
-                    newUser.type = 'slack';
-                  } 
-                  else {
-                    newUser.type = 'email';
-                    newUser.settings.emailNotification = true;                    
-                  }
-                  convo.next();
-                  convo.ask('What is this members email address?', function(response, convo) {
-                    if (response.text) {
-                      newUser.profile.email = response.text;
-                    }
-                    var user = new db.Chatuser(newUser);
-                    user.save(function(err, saved){
-                      if (err) {
-                        console.log('Could not save new user: ', err)
-                           convo.bot.say({
-                            text: 'Oops! Something went wrong!',
-                            channel: channel_id
-                          });
-                         convo.stop()
-                         cb();
+                convo.ask('Should I contact this user via email?', function(response, convo) {
+                  if (response.text.match(convo.bot.utterances.yes) || response.text.match(convo.bot.utterances.no)) {
+                      if (response.text.match(convo.bot.utterances.yes)) {
+                         newUser.settings.emailNotification = true;                    
                       } 
-                      else {
-                         console.log('Saved new user!',saved);
-                         convo.bot.say({
-                            text: 'Great! We added ' + newUser.name + ' to the list!',
-                            channel: channel_id
-                          });
-                         convo.next();
-                          convo.ask('Would you like to add another user?', function(response, convo) {
-                            if (response.text.match(convo.bot.utterances.yes)) {
-                              convo.next();
-                              startConvo();
+                      convo.next();
+                      convo.ask('What is the users email address?', function(response, convo) {
+                      if (response.text && validator.isEmail(response.text.split('mailto:')[1].split('|')[0])) {
+                          newUser.profile.email = response.text;
+                          var user = new db.Chatuser(newUser);
+                          user.save(function(err, saved){
+                            if (err) {
+                               console.log('Could not save new user: ', err);
+                               convo.bot.say({text: 'Oops! Something went wrong!', channel: channel_id});
+                               convo.stop()
+                               cb();
                             } 
-                            else if (response.text.match(convo.bot.utterances.no)) {
-                              convo.stop()
-                              cb();
-                            }
                             else {
-                              convo.stop()
-                              cb();
+                                 console.log('Saved new user!',saved);
+                                 convo.bot.say({
+                                    text: 'Great! We added ' + newUser.name + ' to the list!',
+                                    channel: channel_id
+                                  });
+                                 convo.next();
+                                 convo.ask('Would you like to add another user?', function(response, convo) {
+                                  if (response.text.match(convo.bot.utterances.yes)) {
+                                    convo.next();
+                                    startConvo();
+                                  } 
+                                  else if (response.text.match(convo.bot.utterances.no)) {
+                                    convo.stop();
+                                    cb();
+                                  }
+                                  else {
+                                    convo.stop();
+                                    cb();
+                                  }
+                                });
                             }
-                          })
-                      }
-                    })//save 
-                  })// email address?
+                          })//save 
+                    } else {
+                      convo.bot.say({text: 'That doesn\'t seem to be a valid email address. Please type again.',channel: channel_id});
+                      console.log('email check', validator.isEmail(response.text));
+                      convo.repeat();
+                    }
+
+
+                   })// email address?
+
+
+                  } // user responded yes or no?
+                  else {
+                    convo.say({text: "I'm sorry I couldn't understand that.", channel: channel_id });
+                    convo.repeat();
+                    convo.next();
+                  } 
+
                 }) // slack or email?
               }) //name?
             } 
@@ -373,7 +415,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
               cb();
             } 
             else {
-              convo.say("I'm sorry I couldn't understand that.");
+              convo.say({text: "I'm sorry I couldn't understand that.", channel: channel_id });
               convo.repeat();
               convo.next();
               }

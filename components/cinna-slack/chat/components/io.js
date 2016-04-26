@@ -169,7 +169,7 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
-    }else{
+    } else {
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
         Slackbots.find({
           deleted: {$ne: true}
@@ -212,7 +212,8 @@ var newSlack = function() {
 }
 
 //fired when user responds via email to an 'add order' request from slackbot 
-var newEmail= function(from_email) {
+var newEmail= function(envelope) {
+    console.log('Got new Email!', envelope.from_address)
     //  function routeToSlack(data) {
     //     console.log('incoming slack 📬')
     //     if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
@@ -235,46 +236,37 @@ var newEmail= function(from_email) {
     // }
     // find matching user
     // **Question what to do is a user with same email is participating in multiple slackbots?? o em gee
-    Chatuser.find({'profile.email': from_email }).exec(function(err, users) {
+    // {'profile.email': from_email.toString().trim() }
+    Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
         if(err){
             console.log('saved chat user retrieval error');
-        }
-        else {
-            
+        } else {     
             if (!users || users.length == 0) {
-
+                var mailOptions = {
+                    to: envelope.from_address,
+                    from: 'Kip Bot <hello@kip.ai>',
+                    subject: 'You are not currently in a chat!',
+                    text: 'You are currently not taking part in any Kip Bot chats...'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) console.log(err);
+                    console.log('User was not found in Chatusers db. Sent notification to user.');
+                });
             }
-            if (users.length > 0) {
-
+            else if (users[0] && users[0].team_id && slackUsers[users[0].team_id] ) {
+               // console.log('This should be the active chat: ', slackUsers[users[0].team_id])
+               var emailCommand = {
+                    source: {
+                        'origin':'slack',
+                        'channel':users[0].dm,
+                        'org':slackUsers[users[0].team_id].activeTeamId,
+                        'id':users[0].team_id + "_" + users[0].dm, 
+                        'user': slackUsers[users[0].team_id].activeUserId
+                    },
+                    'msg': 'buy ' + envelope.text.toString().trim()
+                };
+                preProcess(emailCommand);
             }
-            else if (users[0].team_id){
-
-                console.log('This should be the active chat: ', slackUsers[users[0].team_id] )
-
-                //look for keys matching team_id
-                //slackUsers.
-
-  
-                //find relevant slack bot
-                // Slackbots.find({'meta.initialized':  true, 'team_id': users[0].team_id }).exec(function(err, users) {
-                //     if(err){
-                //         console.log('saved slack bot retrieval error');
-                //     }
-                //     else {
-                //         loadSlackUsers(users);
-                //         console.log('DEBUG: new slack team added with this data: ',users);
-                //         res.send('slack user added');
-                //     }
-                // });
-            
-            }
-
-            
-
-
-            // loadSlackUsers(users);
-            // console.log('DEBUG: new slack team added with this data: ',users);
-            // res.send('slack user added');
         }
     });
 }
@@ -564,21 +556,37 @@ function loadSlackUsers(users){
                     debugger;
                     if (channelInfo.channel && channelInfo.channel.members) {
                       // um okay now what?
-
-                      return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, function() {
+        
+                      return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, emailUsers,function() {
                         console.log('um done collecting orders for channel ' + channel)
                         user.conversations[data.channel] = false;
                       })
+
+            
                     }
                   });
 
                 })
               } else {
                 console.log('triggering kip collect, maybe if the person is an admin?')
-                return weekly_updates.collect(data.team, data.user, function() {
-                  console.log('done collecting orders i guess');
-                  user.conversations[data.channel] = false;
-                })
+               
+                    co(function*() {
+                        var emailUsers = yield db.Chatusers.find({
+                          'team_id': data.team, 
+                          'settings.emailNotification': true
+                    }).exec();
+
+                    return weekly_updates.collect(data.team, data.user, emailUsers,function() {
+                      console.log('done collecting orders i guess');
+                      user.conversations[data.channel] = false;
+                    })
+
+                }).catch((e) => {
+                    console.log('error');
+                    console.log(e);
+                    convo.next();
+                });
+
               }
             }
 
@@ -630,6 +638,7 @@ function loadSlackUsers(users){
                         }
                         //not a file share, process normally
                         else {
+                            console.log('\n\n EXANPLE DATA EWJTWREGSEW', data)
                             data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
                             if (data.text.charAt(0) == ':'){
                                 data.text = data.text.substr(1); //remove : from beginning of string
