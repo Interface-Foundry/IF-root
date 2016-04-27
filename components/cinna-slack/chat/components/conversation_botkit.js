@@ -434,51 +434,33 @@ function handleSettingsChange(response, convo) {
     }
 
     //
-    // Add/remove admins
+    // Add/remove admins (only admins can do this)
     //
-    if (response.text.indexOf('<@') >= 0 && isAdmin) {
-      var tokens = response.text.trim().split(' ');
+    var tokens = response.text.toLowerCase().trim().split(' ');
+    if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
+
+      // look for users mentioned with the @ symbol
       var userIds = tokens.filter((t) => {
         return t.indexOf('<@') === 0;
       }).map((u) => {
-        return u.replace(/(\<\@|\>)/g, '');
+        return u.replace(/(\<\@|\>)/g, '').toUpperCase();
       })
 
-      if (tokens[0].toLowerCase() === 'add' && userIds.length > 0) {
-        // add all the users they specified.
-        userIds.map(function(id) {
-          if (convo.slackbot.meta.office_assistants.indexOf(id) < 0) {
-            convo.slackbot.meta.office_assistants.push(id);
-          }
-        });
+      // also look for users mentioned by name without the @ symbol
+      var users = yield db.Chatusers.find({
+        team_id: convo.slackbot.team_id,
+        is_bot: {$ne: true}
+      }).select('id name').exec();
 
-      } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
-        // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
-        var should_return = false;
-        userIds.map(function(id) {
-          if (id == convo.user_id) {
-            convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
-            return convo.next();
-          }
-          var index = convo.slackbot.meta.office_assistants.indexOf(id);
-          if (index >= 0) {
-            convo.slackbot.meta.office_assistants.splice(index, 1);
-          } else {
-            convo.ask('Looks like <@' + id + '> was not an admin.  Do you have any settings changes?', handleSettingsChange)
-            convo.next();
-            should_return = true;
-          }
-        })
-
-        if (should_return) {
-          return;
+      users.map((u) => {
+        var re = new RegExp('\\b' + u.name + '\\b', 'i')
+        if (response.text.match(re)) {
+          userIds.push(u.id);
         }
-      } else {
+      });
 
-        // convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
-
-
-
+      console.log(userIds);
+      if (userIds.length === 0) {
         var attachments = [
           {
             text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
@@ -491,14 +473,72 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
-
-
-
+        convo.ask(resStatus, handleSettingsChange);
         return convo.next();
+      }
+
+
+      var shouldReturn = false;
+      if (tokens[0] === 'add') {
+        userIds.map((id) => {
+          if (convo.slackbot.meta.office_assistants.indexOf(id) < 0) {
+            convo.slackbot.meta.office_assistants.push(id);
+          }
+        })
+      } else if (tokens[0] === 'remove') {
+        userIds.map((id) => {
+          if (id == convo.user_id) {
+            var attachments = [
+              {
+                text: "I'm sorry, but you can't remove yourself as an admin.  Do you have any settings changes?"
+              }
+            ];
+
+            var resStatus = {
+              username: 'Kip',
+              text: "",
+              attachments: attachments,
+              fallback: 'Settings'
+            };
+
+            // showSettings(response, convo, 'noAsk', function(){});
+
+            convo.ask(resStatus, handleSettingsChange);
+            shouldReturn = true;
+            return convo.next();
+          }
+
+          if (convo.slackbot.meta.office_assistants.indexOf(id) >= 0) {
+            var index = convo.slackbot.meta.office_assistants.indexOf(id);
+            convo.slackbot.meta.office_assistants.splice(index, 1);
+          } else {
+            var attachments = [
+              {
+                text: 'Looks like <@' + id + '> was not an admin.  Do you have any settings changes?'
+              }
+            ];
+
+            var resStatus = {
+              username: 'Kip',
+              text: "",
+              attachments: attachments,
+              fallback: 'Settings'
+            };
+
+            // showSettings(response, convo, 'noAsk', function(){});
+
+            convo.ask(resStatus, handleSettingsChange);
+            convo.next();
+            shouldReturn = true;
+          }
+        })
+      }
+
+      if (shouldReturn) {
+        return;
       }
 
       yield convo.slackbot.save();
@@ -541,7 +581,7 @@ function handleSettingsChange(response, convo) {
           convo.ask('Yes? I\'m listening', handleSettingsChange)
           return convo.next();
 
-        //EXITING SETTINGS MODE 
+        //EXITING SETTINGS MODE
         } else if (response.text.match(convo.task.botkit.utterances.no)
             || response.text.match(/^(end|exit|finish|done|quit|settings exit|stop|quit|search|shopping|shop|buy)/)
             || response.text === 'stop') {
@@ -593,14 +633,14 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
+        convo.ask(resStatus, handleSettingsChange);
 
-        return convo.next();    
+        return convo.next();
 
-        
+
     }
 
     convo.say('Ok I have updated your settings.')
@@ -623,7 +663,7 @@ function handleSettingsChange(response, convo) {
     //               image_url: 'http://i.imgur.com/wxoZYmI.png',
     //               text: ''
     //           })
-              
+
     //           user.conversations[data.channel]
     //       break;
     // }
@@ -662,12 +702,12 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
+        convo.ask(resStatus, handleSettingsChange);
 
-        return convo.next();    
+        return convo.next();
 
 
 
