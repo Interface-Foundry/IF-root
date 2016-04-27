@@ -226,6 +226,7 @@ function lastCall(response, convo) {
       convo.users = yield db.Chatusers.find({
         team_id: convo.slackbot.team_id,
         is_bot: false,
+        deleted: {$ne: true},
         id: { '$ne': 'USLACKBOT' }, // because slackbot is not marked as a bot?
         'meta.last_call_alerts': { '$ne': false }
       }).exec();
@@ -236,6 +237,7 @@ function lastCall(response, convo) {
         'id': {$in: convo.users},
         'meta.last_call_alerts': { '$ne': false },
         is_bot: false,
+        deleted: {$ne: true}
       }).exec();
     }
 
@@ -291,13 +293,13 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
           bot.closeRTM();
         });
       startConvo();
-      function startConvo() { 
+      function startConvo() {
           convo.ask('Would you like to add members to this order?', function(response, convo) {
           if (response.text.match(convo.bot.utterances.yes)) {
               console.log('k lets add a member mkay');
-              var newUser = { 
+              var newUser = {
                    id:'U0SM73E5R', //How to generate?
-                   type: 'slack', 
+                   type: 'slack',
                    dm:'D0SM74ECT',
                    team_id: team_id,
                    is_admin:false,
@@ -318,10 +320,10 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
                 convo.ask('Is he/she a slack user?', function(response, convo) {
                   if (response.text.match(convo.bot.utterances.yes)) {
                     newUser.type = 'slack';
-                  } 
+                  }
                   else {
                     newUser.type = 'email';
-                    newUser.settings.emailNotification = true;                    
+                    newUser.settings.emailNotification = true;
                   }
                   convo.next();
                   convo.ask('What is this members email address?', function(response, convo) {
@@ -338,7 +340,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
                           });
                          convo.stop()
                          cb();
-                      } 
+                      }
                       else {
                          console.log('Saved new user!',saved);
                          convo.bot.say({
@@ -350,7 +352,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
                             if (response.text.match(convo.bot.utterances.yes)) {
                               convo.next();
                               startConvo();
-                            } 
+                            }
                             else if (response.text.match(convo.bot.utterances.no)) {
                               convo.stop()
                               cb();
@@ -361,17 +363,17 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
                             }
                           })
                       }
-                    })//save 
+                    })//save
                   })// email address?
                 }) // slack or email?
               }) //name?
-            } 
+            }
             else if (response.text.match(convo.bot.utterances.no)) {
               console.log('no add member');
               convo.bot.say({text: 'OK, you can `checkout` whenever you\'re ready', channel: channel_id});
               convo.stop()
               cb();
-            } 
+            }
             else {
               convo.say("I'm sorry I couldn't understand that.");
               convo.repeat();

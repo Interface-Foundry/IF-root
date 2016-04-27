@@ -183,7 +183,8 @@ function askWhoManagesPurchases(response, convo) {
     // also look for users mentioned by name without the @ symbol
     db.Chatusers.find({
       team_id: convo.slackbot.team_id,
-      is_bot: {$ne: true}
+      is_bot: {$ne: true},
+      deleted: {$ne: true}
     }).select('id name').exec(function(e, users) {
 
       users.map((u) => {
@@ -462,7 +463,8 @@ function handleSettingsChange(response, convo) {
       // also look for users mentioned by name without the @ symbol
       var users = yield db.Chatusers.find({
         team_id: convo.slackbot.team_id,
-        is_bot: {$ne: true}
+        is_bot: {$ne: true},
+        deleted: {$ne: true}
       }).select('id name').exec();
 
       users.map((u) => {
