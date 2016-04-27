@@ -39,7 +39,13 @@ module.exports.onboard = function(slackbot, user_id, done) {
         bot.closeRTM();
         done();
       })
-      askWhoManagesPurchases(response, convo);
+
+      if (slackbot.meta.office_assistants.indexOf(user_id) < 0 && process.env.NODE_ENV === 'production') {
+        convo.say('Only the office admin can perform the onboarding process');
+        return convo.next();
+      } else {
+        askWhoManagesPurchases(response, convo);
+      }
     });
   });
 }
