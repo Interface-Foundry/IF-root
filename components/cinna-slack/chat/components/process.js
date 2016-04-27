@@ -83,6 +83,9 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➊</div>';
             }
+            else if (data.flags && data.flags.email == true) {
+                  numEmoji = '1.'
+            }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':one:';
             }
@@ -94,6 +97,9 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➋</div>';
             }
+            else if (data.flags && data.flags.email == true) {
+                  numEmoji = '2.'
+            }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':two:';
             }
@@ -104,6 +110,9 @@ function getNumEmoji(data,number,callback){
         case 3: //emoji #3
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➌</div>';
+            }
+            else if (data.flags && data.flags.email == true) {
+                  numEmoji = '3.'
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':three:';

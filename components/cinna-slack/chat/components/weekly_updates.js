@@ -250,6 +250,7 @@ function lastCall(response, convo, emailUsers) {
           console.log('Finished sending collect emails!') 
       }
     }) 
+
   }
 
   co(function*() {

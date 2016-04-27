@@ -48,6 +48,12 @@ var chatuserSchema = mongoose.Schema({
         default: false
       }
     }
+    // , email_stages: {
+    //   stage_1: {
+    //     type: Boolean,
+    //     default: false
+    //   }
+    // }
 });
 
 module.exports = mongoose.model('Chatuser', chatuserSchema);

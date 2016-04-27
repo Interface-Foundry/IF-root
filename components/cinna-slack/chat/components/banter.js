@@ -1144,23 +1144,34 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➊</span>';
                 }
-                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
-                    numEmoji = ':one:';
+                else if (data.flags && data.flags.email == true) {
+                    numEmoji = '1'
                 }
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
+                    numEmoji = ':one:';
+                } 
+              
                 break;
             case 2: //emoji #2
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➋</span>';
                 }
-                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                else if (data.flags && data.flags.email == true) {
+                    numEmoji = '2'
+                }
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':two:';
                 }
+            
                 break;
             case 3: //emoji #3
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➌</span>';
                 }
-                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                else if (data.flags && data.flags.email == true) {
+                    numEmoji = '3'
+                }
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':three:';
                 }
                 break;

@@ -44,6 +44,9 @@ var supervisor = require('./supervisor');
 var cinnaEnv;
 // var BufferList = require('bufferlist').BufferList
 var upload = require('../../../../IF_services/upload.js');
+var redisClient = require('../../../../redis.js');
+var  redis = require('redis');
+var client = redis.createClient();
 /////////// LOAD INCOMING ////////////////
 
 
@@ -213,62 +216,59 @@ var newSlack = function() {
 
 //fired when user responds via email to an 'add order' request from slackbot 
 var newEmail= function(envelope) {
-    console.log('Got new Email!', envelope.from_address)
-    //  function routeToSlack(data) {
-    //     console.log('incoming slack 📬')
-    //     if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
-    //         var newSl = {
-    //             source: {
-    //                 'origin':'slack',
-    //                 'channel':data.channel,
-    //                 'org':data.team,
-    //                 'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
-    //                 user: data.user
-    //             },
-    //             'msg':data.text
+    console.log('Got new Email!', envelope.from_address);
+
+    // **Question what to do is a user with same email is participating in multiple slackbots?
+     redisClient.rpush('chat_email', JSON.stringify(envelope), function(err, reply) {
+            if (err) {
+                err.niceMessage = 'Error with redis queue';
+                err.devMessage = 'EMAIL REDIS QUEUE ERR';
+                return
+            } else {
+                console.log('Added new email to redis queue!')
+            }
+      });    
+
+
+    // Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
+    //     if(err){
+    //         console.log('saved chat user retrieval error');
+    //     } else {     
+    //         if (!users || users.length == 0) {
+    //             var mailOptions = {
+    //                 to: envelope.from_address,
+    //                 from: 'Kip Bot <hello@kip.ai>',
+    //                 subject: 'You are not currently in a chat!',
+    //                 text: 'You are currently not taking part in any Kip Bot chats...'
+    //             };
+    //             mailerTransport.sendMail(mailOptions, function(err) {
+    //                 if (err) console.log(err);
+    //                 console.log('User was not found in Chatusers db. Sent notification to user.');
+    //             });
     //         }
-    //         //carry image tags over
-    //         if (data.imageTags){
-    //             newSl.imageTags = data.imageTags;
+    //         else if (users[0] && users[0].team_id && slackUsers[users[0].team_id] ) {
+    //            // console.log('This should be the active chat: ', slackUsers[users[0].team_id])
+    //            var emailCommand = {
+    //                 source: {
+    //                     'origin':'slack',
+    //                     'channel':users[0].dm,
+    //                     'org':slackUsers[users[0].team_id].activeTeamId,
+    //                     'id':users[0].team_id + "_" + users[0].dm, 
+    //                     'user': slackUsers[users[0].team_id].activeUserId
+    //                 },
+    //                 'msg': envelope.text.toString().trim(),
+    //                 'flags': {'email': true},
+    //                 'emailInfo': {
+    //                     to: envelope.from_address,
+    //                     from: 'Kip Bot <hello@kip.ai>',
+    //                     subject: 'Reply from Kip Bot!',
+    //                     text: ''
+    //                 }
+    //             };
+    //             preProcess(emailCommand);
     //         }
-    //         preProcess(newSl);
     //     }
-    // }
-    // find matching user
-    // **Question what to do is a user with same email is participating in multiple slackbots?? o em gee
-    // {'profile.email': from_email.toString().trim() }
-    Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
-        if(err){
-            console.log('saved chat user retrieval error');
-        } else {     
-            if (!users || users.length == 0) {
-                var mailOptions = {
-                    to: envelope.from_address,
-                    from: 'Kip Bot <hello@kip.ai>',
-                    subject: 'You are not currently in a chat!',
-                    text: 'You are currently not taking part in any Kip Bot chats...'
-                };
-                mailerTransport.sendMail(mailOptions, function(err) {
-                    if (err) console.log(err);
-                    console.log('User was not found in Chatusers db. Sent notification to user.');
-                });
-            }
-            else if (users[0] && users[0].team_id && slackUsers[users[0].team_id] ) {
-               // console.log('This should be the active chat: ', slackUsers[users[0].team_id])
-               var emailCommand = {
-                    source: {
-                        'origin':'slack',
-                        'channel':users[0].dm,
-                        'org':slackUsers[users[0].team_id].activeTeamId,
-                        'id':users[0].team_id + "_" + users[0].dm, 
-                        'user': slackUsers[users[0].team_id].activeUserId
-                    },
-                    'msg': 'buy ' + envelope.text.toString().trim()
-                };
-                preProcess(emailCommand);
-            }
-        }
-    });
+    // });
 }
 
 //load slack users into memory, adds them as slack bots
@@ -778,6 +778,8 @@ var loadSocketIO = function(server){
 
 //pre process incoming messages for canned responses
 function preProcess(data){
+
+    console.log('io 781: Getting to preProcess, data: ',data)
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -1856,9 +1858,210 @@ var sendResponse = function(data,flag){
 
     }
     //* * * * * * * *
+    // Email Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'slack' && data.flags && data.flags.email) {
+         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+            var messages = [data.client_res[0]];
+            data.client_res.shift();
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = []; 
+            data.client_res.forEach(function(el, index) {
+                messages.push(el.title + '\n\n' + el.title_link);
+                photos.push({filename: index.toString() + '.png',path: el.image_url});
+            })
+            // console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+            var mailOptions = {
+                to: data.emailInfo.to,
+                from: 'Kip Bot <hello@kip.ai>',
+                subject: 'Reply from Kip Bot!',
+                text: messages.join('\n\n').concat('\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
+                ,attachments: photos
+            };
+            mailerTransport.sendMail(mailOptions, function(err) {
+                if (err) {
+                    console.log('Sending email to user failed: ',err); 
+                }
+                else {
+                console.log('Sent Email Outgoing Bot Response to user.');
+                }
+            });
+        }
+        else if (data.action == 'focus') {
+               console.log('EMAIL OUTGOING FOCUS client_res', data.client_res)
+           try {
+             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n\n' + data.client_res[1].split('|')[0].split('<')[1]
+             formatted = formatted.slice(0,-1)
+           } catch(err) {
+             console.log('io.js 1269 err: ',err)
+             return
+           }
+          data.client_res[1] = formatted ? formatted : data.client_res[1];
+          var toSend = data.client_res[1] + '\n\n' + data.client_res[2] + '\n\n' + truncate(data.client_res[3]) + '\n\n' + (data.client_res[4] ? data.client_res[4] : '');
+           // console.log('formatted : ',formatted)
+          var mailOptions = {
+                to: data.emailInfo.to,
+                from: 'Kip Bot <hello@kip.ai>',
+                subject: 'Reply from Kip Bot!',
+                text: toSend + '\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)'
+                // ,attachments: {filename: 'product.png',path: data.client_res[0]}
+            };
+            mailerTransport.sendMail(mailOptions, function(err) {
+                if (err) {
+                    console.log('Sending email to user failed: ',err); 
+                }
+                else {
+                    console.log('Sent Email Outgoing Bot Response to user.');
+                }
+            });
+        }
+         else if (data.action == 'save') {
+            console.log('\n\n\nSAVE: ',data.client_res)
+          try {
+             var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
+              // + data.client_res[0].text.split('>>')[1].split('>')[0]
+             // formatted = formatted.slice(0,-1)
+             // formatted = formatted + ')'
+           } 
+           catch(err) {
+             console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
+             return
+           }
+          // console.log('toSend:', toSend,'formatted: ',formatted)
+              if (formatted) {
+                var mailOptions = {
+                    to: data.emailInfo.to,
+                    from: 'Kip Bot <hello@kip.ai>',
+                    subject: 'Reply from Kip Bot!',
+                    text: formatted.concat('\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) {
+                        console.log('Sending email to user failed: ',err); 
+                    }
+                    else {
+                        console.log('Sent Email Outgoing Bot Response to user.');
+                    }
+                });
+              }
+     
+        }
+        else if (data.action == 'checkout') {
+          console.log('\n\n\nEMAIL CHECKOUT: ', data.client_res)
+          //    async.eachSeries(data.client_res[1], function iterator(item, callback) {
+          //       console.log('ITEM LEL: ',item)
+          //       if (item.text.indexOf('_Summary') > -1) {
+          //           return callback(item)
+          //       }
+          //        var itemLink = ''
+          //         try {
+          //           itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
+          //           itemLink = encode_utf8(itemLink)
+          //          } catch(err) {
+          //            console.log('io.js 1296 err:',err)
+          //            return callback(null)
+          //          }
+          //          tg.sendMessage({
+          //               chat_id: data.source.channel,
+          //               text: itemLink,
+          //               parse_mode: 'Markdown',
+          //               disable_web_page_preview: 'true'
+          //           }).then(function(){
+          //                var extraInfo = item.text.split('$')[1]
+          //                extraInfo = '\n $' + extraInfo
+          //                extraInfo = extraInfo.replace('*','').replace('@','').replace('<','').replace('>','')
+          //                tg.sendMessage({
+          //                   chat_id: data.source.channel,
+          //                   text: encode_utf8(extraInfo),
+          //                   parse_mode: 'Markdown',
+          //                       disable_web_page_preview: 'true'
+          //                   })
+          //                   .then(function(){
+          //                       callback(null)
+          //                   })
+          //                   .catch(function(err) {
+          //                       console.log('io.js 1354 err: ',err)
+          //                       callback(null)
+          //                   })
+          //           })
+          //     }, function done(thing) {
+          //       if (thing.text) {
+          //           // console.log('\n\n DONESKI!', thing)
+          //           var itemLink = ''
+          //             try {
+          //               itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
+          //               itemLink = encode_utf8(itemLink)
+          //               tg.sendMessage({
+          //                   chat_id: data.source.channel,
+          //                   text: '_Summary: Team Cart_ \n Total: *$691.37* \n' + itemLink,
+          //                   parse_mode: 'Markdown',
+          //                   disable_web_page_preview: 'true'
+          //               }).catch(function(err) {
+          //                console.log('io.js 1353 err:',err)
+          //              })
+          //              } catch(err) {
+          //                console.log('io.js 1356 err:',err)
+          //              }
+          //       } else {
+          //           // console.log('wtf is thing: ',thing)
+          //       }
+          //     })
+
+
+           // // var extraInfo = data.client_res[1][0].text.split('$')[1]
+           // // extraInfo = '\n $' + extraInfo
+           // // var finalSend = itemLink + extraInfo
+           // //      tg.sendMessage({
+           // //          chat_id: data.source.channel,
+           // //          text: data.client_res[0],
+           // //          parse_mode: 'Markdown',
+           // //          disable_web_page_preview: 'true'
+           // //      }).then(function(){
+           //         console.log('finalSend: ', itemLink)
+           //          tg.sendMessage({
+           //              chat_id: data.source.channel,
+           //              text: itemLink,
+           //              parse_mode: 'Markdown',
+           //              disable_web_page_preview: 'true'
+           //          }).then(function(){
+
+           //          // })
+           //      }).catch(function(err) {
+           //          console.log('io.js 1338 err',err)
+           //      })
+        }
+        else if (data.action == 'sendAttachment'){
+          // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
+            // //remove first message from res arr
+            // var attachThis = data.client_res;
+            // attachThis = JSON.stringify(attachThis);
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        else {
+            //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
+            // //loop through responses in order
+            // async.eachSeries(data.client_res, function(message, callback) {
+            //     tg.sendMessage({
+            //         chat_id: data.source.channel,
+            //         text: message
+            //     })
+            //     callback();
+            // }, function done(){
+            // });
+        }
+    }
+    //* * * * * * * *
     // Slack Outgoing
     //* * * * * * * *
-    else if (data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
+    else if (!(data.flags && data.flags.email) && data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
         //eventually cinna can change emotions in this pic based on response type
         var params = {
@@ -2144,10 +2347,8 @@ var saveToCart = function(data){
                         sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                       })
               }
-
               // data.client_res = ['<' + cart.link + '|» View Cart>']
               // outgoingResponse(data, 'txt');
-
               // View cart after adding item TODO doesn't display for some reason
               // Even after adding in 500 ms which solves any amazon rate limiting problems
               if (cart) {
@@ -2155,12 +2356,10 @@ var saveToCart = function(data){
                   viewCart(data, true);
                 }, 500)
               }
-
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
                 sendTxtResponse(data, err);
-
                 //send email about this issue
                 var mailOptions = {
                     to: 'Kip Server <hello@kipthis.com>',
@@ -2383,10 +2582,118 @@ function encode_utf8(s) {
   return unescape(encodeURIComponent(s));
 }
 
+
+client.on("connect", function(err) {
+    console.log("Connected to email redis queue...");
+});
+
+var timer = new InvervalTimer(function() {
+    client.lrange('chat_email', 0, -1, function(err, emails) {
+            // console.log('Email Queue: ' + emails.length)
+            if (emails.length > 0) {
+                console.log('Pausing timer')
+                timer.pause();
+                console.log(emails.length + ' email(s) for processing.')
+                async.eachSeries(emails, function iterator(email_str, callback) {
+                    var envelope = JSON.parse(email_str);
+                    console.log('Incoming email: ', JSON.stringify(envelope));
+                    Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
+                        console.log(0);
+                        if(err){
+                            console.log('saved chat user retrieval error');
+                        } else {     
+                            if (!users || users.length == 0) {
+                                console.log(1);
+                                var mailOptions = {
+                                    to: envelope.from_address,
+                                    from: 'Kip Bot <hello@kip.ai>',
+                                    subject: 'You are not currently in a chat!',
+                                    text: 'You are currently not taking part in any Kip Bot chats...'
+                                };
+                                mailerTransport.sendMail(mailOptions, function(err) {
+                                    if (err) console.log(err);
+                                    console.log('User was not found in Chatusers db. Sent notification to user.');
+                                });
+                            }
+                            else if (users[0] && users[0].team_id ) {
+                                console.log(2);
+                               var emailCommand = {
+                                    source: {
+                                        'origin':'slack',
+                                        'channel':users[0].dm,
+                                        'org':slackUsers[users[0].team_id].activeTeamId,
+                                        'id':users[0].team_id + "_" + users[0].dm, 
+                                        'user': slackUsers[users[0].team_id].activeUserId
+                                    },
+                                    'msg': envelope.text.toString().trim(),
+                                    'flags': {'email': true},
+                                    'emailInfo': {
+                                        to: envelope.from_address,
+                                        from: 'Kip Bot <hello@kip.ai>',
+                                        subject: 'Reply from Kip Bot!',
+                                        text: ''
+                                    }
+                                };
+                                preProcess(emailCommand);
+                                client.lrem('chat_email', 1, email_str);
+                                timer.resume()
+                            } else {
+                                console.log(3);
+                                console.log('wtf mate: slackUsers: ', slackUsers, ' users: ', users);
+                                client.lrem('chat_email', 1, email_str);
+                                timer.resume()
+                            }
+                        }
+                    });
+                }, function complete(err, results) {
+                    console.log('Resuming timer!')
+                    timer.resume()
+                });
+            }
+        }) // end of client lrange, callback)
+}, 5000);
+
+
+function InvervalTimer(callback, interval) {
+    var timerId, startTime, remaining = 0;
+    var state = 0; //  0 = idle, 1 = running, 2 = paused, 3= resumed
+
+    this.pause = function() {
+        if (state != 1) return;
+
+        remaining = interval - (new Date() - startTime);
+        clearInterval(timerId);
+        state = 2;
+    };
+
+    this.resume = function() {
+        if (state != 2) return;
+
+        state = 3;
+        setTimeout(this.timeoutCallback, remaining);
+    };
+
+    this.timeoutCallback = function() {
+        if (state != 3) return;
+
+        callback();
+
+        startTime = new Date();
+        timerId = setInterval(callback, interval);
+        state = 1;
+    };
+
+    startTime = new Date();
+    timerId = setInterval(callback, interval);
+    state = 1;
+}
+
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
 module.exports.newSlack = newSlack;
 module.exports.newEmail = newEmail;
+module.exports.preProcess = preProcess;
+module.exports.slackUsers = slackUsers;
 
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;
