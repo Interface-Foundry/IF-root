@@ -7,6 +7,7 @@ var datejs = require('./date');
 var momenttz = require('moment-timezone');
 var weeklyUpdate = require('./weekly_updates');
 var history = require("./history.js");
+var refreshTeam = require('./refresh_team');
 
 /*
 slackbot: slackbot_schema
@@ -22,6 +23,9 @@ module.exports.onboard = function(slackbot, user_id, done) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   })
+
+  // probably time to refresh the team while messages fly back and forth
+  refreshTeam(slackbot.team_id);
 
   bot.startRTM(function(err, bot, payload) {
     if (err) {
@@ -47,6 +51,9 @@ module.exports.settings = function(slackbot, user_id, done, data) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   });
+
+  // probably time to refresh the team while the messages go back and forth
+  refreshTeam(slackbot.team_id);
 
 
   bot.startRTM(function(err, bot, payload) {
