@@ -1891,147 +1891,90 @@ var sendResponse = function(data,flag){
             });
         }
         else if (data.action == 'focus') {
-               console.log('EMAIL OUTGOING FOCUS client_res', data.client_res)
+           console.log('EMAIL OUTGOING FOCUS client_res', data.client_res);
            try {
-             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n\n' + data.client_res[1].split('|')[0].split('<')[1]
-             formatted = formatted.slice(0,-1)
+             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n\n' + data.client_res[1].split('|')[0].split('<')[1];
+             formatted = formatted.slice(0,-1);
            } catch(err) {
-             console.log('io.js 1269 err: ',err)
-             return
+             console.log('io.js 1269 err: ',err);
+             return;
            }
           data.client_res[1] = formatted ? formatted : data.client_res[1];
-          var toSend = data.client_res[1] + '\n\n' + data.client_res[2] + '\n\n' + truncate(data.client_res[3]) + '\n\n' + (data.client_res[4] ? data.client_res[4] : '');
-           // console.log('formatted : ',formatted)
+          var toSend = data.client_res[1] + '\n\n' + (data.client_res[2] ? data.client_res[2] : '')  + '\n\n' + (data.client_res[3] ? data.client_res[3] : '') + '\n\n' + (data.client_res[4] ? data.client_res[4] : '');
+           console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
           var mailOptions = {
                 to: data.emailInfo.to,
                 from: 'Kip Bot <hello@kip.ai>',
                 subject: 'Reply from Kip Bot!',
                 text: toSend + '\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)'
-                // ,attachments: {filename: 'product.png',path: data.client_res[0]}
+                ,attachments: [{filename: 'productr32r23r3.jpg', path: data.client_res[0]}]
+            };
+            mailerTransport.sendMail(mailOptions, function(err) {
+                if (err) { 
+                    console.log('Sending email to user failed: ',err); 
+                } else {
+                    console.log('Sent Email Outgoing Bot Response to user.');
+            }});
+        }
+         else if (data.action == 'save') {
+              var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = []; 
+            data.client_res[0].forEach(function(el, index) {
+                // console.log('\n\n\n', el)
+                messages.push(el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               } 
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+            var mailOptions = {
+                to: data.emailInfo.to,
+                from: 'Kip Bot <hello@kip.ai>',
+                subject: 'Reply from Kip Bot!',
+                text: messages.join('\n\n'),
+                attachments: photos
             };
             mailerTransport.sendMail(mailOptions, function(err) {
                 if (err) {
                     console.log('Sending email to user failed: ',err); 
                 }
                 else {
-                    console.log('Sent Email Outgoing Bot Response to user.');
+                console.log('Sent Email Outgoing Bot Response to user.');
                 }
             });
         }
-         else if (data.action == 'save') {
-            console.log('\n\n\nSAVE: ',data.client_res)
-          try {
-             var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
-              // + data.client_res[0].text.split('>>')[1].split('>')[0]
-             // formatted = formatted.slice(0,-1)
-             // formatted = formatted + ')'
-           } 
-           catch(err) {
-             console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
-             return
-           }
-          // console.log('toSend:', toSend,'formatted: ',formatted)
-              if (formatted) {
-                var mailOptions = {
-                    to: data.emailInfo.to,
-                    from: 'Kip Bot <hello@kip.ai>',
-                    subject: 'Reply from Kip Bot!',
-                    text: formatted.concat('\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
-                };
-                mailerTransport.sendMail(mailOptions, function(err) {
-                    if (err) {
-                        console.log('Sending email to user failed: ',err); 
-                    }
-                    else {
-                        console.log('Sent Email Outgoing Bot Response to user.');
-                    }
-                });
-              }
-     
-        }
         else if (data.action == 'checkout') {
-          console.log('\n\n\nEMAIL CHECKOUT: ', data.client_res)
-          //    async.eachSeries(data.client_res[1], function iterator(item, callback) {
-          //       console.log('ITEM LEL: ',item)
-          //       if (item.text.indexOf('_Summary') > -1) {
-          //           return callback(item)
-          //       }
-          //        var itemLink = ''
-          //         try {
-          //           itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
-          //           itemLink = encode_utf8(itemLink)
-          //          } catch(err) {
-          //            console.log('io.js 1296 err:',err)
-          //            return callback(null)
-          //          }
-          //          tg.sendMessage({
-          //               chat_id: data.source.channel,
-          //               text: itemLink,
-          //               parse_mode: 'Markdown',
-          //               disable_web_page_preview: 'true'
-          //           }).then(function(){
-          //                var extraInfo = item.text.split('$')[1]
-          //                extraInfo = '\n $' + extraInfo
-          //                extraInfo = extraInfo.replace('*','').replace('@','').replace('<','').replace('>','')
-          //                tg.sendMessage({
-          //                   chat_id: data.source.channel,
-          //                   text: encode_utf8(extraInfo),
-          //                   parse_mode: 'Markdown',
-          //                       disable_web_page_preview: 'true'
-          //                   })
-          //                   .then(function(){
-          //                       callback(null)
-          //                   })
-          //                   .catch(function(err) {
-          //                       console.log('io.js 1354 err: ',err)
-          //                       callback(null)
-          //                   })
-          //           })
-          //     }, function done(thing) {
-          //       if (thing.text) {
-          //           // console.log('\n\n DONESKI!', thing)
-          //           var itemLink = ''
-          //             try {
-          //               itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
-          //               itemLink = encode_utf8(itemLink)
-          //               tg.sendMessage({
-          //                   chat_id: data.source.channel,
-          //                   text: '_Summary: Team Cart_ \n Total: *$691.37* \n' + itemLink,
-          //                   parse_mode: 'Markdown',
-          //                   disable_web_page_preview: 'true'
-          //               }).catch(function(err) {
-          //                console.log('io.js 1353 err:',err)
-          //              })
-          //              } catch(err) {
-          //                console.log('io.js 1356 err:',err)
-          //              }
-          //       } else {
-          //           // console.log('wtf is thing: ',thing)
-          //       }
-          //     })
-
-
-           // // var extraInfo = data.client_res[1][0].text.split('$')[1]
-           // // extraInfo = '\n $' + extraInfo
-           // // var finalSend = itemLink + extraInfo
-           // //      tg.sendMessage({
-           // //          chat_id: data.source.channel,
-           // //          text: data.client_res[0],
-           // //          parse_mode: 'Markdown',
-           // //          disable_web_page_preview: 'true'
-           // //      }).then(function(){
-           //         console.log('finalSend: ', itemLink)
-           //          tg.sendMessage({
-           //              chat_id: data.source.channel,
-           //              text: itemLink,
-           //              parse_mode: 'Markdown',
-           //              disable_web_page_preview: 'true'
-           //          }).then(function(){
-
-           //          // })
-           //      }).catch(function(err) {
-           //          console.log('io.js 1338 err',err)
-           //      })
+            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+            console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = []; 
+            data.client_res[0].forEach(function(el, index) {
+                console.log('\n\n\n', el)
+                messages.push( el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               } 
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+            var mailOptions = {
+                to: data.emailInfo.to,
+                from: 'Kip Bot <hello@kip.ai>',
+                subject: 'Reply from Kip Bot!',
+                text: messages.join('\n\n'),
+                attachments: photos
+            };
+            mailerTransport.sendMail(mailOptions, function(err) {
+                if (err) {
+                    console.log('Sending email to user failed: ',err); 
+                }
+                else {
+                console.log('Sent Email Outgoing Bot Response to user.');
+                }
+            });
         }
         else if (data.action == 'sendAttachment'){
           // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
@@ -2458,16 +2401,17 @@ function viewCart(data, show_added_item){
         ];
 
         // add title, which is a link for admins/p2p and text otherwise
+        var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
         if (isAdmin || isP2P) {
           var text = [
-            `${processData.emoji[i+1].slack} <${link}|${item.title}>`,
+            `${processData.emoji[i+1][emojiType]} <${link}|${item.title}>`,
             `*${item.price}* each`,
             `Quantity: ${item.quantity}`,
             `_Added by: ${userString}_`
           ].join('\n');
         } else {
           var text = [
-            `${processData.emoji[i+1].slack} *${item.title}*`,
+            `${processData.emoji[i+1][emojiType]} *${item.title}*`,
             `Quantity: ${item.quantity}`
           ].join('\n');
         }
@@ -2568,7 +2512,7 @@ function recallHistory(data,callback,steps){
 /////TOOLS
 
 //trim a string to char #
-function truncate(string){
+function truncate(string) {
    if (string.length > 80)
       return string.substring(0,80)+'...';
    else
