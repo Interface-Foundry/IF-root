@@ -23,7 +23,7 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
-CHAT_WIDTH = 350
+CHAT_WIDTH = 365
 CHAT_HEIGHT = 140
 # MOBILE_WIDTH = 0 # TODO
 # MOBILE_HEIGHT = 800 # TODO

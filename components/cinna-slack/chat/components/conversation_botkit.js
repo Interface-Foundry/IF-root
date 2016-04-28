@@ -7,6 +7,10 @@ var datejs = require('./date');
 var momenttz = require('moment-timezone');
 var weeklyUpdate = require('./weekly_updates');
 var history = require("./history.js");
+var nlp = require('../../nlp/api');
+var processData = require("./process.js");
+var banter = require("./banter.js");
+
 
 /*
 slackbot: slackbot_schema
@@ -69,8 +73,16 @@ module.exports.settings = function(slackbot, user_id, done, data) {
       convo.user_id = user_id;
       settingsConvos[user_id] = convo;
       convo.on('end', function() {
+
         bot.closeRTM();
-        done();
+        done(convo.parsedKip);
+
+        // if (convo.status=='completed'){
+        //   var res = convo.extractResponses();
+        //   console.log('CONVO ENDED HERE ',res);
+          
+        // }
+        
       })
       console.log('showing settings');
       showSettings(response, convo);
@@ -336,13 +348,13 @@ function showSettings(response, convo, flag, done) {
       }
     }
 
-    console.log(attachments);
+    console.log('SETTINGS ATTACHMENTS ',attachments);
 
     // make all the attachments markdown
     attachments.map(function(a) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
-    })
+    })  
 
     convo.say({
       username: 'Kip',
@@ -354,10 +366,19 @@ function showSettings(response, convo, flag, done) {
     if(flag !== 'noAsk'){
       convo.ask({
         username: 'Kip',
-        text: 'Have any changes? Type `exit` to quit settings.'
+        attachments: [{
+          text: 'Have any changes? Type `exit` to quit settings',
+          color:'#49d63a',
+          mrkdwn_in: ['text'],
+          fallback:'Settings'
+        }],
+        text:'',
+        fallback:'Settings'
       }, handleSettingsChange);
     }
     if(flag == 'noAsk'){
+
+      console.log('NO ASK ASK ASK ASK ASK ')
       done();
     }
 
@@ -477,11 +498,18 @@ function handleSettingsChange(response, convo) {
 
         // convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
 
+        console.log('REZ REZ ',response.text);
 
+        //CHECK HERE FOR KEYWORDS
 
+        console.log('🐸');
         var attachments = [
           {
-            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
+            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ]
           }
         ];
 
@@ -495,8 +523,6 @@ function handleSettingsChange(response, convo) {
         showSettings(response, convo, 'noAsk', function(){});
 
         convo.ask(resStatus, handleSettingsChange); 
-
-
 
         return convo.next();
       }
@@ -511,29 +537,52 @@ function handleSettingsChange(response, convo) {
     // Simple commands to change settings
     //
     switch (response.text.toLowerCase().trim()) {
+
+      //* * * * * * * * * * * * * * * * * *
+      //MAKE ALL THESE STRING MATCHES FUZZY
+      //* * * * * * * * * * * * * * * * * * 
+      // - -- - - - - > run through banter.js (new function)
+
       case 'yes weekly status':
       case 'yes weekly update':
         convo.slackbot.meta.weekly_status_enabled = true;
         yield convo.slackbot.save();
+        convo.say('Ok I updated weekly status')
+        showSettings(response, convo);
+        convo.next();
         break;
 
       case 'yes weekly status':
       case 'yes weekly update':
         convo.slackbot.meta.weekly_status_enabled = true;
         yield convo.slackbot.save();
+
+        convo.say('Ok I updated weekly status')
+        showSettings(response, convo);
+        convo.next();
         break;
 
       case 'yes last call':
         convo.chatuser.settings.last_call_alerts = true;
         yield convo.chatuser.save();
+
+        convo.say('Ok I updated last call')
+        showSettings(response, convo);
+        convo.next();
         break;
 
       case 'no last call':
         convo.chatuser.settings.last_call_alerts = false;
         yield convo.chatuser.save();
+
+        convo.say('Ok I updated last call')
+        showSettings(response, convo);
+        convo.next();
         break;
 
       default:
+        //check for mode switch here
+        var cleanTxt = response.text.toLowerCase().trim();
 
         // the question was something like "Do you have any settings changes?"
         // so we need to allow the user to say "yes" or "no"
@@ -542,117 +591,134 @@ function handleSettingsChange(response, convo) {
           return convo.next();
 
         //EXITING SETTINGS MODE 
-        } else if (response.text.match(convo.task.botkit.utterances.no)
-            || response.text.match(/^(end|exit|finish|done|quit|settings exit|stop|quit|search|shopping|shop|buy)/)
-            || response.text === 'stop') {
+        } else if (response.text.match(convo.task.botkit.utterances.no) || banter.checkExitMode(cleanTxt)) {
 
+            //FUNCTION CHECK FOR STOP WORDS, SEND BACK RESPONSE IN ATTACHMENT FORMAT
 
-          //FUNCTION CHECK FOR STOP WORDS, SEND BACK RESPONSE IN ATTACHMENT FORMAT
+            //FUNCTION 
+            var attachments = [
+                {
+                  "pretext": "Ok thanks! Done with settings 😊",
+                  "image_url":"http://i.imgur.com/PqrtJmD.png",
+                  "text":"",
+                  "color":"#45a5f4"
+                },
+                {
+                    "text": "Tell me what you're looking for, or use `help` for more options",
+                    "mrkdwn_in": [
+                        "text",
+                        "pretext"
+                    ],
+                    "color":"#45a5f4"
+                }
+            ];
 
-          var attachments = [
-              {
-                "pretext": "Ok thanks! Done with settings 😊",
-                "image_url":"http://i.imgur.com/PqrtJmD.png",
-                "text":"",
-                "color":"#45a5f4"
-              },
-              {
-                  "text": "Tell me what you're looking for, or use `help` for more options",
+            var resStatus = {
+              username: 'Kip',
+              text: "",
+              attachments: attachments,
+              fallback: 'Shopping'
+            };
+
+            convo.say(resStatus);
+
+            //FUNCTION IO.JS UPDATE MODE
+
+            return convo.next();
+
+        }else {
+
+          var currentMode = 'settings';
+          //pass message to check for mode handling with mode 'settings'
+          processData.modeHandle(response.text,currentMode,function(obj){
+            //mode detected 
+            if(obj && obj.mode && obj.mode !== currentMode){
+              convo.parsedKip = obj.res;
+              convo.next();
+            //response in context found
+            }
+            else if (obj.mode == currentMode && obj.res){
+              console.log('🐯🐯',obj.res);
+
+              // var attachments = [
+              //   {
+              //     text: obj.res,
+              //     "mrkdwn_in": [
+              //         "text",
+              //         "pretext"
+              //     ],
+              //     "color":"#fa951b"
+              //   }
+              // ];
+
+              // var resStatus = {
+              //   username: 'Kip',
+              //   text: "",
+              //   attachments: attachments,
+              //   fallback: 'Settings'
+              // };
+              
+              convo.say(obj.res);
+              //convo.ask(resStatus, handleSettingsChange); 
+              
+            }
+            //no mode detected
+            else {
+              //send default 
+              var attachments = [
+                {
+                  text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
                   "mrkdwn_in": [
                       "text",
                       "pretext"
                   ],
-                  "color":"#45a5f4"
-              }
-          ];
+                  "color":"#fa951b"
+                }
+              ];
 
-          var resStatus = {
-            username: 'Kip',
-            text: "",
-            attachments: attachments,
-            fallback: 'Shopping'
-          };
+              var resStatus = {
+                username: 'Kip',
+                text: "",
+                attachments: attachments,
+                fallback: 'Settings'
+              };
+              
+              showSettings(response, convo, 'noAsk', function(){
+                convo.ask(resStatus, handleSettingsChange); 
+              });
 
-          convo.say(resStatus);
+            }
 
-          //FUNCTION IO.JS UPDATE MODE
+          });
 
-          return convo.next();
         }
-
-
-        var attachments = [
-          {
-            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
-          }
-        ];
-
-        var resStatus = {
-          username: 'Kip',
-          text: "",
-          attachments: attachments,
-          fallback: 'Settings'
-        };
-        
-        showSettings(response, convo, 'noAsk', function(){});
-
-        convo.ask(resStatus, handleSettingsChange); 
-
-        return convo.next();    
-
-        
     }
-
-    convo.say('Ok I have updated your settings.')
-    showSettings(response, convo);
-    convo.next();
 
   }).catch(function(e) {
     console.log('error handling settings change')
     console.log(response)
-    console.log(e)
+    console.log(e)  
 
-
-    // switch(user.conversations[data.channel]){
-    //       case 'settings':
-
-    //           var attachments = [];
-
-    //           //adding settings mode sticker
-    //           attachments.push({
-    //               image_url: 'http://i.imgur.com/wxoZYmI.png',
-    //               text: ''
-    //           })
-              
-    //           user.conversations[data.channel]
-    //       break;
-    // }
-
-        //IF CANT UNDERSTAND...
-
-        // var attachments = [
-        //   {
-        //     image_url: 'http://i.imgur.com/Z1Cgl7X.png',
-        //     text: ""
-        //   },
-        //   {
-        //     text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
-        //   }
-        // ];
-
-        // var resStatus = {
-        //   username: 'Kip',
-        //   text: "",
-        //   attachments: attachments,
-        //   fallback: 'Settings'
-        // };
-
-        // return convo.ask(resStatus, handleSettingsChange);
-
+    var currentMode = 'settings';
+    //pass message to check for mode handling with mode 'settings'
+    processData.modeHandle(response.text,currentMode,function(obj){
+      //mode detected 
+      if(obj && obj.mode && obj.mode !== currentMode){
+        convo.parsedKip = obj.res;
+        convo.next();
+      //response in context found
+      }
+      else if (obj.mode == currentMode && obj.res){
+        console.log('🐯🐯',obj.res);
 
         var attachments = [
           {
-            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes?"
+            text: obj.res,
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#fa951b"
           }
         ];
 
@@ -663,17 +729,37 @@ function handleSettingsChange(response, convo) {
           fallback: 'Settings'
         };
         
-        showSettings(response, convo, 'noAsk', function(){});
-
         convo.ask(resStatus, handleSettingsChange); 
+        
+      }
+      //no mode detected
+      else {
+        //send default 
+        var attachments = [
+          {
+            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#fa951b"
+          }
+        ];
 
-        return convo.next();    
+        var resStatus = {
+          username: 'Kip',
+          text: "",
+          attachments: attachments,
+          fallback: 'Settings'
+        };
+        
+        showSettings(response, convo, 'noAsk', function(){
+          convo.ask(resStatus, handleSettingsChange); 
+        });
 
+      }
+    });
 
-
-    //convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
-
-    convo.next();
   })
 }
 

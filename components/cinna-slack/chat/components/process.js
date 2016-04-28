@@ -3,6 +3,9 @@ var request = require('request');
 var fs = require('fs');
 var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
+var nlp = require('../../nlp/api');
+var banter = require("./banter.js");
+
 
 var googl = require('goo.gl');
 if (process.env.NODE_ENV === 'development') {
@@ -263,6 +266,204 @@ var imageSearch = function(data,token,callback){
     }
 
 }
+  
+//check if string contains a mode, then build kip object
+//context here is for which conversation this modeHandle called from, i.e. from 'settings mode'
+var modeHandle = function(input,context,callback){
+
+    //* * Checking if we should switch mode here
+    var inputTxt = {msg:input.toLowerCase().trim()};
+
+
+    banter.checkModes(inputTxt,context,function(mode,res){  
+
+      console.log('MODE FROM BANTER.JS ',mode);
+      console.log('RES FROM BANTER.JS ',res);
+
+      //nothing found in canned 
+      if(!mode && !res){
+          //try for NLP parse
+          nlp.parse(inputTxt, function(e, res) {
+              if (e){
+                console.log('NLP error ',e);
+                callback();
+              }
+              else {
+                //build obj from NLP parse
+                buildKipObject(res, function(rez){
+                  //mode detected via NLP, which is only shopping mode for now
+                  if(rez.action && rez.action !== 'initial'){
+                    var obj = {
+                      mode:'shopping',
+                      res:rez
+                    }
+                    obj.res.mode = 'shopping'; //ugh, whatev 
+                    callback(obj);
+                  }
+                  else {
+                    callback();
+                  }
+                });
+              }
+          });
+      }
+      //pass mode and res
+      else if(mode){
+        var obj = {
+          mode:mode
+        };
+
+        //standardize
+        if(!res){
+          obj.res = mode;
+        }else {
+          obj.res = res;
+        }
+
+        callback(obj);
+      }
+      else {
+        
+        console.log('NO MODE FOUND!!!!! heres mode: ',mode)
+        callback();
+      }
+
+    });
+
+
+}
+
+// //find mode to match incoming kip object
+// function findMode(data,callback){
+//     if(data.action && data.bucket){
+//         switch(data.bucket){
+//             case 'purchase':
+//                 switch(data.action){
+//                     case 'list':
+//                         data.mode = 'viewcart';
+//                     break;
+//                 }
+//             break;
+//             case 'search':
+//             break;
+            
+//         }
+//     }else {
+//         console.error('Error: missing data.bucket or data.action in findMode()');
+//     }
+//     callback(data);
+// }
+
+//BUILDS KIP DATA OBJECT FROM NLP RESPONSES
+var buildKipObject = function(res,callback){
+
+    console.log('INCOMING BUILD KIP OBJ ',res);
+
+
+    var data = {};
+
+    if (res.supervisor && data.flags) {
+
+      data.flags.toSupervisor = true;
+    }
+
+    if(res.execute && res.execute.length > 0){
+
+        if(!res.execute[0].bucket){
+            res.execute[0].bucket = 'search';
+        }
+        if(!res.execute[0].action){
+            res.execute[0].execute[0].action = 'initial';
+        }
+
+        //- - - temp stuff to transfer nlp results to data object - - - //
+        if (res.execute[0].bucket){
+            data.bucket = res.execute[0].bucket;
+        }
+        if (res.execute[0].action){
+            data.action = res.execute[0].action;
+        }
+        if (res.tokens){
+            data.tokens = res.tokens;
+        }
+        if (res.searchSelect){
+            data.searchSelect = res.searchSelect;
+        }
+        if (res.execute[0].dataModify){
+            data.dataModify = res.execute[0].dataModify;
+        }
+        //- - - - end temp - - - - //
+
+        callback(data);
+
+    }
+    else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
+        //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
+
+        //looking for modifier search
+        if (res.tokens && res.tokens[0].indexOf('but') > -1){
+            var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
+            modDetail = modDetail.replace('but','').trim();
+            console.log('mod string ',modDetail);
+
+            data.tokens = res.tokens;
+            data.searchSelect = res.searchSelect;
+            data.bucket = 'search';
+            data.action = 'modify';
+            data.dataModify = {
+                type:'genericDetail',
+                val:[modDetail]
+            };
+
+            console.log('constructor ',data);
+
+            callback(data);
+        }
+        else {
+            data.tokens = res.tokens;
+            data.searchSelect = res.searchSelect;
+            data.bucket = 'search';
+            data.action = 'initial';
+
+            console.log('un struct ',data);
+
+            callback(data);
+        }
+
+    }
+    else {
+
+        if(!res.bucket){
+            res.bucket = 'search';
+        }
+        if(!res.action){
+            res.action = 'initial';
+        }
+
+        //- - - temp stuff to transfer nlp results to data object - - - //
+        if (res.bucket){
+            data.bucket = res.bucket;
+        }
+        if (res.action){
+            data.action = res.action;
+        }
+        if (res.tokens){
+            data.tokens = res.tokens;
+        }
+        if (res.searchSelect){
+            data.searchSelect = res.searchSelect;
+        }
+        if (res.dataModify){
+            data.dataModify = res.dataModify;
+        }
+        //- - - - end temp - - - - //
+
+        callback(data);
+
+    }
+
+};
+
 
 
 /////////// tools /////////////
@@ -276,3 +477,6 @@ module.exports.getCartLink = getCartLink;
 module.exports.getItemLink = getItemLink;
 module.exports.emoji = emoji;
 module.exports.imageSearch = imageSearch;
+module.exports.buildKipObject = buildKipObject;
+module.exports.modeHandle = modeHandle;
+

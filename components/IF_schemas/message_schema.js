@@ -9,6 +9,7 @@ var messageSchema = mongoose.Schema({
     tokens: [String], //broken up incoming message (if applicable)
     bucket: { type: String, index: true},
     action: { type: String, index: true},
+    mode: String,
     amazon: [mongoose.Schema.Types.Mixed], //amazon search results
     dataModify: {
         type: {type: String},
