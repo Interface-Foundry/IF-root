@@ -41,6 +41,7 @@ var http = require('http');
 var request = require('request');
 var async = require('async');
 var bodyParser = require('body-parser');
+var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
 
 //set env vars
@@ -66,6 +67,7 @@ app.get('/healthcheck', function (req, res) {
 //parse incoming body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
@@ -117,11 +119,19 @@ app.post('/slackaction', function(req, res) {
     // ioKip.incomingMsgAction(req.body,'slack');
 });
 
+
 // incoming email from sendgrid
 // In development we're currently using peter's sendgrid api key etc
-app.post('/sendgrid', function(req, res) {
-    email.process(req.body);
-    res.sendStatus(200);
+app.post('/sendgrid', busboy({immediate: true}), function(req, res) {
+    req.body = {};
+    req.busboy.on('field', (k, v) => {
+      req.body[k] = v;
+    })
+
+    req.busboy.on('finish', () => {
+      email.process(req.body);
+      res.sendStatus(200);
+    })
 })
 
 //incoming kik message
