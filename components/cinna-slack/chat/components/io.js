@@ -214,7 +214,8 @@ var newSlack = function() {
         }
     });
 }
-//fired when user responds via email to an 'add order' request from slackbot 
+
+//fired when user responds via email to an 'add order' request from slackbot
 var newEmail= function(envelope) {
     console.log('Got new Email!', envelope.from_address);
 
@@ -227,15 +228,16 @@ var newEmail= function(envelope) {
      //        } else {
      //            console.log('Added new email to redis queue!')
      //        }
-     //  });    
+     //  });
 
-    //update message 
-    //use time stamps 
+    //update message
+    //use time stamps
 
     Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
+
         if(err){
             console.log('saved chat user retrieval error');
-        } else {     
+        } else {
             if (!users || users.length == 0) {
                 var mailOptions = {
                     to: envelope.from_address,
@@ -255,7 +257,7 @@ var newEmail= function(envelope) {
                         'origin':'slack',
                         'channel':users[0].dm,
                         'org':slackUsers[users[0].team_id].activeTeamId,
-                        'id':users[0].team_id + "_" + users[0].dm, 
+                        'id':users[0].team_id + "_" + users[0].dm,
                         'user': slackUsers[users[0].team_id].activeUserId
                     },
                     'msg': envelope.text.toString().trim(),
@@ -760,7 +762,7 @@ function preProcess(data){
         }
         //nothing found in cannedbanter, now check for mode strings
         else {
-            
+
             //check for mode switch, coming from shopping (default) context
             banter.checkModes(data,'shopping',function(mode,res){
                 if(mode){
@@ -1698,7 +1700,7 @@ var sendResponse = function(data,flag){
             var messages = [data.client_res[0]];
             data.client_res.shift();
             // data.client_res = JSON.stringify(data.client_res);
-            var photos = []; 
+            var photos = [];
             data.client_res.forEach(function(el, index) {
                 messages.push(el.title + '\n\n' + el.title_link);
                 photos.push({filename: index.toString() + '.png',path: el.image_url});
@@ -1713,7 +1715,7 @@ var sendResponse = function(data,flag){
             };
             mailerTransport.sendMail(mailOptions, function(err) {
                 if (err) {
-                    console.log('Sending email to user failed: ',err); 
+                    console.log('Sending email to user failed: ',err);
                 }
                 else {
                 console.log('Sent Email Outgoing Bot Response to user.');
@@ -1740,8 +1742,8 @@ var sendResponse = function(data,flag){
                 ,attachments: [{filename: 'productr32r23r3.jpg', path: data.client_res[0]}]
             };
             mailerTransport.sendMail(mailOptions, function(err) {
-                if (err) { 
-                    console.log('Sending email to user failed: ',err); 
+                if (err) {
+                    console.log('Sending email to user failed: ',err);
                 } else {
                     console.log('Sent Email Outgoing Bot Response to user.');
             }});
@@ -1751,13 +1753,13 @@ var sendResponse = function(data,flag){
             data.client_res.shift();
               console.log('\n\n\nEMAIL SAVE: ',data.client_res);
             // data.client_res = JSON.stringify(data.client_res);
-            var photos = []; 
+            var photos = [];
             data.client_res[0].forEach(function(el, index) {
                 // console.log('\n\n\n', el)
                 messages.push(el.text + '\n\n' );
                if (el.thumb_url) {
                 photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               } 
+               }
             })
             console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
             var mailOptions = {
@@ -1769,7 +1771,7 @@ var sendResponse = function(data,flag){
             };
             mailerTransport.sendMail(mailOptions, function(err) {
                 if (err) {
-                    console.log('Sending email to user failed: ',err); 
+                    console.log('Sending email to user failed: ',err);
                 }
                 else {
                 console.log('Sent Email Outgoing Bot Response to user.');
@@ -1781,13 +1783,13 @@ var sendResponse = function(data,flag){
             data.client_res.shift();
             console.log('\n\n\nEMAIL SAVE: ',data.client_res);
             // data.client_res = JSON.stringify(data.client_res);
-            var photos = []; 
+            var photos = [];
             data.client_res[0].forEach(function(el, index) {
                 console.log('\n\n\n', el)
                 messages.push( el.text + '\n\n' );
                if (el.thumb_url) {
                 photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               } 
+               }
             })
             console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
             var mailOptions = {
@@ -1799,7 +1801,7 @@ var sendResponse = function(data,flag){
             };
             mailerTransport.sendMail(mailOptions, function(err) {
                 if (err) {
-                    console.log('Sending email to user failed: ',err); 
+                    console.log('Sending email to user failed: ',err);
                 }
                 else {
                 console.log('Sent Email Outgoing Bot Response to user.');
@@ -1975,7 +1977,7 @@ var sendResponse = function(data,flag){
 
                             }else {
                                 if (err){
-                                   console.log('👹👹👹 delete typing event err ',err); 
+                                   console.log('👹👹👹 delete typing event err ',err);
                                 }
                             }
 
@@ -2361,7 +2363,7 @@ var updateMode = function(data){
         case 'shopping':
             console.log('SHOPPING MODE ON ',data);
 
-            kipUser[data.source.id].conversations = 'shopping'; 
+            kipUser[data.source.id].conversations = 'shopping';
             //show shopping sticker message
 
             if (data.action && data.action !== 'initial' ){
@@ -2372,49 +2374,49 @@ var updateMode = function(data){
         break;
 
         case 'settings':
-            kipUser[data.source.id].conversations = 'settings'; 
+            kipUser[data.source.id].conversations = 'settings';
             //fire show settings
             settingsMode(data);
             console.log('SETTINGS MODE ON')
         break;
 
         // case 'viewcart':
-        //     kipUser[data.source.id].conversations = 'shopping'; 
+        //     kipUser[data.source.id].conversations = 'shopping';
         //     incomingAction(data);
-        //     //switch to shopping mode and fire view cart 
+        //     //switch to shopping mode and fire view cart
         //     console.log('VIEW CART MODE ON')
         // break;
 
         case 'collect':
-            kipUser[data.source.id].conversations = 'collect'; 
+            kipUser[data.source.id].conversations = 'collect';
             collectMode(data);
             // fire collect function
             console.log('COLLECT MODE ON')
         break;
 
         case 'onboarding':
-            kipUser[data.source.id].conversations = 'onboarding'; 
+            kipUser[data.source.id].conversations = 'onboarding';
             // fire collect function
             onboardingMode(data);
             console.log('onboard MODE ON')
         break;
 
         case 'addmember':
-            kipUser[data.source.id].conversations = 'addmember'; 
+            kipUser[data.source.id].conversations = 'addmember';
             // fire collect function
             addmemberMode(data);
             console.log('onboard MODE ON')
         break;
 
         case 'report':
-            kipUser[data.source.id].conversations = 'shopping'; 
+            kipUser[data.source.id].conversations = 'shopping';
             // fire collect function
             reportMode(data);
             console.log('report MODE ON')
         break;
 
         default:
-            kipUser[data.source.id].conversations = 'shopping'; 
+            kipUser[data.source.id].conversations = 'shopping';
             if (data.action && data.action !== 'initial' ){
                 incomingAction(data);
             }else {
@@ -2424,7 +2426,7 @@ var updateMode = function(data){
         break;
 
     }
-    
+
 }
 
 //* * * * MODE FUNCTIONS * * * * //
@@ -2440,18 +2442,18 @@ function settingsMode(data){
         data.action;
         console.log('💎💎💎💎 data ',data);
         console.log('💎💎💎💎 msg ',msg);
-        
+
         if(typeof msg === 'object'){
             var obj = _.extend(data, msg); //merge data obj from kip with botkit
         }else {
             var obj = data;
             obj.mode = msg;
         }
-        updateMode(obj);              
+        updateMode(obj);
     })
 }
 
-function collectMode(data){        
+function collectMode(data){
     data.bucket = 'mode';
     data.action = 'collect';
     history.saveHistory(data,true,function(res){});
@@ -2675,7 +2677,7 @@ function encode_utf8(s) {
 //                         console.log(0);
 //                         if(err){
 //                             console.log('saved chat user retrieval error');
-//                         } else {     
+//                         } else {
 //                             if (!users || users.length == 0) {
 //                                 console.log(1);
 //                                 var mailOptions = {
@@ -2696,7 +2698,7 @@ function encode_utf8(s) {
 //                                         'origin':'slack',
 //                                         'channel':users[0].dm,
 //                                         'org':slackUsers[users[0].team_id].activeTeamId,
-//                                         'id':users[0].team_id + "_" + users[0].dm, 
+//                                         'id':users[0].team_id + "_" + users[0].dm,
 //                                         'user': slackUsers[users[0].team_id].activeUserId
 //                                     },
 //                                     'msg': envelope.text.toString().trim(),
