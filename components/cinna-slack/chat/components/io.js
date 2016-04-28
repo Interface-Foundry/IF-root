@@ -215,65 +215,13 @@ var newSlack = function() {
     });
 }
 
-//fired when user responds via email to an 'add order' request from slackbot
-var newEmail= function(envelope) {
-    console.log('Got new Email!', envelope.from_address);
-
-    // **Question what to do is a user with same email is participating in multiple slackbots?
-     // redisClient.rpush('chat_email', JSON.stringify(envelope), function(err, reply) {
-     //        if (err) {
-     //            err.niceMessage = 'Error with redis queue';
-     //            err.devMessage = 'EMAIL REDIS QUEUE ERR';
-     //            return
-     //        } else {
-     //            console.log('Added new email to redis queue!')
-     //        }
-     //  });
-
-    //update message
-    //use time stamps
-
-    Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
-
-        if(err){
-            console.log('saved chat user retrieval error');
-        } else {
-            if (!users || users.length == 0) {
-                var mailOptions = {
-                    to: envelope.from_address,
-                    from: 'Kip Bot <hello@kip.ai>',
-                    subject: 'You are not currently in a chat!',
-                    text: 'You are currently not taking part in any Kip Bot chats...'
-                };
-                mailerTransport.sendMail(mailOptions, function(err) {
-                    if (err) console.log(err);
-                    console.log('User was not found in Chatusers db. Sent notification to user.');
-                });
-            }
-            else if (users[0] && users[0].team_id && slackUsers[users[0].team_id] ) {
-               // console.log('This should be the active chat: ', slackUsers[users[0].team_id])
-               var emailCommand = {
-                    source: {
-                        'origin':'slack',
-                        'channel':users[0].dm,
-                        'org':slackUsers[users[0].team_id].activeTeamId,
-                        'id':users[0].team_id + "_" + users[0].dm,
-                        'user': slackUsers[users[0].team_id].activeUserId
-                    },
-                    'msg': envelope.text.toString().trim(),
-                    'flags': {'email': true},
-                    'emailInfo': {
-                        to: envelope.from_address,
-                        from: 'Kip Bot <hello@kip.ai>',
-                        subject: 'Reply from Kip Bot!',
-                        text: ''
-                    }
-                };
-                preProcess(emailCommand);
-            }
-        }
-    });
-
+/*
+E mail
+📧
+*/
+var newEmail = function(email) {
+  // THe email has already been saved to the database and stuff.
+  // now we need to respond appropriately to the message.
 }
 
 

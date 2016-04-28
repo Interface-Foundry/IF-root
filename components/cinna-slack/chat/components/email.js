@@ -12,13 +12,50 @@ var key = process.env.NODE_ENV === 'production' ? 'LOL-TO-DO' : 'SG.JogbBbQXSIqn
 var sendgrid = require('sendgrid')(key);
 var co = require('co');
 require('promisify-global');
+var db = require('db');
+var iokip = require('./io');
 
 //
-// Process incoming email from sendgrid
+// Process incoming email from sendgrid.  gets the relevant conversation from mongo and passes to io.js
+// assumes everythig is connected to a slack team
 //
 var processEmail = module.exports.process = function(message) {
   return co(function*() {
     console.log(message);
+
+    // parse the threadId from the email message
+    message.text = message.text || '';
+    var chainId = message.text.match(/email-chain-[az-09]+/i);
+    if (!chainId) {
+      return;
+    } else {
+      chainId = chainId[0];
+    }
+
+    // get all the stuff from the db for this email
+    var last_message = yield db.Emails.findOne({
+      chain: chainId
+    }).orderBy('-sequence').exec();
+
+    var team = yield db.Slackbots.findOne({
+      team: last_message.team
+    }).exec();
+
+    var user = yield db.Chatusers.findOne({
+      team_id: last_message.team,
+      'profile.email': message.from
+    }).exec();
+
+    // save this message to the db for the conversation
+    var m = new Message(_.merge({}, message, {
+      chain: chainId,
+      team: last_message.team,
+      sequence: last_message.sequence + 1
+    })
+    m.save();
+
+    iokip.newEmail(m);
+
   })
 }
 
