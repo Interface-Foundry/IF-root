@@ -56,9 +56,14 @@ var collect = module.exports.collect = function(addresses, id) {
     var text = `Hey bae,
 just lettin u know that i care about u, so i wanted to say that the last call for office stuff is soon. whisper your dreams in my ear and i will make it so.`
 
+    var addr = {
+      production: '<kip@kip.ai>',
+      development: '<inbound@pbrandt1.bymail.in>'
+    }[process.env.NODE_ENV] || '<kip@kip.ai>';
+
     var payload = {
         to: addresses,
-        from: 'cinna@kipthis.com',
+        from: `Kip Personal Shopper <${addr}>`,
         subject: 'Last Call for Office Purchase Order',
         text: text
     };

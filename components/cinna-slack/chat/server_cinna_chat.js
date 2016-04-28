@@ -41,6 +41,7 @@ var http = require('http');
 var request = require('request');
 var async = require('async');
 var bodyParser = require('body-parser');
+var email = require('./components/email');
 
 //set env vars
 var config = require('config');
@@ -63,8 +64,8 @@ app.get('/healthcheck', function (req, res) {
 })
 
 //parse incoming body
-app.use(bodyParser.json());         
-app.use(bodyParser.urlencoded({ extended: true }));                                
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 server.listen(8000, function(e) {
   if (e) { console.error(e) }
@@ -114,20 +115,19 @@ app.post('/slackaction', function(req, res) {
 
     // //SEND REQ.BODY: { payload: }
     // ioKip.incomingMsgAction(req.body,'slack');
-});	
+});
 
-//incoming slack action
-app.post('/emailincoming', function(req, res) {
-    console.log('incoming email BODY: ',req.body);
-    ioKip.newEmail(req.body);
-    res.sendStatus(200)})
+// incoming email from sendgrid
+// In development we're currently using peter's sendgrid api key etc
+app.post('/sendgrid', function(req, res) {
+    email.process(req.body);
+    res.sendStatus(200);
+})
 
-
-//incoming new slack user
+//incoming kik message
 app.post('/kikincoming', function(req, res) {
     console.log('incoming Kik BODY: ',req.body);
     res.sendStatus(200);
-    // ioKip.newSlack();
     ioKip.incomingMsgAction(req.body,'kik');
+    res.sendStatus(200);
 });
-
