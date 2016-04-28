@@ -11,7 +11,6 @@ var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
 var WEB_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.WEB;
-//* * * * * //
 
 var banter = require("./banter.js");
 var history = require("./history.js");
@@ -38,7 +37,9 @@ var Slackbots = db.Slackbots;
 
 var slackUsers = {};
 var slackUsers_web = {};
+var slackUsers_botkit = {};
 var messageHistory = {}; //fake database, stores all users and their chat histories
+var kipUser = {};
 var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
@@ -213,7 +214,6 @@ var newSlack = function() {
         }
     });
 }
-
 //fired when user responds via email to an 'add order' request from slackbot 
 var newEmail= function(envelope) {
     console.log('Got new Email!', envelope.from_address);
@@ -274,6 +274,7 @@ var newEmail= function(envelope) {
 
 }
 
+
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
     console.log('loading '+users.length+' Slack users');
@@ -287,6 +288,22 @@ function loadSlackUsers(users){
         slackUsers_web[user.team_id] = new WebClient(token);
 
         slackUsers[user.team_id].start();
+
+
+        //* * * Adding Botkit to Kip IO ~ ~ ~//
+        //not reliable framework vs Slack SDK
+
+        // var bot = controller.spawn({
+        //     token: token
+        // });
+        // bot.startRTM(function(err, bot, payload) {
+        //     console.log('ADDED BOTKIT ! ! ! ! ! ! !  ! ! ! ! ! ! ! ! ! ! !  ! ! ! ! ! ! ! ! !  ! ! ! !')
+        //     // console.log('bot ',bot);
+        //     // console.log('payload ',payload)
+        //     slackUsers_botkit[user.team_id] = bot;
+        // });
+
+        // - - - - - - - - - - - - - - - - - //
 
         //on slack auth
         slackUsers[user.team_id].on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
@@ -376,7 +393,6 @@ function loadSlackUsers(users){
                         //send attachment!
                         sendResponse(hello, res);
 
-                        user.conversations = user.conversations || {};
                         // user.conversations[addedBy.dm] = 'onboard';
                         // return conversation_botkit.onboard(user, addedBy.id, function() {
                         //   console.log('done with onboarding conversation')
@@ -407,7 +423,7 @@ function loadSlackUsers(users){
             console.log('🔥')
 
 
-            //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71' 
+            //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71'
             // don't talk to urself  TODO why does data sometimes have a bot_id instead of user id?
             if (data.user === user.bot.bot_user_id || data.username === 'Kip') {
               console.log("don't talk to urself")
@@ -417,181 +433,20 @@ function loadSlackUsers(users){
             // Less cyncical comment: might be useful to have history here,
             // but idk how and we'll probably rewrite this segment to handle
             // multiple chat platforms sooner rather than later anyway.
-            user.conversations = user.conversations || {};
 
-            // don't perform searches if ur having a convo with a bot
-            // let botkit handle it
-            if (user.conversations[data.channel]) {
-              console.log('in a conversation: ' + user.conversations[data.channel])
-              return;
-
+            data.source = {
+                'origin':'slack',
+                'channel':data.channel, //channel id on slack
+                'org':data.team, //team id on slack
+                'id':data.team + "_" + data.channel, //for retrieving chat history in node memory, //this is a kip id for user across message platforms
+                user: data.user //user id on slack
             }
 
-            if (data.text === 'report') {
-              console.log('report generation');
-
-              var isAdmin = user.meta.office_assistants.indexOf(data.user) >= 0;
-              var isP2P = user.meta.office_assistants.length === 0;
-              var num_days = 7;
-
-              return kipcart.report(user.team_id, num_days).then(function(report) {
-                console.log('found ' + report.items.length + ' items');
-
-                var fun_stats = [
-                  isAdmin || isP2P ? `You added *${report.items.length}* to your cart totalling *${report.total}*` : `You added *${report.items.length}* to your cart`,
-                  `The most items came from the *${report.top_category}* category`,
-                  `You searched for *${report.most_searched}* the most`,
-                  `Most other teams didn't search for *${report.unique_search}* as much as you did!`
-                ].join('\n');
-
-                if (report.items.length === 0) {
-                  fun_stats = 'You have not added anything to your cart.';
-                }
-
-                // make a nice slacky item report
-                var m = {
-                  user: user.bot.bot_user_id,
-                  username: "Kip",
-                  "text": `*Cart Overview for the last ${num_days} days*`,
-                  "attachments": [
-                    {
-                      "title": "Summary",
-                      "text": fun_stats,
-                      "mrkdwn_in": [
-                        "text",
-                        "pretext"
-                      ]
-                    }
-                  ]
-                };
-
-                m.attachments = m.attachments.concat(report.items
-                  .sort((a, b) => {
-                    if (a.purchased != b.purchased) {
-                      return a.purchased ? 1 : -1;
-                    }
-                    return a.added_date - b.added_date;
-                  })
-                  .map((item) => {
-                  var userString = item.added_by.map(function(u) {
-                    return '<@' + u + '>';
-                  }).join(', ');
-
-                  var text = [
-                    `${item.title}`,
-                    isAdmin || isP2P ? `*${item.price}* each` : '',
-                    `Quantity: ${item.quantity}`,
-                    isAdmin || isP2P ? `_Added by: ${userString}_` : '',
-                    item.purchased ? 'Not currently in cart' : '*Currently in cart*',
-                  ].join('\n').replace(/\n+/g, '\n')
-
-                  return {
-                      "text": text,
-                      "thumb_url": item.image,
-                      "mrkdwn_in": [
-                          "text"
-                      ],
-                      "color": item.purchased ? "#45a5f4" : "#7bd3b6"
-                  };
-                }))
-
-                console.log(m);
-                slackUsers_web[user.team_id].chat.postMessage(data.channel, '', m, function() {
-                    console.log('um okay posted a message i think?');
-                });
-
-              }).catch(function(e) {
-                console.log('error generating report');
-                console.log(e);
-                console.log(e.stack);
-              })
-            }
+            user.conversations = user.conversations || 'shopping';
 
 
-            // TESTING PURPOSES, here is how you would trigger a conversation
-            if (data.text === 'onboard') {
-              user.conversations[data.channel] = 'onboard';
-              // "user" is actually the slackbot here
-              // "data.user" is the user having the convo
-              return conversation_botkit.onboard(user, data.user, function() {
-                console.log('done with onboarding conversation')
-                user.conversations[data.channel] = false;
-              });
-            }
+            kipUser[data.source.id] = user; //transfer conversation to global
 
-            if (data.text === 'settings') {
-              user.conversations[data.channel] = 'settings';
-              return conversation_botkit.settings(user, data.user, function() {
-                console.log('done with settings conversation');
-                user.conversations[data.channel] = false;
-              })
-            }
-
-             if (data.text && data.text.match(/\badd member\b/)) {
-              user.conversations[data.channel] = 'addmember';
-              console.log('triggering kip collect, maybe if the person is an admin?')
-                return weekly_updates.addMembers(data.team, data.user, data.channel, function() {
-                  console.log('done adding members');
-                  user.conversations[data.channel] = false;
-                })
-             }
-
-            if (data.text && data.text.match(/\bcollect\b/)) {
-              user.conversations[data.channel] = 'collect';
-              // a channel might look like this: "collect <#C0R6CJFTK>"
-              if (data.text.indexOf('<#C') >= 0) {
-                console.log('attempting to collect for one or more channels');
-                var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
-                  return markdown.replace('<#', '').replace('>', '');
-                })
-                console.log('channels: ' + channels.join(', '));
-
-
-                // get list of users in all channels
-                return channels.map(function(channel) {
-
-                  request('https://slack.com/api/channels.info?token=' + user.bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
-                    if (e) {
-                      console.log(e);
-                    }
-
-                    var channelInfo = JSON.parse(r.body)
-                    debugger;
-                    if (channelInfo.channel && channelInfo.channel.members) {
-                      // um okay now what?
-        
-                      return weekly_updates.collectFromUsers(data.team, data.user, channel, channelInfo.channel.members, emailUsers,function() {
-                        console.log('um done collecting orders for channel ' + channel)
-                        user.conversations[data.channel] = false;
-                      })
-
-            
-                    }
-                  });
-
-                })
-              } else {
-                console.log('triggering kip collect, maybe if the person is an admin?')
-               
-                    co(function*() {
-                        var emailUsers = yield db.Chatusers.find({
-                          'team_id': data.team, 
-                          'settings.emailNotification': true
-                    }).exec();
-
-                    return weekly_updates.collect(data.team, data.user, emailUsers,function() {
-                      console.log('done collecting orders i guess');
-                      user.conversations[data.channel] = false;
-                    })
-
-                }).catch((e) => {
-                    console.log('error');
-                    console.log(e);
-                    convo.next();
-                });
-
-              }
-            }
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 
@@ -799,13 +654,37 @@ function preProcess(data){
     }
 
     data.msg = data.msg.trim();
+    data.client_res = [];
+
+    // don't perform searches if ur having a convo with a bot
+    // let botkit handle it
+    if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
+
+
+        //PUT MODE LISTENER HERE TO SWITCH BETWEEN MODES
+
+        // * * * * IF NOT EQUAL TO HELP OR .... other banter response
+
+        //IF DETECT NLP, switch to shopping mode and process query!!!!!
+
+        // PASS TO NLP, IF TEXT Breaks context, change mode to correct context!!!!
+        // i.e. in settings mode, if user types '2 but cheaper'
+        // run through NLP and check for buckets / actions
+
+        //if input"settings", reshow settings menu
+
+        //--->
+
+      console.log('in a conversation: ' + kipUser[data.source.id].conversations)
+
+      return;
+    }
 
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
 
         //found canned response
         if(flag){
-            data.client_res = [];
             switch(flag){
                 case 'basic': //just respond, no actions
                     //send message
@@ -879,13 +758,50 @@ function preProcess(data){
                     console.log('error: canned action flag missing');
             }
         }
-        //proceed to NLP instead
+        //nothing found in cannedbanter, now check for mode strings
         else {
-            routeNLP(data);
+            
+            //check for mode switch, coming from shopping (default) context
+            banter.checkModes(data,'shopping',function(mode,res){
+                if(mode){
+                    switch(mode){
+                        //* * MODES * *
+                        case 'settings':
+                            settingsMode(data);
+                            break;
+
+                        case 'collect':
+                            collectMode(data);
+                            break;
+
+                        case 'onboarding':
+                            onboardingMode(data);
+                            break;
+
+                        case 'shopping':
+                            shoppingMode(data);
+                            break;
+
+                        case 'food_ordering':
+
+                            break;
+
+                        case 'report':
+                            reportMode(data);
+                            break;
+
+                        case 'addmember':
+                            addmemberMode(data);
+                            break;
+                    }
+                }else {
+                    //proceed to NLP instead
+                    routeNLP(data);
+                }
+
+            });
         }
     },data.source.origin,data.source);
-
-  //  });
 
 }
 
@@ -905,117 +821,18 @@ function routeNLP(data){
         });
 
         function continueNLP(){
-
             nlp.parse(data, function(e, res) {
                 if (e){
                   console.log('NLP error ',e);
                   // Route to supervisor
-
                   data.flags.toSupervisor = true;
                   incomingAction(data);
                 }
                 else {
-
                     console.log('NLP RES ',res);
-
-                    if (res.supervisor) {
-                      data.flags.toSupervisor = true;
-                    }
-
-                    if(res.execute && res.execute.length > 0){
-
-                        if(!res.execute[0].bucket){
-                            res.execute[0].bucket = 'search';
-                        }
-                        if(!res.execute[0].action){
-                            res.execute[0].execute[0].action = 'initial';
-                        }
-
-                        //- - - temp stuff to transfer nlp results to data object - - - //
-                        if (res.execute[0].bucket){
-                            data.bucket = res.execute[0].bucket;
-                        }
-                        if (res.execute[0].action){
-                            data.action = res.execute[0].action;
-                        }
-                        if (res.tokens){
-                            data.tokens = res.tokens;
-                        }
-                        if (res.searchSelect){
-                            data.searchSelect = res.searchSelect;
-                        }
-                        if (res.execute[0].dataModify){
-                            data.dataModify = res.execute[0].dataModify;
-                        }
-                        //- - - - end temp - - - - //
-
-                        incomingAction(data);
-
-                    }
-                    else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
-                        //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
-
-                        //looking for modifier search
-                        if (res.tokens && res.tokens[0].indexOf('but') > -1){
-                            var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
-                            modDetail = modDetail.replace('but','').trim();
-                            console.log('mod string ',modDetail);
-
-                            data.tokens = res.tokens;
-                            data.searchSelect = res.searchSelect;
-                            data.bucket = 'search';
-                            data.action = 'modify';
-                            data.dataModify = {
-                                type:'genericDetail',
-                                val:[modDetail]
-                            };
-
-                            console.log('constructor ',data);
-
-                            incomingAction(data);
-                        }
-                        else {
-                            data.tokens = res.tokens;
-                            data.searchSelect = res.searchSelect;
-                            data.bucket = 'search';
-                            data.action = 'initial';
-
-                            console.log('un struct ',data);
-
-                            incomingAction(data);
-                        }
-
-                    }
-                    else {
-
-                        if(!res.bucket){
-                            res.bucket = 'search';
-                        }
-                        if(!res.action){
-                            res.action = 'initial';
-                        }
-
-                        //- - - temp stuff to transfer nlp results to data object - - - //
-                        if (res.bucket){
-                            data.bucket = res.bucket;
-                        }
-                        if (res.action){
-                            data.action = res.action;
-                        }
-                        if (res.tokens){
-                            data.tokens = res.tokens;
-                        }
-                        if (res.searchSelect){
-                            data.searchSelect = res.searchSelect;
-                        }
-                        if (res.dataModify){
-                            data.dataModify = res.dataModify;
-                        }
-                        //- - - - end temp - - - - //
-
-                        incomingAction(data);
-
-                    }
+                    processData.buildKipObject(data,function(res){
+                        incomingAction(res);
+                    });
                 }
             })
         }
@@ -1146,6 +963,10 @@ var incomingMsgAction = function(data,origin){
 
 }
 
+
+
+
+
 //sentence breakdown incoming from python
 function incomingAction(data){
 //------------------------supervisor stuff-----------------------------------//
@@ -1178,6 +999,9 @@ data.flags = data.flags ? data.flags : {};
         case 'purchase':
             purchaseBucket(data);
             break;
+        case 'mode':
+            modeBucket(data);
+            break;
         case 'supervisor':
             //route to supervisor chat window
         default:
@@ -1186,6 +1010,12 @@ data.flags = data.flags ? data.flags : {};
 }
 
 //* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
+
+function modeBucket(data){
+
+
+}
+
 
 function searchBucket(data){
 
@@ -2122,6 +1952,8 @@ var sendResponse = function(data,flag){
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
 
+
+
                     //item is a string, send message
                     if (typeof message === 'string'){
                         var msgData = {
@@ -2142,7 +1974,9 @@ var sendResponse = function(data,flag){
                                 console.log('👹👹👹 ',messageHistory[data.source.id]);
 
                             }else {
-                                console.log('👹👹👹 delete typing event err ',err);
+                                if (err){
+                                   console.log('👹👹👹 delete typing event err ',err); 
+                                }
                             }
 
                             callback();
@@ -2151,6 +1985,7 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
+                        console.log('ATTACH ',message);
                         var attachThis = message;
                         attachThis = JSON.stringify(attachThis);
 
@@ -2442,9 +2277,17 @@ function viewCart(data, show_added_item){
       console.log('done with cartObj');
 
       banter.getCinnaResponse(data,function(res){
-          if(res && res !== 'null'){
-              data.client_res.unshift(res);
+          if(res && res !== 'null' && data.client_res[0]){
+             if (res.length == 1){
+                data.client_res[0].unshift(res);
+             }else {
+                for (var x = 0; x < res.length; x++) {
+                    data.client_res[0].unshift(res[x]);
+                }
+             }
           }
+
+          console.log('CLIENT_RES ',data.client_res);
           sendResponse(data);
       });
       // sendResponse(data);
@@ -2508,6 +2351,296 @@ function recallHistory(data,callback,steps){
 
 
 }
+
+//MODE UPDATE HANDLING
+var updateMode = function(data){
+
+    console.log('UPDATE MODE DATA ',data);
+
+    switch(data.mode){
+        case 'shopping':
+            console.log('SHOPPING MODE ON ',data);
+
+            kipUser[data.source.id].conversations = 'shopping'; 
+            //show shopping sticker message
+
+            if (data.action && data.action !== 'initial' ){
+                incomingAction(data);
+            }else {
+                shoppingMode(data);
+            }
+        break;
+
+        case 'settings':
+            kipUser[data.source.id].conversations = 'settings'; 
+            //fire show settings
+            settingsMode(data);
+            console.log('SETTINGS MODE ON')
+        break;
+
+        // case 'viewcart':
+        //     kipUser[data.source.id].conversations = 'shopping'; 
+        //     incomingAction(data);
+        //     //switch to shopping mode and fire view cart 
+        //     console.log('VIEW CART MODE ON')
+        // break;
+
+        case 'collect':
+            kipUser[data.source.id].conversations = 'collect'; 
+            collectMode(data);
+            // fire collect function
+            console.log('COLLECT MODE ON')
+        break;
+
+        case 'onboarding':
+            kipUser[data.source.id].conversations = 'onboarding'; 
+            // fire collect function
+            onboardingMode(data);
+            console.log('onboard MODE ON')
+        break;
+
+        case 'addmember':
+            kipUser[data.source.id].conversations = 'addmember'; 
+            // fire collect function
+            addmemberMode(data);
+            console.log('onboard MODE ON')
+        break;
+
+        case 'report':
+            kipUser[data.source.id].conversations = 'shopping'; 
+            // fire collect function
+            reportMode(data);
+            console.log('report MODE ON')
+        break;
+
+        default:
+            kipUser[data.source.id].conversations = 'shopping'; 
+            if (data.action && data.action !== 'initial' ){
+                incomingAction(data);
+            }else {
+                shoppingMode(data);
+            }
+            console.log('DEFAULT SHOPPING MODE ON');
+        break;
+
+    }
+    
+}
+
+//* * * * MODE FUNCTIONS * * * * //
+function settingsMode(data){
+    data.bucket = 'mode';
+    data.action = 'settings';
+    history.saveHistory(data,true,function(res){});
+
+    kipUser[data.source.id].conversations = 'settings';
+
+    return conversation_botkit.settings(kipUser[data.source.id], data.source.user, function(msg) {
+        data.bucket;
+        data.action;
+        console.log('💎💎💎💎 data ',data);
+        console.log('💎💎💎💎 msg ',msg);
+        
+        if(typeof msg === 'object'){
+            var obj = _.extend(data, msg); //merge data obj from kip with botkit
+        }else {
+            var obj = data;
+            obj.mode = msg;
+        }
+        updateMode(obj);              
+    })
+}
+
+function collectMode(data){        
+    data.bucket = 'mode';
+    data.action = 'collect';
+    history.saveHistory(data,true,function(res){});
+
+    kipUser[data.source.id].conversations = "collect";
+
+    console.log('triggering kip collect, maybe if the person is an admin?')
+
+    data.text = data.msg; //converting
+
+    if (data.text.indexOf('<#C') >= 0) {
+        console.log('attempting to collect for one or more channels');
+        var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
+          return markdown.replace('<#', '').replace('>', '');
+        })
+        console.log('channels: ' + channels.join(', '));
+
+        // get list of users in all channels
+        return channels.map(function(channel) {
+
+          request('https://slack.com/api/channels.info?token=' + kipUser[data.source.id].bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
+            if (e) {
+              console.log(e);
+            }
+
+            var channelInfo = JSON.parse(r.body)
+            debugger;
+            if (channelInfo.channel && channelInfo.channel.members) {
+              // um okay now what?
+
+              return weekly_updates.collectFromUsers(data.source.org, data.source.user, channel, channelInfo.channel.members, function() {
+                console.log('um done collecting orders for channel ' + channel)
+                kipUser[data.source.id].conversation = 'shopping';
+              })
+            }
+          });
+
+        })
+    } else {
+        console.log('triggering kip collect, maybe if the person is an admin?')
+        return weekly_updates.collect(data.source.org, data.source.user, function() {
+          console.log('done collecting orders');
+          kipUser[data.source.id].conversation = 'shopping';
+        })
+    }
+}
+
+function onboardingMode(data){
+    data.bucket = 'mode';
+    data.action = 'onboarding';
+    history.saveHistory(data,true,function(res){});
+
+    kipUser[data.source.id].conversations = 'onboard';
+    // "user" is actually the slackbot here
+    // "data.user" is the user having the convo
+    return conversation_botkit.onboard(kipUser[data.source.id], data.source.user, function() {
+        console.log('done with onboarding conversation')
+        kipUser[data.source.id].conversations = 'shopping';
+    });
+}
+
+function shoppingMode(data){
+    data.bucket = 'mode';
+    data.action = 'shopping';
+    history.saveHistory(data,true,function(res){});
+
+    data.action = 'sendAttachment';
+
+    data.client_res = [
+      {
+        "image_url":"http://i.imgur.com/PqrtJmD.png",
+        "text":"",
+        "color":"#45a5f4"
+      },
+      {
+          "text": "Tell me what you're looking for, or use `help` for more options",
+          "mrkdwn_in": [
+              "text",
+              "pretext"
+          ],
+          "color":"#45a5f4"
+      }
+    ];
+    sendResponse(data);
+}
+
+function reportMode(data){
+    data.bucket = 'mode';
+    data.action = 'report';
+    history.saveHistory(data,true,function(res){});
+
+    console.log('report generation');
+
+    var isAdmin = kipUser[data.source.id].meta.office_assistants.indexOf(data.source.user) >= 0;
+    var isP2P = kipUser[data.source.id].meta.office_assistants.length === 0;
+    var num_days = 7;
+
+    console.log('isAdmin:', isAdmin, ' isP2P:', isP2P);
+    console.log(JSON.stringify(kipUser, null, 2));
+    console.log(data.user);
+    console.log(data.source);
+
+    return kipcart.report(kipUser[data.source.id].team_id, num_days).then(function(report) {
+    console.log('found ' + report.items.length + ' items');
+
+    var fun_stats = [
+      isAdmin || isP2P ? `You added *${report.items.length}* to your cart totalling *${report.total}*` : `You added *${report.items.length}* to your cart`,
+      `The most items came from the *${report.top_category}* category`,
+      `You searched for *${report.most_searched}* the most`,
+      `Most other teams didnt search for *${report.unique_search}* as much as you did!`
+    ].join('\n');
+
+    if (report.items.length === 0) {
+      fun_stats = 'You have not added anything to your cart.';
+    }
+
+    // make a nice slacky item report
+    var m = {
+      user: kipUser[data.source.id].bot.bot_user_id,
+      username: "Kip",
+      "text": `*Cart Overview for the last ${num_days} days*`,
+      "attachments": [
+        {
+          "title": "Summary",
+          "text": fun_stats,
+          "mrkdwn_in": [
+            "text",
+            "pretext"
+          ]
+        }
+      ]
+    };
+
+    m.attachments = m.attachments.concat(report.items
+      .sort((a, b) => {
+        if (a.purchased != b.purchased) {
+          return a.purchased ? 1 : -1;
+        }
+        return a.added_date - b.added_date;
+      })
+      .map((item) => {
+      var userString = item.added_by.map(function(u) {
+        return '<@' + u + '>';
+      }).join(', ');
+
+      var text = [
+        `${item.title}`,
+        isAdmin || isP2P ? `*${item.price}* each` : '',
+        `Quantity: ${item.quantity}`,
+        isAdmin || isP2P ? `_Added by: ${userString}_` : '',
+        item.purchased ? 'Not currently in cart' : '*Currently in cart*',
+      ].join('\n').replace(/\n+/g, '\n')
+
+      return {
+          "text": text,
+          "thumb_url": item.image,
+          "mrkdwn_in": [
+              "text"
+          ],
+          "color": item.purchased ? "#45a5f4" : "#7bd3b6"
+      };
+    }))
+
+    console.log(m);
+    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', m, function() {
+        console.log('um okay posted a message i think?');
+    });
+
+    }).catch(function(e) {
+        console.log('error generating report');
+        console.log(e);
+        console.log(e.stack);
+    })
+}
+
+function addmemberMode(data){
+    data.bucket = 'mode';
+    data.action = 'addmember';
+    history.saveHistory(data,true,function(res){});
+
+    kipUser[data.source.id].conversations = 'addmember';
+
+    console.log('triggering kip collect, maybe if the person is an admin?')
+    return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function() {
+      console.log('done adding members');
+      kipUser[data.source.id].conversations[data.channel] = 'shopping';
+    })
+}
+
 
 /////TOOLS
 
@@ -2631,6 +2764,7 @@ function InvervalTimer(callback, interval) {
 
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
+module.exports.updateMode = updateMode;
 module.exports.newSlack = newSlack;
 module.exports.newEmail = newEmail;
 module.exports.preProcess = preProcess;

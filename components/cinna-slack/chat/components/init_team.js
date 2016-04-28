@@ -50,6 +50,7 @@ var scrape_team_info = function(bot, callback) {
       }
 
       bot.meta.addedBy = r.body.user_id;
+      bot.meta.office_assistants = [r.body.user_id];
       if (typeof bot.save === 'function') {
         bot.save();
       } else {

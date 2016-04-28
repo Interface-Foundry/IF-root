@@ -83,6 +83,27 @@ module.exports.basic = function basic(url, callback) {
         }
       });
 
+
+        // headers: {
+        //     'Accept': '*/*',
+        //     'Accept-Encoding':'gzip, deflate',
+        //     'Accept-Language':'en-US,en;q=0.8',
+        //     // 'Avail-Dictionary':'qHs1hh9Q',
+        //     'Cache-Control':'max-age=0',
+        //     'Content-Length':7620,
+        //     'Connection':'keep-alive',
+        //     'Content-Type':'text/plain;charset=UTF-8',
+        //     // 'Cookie': 'csm-hit='+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN+s-'+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN|'+Math.floor(Math.random() * 9999999999999) + 1111111111111+'; ubid-main=181-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'; session-id-time=20827'+Math.floor(Math.random() * 99999) + 11111+'l; session-id=187-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'',
+        //     'Cookie':'skin=noskin; x-wl-uid=1ZkF/9DlKrGNXARXyoWaAKeH9OSn5mWPK7k8h9SNW1lQATtqZ9GthMaxV9Yh7iCDVJQblgK4+lM0=; session-token=AFXsr7dsTCgNkaqoJlQQt2p7zvIz4eGml/Bp8261MU7VhOJRh0pUJQPRPiFCSlSmRvn/yucYWpSOqD4afuFKVWsLmBhD1vvURM9fjGKH98hZPWyteX1jEXBcLR9rQbs7ETcuVp8WJXBYGfAgXLpdy/XsCOUXoPtb4h6qzFkAqqVWqCgPB2zABvUQ0MXxCDoyri6/iAFWY3beh8SO/YFjOAgIPaGr9E2QD0PJUy9dlVd7ArxfonLWn36+6vg/g67W; ubid-main=190-8589396-8276564; session-id-time=2082787201l; session-id=185-9694891-7040613',
+
+        //     'Host':'fls-na.amazon.com',
+        //     'Origin':'http://www.amazon.com',
+        //     'Pragma':'no-cache',
+        //     // 'Upgrade-Insecure-Requests':'1',
+        //     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
+        //     'Referer':url
+        // }
+
       proxiedRequest.get(url, function(err, response, body) {
 
 
