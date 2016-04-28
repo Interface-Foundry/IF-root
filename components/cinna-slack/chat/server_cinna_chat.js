@@ -120,8 +120,8 @@ app.post('/slackaction', function(req, res) {
 app.post('/emailincoming', function(req, res) {
     console.log('incoming email BODY: ',req.body);
     ioKip.newEmail(req.body);
-    res.sendStatus(200)
-})
+    res.sendStatus(200)})
+
 
 //incoming new slack user
 app.post('/kikincoming', function(req, res) {

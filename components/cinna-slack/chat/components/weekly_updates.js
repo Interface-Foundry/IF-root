@@ -228,7 +228,7 @@ function lastCall(response, convo, emailUsers) {
             to: user.profile.email.split('mailto:')[1].split('|')[0],
             from: 'Kip Bot <hello@kip.ai>',
             subject: 'Reminder from Kip Bot!',
-            text: 'Hi!  <@' + convo.user_id + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! Simply respond to this email with your choice ( 1, 2, or 3).'
+            text: 'Hi! ' + user.name + ' wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! Simply respond to this email with your choice ( 1, 2, or 3).'
         };
         mailerTransport.sendMail(mailOptions, function(err) {
             if (err) {
