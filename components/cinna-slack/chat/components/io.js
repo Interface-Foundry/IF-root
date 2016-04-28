@@ -213,7 +213,7 @@ var newSlack = function() {
 }
 
 
-//fired when user responds via email to an 'add order' request from slackbot 
+//fired when user responds via email to an 'add order' request from slackbot
 var newEmail= function(from_email) {
     //  function routeToSlack(data) {
     //     console.log('incoming slack 📬')
@@ -242,7 +242,7 @@ var newEmail= function(from_email) {
             console.log('saved chat user retrieval error');
         }
         else {
-            
+
             if (!users || users.length == 0) {
 
             }
@@ -268,10 +268,10 @@ var newEmail= function(from_email) {
                 //         res.send('slack user added');
                 //     }
                 // });
-            
+
             }
 
-            
+
 
 
             // loadSlackUsers(users);
@@ -430,7 +430,7 @@ function loadSlackUsers(users){
             console.log('🔥')
 
 
-            //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71' 
+            //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71'
             // don't talk to urself  TODO why does data sometimes have a bot_id instead of user id?
             if (data.user === user.bot.bot_user_id || data.username === 'Kip') {
               console.log("don't talk to urself")
@@ -665,7 +665,7 @@ function preProcess(data){
     if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
 
 
-        //PUT MODE LISTENER HERE TO SWITCH BETWEEN MODES 
+        //PUT MODE LISTENER HERE TO SWITCH BETWEEN MODES
 
         // * * * * IF NOT EQUAL TO HELP OR .... other banter response
 
@@ -677,7 +677,7 @@ function preProcess(data){
 
         //if input"settings", reshow settings menu
 
-        //---> 
+        //--->
 
       console.log('in a conversation: ' + kipUser[data.source.id].conversations)
 
@@ -2357,6 +2357,7 @@ function collectMode(data){
               })
             }
           });
+
         })
     } else {
         console.log('triggering kip collect, maybe if the person is an admin?')
@@ -2413,9 +2414,14 @@ function reportMode(data){
 
     console.log('report generation');
 
-    var isAdmin = kipUser[data.source.id].meta.office_assistants.indexOf(data.user) >= 0;
+    var isAdmin = kipUser[data.source.id].meta.office_assistants.indexOf(data.source.user) >= 0;
     var isP2P = kipUser[data.source.id].meta.office_assistants.length === 0;
     var num_days = 7;
+
+    console.log('isAdmin:', isAdmin, ' isP2P:', isP2P);
+    console.log(JSON.stringify(kipUser, null, 2));
+    console.log(data.user);
+    console.log(data.source);
 
     return kipcart.report(kipUser[data.source.id].team_id, num_days).then(function(report) {
     console.log('found ' + report.items.length + ' items');

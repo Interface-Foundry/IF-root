@@ -10,6 +10,7 @@ var history = require("./history.js");
 var nlp = require('../../nlp/api');
 var processData = require("./process.js");
 var banter = require("./banter.js");
+var refreshTeam = require('./refresh_team');
 
 
 /*
@@ -27,6 +28,9 @@ module.exports.onboard = function(slackbot, user_id, done) {
     token: slackbot.bot.bot_access_token
   })
 
+  // probably time to refresh the team while messages fly back and forth
+  refreshTeam(slackbot.team_id);
+
   bot.startRTM(function(err, bot, payload) {
     if (err) {
       throw new Error('Could not connect to Slack');
@@ -39,7 +43,13 @@ module.exports.onboard = function(slackbot, user_id, done) {
         bot.closeRTM();
         done();
       })
-      askWhoManagesPurchases(response, convo);
+
+      if (slackbot.meta.office_assistants.indexOf(user_id) < 0 && process.env.NODE_ENV === 'production') {
+        convo.say('Only the office admin can perform the onboarding process');
+        return convo.next();
+      } else {
+        askWhoManagesPurchases(response, convo);
+      }
     });
   });
 }
@@ -51,6 +61,9 @@ module.exports.settings = function(slackbot, user_id, done, data) {
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   });
+
+  // probably time to refresh the team while the messages go back and forth
+  refreshTeam(slackbot.team_id);
 
 
   bot.startRTM(function(err, bot, payload) {
@@ -182,7 +195,8 @@ function askWhoManagesPurchases(response, convo) {
     // also look for users mentioned by name without the @ symbol
     db.Chatusers.find({
       team_id: convo.slackbot.team_id,
-      is_bot: {$ne: true}
+      is_bot: {$ne: true},
+      deleted: {$ne: true}
     }).select('id name').exec(function(e, users) {
 
       users.map((u) => {
@@ -455,54 +469,34 @@ function handleSettingsChange(response, convo) {
     }
 
     //
-    // Add/remove admins
+    // Add/remove admins (only admins can do this)
     //
-    if (response.text.indexOf('<@') >= 0 && isAdmin) {
-      var tokens = response.text.trim().split(' ');
+    var tokens = response.text.toLowerCase().trim().split(' ');
+    if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
+
+      // look for users mentioned with the @ symbol
       var userIds = tokens.filter((t) => {
         return t.indexOf('<@') === 0;
       }).map((u) => {
-        return u.replace(/(\<\@|\>)/g, '');
+        return u.replace(/(\<\@|\>)/g, '').toUpperCase();
       })
 
-      if (tokens[0].toLowerCase() === 'add' && userIds.length > 0) {
-        // add all the users they specified.
-        userIds.map(function(id) {
-          if (convo.slackbot.meta.office_assistants.indexOf(id) < 0) {
-            convo.slackbot.meta.office_assistants.push(id);
-          }
-        });
+      // also look for users mentioned by name without the @ symbol
+      var users = yield db.Chatusers.find({
+        team_id: convo.slackbot.team_id,
+        is_bot: {$ne: true},
+        deleted: {$ne: true}
+      }).select('id name').exec();
 
-      } else if (tokens[0].toLowerCase() === 'remove' && userIds.length > 0) {
-        // remove all the users, EXCEPT THEMSELF.  you cannot give up this power, it must be taken away from you.
-        var should_return = false;
-        userIds.map(function(id) {
-          if (id == convo.user_id) {
-            convo.ask("Sorry, but you can't remove yourself from being an admin.  Do you have any settings changes?", handleSettingsChange);
-            return convo.next();
-          }
-          var index = convo.slackbot.meta.office_assistants.indexOf(id);
-          if (index >= 0) {
-            convo.slackbot.meta.office_assistants.splice(index, 1);
-          } else {
-            convo.ask('Looks like <@' + id + '> was not an admin.  Do you have any settings changes?', handleSettingsChange)
-            convo.next();
-            should_return = true;
-          }
-        })
-
-        if (should_return) {
-          return;
+      users.map((u) => {
+        var re = new RegExp('\\b' + u.name + '\\b', 'i')
+        if (response.text.match(re)) {
+          userIds.push(u.id);
         }
-      } else {
+      });
 
-        // convo.ask("I'm sorry, I couldn't understand that.  Do you have any settings changes?", handleSettingsChange);
-
-        console.log('REZ REZ ',response.text);
-
-        //CHECK HERE FOR KEYWORDS
-
-        console.log('🐸');
+      console.log(userIds);
+      if (userIds.length === 0) {
         var attachments = [
           {
             text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
@@ -519,12 +513,71 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){});
 
-        convo.ask(resStatus, handleSettingsChange); 
-
+        convo.ask(resStatus, handleSettingsChange);
         return convo.next();
+      }
+
+      var shouldReturn = false;
+      if (tokens[0] === 'add') {
+        userIds.map((id) => {
+          if (convo.slackbot.meta.office_assistants.indexOf(id) < 0) {
+            convo.slackbot.meta.office_assistants.push(id);
+          }
+        })
+      } else if (tokens[0] === 'remove') {
+        userIds.map((id) => {
+          if (id == convo.user_id) {
+            var attachments = [
+              {
+                text: "I'm sorry, but you can't remove yourself as an admin.  Do you have any settings changes?"
+              }
+            ];
+
+            var resStatus = {
+              username: 'Kip',
+              text: "",
+              attachments: attachments,
+              fallback: 'Settings'
+            };
+
+            // showSettings(response, convo, 'noAsk', function(){});
+
+            convo.ask(resStatus, handleSettingsChange);
+            shouldReturn = true;
+            return convo.next();
+          }
+
+          if (convo.slackbot.meta.office_assistants.indexOf(id) >= 0) {
+            var index = convo.slackbot.meta.office_assistants.indexOf(id);
+            convo.slackbot.meta.office_assistants.splice(index, 1);
+          } else {
+            var attachments = [
+              {
+                text: 'Looks like <@' + id + '> was not an admin.  Do you have any settings changes?'
+              }
+            ];
+
+            var resStatus = {
+              username: 'Kip',
+              text: "",
+              attachments: attachments,
+              fallback: 'Settings'
+            };
+
+            // showSettings(response, convo, 'noAsk', function(){});
+
+            convo.ask(resStatus, handleSettingsChange);
+            convo.next();
+            shouldReturn = true;
+          }
+        })
+      }
+
+      if (shouldReturn) {
+        return;
       }
 
       yield convo.slackbot.save();
@@ -762,6 +815,7 @@ function handleSettingsChange(response, convo) {
 
   })
 }
+
 
 
 // TODO do these even matter?
