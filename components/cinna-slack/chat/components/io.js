@@ -215,16 +215,6 @@ var newSlack = function() {
     });
 }
 
-/*
-E mail
-📧
-*/
-var newEmail = function(email) {
-  // THe email has already been saved to the database and stuff.
-  // now we need to respond appropriately to the message.
-}
-
-
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
     console.log('loading '+users.length+' Slack users');
@@ -779,9 +769,9 @@ function routeNLP(data){
                   incomingAction(data);
                 }
                 else {
-                    console.log('NLP RES ',res);
+                    data = _.merge({}, data, res)
                     processData.buildKipObject(data,function(res){
-                        incomingAction(res);
+                      incomingAction(_.merge({}, data, res));
                     });
                 }
             })
@@ -2716,7 +2706,6 @@ function InvervalTimer(callback, interval) {
 module.exports.initSlackUsers = initSlackUsers;
 module.exports.updateMode = updateMode;
 module.exports.newSlack = newSlack;
-module.exports.newEmail = newEmail;
 module.exports.preProcess = preProcess;
 module.exports.slackUsers = slackUsers;
 

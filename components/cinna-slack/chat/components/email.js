@@ -16,6 +16,7 @@ var db = require('db');
 var iokip = require('./io');
 var uuid = require('uuid');
 var _ = require('lodash');
+var linkify = require('linkifyjs');
 
 //
 // Process incoming email from sendgrid.  gets the relevant conversation from mongo and passes to io.js
@@ -25,9 +26,13 @@ var processEmail = module.exports.process = function(message) {
   return co(function*() {
     console.log(message);
 
+    // make the message nice if it was a reply
+
+
     // parse the threadId from the email message
     message.text = message.text || '';
     var chainId = message.text.match(/email-chain-[a-z0-9\-]+/i);
+    console.log(chainId);
     if (!chainId) {
       return;
     } else {
@@ -47,13 +52,18 @@ var processEmail = module.exports.process = function(message) {
       }
     }
 
+    console.log(last_message);
+
     var team = yield db.Slackbots.findOne({
-      team: last_message.team
+      team_id: last_message.team
     }).exec();
 
+    var user_email = _.get(linkify.find(message.from).filter((a) => {
+      return a.type === 'email'
+    }), '[0].value');
     var user = yield db.Chatusers.findOne({
       team_id: last_message.team,
-      'profile.email': message.from
+      'profile.email': user_email
     }).exec();
 
     // save this message to the db for the conversation
@@ -64,19 +74,41 @@ var processEmail = module.exports.process = function(message) {
     }))
     m.save();
 
+    // iokip.preProcess({
+    //   msg: message.text.split(/On (.*) wrote/)[0].trim(),
+    //   source: {
+    //     origin: 'email',
+    //     channel: 'email',
+    //     org: team.team_id,
+    //     id: chainId,
+    //     user: user.id
+    //   },
+    //   // thread: {
+    //   //   id: chainId,
+    //   //   sequence: last_message.sequence + 1
+    //   // }
+    // });
+
     iokip.preProcess({
-      incoming: true,
-      msg: message.text,
+      msg: message.text.split(/On (.*) wrote/)[0].trim(),
       source: {
-        origin: 'email',
+        origin: 'slack',
+        channel: 'fasl;kf rw;h[uhjka]',
         org: team.team_id,
         id: chainId,
         user: user.id
       },
-      thread: {
-        id: chainId,
-        sequence: last_message.sequence + 1
+      flags: {email: true},
+      emailInfo: {
+        to: user.profile.email,
+        from: 'Kip Bot <kip@kip.ai>',
+        subject: message.subject,
+        text: ''
       }
+      // thread: {
+      //   id: chainId,
+      //   sequence: last_message.sequence + 1
+      // }
     });
 
   })
