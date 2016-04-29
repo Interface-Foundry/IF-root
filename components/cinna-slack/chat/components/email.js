@@ -14,6 +14,7 @@ var co = require('co');
 require('promisify-global');
 var db = require('db');
 var iokip = require('./io');
+var uuid = require('uuid');
 
 //
 // Process incoming email from sendgrid.  gets the relevant conversation from mongo and passes to io.js
@@ -90,8 +91,19 @@ D.H., 1991           __gggrgM**M#mggg__
 // 1-800-EMAILBAE  😘
 //
 var collect = module.exports.collect = function(addresses, id) {
+    var threadId = uuid.v4();
     var text = `Hey bae,
-just lettin u know that i care about u, so i wanted to say that the last call for office stuff is soon. whisper your dreams in my ear and i will make it so.`
+just lettin u know that i care about u, so i wanted to say that the last call for office stuff is soon. whisper your dreams in my ear and i will make it so.
+
+❤️
+Kip
+
+Your Personal Shopping Assistant
+kip@kip.ai
+
+--
+${threadId}
+`
 
     var addr = {
       production: '<kip@kip.ai>',
