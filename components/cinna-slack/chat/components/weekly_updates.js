@@ -13,6 +13,7 @@ var mailerTransport = require('../../../IF_mail/IF_mail.js');
 var async = require('async');
 var _ = require('lodash');
 var email = require('./email');
+var request = require('request-promise');
 
 //
 // In-memory hash of jobs so we can stop and start them
@@ -73,9 +74,6 @@ var updateJob = module.exports.updateJob = function(team_id) {
       var bot = controller.spawn({
         token: slackbot.bot.bot_access_token
       })
-
-      promisify
-
 
       bot.startRTM(function(err, bot, payload) {
         if (err) {
@@ -194,7 +192,7 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
         convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
         setTimeout(function() {
           lastCall({text: ''}, convo);
-        }, 5000)
+        }, 500)
       })
     })
 
@@ -202,6 +200,39 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
   }).catch((e) => {
     console.log(e);
     console.log(e.stack);
+  })
+}
+
+//
+// returns the list of users to notify
+//
+function getTeam(slackbot) {
+  return co(function*() {
+
+    var channel_users = [];
+    yield (slackbot.cart_channels || []).map((c) => {
+      return request('https://slack.com/api/channels.info?token=' + slackbot.bot.bot_access_token + '&channel=' + c)
+        .then((r) => {
+          var info = JSON.parse(r);
+          channel_users = channel_users.concat(info.channel.members);
+        }).catch((e) => {
+          console.log(e.stack);
+        })
+    })
+
+    console.log(channel_users)
+
+    return db.Chatusers.find({
+      team_id: slackbot.team_id,
+      is_bot: {$ne: true},
+      deleted: {$ne: true},
+      id: {$ne: 'USLACKBOT'}, // because slackbot is not marked as a bot?
+      'meta.last_call_alerts': { '$ne': false },
+      $or: [
+        {dm: {$exists: false}},
+        {id: {$in: channel_users}}
+      ]
+    })
   })
 }
 
@@ -227,18 +258,14 @@ function lastCall(response, convo) {
   }
 
   co(function*() {
-    var users = yield db.Chatusers.find({
-      team_id: convo.slackbot.team_id,
-      is_bot: {$ne: true},
-      deleted: {$ne: true},
-      id: {$ne: 'USLACKBOT'}, // because slackbot is not marked as a bot?
-      'meta.last_call_alerts': { '$ne': false }
-    }).exec();
+    // get all the users.
+    var team = yield getTeam(convo.slackbot);
+    console.log(team);
 
     var admin = convo.user_id;
 
-    console.log('sending last call to all ' + users.length + ' users');
-    yield users.map(function(u) {
+    console.log('sending last call to all ' + team.length + ' users');
+    yield team.map(function(u) {
       if (u.dm) {
         // Send the user a slack message
         return new Promise(function(resolve, reject) {
