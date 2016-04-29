@@ -26,7 +26,7 @@ var processEmail = module.exports.process = function(message) {
 
     // parse the threadId from the email message
     message.text = message.text || '';
-    var chainId = message.text.match(/email-chain-[az-09]+/i);
+    var chainId = message.text.match(/email-chain-[a-z0-9\-]+/i);
     if (!chainId) {
       return;
     } else {
@@ -38,6 +38,13 @@ var processEmail = module.exports.process = function(message) {
       chain: chainId
     }).orderBy('-sequence').exec();
 
+    if (!last_message) {
+      last_message = {
+        chain: 'email-chain-' + uuid.v4(),
+        sequence: 0
+      }
+    }
+
     var team = yield db.Slackbots.findOne({
       team: last_message.team
     }).exec();
@@ -48,14 +55,27 @@ var processEmail = module.exports.process = function(message) {
     }).exec();
 
     // save this message to the db for the conversation
-    var m = new Message(_.merge({}, message, {
+    var m = new db.Email(_.merge({}, message, {
       chain: chainId,
       team: last_message.team,
       sequence: last_message.sequence + 1
-    })
+    }))
     m.save();
 
-    iokip.newEmail(m);
+    iokip.preProcess({
+      incoming: true,
+      msg: message.text,
+      source: {
+        origin: 'email',
+        org: team.team_id,
+        id: chainId,
+        user: user.id
+      },
+      thread: {
+        id: chainId,
+        sequence: last_message.sequence + 1
+      }
+    });
 
   })
 }
@@ -91,28 +111,31 @@ D.H., 1991           __gggrgM**M#mggg__
 // 1-800-EMAILBAE  😘
 //
 var collect = module.exports.collect = function(addresses, id) {
-    var threadId = uuid.v4();
+    var threadId = 'email-chain-' + uuid.v4();
     var text = `Hey bae,
 just lettin u know that i care about u, so i wanted to say that the last call for office stuff is soon. whisper your dreams in my ear and i will make it so.
 
-❤️
+😘
+
+Your Shopping Assistant,
+
 Kip
 
-Your Personal Shopping Assistant
 kip@kip.ai
 
 --
+
 ${threadId}
 `
 
     var addr = {
-      production: '<kip@kip.ai>',
-      development: '<inbound@pbrandt1.bymail.in>'
-    }[process.env.NODE_ENV] || '<kip@kip.ai>';
+      production: 'kip@kip.ai',
+      development: 'inbound@pbrandt1.bymail.in'
+    }[process.env.NODE_ENV] || 'kip@kip.ai';
 
     var payload = {
         to: addresses,
-        from: `Kip Personal Shopper <${addr}>`,
+        from: `Kip Shopping Assistant <${addr}>`,
         subject: 'Last Call for Office Purchase Order',
         text: text
     };
