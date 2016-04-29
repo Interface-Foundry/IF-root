@@ -15,6 +15,7 @@ require('promisify-global');
 var db = require('db');
 var iokip = require('./io');
 var uuid = require('uuid');
+var _ = require('lodash');
 
 //
 // Process incoming email from sendgrid.  gets the relevant conversation from mongo and passes to io.js
@@ -36,9 +37,10 @@ var processEmail = module.exports.process = function(message) {
     // get all the stuff from the db for this email
     var last_message = yield db.Emails.findOne({
       chain: chainId
-    }).orderBy('-sequence').exec();
+    }).sort('-sequence').exec();
 
     if (!last_message) {
+      throw new Error('No last message found, so no team sorry cannot do this it\'s just over.')
       last_message = {
         chain: 'email-chain-' + uuid.v4(),
         sequence: 0
@@ -140,7 +142,14 @@ ${threadId}
         text: text
     };
 
+    var email = new db.Email(_.merge({}, payload, {
+      chain: threadId,
+      sequence: 0,
+      team: id
+    }))
+
     return co(function*() {
+        yield email.save();
         return sendgrid.send.promise(payload);
     })
 }

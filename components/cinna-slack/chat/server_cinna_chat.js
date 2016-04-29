@@ -129,7 +129,9 @@ app.post('/sendgrid', busboy({immediate: true}), function(req, res) {
     })
 
     req.busboy.on('finish', () => {
-      email.process(req.body);
+      email.process(req.body).catch((e) => {
+        console.log(e.stack);
+      })
       res.sendStatus(200);
     })
 })
