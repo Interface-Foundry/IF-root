@@ -48,6 +48,7 @@ var upload = require('../../../../IF_services/upload.js');
 var redisClient = require('../../../../redis.js');
 var  redis = require('redis');
 var client = redis.createClient();
+var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 
 
@@ -1634,34 +1635,30 @@ var sendResponse = function(data,flag){
     // Email Outgoing
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'slack' && data.flags && data.flags.email) {
-         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
             var messages = [data.client_res[0]];
             data.client_res.shift();
-            // data.client_res = JSON.stringify(data.client_res);
             var photos = [];
             data.client_res.forEach(function(el, index) {
                 messages.push(el.title + '\n\n' + el.title_link);
                 photos.push({filename: index.toString() + '.png',path: el.image_url});
             })
-            // console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
-            var mailOptions = {
-                to: data.emailInfo.to,
-                from: 'Kip Bot <hello@kip.ai>',
-                subject: 'Reply from Kip Bot!',
-                text: messages.join('\n\n').concat('\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
-                ,attachments: photos
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
-                if (err) {
-                    console.log('Sending email to user failed: ',err);
-                }
-                else {
-                console.log('Sent Email Outgoing Bot Response to user.');
-                }
-            });
+            messages.push('Simply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
+
+            email.reply({
+              to: data.emailInfo.to,
+              text: messages.join('\n\n'),
+              attachments: photos
+            }, data).catch((e) => {
+              console.log(e.stack);
+            })
+
         }
         else if (data.action == 'focus') {
            console.log('EMAIL OUTGOING FOCUS client_res', data.client_res);
+
            try {
              var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n\n' + data.client_res[1].split('|')[0].split('<')[1];
              formatted = formatted.slice(0,-1);
@@ -1671,20 +1668,16 @@ var sendResponse = function(data,flag){
            }
           data.client_res[1] = formatted ? formatted : data.client_res[1];
           var toSend = data.client_res[1] + '\n\n' + (data.client_res[2] ? data.client_res[2] : '')  + '\n\n' + (data.client_res[3] ? data.client_res[3] : '') + '\n\n' + (data.client_res[4] ? data.client_res[4] : '');
-           console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
-          var mailOptions = {
-                to: data.emailInfo.to,
-                from: 'Kip Bot <hello@kip.ai>',
-                subject: 'Reply from Kip Bot!',
-                text: toSend + '\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)'
-                ,attachments: [{filename: 'productr32r23r3.jpg', path: data.client_res[0]}]
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
-                if (err) {
-                    console.log('Sending email to user failed: ',err);
-                } else {
-                    console.log('Sent Email Outgoing Bot Response to user.');
-            }});
+          console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
+
+          email.reply({
+            to: data.emailInfo.to,
+            text: toSend + '\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)',
+            attachments: [{filename: 'productr32r23r3.jpg', path: data.client_res[0]}]
+          }, data).catch((e) => {
+            console.log(e.stack);
+          })
+
         }
          else if (data.action == 'save') {
               var messages = ['Awesome! I\'ve saved your item for you 😊'];
@@ -1700,21 +1693,13 @@ var sendResponse = function(data,flag){
                }
             })
             console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
-            var mailOptions = {
+
+
+            email.reply({
                 to: data.emailInfo.to,
-                from: 'Kip Bot <hello@kip.ai>',
-                subject: 'Reply from Kip Bot!',
                 text: messages.join('\n\n'),
                 attachments: photos
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
-                if (err) {
-                    console.log('Sending email to user failed: ',err);
-                }
-                else {
-                console.log('Sent Email Outgoing Bot Response to user.');
-                }
-            });
+            }, data);
         }
         else if (data.action == 'checkout') {
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
@@ -1730,21 +1715,11 @@ var sendResponse = function(data,flag){
                }
             })
             console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
-            var mailOptions = {
+            email.reply({
                 to: data.emailInfo.to,
-                from: 'Kip Bot <hello@kip.ai>',
-                subject: 'Reply from Kip Bot!',
                 text: messages.join('\n\n'),
                 attachments: photos
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
-                if (err) {
-                    console.log('Sending email to user failed: ',err);
-                }
-                else {
-                console.log('Sent Email Outgoing Bot Response to user.');
-                }
-            });
+            }, data);
         }
         else if (data.action == 'sendAttachment'){
           // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')

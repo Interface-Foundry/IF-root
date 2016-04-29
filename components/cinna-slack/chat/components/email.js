@@ -8,7 +8,7 @@
 |_____||___|___||__|__||____||_____|
 
 */
-var key = process.env.NODE_ENV === 'production' ? 'LOL-TO-DO' : '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';
+var key = process.env.NODE_ENV === 'production' ? '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' : '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';
 var sendgrid = require('sendgrid')(key);
 var co = require('co');
 require('promisify-global');
@@ -17,6 +17,27 @@ var iokip = require('./io');
 var uuid = require('uuid');
 var _ = require('lodash');
 var linkify = require('linkifyjs');
+var send = require('../../../IF_mail/IF_mail.js').send;
+
+var addr = {
+  production: 'kip@kip.ai',
+  development: 'inbound@pbrandt1.bymail.in'
+}[process.env.NODE_ENV] || 'kip@kip.ai';
+
+var signature = `
+
+😘
+
+Your Shopping Assistant,
+
+Kip
+
+kip@kip.ai
+
+--
+
+`;
+
 
 //
 // Process incoming email from sendgrid.  gets the relevant conversation from mongo and passes to io.js
@@ -103,12 +124,13 @@ var processEmail = module.exports.process = function(message) {
         to: user.profile.email,
         from: 'Kip Bot <kip@kip.ai>',
         subject: message.subject,
-        text: ''
+        text: '',
+        original_message: message
+      },
+      thread: {
+        id: chainId,
+        sequence: last_message.sequence + 1
       }
-      // thread: {
-      //   id: chainId,
-      //   sequence: last_message.sequence + 1
-      // }
     });
 
   })
@@ -144,7 +166,8 @@ D.H., 1991           __gggrgM**M#mggg__
 //
 // 1-800-EMAILBAE  😘
 //
-var collect = module.exports.collect = function(addresses, id) {
+var collect = module.exports.collect = function(address, team_name, team_id) {
+    console.log('collect for', team_name, team_id);
     var threadId = 'email-chain-' + uuid.v4();
     var text = `Hey bae,
 just lettin u know that i care about u, so i wanted to say that the last call for office stuff is soon. whisper your dreams in my ear and i will make it so.
@@ -162,22 +185,17 @@ kip@kip.ai
 ${threadId}
 `
 
-    var addr = {
-      production: 'kip@kip.ai',
-      development: 'inbound@pbrandt1.bymail.in'
-    }[process.env.NODE_ENV] || 'kip@kip.ai';
-
     var payload = {
-        to: addresses,
-        from: `Kip Shopping Assistant <${addr}>`,
-        subject: 'Last Call for Office Purchase Order',
+        to: address,
+        from: `Kip <${addr}>`,
+        subject: 'Last Call for ' + team_name + ' Purchase Order',
         text: text
     };
 
     var email = new db.Email(_.merge({}, payload, {
       chain: threadId,
       sequence: 0,
-      team: id
+      team: team_id
     }))
 
     return co(function*() {
@@ -185,6 +203,36 @@ ${threadId}
         return sendgrid.send.promise(payload);
     })
 }
+
+//
+// Replies to whatever message was in the thread
+//
+var reply = module.exports.reply = function(payload, data) {
+  console.log('replying to thread', data.source.id);
+  if (!payload || !payload.to) {
+    throw new Error('Cannot send email to nobody');
+  }
+
+  payload.from = `Kip <${addr}>`;
+  payload.subject = data.emailInfo.subject,
+  payload.text = payload.text + signature + data.source.id;
+  var email = new db.Email(_.merge({}, payload, {
+    chain: data.source.id,
+    sequence: data.thread.sequence + 1,
+    team: data.source.org
+  }))
+
+  return co(function*() {
+    yield email.save();
+    // var sgemail = new sendgrid.Email(payload);
+    // payload.attachments.map((a) => {
+    //   sgemail.addFile(a);
+    // })
+    // return sendgrid.send.promise(sgemail);
+    return send(payload);
+  })
+}
+
 
 
 if (!module.parent) {

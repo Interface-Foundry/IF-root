@@ -11,8 +11,8 @@ var promisify = require('promisify-node');
 var validator = require('validator');
 var mailerTransport = require('../../../IF_mail/IF_mail.js');
 var async = require('async');
-var uuid = require('uuid');
 var _ = require('lodash');
+var email = require('./email');
 
 //
 // In-memory hash of jobs so we can stop and start them
@@ -252,25 +252,7 @@ function lastCall(response, convo) {
           });
         })
       } else if (u.profile.email) {
-        // send the user an email
-        var threadId = 'email-chain-' + uuid.v4();
-        var options = {
-          to: u.profile.email,
-          from: 'Kip <kip@kip.ai>',
-          subject: 'Shopping Order for ' + convo.slackbot.team_name,
-          text: 'Hi!\n\nI wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!.'
-        };
-
-        var email = new db.Email(_.merge({}, options, {
-          chain: threadId,
-          team: convo.slackbot.team_id,
-          sequence: 0
-        }))
-        email.save();
-        console.log(options);
-        mailerTransport.sendMail(options, function(e) {
-          console.log(e);
-        })
+        return email.collect(u.profile.email, convo.slackbot.team_name, convo.slackbot.team_id);
       }
     })
 
