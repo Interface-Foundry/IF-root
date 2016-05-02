@@ -45,6 +45,10 @@ var supervisor = require('./supervisor');
 var cinnaEnv;
 // var BufferList = require('bufferlist').BufferList
 var upload = require('../../../../IF_services/upload.js');
+// var redisClient = require('../../../../redis.js');
+// var redis = require('redis');
+// var client = redis.createClient();
+var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 
 
@@ -170,7 +174,7 @@ var initSlackUsers = function(env){
             }
         }];
         loadSlackUsers(testUser);
-    }else{
+    } else {
         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
         Slackbots.find({
           deleted: {$ne: true}
@@ -211,76 +215,6 @@ var newSlack = function() {
         }
     });
 }
-
-
-//fired when user responds via email to an 'add order' request from slackbot
-var newEmail= function(from_email) {
-    //  function routeToSlack(data) {
-    //     console.log('incoming slack 📬')
-    //     if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
-    //         var newSl = {
-    //             source: {
-    //                 'origin':'slack',
-    //                 'channel':data.channel,
-    //                 'org':data.team,
-    //                 'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
-    //                 user: data.user
-    //             },
-    //             'msg':data.text
-    //         }
-    //         //carry image tags over
-    //         if (data.imageTags){
-    //             newSl.imageTags = data.imageTags;
-    //         }
-    //         preProcess(newSl);
-    //     }
-    // }
-    // find matching user
-    // **Question what to do is a user with same email is participating in multiple slackbots?? o em gee
-    Chatuser.find({'profile.email': from_email }).exec(function(err, users) {
-        if(err){
-            console.log('saved chat user retrieval error');
-        }
-        else {
-
-            if (!users || users.length == 0) {
-
-            }
-            if (users.length > 0) {
-
-            }
-            else if (users[0].team_id){
-
-                console.log('This should be the active chat: ', slackUsers[users[0].team_id] )
-
-                //look for keys matching team_id
-                //slackUsers.
-
-  
-                //find relevant slack bot
-                // Slackbots.find({'meta.initialized':  true, 'team_id': users[0].team_id }).exec(function(err, users) {
-                //     if(err){
-                //         console.log('saved slack bot retrieval error');
-                //     }
-                //     else {
-                //         loadSlackUsers(users);
-                //         console.log('DEBUG: new slack team added with this data: ',users);
-                //         res.send('slack user added');
-                //     }
-                // });
-
-            }
-
-
-
-
-            // loadSlackUsers(users);
-            // console.log('DEBUG: new slack team added with this data: ',users);
-            // res.send('slack user added');
-        }
-    });
-}
-
 
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
@@ -503,6 +437,7 @@ function loadSlackUsers(users){
                         }
                         //not a file share, process normally
                         else {
+                            console.log('\n\n EXANPLE DATA EWJTWREGSEW', data)
                             data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
                             if (data.text.charAt(0) == ':'){
                                 data.text = data.text.substr(1); //remove : from beginning of string
@@ -643,6 +578,8 @@ var loadSocketIO = function(server){
 //pre process incoming messages for canned responses
 function preProcess(data){
 
+    console.log('io 781: Getting to preProcess, data: ',data)
+
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
@@ -764,7 +701,7 @@ function preProcess(data){
         }
         //nothing found in cannedbanter, now check for mode strings
         else {
-            
+
             //check for mode switch, coming from shopping (default) context
             banter.checkModes(data,'shopping',function(mode,res){
                 if(mode){
@@ -1695,9 +1632,127 @@ var sendResponse = function(data,flag){
 
     }
     //* * * * * * * *
+    // Email Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'slack' && data.flags && data.flags.email) {
+
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
+            var messages = [data.client_res[0]];
+            data.client_res.shift();
+            var photos = [];
+            data.client_res.forEach(function(el, index) {
+                messages.push(el.title + '\n\n' + el.title_link);
+                photos.push({filename: index.toString() + '.png',path: el.image_url});
+            })
+            messages.push('Simply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
+
+            email.reply({
+              to: data.emailInfo.to,
+              text: messages.join('\n\n'),
+              attachments: photos
+            }, data).catch((e) => {
+              console.log(e.stack);
+            })
+
+        }
+        else if (data.action == 'focus') {
+           console.log('EMAIL OUTGOING FOCUS client_res', data.client_res);
+
+           try {
+             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n\n' + data.client_res[1].split('|')[0].split('<')[1];
+             formatted = formatted.slice(0,-1);
+           } catch(err) {
+             console.log('io.js 1269 err: ',err);
+             return;
+           }
+          data.client_res[1] = formatted ? formatted : data.client_res[1];
+          var toSend = data.client_res[1] + '\n\n' + (data.client_res[2] ? data.client_res[2] : '')  + '\n\n' + (data.client_res[3] ? data.client_res[3] : '') + '\n\n' + (data.client_res[4] ? data.client_res[4] : '');
+          console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
+
+          email.reply({
+            to: data.emailInfo.to,
+            text: toSend + '\n\nSimply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)',
+            attachments: [{filename: 'productr32r23r3.jpg', path: data.client_res[0]}]
+          }, data).catch((e) => {
+            console.log(e.stack);
+          })
+
+        }
+         else if (data.action == 'save') {
+              var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                // console.log('\n\n\n', el)
+                messages.push(el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+
+
+            email.reply({
+                to: data.emailInfo.to,
+                text: messages.join('\n\n'),
+                attachments: photos
+            }, data);
+        }
+        else if (data.action == 'checkout') {
+            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+            console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                console.log('\n\n\n', el)
+                messages.push( el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+            email.reply({
+                to: data.emailInfo.to,
+                text: messages.join('\n\n'),
+                attachments: photos
+            }, data);
+        }
+        else if (data.action == 'sendAttachment'){
+          // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
+            // //remove first message from res arr
+            // var attachThis = data.client_res;
+            // attachThis = JSON.stringify(attachThis);
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        else {
+            //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
+            // //loop through responses in order
+            // async.eachSeries(data.client_res, function(message, callback) {
+            //     tg.sendMessage({
+            //         chat_id: data.source.channel,
+            //         text: message
+            //     })
+            //     callback();
+            // }, function done(){
+            // });
+        }
+    }
+    //* * * * * * * *
     // Slack Outgoing
     //* * * * * * * *
-    else if (data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
+    else if (!(data.flags && data.flags.email) && data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
         //eventually cinna can change emotions in this pic based on response type
         var params = {
@@ -1835,7 +1890,7 @@ var sendResponse = function(data,flag){
 
                             }else {
                                 if (err){
-                                   console.log('👹👹👹 delete typing event err ',err); 
+                                   console.log('👹👹👹 delete typing event err ',err);
                                 }
                             }
 
@@ -1866,15 +1921,9 @@ var sendResponse = function(data,flag){
                         username:'Kip',
                         attachments: attachThis
                     };
-                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
-
-                    });
-
+                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {});
                 });
-
             }
-
-
         }else {
             console.log('error: slackUsers channel missing', slackUsers);
         }
@@ -1988,10 +2037,8 @@ var saveToCart = function(data){
                         sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                       })
               }
-
               // data.client_res = ['<' + cart.link + '|» View Cart>']
               // outgoingResponse(data, 'txt');
-
               // View cart after adding item TODO doesn't display for some reason
               // Even after adding in 500 ms which solves any amazon rate limiting problems
               if (cart) {
@@ -1999,12 +2046,10 @@ var saveToCart = function(data){
                   viewCart(data, true);
                 }, 500)
               }
-
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
                 sendTxtResponse(data, err);
-
                 //send email about this issue
                 var mailOptions = {
                     to: 'Kip Server <hello@kipthis.com>',
@@ -2106,16 +2151,17 @@ function viewCart(data, show_added_item){
         ];
 
         // add title, which is a link for admins/p2p and text otherwise
+        var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
         if (isAdmin || isP2P) {
           var text = [
-            `${processData.emoji[i+1].slack} <${link}|${item.title}>`,
+            `${processData.emoji[i+1][emojiType]} <${link}|${item.title}>`,
             `*${item.price}* each`,
             `Quantity: ${item.quantity}`,
             `_Added by: ${userString}_`
           ].join('\n');
         } else {
           var text = [
-            `${processData.emoji[i+1].slack} *${item.title}*`,
+            `${processData.emoji[i+1][emojiType]} *${item.title}*`,
             `Quantity: ${item.quantity}`
           ].join('\n');
         }
@@ -2230,7 +2276,7 @@ var updateMode = function(data){
         case 'shopping':
             console.log('SHOPPING MODE ON ',data);
 
-            kipUser[data.source.id].conversations = 'shopping'; 
+            kipUser[data.source.id].conversations = 'shopping';
             //show shopping sticker message
 
             if (data.action && data.action !== 'initial' ){
@@ -2241,49 +2287,49 @@ var updateMode = function(data){
         break;
 
         case 'settings':
-            kipUser[data.source.id].conversations = 'settings'; 
+            kipUser[data.source.id].conversations = 'settings';
             //fire show settings
             settingsMode(data);
             console.log('SETTINGS MODE ON')
         break;
 
         // case 'viewcart':
-        //     kipUser[data.source.id].conversations = 'shopping'; 
+        //     kipUser[data.source.id].conversations = 'shopping';
         //     incomingAction(data);
-        //     //switch to shopping mode and fire view cart 
+        //     //switch to shopping mode and fire view cart
         //     console.log('VIEW CART MODE ON')
         // break;
 
         case 'collect':
-            kipUser[data.source.id].conversations = 'collect'; 
+            kipUser[data.source.id].conversations = 'collect';
             collectMode(data);
             // fire collect function
             console.log('COLLECT MODE ON')
         break;
 
         case 'onboarding':
-            kipUser[data.source.id].conversations = 'onboarding'; 
+            kipUser[data.source.id].conversations = 'onboarding';
             // fire collect function
             onboardingMode(data);
             console.log('onboard MODE ON')
         break;
 
         case 'addmember':
-            kipUser[data.source.id].conversations = 'addmember'; 
+            kipUser[data.source.id].conversations = 'addmember';
             // fire collect function
             addmemberMode(data);
             console.log('onboard MODE ON')
         break;
 
         case 'report':
-            kipUser[data.source.id].conversations = 'shopping'; 
+            kipUser[data.source.id].conversations = 'shopping';
             // fire collect function
             reportMode(data);
             console.log('report MODE ON')
         break;
 
         default:
-            kipUser[data.source.id].conversations = 'shopping'; 
+            kipUser[data.source.id].conversations = 'shopping';
             if (data.action && data.action !== 'initial' ){
                 incomingAction(data);
             }else {
@@ -2293,7 +2339,7 @@ var updateMode = function(data){
         break;
 
     }
-    
+
 }
 
 //* * * * MODE FUNCTIONS * * * * //
@@ -2307,7 +2353,7 @@ function settingsMode(data){
     return conversation_botkit.settings(kipUser[data.source.id], data.source.user, function(msg) {
         data.bucket;
         data.action;
-        
+
         if(typeof msg === 'object'){
             var obj = _.extend(data, msg); //merge data obj from kip with botkit
         }else {
@@ -2349,8 +2395,8 @@ function addmemberMode(data){
     })
 }
 
+function collectMode(data){
 
-function collectMode(data){        
     data.bucket = 'mode';
     data.action = 'collect';
     history.saveHistory(data,true,function(res){});
@@ -2551,7 +2597,7 @@ function reportMode(data){
 /////TOOLS
 
 //trim a string to char #
-function truncate(string){
+function truncate(string) {
    if (string.length > 80)
       return string.substring(0,80)+'...';
    else
@@ -2562,11 +2608,118 @@ function encode_utf8(s) {
   return unescape(encodeURIComponent(s));
 }
 
+
+// client.on("connect", function(err) {
+//     console.log("Connected to email redis queue...");
+// });
+
+// var timer = new InvervalTimer(function() {
+//     client.lrange('chat_email', 0, -1, function(err, emails) {
+//             // console.log('Email Queue: ' + emails.length)
+//             if (emails.length > 0) {
+//                 console.log('Pausing timer')
+//                 timer.pause();
+//                 console.log(emails.length + ' email(s) for processing.')
+//                 async.eachSeries(emails, function iterator(email_str, callback) {
+//                     var envelope = JSON.parse(email_str);
+//                     console.log('Incoming email: ', JSON.stringify(envelope));
+//                     Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
+//                         console.log(0);
+//                         if(err){
+//                             console.log('saved chat user retrieval error');
+//                         } else {
+//                             if (!users || users.length == 0) {
+//                                 console.log(1);
+//                                 var mailOptions = {
+//                                     to: envelope.from_address,
+//                                     from: 'Kip Bot <hello@kip.ai>',
+//                                     subject: 'You are not currently in a chat!',
+//                                     text: 'You are currently not taking part in any Kip Bot chats...'
+//                                 };
+//                                 mailerTransport.sendMail(mailOptions, function(err) {
+//                                     if (err) console.log(err);
+//                                     console.log('User was not found in Chatusers db. Sent notification to user.');
+//                                 });
+//                             }
+//                             else if (users[0] && users[0].team_id ) {
+//                                 console.log(2);
+//                                var emailCommand = {
+//                                     source: {
+//                                         'origin':'slack',
+//                                         'channel':users[0].dm,
+//                                         'org':slackUsers[users[0].team_id].activeTeamId,
+//                                         'id':users[0].team_id + "_" + users[0].dm,
+//                                         'user': slackUsers[users[0].team_id].activeUserId
+//                                     },
+//                                     'msg': envelope.text.toString().trim(),
+//                                     'flags': {'email': true},
+//                                     'emailInfo': {
+//                                         to: envelope.from_address,
+//                                         from: 'Kip Bot <hello@kip.ai>',
+//                                         subject: 'Reply from Kip Bot!',
+//                                         text: ''
+//                                     }
+//                                 };
+//                                 preProcess(emailCommand);
+//                                 client.lrem('chat_email', 1, email_str);
+//                                 timer.resume()
+//                             } else {
+//                                 console.log(3);
+//                                 console.log('wtf mate: slackUsers: ', slackUsers, ' users: ', users);
+//                                 client.lrem('chat_email', 1, email_str);
+//                                 timer.resume()
+//                             }
+//                         }
+//                     });
+//                 }, function complete(err, results) {
+//                     console.log('Resuming timer!')
+//                     timer.resume()
+//                 });
+//             }
+//         }) // end of client lrange, callback)
+// }, 5000);
+
+
+function InvervalTimer(callback, interval) {
+    var timerId, startTime, remaining = 0;
+    var state = 0; //  0 = idle, 1 = running, 2 = paused, 3= resumed
+
+    this.pause = function() {
+        if (state != 1) return;
+
+        remaining = interval - (new Date() - startTime);
+        clearInterval(timerId);
+        state = 2;
+    };
+
+    this.resume = function() {
+        if (state != 2) return;
+
+        state = 3;
+        setTimeout(this.timeoutCallback, remaining);
+    };
+
+    this.timeoutCallback = function() {
+        if (state != 3) return;
+
+        callback();
+
+        startTime = new Date();
+        timerId = setInterval(callback, interval);
+        state = 1;
+    };
+
+    startTime = new Date();
+    timerId = setInterval(callback, interval);
+    state = 1;
+}
+
 /// exports
 module.exports.initSlackUsers = initSlackUsers;
 module.exports.updateMode = updateMode;
 module.exports.newSlack = newSlack;
-module.exports.newEmail = newEmail;
+module.exports.preProcess = preProcess;
+module.exports.slackUsers = slackUsers;
 
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;

@@ -51,11 +51,14 @@ var messageSchema = mongoose.Schema({
     },
     urlShorten:[String],
     flags: {
+            //stuff for supervisor
             toSupervisor: Boolean, //messages coming from cinna to supervisor
             toClient: Boolean, //messages going from supervisor to cinna to client
             toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
             searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
-            recalled: Boolean //flag to bypass history function in cinna
+            recalled: Boolean, //flag to bypass history function in cinna
+            //stuff for email
+            email: Boolean
         },
     click: {
         productId: String,

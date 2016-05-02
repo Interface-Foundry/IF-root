@@ -63,6 +63,10 @@ var schemas = [{
     single: 'ContestEntry',
     plural: 'ContestEntries'
 }, {
+    filename: 'email_schema',
+    single: 'Email',
+    plural: 'Emails'
+}, {
     filename: 'instagram_schema',
     single: 'Instagram',
     plural: 'Instagrams'

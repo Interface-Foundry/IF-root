@@ -42,8 +42,18 @@ var chatuserSchema = mongoose.Schema({
       emailNotification: {
         type: Boolean,
         default: false
+      },
+      awaiting_email_response: {
+        type: Boolean,
+        default: false
       }
     }
+    // , email_stages: {
+    //   stage_1: {
+    //     type: Boolean,
+    //     default: false
+    //   }
+    // }
 });
 
 module.exports = mongoose.model('Chatuser', chatuserSchema);

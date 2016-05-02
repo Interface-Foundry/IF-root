@@ -10,8 +10,12 @@ var controller = botkit.slackbot();
 var promisify = require('promisify-node');
 var banter = require("./banter.js");
 var validator = require('validator');
-var request = require('request');
-var _ = require('lodash')
+var mailerTransport = require('../../../IF_mail/IF_mail.js');
+var async = require('async');
+var _ = require('lodash');
+var email = require('./email');
+var request = require('request-promise');
+
 
 //
 // In-memory hash of jobs so we can stop and start them
@@ -73,9 +77,6 @@ var updateJob = module.exports.updateJob = function(team_id) {
         token: slackbot.bot.bot_access_token
       })
 
-      promisify
-
-
       bot.startRTM(function(err, bot, payload) {
         if (err) {
           throw new Error('Could not connect to Slack');
@@ -121,12 +122,14 @@ module.exports.collect = function(team_id, person_id, callback) {
     console.log('slackbot: ',slackbot);
     console.log(slackbot.meta.office_assistants);
     console.log(person_id);
+
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
       // oh no the person is not an admin, whatever will we do???
       console.log('cannot do this b/c the person is def not an admin');
-
       return;
     }
+
+    var admins = yield db.Chatusers.find({id: {$in: slackbot.meta.office_assistants}}).exec();
 
     //
     // Set up the bot
@@ -198,7 +201,7 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
         convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
         setTimeout(function() {
           lastCall({text: ''}, convo);
-        }, 5000)
+        }, 500)
       })
     })
 
@@ -206,6 +209,39 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
   }).catch((e) => {
     console.log(e);
     console.log(e.stack);
+  })
+}
+
+//
+// returns the list of users to notify
+//
+function getTeam(slackbot) {
+  return co(function*() {
+
+    var channel_users = [];
+    yield (slackbot.cart_channels || []).map((c) => {
+      return request('https://slack.com/api/channels.info?token=' + slackbot.bot.bot_access_token + '&channel=' + c)
+        .then((r) => {
+          var info = JSON.parse(r);
+          channel_users = channel_users.concat(info.channel.members);
+        }).catch((e) => {
+          console.log(e.stack);
+        })
+    })
+
+    console.log(channel_users)
+
+    return db.Chatusers.find({
+      team_id: slackbot.team_id,
+      is_bot: {$ne: true},
+      deleted: {$ne: true},
+      id: {$ne: 'USLACKBOT'}, // because slackbot is not marked as a bot?
+      'meta.last_call_alerts': { '$ne': false },
+      $or: [
+        {dm: {$exists: false}},
+        {id: {$in: channel_users}}
+      ]
+    })
   })
 }
 
@@ -231,41 +267,29 @@ function lastCall(response, convo) {
   }
 
   co(function*() {
-    // maybe i should update the team roster here???
-    if (!convo.users) {
-      // sent to the whole team
-      convo.users = yield db.Chatusers.find({
-        team_id: convo.slackbot.team_id,
-        is_bot: false,
-        deleted: {$ne: true},
-        id: { '$ne': 'USLACKBOT' }, // because slackbot is not marked as a bot?
-        'meta.last_call_alerts': { '$ne': false }
-      }).exec();
-    } else {
-      // sent to a particular channel
-      // remove all users which have disabled last call alerts
-      convo.users = yield db.Chatusers.find({
-        'id': {$in: convo.users},
-        'meta.last_call_alerts': { '$ne': false },
-        is_bot: false,
-        deleted: {$ne: true}
-      }).exec();
-    }
+    // get all the users.
+    var team = yield getTeam(convo.slackbot);
+    console.log(team);
 
     var admin = convo.user_id;
 
-    console.log('sending last call to all ' + convo.users.length + ' users');
-    yield convo.users.map(function(u) {
-      return new Promise(function(resolve, reject) {
-        convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
-          convo.on('end', function() {
-            resolve();
+    console.log('sending last call to all ' + team.length + ' users');
+    yield team.map(function(u) {
+      if (u.dm) {
+        // Send the user a slack message
+        return new Promise(function(resolve, reject) {
+          convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
+            convo.on('end', function() {
+              resolve();
+            });
+            convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
+            convo.say('The clock\'s ticking! You have *60* minutes.');
+            convo.next();
           });
-          convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
-          convo.say('The clock\'s ticking! You have *60* minutes.');
-          convo.next();
-        });
-      })
+        })
+      } else if (u.profile.email) {
+        return email.collect(u.profile.email, convo.slackbot.team_name, convo.slackbot.team_id);
+      }
     })
 
     // continue the admin's conversation if there's anything left to say.
@@ -275,8 +299,7 @@ function lastCall(response, convo) {
     convo.next();
 
   }).catch((e) => {
-    console.log('error');
-    console.log(e);
+    console.log(e.stack);
     convo.next();
   });
 }
