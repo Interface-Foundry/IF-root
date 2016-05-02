@@ -8,6 +8,10 @@ var momenttz = require('moment-timezone');
 var botkit = require('botkit');
 var controller = botkit.slackbot();
 var promisify = require('promisify-node');
+var banter = require("./banter.js");
+var validator = require('validator');
+var request = require('request');
+var _ = require('lodash')
 
 //
 // In-memory hash of jobs so we can stop and start them
@@ -87,7 +91,12 @@ var updateJob = module.exports.updateJob = function(team_id) {
               bot.closeRTM();
             })
             convo.say('Hi, this is your weekly update');
-            convo.ask('Would you like me to send an last call message to all your employees?', lastCall)
+
+            // SHOW CART STICKER
+
+            //* * * *  SHOW TEAM CART USERS  ** * * * //
+
+            convo.ask('Would you like me to send an last call message to *SHOW TEAM LIST*', lastCall)
             convo.next();
           });
         });
@@ -139,9 +148,11 @@ module.exports.collect = function(team_id, person_id, callback) {
         })
         convo.interrupted = false;
         convo.ask('Okay, in 5 seconds I\'ll send the last call message to all users.  Say `wait` or `stop` to prevent this.', lastCall);
-        setTimeout(function() {
-          lastCall({text: ''}, convo);
-        }, 5000)
+
+        lastCall({text: ''}, convo);
+        // setTimeout(function() {
+          
+        // }, 5000)
       })
     })
   }).catch((e) => {
@@ -292,95 +303,9 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
           console.log('ending addmember convo');
           bot.closeRTM();
         });
-      startConvo();
-      function startConvo() {
-          convo.ask('Would you like to add members to this order?', function(response, convo) {
-          if (response.text.match(convo.bot.utterances.yes)) {
-              console.log('k lets add a member mkay');
-              var newUser = {
-                   id:'U0SM73E5R', //How to generate?
-                   type: 'slack',
-                   dm:'D0SM74ECT',
-                   team_id: team_id,
-                   is_admin:false,
-                   is_owner:false,
-                   is_primary_owner:false,
-                   is_restricted:false,
-                   is_ultra_restricted:false,
-                   is_bot:false,
-                   profile: {},
-                   settings: { emailNotification: false}
-               };
-              convo.next();
-              convo.ask('What is the name of this member? ', function(response, convo) {
-                if (response.text) {
-                  newUser.name = response.text;
-                }
-                convo.next();
-                convo.ask('Is he/she a slack user?', function(response, convo) {
-                  if (response.text.match(convo.bot.utterances.yes)) {
-                    newUser.type = 'slack';
-                  }
-                  else {
-                    newUser.type = 'email';
-                    newUser.settings.emailNotification = true;
-                  }
-                  convo.next();
-                  convo.ask('What is this members email address?', function(response, convo) {
-                    if (response.text) {
-                      newUser.profile.email = response.text;
-                    }
-                    var user = new db.Chatuser(newUser);
-                    user.save(function(err, saved){
-                      if (err) {
-                        console.log('Could not save new user: ', err)
-                           convo.bot.say({
-                            text: 'Oops! Something went wrong!',
-                            channel: channel_id
-                          });
-                         convo.stop()
-                         cb();
-                      }
-                      else {
-                         console.log('Saved new user!',saved);
-                         convo.bot.say({
-                            text: 'Great! We added ' + newUser.name + ' to the list!',
-                            channel: channel_id
-                          });
-                         convo.next();
-                          convo.ask('Would you like to add another user?', function(response, convo) {
-                            if (response.text.match(convo.bot.utterances.yes)) {
-                              convo.next();
-                              startConvo();
-                            }
-                            else if (response.text.match(convo.bot.utterances.no)) {
-                              convo.stop()
-                              cb();
-                            }
-                            else {
-                              convo.stop()
-                              cb();
-                            }
-                          })
-                      }
-                    })//save
-                  })// email address?
-                }) // slack or email?
-              }) //name?
-            }
-            else if (response.text.match(convo.bot.utterances.no)) {
-              console.log('no add member');
-              convo.bot.say({text: 'OK, you can `checkout` whenever you\'re ready', channel: channel_id});
-              convo.stop()
-              cb();
-            }
-            else {
-              convo.say("I'm sorry I couldn't understand that.");
-              convo.repeat();
-              convo.next();
-              }
-        });// add members
-      }//end of startConvo function
+        listenForCart(response,convo);
+      //}//end of startConvo function
+
       }); // start private conversation
     }); //start RTM
    }).catch((e) => {
@@ -388,3 +313,633 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
     console.log(e.stack);
   })
 }
+
+
+function listenForCart(response,convo) {
+
+    console.log('👭 ',response)
+
+    
+
+    //DISPLAY TEAM USER VIEW HERE 
+    //AT FIRST, ONLY SHOWS #general view and # of users
+
+    viewCartMembers(convo,function(res){
+      convo.ask(res, handleChange);            
+    });
+
+    //* * * * * ** * * * * 
+    //update list of users with team_cart boolean
+    //* * * * * * * * * * 
+
+
+  //* * * * * * * * * * * * * //
+  //      CHAT TO ADD FUNCTION FIRE ---->
+  // * * * * * * * * * * * * *
+  //
+  //if user is confused (frustration triggers)
+
+
+
+  //* * * * * * * * * * * * * //
+  //SHOW HELP MODE ON ONBOARDING???
+  //* * * * * * * * * * * * * //
+
+  //this mode is triggered when we detect user is frustrated or confused
+  function helpMode(){
+    convo.ask('Would you like to add members to this order?', function(response, convo) {
+      if (response.text.match(convo.bot.utterances.yes)) {
+          console.log('k lets add a member mkay');
+          var newUser = {
+               id:'U0SM73E5R', //How to generate?
+               type: 'slack',
+               dm:'D0SM74ECT',
+               team_id: team_id,
+               is_admin:false,
+               is_owner:false,
+               is_primary_owner:false,
+               is_restricted:false,
+               is_ultra_restricted:false,
+               is_bot:false,
+               profile: {},
+               settings: { emailNotification: false}
+           };
+          convo.next();
+          convo.ask('What is the name of this member? ', function(response, convo) {
+            if (response.text) {
+              newUser.name = response.text;
+            }
+            convo.next();
+            convo.ask('Is he/she a slack user?', function(response, convo) {
+              if (response.text.match(convo.bot.utterances.yes)) {
+                newUser.type = 'slack';
+              }
+              else {
+                newUser.type = 'email';
+                newUser.settings.emailNotification = true;
+              }
+              convo.next();
+              convo.ask('What is this members email address?', function(response, convo) {
+                if (response.text) {
+
+                  //parsing email
+                  if (response.text.indexOf('<mailto') >= 0) {
+                    response.text = response.text.split('|');
+                    response.text = response.text[1].replace('>','');
+                  }
+                  newUser.profile.email = response.text;
+                }
+                var user = new db.Chatuser(newUser);
+                user.save(function(err, saved){
+                  if (err) {
+                    console.log('Could not save new user: ', err)
+                       convo.bot.say({
+                        text: 'Oops! Something went wrong!',
+                        channel: channel_id
+                      });
+                     convo.stop()
+                     cb();
+                  }
+                  else {
+                     console.log('Saved new user!',saved);
+                     convo.bot.say({
+                        text: 'Great! We added ' + newUser.name + ' to the list!',
+                        channel: channel_id
+                      });
+                     convo.next();
+                      convo.ask('Would you like to add another user?', function(response, convo) {
+                        if (response.text.match(convo.bot.utterances.yes)) {
+                          convo.next();
+                          startConvo();
+                        }
+                        else if (response.text.match(convo.bot.utterances.no)) {
+                          convo.stop()
+                          cb();
+                        }
+                        else {
+                          convo.stop()
+                          cb();
+                        }
+                      })
+                  }
+                })//save
+              })// email address?
+            }) // slack or email?
+          }) //name?
+        }
+        else if (response.text.match(convo.bot.utterances.no)) {
+          console.log('no add member');
+          convo.bot.say({text: 'OK, you can `checkout` whenever you\'re ready', channel: channel_id});
+          convo.stop()
+          cb();
+        }
+        else {
+          convo.say("I'm sorry I couldn't understand that.");
+          convo.repeat();
+          convo.next();
+          }
+    });// add members
+  }
+
+}
+
+
+function handleChange(response, convo){
+
+  console.log('👭 ',response)  
+
+  var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
+
+  var tokens = response.text.toLowerCase().trim().replace(/[`~!$%^&*()\-=?;:'",\{\}\[\]\\\/]/gi, '').split(' ');
+
+  if (isAdmin && ['add', 'remove', 'rm', 'rem'].indexOf(tokens[0]) >= 0) {
+
+    var channelIds = [];
+    var emails = [];
+
+    // look for channels mentioned with # symbol
+    channelIds = tokens.filter((t) => {
+      return t.indexOf('<#') === 0;
+    }).map((u) => {
+      return u.replace(/(\<\#|\>)/g, '').toUpperCase();
+    })
+    channelIds = _.uniq(channelIds, false) //remove duplicates
+
+
+    //get emails
+    for (var i = 0; i < tokens.length; i++) { 
+      parseEmail(tokens[i],function(res){
+        if(validator.isEmail(res)){
+          emails.push(res);
+        }
+      })
+    }
+    emails = _.uniq(emails, false) //remove duplicate emails
+
+    //* * * NOTHING FOUND * * * *//
+    //CHECK IF CANT FIND CHANNELS OR EMAILS
+    if (channelIds.length === 0 && emails.length === 0) {
+
+      console.log('NOTHING FOUND');
+      var attachments = [
+        {
+          text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+          "mrkdwn_in": [
+              "text",
+              "pretext"
+          ]
+        }
+      ];
+      var resStatus = {
+        username: 'Kip',
+        text: "",
+        attachments: attachments,
+        fallback: 'Settings'
+      };
+      // viewCartMembers(convo,function(res){
+      // }
+      return convo.say(resStatus);
+       //convo.next();
+    }
+
+    //* * * * * * * * * * * * * * //
+    //* * * * ADD / REMOVE * * * //
+    //* * * * * * * * * * * * * * //
+
+    var updateCount = channelIds.length + emails.length;
+    var counter = 0;
+
+    console.log(updateCount);
+
+    //add stuff
+    if (tokens[0] === 'add') {
+
+      //update channels
+      if (channelIds.length > 0){
+        channelIds.map(function(channel) {
+
+          if (!convo.slackbot.meta.cart_channels){
+            convo.slackbot.meta.cart_channels = [];
+          }    
+
+          //check if arr already contains channel id
+          if (!_.includes(convo.slackbot.meta.cart_channels, channel)){
+            convo.slackbot.meta.cart_channels.push(channel);
+          }
+
+          convo.slackbot.save(function(err, saved){
+            if (err) {
+              console.log('err ',err);
+              //- - - COUNTER - - - //
+              counter++;
+              if(updateCount == counter){
+                membersUpdated(convo);
+              }
+              //- - - - - - - - - - //
+            }
+            else {
+               console.log('updated channels to team!',saved);
+                //- - - COUNTER - - - //
+                counter++;
+                if(updateCount == counter){
+                  membersUpdated(convo);
+                }
+                //- - - - - - - - - - //
+            }
+          })//save
+
+        })
+      }
+
+      //adding / updating email users
+      if (emails.length > 0){
+
+        emails.map(function(email) {
+
+          console.log('ADDING INCOMING EMAIL ',email);
+
+          co(function*() {
+
+            //update existing users in db
+            var emailUser = yield Chatuser.findOne({
+              'team_id': convo.slackbot.team_id,
+              'type': 'email',
+              'profile.email':email
+            }).exec();
+
+            console.log('emailUser ',emailUser)
+
+            //does email user exist?
+            if(emailUser && emailUser.id){
+              emailUser.settings.emailNotification = true;
+              emailUser.save(function(err, saved){
+                if (err) {
+                  console.log('err ',err);
+                    //- - - COUNTER - - - //
+                    counter++;
+                    if(updateCount == counter){
+                      membersUpdated(convo);
+                    }
+                    //- - - - - - - - - - //
+                }
+                else {
+                   console.log('updated user',saved);
+
+                    //- - - COUNTER - - - //
+                    counter++;
+                    if(updateCount == counter){
+                      membersUpdated(convo);
+                    }
+                    //- - - - - - - - - - //
+
+                }
+              })//save
+            }
+
+            //CREATING NEW EMAIL USER
+            else {
+              var emailName;
+              if(email.split("@")[0]){
+                emailName = email.split("@")[0];
+              }
+
+              //didn't find user in DB so let's create new email user
+              //new user here
+              var newUser = {
+                 id: Math.floor((Math.random() * 100) + 1) + '_' + emailName + '_' + convo.slackbot.team_id, //lol some id 
+                 type: 'email',
+                 team_id: convo.slackbot.team_id,
+                 name: emailName,
+                 is_admin:false,
+                 is_owner:false,
+                 is_primary_owner:false,
+                 is_restricted:false,
+                 is_ultra_restricted:false,
+                 is_bot:false,
+                 profile: {
+                  email: email
+                 },
+                 settings: { emailNotification: true}
+              };
+
+              console.log('NEWUSER ',newUser)
+
+              var user = new Chatuser(newUser);
+              user.save(function(err, saved){
+                if (err) {
+                  console.log('Could not save new user: ', err)
+                  //- - - COUNTER - - - //
+                  counter++;
+                  if(updateCount == counter){
+                    membersUpdated(convo);
+                  }
+                  //- - - - - - - - - - //
+                }
+                else {
+                    console.log('SAVED USER TO DB ',emailName)
+                    //- - - COUNTER - - - //
+                    counter++;
+                    if(updateCount == counter){
+                      membersUpdated(convo);
+                    }
+                    //- - - - - - - - - - //
+                }
+              })//save
+            }//creating new email user
+          })
+        }) //map emails
+      }//we found emails
+    }
+
+    //remove things
+    else if (tokens[0] === 'remove' || tokens[0] === 'rm' || tokens[0] === 'rem') {
+
+      console.log('REMOVE CHANNEL or EMAIL');
+
+      //remove channels
+      if (channelIds.length > 0){
+        // get list of users in all channels
+        channelIds.map(function(channel) {
+          if (!convo.slackbot.meta.cart_channels){
+            convo.slackbot.meta.cart_channels = [];
+          }
+          convo.slackbot.meta.cart_channels = _.without(convo.slackbot.meta.cart_channels, channel); //remove channel from arr
+          convo.slackbot.save(function(err, saved){
+            if (err) {
+              console.log('err ',err);
+              //- - - COUNTER - - - //
+              counter++;
+              if(updateCount == counter){
+                membersUpdated(convo);
+              }
+              //- - - - - - - - - - //
+            }
+            else {
+               console.log('updated channels to team!',saved);
+              //- - - COUNTER - - - //
+              counter++;
+              if(updateCount == counter){
+                membersUpdated(convo);
+              }
+              //- - - - - - - - - - //
+            }
+          })//save
+        })                    
+      }
+
+      //remove emails
+      if (emails.length > 0){
+        emails.map(function(email) {
+          co(function*() {
+            var emailUser = yield Chatuser.findOne({
+              'team_id': convo.slackbot.team_id,
+              'type': 'email',
+              'profile.email':email
+            }).exec();
+
+            console.log('REMOVE EMAIL ',emailUser);
+
+            if(emailUser && emailUser.id){
+              console.log('update user ',emailUser);
+              emailUser.settings.emailNotification = false;
+              emailUser.save(function(err, saved){
+                if (err) {
+                  console.log('err ',err);
+                    //- - - COUNTER - - - //
+                    counter++;
+                    if(updateCount == counter){
+                      membersUpdated(convo);
+                    }
+                    //- - - - - - - - - - //
+                }
+                else {
+                   console.log('updated user',saved);
+                    //- - - COUNTER - - - //
+                    counter++;
+                    if(updateCount == counter){
+                      membersUpdated(convo);
+                    }
+                    //- - - - - - - - - - //
+                }
+              })//save
+            }else {
+              //- - - COUNTER - - - //
+              counter++;
+              if(updateCount == counter){
+                membersUpdated(convo);
+              }
+              //- - - - - - - - - - //
+            }
+          })
+        })
+      }//emails
+
+
+    }//removing stuff
+  }//parse tokens
+}
+
+function membersUpdated(convo){
+
+  viewCartMembers(convo,function(res){
+    
+    convo.say(res);
+    //convo.next();
+
+    var attachments = [
+      {
+        "text":"Team Cart Members updated! Are you done with changes? Type `done`",
+        "mrkdwn_in": ["fields","text"],
+        "color":"#49d63a"
+      }
+    ];
+
+    var rez = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Cart Members Updated'
+    };
+
+    convo.ask(rez, handleChange)
+    convo.next();
+  })  
+}
+
+function viewCartMembers(convo,callback){
+
+  co(function*() {
+
+    //get slack team
+    var slackbot = yield db.Slackbots.findOne({team_id: convo.slackbot.team_id}).exec();
+
+    if (!slackbot.meta.cart_channels){
+      slackbot.meta.cart_channels = [];
+    }
+
+    var cartChannels = slackbot.meta.cart_channels;
+
+    //get email users on team
+    var emailUsers = yield Chatuser.find({
+      'team_id': convo.slackbot.team_id,
+      'type': 'email',
+      'settings.emailNotification': true
+    }).exec();
+
+    console.log('emailUsers()())(()()() ',emailUsers)
+
+    //how many rows do we need for attachment?
+
+    var emails = _.map(emailUsers, _.property('profile.email')); //extract emails
+
+    //* * * Building column slug to fill unequal columns * * * //
+
+    //add to cartChannels
+    if(cartChannels.length < emails.length){
+
+      if(cartChannels.length < 1){
+        var calc = 0;
+      }else {
+        var calc = cartChannels.length;
+      }
+
+      var addNum = emails.length - calc;
+      var slugArr = new Array(addNum).fill('');
+      cartChannels = cartChannels.concat(slugArr);
+    }
+    //add to emails
+    else if (cartChannels.length > emails.length){
+
+      if(emails.length < 1){
+        var calc = 0;
+      }else {
+        var calc = emails.length;
+      }
+
+      var addNum = cartChannels.length - calc;
+
+      console.log('emails ',emails.length)
+      console.log('channels ',cartChannels.length)
+      console.log('addNum ',addNum)
+
+      var slugArr = new Array(addNum).fill('');
+
+      emails = emails.concat(slugArr);
+    }
+    //* * * * * * *//
+
+    //this merges both arrays and alternates between them
+    var comboArr = _.flatten(_.zip(cartChannels, emails));
+
+    var comboObj = comboArr.map(function(res) {
+        //not email, add slack channel syntax
+        if(!validator.isEmail(res) && res !== '' && res !== undefined && res !== null){
+          res = "<#"+res+">";
+        }
+        var obj = {
+          "value": res,
+          "short": true
+        }
+        return obj;
+    });
+
+    var userList = {        
+      "color":"#45a5f4",
+      "mrkdwn_in": ["fields"],
+      "fields": comboObj
+    };
+
+
+    //ensure column titles
+    if(userList.fields[0]){
+      userList.fields[0].title = 'Slack Channel Members';
+    }else {
+      userList.fields[0] = {
+        "title": "Slack Channels",
+        "short": true,
+        "val":"_No Channels_"
+      }      
+    }
+    if(userList.fields[1]){
+      userList.fields[1].title = 'Emails';
+    }else {
+      userList.fields[1] = {
+        "title": "Emails",
+        "short": true,
+        "val":"_No Emails_"
+      }     
+    }
+    //- - - - - - //
+
+    
+    var attachments = [
+      {
+        "image_url":"http://i.imgur.com/nKSYO8d.png",
+        "text":"",
+        "color":"#45a5f4"
+      }
+    ]
+
+    attachments.push(userList);
+
+
+    var endpart = [{
+      "text":"",
+      "pretext":"*Options*",
+      "mrkdwn_in": ["fields","pretext"],
+      "color":"#45a5f4",
+      "fields": [
+        {
+          "value": "_Add channel_ `add #channel`",
+          "short": true
+        },
+        {
+          "value": "_Add email_ `add name@email.com`",
+          "short": true
+        },
+        {
+          "value": "_Remove channel_ `rm #channel`",
+          "short": true
+        },
+        {
+          "value": "_Remove email_ `rm name@email.com`",
+          "short": true
+        }
+      ]
+    },
+    {
+      "text":"Update team cart members? Or type `exit`",
+      "mrkdwn_in": ["fields","text"],
+      "color":"#49d63a"
+    }];
+
+
+    attachments = attachments.concat(endpart);
+
+
+    var resList = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Team Cart Members'
+    };
+    
+    callback(resList);
+
+   }).catch((e) => {
+    console.log(e);
+    console.log(e.stack);
+  })
+
+
+}
+
+
+function parseEmail(input,callback){
+  if (input.indexOf('<mailto') >= 0) {
+    input = input.split('|');
+    input = input[1].replace('>','');
+  }
+  callback(input);
+}
+

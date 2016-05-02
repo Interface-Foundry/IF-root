@@ -112,12 +112,27 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'add member') > 80:
         case textSimilar(input,'add members') > 90:
         case textSimilar(input,'add team') > 90:
+        case textSimilar(input,'member add') > 90:
+        case textSimilar(input,'members add') > 90:
         case textSimilar(input,'add team member') > 90:
         case textSimilar(input,'add email') > 90:
         case textSimilar(input,'add name') > 90:
         case textSimilar(input,'add emails') > 90:
         case textSimilar(input,'add people') > 90:
         case textSimilar(input,'add person') > 90:
+        case textSimilar(input,'add channels') > 90:
+        case textSimilar(input,'add channel') > 90:
+        case textSimilar(input,'cart members') > 90:
+        case textSimilar(input,'cart member') > 90:
+        case textSimilar(input,'cart user') > 90:
+        case textSimilar(input,'cart users') > 90:
+        case textSimilar(input,'members') > 90:
+        case textSimilar(input,'member') > 90:
+        case textSimilar(input,'memeber') > 90:
+        case textSimilar(input,'users') > 90:
+        case textSimilar(input,'channels') > 90:
+        case textSimilar(input,'emails') > 90:
+        case textSimilar(input,'email') > 90:
             mode = 'addmember';
             break;
 
@@ -1407,7 +1422,7 @@ var getCinnaResponse = function(data,callback){
 
 //text similarity percentage
 //mod of: http://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
-function textSimilar(a,b) {
+var textSimilar = function(a,b) {
     if (a && b){
         a = a.toLowerCase().trim();
         b = b.toLowerCase().trim();
@@ -1433,3 +1448,4 @@ module.exports.welcomeMessage = welcomeMessage;
 module.exports.getCinnaResponse = getCinnaResponse;
 module.exports.checkModes = checkModes;
 module.exports.checkExitMode = checkExitMode;
+module.exports.textSimilar = textSimilar;

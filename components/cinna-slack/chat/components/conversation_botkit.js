@@ -662,7 +662,7 @@ function handleSettingsChange(response, convo) {
                         "text",
                         "pretext"
                     ],
-                    "color":"#45a5f4"
+                    "color":"#49d63a"
                 }
             ];
 

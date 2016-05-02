@@ -825,20 +825,20 @@ function routeNLP(data){
         });
 
         function continueNLP(){
-            nlp.parse(data, function(e, res) {
-                if (e){
-                  console.log('NLP error ',e);
-                  // Route to supervisor
-                  data.flags.toSupervisor = true;
-                  incomingAction(data);
-                }
-                else {
-                    console.log('NLP RES ',res);
-                    processData.buildKipObject(data,function(res){
-                        incomingAction(res);
-                    });
-                }
-            })
+           nlp.parse(data, function(e, res) {
+               if (e){
+                 console.log('NLP error ',e);
+                 // Route to supervisor
+                 data.flags.toSupervisor = true;
+                 incomingAction(data);
+               }
+               else {
+                   data = _.merge({}, data, res)
+                   processData.buildKipObject(data,function(res){
+                     incomingAction(_.merge({}, data, res));
+                   });
+               }
+           })
         }
     }
     else {
@@ -2138,7 +2138,7 @@ function viewCart(data, show_added_item){
       cartObj.push({
         text: summaryText,
         mrkdwn_in: ['text', 'pretext'],
-        color: '#45a5f4'
+        color: '#49d63a'
       })
 
       data.client_res = [];
@@ -2307,8 +2307,6 @@ function settingsMode(data){
     return conversation_botkit.settings(kipUser[data.source.id], data.source.user, function(msg) {
         data.bucket;
         data.action;
-        console.log('💎💎💎💎 data ',data);
-        console.log('💎💎💎💎 msg ',msg);
         
         if(typeof msg === 'object'){
             var obj = _.extend(data, msg); //merge data obj from kip with botkit
@@ -2316,9 +2314,41 @@ function settingsMode(data){
             var obj = data;
             obj.mode = msg;
         }
+
+        console.log('💎incoming💎 💎 ',obj);
         updateMode(obj);              
     })
 }
+
+
+function addmemberMode(data){
+    data.bucket = 'mode';
+    data.action = 'addmember';
+    history.saveHistory(data,true,function(res){});
+
+    kipUser[data.source.id].conversations = 'addmember';
+
+    return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function() {
+
+        console.log('done adding members');
+        kipUser[data.source.id].conversations[data.channel] = 'shopping';
+
+        //fire same here as exit settings mode!!!! 
+
+        // data.bucket;
+        // data.action;
+
+        // if(typeof msg === 'object'){
+        //     var obj = _.extend(data, msg); //merge data obj from kip with botkit
+        // }else {
+        //     var obj = data;
+        //     obj.mode = msg;
+        // }
+        // updateMode(obj);     
+
+    })
+}
+
 
 function collectMode(data){        
     data.bucket = 'mode';
@@ -2353,7 +2383,23 @@ function collectMode(data){
 
               return weekly_updates.collectFromUsers(data.source.org, data.source.user, channel, channelInfo.channel.members, function() {
                 console.log('um done collecting orders for channel ' + channel)
+
                 kipUser[data.source.id].conversation = 'shopping';
+
+                //fire same here as exit settings mode!!!! 
+
+                // data.bucket;
+                // data.action;
+
+                // if(typeof msg === 'object'){
+                //     var obj = _.extend(data, msg); //merge data obj from kip with botkit
+                // }else {
+                //     var obj = data;
+                //     obj.mode = msg;
+                // }
+                // updateMode(obj);     
+
+    
               })
             }
           });
@@ -2383,6 +2429,9 @@ function onboardingMode(data){
 }
 
 function shoppingMode(data){
+
+    console.log('SHOPPING MODE FIRED');
+
     data.bucket = 'mode';
     data.action = 'shopping';
     history.saveHistory(data,true,function(res){});
@@ -2401,7 +2450,7 @@ function shoppingMode(data){
               "text",
               "pretext"
           ],
-          "color":"#45a5f4"
+          "color":"#49d63a"
       }
     ];
     sendResponse(data);
@@ -2496,19 +2545,7 @@ function reportMode(data){
     })
 }
 
-function addmemberMode(data){
-    data.bucket = 'mode';
-    data.action = 'addmember';
-    history.saveHistory(data,true,function(res){});
 
-    kipUser[data.source.id].conversations = 'addmember';
-
-    console.log('triggering kip collect, maybe if the person is an admin?')
-    return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function() {
-      console.log('done adding members');
-      kipUser[data.source.id].conversations[data.channel] = 'shopping';
-    })
-}
 
 
 /////TOOLS
