@@ -254,9 +254,43 @@ var reply = module.exports.reply = function(payload, data) {
 }
 
 
+//
+// Replies with three choices, woooooooooooooooooooooooooooooooo
+//
+var results = module.exports.results = function(data) {
+  return co(function*() {
+    console.log('sending results to thread', data.source.id);
+    var payload = {
+      to: data.emailInfo.to,
+      from: `Kip <${addr}>`
+    };
+
+    payload.html = template_results
+      .replace(/\$ID/g, data.source.id)
+      .replace(/\$FIRST_NAME/g, data.client_res[0].title)
+      .replace(/\$FIRST_LINK/g, data.client_res[0].title_link)
+      .replace(/\$FIRST_IMAGE/g, data.client_res[0].image_url)
+      .replace(/\$SECOND_NAME/g, data.client_res[1].title)
+      .replace(/\$SECOND_LINK/g, data.client_res[1].title_link)
+      .replace(/\$SECOND_IMAGE/g, data.client_res[1].image_url)
+      .replace(/\$THIRD_NAME/g, data.client_res[2].title)
+      .replace(/\$THIRD_LINK/g, data.client_res[2].title_link)
+      .replace(/\$THIRD_IMAGE/g, data.client_res[2].image_url)
+
+    var email = new db.Email(_.merge({}, payload, {
+      chain: data.source.id,
+      sequence: data.thread.sequence + 1,
+      team: data.source.org
+    }))
+
+    yield email.save();
+    return send(payload);
+  })
+}
+
 
 if (!module.parent) {
-  var template = fs.readFileSync('./email-collect.html', 'utf8');
+  var template = fs.readFileSync('./email-results.html', 'utf8');
 
   var template2 = template
     .replace(/\$ID/g, 'email-chain-13f8jasf04fjakdf9320jk')
