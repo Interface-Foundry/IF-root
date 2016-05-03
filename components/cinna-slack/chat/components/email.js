@@ -18,15 +18,22 @@ var uuid = require('uuid');
 var _ = require('lodash');
 var linkify = require('linkifyjs');
 var send = require('../../../IF_mail/IF_mail.js').send;
+var juice = require('juice');
+var fs = require('fs');
+
+//
+// Email templates
+//
+var template_collect = fs.readFileSync(__dirname + '/email-collect.html');
+var template_generic = fs.readFileSync(__dirname + '/email-generic.html');
+var template_results = fs.readFileSync(__dirname + '/email-results.html');
 
 var addr = {
   production: 'kip@kip.ai',
   development: 'inbound@pbrandt1.bymail.in'
 }[process.env.NODE_ENV] || 'kip@kip.ai';
 
-var signature = `
-
-😘
+var plaintext_signature = `
 
 Your Shopping Assistant,
 
@@ -166,13 +173,21 @@ D.H., 1991           __gggrgM**M#mggg__
 //
 // 1-800-EMAILBAE  😘
 //
-var collect = module.exports.collect = function(address, team_name, team_id) {
+var collect = module.exports.collect = function(address, team_name, team_id, team_link) {
     console.log('collect for', team_name, team_id);
     var threadId = 'email-chain-' + uuid.v4();
-    var text = `Hey bae,
-just lettin u know that i care about u, so i wanted to say that the last call for office stuff is soon. whisper your dreams in my ear and i will make it so.
 
-😘
+    var html = template_collect
+      .replace(/\$ID/g, threadId)
+      .replace(/\$SLACKBOT_NAME/g, team_name)
+      .replace(/\$SLACKBOT_LINK/g, team_link);
+
+
+    var text = `Hey there,
+
+I'm just letting you know that they will be submitting the office purcase order for your slack team ${team_name} soon.
+
+If you need to add anything to the shopping cart, you can either log on to https://${team_link}.slack.com/messages/@kip and talk to me there, or you can just send a reply to this message with the item you are looking for.
 
 Your Shopping Assistant,
 
@@ -183,13 +198,14 @@ kip@kip.ai
 --
 
 ${threadId}
-`
+`;
 
     var payload = {
         to: address,
         from: `Kip <${addr}>`,
         subject: 'Last Call for ' + team_name + ' Purchase Order',
-        text: text
+        text: text,
+        html: html
     };
 
     var email = new db.Email(_.merge({}, payload, {
@@ -215,7 +231,11 @@ var reply = module.exports.reply = function(payload, data) {
 
   payload.from = `Kip <${addr}>`;
   payload.subject = data.emailInfo.subject,
-  payload.text = payload.text + signature + data.source.id;
+  payload.html = template_generic
+    .replace(/\$ID/g, data.source.id)
+    .replace(/\$MESSAGE/, payload.text)
+  payload.text = payload.text + plaintext_signature + data.source.id;
+
   var email = new db.Email(_.merge({}, payload, {
     chain: data.source.id,
     sequence: data.thread.sequence + 1,
@@ -236,9 +256,29 @@ var reply = module.exports.reply = function(payload, data) {
 
 
 if (!module.parent) {
-  collect(['peter.m.brandt@gmail.com'], 'bae')
-    .then(console.log.bind(console))
-    .catch(function(err) {
-      console.error(err.stack);
-    });
+  var template = fs.readFileSync('./email-collect.html', 'utf8');
+
+  var template2 = template
+    .replace(/\$ID/g, 'email-chain-13f8jasf04fjakdf9320jk')
+    .replace(/\$SLACKBOT_NAME/g, 'slytherin')
+
+  // juice it
+  var juiced = juice(template2);
+
+
+  var addr = 'inbound@pbrandt1.bymail.in';
+  var team_name = 'Slytherin';
+  var payload = {
+      to: 'peter.m.brandt@gmail.com',
+      from: `Kip <${addr}>`,
+      subject: 'Last Call for ' + team_name + ' Purchase Order',
+      // text: 'email from kip this is a test plaintext jank',
+      html: juiced
+  };
+  send(payload);
+  // collect(['peter.m.brandt@gmail.com'], 'bae')
+  //   .then(console.log.bind(console))
+  //   .catch(function(err) {
+  //     console.error(err.stack);
+  //   });
 }
