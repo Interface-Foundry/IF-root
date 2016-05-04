@@ -8,8 +8,8 @@
 |_____||___|___||__|__||____||_____|
 
 */
-var key = process.env.NODE_ENV === 'production' ? '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' : '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';
-var sendgrid = require('sendgrid')(key);
+// var key = process.env.NODE_ENV === 'production' ? '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' : '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';
+// var sendgrid = require('sendgrid')(key);
 var co = require('co');
 require('promisify-global');
 var db = require('db');
@@ -20,13 +20,14 @@ var linkify = require('linkifyjs');
 var send = require('../../../IF_mail/IF_mail.js').send;
 var juice = require('juice');
 var fs = require('fs');
+var parsereply = require('parse-reply');
 
 //
 // Email templates
 //
-var template_collect = fs.readFileSync(__dirname + '/email-collect.html');
-var template_generic = fs.readFileSync(__dirname + '/email-generic.html');
-var template_results = fs.readFileSync(__dirname + '/email-results.html');
+var template_collect = fs.readFileSync(__dirname + '/email-collect.html', 'utf8');
+var template_generic = fs.readFileSync(__dirname + '/email-generic.html', 'utf8');
+var template_results = fs.readFileSync(__dirname + '/email-results.html', 'utf8');
 
 var addr = {
   production: 'kip@kip.ai',
@@ -54,9 +55,6 @@ var processEmail = module.exports.process = function(message) {
   return co(function*() {
     console.log(message);
 
-    // make the message nice if it was a reply
-
-
     // parse the threadId from the email message
     message.text = message.text || '';
     var chainId = message.text.match(/email-chain-[a-z0-9\-]+/i);
@@ -66,6 +64,9 @@ var processEmail = module.exports.process = function(message) {
     } else {
       chainId = chainId[0];
     }
+
+    // make the message nice if it was a reply
+    message.text = parsereply(message.text);
 
     // get all the stuff from the db for this email
     var last_message = yield db.Emails.findOne({
@@ -216,7 +217,7 @@ ${threadId}
 
     return co(function*() {
         yield email.save();
-        return sendgrid.send.promise(payload);
+        return send(payload);
     })
 }
 
@@ -260,22 +261,25 @@ var reply = module.exports.reply = function(payload, data) {
 var results = module.exports.results = function(data) {
   return co(function*() {
     console.log('sending results to thread', data.source.id);
+
     var payload = {
       to: data.emailInfo.to,
-      from: `Kip <${addr}>`
+      from: `Kip <${addr}>`,
+      subject: data.emailInfo.subject
     };
 
     payload.html = template_results
       .replace(/\$ID/g, data.source.id)
-      .replace(/\$FIRST_NAME/g, data.client_res[0].title)
+      .replace(/\$FIRST_NAME/g, data.client_res[0].title.replace(/^1. /, ''))
       .replace(/\$FIRST_LINK/g, data.client_res[0].title_link)
       .replace(/\$FIRST_IMAGE/g, data.client_res[0].image_url)
-      .replace(/\$SECOND_NAME/g, data.client_res[1].title)
+      .replace(/\$SECOND_NAME/g, data.client_res[1].title.replace(/^2. /, ''))
       .replace(/\$SECOND_LINK/g, data.client_res[1].title_link)
       .replace(/\$SECOND_IMAGE/g, data.client_res[1].image_url)
-      .replace(/\$THIRD_NAME/g, data.client_res[2].title)
+      .replace(/\$THIRD_NAME/g, data.client_res[2].title.replace(/^3. /, ''))
       .replace(/\$THIRD_LINK/g, data.client_res[2].title_link)
       .replace(/\$THIRD_IMAGE/g, data.client_res[2].image_url)
+      .replace(/\$SEARCH_TERM/g, data.tokens)
 
     var email = new db.Email(_.merge({}, payload, {
       chain: data.source.id,
