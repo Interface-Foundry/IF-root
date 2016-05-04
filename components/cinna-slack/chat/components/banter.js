@@ -1,12 +1,175 @@
 
-var checkForCanned = function(input,callback,origin) {
+var checkExitMode = function(input){
+
+    console.log('INPUT ',input)
+    switch (true) {
+        case textSimilar(input,'exit') > 90:
+        case textSimilar(input,'ex') > 90:
+        case textSimilar(input,'leave') > 90:
+        case textSimilar(input,'bye') > 90:
+        case textSimilar(input,'cancel') > 90:
+        case textSimilar(input,'end') > 90:
+        case textSimilar(input,'finish') > 90:
+        case textSimilar(input,'done') > 90:
+        case textSimilar(input,'quit') > 90:
+        case textSimilar(input,'settings exit') > 90:
+        case textSimilar(input,'members exit') > 90:
+        case textSimilar(input,'stop') > 90:
+            return true;
+        break;
+    }   
+}
+
+var checkModes = function(inputObj,context,callback) {
+
+    var input = inputObj.msg; //because...
+    var mode;
+    var res;
+
+    switch (true) {
+        //* * * * Mode specific HELP * * * * //
+        case textSimilar(input,'help') > 70:
+        case textSimilar(input,'he#p') > 90:
+        case textSimilar(input,'what does kip do') > 80:
+        case textSimilar(input,'?') > 50:
+        case textSimilar(input,'???') > 50:
+        case textSimilar(input,'what?') > 90:
+        case textSimilar(input,'what') > 90:
+        case textSimilar(input,'huh?') > 90:
+        case textSimilar(input,'huh') > 90:
+        case textSimilar(input,'eh') > 90:
+        case textSimilar(input,'wah') > 90:
+        case textSimilar(input,'um') > 90:
+        case textSimilar(input,'umm') > 90:
+        case textSimilar(input,'hmm') > 90:
+        case textSimilar(input,'mm') > 90:
+        case textSimilar(input,'wt') > 90:
+        case textSimilar(input,'help me shop') > 90:
+        case textSimilar(input,'help me') > 90:
+        case textSimilar(input,':|') > 90:
+        case textSimilar(input,':\\') > 90:
+        case textSimilar(input,'i dont understand') > 70:
+        case textSimilar(input,'i dont get it') > 70:
+        case textSimilar(input,'this doesnt make sense') > 60:
+        case textSimilar(input,'wah?') > 90:
+        case textSimilar(input,'you got me there') > 70:
+        case textSimilar(input,'what is this') > 60:
+        case textSimilar(input,'I don\'t understand') > 60:
+        case textSimilar(input,'Can you help me') > 60:
+        case textSimilar(input,'what do I do next') > 60:
+        case textSimilar(input,'wut') > 70:
+        case textSimilar(input,'wtf') > 70:
+            if(context == 'settings'){
+                mode = 'settings';
+                res = 'SETTINGS HELP GOES HERE 😊';
+            }else if (context == 'collect'){
+                mode = 'collect';
+                res = 'COLLECT HELP GOES HERE 😊';
+            }
+            break;
+
+        //* * * * COLLECT MODE * * * * //
+        case textSimilar(input,'collect') > 80:
+        case textSimilar(input,'colect') > 90:
+        case textSimilar(input,'fetch') > 90:
+        case textSimilar(input,'kip collect') > 90:
+        case textSimilar(input,'coollect') > 90:
+        case textSimilar(input,'collekt') > 90:
+            mode = 'collect';            
+            break;
+
+        //* * * * SETTINGS MODE * * * * //
+        case textSimilar(input,'settings') > 80:
+        case textSimilar(input,'settingss') > 90:
+        case textSimilar(input,'setingss') > 90:
+        case textSimilar(input,'setings') > 90:
+        case textSimilar(input,'seting') > 90:
+        case textSimilar(input,'setting') > 90:
+        case textSimilar(input,'admin') > 90:
+        case textSimilar(input,'admins') > 90:
+        case textSimilar(input,'admins') > 90:
+        case textSimilar(input,'configure') > 90:        
+        case textSimilar(input,'configuration') > 90:      
+        case textSimilar(input,'change settings') > 90:
+        case textSimilar(input,'show settings') > 90:
+        case textSimilar(input,'show me settings') > 90:
+        case textSimilar(input,'kip settings') > 90:
+            mode = 'settings';            
+            break;
+
+        //* * onboarding mode
+        // case textSimilar(input,'onboarding') > 90:
+        // case textSimilar(input,'kip onboarding') > 90:
+        // case textSimilar(input,'onboard') > 90:
+        //     mode = 'onboarding';
+        //     break;
+
+        //* * * shopping mode
+        case textSimilar(input,'shopping') > 90:
+        case textSimilar(input,'shop') > 90:
+        case textSimilar(input,'search') > 90:
+        case textSimilar(input,'kip shop') > 90:
+        case textSimilar(input,'kip shopping') > 90:
+        case textSimilar(input,'buy') > 90:
+        case textSimilar(input,'searching') > 90:
+        case textSimilar(input,'kip search') > 90:
+            mode = 'shopping';
+            break;
+
+        //* * * * add member mode
+        case textSimilar(input,'addmember') > 90:
+        case textSimilar(input,'add member') > 80:
+        case textSimilar(input,'add members') > 90:
+        case textSimilar(input,'add team') > 90:
+        case textSimilar(input,'member add') > 90:
+        case textSimilar(input,'kip members') > 90:
+        case textSimilar(input,'members add') > 90:
+        case textSimilar(input,'add team member') > 90:
+        case textSimilar(input,'add email') > 90:
+        case textSimilar(input,'add name') > 90:
+        case textSimilar(input,'add emails') > 90:
+        case textSimilar(input,'add people') > 90:
+        case textSimilar(input,'add person') > 90:
+        case textSimilar(input,'add channels') > 90:
+        case textSimilar(input,'add channel') > 90:
+        case textSimilar(input,'cart members') > 90:
+        case textSimilar(input,'cart member') > 90:
+        case textSimilar(input,'cart user') > 90:
+        case textSimilar(input,'cart users') > 90:
+        case textSimilar(input,'members') > 90:
+        case textSimilar(input,'member') > 90:
+        case textSimilar(input,'memeber') > 90:
+        case textSimilar(input,'users') > 90:
+        case textSimilar(input,'channels') > 90:
+            mode = 'addmember';
+            break;
+
+        //* * * * * report mode
+        case textSimilar(input,'report') > 90:
+        case textSimilar(input,'kip report') > 90:
+        case textSimilar(input,'show report') > 90:
+            mode = 'report';
+            break;
+    }
+
+    //check for exit intent
+    if(checkExitMode(input)){
+        mode = context;
+    }
+
+    callback(mode,res);
+};
+
+
+
+var checkForCanned = function(input,callback,origin,source) {
    
     var res;
     var flag;
     var query;
 
     //prevents people from copy pasting onboard message into pub channel to @kip
-    if(input.indexOf('I just enabled') > -1){
+    if(input.indexOf('I just enabled') > -1){ 
         flag = 'cancel';
     }
 
@@ -62,6 +225,7 @@ var checkForCanned = function(input,callback,origin) {
             res = 'That\'s good to hear. It\'s a hard life being in retail, want to help a bot out and buy something? We have discounts! 😊';
             break;
         case textSimilar(input,'yes') > 90:
+        case textSimilar(input,'yep') > 90:
         case textSimilar(input,'yah') > 90:
         case textSimilar(input,'yeah') > 90:
             flag = 'basic'; //do this action
@@ -565,7 +729,6 @@ var checkForCanned = function(input,callback,origin) {
             break;
 
         case textSimilar(input,'feedback') > 60:
-        case textSimilar(input,'report') > 60:
         case textSimilar(input,'contact') > 90:
             flag = 'basic';
             res = 'Say hi at hello@kipthis.com! Thanks for your feedback! We appreciate any thoughts you have to improve our service :)';
@@ -727,7 +890,6 @@ var checkForCanned = function(input,callback,origin) {
             break;
 
 
-
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 
         //* * * * TEMP FOR TESTING * * * *//
@@ -803,7 +965,7 @@ var checkForCanned = function(input,callback,origin) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.6.4 Cardamom';
+            res = 'I\'m a penguin running Kip v0.7.0 Paprika';
             break;
 
         case '/':
@@ -824,6 +986,12 @@ var checkForCanned = function(input,callback,origin) {
         case 'k':
             flag = 'basic'; //do this action
             res = 'yah';
+            break;
+
+        case 'uh oh':
+            flag = 'search.initial'; //do this action
+            res = '👌';
+            query = 'uh oh'; //what we're going to search for
             break;
 
         case 'hello world':
@@ -890,6 +1058,7 @@ var checkForCanned = function(input,callback,origin) {
             flag = 'search.focus';
             query = 3;
             break;
+
 
         //CART REMOVE ITEM # 
         case 'remove':
@@ -1033,7 +1202,6 @@ var checkForCanned = function(input,callback,origin) {
             query = 32;
             break;
 
-
         case '4':
         case '5':
         case '6':
@@ -1049,6 +1217,38 @@ var checkForCanned = function(input,callback,origin) {
                 res = 'I\'m not very smart, did you mean <span class="selector">➊</span>, <span class="selector">➋</span> or <span class="selector">➌</span>?';
             }
             break;
+    }
+
+    //PAPRIKA ACTION BUTTON TESTING
+    if (source && source.org == 'T02PN3B25'){
+
+        switch(input){
+
+            //add to cart
+            case 'kip_cheaper':
+                flag = 'slack.search'; //do this action
+                res = 'cheaper';
+                break;
+            case 'kip_addcart':
+                flag = 'slack.search'; //do this action
+                res = 'addcart';
+                break;
+            case 'kip_moreinfo':
+                flag = 'slack.search'; //do this action
+                res = 'moreinfo';
+                break;
+            case 'kip_similar':
+                flag = 'slack.search'; //do this action
+                res = 'similar';
+                break;
+            case 'kip_modify':
+                flag = 'slack.search'; //do this action
+                res = 'modify';
+                break;
+
+            //- - - - -  END TESTING - - - - - -//
+
+        }
     }
 
     callback(res,flag,query);
@@ -1105,23 +1305,34 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➊</span>';
                 }
-                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
-                    numEmoji = ':one:';
+                else if (data.flags && data.flags.email == true) {
+                    numEmoji = '1'
                 }
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
+                    numEmoji = ':one:';
+                } 
+              
                 break;
             case 2: //emoji #2
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➋</span>';
                 }
-                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                else if (data.flags && data.flags.email == true) {
+                    numEmoji = '2'
+                }
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':two:';
                 }
+            
                 break;
             case 3: //emoji #3
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➌</span>';
                 }
-                else if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                else if (data.flags && data.flags.email == true) {
+                    numEmoji = '3'
+                }
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':three:';
                 }
                 break;
@@ -1133,10 +1344,10 @@ var getCinnaResponse = function(data,callback){
                 case 'initial':
                     if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                         if (data.imageTags){
-                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                         else {
-                            res = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                            res = 'Hi, here are some options you might like. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                     }
                     else if (data.source.origin == 'socket.io'){
@@ -1191,13 +1402,33 @@ var getCinnaResponse = function(data,callback){
         case 'purchase':
                 switch (data.action) {
                     case 'save':
-                        res = 'Awesome! I\'ve saved your item for you 😊 Use `view cart` to see your cart, `checkout` to checkout or `help` for more options.';
+                        
+                        if (data.source.origin == 'slack'){
+                            res = 'Awesome! I\'ve saved your item to the Team Cart 😊 Type `remove 1` to remove item :one:. Type `help` for more options';
+                        }else {
+                            res = 'Awesome! I\'ve saved your item for you 😊 Use `view cart` to see your cart, `checkout` to checkout or `help` for more options.';
+                        }
+
                         break;
                     case 'removeAll':
                         res = 'All items removed from your cart. To start a new search just chat me the item you\'re looking for';
                         break;
                     case 'list':
-                        res = 'Here\'s everything you have in your cart 😊 Use `remove 1` to remove item :one: or `help` for more options';
+                        res = [
+                        {
+                            text:'Here\'s everything you have in your cart 😊 Use `remove 1` to remove item :one: or `help` for more options',
+                            color: '#45a5f4',
+                            "mrkdwn_in": [
+                                "text",
+                                "pretext"
+                            ]
+                        },
+                        {
+                            image_url:'http://i.imgur.com/PPHvxi1.png',
+                            text:'',
+                            color: '#45a5f4'
+                        }];
+                        // res = 'Here\'s everything you have in your cart 😊 Use `remove 1` to remove item :one: or `help` for more options';
                         break;
                     case 'checkout':
                         res = 'Great! Please click the link to confirm your items and checkout. Thank you 😊';
@@ -1221,7 +1452,7 @@ var getCinnaResponse = function(data,callback){
 
 //text similarity percentage
 //mod of: http://stackoverflow.com/questions/10473745/compare-strings-javascript-return-of-likely
-function textSimilar(a,b) {
+var textSimilar = function(a,b) {
     if (a && b){
         a = a.toLowerCase().trim();
         b = b.toLowerCase().trim();
@@ -1245,3 +1476,6 @@ function textSimilar(a,b) {
 module.exports.checkForCanned = checkForCanned;
 module.exports.welcomeMessage = welcomeMessage;
 module.exports.getCinnaResponse = getCinnaResponse;
+module.exports.checkModes = checkModes;
+module.exports.checkExitMode = checkExitMode;
+module.exports.textSimilar = textSimilar;

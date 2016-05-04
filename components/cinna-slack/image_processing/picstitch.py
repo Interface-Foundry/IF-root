@@ -23,8 +23,8 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
-CHAT_WIDTH = 400
-CHAT_HEIGHT = 175
+CHAT_WIDTH = 365
+CHAT_HEIGHT = 140
 # MOBILE_WIDTH = 0 # TODO
 # MOBILE_HEIGHT = 800 # TODO
 
@@ -65,8 +65,8 @@ def index():
     biggest_width = 0
     biggest_height = 0
     thumbnails = []
-    PIC_SIZE = 153, 153
-    PIC_COORDS = [{'x': 24, 'y': 10},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
+    PIC_SIZE = 130, 130
+    PIC_COORDS = [{'x': 14, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
     TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
@@ -89,15 +89,15 @@ def index():
         # img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
     #add names, text wrapped
-    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 15)
+    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price 
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
 
     for i, im in enumerate(images):
-        x = TEXTBOX_COORDS[i][u'x']
+        x = TEXTBOX_COORDS[i][u'x'] - 30
         y = TEXTBOX_COORDS[i][u'y']
         draw = ImageDraw.Draw(img)
 
-        last_y = 10
+        last_y = 5
 
         #add price
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
@@ -106,7 +106,7 @@ def index():
         if im[u'prime'] == '1':
             img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
 
-        last_y = last_y + 22
+        last_y = last_y + 27
 
         if 'reviews' in im and 'rating' in im[u'reviews']:   
             # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
@@ -134,7 +134,7 @@ def index():
             img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
             #add review count
             if 'reviewCount' in im[u'reviews']:  
-                draw.text((x + 80, last_y),' - ' + str(im[u'reviews'][u'reviewCount']),font=font2,fill="#2d70c1")
+                draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
 
             last_y = last_y + 20
 
@@ -146,7 +146,7 @@ def index():
             countLines = 0
             for line in textwrap.wrap(z, width=30):
                 countLines += 1
-                if countLines < 4:
+                if countLines < 3:
                     filler = ''
                     if countLines == 3:
                         filler = '...'

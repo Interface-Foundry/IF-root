@@ -3,6 +3,8 @@ var db = require('db')
 var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
+var sleep = require('co-sleep')
+var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -28,7 +30,12 @@ module.exports = {};
 //
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
-  console.log(item)
+  console.log('ITEM ZZZZ ',item)
+
+  //fixing bug to convert string to to int
+  if (item.reviews && item.reviews.reviewCount){
+    item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
+  }
 
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
@@ -72,13 +79,16 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 
 // Remove item from the db
 // slack_id: either the team id or the user id if a personal cart
+// user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, number) {
+module.exports.removeFromCart = function(slack_id, user_id, number) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
+    var team = yield db.slackbots.findOne({team_id: slack_id});
+    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
@@ -88,16 +98,26 @@ module.exports.removeFromCart = function(slack_id, number) {
       return cart;
     }
 
-    // remove the last item that matched this one
+
+    // first just try to remove one item that this user added
     var matching_items = cart.items.filter(function(i) {
+      return i.ASIN === ASIN_to_remove && i.added_by === user_id;
+    })
+
+    if (matching_items.length >= 1) {
+        return module.exports.removeFromCartByItem(matching_items.pop());
+    }
+
+    // if no items matching the user_id were found, an admin can still remove any item
+    matching_items = cart.items.filter(function(i) {
       return i.ASIN === ASIN_to_remove;
     })
 
-    module.exports.removeFromCartByItem(matching_items.pop());
+    return module.exports.removeFromCartByItem(matching_items.pop());
   })
 }
 
-
+//
 // Removes one item from the cart at a time
 //
 module.exports.removeFromCartByItem = function(item) {
@@ -162,6 +182,10 @@ var getCart = module.exports.getCart = function(slack_id) {
       return cart_items;
     }, {})
 
+    // Check in with the amazon cart to see if they click-throughed to purchase,
+    // which removes the items from the Kip-generated cart and puts them in
+    // a real cart in their browser, where they are logged in or something.
+
     // create a new cart if they don't have one
     if (!cart.amazon) {
       console.log('creating new cart in amazon')
@@ -184,7 +208,9 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     // console.log(JSON.stringify(amazonCart, null, 2))
     console.log('got amazon cart')
-    console.log(amazonCart);
+    console.log(amazonCart)
+
+    // If the amazon cart is empty but
 
     // if the cart is not there, then i guess it has been purchased
     // Although maybe the cart has expired? TODO
@@ -245,6 +271,8 @@ var getCart = module.exports.getCart = function(slack_id) {
       'HMAC': cart.amazon.HMAC[0]
     })
 
+    yield sleep(8); //prevent amazon throttle
+
     console.log('rebuilding cart ' + cart.amazon.CartId)
     yield client.addCart(_.merge({}, cart_items, {
       CartId: cart.amazon.CartId[0],
@@ -257,21 +285,133 @@ var getCart = module.exports.getCart = function(slack_id) {
 }
 
 //
-// Get the summary of all the things ppl ordered on slack in the past week
+// for the report, we'll need a base corpus of words searched in the last week
 //
-function weeklySummary(slack_id) {
+var term_freq = new natural.TfIdf();
+db.Messages.find({
+  bucket: 'search',
+  action: 'initial',
+  incoming: 'true',
+  ts: {$gt: moment().subtract(7, 'day')}
+}).exec(function(e, messages) {
+  if (e) {
+    console.error('Could not get search terms for report generation statistics');
+  }
+  var all_terms_doc = messages.map((m) => {
+    return m.tokens[0];
+  }).join(' ');
+  term_freq.addDocument(all_terms_doc);
+})
+
+//
+// Get the summary of all the things ppl ordered on slack in the past X days
+//
+var report = module.exports.report = function(slack_id, days) {
+  // default days to one week, eek!
+  if (typeof days !== 'number' || days < 1) {
+    days = 7;
+  }
+
+  // fill in these fields
+  var report = {
+    begin_date: '',
+    end_date: '',
+    generated_date: '',
+    total: '',
+    items: [],
+    top_category: '',
+    most_searched: '',
+    unique_search: ''
+  };
+
   return co(function*() {
-    var last_week = moment().subtract(1, 'week');
+    report.begin_date = moment().subtract(days, 'day');
+    report.end_date = moment();
+    report.generated_date = moment();
+
     var carts = yield db.Carts.find({
       slack_id: slack_id,
       deleted: false,
       $or: [
         {purchased_date: {$exists: false}}, // all open carts
-        {purchased_date: {$gt: last_week}} // carts purchased in the last week
+        {purchased_date: {$gt: report.begin_date}}
       ]
+    }).populate('items').exec();
+
+
+
+    // I guess we'll aggregate all the items by creating a new cart object
+    var aggregate_cart = new db.Cart();
+    aggregate_cart.items = carts.reduce(function(items, cart) {
+      return items.concat(cart.items);
+    }, [])
+
+    report.total = aggregate_cart.total;
+    report.items = aggregate_cart.aggregate_items;
+
+    //
+    // get top category
+    //
+    var category_counts = _.countBy(report.items, (i) =>  {
+      return _.get(JSON.parse(i.source_json), 'ItemAttributes[0]Binding[0]')
     })
 
-    // TODO format the weekly summary somehow
+    var top_count = 0;
+    Object.keys(category_counts).map(function(cat) {
+      if (category_counts[cat] > top_count) {
+        top_count = category_counts[cat];
+        report.top_category = cat;
+      }
+    })
+
+    //
+    // Get most searched term
+    //
+    var messages = yield db.Messages.find({
+      bucket: 'search',
+      action: 'initial',
+      incoming: 'true',
+      'source.org': slack_id,
+      ts: {$gt: report.begin_date}
+    }).select('tokens').exec();
+
+    console.log(messages);
+    var search_terms = messages
+      .map((m) => { return m.tokens[0] })
+      .filter((t) => {
+        return !t.match(/(collect|report|wait|stop|no|yes)/);
+      });
+    console.log(search_terms);
+    word_counts = {};
+    for(var i = 0; i < search_terms.length; i++) {
+      word_counts["_" + search_terms[i]] = (word_counts["_" + search_terms[i]] || 0) + 1;
+    }
+    top_count = 0;
+    console.log(word_counts);
+    Object.keys(word_counts).map(function(word) {
+      if (word_counts[word] > top_count) {
+        top_count = word_counts[word];
+        report.most_searched = word.substr(1);
+      }
+    })
+
+    //
+    // Get most unique search term
+    //
+    var lowest_score = 10;
+    Object.keys(word_counts).map(function(word) {
+      word = word.substr(1);
+      term_freq.tfidfs(word, function(i, measure) {
+        console.log(word, i, measure, word_counts['_' + word], measure/word_counts['_' + word]);
+        measure = measure / word_counts['_' + word];
+        if (measure < lowest_score) {
+          lowest_score = measure;
+          report.unique_search = word;
+        }
+      })
+    });
+
+    return report;
   })
 }
 

@@ -11,6 +11,9 @@ var processData = require("./process.js");
 var ioKip = require("./io.js");
 var kip = require('kip')
 
+var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
+
+
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
@@ -36,12 +39,14 @@ var searchSimilar = function(data){
         searchAmazon(data,'similar','none','null');
     }
     else {
-        console.log('warning: recallhistory obj missing');
+        debug('warning: recallhistory obj missing');
         ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
     }
 }
 
 var searchAmazon = function(data, type, query, flag) {
+    debug(data);
+    debug('searching amazon');
 
     //* * * * * * * * *  NN CLASSIFICATION NEEDED * * * * * * * * //
     // & & & & & & & & & & & & & & & & & & & & & & & & & & & & & &//
@@ -56,20 +61,23 @@ var searchAmazon = function(data, type, query, flag) {
             var amazonParams = {};
             amazonParams.responseGroup = 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank';
 
+            if (!data.tokens || data.tokens.length < 1) {
+              data.tokens = [data.msg];
+            }
             if (data.tokens && data.tokens.length > 0){
                 //remove random symbols
                 amazonParams.Keywords = data.tokens[0];
                 continueProcess();
 
-                // console.log('X X X ',data.tokens[0]);
+                // debug('X X X ',data.tokens[0]);
                 // removeSpecials(data.tokens[0],function(res){
-                //     console.log('Y Y Y ',res)
+                //     debug('Y Y Y ',res)
                 //     amazonParams.Keywords = data.tokens[0];
                 //     continueProcess();
                 // });
             }
             else {
-                console.log('Error: data.tokens missing from searchAmazon');
+                debug('Error: data.tokens missing from searchAmazon');
                 ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
             }
 
@@ -96,16 +104,16 @@ var searchAmazon = function(data, type, query, flag) {
 
                     if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material' || flag.type == 'genericDetail' && flag.val){
 
-                        console.log('FLAG TYPE &!&!&! ',flag.type);
+                        debug('FLAG TYPE &!&!&! ',flag.type);
 
                         if (flag.flagAction == 'weakSearchContinue' && data.amazonParams || flag.flagAction == 'weakSearch' && data.amazonParams){
                             if (data.amazonParams){
-                                console.log('GENERCICCC: DOING WEAK NODE SEARCH');
+                                debug('GENERCICCC: DOING WEAK NODE SEARCH');
                                 amazonParams = data.amazonParams;
                                 doSearch();
                             }
                             else {
-                                console.log('Error: data.amazonParams not found while doing weaksearch in initial search');
+                                debug('Error: data.amazonParams not found while doing weaksearch in initial search');
                                 ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
                             }
                         }
@@ -119,7 +127,7 @@ var searchAmazon = function(data, type, query, flag) {
                                     amazonParams.BrowseNode = res.BrowseNode;
 
                                     if (flag.val instanceof Array){
-                                        console.log('IS ARRAY');
+                                        debug('IS ARRAY');
                                         // if (flag.val[0].name == 'lime' || flag.val[0].name == 'Lime'){
                                         //     flag.val[0].name = 'green';
                                         // }
@@ -134,7 +142,7 @@ var searchAmazon = function(data, type, query, flag) {
                                             amazonParams.Keywords = flag.val; //!\!\!\!\ remove so we query by browsenode
                                         }
                                     }
-                                    console.log('KEYWORDS ',amazonParams.Keywords);
+                                    debug('KEYWORDS ',amazonParams.Keywords);
                                     doSearch();
                                 }
 
@@ -154,14 +162,14 @@ var searchAmazon = function(data, type, query, flag) {
                             case 'less':
 
                                 if (flag.flagAction == 'weakSearchContinue' || flag.flagAction == 'weakSearch' && data.amazonParams){
-                                    console.log('? ?? ? ? ? ? ? ? ');
+                                    debug('? ?? ? ? ? ? ? ? ');
                                     if (data.amazonParams){
-                                        console.log('DOING WEAK NODE SEARCH');
+                                        debug('DOING WEAK NODE SEARCH');
                                         amazonParams = data.amazonParams;
                                         doSearch();
                                     }
                                     else {
-                                        console.log('Error: data.amazonParams not found while doing weaksearch in initial search');
+                                        debug('Error: data.amazonParams not found while doing weaksearch in initial search');
                                         ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
                                     }
                                 }
@@ -178,7 +186,7 @@ var searchAmazon = function(data, type, query, flag) {
                                           modPrice = modPrice.trim();
                                         }
 
-                                        console.log('MODDED PROCE ',modPrice);
+                                        debug('MODDED PROCE ',modPrice);
 
                                         modPrice = modPrice.replace('$','');
                                         modPrice = modPrice.replace('.','');
@@ -196,24 +204,24 @@ var searchAmazon = function(data, type, query, flag) {
                                         //its a real number, shoudl always be a real number here,
                                         if (modPrice > 0){
 
-                                            console.log('browsenode?1 ',JSON.stringify(data.recallHistory.amazon[searchSelect].BrowseNodes));
+                                            debug('browsenode?1 ',JSON.stringify(data.recallHistory.amazon[searchSelect].BrowseNodes));
 
                                             //WHAT DO IF NO PG? NORMAL SEARCH?
                                             if (data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup){
 
-                                                console.log('!!productGroup <-- ',productGroup);
+                                                debug('!!productGroup <-- ',productGroup);
 
                                                 parseAmazon(productGroup,browseNodes,function(res){
 
                                                     //* * * * * TEMPORARY TO HELP WITH CHEAPER RESULTS??????????? * * * * * //
                                                     res.BrowseNode = res.BrowseNode.split(',');
-                                                    console.log('arr ',res.BrowseNode);
-                                                    console.log('ARRAY LENGTH ',res.BrowseNode.length);
+                                                    debug('arr ',res.BrowseNode);
+                                                    debug('ARRAY LENGTH ',res.BrowseNode.length);
                                                     if (res.BrowseNode && res.BrowseNode.length >= 2){
                                                         res.BrowseNode = res.BrowseNode.slice(0,2);
                                                     }
-                                                    console.log('arr ',res.BrowseNode);
-                                                    console.log('ARRAY LENGTH ',res.BrowseNode.length);
+                                                    debug('arr ',res.BrowseNode);
+                                                    debug('ARRAY LENGTH ',res.BrowseNode.length);
 
                                                     res.BrowseNode = res.BrowseNode.toString();
                                                     //* * * * * * * * * * * END TEST * * * * * * * * * * * * * * * * * * //
@@ -227,7 +235,7 @@ var searchAmazon = function(data, type, query, flag) {
                                                 });
                                             }
                                             else {
-                                                console.log('Error: Product Group missing from amazon itemAttributes');
+                                                debug('Error: Product Group missing from amazon itemAttributes');
                                                 doSearch();
                                             }
 
@@ -235,13 +243,13 @@ var searchAmazon = function(data, type, query, flag) {
                                         }
                                         else {
                                             doSearch();
-                                            console.log('Error: not allowing search for max price below 0');
+                                            debug('Error: not allowing search for max price below 0');
                                         }
 
                                     }
                                     else {
                                         doSearch();
-                                        console.log('error: amazon price missing');
+                                        debug('error: amazon price missing');
                                     }
                                 }
                                 break;
@@ -251,12 +259,12 @@ var searchAmazon = function(data, type, query, flag) {
                                 /// sort by reviews / cheaper
 
                             // case 'less than':
-                            //     console.log('less than');
+                            //     debug('less than');
 
                             //     //check if val is real number
                             //     if (flag.val && isNumber(flag.val[0])){
 
-                            //         console.log('FIRING less than ',data.searchSelect.length);
+                            //         debug('FIRING less than ',data.searchSelect.length);
 
                             //         //WARNING: THIS SUCKS AND IS INACCURATE / TOO SPECIFIC OF A QUERY RIGHT NOW. USE WEAK SEARCHER
 
@@ -274,14 +282,14 @@ var searchAmazon = function(data, type, query, flag) {
                             //                 amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
 
 
-                            //                 console.log('params ',amazonParams);
+                            //                 debug('params ',amazonParams);
                             //             }
                             //             else {
-                            //                 console.log('Error: Title is missing from amazon itemattributes object');
+                            //                 debug('Error: Title is missing from amazon itemattributes object');
                             //             }
                             //         }
                             //         else {
-                            //             console.log('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
+                            //             debug('Warning: no single item selected for less than (not supporting multiple), so resorting to less than N original query from user')
                             //             amazonParams.MaximumPrice = flag.val[0];
                             //             amazonParams.MaximumPrice = parseInt(amazonParams.MaximumPrice); //remove any decimals
                             //             amazonParams.MaximumPrice = amazonParams.MaximumPrice.toString() + '00'; //add amazon friendly decimal
@@ -289,7 +297,7 @@ var searchAmazon = function(data, type, query, flag) {
                             //         }
                             //     }
                             //     else {
-                            //         console.log(' number not used in flag.val with flag.modify == price');
+                            //         debug(' number not used in flag.val with flag.modify == price');
                             //     }
                             //     break;
                             case 'more':
@@ -299,17 +307,17 @@ var searchAmazon = function(data, type, query, flag) {
                                 doSearch();
                                 break;
                             default:
-                                console.log('error: no flag.param found with flag.modify == price');
+                                debug('error: no flag.param found with flag.modify == price');
                                 doSearch();
                         }
                     }
                     else if (flag.type == 'brand'){
-                        console.log('BRAND FIRED');
+                        debug('BRAND FIRED');
                         doSearch();
                     }
                     //this fires if we didn't get enough results from normal initial query
                     else if (flag.type == 'initial' && flag.flagAction == 'weakSearchContinue' && data.amazonParams || flag.type == 'initial' && flag.flagAction == 'weakSearch' && data.amazonParams){
-                        console.log('intial search advanced query', data.amazonParams);
+                        debug('intial search advanced query', data.amazonParams);
                         amazonParams = data.amazonParams;
                         doSearch();
                     }
@@ -322,36 +330,47 @@ var searchAmazon = function(data, type, query, flag) {
                 }
             }
 
-            //console.log('amazonParams ',amazonParams);
+            //debug('amazonParams ',amazonParams);
 
             function doSearch(){
                 //AMAZON BASIC SEARCH
 
-                console.log('PARAMS ',amazonParams);
+                debug('PARAMS ',amazonParams);
                 if (!data.amazonParams){
                     data.amazonParams = amazonParams;
                 }
 
                 client.itemSearch(amazonParams).then(function(results,err){
+
+                    debug('got search')
+                    debug(results.length);
+                    if (err) { debug(err); }
+
+                    results.map(function(r) {
+                      if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
+                        r.mustSelectSize = true;
+                      }
+                    })
+
                     // results = results.filter(function(r) {
                     //   return (_.get(r, 'Offers[0].TotalOffers[0]') || '0') !== '0';
                     // })
 
                     data.amazon = results;
 
-                    console.log('found ' + data.amazon.length + ' available search results');
+                    debug('found ' + data.amazon.length + ' available search results');
 
                     if (data.amazon[0]){
-                        console.log('#1 browsenode ',JSON.stringify(data.amazon[0].BrowseNodes));
-                        console.log('#1 productGroup <-- ',data.amazon[0].ItemAttributes[0].ProductGroup[0]);
+                        debug('#1 browsenode ',JSON.stringify(data.amazon[0].BrowseNodes));
+                        debug('#1 productGroup <-- ',data.amazon[0].ItemAttributes[0].ProductGroup[0]);
                     }
                     if (data.amazon[1]){
-                        console.log('#2 browsenode ',JSON.stringify(data.amazon[1].BrowseNodes));
-                        console.log('#2 productGroup <-- ',data.amazon[1].ItemAttributes[0].ProductGroup[0]);
+                        debug('#2 browsenode ',JSON.stringify(data.amazon[1].BrowseNodes));
+                        debug('#2 productGroup <-- ',data.amazon[1].ItemAttributes[0].ProductGroup[0]);
                     }
                     if (data.amazon[2]){
-                        console.log('#3 browsenode ',JSON.stringify(data.amazon[2].BrowseNodes));
-                        console.log('#3 productGroup <-- ',data.amazon[2].ItemAttributes[0].ProductGroup[0]);
+                        debug('#3 browsenode ',JSON.stringify(data.amazon[2].BrowseNodes));
+                        debug('#3 productGroup <-- ',data.amazon[2].ItemAttributes[0].ProductGroup[0]);
                     }
 
                     //temporarily using async parallel with only 3 item results, need to build array dynamically, using mapped closures /!\ /!\
@@ -397,6 +416,7 @@ var searchAmazon = function(data, type, query, flag) {
                     }
 
                 }).catch(function(err){
+                    console.error(err);
 
                     //handle err codes. do stuff.
                     if (err[0].Error[0].Code[0]){
@@ -409,7 +429,7 @@ var searchAmazon = function(data, type, query, flag) {
                                 break;
 
                             default:
-                                console.log('amazon err ',err[0].Error[0]);
+                                debug('amazon err ',err[0].Error[0]);
                                 //no results after weaksearch, now do:
                                 ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have that available. Try another search?');
                         }
@@ -424,7 +444,7 @@ var searchAmazon = function(data, type, query, flag) {
         case 'similar':
             //handle no data error
             if (!data){
-                console.log('error no amazon item found for similar search');
+                debug('error no amazon item found for similar search');
 
                 var msg = 'Sorry, I don\'t understand, please ask me again';
                 cannedBanter(data,msg);
@@ -440,7 +460,7 @@ var searchAmazon = function(data, type, query, flag) {
                     var IdArray = [];
                     for (var i = 0; i < data.searchSelect.length; i++) { //match item choices to product IDs
                         var searchNum = data.searchSelect[i];
-                        // console.log('searchNum:', searchNum,'recallhistory.amazon:',data.recallHistory.amazon)
+                        // debug('searchNum:', searchNum,'recallhistory.amazon:',data.recallHistory.amazon)
                         IdArray.push(data.recallHistory.amazon[searchNum - 1].ASIN[0]);
                     }
                     var ItemIdString = IdArray.toString();
@@ -495,11 +515,11 @@ var searchAmazon = function(data, type, query, flag) {
                         }
 
                     }).catch(function(err){
-                        console.log('amazon err ',err[0].Error[0]);
-                        console.log('SIMILAR FAILED: should we fire random query or mod query');
+                        debug('amazon err ',err[0].Error[0]);
+                        debug('SIMILAR FAILED: should we fire random query or mod query');
 
                          //----supervisor: adding flag to variable since it is overwitten in the HACK code below ---//
-                        // console.log('Mitsu search.js493: ',data)
+                        // debug('Mitsu search.js493: ',data)
                         var flags = null
                         if (data.flags && data.flags.toCinna) {
                             flags = data.flags
@@ -521,13 +541,13 @@ var searchAmazon = function(data, type, query, flag) {
                             cSearch = cSearch + ' ' + itemAttrib[0].Binding[0];
                         }
 
-                        console.log('BS string ugh ',cSearch);
+                        debug('BS string ugh ',cSearch);
 
                         data = data.recallHistory; //HACK!!!!!!
                         //----supervisor: re-adding back flag from above var ---//
                         if (flags) {
                            data.flags = flags
-                           console.log('\n\n\n\n!!!Mitsu search520: ',data,'\n\n\n\n')
+                           debug('\n\n\n\n!!!Mitsu search520: ',data,'\n\n\n\n')
                         }
                         //------------------------------------------------------------------------------------------//
                         data.tokens = [];
@@ -538,7 +558,7 @@ var searchAmazon = function(data, type, query, flag) {
                     });
                 }
                 else {
-                    console.log('warning: there was a data error resolving to basic search');
+                    debug('warning: there was a data error resolving to basic search');
                     searchAmazon(data,'initial'); //if amazon id doesn't exist, do init search instead
                 }
             }
@@ -556,7 +576,7 @@ function weakSearch(data,type,query,flag,amazonParams){
     //sort incoming flags for redundant searches
     switch (flag) {
         case 'weakSearch': //we already did weakSearch
-            console.log('ALREADY TRIED weakSearch FLAG!');
+            debug('ALREADY TRIED weakSearch FLAG!');
             if (data.dataModify){
                 if (data.dataModify.param){
                     var modDetail = data.dataModify.param;
@@ -572,34 +592,34 @@ function weakSearch(data,type,query,flag,amazonParams){
             break;
         default:
             //no results, trying weak search
-            console.log('no results');
+            debug('no results');
 
             //select weakSearch action (initial, modify, etc)
             switch (data.action) {
                 case 'modify':
                     if (data.dataModify && data.amazonParams){
-                        //console.log('cant find lower price item, preventing infinite loop');
-                        console.log('dataforModifyPRICE ',data.amazonParams);
+                        //debug('cant find lower price item, preventing infinite loop');
+                        debug('dataforModifyPRICE ',data.amazonParams);
                         data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.split(',');
-                        console.log('newNodes ',data.amazonParams.BrowseNode);
+                        debug('newNodes ',data.amazonParams.BrowseNode);
                         data.amazonParams.BrowseNode.pop(); // remove last id in arr
                         //data.amazonParams.BrowseNode.shift(); // remove last id in arr
-                        console.log('newNodes POPPED ', data.amazonParams.BrowseNode);
+                        debug('newNodes POPPED ', data.amazonParams.BrowseNode);
 
-                        console.log('arr length ',data.amazonParams.BrowseNode.length);
+                        debug('arr length ',data.amazonParams.BrowseNode.length);
 
                         setTimeout(function() {
                             if(data.amazonParams.BrowseNode.length > 1){
-                                console.log('continue trying to search!');
+                                debug('continue trying to search!');
                                 data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.toString();
                                 searchModify(data, 'weakSearchContinue');
                             }else if (data.amazonParams.BrowseNode.length == 1) { //ok last one, set flag
                                 data.amazonParams.BrowseNode = data.amazonParams.BrowseNode.toString();
-                                console.log('ok our last search!!!!!!!!!!!!!!!!!!!');
+                                debug('ok our last search!!!!!!!!!!!!!!!!!!!');
                                 searchModify(data, 'weakSearch');
                             }
                             else {
-                                console.log('warning: no results found after trying weak searches. consider re-searching for SOMETHING to give user');
+                                debug('warning: no results found after trying weak searches. consider re-searching for SOMETHING to give user');
                                 ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
                             }
                         }, 250);
@@ -612,17 +632,17 @@ function weakSearch(data,type,query,flag,amazonParams){
                 case 'initial':
                     if (data.amazonParams && data.amazonParams.Keywords){
 
-                        console.log('PARAMS ',data.amazonParams);
+                        debug('PARAMS ',data.amazonParams);
 
                         var newQuery = data.amazonParams.Keywords.split(/[ ,]+/).filter(Boolean);
-                        console.log('split ',newQuery);
+                        debug('split ',newQuery);
                         newQuery.pop();
-                        console.log('newQuery ',newQuery);
-                        console.log('newQuery length ',newQuery.length);
+                        debug('newQuery ',newQuery);
+                        debug('newQuery length ',newQuery.length);
 
                         // if (newQuery.length > 1){
                         //     newQuery = newQuery.pop();
-                        //     console.log('newQuery ',newQuery);
+                        //     debug('newQuery ',newQuery);
                         // }
                         // else {
                         //     //last search
@@ -631,17 +651,17 @@ function weakSearch(data,type,query,flag,amazonParams){
                         setTimeout(function() {
 
                             if(newQuery.length > 1){
-                                console.log('continue trying to search!');
+                                debug('continue trying to search!');
                                 data.amazonParams.Keywords = newQuery.toString();
                                 searchInitial(data, {type:'initial',flagAction:'weakSearchContinue'});
 
                             }else if (newQuery.length == 1) { //ok last one, set flag
-                                console.log('ok our last search!!!!!!!!!!!!!!!!!!!');
+                                debug('ok our last search!!!!!!!!!!!!!!!!!!!');
                                 data.amazonParams.Keywords = newQuery.toString();
                                 searchInitial(data, {type:'initial',flagAction:'weakSearchContinue'});
                             }
                             else {
-                                console.log('warning: no results found after trying weak INITIAL searches.');
+                                debug('warning: no results found after trying weak INITIAL searches.');
                                 ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
                             }
 
@@ -654,11 +674,11 @@ function weakSearch(data,type,query,flag,amazonParams){
                     }
                     else {
                         //searchModify(data, 'weakSearch');
-                        console.log('NO PARAMS FOUND ',data);
+                        debug('NO PARAMS FOUND ',data);
                     }
                     break;
                 default:
-                    console.log('warning: weak search not enabled for '+ data.action);
+                    debug('warning: weak search not enabled for '+ data.action);
                     ioKip.sendTxtResponse(data,'Sorry, it looks like we don\'t have it available. Try another search?');
             }
     }
@@ -697,12 +717,12 @@ var searchModify = function(data,flag){
                     break;
 
                 case 'color':
-                    console.log('COLOR FIRED!!!');
-                    console.log('COLOR type: ',data.dataModify.type);
-                    console.log('COLOR param: ',data.dataModify.param);
-                    console.log('COLOR val: ',dumbVal);
-                    console.log('COLOR val: name: ',dumbVal.name);
-                    console.log('COLOR flagAction: ',flag);
+                    debug('COLOR FIRED!!!');
+                    debug('COLOR type: ',data.dataModify.type);
+                    debug('COLOR param: ',data.dataModify.param);
+                    debug('COLOR val: ',dumbVal);
+                    debug('COLOR val: name: ',dumbVal.name);
+                    debug('COLOR flagAction: ',flag);
                     searchInitial(data,{ // passing special FLAG for search to handle
                         'type':data.dataModify.type,
                         'param':data.dataModify.param,
@@ -714,12 +734,12 @@ var searchModify = function(data,flag){
 
                 case 'size':
 
-                    console.log('SIZE FIRED!!!');
-                    console.log('SIZE type: ',data.dataModify.type);
-                    console.log('SIZE param: ',data.dataModify.param);
-                    console.log('SIZE val: ',dumbVal);
-                    console.log('SIZE val: name: ',dumbVal.name);
-                    console.log('SIZE flagAction: ',flag);
+                    debug('SIZE FIRED!!!');
+                    debug('SIZE type: ',data.dataModify.type);
+                    debug('SIZE param: ',data.dataModify.param);
+                    debug('SIZE val: ',dumbVal);
+                    debug('SIZE val: name: ',dumbVal.name);
+                    debug('SIZE flagAction: ',flag);
                     searchInitial(data,{ // passing special FLAG for search to handle
                         'type':data.dataModify.type,
                         'param':data.dataModify.param,
@@ -731,12 +751,12 @@ var searchModify = function(data,flag){
                 //texture, fabric, coating, etc
                 case 'material':
 
-                    console.log('material FIRED!!!');
-                    console.log('material type: ',data.dataModify.type);
-                    console.log('material param: ',data.dataModify.param);
-                    console.log('material val: ',dumbVal);
-                    console.log('material val: name: ',dumbVal.name);
-                    console.log('material flagAction: ',flag);
+                    debug('material FIRED!!!');
+                    debug('material type: ',data.dataModify.type);
+                    debug('material param: ',data.dataModify.param);
+                    debug('material val: ',dumbVal);
+                    debug('material val: name: ',dumbVal.name);
+                    debug('material flagAction: ',flag);
                     searchInitial(data,{ // passing special FLAG for search to handle
                         'type':data.dataModify.type,
                         'param':data.dataModify.param,
@@ -749,20 +769,20 @@ var searchModify = function(data,flag){
                 case 'genericDetail':
                     //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
                     if (data.dataModify.val[0] == 'buy'){
-                        console.log('\n\n\n\n\n1I mean is it getting here even?', data)
+                        debug('\n\n\n\n\n1I mean is it getting here even?', data)
                         data.bucket = 'purchase';
                         data.action = 'save';
                         ioKip.saveToCart(data);
                     }
                     //normal action here
                     else {
-                        console.log('\n\n\n\n\n1 Or is it getting here even?', data)
-                        console.log('genericDetail FIRED!!!');
-                        console.log('genericDetail type: ',data.dataModify.type);
-                        console.log('genericDetail param: ',data.dataModify.param);
-                        console.log('genericDetail val: ',dumbVal);
-                        console.log('genericDetail val: name: ',dumbVal.name);
-                        console.log('genericDetail flagAction: ',flag);
+                        debug('\n\n\n\n\n1 Or is it getting here even?', data)
+                        debug('genericDetail FIRED!!!');
+                        debug('genericDetail type: ',data.dataModify.type);
+                        debug('genericDetail param: ',data.dataModify.param);
+                        debug('genericDetail val: ',dumbVal);
+                        debug('genericDetail val: name: ',dumbVal.name);
+                        debug('genericDetail flagAction: ',flag);
                         searchInitial(data,{ // passing special FLAG for search to handle
                             'type':data.dataModify.type,
                             'param':data.dataModify.param,
@@ -786,12 +806,12 @@ var searchModify = function(data,flag){
             }
         }
         else {
-            console.log('error: data.dataModify params missing')
+            debug('error: data.dataModify params missing')
         }
 
         function constructAmazonQuery(){
 
-            console.log('how is this still firing ??? ');
+            debug('how is this still firing ??? ');
 
             async.eachSeries(data.searchSelect, function(searchSelect, callback) {
 
@@ -799,7 +819,7 @@ var searchModify = function(data,flag){
 
                 //DETAILED SEARCH, FIRED IF FLAG weakSearch not on
                 if (flag !== 'weakSearch'){
-                    console.log('weakSearch FALSE');
+                    debug('weakSearch FALSE');
                     //add brand
                     if (itemAttrib[0].Brand){
                         cSearch = cSearch + ' ' + itemAttrib[0].Brand[0];
@@ -810,7 +830,7 @@ var searchModify = function(data,flag){
                     }
                 }
                 else {
-                    console.log('weakSearch TRUE');
+                    debug('weakSearch TRUE');
                 }
                 if (itemAttrib[0].Department){
                     cSearch = cSearch + ' ' + itemAttrib[0].Department[0];
@@ -829,7 +849,7 @@ var searchModify = function(data,flag){
         }
     }
     else {
-        console.log('no Amazon data found in last history item. can not modify search');
+        debug('no Amazon data found in last history item. can not modify search');
         data.action = 'initial';
         searchInitial(data); //do a search anyway
     }
@@ -859,7 +879,7 @@ var searchModify = function(data,flag){
             //     //     var productGroup = data.recallHistory.amazon[searchSelect].ItemAttributes[0].ProductGroup[0];
             //     //     var browseNodes = data.recallHistory.amazon[searchSelect].BrowseNodes[0].BrowseNode;
 
-            //     //     console.log('!!productGroup <-- ',productGroup);
+            //     //     debug('!!productGroup <-- ',productGroup);
 
             //     //     parseAmazon(productGroup,browseNodes,function(res){
             //     //         amazonParams.SearchIndex = res.SearchIndex;
@@ -870,7 +890,7 @@ var searchModify = function(data,flag){
             //     //     });
             //     // }
             //     // else {
-            //     //     console.log('Error: Product Group missing from amazon itemAttributes');
+            //     //     debug('Error: Product Group missing from amazon itemAttributes');
             //     //     doSearch();
             //     // }
 
@@ -913,14 +933,14 @@ var searchModify = function(data,flag){
             case 'genericDetail':
                 //FIXING random glitch. GLITCH NLP should output this to "purchase" bucket, "save" action. temp fix
                 if (data.dataModify.val[0] == 'buy'){
-                    console.log('\n\n\n\n\nI mean is it getting here even?', data)
+                    debug('\n\n\n\n\nI mean is it getting here even?', data)
                     data.bucket = 'purchase';
                     data.action = 'save';
                     ioKip.saveToCart(data);
                 }
                 //normal action here
                 else {
-                    console.log('\n\n\n\n\nOr is it getting here even?', data)
+                    debug('\n\n\n\n\nOr is it getting here even?', data)
                     //SORT THROUGH RESULTS OF SIZES, FILTER
                     cSearch = data.dataModify.val + ' ' + cSearch; //add new color
                     data.tokens[0] = cSearch; //replace search string in data obj
@@ -933,10 +953,17 @@ var searchModify = function(data,flag){
 }
 
 var searchFocus = function(data) {
-                        console.log('SEARCHKS 922 lol: ',data)
+                        debug('SEARCHKS 922 lol: ',data)
 
     if (data.searchSelect && data.searchSelect.length == 1){ //we have something to focus on
         if(data.recallHistory && data.recallHistory.amazon){
+
+            // if (data.source.flag && data.source.flag == 'buttonAction'){
+            //     var searchSelect = data.searchSelect[0];
+            // }
+            // else {
+
+            // }
 
             var searchSelect = data.searchSelect[0] - 1;
 
@@ -1049,15 +1076,15 @@ var searchFocus = function(data) {
                 }
 
             }else {
-                console.log('warning: item selection does not exist in amazon array');
+                debug('warning: item selection does not exist in amazon array');
                 ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
             }
         }else {
-            console.log('error: amazon search missing from recallHistory obj');
+            debug('error: amazon search missing from recallHistory obj');
             ioKip.sendTxtResponse(data,'Oops sorry, I\'m not sure which item you\'re referring to');
         }
     }else {
-        console.log('error: you can only select one item for search focus');
+        debug('error: you can only select one item for search focus');
         ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
     }
 
@@ -1065,7 +1092,7 @@ var searchFocus = function(data) {
 
 
 var searchMore = function(data){
-    console.log('FIRING SEARCHMORE')
+    debug('FIRING SEARCHMORE')
     if (data.recallHistory && data.recallHistory.amazon){
 
         var moreHist = data;
@@ -1100,33 +1127,27 @@ var searchMore = function(data){
             var loopLame = [0,1,2];//lol
             async.eachSeries(loopLame, function(i, callback) {
                 if (data.amazon[i]){
-                    //get reviews by ASIN
-                    getReviews(data.amazon[i].ASIN[0],function(rating,reviewCount){
-                        //adding scraped reviews to amazon objects
-                        data.amazon[i].reviews = {
-                            rating: rating,
-                            reviewCount: reviewCount
+                    //GET PRICE and review
+                    getPrices(data.amazon[i],function(realPrice,altImage,reviews){
+                        data.amazon[i].realPrice = realPrice;
+                        if (reviews){
+                            data.amazon[i].reviews = reviews;
                         }
-                        //GET PRICE
-                        getPrices(data.amazon[i],function(realPrice,altImage){
-                            data.amazon[i].realPrice = realPrice;
-                            if (altImage){
-                               data.amazon[i].altImage = altImage;
-                            }
-                            callback();
-                        });
+                        if (altImage){
+                           data.amazon[i].altImage = altImage;
+                        }
+                        callback();
                     });
                 }
                 else {
                     callback();
                 }
             }, function done(){
-                console.log('more data',data);
                 ioKip.outgoingResponse(data,'stitch','amazon');
             });
         }
     }else {
-        console.log('warning: recallHistory missing in searchMore()');
+        debug('warning: recallHistory missing in searchMore()');
         ioKip.sendTxtResponse(data,'Oops sorry, My brain just broke for a sec, what did you ask?');
     }
 
@@ -1167,12 +1188,12 @@ var getReviews = function(ASIN,callback) {
 
     proxiedRequest.get(url, function(err, res, body) {
       if(err){
-        console.log('getReviews error: ',err);
+        debug('getReviews error: ',err);
         callback();
       }
       else {
 
-        console.log(body);
+        debug(body);
         $ = cheerio.load(body);
         callback(( $('.a-size-base').text()
           .match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [] )
@@ -1188,17 +1209,18 @@ var getPrices = function(item,callback){
     var url = item.DetailPageURL[0];
     var price;  // get price from API
     var altImage;
+    var reviews;
 
     if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
         //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-        console.log('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
+        debug('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
 
         price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
 
     }
     else if (item.ItemAttributes[0].ListPrice){
 
-        console.log('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
+        debug('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
 
         if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
             price = '';
@@ -1209,28 +1231,36 @@ var getPrices = function(item,callback){
         }
     }
 
-    console.log('price PRE PROCESS ',price);
+    debug('price PRE PROCESS ',price);
 
     amazonHTML.basic(url, function(err, product) {
       kip.err(err); // print error
 
+      debug('& & & & & & & & & & & &PRODUCT OBJ ',product);
+
+      if (product.reviews){
+        reviews = product.reviews;
+      }
+
       if (product && product.price) {
-        console.log('returning early with price: ' + product.price);
-        console.log('returning early with rice ' + product.altImage);
+        debug('returning early with price: ' + product.price);
+        debug('returning early with rice ' + product.altImage);
           // if(product.altImage){
           //   altImage = product.altImage;
           // }
-        return callback(product.price,product.altImage)
+        return callback(product.price,product.altImage,reviews)
       }
 
-        console.log('product.price: ' + product.price + ', price: ' + price);
+      debug('product.price: ' + product.price + ', price: ' + price);
 
       price = product.price || price || '';
-      console.log('final price: ' + price);
+      debug('final price: ' + price);
       if(product.altImage){
         altImage = product.altImage;
       }
-      callback(price,altImage);
+
+
+      callback(price,altImage,reviews);
     })
 }
 
@@ -1239,27 +1269,17 @@ var getAmazonStuff = function(data,results,callback3){
 
     //!\\ //!\\ NOTE!!! Add timeout here, fire callback if parallel doesnt fire callback!!
 
+
+    //getting prices and reviews from same source
     async.parallel([
 
-
         //* * item 1 * * *//
-        //get review
-        function(callback){
-            var id = results[0].ASIN[0];
-            getReviews(id,function(rating,count){
-                var obj = {
-                    rating:rating,
-                    reviewCount:count
-                }
-                callback(null,obj);
-            });
-        },
-        //get real price
         function(callback){
             //GET PRICE
-            getPrices(results[0],function(realPrice,altImage){
+            getPrices(results[0],function(realPrice,altImage,reviews){
                 var obj = {
-                    realPrice:realPrice
+                    realPrice:realPrice,
+                    reviews:reviews
                 }
                 if (altImage){
                     obj.altImage = altImage;
@@ -1269,22 +1289,11 @@ var getAmazonStuff = function(data,results,callback3){
         },
 
         //* * item 2 * * *//
-        //get review
         function(callback){
-            var id = results[1].ASIN[0];
-            getReviews(id,function(rating,count){
+            getPrices(results[1],function(realPrice,altImage,reviews){
                 var obj = {
-                    rating:rating,
-                    reviewCount:count
-                }
-                callback(null,obj);
-            });
-        },
-        //get real price
-        function(callback){
-            getPrices(results[1],function(realPrice,altImage){
-                var obj = {
-                    realPrice:realPrice
+                    realPrice:realPrice,
+                    reviews:reviews
                 }
                 if (altImage){
                     obj.altImage = altImage;
@@ -1294,22 +1303,11 @@ var getAmazonStuff = function(data,results,callback3){
         },
 
         //* * item 3 * * *//
-        //get review
         function(callback){
-            var id = results[2].ASIN[0];
-            getReviews(id,function(rating,count){
+            getPrices(results[2],function(realPrice,altImage,reviews){
                 var obj = {
-                    rating:rating,
-                    reviewCount:count
-                }
-                callback(null,obj);
-            });
-        },
-        //get real price
-        function(callback){
-            getPrices(results[2],function(realPrice,altImage){
-                var obj = {
-                    realPrice:realPrice
+                    realPrice:realPrice,
+                    reviews:reviews
                 }
                 if (altImage){
                     obj.altImage = altImage;
@@ -1320,29 +1318,32 @@ var getAmazonStuff = function(data,results,callback3){
     ],
     function(err, rez){
         if (err){
-            console.log('Error: parallel getAmazonStuff in search.js ',err);
+            debug('Error: parallel getAmazonStuff in search.js ',err);
         }
         var count = 0;
-        var loopLame = [0,0,1,1,2,2];
+        var loopLame = [0,1,2];
         async.eachSeries(loopLame, function(i, callback) {
             if (data.amazon[i]){
 
-                //TEST SCRAPE RESULTS NULL BEORE PROCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                if (rez[count].rating){
-                    console.log('add rating');
-                    data.amazon[i].reviews = rez[count];
+                //add review
+                if (rez[count] && rez[count].reviews){
+                    debug('add rating');
+                    data.amazon[i].reviews = rez[count].reviews;
                 }
-                else if(rez[count].realPrice){
-                    console.log('add real price');
+
+                //add price
+                if(rez[count] && rez[count].realPrice){
+                    debug('add real price');
                     data.amazon[i].realPrice = rez[count].realPrice;
 
                     if(rez[count].altImage){ //adding alt image here as well
                        data.amazon[i].altImage = rez[count].altImage;
                     }
                 }
-                else {
-                    console.log('/!/ Warning: no reviews or real prices found for current item');
-                }
+
+                // else {
+                //     debug('/!/ Warning: no reviews or real prices found for current item');
+                // }
                 count++;
                 callback();
             }
@@ -1392,7 +1393,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
     switch(productGroup){
         case 'Hobby':
         case 'Toy':
-            console.log('Toy or Hobby');
+            debug('Toy or Hobby');
             resParams.SearchIndex = 'Toys'; //link product group to searchindex
 
             //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
@@ -1402,7 +1403,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Pantry':
-            console.log('pantry');
+            debug('pantry');
             resParams.SearchIndex = 'Pantry'; //link product group to searchindex
 
             //using ['Toys & Games'] here to only search for one string in nodes (can ONLY have up to 3 in arr)
@@ -1412,7 +1413,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Book':
-            console.log('Book');
+            debug('Book');
             resParams.SearchIndex = 'Books'; //link product group to searchindex
             traverseNodes(browseNodes,['Books'],function(res){
                 resParams.BrowseNode = res;
@@ -1420,7 +1421,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Magazine':
-            console.log('Magazine');
+            debug('Magazine');
             resParams.SearchIndex = 'Magazines'; //link product group to searchindex
             traverseNodes(browseNodes,['Magazine Subscriptions','Magazines'],function(res){
                 resParams.BrowseNode = res;
@@ -1428,7 +1429,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Music':
-            console.log('music');
+            debug('music');
             resParams.SearchIndex = 'Music'; //link product group to searchindex
             traverseNodes(browseNodes,['CDs & Vinyl'],function(res){
                 resParams.BrowseNode = res;
@@ -1436,7 +1437,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Watch':
-            console.log('watch');
+            debug('watch');
             resParams.SearchIndex = 'Watches'; //link product group to searchindex
             traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics','Health & Personal Care','Sports & Outdoors'],function(res){
                 resParams.BrowseNode = res;
@@ -1445,7 +1446,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Digital Music Track':
         case 'Digital Music Album':
-            console.log('Digital Music Track OR Digital Music Album');
+            debug('Digital Music Track OR Digital Music Album');
             resParams.SearchIndex = 'DigitalMusic'; //link product group to searchindex
             traverseNodes(browseNodes,['Digital Music'],function(res){
                 resParams.BrowseNode = res;
@@ -1455,7 +1456,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Entertainment Memorabilia':
         case 'Art':
         case 'Coins':
-            console.log('Entertainment Memorabilia OR art');
+            debug('Entertainment Memorabilia OR art');
             resParams.SearchIndex = 'Collectibles'; //link product group to searchindex
             traverseNodes(browseNodes,['Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res;
@@ -1463,7 +1464,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Musical Instruments':
-            console.log('MusicalInstruments');
+            debug('MusicalInstruments');
             resParams.SearchIndex = 'MusicalInstruments'; //link product group to searchindex
             traverseNodes(browseNodes,['Musical Instruments','Electronics','Sports & Outdoors','Toys & Games'],function(res){
                 resParams.BrowseNode = res;
@@ -1471,7 +1472,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Photography':
-            console.log('photo');
+            debug('photo');
             resParams.SearchIndex = 'Photo'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics'],function(res){
                 resParams.BrowseNode = res;
@@ -1479,7 +1480,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Apparel':
-            console.log('apparel');
+            debug('apparel');
             resParams.SearchIndex = 'Apparel'; //link product group to searchindex
             traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors','Health & Personal Care'],function(res){
                 resParams.BrowseNode = res;
@@ -1487,7 +1488,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Shoes':
-            console.log('shoes');
+            debug('shoes');
             resParams.SearchIndex = 'Shoes'; //link product group to searchindex
             traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Baby Products','Beauty','Sports & Outdoors'],function(res){
                 resParams.BrowseNode = res;
@@ -1495,7 +1496,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Wine':
-            console.log('Wine');
+            debug('Wine');
             resParams.SearchIndex = 'Wine'; //link product group to searchindex
             traverseNodes(browseNodes,['Wine'],function(res){
                 resParams.BrowseNode = res;
@@ -1504,7 +1505,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Personal Computer':
         case 'PC Accessory':
-            console.log('personal computer OR PC Accessory');
+            debug('personal computer OR PC Accessory');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex  //* *  or: PCHardware
             traverseNodes(browseNodes,['Computers & Accessories','Electronics','Clothing, Shoes & Jewelry','Office Products'],function(res){
                 resParams.BrowseNode = res;
@@ -1515,7 +1516,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Speakers':
         case 'Network Media Player':
         case 'GPS or Navigation System':
-            console.log(productGroup);
+            debug(productGroup);
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Cell Phones & Accessories','Clothing, Shoes & Jewelry','Office Products'],function(res){
                 resParams.BrowseNode = res;
@@ -1523,7 +1524,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Wireless':
-            console.log(productGroup);
+            debug(productGroup);
             resParams.SearchIndex = 'Wireless'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Cell Phones & Accessories','Clothing, Shoes & Jewelry','Sports & Outdoors','Health & Personal Care','Office Products','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res;
@@ -1531,7 +1532,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Single Detail Page Misc':
-            console.log(productGroup);
+            debug(productGroup);
             resParams.SearchIndex = 'Miscellaneous'; //link product group to searchindex
             traverseNodes(browseNodes,['Everything Else'],function(res){
                 resParams.BrowseNode = res;
@@ -1539,7 +1540,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Art and Craft Supply':
-            console.log('arts crafts supply');
+            debug('arts crafts supply');
             resParams.SearchIndex = 'ArtsAndCrafts'; //link product group to searchindex
             traverseNodes(browseNodes,['Painting, Drawing & Art Supplies','Home & Kitchen','Office Products','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res;
@@ -1547,7 +1548,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'eBooks':
-            console.log('kindle store');
+            debug('kindle store');
             resParams.SearchIndex = 'KindleStore'; //link product group to searchindex
             traverseNodes(browseNodes,['Kindle Store','Books'],function(res){
                 resParams.BrowseNode = res;
@@ -1555,7 +1556,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Pet Products':
-            console.log('Pet Products');
+            debug('Pet Products');
             resParams.SearchIndex = 'PetSupplies'; //link product group to searchindex
             traverseNodes(browseNodes,['Pet Supplies','Patio, Lawn & Garden','Electronics','Industrial & Scientific','Toys & Games'],function(res){
                 resParams.BrowseNode = res;
@@ -1564,7 +1565,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'CE':
         case 'Home Theater':
-            console.log('>> CE OR home theater');
+            debug('>> CE OR home theater');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Video Games','Cell Phones & Accessories','Office Products','Sports & Outdoors','Clothing, Shoes & Jewelry','Car Audio or Theater','Industrial & Scientific','Toys & Games'],function(res){
                 resParams.BrowseNode = res;
@@ -1573,7 +1574,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Video Games':
         case 'Digital Video Games':
-            console.log('>> VideoGames OR digital video games');
+            debug('>> VideoGames OR digital video games');
             resParams.SearchIndex = 'VideoGames'; //link product group to searchindex
             traverseNodes(browseNodes,['Video Games','Gift Cards','Electronics','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry'],function(res){
                 resParams.BrowseNode = res;
@@ -1582,7 +1583,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Gift Card':
         case 'Electronic Gift Card':
-            console.log('Gift Card or Electronic Gift Card');
+            debug('Gift Card or Electronic Gift Card');
             resParams.SearchIndex = 'GiftCards'; //link product group to searchindex
             traverseNodes(browseNodes,['Gift Cards','Apps & Games','Grocery & Gourmet Food','Baby Products','Appliances','Patio, Lawn & Garden','Beauty','Health & Personal Care','Tools & Home Improvement','Painting, Drawing & Art Supplies','Books','Arts, Crafts & Sewing','Pet Supplies','Home & Kitchen','Electronics','Video Games','Office Products','Cell Phones & Accessories','Car Audio or Theater','Sports & Outdoors','Clothing, Shoes & Jewelry','Industrial & Scientific','Kindle Store','Automotive','Movies & TV','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res;
@@ -1592,7 +1593,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Digital Accessories 1':
         case 'Digital Accessories 2':
         case 'Digital Accessories 3':
-            console.log('Digital Accessories 1 or 2 or 3');
+            debug('Digital Accessories 1 or 2 or 3');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
             traverseNodes(browseNodes,['Kindle Store','Electronics','Video Games'],function(res){
                 resParams.BrowseNode = res;
@@ -1600,7 +1601,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Kitchen':
-            console.log('kitchen');
+            debug('kitchen');
             resParams.SearchIndex = 'Kitchen'; //link product group to searchindex
             traverseNodes(browseNodes,['Home & Kitchen'],function(res){
                 resParams.BrowseNode = res;
@@ -1608,7 +1609,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Grocery':
-            console.log('grocery');
+            debug('grocery');
             resParams.SearchIndex = 'Grocery'; //link product group to searchindex
             traverseNodes(browseNodes,['Grocery & Gourmet Food','Baby Products','Beauty'],function(res){
                 resParams.BrowseNode = res;
@@ -1616,7 +1617,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Wine':
-            console.log('wine');
+            debug('wine');
             resParams.SearchIndex = 'Wine'; //link product group to searchindex
             traverseNodes(browseNodes,['Grocery & Gourmet Food'],function(res){
                 resParams.BrowseNode = res;
@@ -1625,7 +1626,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'TV Series Episode Video on Demand':
         case 'Movie':
-            console.log('tv series Episode video on demand OR Movie');
+            debug('tv series Episode video on demand OR Movie');
             resParams.SearchIndex = 'Video'; //link product group to searchindex
             traverseNodes(browseNodes,['Movies & TV'],function(res){
                 resParams.BrowseNode = res;
@@ -1633,7 +1634,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'DVD':
-            console.log('DVD');
+            debug('DVD');
             resParams.SearchIndex = 'DVD'; //link product group to searchindex
             traverseNodes(browseNodes,['Movies & TV','Electronics','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res;
@@ -1641,7 +1642,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'VHS':
-            console.log('VHS');
+            debug('VHS');
             resParams.SearchIndex = 'VHS'; //link product group to searchindex
             traverseNodes(browseNodes,['Movies & TV','Electronics','Collectibles & Fine Art'],function(res){
                 resParams.BrowseNode = res;
@@ -1649,7 +1650,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Baby Product':
-            console.log('baby product');
+            debug('baby product');
             resParams.SearchIndex = 'Baby'; //link product group to searchindex
             traverseNodes(browseNodes,['Baby Products','Clothing, Shoes & Jewelry','Clothing, Shoes & Jewelry','Home & Kitchen'],function(res){
                 resParams.BrowseNode = res;
@@ -1659,7 +1660,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
 
         case 'Home Improvement':
         case 'Tools':
-            console.log('home improvement');
+            debug('home improvement');
             resParams.SearchIndex = 'Tools'; //link product group to searchindex
             traverseNodes(browseNodes,['Industrial & Scientific','Appliances','Tools & Home Improvement','Electronics','Automotive','Office Products','Patio, Lawn & Garden'],function(res){
                 resParams.BrowseNode = res;
@@ -1668,7 +1669,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
 
         case 'Guild Product':
-            console.log('Guild Product');
+            debug('Guild Product');
             resParams.SearchIndex = 'Home & Kitchen'; //link product group to searchindex
             traverseNodes(browseNodes,['Handmade Products','Tools & Home Improvement','Home & Kitchen'],function(res){
                 resParams.BrowseNode = res;
@@ -1677,7 +1678,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
 
         case 'Jewelry':
-            console.log('Jewelry');
+            debug('Jewelry');
             resParams.SearchIndex = 'Jewelry'; //link product group to searchindex
             traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Beauty','Apparel'],function(res){
                 resParams.BrowseNode = res;
@@ -1687,7 +1688,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
 
 
         case 'Major Appliances':
-            console.log('Major Appliances');
+            debug('Major Appliances');
             resParams.SearchIndex = 'Appliances'; //link product group to searchindex
             traverseNodes(browseNodes,['Appliances'],function(res){
                 resParams.BrowseNode = res;
@@ -1696,7 +1697,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Amazon Tablets':
         case 'Amazon SMP':
-            console.log('amazon tablets');
+            debug('amazon tablets');
             resParams.SearchIndex = 'KindleStore'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Tools & Home Improvement','Kindle Store','Video Games'],function(res){
                 resParams.BrowseNode = res;
@@ -1704,7 +1705,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Amazon Home':
-            console.log('amaazon home');
+            debug('amaazon home');
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Tools & Home Improvement','Kindle Store'],function(res){
                 resParams.BrowseNode = res;
@@ -1714,7 +1715,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         case 'Mobile Application':
         case 'Software':
         case 'Digital Software':
-            console.log('mobile app OR software');
+            debug('mobile app OR software');
             resParams.SearchIndex = 'Software'; //link product group to searchindex
             traverseNodes(browseNodes,['Apps & Games','Software','Office Products','Video Games','Toys & Games'],function(res){
                 resParams.BrowseNode = res;
@@ -1722,7 +1723,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Office Product':
-            console.log('Office Product');
+            debug('Office Product');
             resParams.SearchIndex = 'OfficeProducts'; //link product group to searchindex
             traverseNodes(browseNodes,['Office Products','Electronics','Arts, Crafts & Sewing','Tools & Home Improvement','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res;
@@ -1730,7 +1731,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Jewelry':
-            console.log('Jewelry');
+            debug('Jewelry');
             resParams.SearchIndex = 'Jewelry'; //link product group to searchindex
             traverseNodes(browseNodes,['Clothing, Shoes & Jewelry','Electronics'],function(res){
                 resParams.BrowseNode = res;
@@ -1738,7 +1739,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Home':
-            console.log('home');
+            debug('home');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
             traverseNodes(browseNodes,['Home & Kitchen','Arts, Crafts & Sewing','Beauty','Health & Personal Care','Electronics','Clothing, Shoes & Jewelry','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res;
@@ -1746,7 +1747,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Lawn & Patio':
-            console.log('Lawn & Patio');
+            debug('Lawn & Patio');
             resParams.SearchIndex = 'LawnAndGarden'; //link product group to searchindex
             traverseNodes(browseNodes,['Patio, Lawn & Garden','Home & Kitchen','Industrial & Scientific','Electronics','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res;
@@ -1754,7 +1755,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Furniture':
-            console.log('Furniture');
+            debug('Furniture');
             resParams.SearchIndex = 'HomeGarden'; //link product group to searchindex
             traverseNodes(browseNodes,['Office Products','Arts, Crafts & Sewing','Home & Kitchen','Patio, Lawn & Garden'],function(res){
                 resParams.BrowseNode = res;
@@ -1763,7 +1764,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Automotive Parts and Accessories':
         case 'Car Audio or Theater':
-            console.log(productGroup);
+            debug(productGroup);
             resParams.SearchIndex = 'Automotive'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Health & Personal Care','Automotive','Patio, Lawn & Garden','Cell Phones & Accessories','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res;
@@ -1772,7 +1773,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
 
         case 'Boost':
-            console.log(productGroup);
+            debug(productGroup);
             resParams.SearchIndex = 'Electronics'; //link product group to searchindex
             traverseNodes(browseNodes,['Electronics','Health & Personal Care','Automotive','Patio, Lawn & Garden','Cell Phones & Accessories','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res;
@@ -1780,7 +1781,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Custom Services':
-            console.log('Custom Services');
+            debug('Custom Services');
             resParams.SearchIndex = 'Miscellaneous'; //link product group to searchindex
             traverseNodes(browseNodes,['Local Business'],function(res){
                 resParams.BrowseNode = res;
@@ -1789,7 +1790,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
 
         case 'Health and Beauty':
-            console.log('Health and Beauty');
+            debug('Health and Beauty');
             resParams.SearchIndex = 'HealthPersonalCare'; //link product group to searchindex
             traverseNodes(browseNodes,['Health & Personal Care','Beauty','Sports & Outdoors','Automotive','Electronics','Home & Kitchen','Baby Products','Industrial & Scientific'],function(res){
                 resParams.BrowseNode = res;
@@ -1798,7 +1799,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'Prestige Beauty':
         case 'Beauty':
-            console.log('Beauty');
+            debug('Beauty');
             resParams.SearchIndex = 'Beauty'; //link product group to searchindex
             traverseNodes(browseNodes,['Beauty','Health & Personal Care','Grocery & Gourmet Food','Home & Kitchen','Electronics','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res;
@@ -1806,7 +1807,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         case 'Sports':
-            console.log('Sports');
+            debug('Sports');
             resParams.SearchIndex = 'SportingGoods'; //link product group to searchindex
             traverseNodes(browseNodes,['Sports & Outdoors','Clothing, Shoes & Jewelry','Automotive','Toys & Games','Electronics','Collectibles & Fine Art','Grocery & Gourmet Food','Health & Personal Care','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res;
@@ -1815,7 +1816,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
         break;
         case 'BISS':
         case 'BISS Basic':
-            console.log('BISS');
+            debug('BISS');
             resParams.SearchIndex = 'Industrial'; //link product group to searchindex
             traverseNodes(browseNodes,['Industrial & Scientific','Office Products','Automotive','Beauty','Health & Personal Care','Electronics','Home & Kitchen','Tools & Home Improvement'],function(res){
                 resParams.BrowseNode = res;
@@ -1823,7 +1824,7 @@ function parseAmazon(productGroup,browseNodes,callback5){
             });
         break;
         default:
-            console.log('Warning: "All" search category fired! this shouldn\'t happen. productGroup is: ',productGroup);
+            debug('Warning: "All" search category fired! this shouldn\'t happen. productGroup is: ',productGroup);
             resParams.SearchIndex = 'All';
             callback5(resParams);
     }
@@ -1831,8 +1832,8 @@ function parseAmazon(productGroup,browseNodes,callback5){
 
 function traverseNodes(nodeList,findMe,callbackMM){
 
-    console.log(findMe);
-    console.log(findMe[0]);
+    debug(findMe);
+    debug(findMe[0]);
 
     var nodeArr = []; //collect all browse nodes
 
@@ -1847,107 +1848,107 @@ function traverseNodes(nodeList,findMe,callbackMM){
                 //authors note: findMe[i] logic a real shit way to check for multiple string matches while traversing nodes
                 if (currentNode.Name && findMe.length > 0 && currentNode.Name[0] == findMe[0]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 1 && currentNode.Name[0] == findMe[1]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 2 && currentNode.Name[0] == findMe[2]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 3 && currentNode.Name[0] == findMe[3]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 4 && currentNode.Name[0] == findMe[4]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 5 && currentNode.Name[0] == findMe[5]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 6 && currentNode.Name[0] == findMe[6]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 7 && currentNode.Name[0] == findMe[7]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 8 && currentNode.Name[0] == findMe[8]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 9 && currentNode.Name[0] == findMe[9]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 10 && currentNode.Name[0] == findMe[10]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 11 && currentNode.Name[0] == findMe[11]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 12 && currentNode.Name[0] == findMe[12]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 13 && currentNode.Name[0] == findMe[13]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 14 && currentNode.Name[0] == findMe[14]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 15 && currentNode.Name[0] == findMe[15]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 16 && currentNode.Name[0] == findMe[16]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 17 && currentNode.Name[0] == findMe[17]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 18 && currentNode.Name[0] == findMe[18]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 19 && currentNode.Name[0] == findMe[19]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 20 && currentNode.Name[0] == findMe[20]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 21 && currentNode.Name[0] == findMe[21]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 22 && currentNode.Name[0] == findMe[22]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 23 && currentNode.Name[0] == findMe[23]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 24 && currentNode.Name[0] == findMe[24]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Name && findMe.length > 25 && currentNode.Name[0] == findMe[25]){ //we found the string, stop traversing
                     nodeArr.push(childNodeId);
-                    console.log('CHILD NAME ',childNodeName);
+                    debug('CHILD NAME ',childNodeName);
                     return false;
                 }else if (currentNode.Ancestors){ //didn't find string, keep traversing
                     currentNode = currentNode.Ancestors[0].BrowseNode[0];
@@ -1962,7 +1963,7 @@ function traverseNodes(nodeList,findMe,callbackMM){
             },
             function (err) {
                 if (err){
-                    console.log('WHILST error in search.js ',err);
+                    debug('WHILST error in search.js ',err);
                 }
                 callbackZ();
             }
@@ -1970,17 +1971,17 @@ function traverseNodes(nodeList,findMe,callbackMM){
 
     }, function done(){
         if (nodeArr.length > 0){
-            // console.log('arr ',nodeArr);
-            // console.log('ARRAY LENGTH ',nodeArr.length);
+            // debug('arr ',nodeArr);
+            // debug('ARRAY LENGTH ',nodeArr.length);
             // if (nodeArr.length >= 2){
             //     nodeArr = nodeArr.slice(0,2);
             // }
-            // console.log('arr ',nodeArr);
-            // console.log('ARRAY LENGTH ',nodeArr.length);
+            // debug('arr ',nodeArr);
+            // debug('ARRAY LENGTH ',nodeArr.length);
             callbackMM(nodeArr.toString());
         }
         else {
-            console.log('error: no browseNodes found');
+            debug('error: no browseNodes found');
             callbackMM();
         }
     });

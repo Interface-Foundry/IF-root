@@ -9,6 +9,7 @@ var messageSchema = mongoose.Schema({
     tokens: [String], //broken up incoming message (if applicable)
     bucket: { type: String, index: true},
     action: { type: String, index: true},
+    mode: String,
     amazon: [mongoose.Schema.Types.Mixed], //amazon search results
     dataModify: {
         type: {type: String},
@@ -19,7 +20,9 @@ var messageSchema = mongoose.Schema({
         origin: String,
         channel: String,
         org: String,
-        id: { type: String, index: true }
+        id: { type: String, index: true },
+        flag: String,
+        user: String
     },
     client_res: [mongoose.Schema.Types.Mixed], //outgoing messages, if applicable
     ts: {
@@ -48,17 +51,23 @@ var messageSchema = mongoose.Schema({
     },
     urlShorten:[String],
     flags: {
+            //stuff for supervisor
             toSupervisor: Boolean, //messages coming from cinna to supervisor
             toClient: Boolean, //messages going from supervisor to cinna to client
             toCinna: Boolean, // messages going from supervisor to cinna only (previewing search results)
             searchResults: Boolean, //messages coming from cinna to supervisor that are search preview result sets
-            recalled: Boolean //flag to bypass history function in cinna
+            recalled: Boolean, //flag to bypass history function in cinna
+            //stuff for email
+            email: Boolean
         },
     click: {
         productId: String,
         url: String,
         IP: String,
         headers:String
+    },
+    slackData: {
+        callback_id: String
     }
 });
 

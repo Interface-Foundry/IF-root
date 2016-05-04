@@ -8,8 +8,6 @@ var debug = require('debug')('chat')
 
 module.exports = function(bot, cb) {
   cb = cb || function() {};
-
-
   scrape_team_info(bot, function(err, users) {
     if (err || !users) {
       console.error('Could not scrape users for slackbot ' + bot._id);
@@ -40,18 +38,20 @@ module.exports = function(bot, cb) {
 
 // callback is a team, the list of chatusers for this bot
 var scrape_team_info = function(bot, callback) {
-    console.log('scraping team for bot ' + bot._id)
+    //console.log('scraping team for bot ' + bot._id);
     request('https://slack.com/api/auth.test?token=' + bot.access_token, function(e, r, b) {
       if (kip.error(e)) return;
 
       r.body = JSON.parse(r.body)
-      console.log(r.body);
 
       if (!r.body.user_id) {
         return kip.error('Could not find the user who added slackbot ' + bot._id)
       }
 
       bot.meta.addedBy = r.body.user_id;
+      bot.meta.office_assistants = [r.body.user_id];
+      console.log('ASSISTANTS HERE!!!!!! ',bot.meta.office_assistants);
+      
       if (typeof bot.save === 'function') {
         bot.save();
       } else {

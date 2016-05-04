@@ -3,6 +3,9 @@ var request = require('request');
 var fs = require('fs');
 var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
+var nlp = require('../../nlp/api');
+var banter = require("./banter.js");
+
 
 var googl = require('goo.gl');
 if (process.env.NODE_ENV === 'development') {
@@ -83,6 +86,9 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➊</div>';
             }
+            else if (data.flags && data.flags.email == true) {
+                  numEmoji = '1.'
+            }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':one:';
             }
@@ -94,6 +100,9 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➋</div>';
             }
+            else if (data.flags && data.flags.email == true) {
+                  numEmoji = '2.'
+            }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':two:';
             }
@@ -104,6 +113,9 @@ function getNumEmoji(data,number,callback){
         case 3: //emoji #3
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➌</div>';
+            }
+            else if (data.flags && data.flags.email == true) {
+                  numEmoji = '3.'
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':three:';
@@ -117,26 +129,26 @@ function getNumEmoji(data,number,callback){
 }
 
 var emoji = {
-  1: { slack: ':one:', html: '<div class="number">①</div>' },
-  2: { slack: ':two:', html: '<div class="number">②</div>' },
-  3: { slack: ':three:', html: '<div class="number">③</div>' },
-  4: { slack: ':four:', html: '<div class="number">④</div>' },
-  5: { slack: ':five:', html: '<div class="number">⑤</div>' },
-  6: { slack: ':six:', html: '<div class="number">⑥</div>' },
-  7: { slack: ':seven:', html: '<div class="number">⑦</div>' },
-  8: { slack: ':eight:', html: '<div class="number">⑧</div>' },
-  9: { slack: ':nine:', html: '<div class="number">⑨</div>' },
-  10: { slack: '10.', html: '<div class="number">⑩</div>' },
-  11: { slack: '11.', html: '<div class="number">⑪</div>' },
-  12: { slack: '12.', html: '<div class="number">⑫</div>' },
-  13: { slack: '13.', html: '<div class="number">⑬</div>' },
-  14: { slack: '14.', html: '<div class="number">⑭</div>' },
-  15: { slack: '15.', html: '<div class="number">⑮</div>' },
-  16: { slack: '16.', html: '<div class="number">⑯</div>' },
-  17: { slack: '17.', html: '<div class="number">⑰</div>' },
-  18: { slack: '18.', html: '<div class="number">⑱</div>' },
-  19: { slack: '19.', html: '<div class="number">⑲</div>' },
-  20: { slack: '20.', html: '<div class="number">⑳</div>' },
+  1: { slack: ':one:', html: '<div class="number">①</div>', email: '1. ' },
+  2: { slack: ':two:', html: '<div class="number">②</div>', email: '2. ' },
+  3: { slack: ':three:', html: '<div class="number">③</div>', email: '3. ' },
+  4: { slack: ':four:', html: '<div class="number">④</div>', email: '4. ' },
+  5: { slack: ':five:', html: '<div class="number">⑤</div>', email: '5. ' },
+  6: { slack: ':six:', html: '<div class="number">⑥</div>', email: '6. ' },
+  7: { slack: ':seven:', html: '<div class="number">⑦</div>', email: '7. ' },
+  8: { slack: ':eight:', html: '<div class="number">⑧</div>', email: '8. ' },
+  9: { slack: ':nine:', html: '<div class="number">⑨</div>', email: '9. ' },
+  10: { slack: '10.', html: '<div class="number">⑩</div>', email: '10. ' },
+  11: { slack: '11.', html: '<div class="number">⑪</div>', email: '11. ' },
+  12: { slack: '12.', html: '<div class="number">⑫</div>', email: '12. ' },
+  13: { slack: '13.', html: '<div class="number">⑬</div>', email: '13. ' },
+  14: { slack: '14.', html: '<div class="number">⑭</div>', email: '14. ' },
+  15: { slack: '15.', html: '<div class="number">⑮</div>', email: '15. ' },
+  16: { slack: '16.', html: '<div class="number">⑯</div>', email: '16. ' },
+  17: { slack: '17.', html: '<div class="number">⑰</div>', email: '17. ' },
+  18: { slack: '18.', html: '<div class="number">⑱</div>', email: '18. ' },
+  19: { slack: '19.', html: '<div class="number">⑲</div>', email: '19. ' },
+  20: { slack: '20.', html: '<div class="number">⑳</div>', email: '20. ' },
 
 }
 
@@ -263,6 +275,204 @@ var imageSearch = function(data,token,callback){
     }
 
 }
+  
+//check if string contains a mode, then build kip object
+//context here is for which conversation this modeHandle called from, i.e. from 'settings mode'
+var modeHandle = function(input,context,callback){
+
+    //* * Checking if we should switch mode here
+    var inputTxt = {msg:input.toLowerCase().trim()};
+
+
+    banter.checkModes(inputTxt,context,function(mode,res){  
+
+      console.log('MODE FROM BANTER.JS ',mode);
+      console.log('RES FROM BANTER.JS ',res);
+
+      //nothing found in canned 
+      if(!mode && !res){
+          //try for NLP parse
+          nlp.parse(inputTxt, function(e, res) {
+              if (e){
+                console.log('NLP error ',e);
+                callback();
+              }
+              else {
+                //build obj from NLP parse
+                buildKipObject(res, function(rez){
+                  //mode detected via NLP, which is only shopping mode for now
+                  if(rez.action && rez.action !== 'initial'){
+                    var obj = {
+                      mode:'shopping',
+                      res:rez
+                    }
+                    obj.res.mode = 'shopping'; //ugh, whatev 
+                    callback(obj);
+                  }
+                  else {
+                    callback();
+                  }
+                });
+              }
+          });
+      }
+      //pass mode and res
+      else if(mode){
+        var obj = {
+          mode:mode
+        };
+
+        //standardize
+        if(!res){
+          obj.res = mode;
+        }else {
+          obj.res = res;
+        }
+
+        callback(obj);
+      }
+      else {
+        
+        console.log('NO MODE FOUND!!!!! heres mode: ',mode)
+        callback();
+      }
+
+    });
+
+
+}
+
+// //find mode to match incoming kip object
+// function findMode(data,callback){
+//     if(data.action && data.bucket){
+//         switch(data.bucket){
+//             case 'purchase':
+//                 switch(data.action){
+//                     case 'list':
+//                         data.mode = 'viewcart';
+//                     break;
+//                 }
+//             break;
+//             case 'search':
+//             break;
+            
+//         }
+//     }else {
+//         console.error('Error: missing data.bucket or data.action in findMode()');
+//     }
+//     callback(data);
+// }
+
+//BUILDS KIP DATA OBJECT FROM NLP RESPONSES
+var buildKipObject = function(res,callback){
+
+    console.log('INCOMING BUILD KIP OBJ ',res);
+
+
+    var data = {};
+
+    if (res.supervisor && data.flags) {
+
+      data.flags.toSupervisor = true;
+    }
+
+    if(res.execute && res.execute.length > 0){
+
+        if(!res.execute[0].bucket){
+            res.execute[0].bucket = 'search';
+        }
+        if(!res.execute[0].action){
+            res.execute[0].execute[0].action = 'initial';
+        }
+
+        //- - - temp stuff to transfer nlp results to data object - - - //
+        if (res.execute[0].bucket){
+            data.bucket = res.execute[0].bucket;
+        }
+        if (res.execute[0].action){
+            data.action = res.execute[0].action;
+        }
+        if (res.tokens){
+            data.tokens = res.tokens;
+        }
+        if (res.searchSelect){
+            data.searchSelect = res.searchSelect;
+        }
+        if (res.execute[0].dataModify){
+            data.dataModify = res.execute[0].dataModify;
+        }
+        //- - - - end temp - - - - //
+
+        callback(data);
+
+    }
+    else if (!res.bucket && !res.action && res.searchSelect && res.searchSelect.length > 0){
+        //IF got NLP that looks like { tokens: [ '1 but xo' ], execute: [], searchSelect: [ 1 ] }
+
+        //looking for modifier search
+        if (res.tokens && res.tokens[0].indexOf('but') > -1){
+            var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
+            modDetail = modDetail.replace('but','').trim();
+            console.log('mod string ',modDetail);
+
+            data.tokens = res.tokens;
+            data.searchSelect = res.searchSelect;
+            data.bucket = 'search';
+            data.action = 'modify';
+            data.dataModify = {
+                type:'genericDetail',
+                val:[modDetail]
+            };
+
+            console.log('constructor ',data);
+
+            callback(data);
+        }
+        else {
+            data.tokens = res.tokens;
+            data.searchSelect = res.searchSelect;
+            data.bucket = 'search';
+            data.action = 'initial';
+
+            console.log('un struct ',data);
+
+            callback(data);
+        }
+
+    }
+    else {
+
+        if(!res.bucket){
+            res.bucket = 'search';
+        }
+        if(!res.action){
+            res.action = 'initial';
+        }
+
+        //- - - temp stuff to transfer nlp results to data object - - - //
+        if (res.bucket){
+            data.bucket = res.bucket;
+        }
+        if (res.action){
+            data.action = res.action;
+        }
+        if (res.tokens){
+            data.tokens = res.tokens;
+        }
+        if (res.searchSelect){
+            data.searchSelect = res.searchSelect;
+        }
+        if (res.dataModify){
+            data.dataModify = res.dataModify;
+        }
+        //- - - - end temp - - - - //
+
+        callback(data);
+
+    }
+
+};
+
 
 
 /////////// tools /////////////
@@ -276,3 +486,6 @@ module.exports.getCartLink = getCartLink;
 module.exports.getItemLink = getItemLink;
 module.exports.emoji = emoji;
 module.exports.imageSearch = imageSearch;
+module.exports.buildKipObject = buildKipObject;
+module.exports.modeHandle = modeHandle;
+
