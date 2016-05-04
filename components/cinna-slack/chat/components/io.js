@@ -43,12 +43,9 @@ var kipUser = {};
 var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
-// var BufferList = require('bufferlist').BufferList
 var upload = require('../../../../IF_services/upload.js');
-// var redisClient = require('../../../../redis.js');
-// var redis = require('redis');
-// var client = redis.createClient();
 var email = require('./email');
+var request = require('request');
 /////////// LOAD INCOMING ////////////////
 
 
@@ -1232,6 +1229,12 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             attachObj.photo = urlArr[count];
                             attachObj.message =  emoji + '[' + truncate(data.amazon[count].ItemAttributes[0].Title[0]) + ']('+ res[count] +')';
                             data.client_res.push(attachObj);
+                        } else if (data.source.origin == 'facebook') {
+                           var attachObj = {};
+                            attachObj.photo = urlArr[count];
+                            attachObj.message =  emoji + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            attachObj.link = res[count];
+                            data.client_res.push(attachObj);
                         }
                         count++;
                         callback();
@@ -1637,6 +1640,21 @@ var sendResponse = function(data,flag){
     else if (data.source && data.source.channel && data.source.origin == 'slack' && data.flags && data.flags.email) {
 
         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
+             // {
+      //   "object":"page",
+      //   "entry":[{"id":976386645706699,
+      //           "time":1462290198559,
+      //           "messaging":[{"sender":{"id":835675223228683},
+      //                         "recipient":{"id":976386645706699},
+      //                         "timestamp":1462290198521,
+      //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
+      //                         "seq":61,
+      //                         "text":"LELELELE"}}]
+      //             }]
+      //   }
+
+            
 
             var messages = [data.client_res[0]];
             data.client_res.shift();
@@ -1721,21 +1739,6 @@ var sendResponse = function(data,flag){
                 attachments: photos
             }, data);
         }
-        else if (data.action == 'sendAttachment'){
-          // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
-            // //remove first message from res arr
-            // var attachThis = data.client_res;
-            // attachThis = JSON.stringify(attachThis);
-
-            // var msgData = {
-            //   // attachments: [...],
-            //     icon_url:'http://kipthis.com/img/kip-icon.png',
-            //     username:'Kip',
-            //     attachments: attachThis
-            // };
-            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
-        }
         else {
             //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
             // //loop through responses in order
@@ -1748,6 +1751,232 @@ var sendResponse = function(data,flag){
             // }, function done(){
             // });
         }
+    }
+    //* * * * * * * *
+    // Facebook Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'facebook') {
+        var url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+          if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+            console.log(0, data.client_res);
+             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
+             // {
+              //   "object":"page",
+              //   "entry":[{"id":976386645706699,
+              //           "time":1462290198559,
+              //           "messaging":[{"sender":{"id":835675223228683},
+              //                         "recipient":{"id":976386645706699},
+              //                         "timestamp":1462290198521,
+              //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
+              //                         "seq":61,
+              //                         "text":"LELELELE"}}]
+              //             }]
+              //   }
+            var messages = [];
+            var photos = [];
+            var firstMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text": data.client_res[0]+ '\n'
+                },
+                "notification_type": "NO_PUSH"
+             };
+            request.post({
+                    url: url,
+                    method: "POST",
+                    json: true,
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                    body: firstMessage
+                },
+                function (err, res, body) {
+                    if (err) console.error('post err ',err);
+                    // console.log(1, body);
+                    data.client_res.shift();
+                    async.eachSeries(data.client_res, function iterator(object, callback) {
+                        // console.log(2, body);
+                        var textMessage = {
+                           "recipient": {"id": data.source.channel},
+                            "message": {
+                                 "attachment":{
+                                  "type":"template",
+                                  "payload":{
+                                    "template_type":"button",
+                                    "text": " ",
+                                    "buttons":[
+                                      {
+                                        "type":"web_url",
+                                        "url":object.link,
+                                        "title": object.message
+                                      }
+                                    ]
+                                  }
+                                }
+                            },
+                            "notification_type": "NO_PUSH"
+                         }
+                        request.post(
+                           { url: url,
+                            method: "POST",
+                            json: true,
+                            headers: {
+                                "content-type": "application/json",
+                            },
+                            body: textMessage
+                            },
+                            function (err, res, body) {
+                               if (err) console.error('post err ',err);
+                              
+                               var photoMessage = {
+                                    "recipient": {"id": data.source.channel},
+                                     "message": {
+                                     "attachment":{
+                                          "type":"image",
+                                          "payload":{
+                                            "url": object.photo
+                                          }
+                                        }
+                                     },
+                                     "notification_type": "NO_PUSH"
+                                 }
+
+                                request.post({url: url,
+                                    method: "POST",
+                                    json: true,
+                                    headers: {
+                                        "content-type": "application/json",
+                                    },
+                                    body: photoMessage
+                                    },
+                                function (err, res, body) {
+                                       if (err) console.error('post err ',err);
+                                      callback()
+                                });
+                          });
+                    }, function done() {
+
+                    })
+            });
+        }
+        else if (data.action == 'focus') {
+           console.log('facebook outgoing client_res:', data);
+
+           try {
+             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n' + data.client_res[1].split('|')[0].split('<')[1];
+             formatted = formatted.slice(0,-1);
+           } catch(err) {
+             console.log('io.js 1269 err: ',err);
+             return;
+           }
+          data.client_res[1] = formatted ? formatted : data.client_res[1];
+          var toSend = truncate(data.client_res[1]) + '\n' + (data.client_res[2] ? truncate(data.client_res[2]) : '') + '\n'  + (data.client_res[3] ? truncate(data.client_res[3]) : '') + '\n' + (data.client_res[4] ? truncate(data.client_res[4]) : '');
+          // console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
+             // var focusMessage = {
+             //    "recipient": {"id": data.source.channel},
+             //    "message": {
+             //         "text": toSend,
+             //         "attachment":{
+             //          "type":"template",
+             //          "payload":{
+             //            "template_type":"button",
+             //            "text": toSend,
+             //            "buttons":[
+             //              {
+             //                "type":"web_url",
+             //                "url": data.client_res[1].split('|')[0].split('<')[1],
+             //                "title": "See Product"
+             //              }
+             //            ]
+             //          }
+             //        }
+             //    },
+             //    "notification_type": "NO_PUSH"
+             // };
+
+            var focusMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                     "attachment":{
+                      "type":"template",
+                      "payload":{
+                        "template_type":"button",
+                        "buttons":[
+                          {
+                            "type":"web_url",
+                            "url": data.recallHistory.urlShorten[parseInt(data.msg.trim())-1],
+                            "title": "See Product"
+                          }
+                        ],
+                        "text": toSend
+                      }
+                    }
+                },
+                "notification_type": "NO_PUSH"
+             };
+            console.log(url, focusMessage)
+            request.post(
+               { url: url,
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: focusMessage
+                },
+            function (err, res, body) {
+               if (err) console.error('post err ',err);
+               console.log(body)
+            })
+
+        }
+         else if (data.action == 'save') {
+              var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                // console.log('\n\n\n', el)
+                messages.push(el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+
+
+            email.reply({
+                to: data.emailInfo.to,
+                text: messages.join('\n\n'),
+                attachments: photos
+            }, data);
+        }
+        else if (data.action == 'checkout') {
+            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+            console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                console.log('\n\n\n', el)
+                messages.push( el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+            email.reply({
+                to: data.emailInfo.to,
+                text: messages.join('\n\n'),
+                attachments: photos
+            }, data);
+        }
+
+
+
+
+
     }
     //* * * * * * * *
     // Slack Outgoing
