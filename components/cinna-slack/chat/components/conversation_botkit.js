@@ -11,6 +11,7 @@ var nlp = require('../../nlp/api');
 var processData = require("./process.js");
 var banter = require("./banter.js");
 var refreshTeam = require('./refresh_team');
+var ioKip = require("./io.js");
 
 
 /*
@@ -40,7 +41,18 @@ module.exports.onboard = function(slackbot, user_id, done) {
       // inject the slackbot into the convo so that we can save it in the db
       convo.slackbot = slackbot;
       convo.on('end', function() {
+        slackbot = convo.slackbot;
+        slackbot.save() //x_x saving onboard admins here
+        //console.log('FYI SAD _ _ _ _ _ _ _ _ _ _ _ _ ',convo.slackbot)
+
         bot.closeRTM();
+        var objData = {
+          mode:'shopping',
+          source: {
+            id: convo.slackbot.team_id + "_" + user_id,
+          }
+        }
+        ioKip.updateMode(objData);
         done();
       })
 
@@ -57,6 +69,7 @@ module.exports.onboard = function(slackbot, user_id, done) {
 var settingsConvos = {};
 
 module.exports.settings = function(slackbot, user_id, done, data) {
+
   console.log('passing in data 😅😅 ',data);
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
@@ -129,68 +142,291 @@ the admin then should be able to add, remove, modify executive assistants
 // Apparently we are plunging headlong into the dark black void of enterprise
 // organizational structure and authorization. welp, gotta make money somehow.
 function askWhoManagesPurchases(response, convo) {
-  convo.ask('Who manages the office purchases? You can say something like "me" or "me and @jane".', function(response, convo) {
-    console.log(response);
-
-    var user_is_admin = false;
-    var user_id = response.user;
-
-    // check for "skip"
-    if (response.text.toLowerCase().trim() === 'skip') {
-      // by default put the user in charge of everything
-      user_is_admin = true;
-      convo.slackbot.meta.office_assistants = [response.user];
-    }
-
-    // check for "me" or "i do"
-    if (response.text.toLowerCase().match(/(\bme\b|\bi do\b)/) && response.text.toLowerCase().indexOf('and') < 0) {
-      convo.slackbot.meta.office_assistants = [response.user];
-      user_is_admin = true;
 
 
-          var attachments = [
+  var attachments = [
+      {
+        // "pretext": "Ok thanks! Done with cart members 😊",
+        "image_url":"http://kipthis.com/kip_modes/mode_success.png",
+        "text":"",
+        "color":"#45a5f4",
+        "fallback":"Success"
+      },
+      {
+        // "pretext": "Ok thanks! Done with cart members 😊",
+        "text":"Well done! *Kip* has been enabled for your team 😊",
+        "color":"#45a5f4",
+        "mrkdwn_in": ["text"],
+        "fallback":"Success"
+      },
+      {
+          "text": 'Who manages the office purchases? Type something like `me` or `me and @jane`',
+          "mrkdwn_in": [
+              "text",
+              "pretext"
+          ],
+          "color":"#49d63a",
+          "fallback":"Success"
+      }
+  ];
+
+  var resStatus = {
+    username: 'Kip',
+    text: "",
+    attachments: attachments,
+    fallback: 'Success'
+  };
+
+
+  convo.ask(resStatus, listenOnboard)
+
+  convo.next()
+}
+
+function listenOnboard(response, convo){
+
+  var user_is_admin = false;
+  var user_id = response.user;
+
+  // check for "skip"
+  // if () {
+  //   // by default put the user in charge of everything
+  //   user_is_admin = true;
+  //   convo.slackbot.meta.office_assistants = [response.user];
+  //   specialAdminMessage();
+  // }
+
+  // check for "me" or "i do" but no other users on slack
+
+  if (response.text.indexOf('<@') < 0 && response.text.toLowerCase().match(/(\bme\b|\bi do\b)/) || response.text.toLowerCase().trim() === 'skip' || banter.checkExitMode(response.text)) {
+
+    convo.slackbot.meta.office_assistants = [response.user];
+    user_is_admin = true;
+
+    var attachments = [
+        {
+          "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+          "color":"#45a5f4",
+          "fallback":"Welcome",
+          'text':''
+        },
+        {
+          "pretext": "Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart 😊",
+          // "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+          "text":"",
+          "color":"#45a5f4",
+          "fallback":"Welcome"
+        }
+    ];
+
+    var resStatus = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Welcome'
+    };
+
+    convo.say(resStatus);
+    convo.next()
+    specialAdminMessage();
+
+  //contains me && <@user> but w.out 'and'
+  }else if (response.text.indexOf('me ') > -1){
+
+    fireGremlins();
+
+    convo.slackbot.meta.office_assistants = [response.user];
+    user_is_admin = true;
+
+    var attachments = [
+        {
+          "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+          "color":"#45a5f4",
+          "fallback":"Welcome",
+          'text':''
+        },
+        {
+          "text": "Great!  I'll keep you and the other admins up-to-date on what your team members are adding to the office shopping cart 😊",
+          // "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+          "color":"#45a5f4",
+          "fallback":"Welcome"
+        }
+    ];
+
+    var resStatus = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Welcome'
+    };
+
+
+    convo.say(resStatus);
+    //convo.next()
+    specialAdminMessage();     
+  }
+
+  // check for something like "nobody"
+  else if (response.text.toLowerCase().match(/^(no one|nobody|noone)/)) {
+    convo.slackbot.meta.office_assistants = [response.user];
+    user_is_admin = true;
+
+    var attachments = [
+        {
+          "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+          "color":"#45a5f4",
+          "fallback":"Welcome",
+          'text':''
+        },
+        {
+          "text": "Ok, then I'll keep you on as office admin 😊",
+          "color":"#45a5f4",
+          "fallback":"Welcome"
+        }
+    ];
+
+    var resStatus = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Welcome'
+    };
+
+    convo.say(resStatus)
+    //convo.next()
+    
+    specialAdminMessage();
+  }
+
+  //add slack members only, no "me"
+  else if (response.text.indexOf('<@') > -1) {
+    fireGremlins();
+  }
+  //send error
+  else {
+
+    var attachments = [
+        {
+          "text": "Sorry, I don't understand. Who manages office purchases? Type something like `me` or `me and @jane`. Or type `skip` 😊",
+          "color":"#fe9b00",
+          "fallback":"Welcome",
+          "mrkdwn_in": [
+              "text",
+              "pretext"
+          ],  
+        }
+    ];
+
+    var resStatus = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Welcome'
+    };
+
+    //convo.say(resStatus)
+    //convo.next()
+    convo.ask(resStatus, listenOnboard)
+
+    convo.next()
+  }
+
+  function specialAdminMessage(){
+
+    var attachments = [
+        {
+            "color":"#45a5f4",  
+            "image_url":"http://kipthis.com/kip_modes/mode_howtousekip.png",
+            "text":'',
+            "fallback":"Welcome"
+        },
+        {
+            "text": "• Type `settings` to add other admins, edit standing orders and reminders",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#49d63a",
+            "fallback":"Welcome"
+        },
+        {
+            "text": "• Type `cart` to view Team Cart",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#49d63a",
+            "fallback":"Welcome"
+        },
+        {
+            "text": "• Type `members` to add Slack channels and emails for Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#49d63a",
+            "fallback":"Welcome"
+        },
+        {
+            "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "color":"#49d63a",
+            "fallback":"Welcome"
+        },
+        {
+          "mrkdwn_in": [
+              "fields"
+          ],
+          "fields": [
               {
-                "pretext": "Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart 😊",
-                "image_url":"http://i.imgur.com/PqrtJmD.png",
-                "text":"",
-                "color":"#45a5f4"
-              },
-              {
-                  "text": "Tell me what you're looking for. Or type `settings` for more options",
-                  "mrkdwn_in": [
-                      "text",
-                      "pretext"
-                  ],
-                  "color":"#45a5f4"
+                  "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
+                  "short": false
               }
-          ];
+          ],
+          "fallback":"Welcome"
+        }
+    ];
 
-          var resStatus = {
-            username: 'Kip',
-            text: "",
-            attachments: attachments,
-            fallback: 'Shopping'
-          };
+    var resStatus = {
+      username: 'Kip',
+      text: "",
+      attachments: attachments,
+      fallback: 'Welcome'
+    };
 
-          convo.say(resStatus);
+    convo.say(resStatus);
+
+    convo.next()
+  }
+
+  
+
+  function fireGremlins(){
+
+    console.log("FIRING GREMLINS NOW")
 
 
+    // if(response.text.indexOf('me ') > -1){
 
-      convo.say("")
-    }
-
-    // check for something like "nobody"
-    if (response.text.toLowerCase().match(/^(no one|nobody|noone)/)) {
-      convo.slackbot.meta.office_assistants = [response.user];
-      user_is_admin = true;
-      convo.say("Well, I'll put you in charge of me, then!")
-    }
+    //   var notifiedAdmin = true; //we sent welcome admin message above already so dont send another to admin admin
+    // }
 
     // check for mentioned users
     // for a typed message like "that would be @dan"
     // the response.text would be like  "that would be <@U0R6H9BKN>"
     var office_gremlins = response.text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
     response.text = response.text.replace(/(\<\@[^\s]+\>|\bme\b)/ig, '');
+
+    console.log("office_gremlins TEXT ",office_gremlins)
+    console.log("office_gremlins response.text ",response.text)
+
+
+    // if (!convo.slackbot.meta.office_assistants){
+    //   convo.slackbot.meta.office_assistants = [];
+    // }
+    // convo.slackbot.meta.office_assistants.push(response.user);
 
     // also look for users mentioned by name without the @ symbol
     db.Chatusers.find({
@@ -206,6 +442,9 @@ function askWhoManagesPurchases(response, convo) {
         }
       })
 
+      console.log('admin🔸',user_is_admin)
+      console.log('office_gremlins🔸',office_gremlins)
+
       if (office_gremlins && office_gremlins.length > 0 && !user_is_admin) {
         convo.slackbot.meta.office_assistants = office_gremlins.map(function(handle) {
           if (handle.toLowerCase() === 'me') {
@@ -216,7 +455,7 @@ function askWhoManagesPurchases(response, convo) {
           }
         })
 
-        console.log(office_gremlins)
+        console.log('0🔸',office_gremlins)
         office_gremlins = office_gremlins.map(function(handle) {
           if (handle.toLowerCase() === 'me') {
             return 'you';
@@ -224,14 +463,66 @@ function askWhoManagesPurchases(response, convo) {
             return handle;
           }
         });
-        console.log(office_gremlins)
+        console.log('1🔸',office_gremlins)
 
         if (office_gremlins.length > 1) {
           var last = office_gremlins.pop();
           office_gremlins[office_gremlins.length-1] += ' and ' + last;
         }
 
-        convo.say('Great.  I have added ' + office_gremlins.join(', ') + ' to the list of office admins.  I keep all the office admins up-to-date on what team members are adding to the office shopping cart.')
+
+        // if(response.text.indexOf('me ') > -1){
+
+        //   var notifiedAdmin = true; //we sent welcome admin message above already so dont send another to admin admin
+        // }
+
+
+        //IF RESPONSE TEXT DIDN"T CONTAIN ME
+        //if(!notifiedAdmin){
+          var attachments = [
+              {
+                "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+                "color":"#45a5f4",
+                "fallback":"Welcome",
+                'text':''
+              },
+              {
+                "text": 'Great,  I\'ve added ' + office_gremlins.join(', ') + ' to the list of office admins. I keep all the office admins up-to-date on what team members are adding to the office shopping cart. Entering normal Shopping Mode now! 😊',
+                "color":"#45a5f4",
+                "mrkdwn_in": [
+                    "text",
+                    "pretext"
+                ]
+              },
+              {
+                "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+                "color":"#45a5f4",
+                "fallback":"Welcome",
+                'text':''
+              },
+              {
+                "text":"Tell me what you're looking for, or use `help` for more options",
+                "mrkdwn_in": [
+                    "text",
+                    "pretext"
+                ],
+                "color":"#49d63a",
+                "fallback":"Shopping"
+              }
+          ];
+
+          var resStatus = {
+            username: 'Kip',
+            text: "",
+            attachments: attachments,
+            fallback: 'Welcome'
+          };
+
+          convo.say(resStatus)
+
+          convo.next();
+        //}
+        console.log('2🔸','GREMLINS FIRED'); 
       }
 
       // check if we didn't get it
@@ -267,25 +558,162 @@ function askWhoManagesPurchases(response, convo) {
               }
               convo.slackbot = slackbot;
               convo.on('end', function() {
+
                 bot.closeRTM();
+
+                var objData = {
+                  mode:'shopping',
+                  source: {
+                    id: convo.slackbot.team_id + "_" + id,
+                  }
+                }
+                ioKip.updateMode(objData);
               })
-              convo.say("Hi! I'm Kip, your office shopping helper bot! <@$user> told me to make you an admin for the team, so I'll keep you up-to-date on what team members are adding to the office shopping cart.".replace('$user', user_id))
-              welcomeVid(response, convo);
+
+              var attachments = [
+                  {
+                    // "pretext": "Ok thanks! Done with cart members 😊",
+                    "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+                    "text":"",
+                    "color":"#45a5f4",
+                    "fallback":"Welcome"
+                  },
+                  {
+                      "text": "Hi I'm *Kip*, your shopping helper bot! <@$user> made you an admin, so I'll keep you updated on what other members are adding to your Team Shopping Cart 😊".replace('$user', user_id),
+                      "mrkdwn_in": [
+                          "text",
+                          "pretext"
+                      ],
+                      "color":"#45a5f4",  
+                      "image_url":"http://kipthis.com/kip_modes/mode_howtousekip.png",
+                      "fallback":"Welcome"
+                  },
+                  {
+                      "text": "• Type `settings` to add other admins, edit standing orders and reminders",
+                      "mrkdwn_in": [
+                          "text",
+                          "pretext"
+                      ],
+                      "color":"#49d63a",
+                      "fallback":"Welcome"
+                  },
+                  {
+                      "text": "• Type `cart` to view Team Cart",
+                      "mrkdwn_in": [
+                          "text",
+                          "pretext"
+                      ],
+                      "color":"#49d63a",
+                      "fallback":"Welcome"
+                  },
+                  {
+                      "text": "• Type `members` to add Slack channels and emails for Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
+                      "mrkdwn_in": [
+                          "text",
+                          "pretext"
+                      ],
+                      "color":"#49d63a",
+                      "fallback":"Welcome"
+                  },
+                  {
+                      "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+                      "mrkdwn_in": [
+                          "text"
+                      ],
+                      "color":"#49d63a",
+                      "fallback":"Welcome"
+                  },
+                  {
+                    "mrkdwn_in": [
+                        "fields"
+                    ],
+                    "fields": [
+                        {
+                            "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
+                            "short": false
+                        }
+                    ],
+                    "fallback":"Welcome"
+                  }
+              ];
+
+              var resStatus = {
+                username: 'Kip',
+                text: "",
+                attachments: attachments,
+                fallback: 'Welcome'
+              };
+
+              convo.say(resStatus);
+
+              convo.next()
+              // convo.next()
+              //welcomeVid(response, convo);
             });
           });
 
         })
-
+  
         // show this user the welcome video
-        welcomeVid(response, convo);
+        //welcomeVid(response, convo);
       });
-    })
-  })
+    }) 
+  }
+
 }
 
 // welcome video
 function welcomeVid(response, convo) {
   // TODO
+
+
+
+
+  // convo.say('How to use Kip');
+
+  // convo.say(":one: I'll keep you up-to-date on what team members are adding to your group shopping cart");
+  // convo.say("Your team members can chat with Kip to search for items and save them to your group cart");
+
+  // convo.say(":two: I'll ask you before closing the group cart each week. When I close the cart, I'll message each person on your team to save the items they want to the cart. sking your team for final cart orders closing the cart weekly and ask Type `collect` to ask");
+
+  // convo.say(':three: Tell your team how to find and add items to your group cart _INCLUDE WELCOME MSG SHARE HELP WITH TEAM_');
+
+
+  // var attachments = [
+  //     {
+  //       // "pretext": "Ok thanks! Done with cart members 😊",
+  //       "image_url":"http://i.imgur.com/vRX1ey8.png",
+  //       "text":"",
+  //       "color":"#45a5f4"
+  //     },
+  //     {
+  //         "text": "Hi I'm *Kip*, your shopping helper bot! <@$user> made you an admin, so I'll keep you updated on what other members are adding to your Team Shopping Cart".replace('$user', user_id),
+  //         "mrkdwn_in": [
+  //             "text",
+  //             "pretext"
+  //         ],
+  //         "color":"#45a5f4"
+  //     },
+  //     {
+  //         "text":  "Do you have a few minutes to learn more? I can come back later 😊",
+  //         "mrkdwn_in": [
+  //             "text",
+  //             "pretext"
+  //         ],
+  //         "color":"#49d63a"
+  //     }
+  // ];
+
+  // var resStatus = {
+  //   username: 'Kip',
+  //   text: "",
+  //   attachments: attachments,
+  //   fallback: 'Welcome'
+  // };
+
+  convo.say(resStatus);
+
+
   // convo.say('Check out this 🔥 vid the squad made')
   convo.next()
 }
@@ -304,7 +732,7 @@ function showSettings(response, convo, flag, done) {
 
     //adding settings mode sticker
     attachments.push({
-      image_url: 'http://i.imgur.com/Z1Cgl7X.png',
+      image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
       text: ''
     })
 
@@ -499,7 +927,7 @@ function handleSettingsChange(response, convo) {
       if (userIds.length === 0) {
         var attachments = [
           {
-            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+            text: "I'm sorry, I couldn't understand that.  Do you have any Settings changes? Type `exit` to quit Settings",
             "mrkdwn_in": [
                 "text",
                 "pretext"
@@ -532,7 +960,7 @@ function handleSettingsChange(response, convo) {
           if (id == convo.user_id) {
             var attachments = [
               {
-                text: "I'm sorry, but you can't remove yourself as an admin.  Do you have any settings changes?"
+                text: "I'm sorry, but you can't remove yourself as an admin unless you add someone else as admin first.  Do you have any settings changes?"
               }
             ];
 
@@ -550,28 +978,33 @@ function handleSettingsChange(response, convo) {
             return convo.next();
           }
 
+          console.log('IDIDIDIDIDIDIDID ', id);
+
+          console.log('IDIDIDIDIDIDIDID ', convo.slackbot.meta.office_assistants);
+
           if (convo.slackbot.meta.office_assistants.indexOf(id) >= 0) {
             var index = convo.slackbot.meta.office_assistants.indexOf(id);
             convo.slackbot.meta.office_assistants.splice(index, 1);
           } else {
-            var attachments = [
-              {
-                text: 'Looks like <@' + id + '> was not an admin.  Do you have any settings changes?'
-              }
-            ];
 
-            var resStatus = {
-              username: 'Kip',
-              text: "",
-              attachments: attachments,
-              fallback: 'Settings'
-            };
+            // var attachments = [
+            //   {
+            //     text: 'Looks like <@' + id + '> was not an admin.  Do you have any settings changes? Type `exit` to quit Settings'
+            //   }
+            // ];
 
-            // showSettings(response, convo, 'noAsk', function(){});
+            // var resStatus = {
+            //   username: 'Kip',
+            //   text: "",
+            //   attachments: attachments,
+            //   fallback: 'Settings'
+            // };
 
-            convo.ask(resStatus, handleSettingsChange);
-            convo.next();
-            shouldReturn = true;
+            // // showSettings(response, convo, 'noAsk', function(){});
+
+            // convo.ask(resStatus, handleSettingsChange);
+            // convo.next();
+            // shouldReturn = true;
           }
         })
       }
@@ -652,7 +1085,7 @@ function handleSettingsChange(response, convo) {
             var attachments = [
                 {
                   "pretext": "Ok thanks! Done with settings 😊",
-                  "image_url":"http://i.imgur.com/PqrtJmD.png",
+                  "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
                   "text":"",
                   "color":"#45a5f4"
                 },
@@ -673,11 +1106,14 @@ function handleSettingsChange(response, convo) {
               fallback: 'Shopping'
             };
 
+
+            console.log('SHOULD BE SAYING HERE');
+
             convo.say(resStatus);
 
             //FUNCTION IO.JS UPDATE MODE
 
-            return convo.next();
+            convo.next();
 
         }else {
 
@@ -690,37 +1126,16 @@ function handleSettingsChange(response, convo) {
               convo.next();
             //response in context found
             }
-            else if (obj.mode == currentMode && obj.res){
-              console.log('🐯🐯',obj.res);
-
-              // var attachments = [
-              //   {
-              //     text: obj.res,
-              //     "mrkdwn_in": [
-              //         "text",
-              //         "pretext"
-              //     ],
-              //     "color":"#fa951b"
-              //   }
-              // ];
-
-              // var resStatus = {
-              //   username: 'Kip',
-              //   text: "",
-              //   attachments: attachments,
-              //   fallback: 'Settings'
-              // };
-              
-              convo.say(obj.res);
-              //convo.ask(resStatus, handleSettingsChange); 
-              
+            //continue same mode
+            else if (obj && obj.mode && obj.mode == currentMode && obj.res){
+              convo.say(obj.res);              
             }
             //no mode detected
             else {
               //send default 
               var attachments = [
                 {
-                  text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+                  text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit Settings",
                   "mrkdwn_in": [
                       "text",
                       "pretext"
@@ -738,6 +1153,7 @@ function handleSettingsChange(response, convo) {
               
               showSettings(response, convo, 'noAsk', function(){
                 convo.ask(resStatus, handleSettingsChange); 
+                convo.next();
               });
 
             }
@@ -783,14 +1199,14 @@ function handleSettingsChange(response, convo) {
         };
         
         convo.ask(resStatus, handleSettingsChange); 
-        
+        convo.next()
       }
       //no mode detected
       else {
         //send default 
         var attachments = [
           {
-            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+            text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit Settings",
             "mrkdwn_in": [
                 "text",
                 "pretext"
@@ -808,6 +1224,7 @@ function handleSettingsChange(response, convo) {
         
         showSettings(response, convo, 'noAsk', function(){
           convo.ask(resStatus, handleSettingsChange); 
+          convo.next()
         });
 
       }

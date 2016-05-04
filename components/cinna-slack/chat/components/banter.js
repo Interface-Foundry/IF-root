@@ -4,11 +4,16 @@ var checkExitMode = function(input){
     console.log('INPUT ',input)
     switch (true) {
         case textSimilar(input,'exit') > 90:
+        case textSimilar(input,'ex') > 90:
+        case textSimilar(input,'leave') > 90:
+        case textSimilar(input,'bye') > 90:
+        case textSimilar(input,'cancel') > 90:
         case textSimilar(input,'end') > 90:
         case textSimilar(input,'finish') > 90:
         case textSimilar(input,'done') > 90:
         case textSimilar(input,'quit') > 90:
         case textSimilar(input,'settings exit') > 90:
+        case textSimilar(input,'members exit') > 90:
         case textSimilar(input,'stop') > 90:
             return true;
         break;
@@ -80,6 +85,9 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'setings') > 90:
         case textSimilar(input,'seting') > 90:
         case textSimilar(input,'setting') > 90:
+        case textSimilar(input,'admin') > 90:
+        case textSimilar(input,'admins') > 90:
+        case textSimilar(input,'admins') > 90:
         case textSimilar(input,'configure') > 90:        
         case textSimilar(input,'configuration') > 90:      
         case textSimilar(input,'change settings') > 90:
@@ -90,17 +98,18 @@ var checkModes = function(inputObj,context,callback) {
             break;
 
         //* * onboarding mode
-        case textSimilar(input,'onboarding') > 90:
-        case textSimilar(input,'kip onboarding') > 90:
-        case textSimilar(input,'onboard') > 90:
-            mode = 'onboarding';
-            break;
+        // case textSimilar(input,'onboarding') > 90:
+        // case textSimilar(input,'kip onboarding') > 90:
+        // case textSimilar(input,'onboard') > 90:
+        //     mode = 'onboarding';
+        //     break;
 
         //* * * shopping mode
         case textSimilar(input,'shopping') > 90:
         case textSimilar(input,'shop') > 90:
         case textSimilar(input,'search') > 90:
         case textSimilar(input,'kip shop') > 90:
+        case textSimilar(input,'kip shopping') > 90:
         case textSimilar(input,'buy') > 90:
         case textSimilar(input,'searching') > 90:
         case textSimilar(input,'kip search') > 90:
@@ -113,6 +122,7 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'add members') > 90:
         case textSimilar(input,'add team') > 90:
         case textSimilar(input,'member add') > 90:
+        case textSimilar(input,'kip members') > 90:
         case textSimilar(input,'members add') > 90:
         case textSimilar(input,'add team member') > 90:
         case textSimilar(input,'add email') > 90:
@@ -131,8 +141,6 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'memeber') > 90:
         case textSimilar(input,'users') > 90:
         case textSimilar(input,'channels') > 90:
-        case textSimilar(input,'emails') > 90:
-        case textSimilar(input,'email') > 90:
             mode = 'addmember';
             break;
 
@@ -142,6 +150,11 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'show report') > 90:
             mode = 'report';
             break;
+    }
+
+    //check for exit intent
+    if(checkExitMode(input)){
+        mode = context;
     }
 
     callback(mode,res);
@@ -1331,10 +1344,10 @@ var getCinnaResponse = function(data,callback){
                 case 'initial':
                     if (data.source.origin == 'slack' || data.source.origin == 'telegram'  || data.source.origin == 'facebook'){
                         if (data.imageTags){
-                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                         else {
-                            res = 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now 😊';
+                            res = 'Hi, here are some options you might like. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                     }
                     else if (data.source.origin == 'socket.io'){
@@ -1389,7 +1402,13 @@ var getCinnaResponse = function(data,callback){
         case 'purchase':
                 switch (data.action) {
                     case 'save':
-                        res = 'Awesome! I\'ve saved your item for you 😊 Use `view cart` to see your cart, `checkout` to checkout or `help` for more options.';
+                        
+                        if (data.source.origin == 'slack'){
+                            res = 'Awesome! I\'ve saved your item to the Team Cart 😊 Type `remove 1` to remove item :one:. Type `help` for more options';
+                        }else {
+                            res = 'Awesome! I\'ve saved your item for you 😊 Use `view cart` to see your cart, `checkout` to checkout or `help` for more options.';
+                        }
+
                         break;
                     case 'removeAll':
                         res = 'All items removed from your cart. To start a new search just chat me the item you\'re looking for';
