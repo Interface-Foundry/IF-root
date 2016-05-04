@@ -9,6 +9,7 @@ var botkit = require('botkit');
 var controller = botkit.slackbot();
 var promisify = require('promisify-node');
 var banter = require("./banter.js");
+var processData = require("./process.js");
 var validator = require('validator');
 var mailerTransport = require('../../../IF_mail/IF_mail.js');
 var async = require('async');
@@ -73,35 +74,41 @@ var updateJob = module.exports.updateJob = function(team_id) {
       //
       // Set up the bot
       //
-      var bot = controller.spawn({
-        token: slackbot.bot.bot_access_token
-      })
 
-      bot.startRTM(function(err, bot, payload) {
-        if (err) {
-          throw new Error('Could not connect to Slack');
-        }
+      // var bot = controller.spawn({
+      //   token: slackbot.bot.bot_access_token
+      // })
 
-        slackbot.meta.office_assistants.map(function(assistant) {
-          bot.startPrivateConversation({user: assistant}, function(response, convo) {
-            // inject the slackbot into the convo so that we can save it in the db
-            convo.slackbot = slackbot;
-            convo.bot = bot;
-            convo.user_id = assistant;
-            convo.on('end', function() {
-              bot.closeRTM();
-            })
-            convo.say('Hi, this is your weekly update');
+      // bot.startRTM(function(err, bot, payload) {
+      //   if (err) {
+      //     throw new Error('Could not connect to Slack');
+      //   }
 
-            // SHOW CART STICKER
+      //   slackbot.meta.office_assistants.map(function(assistant) {
+      //     bot.startPrivateConversation({user: assistant}, function(response, convo) {
+      //       // inject the slackbot into the convo so that we can save it in the db
+      //       convo.slackbot = slackbot;
+      //       convo.bot = bot;
+      //       convo.user_id = assistant;
+      //       convo.on('end', function() {
+      //         bot.closeRTM();
+      //       })
+      //       convo.say('Hi, this is your weekly update');
 
-            //* * * *  SHOW TEAM CART USERS  ** * * * //
+      //       // SHOW CART STICKER
 
-            convo.ask('Would you like me to send an last call message to *SHOW TEAM LIST*', lastCall)
-            convo.next();
-          });
-        });
-      });
+      //      //* * * * * * * * * * * * * * * * * //
+      //      //CHECKING HERE IF NO EMAILS users or channels. If none, Show User Cart Members, prompt to add people, defaults to <#general>
+      //      //* * * * * * * * * * * * * * * * * //
+
+      //       //* * * *  SHOW TEAM CART USERS  ** * * * //
+
+      //       convo.ask('Would you like me to send an last call message to *SHOW TEAM LIST*', lastCall)
+      //       convo.next();
+      //     });
+      //   });
+      // });
+
     }, function() {
       console.log('just finished the weekly update thing for team ' + team_id + ' ' + slackbot.team_name);
     },
@@ -116,6 +123,7 @@ var updateJob = module.exports.updateJob = function(team_id) {
 }
 
 module.exports.collect = function(team_id, person_id, callback) {
+  console.log('* * * * * * * * * * * * * - - - COLLECT - - - -  ** * * * * * * * * * * * ')
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
@@ -126,6 +134,9 @@ module.exports.collect = function(team_id, person_id, callback) {
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
       // oh no the person is not an admin, whatever will we do???
       console.log('cannot do this b/c the person is def not an admin');
+      // convo.say('Sorry, only team admins can start last call');
+      // convo.next();
+      callback();
       return;
     }
 
@@ -150,9 +161,11 @@ module.exports.collect = function(team_id, person_id, callback) {
           callback();
         })
         convo.interrupted = false;
-        convo.ask('Okay, in 5 seconds I\'ll send the last call message to all users.  Say `wait` or `stop` to prevent this.', lastCall);
 
+
+        convo.ask('Sending last call to Team Cart Members', lastCall);
         lastCall({text: ''}, convo);
+        convo.stop()
         // setTimeout(function() {
           
         // }, 5000)
@@ -166,6 +179,7 @@ module.exports.collect = function(team_id, person_id, callback) {
 
 // just regular collect except that it restricts the messages to a specific user list
 module.exports.collectFromUsers = function(team_id, person_id, channel, users, callback) {
+  console.log('* * * * * * * * * * * * * - - - COLLECT FROM USERS - - - -  ** * * * * * * * * * * * ')
   co(function*() {
     // um let's refresh the slackbot just in case...
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
@@ -175,6 +189,9 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
       // oh no the person is not an admin, whatever will we do???
       console.log('cannot do this b/c the person is def not an admin');
+      // convo.say('Sorry, only team admins can start last call');
+      // convo.next();
+      callback();
       return;
     }
 
@@ -198,10 +215,26 @@ module.exports.collectFromUsers = function(team_id, person_id, channel, users, c
           callback();
         })
         convo.interrupted = false;
-        convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
-        setTimeout(function() {
-          lastCall({text: ''}, convo);
-        }, 500)
+
+
+       // convo.say('CHECKING HERE IF NO EMAILS users or channels. If none, Show User Cart Members, prompt to add people, defaults to <#general>');
+
+       //* * * * * * * * * * * * * * * * * //
+       //CHECKING HERE IF NO EMAILS users or channels. If none, Show User Cart Members, prompt to add people, defaults to <#general>
+       //* * * * * * * * * * * * * * * * * //
+
+
+        //* * * * * SEND COLLECT TO USERS * * * * //
+
+        //convo.ask('Okay, in 5 seconds I\'ll send a last call message to all ' + convo.users.length + ' users in <#' + channel + '> for 60 minutes from now. Say `wait` or `stop` to prevent this.', lastCall);
+        //setTimeout(function() {
+        convo.ask('Sending last call to Team Cart Members', lastCall);
+        lastCall({text: ''}, convo);
+        //}, 500)
+        convo.stop()
+
+
+
       })
     })
 
@@ -219,7 +252,7 @@ function getTeam(slackbot) {
   return co(function*() {
 
     var channel_users = [];
-    yield (slackbot.cart_channels || []).map((c) => {
+    yield (slackbot.meta.cart_channels || []).map((c) => {
       return request('https://slack.com/api/channels.info?token=' + slackbot.bot.bot_access_token + '&channel=' + c)
         .then((r) => {
           var info = JSON.parse(r);
@@ -229,7 +262,7 @@ function getTeam(slackbot) {
         })
     })
 
-    console.log(channel_users)
+    console.log('CHANNEL USERS  ! ! ! ! ! ! ! !  ',channel_users)
 
     return db.Chatusers.find({
       team_id: slackbot.team_id,
@@ -238,7 +271,7 @@ function getTeam(slackbot) {
       id: {$ne: 'USLACKBOT'}, // because slackbot is not marked as a bot?
       'meta.last_call_alerts': { '$ne': false },
       $or: [
-        {dm: {$exists: false}},
+        // {dm: {$exists: false}},
         {id: {$in: channel_users}}
       ]
     })
@@ -246,7 +279,7 @@ function getTeam(slackbot) {
 }
 
 //
-// Sends a "last call" message to everyone who has not shut Kip up about messages like this
+// Sends a "last call" message to group cart members
 //
 function lastCall(response, convo) {
   // Catch message interrupts
@@ -274,29 +307,66 @@ function lastCall(response, convo) {
     var admin = convo.user_id;
 
     console.log('sending last call to all ' + team.length + ' users');
+
+    team = _.uniq(team, 'id');
+
     yield team.map(function(u) {
+
+      console.log('TEAM MAP OF USERS ',u)
+
+      //ARE WE ONLY GETTING TEAM USERS HERE INSIDE CHANNELS??
+
       if (u.dm) {
         // Send the user a slack message
+        console.log('SLACK SEND ',u.dm)
+
         return new Promise(function(resolve, reject) {
           convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
             convo.on('end', function() {
               resolve();
             });
             convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
-            convo.say('The clock\'s ticking! You have *60* minutes.');
+            convo.say('The clock\'s ticking! You have *60* minutes');
             convo.next();
           });
         })
-      } else if (u.profile.email) {
-        return email.collect(u.profile.email, convo.slackbot.team_name, convo.slackbot.team_id);
+      } else {
+
       }
+      // else if (u.profile.email) {
+
+      //   console.log('EMAIL SEND ',u.profile.email)
+      //   //return email.collect(u.profile.email, convo.slackbot.team_name, convo.slackbot.team_id);
+      // }
     })
+
+
+    var emailUsers = yield db.Chatusers.find({'settings.emailNotification':true});
+
+    yield emailUsers.map(function(u) {
+
+      console.log('TEAM EMAIL OF USERS ',u)
+
+      //ARE WE ONLY GETTING TEAM USERS HERE INSIDE CHANNELS?
+        if (u.profile.email) {
+
+          console.log('EMAIL SEND ',u.profile.email)
+          email.collect(u.profile.email, convo.slackbot.team_name, convo.slackbot.team_id);
+
+          return;
+        }
+    })
+
+
+
+    //FIND USERS BY EMAIL, MAP EMAILS TO RETURN COLLECT
+    //return email.collect(u.profile.email, convo.slackbot.team_name, convo.slackbot.team_id);
 
     // continue the admin's conversation if there's anything left to say.
 
     // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
     console.log('calling next');
-    convo.next();
+    convo.stop();
 
   }).catch((e) => {
     console.log(e.stack);
@@ -304,15 +374,21 @@ function lastCall(response, convo) {
   });
 }
 
-module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
+module.exports.addMembers = function(team_id, person_id, channel_id, done) {
    // um let's refresh the slackbot just in case...
    co(function*() {
     console.log('team_id: ',team_id,'person_id: ',person_id, '')
     var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec();
+
+
     console.log('slackbot: ',slackbot);
+    console.log('PERSON ID!!!!!!: ',person_id);
+    console.log('slackbot assistants!!!!: ',slackbot.meta.office_assistants);
+
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
       // oh no the person is not an admin, whatever will we do???
       console.log('cannot do this b/c the person is def not an admin');
+      done();
       return;
     }
     // Set up the bot
@@ -325,6 +401,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
         convo.on('end', function() {
           console.log('ending addmember convo');
           bot.closeRTM();
+          done(convo.parsedKip);
         });
         listenForCart(response,convo);
       //}//end of startConvo function
@@ -339,10 +416,6 @@ module.exports.addMembers = function(team_id, person_id, channel_id, cb) {
 
 
 function listenForCart(response,convo) {
-
-    console.log('👭 ',response)
-
-    
 
     //DISPLAY TEAM USER VIEW HERE 
     //AT FIRST, ONLY SHOWS #general view and # of users
@@ -469,11 +542,11 @@ function listenForCart(response,convo) {
 
 function handleChange(response, convo){
 
-  console.log('👭 ',response)  
+  console.log('RES ',response);
 
   var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
-
   var tokens = response.text.toLowerCase().trim().replace(/[`~!$%^&*()\-=?;:'",\{\}\[\]\\\/]/gi, '').split(' ');
+  var cleanTxt = response.text.toLowerCase().trim();
 
   if (isAdmin && ['add', 'remove', 'rm', 'rem'].indexOf(tokens[0]) >= 0) {
 
@@ -506,7 +579,11 @@ function handleChange(response, convo){
       console.log('NOTHING FOUND');
       var attachments = [
         {
-          text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit settings",
+          image_url:'http://kipthis.com/kip_modes/mode_teamcart_members.png',
+          text:''
+        },
+        {
+          text: "I'm sorry, I couldn't understand that.  Do you have any cart member changes? Type `exit` to quit settings",
           "mrkdwn_in": [
               "text",
               "pretext"
@@ -537,7 +614,7 @@ function handleChange(response, convo){
     //add stuff
     if (tokens[0] === 'add') {
 
-      //update channels
+      //add / update channels
       if (channelIds.length > 0){
         channelIds.map(function(channel) {
 
@@ -550,28 +627,34 @@ function handleChange(response, convo){
             convo.slackbot.meta.cart_channels.push(channel);
           }
 
-          convo.slackbot.save(function(err, saved){
-            if (err) {
-              console.log('err ',err);
+          counter++;
+        })
+        //save updated channels
+        convo.slackbot.save(function(err, saved){
+          if (err) {
+            console.log('err ',err);
+            //- - - COUNTER - - - //
+            
+            if(updateCount == counter){
+              membersUpdated(convo);
+            }
+            //- - - - - - - - - - //
+          }
+          else {
+             console.log('updated channels to team!',saved);
+
+             console.log(counter);
               //- - - COUNTER - - - //
-              counter++;
+              
+              console.log(counter);
+              console.log(updateCount);
               if(updateCount == counter){
+                console.log('????????????????')
                 membersUpdated(convo);
               }
               //- - - - - - - - - - //
-            }
-            else {
-               console.log('updated channels to team!',saved);
-                //- - - COUNTER - - - //
-                counter++;
-                if(updateCount == counter){
-                  membersUpdated(convo);
-                }
-                //- - - - - - - - - - //
-            }
-          })//save
-
-        })
+          }
+        })//save
       }
 
       //adding / updating email users
@@ -757,9 +840,99 @@ function handleChange(response, convo){
         })
       }//emails
 
-
     }//removing stuff
+
   }//parse tokens
+
+  //LISTEN FOR EXIT MODES
+  else if (response.text.match(convo.task.botkit.utterances.no) || banter.checkExitMode(cleanTxt)) {
+
+      //FUNCTION CHECK FOR STOP WORDS, SEND BACK RESPONSE IN ATTACHMENT FORMAT
+
+      //FUNCTION 
+      var attachments = [
+          {
+            "pretext": "Ok thanks! Done with Cart Members. Type `collect` to send a cart closing message to all Cart Members 😊",
+            "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+            "text":"",
+            "mrkdwn_in": [
+                "text",
+                "pretext"
+            ],
+            "color":"#45a5f4"
+          },
+          {
+              "text": "Tell me what you're looking for, or use `help` for more options",
+              "mrkdwn_in": [
+                  "text",
+                  "pretext"
+              ],
+              "color":"#49d63a"
+          }
+      ];
+
+      var resStatus = {
+        username: 'Kip',
+        text: "",
+        attachments: attachments,
+        fallback: 'Shopping'
+      };
+
+      convo.say(resStatus);
+
+      //FUNCTION IO.JS UPDATE MODE
+
+      return convo.next();
+
+  }
+
+  //we didn't understand the request, lets listen for mode switch or give error message
+  else {
+
+    var currentMode = 'addmember';
+    //pass message to check for mode handling with mode 'settings'
+    processData.modeHandle(response.text,currentMode,function(obj){
+      //mode detected 
+      if(obj && obj.mode && obj.mode !== currentMode){
+        convo.parsedKip = obj.res;
+        convo.next();
+      //response in context found
+      }
+      //continue same mode
+      else if (obj && obj.mode && obj.mode == currentMode && obj.res){
+        convo.say(obj.res); 
+        convo.next();             
+      }
+      //no mode detected
+      else {
+
+        console.log('NO MODE DETECTED');
+
+        viewCartMembers(convo,function(res){        
+          convo.say(res);
+
+          var attachments = [
+            {
+              "text":"Sorry, I don't understand. Do you have any Cart Member changes? Or type `exit`",
+              "mrkdwn_in": ["fields","text"],
+              "color":"#fe9b00" //warning color
+            }
+          ];
+
+          var rez = {
+            username: 'Kip',
+            text: "",
+            attachments: attachments,
+            fallback: 'Cart Members'
+          };
+
+          convo.ask(rez, handleChange)
+          convo.next();
+        },'noPrompt')  
+      }
+
+    });
+  }
 }
 
 function membersUpdated(convo){
@@ -771,7 +944,7 @@ function membersUpdated(convo){
 
     var attachments = [
       {
-        "text":"Team Cart Members updated! Are you done with changes? Type `done`",
+        "text":"Team Cart Members updated! Are you done with changes? Or type `exit`",
         "mrkdwn_in": ["fields","text"],
         "color":"#49d63a"
       }
@@ -786,10 +959,10 @@ function membersUpdated(convo){
 
     convo.ask(rez, handleChange)
     convo.next();
-  })  
+  },'noPrompt')  
 }
 
-function viewCartMembers(convo,callback){
+function viewCartMembers(convo,callback,flag){
 
   co(function*() {
 
@@ -808,8 +981,6 @@ function viewCartMembers(convo,callback){
       'type': 'email',
       'settings.emailNotification': true
     }).exec();
-
-    console.log('emailUsers()())(()()() ',emailUsers)
 
     //how many rows do we need for attachment?
 
@@ -880,7 +1051,7 @@ function viewCartMembers(convo,callback){
       userList.fields[0] = {
         "title": "Slack Channels",
         "short": true,
-        "val":"_No Channels_"
+        "value":"_No Channels_"
       }      
     }
     if(userList.fields[1]){
@@ -889,7 +1060,7 @@ function viewCartMembers(convo,callback){
       userList.fields[1] = {
         "title": "Emails",
         "short": true,
-        "val":"_No Emails_"
+        "value":"_No Emails_"
       }     
     }
     //- - - - - - //
@@ -897,7 +1068,7 @@ function viewCartMembers(convo,callback){
     
     var attachments = [
       {
-        "image_url":"http://i.imgur.com/nKSYO8d.png",
+        "image_url":"http://kipthis.com/kip_modes/mode_teamcart_members.png",
         "text":"",
         "color":"#45a5f4"
       }
@@ -905,8 +1076,7 @@ function viewCartMembers(convo,callback){
 
     attachments.push(userList);
 
-
-    var endpart = [{
+    var commands = {
       "text":"",
       "pretext":"*Options*",
       "mrkdwn_in": ["fields","pretext"],
@@ -929,16 +1099,18 @@ function viewCartMembers(convo,callback){
           "short": true
         }
       ]
-    },
-    {
-      "text":"Update team cart members? Or type `exit`",
-      "mrkdwn_in": ["fields","text"],
-      "color":"#49d63a"
-    }];
+    };
 
+    attachments.push(commands);
 
-    attachments = attachments.concat(endpart);
-
+    if (flag !== 'noPrompt'){
+      var endpart = {
+        "text":"Update group cart members? Type `view cart` to view group cart. Or type `exit`",
+        "mrkdwn_in": ["fields","text"],
+        "color":"#49d63a"
+      };
+      attachments.push(endpart);
+    }
 
     var resList = {
       username: 'Kip',

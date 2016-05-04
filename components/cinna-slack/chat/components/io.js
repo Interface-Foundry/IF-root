@@ -248,7 +248,7 @@ function loadSlackUsers(users){
 
         //on slack auth
         slackUsers[user.team_id].on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
-            console.log('DEBUG: checking meta initialized: ', user.meta);
+            console.log('DEBUG: checking meta initialized: ', user.meta.initialized);
             //* * * * Welcome message * * * //
             //send welcome to new teams – dont spam all slack people on node reboot
 
@@ -258,88 +258,107 @@ function loadSlackUsers(users){
             }
 
             //this if here for dev testing
-            if (cinnaEnv === 'development_alyx'){
+            if (cinnaEnv === 'development_alyx_NAH'){
                 //
                 // Onboarding conversation
                 //
-                var hello = {
-                    msg: 'welcome',
-                    source: {
-                      origin: 'slack',
-                      channel: 'D0H6X6TA8',
-                      org: user.team_id,
-                      id: user.team_id + '_' + 'D0H6X6TA8'
-                    },
-                    action:'sendAttachment',
-                    client_res: [],
-                    botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
-                    botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
-                };
 
-                banter.welcomeMessage(hello, function(res) {
-                    hello.client_res.push(res);
-                    //send attachment!
-                    sendResponse(hello);
-                })
-            } else if (cinnaEnv === 'development_mitsu'){
+                // var hello = {
+                //     msg: 'welcome',
+                //     source: {
+                //       origin: 'slack',
+                //       channel: 'D0H6X6TA8',
+                //       org: user.team_id,
+                //       id: user.team_id + '_' + 'D0H6X6TA8'
+                //     },
+                //     action:'sendAttachment',
+                //     client_res: [],
+                //     botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                //     botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
+                // };
+
+                // banter.welcomeMessage(hello, function(res) {
+                //     hello.client_res.push(res);
+                //     //send attachment!
+                //     sendResponse(hello);
+                // })
+            } 
+            else if (cinnaEnv === 'development_mitsu'){
                 //
                 // Onboarding conversation
                 //
-                var hello = {
-                    msg: 'welcome',
-                    source: {
-                      origin: 'slack',
-                      channel: 'D0HLZLBDM',
-                      org: user.team_id,
-                      id: user.team_id + '_' + 'D0HLZLBDM'
-                    },
-                    action:'sendAttachment',
-                    client_res: [],
-                    botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
-                    botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
-                };
+                // var hello = {
+                //     msg: 'welcome',
+                //     source: {
+                //       origin: 'slack',
+                //       channel: 'D0HLZLBDM',
+                //       org: user.team_id,
+                //       id: user.team_id + '_' + 'D0HLZLBDM'
+                //     },
+                //     action:'sendAttachment',
+                //     client_res: [],
+                //     botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                //     botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
+                // };
 
-                banter.welcomeMessage(hello, function(res) {
-                    hello.client_res.push(res);
-                    //send attachment!
-                    sendResponse(hello);
-                })
+                // banter.welcomeMessage(hello, function(res) {
+                //     hello.client_res.push(res);
+                //     //send attachment!
+                //     sendResponse(hello);
+                // })
             }
             else if (user.meta && user.meta.initialized == false){
                 init_team(user, function(e, addedBy) {
-                    user.meta.initialized = true;
+                    if(cinnaEnv !== "development_alyx"){
+                        user.meta.initialized = true;
+                    }
+                    
                     if (typeof user.save === 'function') {
                       user.save();
                     }
 
                     //
                     // Onboarding conversation
-                    //
-                    var hello = {
-                        msg: 'welcome',
-                        source: {
-                          origin: 'slack',
-                          channel: addedBy.dm,
-                          org: user.team_id,
-                          id: user.team_id + '_' + addedBy.dm
-                        },
-                        action:'sendAttachment',
-                        client_res: [],
-                        botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
-                        botName: slackUsers[user.team_id].botName //this is the name of the bot on the channel so we can @ the bot
-                    };
 
-                    banter.welcomeMessage(hello, function(res) {
-                        hello.client_res.push(res);
-                        //send attachment!
-                        sendResponse(hello, res);
+                    if (cinnaEnv === 'development_alyx'){
+                        var data = {
+                            msg: 'welcome',
+                            source: {
+                              origin: 'slack',
+                              channel: 'D0H6X6TA8',
+                              org: 'T02PN3B25',
+                              id: 'T02PN3B25' + '_' + 'U02PN3T5R',
+                              user: 'U02PN3T5R'
+                            },
+                            //action:'sendAttachment',
+                            client_res: [],
+                            botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                            botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot,
+                            mode: 'onboarding' //start onboarding mode
+                        };
+                    }else {
+                        var data = {
+                            msg: 'welcome',
+                            source: {
+                              origin: 'slack',
+                              channel: addedBy.dm,
+                              org: user.team_id,
+                              id: user.team_id + '_' + addedBy.id,
+                              user: addedBy.id
+                            },
+                            //action:'sendAttachment',
+                            client_res: [],
+                            botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+                            botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot
+                            mode: 'onboarding' //start onboarding mode
+                        };   
+                    }
 
-                        // user.conversations[addedBy.dm] = 'onboard';
-                        // return conversation_botkit.onboard(user, addedBy.id, function() {
-                        //   console.log('done with onboarding conversation')
-                        //   user.conversations[addedBy.dm] = false;
-                        // });
-                    })
+                    if(!kipUser[data.source.id]){
+                       kipUser[data.source.id] = {}; //omg lol
+                    }
+                    kipUser[data.source.id].slack = user; //transfer conversation to global
+                    updateMode(data);
 
                 })
             }
@@ -379,15 +398,27 @@ function loadSlackUsers(users){
                 'origin':'slack',
                 'channel':data.channel, //channel id on slack
                 'org':data.team, //team id on slack
-                'id':data.team + "_" + data.channel, //for retrieving chat history in node memory, //this is a kip id for user across message platforms
+                'id':data.team + "_" + data.user, //for retrieving chat history in node memory, //this is a kip id for user across message platforms
                 user: data.user //user id on slack
             }
 
-            user.conversations = user.conversations || 'shopping';
+            if(!kipUser[data.source.id]){
+               kipUser[data.source.id] = {}; //omg lol
+            }
 
+            if (!kipUser[data.source.id].conversations){
+                kipUser[data.source.id].conversations = 'shopping';
+            }
 
-            kipUser[data.source.id] = user; //transfer conversation to global
+           // user.conversations = user.conversations || 'shopping';
 
+           // console.log('🔥🔥 ',user.conversations)
+
+           // var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
+
+            kipUser[data.source.id].slack = user; //transfer conversation to global
+
+            console.log('🔥🔥🔥🔥 ',kipUser[data.source.id])
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 
@@ -426,7 +457,7 @@ function loadSlackUsers(users){
                                         'origin':'slack',
                                         'channel':data.channel,
                                         'org':data.team,
-                                        'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                                        'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
                                         user: data.user
                                     }
                                 }
@@ -479,7 +510,7 @@ function loadSlackUsers(users){
                                     'origin':'slack',
                                     'channel':data.channel,
                                     'org':data.team,
-                                    'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                                    'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
                                     user: data.user
                                 }
                             }
@@ -507,7 +538,7 @@ function loadSlackUsers(users){
                             'origin':'slack',
                             'channel':data.channel,
                             'org':data.team,
-                            'id':data.team + "_" + data.channel, //for retrieving chat history in node memory,
+                            'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
                             user: data.user
                         },
                         'msg':data.text
@@ -578,8 +609,6 @@ var loadSocketIO = function(server){
 //pre process incoming messages for canned responses
 function preProcess(data){
 
-    console.log('io 781: Getting to preProcess, data: ',data)
-
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
@@ -599,6 +628,9 @@ function preProcess(data){
 
     // don't perform searches if ur having a convo with a bot
     // let botkit handle it
+
+    console.log('👻 👻 👻 👻  ',kipUser[data.source.id].conversations)
+
     if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
 
 
@@ -734,10 +766,19 @@ function preProcess(data){
                         case 'addmember':
                             addmemberMode(data);
                             break;
+
+                        default:
+                            shoppingMode(data);
                     }
                 }else {
                     //proceed to NLP instead
-                    routeNLP(data);
+                    if (data){
+                        routeNLP(data);
+                    }
+                    else {
+                        console.log('NOT PROCESSING, DATA NOT FOUND')
+                    }
+                    
                 }
 
             });
@@ -2076,8 +2117,9 @@ function removeCartItem(data){
           yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect);
       }
 
-      data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart. Type `view cart` to see your updated cart']
+      data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart']
       outgoingResponse(data, 'txt');
+      viewCart(data);
 
     }).then(function(){}).catch(function(err) {
         console.log(err);
@@ -2116,6 +2158,14 @@ function viewCart(data, show_added_item){
       }
 
       var cartObj = [];
+
+        //add mode sticker
+        cartObj.push({
+            text: '',
+            color:'#45a5f4',
+            image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'            
+        })
+
       for (var i = 0; i < cart.aggregate_items.length; i++) {
         var item = cart.aggregate_items[i];
         var userString = item.added_by.map(function(u) {
@@ -2162,7 +2212,8 @@ function viewCart(data, show_added_item){
         } else {
           var text = [
             `${processData.emoji[i+1][emojiType]} *${item.title}*`,
-            `Quantity: ${item.quantity}`
+            `Quantity: ${item.quantity}`,
+            `_Added by: ${userString}_`
           ].join('\n');
         }
 
@@ -2176,31 +2227,53 @@ function viewCart(data, show_added_item){
       }
 
       // Only show the purchase link in the summary for office admins.
-      var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
-      if (isAdmin) {
+      if (isAdmin || isP2P) {
+        var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
         summaryText += ` \n <${cart.link}|» Purchase Items >`;
-      }
+        cartObj.push({
+            text: summaryText,
+            mrkdwn_in: ['text', 'pretext'],
+            color: '#49d63a'
+        })
+      }else {
+        //var officeAdmins = slackbot.meta.office_assistants.join(' ')
 
-      cartObj.push({
-        text: summaryText,
-        mrkdwn_in: ['text', 'pretext'],
-        color: '#49d63a'
-      })
+        if(slackbot.meta.office_assistants && slackbot.meta.office_assistants[0]){
+             var officeAdmins = '<@'+slackbot.meta.office_assistants[0]+'>';
+        }else {
+            var officeAdmins = '';
+        }
+
+        cartObj.push({
+            text: '_Office admins '+officeAdmins+' can checkout the Team Cart_',
+            mrkdwn_in: ['text', 'pretext'],
+            color: '#49d63a'
+        })        
+      }
 
       data.client_res = [];
       data.client_res.push(cartObj);
       console.log('done with cartObj');
 
       banter.getCinnaResponse(data,function(res){
-          if(res && res !== 'null' && data.client_res[0]){
-             if (res.length == 1){
-                data.client_res[0].unshift(res);
-             }else {
-                for (var x = 0; x < res.length; x++) {
-                    data.client_res[0].unshift(res[x]);
-                }
-             }
+
+          if(res[0] && res[0].text && data.client_res[0]){
+
+            
+                //console.log('RES TEXT ',res[0].text);
+                data.client_res[0].unshift(res[0]);
+             // }           
+             // if (res.length == 1){
+             //    console.log('RES TEXT ',res[0].text);
+             //    data.client_res[0].unshift(res[0].text);
+             // }else {
+             //    for (var x = 0; x < res.length; x++) {
+             //        data.client_res[0].unshift(res[x].text);
+             //    }
+             // }
           }
+
+          console.log('CINNARES ',res);
 
           console.log('CLIENT_RES ',data.client_res);
           sendResponse(data);
@@ -2209,6 +2282,9 @@ function viewCart(data, show_added_item){
 
     }).catch(function(e) {
       console.log('error retriving cart for view cart')
+      setTimeout(function() {
+        viewCart(data);
+      }, 1000);
       console.log(e.stack);
     })
 }
@@ -2271,6 +2347,10 @@ function recallHistory(data,callback,steps){
 var updateMode = function(data){
 
     console.log('UPDATE MODE DATA ',data);
+
+    if(!kipUser[data.source.id]){
+        kipUser[data.source.id] = {};
+    }
 
     switch(data.mode){
         case 'shopping':
@@ -2350,20 +2430,30 @@ function settingsMode(data){
 
     kipUser[data.source.id].conversations = 'settings';
 
-    return conversation_botkit.settings(kipUser[data.source.id], data.source.user, function(msg) {
-        data.bucket;
-        data.action;
+    co(function*() {
+        // um let's refresh the slackbot just in case...
+        var slackbot = yield db.Slackbots.findOne({team_id: data.source.org}).exec();
 
-        if(typeof msg === 'object'){
-            var obj = _.extend(data, msg); //merge data obj from kip with botkit
-        }else {
-            var obj = data;
-            obj.mode = msg;
-        }
+        return conversation_botkit.settings(slackbot, data.source.user, function(msg) {
+            data.bucket;
+            data.action;
 
-        console.log('💎incoming💎 💎 ',obj);
-        updateMode(obj);              
+            if(typeof msg === 'object'){
+                var obj = _.extend(data, msg); //merge data obj from kip with botkit
+            }else {
+                var obj = data;
+                obj.mode = msg;
+            }
+
+            console.log('💎incoming💎 💎 ',obj);
+            updateMode(obj);              
+        })
+
+    }).catch((e) => {
+        console.log(e);
+        console.log(e.stack);
     })
+
 }
 
 
@@ -2374,25 +2464,33 @@ function addmemberMode(data){
 
     kipUser[data.source.id].conversations = 'addmember';
 
-    return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function() {
+    co(function*() {
 
-        console.log('done adding members');
-        kipUser[data.source.id].conversations[data.channel] = 'shopping';
+        //var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
+        return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function(msg) {
 
-        //fire same here as exit settings mode!!!! 
+            console.log('done adding members');
 
-        // data.bucket;
-        // data.action;
+            data.bucket;
+            data.action;
 
-        // if(typeof msg === 'object'){
-        //     var obj = _.extend(data, msg); //merge data obj from kip with botkit
-        // }else {
-        //     var obj = data;
-        //     obj.mode = msg;
-        // }
-        // updateMode(obj);     
+            if(typeof msg === 'object'){
+                var obj = _.extend(data, msg); //merge data obj from kip with botkit
+            }else {
+                var obj = data;
+                obj.mode = msg;
+            }
 
+            console.log('💎incoming💎 💎 ',obj);
+            updateMode(obj);         
+
+        })
+
+    }).catch((e) => {
+        console.log(e);
+        console.log(e.stack);
     })
+
 }
 
 function collectMode(data){
@@ -2417,7 +2515,7 @@ function collectMode(data){
         // get list of users in all channels
         return channels.map(function(channel) {
 
-          request('https://slack.com/api/channels.info?token=' + kipUser[data.source.id].bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
+          request('https://slack.com/api/channels.info?token=' + kipUser[data.source.id].slack.bot.bot_access_token + '&channel=' + channel, function(e, r, b) {
             if (e) {
               console.log(e);
             }
@@ -2430,7 +2528,7 @@ function collectMode(data){
               return weekly_updates.collectFromUsers(data.source.org, data.source.user, channel, channelInfo.channel.members, function() {
                 console.log('um done collecting orders for channel ' + channel)
 
-                kipUser[data.source.id].conversation = 'shopping';
+                kipUser[data.source.id].conversations = 'shopping';
 
                 //fire same here as exit settings mode!!!! 
 
@@ -2443,7 +2541,7 @@ function collectMode(data){
                 //     var obj = data;
                 //     obj.mode = msg;
                 // }
-                // updateMode(obj);     
+                   
 
     
               })
@@ -2455,20 +2553,27 @@ function collectMode(data){
         console.log('triggering kip collect, maybe if the person is an admin?')
         return weekly_updates.collect(data.source.org, data.source.user, function() {
           console.log('done collecting orders');
-          kipUser[data.source.id].conversation = 'shopping';
+          kipUser[data.source.id].conversations = 'shopping';
+
+          sendTxtResponse(data,'Done sending last call to all Team Cart Members :)');
+          // updateMode();  
         })
     }
 }
 
 function onboardingMode(data){
+
+    console.log('ONBOARDING FIRED 💎 💎 💎 💎')
+
     data.bucket = 'mode';
     data.action = 'onboarding';
     history.saveHistory(data,true,function(res){});
 
-    kipUser[data.source.id].conversations = 'onboard';
+    kipUser[data.source.id].conversations = 'onboarding';
+
     // "user" is actually the slackbot here
     // "data.user" is the user having the convo
-    return conversation_botkit.onboard(kipUser[data.source.id], data.source.user, function() {
+    return conversation_botkit.onboard(kipUser[data.source.id].slack, data.source.user, function() {
         console.log('done with onboarding conversation')
         kipUser[data.source.id].conversations = 'shopping';
     });
@@ -2476,30 +2581,32 @@ function onboardingMode(data){
 
 function shoppingMode(data){
 
-    console.log('SHOPPING MODE FIRED');
+    console.log('SHOPPING MODE FIRED 💎 💎 💎 💎');
 
     data.bucket = 'mode';
     data.action = 'shopping';
     history.saveHistory(data,true,function(res){});
 
-    data.action = 'sendAttachment';
+    kipUser[data.source.id].conversations = 'shopping';
 
-    data.client_res = [
-      {
-        "image_url":"http://i.imgur.com/PqrtJmD.png",
-        "text":"",
-        "color":"#45a5f4"
-      },
-      {
-          "text": "Tell me what you're looking for, or use `help` for more options",
-          "mrkdwn_in": [
-              "text",
-              "pretext"
-          ],
-          "color":"#49d63a"
-      }
-    ];
-    sendResponse(data);
+    // data.action = 'sendAttachment';
+
+    // data.client_res = [
+    //   {
+    //     "image_url":"http://i.imgur.com/PqrtJmD.png",
+    //     "text":"",
+    //     "color":"#45a5f4"
+    //   },
+    //   {
+    //       "text": "Tell me what you're looking for, or use `help` for more options",
+    //       "mrkdwn_in": [
+    //           "text",
+    //           "pretext"
+    //       ],
+    //       "color":"#49d63a"
+    //   }
+    // ];
+    // sendResponse(data);
 }
 
 function reportMode(data){
@@ -2509,8 +2616,8 @@ function reportMode(data){
 
     console.log('report generation');
 
-    var isAdmin = kipUser[data.source.id].meta.office_assistants.indexOf(data.source.user) >= 0;
-    var isP2P = kipUser[data.source.id].meta.office_assistants.length === 0;
+    var isAdmin = kipUser[data.source.id].slack.meta.office_assistants.indexOf(data.source.user) >= 0;
+    var isP2P = kipUser[data.source.id].slack.meta.office_assistants.length === 0;
     var num_days = 7;
 
     console.log('isAdmin:', isAdmin, ' isP2P:', isP2P);
@@ -2518,7 +2625,7 @@ function reportMode(data){
     console.log(data.user);
     console.log(data.source);
 
-    return kipcart.report(kipUser[data.source.id].team_id, num_days).then(function(report) {
+    return kipcart.report(kipUser[data.source.id].slack.team_id, num_days).then(function(report) {
     console.log('found ' + report.items.length + ' items');
 
     var fun_stats = [
@@ -2534,7 +2641,7 @@ function reportMode(data){
 
     // make a nice slacky item report
     var m = {
-      user: kipUser[data.source.id].bot.bot_user_id,
+      user: kipUser[data.source.id].slack.bot.bot_user_id,
       username: "Kip",
       "text": `*Cart Overview for the last ${num_days} days*`,
       "attachments": [
