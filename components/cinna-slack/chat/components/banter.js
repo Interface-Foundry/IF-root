@@ -98,11 +98,11 @@ var checkModes = function(inputObj,context,callback) {
             break;
 
         //* * onboarding mode
-        case textSimilar(input,'onboarding') > 90:
-        case textSimilar(input,'kip onboarding') > 90:
-        case textSimilar(input,'onboard') > 90:
-            mode = 'onboarding';
-            break;
+        // case textSimilar(input,'onboarding') > 90:
+        // case textSimilar(input,'kip onboarding') > 90:
+        // case textSimilar(input,'onboard') > 90:
+        //     mode = 'onboarding';
+        //     break;
 
         //* * * shopping mode
         case textSimilar(input,'shopping') > 90:
