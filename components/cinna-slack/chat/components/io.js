@@ -979,7 +979,13 @@ data.flags = data.flags ? data.flags : {};
             banterBucket(data);
             break;
         case 'purchase':
-            purchaseBucket(data);
+
+            if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
+                sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
+            }else {
+                purchaseBucket(data);
+            }
+
             break;
         case 'mode':
             modeBucket(data);
