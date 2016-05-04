@@ -626,7 +626,7 @@ function preProcess(data){
     // don't perform searches if ur having a convo with a bot
     // let botkit handle it
 
-    console.log('👻 👻 👻 👻  ',kipUser[data.source.id].conversations)
+    //console.log('👻 👻 👻 👻  ',kipUser[data.source.id].conversations)
 
     if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
 
@@ -976,7 +976,13 @@ data.flags = data.flags ? data.flags : {};
             banterBucket(data);
             break;
         case 'purchase':
-            purchaseBucket(data);
+
+            if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
+                sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
+            }else {
+                purchaseBucket(data);
+            }
+
             break;
         case 'mode':
             modeBucket(data);
