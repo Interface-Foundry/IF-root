@@ -2503,11 +2503,10 @@ function collectMode(data){
 
     kipUser[data.source.id].conversations = "collect";
 
-    console.log('triggering kip collect, maybe if the person is an admin?')
-
     data.text = data.msg; //converting
 
     if (data.text.indexOf('<#C') >= 0) {
+        throw new Error('cannot do "collect #channel" right now')
         console.log('attempting to collect for one or more channels');
         var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
           return markdown.replace('<#', '').replace('>', '');
