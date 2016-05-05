@@ -43,6 +43,7 @@ var async = require('async');
 var bodyParser = require('body-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
+var kikHandler = require('./components/kik')
 
 //set env vars
 var config = require('config');
@@ -151,10 +152,9 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
   SPF: 'pass' }
 */
 
-//incoming kik message
+// incoming kik message
 app.post('/kikincoming', function(req, res) {
-    console.log('incoming Kik BODY: ',req.body);
-    res.sendStatus(200);
-    ioKip.incomingMsgAction(req.body,'kik');
-    res.sendStatus(200);
+  if (process.env.NODE_ENV !== 'production') console.log('incoming Kik BODY: ', req.body);
+
+  return kikHandler(req, res);
 });
