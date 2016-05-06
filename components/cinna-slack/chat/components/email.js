@@ -122,7 +122,7 @@ var processEmail = module.exports.process = function(message) {
       msg: message.text.split(/On (.*) wrote/)[0].trim(),
       source: {
         origin: 'slack',
-        channel: 'fasl;kf rw;h[uhjka]',
+        channel: 'none',
         org: team.team_id,
         id: chainId,
         user: user.id
@@ -186,7 +186,7 @@ var collect = module.exports.collect = function(address, team_name, team_id, tea
 
     var text = `Hey there,
 
-I'm just letting you know that they will be submitting the office purcase order for your slack team ${team_name} soon.
+I'm just letting you know that they will be submitting the office purchase order for your slack team ${team_name} soon.
 
 If you need to add anything to the shopping cart, you can either log on to https://${team_link}.slack.com/messages/@kip and talk to me there, or you can just send a reply to this message with the item you are looking for.
 

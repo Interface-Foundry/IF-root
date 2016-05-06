@@ -16,6 +16,7 @@ var async = require('async');
 var _ = require('lodash');
 var email = require('./email');
 var request = require('request-promise');
+var ioKip = require("./io.js");
 
 
 //
@@ -159,8 +160,8 @@ module.exports.collect = function(team_id, person_id, callback) {
         convo.interrupted = false;
 
 
-        convo.say('Sending last call to Team Cart Members');
-        convo.next();
+        //convo.say('Sending last call to Team Cart Members');
+        //convo.next();
         lastCall({text: ''}, convo);
 
       })
@@ -241,21 +242,41 @@ function lastCall(response, convo) {
 
     console.log('sending last call to all ' + team.length + ' users');
 
-
     yield team.map(function(u) {
       if (u.dm) {
         // Send the user a slack message
         console.log('SLACK SEND', u.name);
+
         return new Promise(function(resolve, reject) {
-          convo.bot.startPrivateConversation({user: u.id}, function(response, convo) {
-            convo.on('end', function() {
-              console.log('end', u.name);
-              resolve();
-            });
-            convo.say('Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late!')
-            convo.say('The clock\'s ticking! You have *60* minutes');
-            convo.next();
-          });
+          //send message back to ioKip
+          var attachment = [{
+              "fallback": "Last Call",
+              "text":'',
+              "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
+              "color": "#45a5f4",
+              "mrkdwn_in": ["text"]        
+          },{
+              "fallback": "Last Call",
+              "text":'Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! \n The clock\'s ticking! You have *60* minutes',
+              "color": "#45a5f4",
+              "mrkdwn_in": ["text"]
+          }]
+          var obj = {
+              msg: 'Last Call',
+              source: {
+                origin: 'slack',
+                channel: u.dm,
+                org: convo.slackbot.team_id,
+                id: convo.slackbot.team_id + '_' + u.dm,
+                user: u.id
+              },
+              action:'sendAttachment',
+              client_res: attachment
+          };
+          //bye bye botkit ugh
+          ioKip.sendResponse(obj); 
+
+          resolve();
         })
       } else if (u.profile.email && u.settings.emailNotification) {
         console.log('EMAIL SEND', u.profile.email);

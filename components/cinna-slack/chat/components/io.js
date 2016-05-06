@@ -2350,8 +2350,9 @@ function recallHistory(data,callback,steps){
 
     }
 
-
 }
+
+
 
 //MODE UPDATE HANDLING
 var updateMode = function(data){
@@ -2560,7 +2561,7 @@ function collectMode(data){
           console.log('done collecting orders');
           kipUser[data.source.id].conversations = 'shopping';
 
-          sendTxtResponse(data,'Done sending last call to all Team Cart Members :)');
+          sendTxtResponse(data,'Done sending last call to all Team Cart Members 😊 Type `settings` for last call options');
           // updateMode();
         })
     }
@@ -2832,6 +2833,7 @@ module.exports.updateMode = updateMode;
 module.exports.newSlack = newSlack;
 module.exports.preProcess = preProcess;
 module.exports.slackUsers = slackUsers;
+module.exports.sendResponse = sendResponse;
 
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;
