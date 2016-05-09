@@ -1,0 +1,28 @@
+body{
+  font-family: 'PT Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+
+h3 {
+  color: #47a2fc;
+}
+
+h2 {
+  color: #47a2fc;
+}
+
+a {
+  color: #47a2fc 
+}
+
+hr
+{
+    background-color: #999;
+    border: 0 none;
+    color: #eee;
+    height: 1px;
+    margin: 50px 0px;
+}
+
+.max-width-image {
+  max-width: 100%;
+}
