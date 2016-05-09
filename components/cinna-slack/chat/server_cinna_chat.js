@@ -43,6 +43,7 @@ var async = require('async');
 var bodyParser = require('body-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
+var botkit = require('botkit');
 
 //set env vars
 var config = require('config');
@@ -138,6 +139,7 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
 
 app.get('/facebook', function (req, res) {
   if (req.query['hub.verify_token'] === 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD') {
+    //bot stuff
     res.send(req.query['hub.challenge']);
   }
   res.send('Error, wrong validation token');
@@ -150,8 +152,7 @@ app.post('/facebook', function (req, res) {
     sender = event.sender.id;
     if (event.message && event.message.text) {
       text = event.message.text;
-      console.log(JSON.stringify(req.body))
-
+      console.log(JSON.stringify(req.body));
       // {
       //   "object":"page",
       //   "entry":[{"id":976386645706699,
@@ -164,17 +165,21 @@ app.post('/facebook', function (req, res) {
       //                         "text":"LELELELE"}}]
       //             }]
       //   }
-
-      var newfB = {
-                    source: {
-                        'origin':'facebook',
-                        'channel': sender.toString(),
-                        'org': 'facebook',
-                        'id':"facebook_" + sender.toString()
-                    },
-                    'msg': text
-                  };
-      ioKip.preProcess(newfB);
+      var newFb = {
+            source: {
+                'origin':'facebook',
+                'channel': sender.toString(),
+                'org': 'facebook',
+                'id':"facebook_" + sender.toString()
+            },
+            'msg': text,
+            'fb_access_token': ''
+        };
+        
+      ioKip.preProcess(newFb);
+      
+      ioKip.initFacebookBot(newFb);
+    
     }
   }
   res.sendStatus(200);

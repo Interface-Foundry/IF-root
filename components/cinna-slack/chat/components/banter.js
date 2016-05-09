@@ -1220,9 +1220,9 @@ var checkForCanned = function(input,callback,origin,source) {
     }
 
     //PAPRIKA ACTION BUTTON TESTING
-    if (source && source.org == 'T02PN3B25'){
+    if (source && (source.org == 'T02PN3B25' || source.org == 'facebook')){
 
-        switch(input){
+        switch(input) {
 
             //add to cart
             case 'kip_cheaper':
