@@ -1,0 +1,32 @@
+.office-main-content {
+ margin-bottom: 30px;
+}
+
+.kip-quote-container {
+  width: 100%;
+  padding: 30px 0px 40px 0px;
+  background-color: #47a2fc;
+  color: #fff;
+  margin-bottom: 50px;
+}
+
+.kip-quote {
+  font-size: 20pt;
+}
+
+.get-kip-container {
+  margin-bottom: 80px;
+}
+
+.get-kip {
+  margin-bottom: 20px;
+}
+
+.get-kip > h2 {
+  display: inline-block;
+}
+
+.kip-head {
+  vertical-align: bottom;
+  height: 50px;
+}
