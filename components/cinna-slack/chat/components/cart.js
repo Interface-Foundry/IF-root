@@ -30,7 +30,7 @@ module.exports = {};
 //
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
-  console.log('ITEM ZZZZ ',item)
+  console.log('ITEM ZZZZ ',item);
 
   //fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount){
@@ -48,10 +48,19 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var cart = yield getCart(slack_id);
+    var cart, personal; 
+    if (slack_id !== null) {
+      cart = yield getCart(slack_id);
+      personal = false;
+    } else {
+      cart = yield getCart(user_id);
+      personal = true;
+    }
+
     console.log(cart);
 
     console.log('creating item in database')
+
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
@@ -63,15 +72,19 @@ module.exports.addToCart = function(slack_id, user_id, item) {
       review_count: _.get(item, 'reviews.reviewCount'),
       added_by: user_id,
       slack_id: slack_id,
-      source_json: JSON.stringify(item)
+      source_json: JSON.stringify(item),
+      personal: personal
     })).save();
 
     console.log('adding item ' + i._id + ' to cart ' + cart._id);
     cart.items.push(i._id);
     yield cart.save();
-
-    console.log('calling getCart again to rebuild amazon cart')
-    return getCart(slack_id);
+    console.log('calling getCart again to rebuild amazon cart');
+    if (slack_id !== null) {
+      return getCart(slack_id);
+    } else {
+      return getCart(user_id);
+    }
   })
 }
 
@@ -86,9 +99,13 @@ module.exports.removeFromCart = function(slack_id, user_id, number) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
-    var cart = yield getCart(slack_id);
-    var team = yield db.slackbots.findOne({team_id: slack_id});
-    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    if (slack_id !== null) {
+      var cart = yield getCart(slack_id);
+      var team = yield db.slackbots.findOne({team_id: slack_id});
+      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    } else {
+      var cart = yield getCart(user_id);
+    }
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists

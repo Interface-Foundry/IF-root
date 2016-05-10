@@ -55,11 +55,11 @@ var email = require('./email');
 var telegram = require('telegram-bot-api');
 
 var telegramToken;
-if (process.env.NODE_ENV == 'development_alyx'){
+if (process.env.NODE_ENV == 'development_alyx') {
     telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
-}else if (process.env.NODE_ENV == 'development_mitsu'){
+} else if (process.env.NODE_ENV == 'development_mitsu'){
     telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
-}else{
+} else {
     telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
 }
 
@@ -97,10 +97,11 @@ if (process.env.NODE_ENV !== 'development') {
         preProcess(newTg);
       }
   });
+
 }
 
 //get stored slack users from mongo
-var initSlackUsers = function(env){
+var initSlackUsers = function(env) {
     console.log('loading with env: ',env);
     cinnaEnv = env;
     //load kip-pepper for testing
@@ -607,7 +608,7 @@ var loadSocketIO = function(server){
 /////////// PROCESSING INCOMING //////////
 
 //pre process incoming messages for canned responses
-function preProcess(data){
+function preProcess(data) {
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -708,16 +709,16 @@ function preProcess(data){
                     if (res == 'cheaper'){
                         slackTester = { payload: '{"actions":[{"name":"cheaper","value":"1"}],"callback_id":"57081aeed625bc9f8a359926","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460148983.486353","message_ts":"1460148974.000406","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/ZM0ZP8V7RNXDY81DH4L1HQ7S.png","image_width":400,"image_height":175,"image_bytes":34155,"callback_id":"57081aeed625bc9f8a359926","title":":one: Women\'s Military Up Buckle Combat Boots Mid Knee High E...","id":1,"title_link":"http:\\/\\/goo.gl\\/VgkoLs","color":"45a5f4","actions":[{"id":"1","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"Similar","text":"\\u27b0 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/CPY561LDJDMINVXX6OI1ICNM.png","image_width":400,"image_height":175,"image_bytes":26562,"callback_id":"57081aeed625bc9f8a359926","title":":two: COCO 1 Womens Buckle Riding Knee High Boots,Coco-01v4.0...","id":2,"title_link":"http:\\/\\/goo.gl\\/u8EY7U","color":"45a5f4","actions":[{"id":"6","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"Similar","text":"\\u27b0 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WQSCP0BWTPXYHBTXR7E2PIPS.png","image_width":400,"image_height":175,"image_bytes":22442,"callback_id":"57081aeed625bc9f8a359926","title":":three: Forever Mango-21 Women\'s Winkle Back Shaft Side Zip Kne...","id":3,"title_link":"http:\\/\\/goo.gl\\/teZTD5","color":"45a5f4","actions":[{"id":"11","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"Similar","text":"\\u27b0 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460148974.000406"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33282428390\\/2Sq4RdP8qAJKRp5JrXfNoGP1"}' };
                     }
-                    else if (res == 'addcart'){
+                    else if (res == 'addcart') {
                         slackTester = { payload: '{"actions":[{"name":"addcart","value":"1"}],"callback_id":"570c721cd365f919d8e2d42d","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460433491.790565","message_ts":"1460433437.000476","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Q3QUY8L4W7M800SX5VX0ZJPZ.png","image_width":400,"image_height":175,"image_bytes":44065,"callback_id":"570c721cd365f919d8e2d42d","title":":one: Poop Emoji Pillow Emoticon Stuffed Plush Toy Doll Smile...","id":1,"title_link":"http:\\/\\/goo.gl\\/tUkU8X","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/JVK7D21JRMI3W166JGZY3E9E.png","image_width":400,"image_height":175,"image_bytes":43405,"callback_id":"570c721cd365f919d8e2d42d","title":":two: ToLuLu\\u00ae Soft Emoji Bedding Pillow Cushion Car Sofa Pill...","id":2,"title_link":"http:\\/\\/goo.gl\\/slwuZ2","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/QUKE3JMMCWAOFCVSTTFL8WYE.png","image_width":400,"image_height":175,"image_bytes":25642,"callback_id":"570c721cd365f919d8e2d42d","title":":three: Emoji Shirt Smiley - Money Mouth Face - Doller Sign - F...","id":3,"title_link":"http:\\/\\/goo.gl\\/vCPV35","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460433437.000476"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33838187251\\/zVu3xcqUIvln4FbwLLC51zIR"}' };
                     }
-                    else if (res == 'similar'){
+                    else if (res == 'similar') {
                         slackTester = { payload: '{"actions":[{"name":"similar","value":"2"}],"callback_id":"570c6cef64513dd7d7b1fd24","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460433572.400826","message_ts":"1460432112.000473","attachment_id":"3","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/K8JSSSW1PUVP4IZJLP4M2ZP1.png","image_width":400,"image_height":175,"image_bytes":42014,"callback_id":"570c6cef64513dd7d7b1fd24","title":":one: Poop Emoji Pillow Emoticon Stuffed Plush Toy Doll Smile...","id":1,"title_link":"http:\\/\\/goo.gl\\/tUkU8X","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/IS52N2SHFGP2RD9BDRKWWXBG.png","image_width":400,"image_height":175,"image_bytes":43405,"callback_id":"570c6cef64513dd7d7b1fd24","title":":two: ToLuLu\\u00ae Soft Emoji Bedding Pillow Cushion Car Sofa Pill...","id":2,"title_link":"http:\\/\\/goo.gl\\/slwuZ2","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/VTCYNQ0V06PZVODX85ORIE1C.png","image_width":400,"image_height":175,"image_bytes":25642,"callback_id":"570c6cef64513dd7d7b1fd24","title":":three: Emoji Shirt Smiley - Money Mouth Face - Doller Sign - F...","id":3,"title_link":"http:\\/\\/goo.gl\\/vCPV35","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460432112.000473"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33887511719\\/sh4EXEcx5h2HVAjz5dIIG50i"}' };
                     }
-                    else if (res == 'modify'){
+                    else if (res == 'modify') {
                         slackTester = { payload: '{"actions":[{"name":"modify","value":"1"}],"callback_id":"570c75d7d365f919d8e2d431","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434417.593489","message_ts":"1460434392.000484","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/6BSZE72GXWKRR0Y79V72NBC7.png","image_width":400,"image_height":175,"image_bytes":39117,"callback_id":"570c75d7d365f919d8e2d431","title":":one: Youngin\' Blues: The Story of Reed and RaKeem","id":1,"title_link":"http:\\/\\/goo.gl\\/dG0mQm","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/UWF0QVNWH4I4LOA7V9PJX270.png","image_width":400,"image_height":175,"image_bytes":44919,"callback_id":"570c75d7d365f919d8e2d431","title":":two: 2015-16 Totally Certified Roll Call Mirror Camo RC Auto...","id":2,"title_link":"http:\\/\\/goo.gl\\/0UHjD5","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/K89N9L5QU3SVLH3T7QE4YRZN.png","image_width":400,"image_height":175,"image_bytes":48795,"callback_id":"570c75d7d365f919d8e2d431","title":":three: Rakeem Interlude (feat. Merc)","id":3,"title_link":"http:\\/\\/goo.gl\\/XWkxKp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434392.000484"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33879490084\\/KY3oPL33C2V4W9V7B45xWEMA"}' };
                     }
-                    else if (res == 'moreinfo'){
+                    else if (res == 'moreinfo') {
                         slackTester = { payload: '{"actions":[{"name":"moreinfo","value":"0"}],"callback_id":"570c7611d365f919d8e2d433","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434463.610937","message_ts":"1460434449.000488","attachment_id":"1","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/OBIAI1M7VY2U2BGWWAA3VIZB.png","image_width":400,"image_height":175,"image_bytes":52377,"callback_id":"570c7611d365f919d8e2d433","title":":one: Greatest Hits","id":1,"title_link":"http:\\/\\/goo.gl\\/vpf4iz","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Z9RGCV9RBFGATNUWVSRUKT7X.png","image_width":400,"image_height":175,"image_bytes":35445,"callback_id":"570c7611d365f919d8e2d433","title":":two: ZZ Way - Spring ZigZag Craft Game","id":2,"title_link":"http:\\/\\/goo.gl\\/W9si1L","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WOIKXKZKL7JO3J6IR9L8YFJ5.png","image_width":400,"image_height":175,"image_bytes":52322,"callback_id":"570c7611d365f919d8e2d433","title":":three: Til The Casket Drops [Explicit]","id":3,"title_link":"http:\\/\\/goo.gl\\/tDTjNp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434449.000488"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33890435429\\/zRrVRvLmlnN8PEDyvMcQWNIx"}' };
                     }
 
@@ -843,7 +844,7 @@ var incomingMsgAction = function(data,origin){
         console.error('Slack callback_id missing from Slack response');
         return;
     }
-    console.log('PARSED INCOMONG ',parsedIn);
+    console.log('PARSED INCOMING ',parsedIn);
 
     //build new incoming Kip obj
     var kipObj = {
@@ -980,11 +981,11 @@ data.flags = data.flags ? data.flags : {};
             break;
         case 'purchase':
 
-            if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
-                sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
-            }else {
+            // if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
+            //     sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
+            // }else {
                 purchaseBucket(data);
-            }
+            // }
 
             break;
         case 'mode':
@@ -1182,7 +1183,8 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
             processData.urlShorten(data,function(res){
                 var count = 0;
 
-                if (data.source.origin == 'slack'){
+                if (data.source.origin == 'slack') {
+
                     //store a new mongo ID to pass in Slack callback
                     data.searchId = mongoose.Types.ObjectId();
 
@@ -1410,7 +1412,7 @@ var sendResponse = function(data,flag){
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'telegram'){
 
-        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more') {
 
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
@@ -2139,7 +2141,7 @@ function removeCartItem(data){
     })
 }
 
-function viewCart(data, show_added_item){
+function viewCart(data, show_added_item) {
 
     console.log('view cart')
     db.Metrics.log('cart.view', data);
@@ -2147,19 +2149,25 @@ function viewCart(data, show_added_item){
     console.log(data.source)
 
     co(function*() {
-      var cart = yield kipcart.getCart(data.source.org);
+      if (data.source.origin === 'slack') {
+          var cart = yield kipcart.getCart(data.source.org);
+      } 
+      else if (data.source.origin === 'facebook' || data.source.origin === 'telegram' || data.source.origin === 'socket.io') {
+          var cart = yield kipcart.getCart(data.source.user);
+      }
 
       if (cart.items.length < 1) {
         return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet.');
       }
 
-      var slackbot = yield db.Slackbots.findOne({
-        team_id: data.source.org
-      }).exec();
-
-      // admins have special rights
-      var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
-      var isP2P = slackbot.meta.office_assistants.length === 0;
+      if (data.source.origin == 'slack') {
+          var slackbot = yield db.Slackbots.findOne({
+            team_id: data.source.org
+          }).exec();
+         // admins have special rights
+          var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
+          var isP2P = slackbot.meta.office_assistants.length === 0;
+      }
 
       // get the latest added item if we need to highlight it
       if (show_added_item) {
@@ -2182,7 +2190,7 @@ function viewCart(data, show_added_item){
           return '<@' + u + '>';
         }).join(', ');
 
-        if (isAdmin || isP2P) {
+        if (isAdmin || isP2P || cart.personal) {
           var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
           console.log(link);
         }
@@ -2212,20 +2220,44 @@ function viewCart(data, show_added_item){
 
         // add title, which is a link for admins/p2p and text otherwise
         var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
-        if (isAdmin || isP2P) {
-          var text = [
-            `${processData.emoji[i+1][emojiType]} <${link}|${item.title}>`,
-            `*${item.price}* each`,
-            `Quantity: ${item.quantity}`,
-            `_Added by: ${userString}_`
-          ].join('\n');
-        } else {
-          var text = [
-            `${processData.emoji[i+1][emojiType]} *${item.title}*`,
-            `Quantity: ${item.quantity}`,
-            `_Added by: ${userString}_`
-          ].join('\n');
-        }
+
+
+        if (isAdmin || isP2P || cart.personal) {
+
+           if (data.source.origin === 'slack') {
+              var text = [
+                `${processData.emoji[i+1][emojiType]} <${link}|${item.title}>`,
+                `*${item.price}* each`,
+                `Quantity: ${item.quantity}`,
+                `_Added by: ${userString}_`
+              ].join('\n');
+           }
+           else {
+             var text = [
+                processData.emoji[i+1][emojiType] + link + ' | ' + item.title,
+                'Quantity: ' + item.quantity,
+                '_Added by: ' + userString
+             ]
+           }
+
+        } 
+        else {
+
+          if (data.source.origin === 'slack') {
+             var text = [
+                `${processData.emoji[i+1][emojiType]} *${item.title}*`,
+                `Quantity: ${item.quantity}`,
+                `_Added by: ${userString}_`
+              ].join('\n');
+          }
+          else {
+             var text = [
+                processData.emoji[i+1][emojiType] + item.title,
+                'Quantity: ' + item.quantity,
+                '_Added by: ' + userString
+             ].join('\n');
+          }
+      }
 
         cartObj.push({
           text: text,
@@ -2234,38 +2266,50 @@ function viewCart(data, show_added_item){
           thumb_url: item.image
          // actions: actionObj
         })
-      }
+
+    }
 
       // Only show the purchase link in the summary for office admins.
-      if (isAdmin || isP2P) {
-        var summaryText = `_Summary: Team Cart_ \n Total: *${cart.total}*`;
-        summaryText += ` \n <${cart.link}|» Purchase Items >`;
-        cartObj.push({
-            text: summaryText,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#49d63a'
-        })
-      }else {
-        //var officeAdmins = slackbot.meta.office_assistants.join(' ')
+      if (isAdmin || isP2P || cart.personal) {
+            if (data.source.origin === 'slack') {
+                var summaryText =  cart.personal ? `_Summary: Your Cart_ \n Total: *${cart.total}*` : `_Summary: Team Cart_ \n Total: *${cart.total}*`;
+                    summaryText += ` \n <${cart.link}|» Purchase Items >`;
+                    cartObj.push({
+                        text: summaryText,
+                        mrkdwn_in: ['text', 'pretext'],
+                        color: '#49d63a'
+                    })
+            }
+            else {
+                 var summaryText = cart.personal ? '_Summary: Your Cart_ \n Total: ' + cart.total : '_Summary: Team Cart_ \n Total: ' + cart.total;
+                     summaryText += ' \n' + cart.link + '|» Purchase Items >';
+                     cartObj.push({
+                        text: summaryText,
+                        mrkdwn_in: ['text', 'pretext'],
+                        color: '#49d63a'
+                     })
+            }
+      } else if (!isAdmin && !isP2P && !cart.personal){
 
-        if(slackbot.meta.office_assistants && slackbot.meta.office_assistants[0]){
-             var officeAdmins = '<@'+slackbot.meta.office_assistants[0]+'>';
+        //var officeAdmins = slackbot.meta.office_assistants.join(' ')
+        if(slackbot && slackbot.meta.office_assistants && slackbot.meta.office_assistants[0]){
+            var officeAdmins = '<@'+slackbot.meta.office_assistants[0]+'>';
         }else {
             var officeAdmins = '';
         }
-
         cartObj.push({
             text: '_Office admins '+officeAdmins+' can checkout the Team Cart_',
             mrkdwn_in: ['text', 'pretext'],
             color: '#49d63a'
         })
+
       }
 
       data.client_res = [];
       data.client_res.push(cartObj);
       console.log('done with cartObj');
 
-      banter.getCinnaResponse(data,function(res){
+      banter.getCinnaResponse(data,function(res) {
 
           if(res[0] && res[0].text && data.client_res[0]){
 
