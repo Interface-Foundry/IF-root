@@ -593,7 +593,7 @@ var loadSocketIO = function(server){
 
         socket.on("msgFromSever", function(data) {
             // var items = {}
-            // if (data.amazon && data.amazon[0] && data.amazon[0].ItemAttributes) {
+            // if (data.e&& data.amazon[0] && data.amazon[0].ItemAttributes) {
             //     items = JSON.stringify(data.amazon.slice(0,3))
             // }
             console.log('\n\n\nReceived message from supervisor: ',data.flags,'\n\n\n')
@@ -2141,16 +2141,22 @@ function removeCartItem(data){
 
 function viewCart(data, show_added_item){
 
+    if (data.source.origin == 'socket.io' || data.source.origin == 'telegram'){
+        return;
+    }
+
     console.log('view cart')
     db.Metrics.log('cart.view', data);
 
     console.log(data.source)
 
+    var cartDelay = 2000;
+
     co(function*() {
       var cart = yield kipcart.getCart(data.source.org);
 
       if (cart.items.length < 1) {
-        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet.');
+        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
       }
 
       var slackbot = yield db.Slackbots.findOne({
@@ -2265,6 +2271,9 @@ function viewCart(data, show_added_item){
       data.client_res.push(cartObj);
       console.log('done with cartObj');
 
+      //reset cart delay 
+      cartDelay = 2000;
+
       banter.getCinnaResponse(data,function(res){
 
           if(res[0] && res[0].text && data.client_res[0]){
@@ -2291,11 +2300,20 @@ function viewCart(data, show_added_item){
       // sendResponse(data);
 
     }).catch(function(e) {
-      console.log('error retriving cart for view cart')
-      setTimeout(function() {
-        viewCart(data);
-      }, 1000);
-      console.log(e.stack);
+
+      //incrementally trying to cart with longer query time
+      if (cartDelay < 16000){
+            cartDelay = cartDelay + 2000;
+            console.log('slowing view cart down ',cartDelay)
+          setTimeout(function() {
+            viewCart(data);
+          }, cartDelay);           
+      }else {
+            console.log('error retriving cart for view cart')
+            console.log(e.stack);
+      }
+
+
     })
 }
 
