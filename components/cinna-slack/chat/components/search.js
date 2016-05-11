@@ -175,7 +175,7 @@ var searchAmazon = function(data, type, query, flag) {
                                 }
                                 else {
                                     //there's a price for the item
-                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect].realPrice){
+                                    if (data.recallHistory && data.recallHistory.amazon && data.recallHistory.amazon[searchSelect] && data.recallHistory.amazon[searchSelect].realPrice){
 
                                         var modPrice = data.recallHistory.amazon[searchSelect].realPrice;
 
