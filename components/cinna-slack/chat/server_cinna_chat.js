@@ -136,6 +136,14 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
     })
 })
 
+app.get('/facebook', function (req, res) {
+  if (req.query['hub.verify_token'] === 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD') {
+    //bot stuff
+    res.send(req.query['hub.challenge']);
+  }
+  else {res.send('Error, wrong validation token'); }
+})
+
 
 app.post('/facebook', function (req, res) {
   messaging_events = req.body.entry[0].messaging;
