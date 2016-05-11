@@ -60,6 +60,11 @@ var ioKip = require("./components/io.js");
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
+
+// configure the kik handler here
+app.use(kikHandler.configure());
+
+
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function (req, res) {
   res.send('💬 🌏')
@@ -151,10 +156,3 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
   charsets: '{"to":"UTF-8","html":"UTF-8","subject":"UTF-8","from":"UTF-8","text":"UTF-8"}',
   SPF: 'pass' }
 */
-
-// incoming kik message
-app.post('/kikincoming', function(req, res) {
-  if (process.env.NODE_ENV !== 'production') console.log('incoming Kik BODY: ', req.body);
-
-  return kikHandler(req, res);
-});

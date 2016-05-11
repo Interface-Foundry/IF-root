@@ -282,7 +282,7 @@ function loadSlackUsers(users){
                 //     //send attachment!
                 //     sendResponse(hello);
                 // })
-            } 
+            }
             else if (cinnaEnv === 'development_mitsu'){
                 //
                 // Onboarding conversation
@@ -312,7 +312,7 @@ function loadSlackUsers(users){
                     if(cinnaEnv !== "development_alyx"){
                         user.meta.initialized = true;
                     }
-                    
+
                     if (typeof user.save === 'function') {
                       user.save();
                     }
@@ -351,7 +351,7 @@ function loadSlackUsers(users){
                             botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
                             botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot
                             mode: 'onboarding' //start onboarding mode
-                        };   
+                        };
                     }
 
                     if(!kipUser[data.source.id]){
@@ -593,7 +593,7 @@ var loadSocketIO = function(server){
 
         socket.on("msgFromSever", function(data) {
             // var items = {}
-            // if (data.amazon && data.amazon[0] && data.amazon[0].ItemAttributes) {
+            // if (data.e&& data.amazon[0] && data.amazon[0].ItemAttributes) {
             //     items = JSON.stringify(data.amazon.slice(0,3))
             // }
             console.log('\n\n\nReceived message from supervisor: ',data.flags,'\n\n\n')
@@ -629,7 +629,7 @@ function preProcess(data){
     // don't perform searches if ur having a convo with a bot
     // let botkit handle it
 
-    console.log('👻 👻 👻 👻  ',kipUser[data.source.id].conversations)
+    //console.log('👻 👻 👻 👻  ',kipUser[data.source.id].conversations)
 
     if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
 
@@ -778,7 +778,7 @@ function preProcess(data){
                     else {
                         console.log('NOT PROCESSING, DATA NOT FOUND')
                     }
-                    
+
                 }
 
             });
@@ -979,7 +979,13 @@ data.flags = data.flags ? data.flags : {};
             banterBucket(data);
             break;
         case 'purchase':
-            purchaseBucket(data);
+
+            if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
+                sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
+            }else {
+                purchaseBucket(data);
+            }
+
             break;
         case 'mode':
             modeBucket(data);
@@ -1688,13 +1694,17 @@ var sendResponse = function(data,flag){
             })
             messages.push('Simply reply with your choice (buy 1, buy 2 or buy 3) to add it to cart.  To find out more information about a product reply with the number you wish to get details for. To search again, simply reply with the name of the product you are looking for :)')
 
-            email.reply({
-              to: data.emailInfo.to,
-              text: messages.join('\n\n'),
-              attachments: photos
-            }, data).catch((e) => {
+            email.results(data).catch((e) => {
               console.log(e.stack);
-            })
+            });
+
+            // email.reply({
+            //   to: data.emailInfo.to,
+            //   text: messages.join('\n\n'),
+            //   attachments: photos
+            // }, data).catch((e) => {
+            //   console.log(e.stack);
+            // })
 
         }
         else if (data.action == 'focus') {
@@ -2131,16 +2141,22 @@ function removeCartItem(data){
 
 function viewCart(data, show_added_item){
 
+    if (data.source.origin == 'socket.io' || data.source.origin == 'telegram'){
+        return;
+    }
+
     console.log('view cart')
     db.Metrics.log('cart.view', data);
 
     console.log(data.source)
 
+    var cartDelay = 2000;
+
     co(function*() {
       var cart = yield kipcart.getCart(data.source.org);
 
       if (cart.items.length < 1) {
-        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet.');
+        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
       }
 
       var slackbot = yield db.Slackbots.findOne({
@@ -2163,7 +2179,7 @@ function viewCart(data, show_added_item){
         cartObj.push({
             text: '',
             color:'#45a5f4',
-            image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'            
+            image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
         })
 
       for (var i = 0; i < cart.aggregate_items.length; i++) {
@@ -2248,21 +2264,24 @@ function viewCart(data, show_added_item){
             text: '_Office admins '+officeAdmins+' can checkout the Team Cart_',
             mrkdwn_in: ['text', 'pretext'],
             color: '#49d63a'
-        })        
+        })
       }
 
       data.client_res = [];
       data.client_res.push(cartObj);
       console.log('done with cartObj');
 
+      //reset cart delay 
+      cartDelay = 2000;
+
       banter.getCinnaResponse(data,function(res){
 
           if(res[0] && res[0].text && data.client_res[0]){
 
-            
+
                 //console.log('RES TEXT ',res[0].text);
                 data.client_res[0].unshift(res[0]);
-             // }           
+             // }
              // if (res.length == 1){
              //    console.log('RES TEXT ',res[0].text);
              //    data.client_res[0].unshift(res[0].text);
@@ -2281,11 +2300,20 @@ function viewCart(data, show_added_item){
       // sendResponse(data);
 
     }).catch(function(e) {
-      console.log('error retriving cart for view cart')
-      setTimeout(function() {
-        viewCart(data);
-      }, 1000);
-      console.log(e.stack);
+
+      //incrementally trying to cart with longer query time
+      if (cartDelay < 16000){
+            cartDelay = cartDelay + 2000;
+            console.log('slowing view cart down ',cartDelay)
+          setTimeout(function() {
+            viewCart(data);
+          }, cartDelay);           
+      }else {
+            console.log('error retriving cart for view cart')
+            console.log(e.stack);
+      }
+
+
     })
 }
 
@@ -2340,8 +2368,9 @@ function recallHistory(data,callback,steps){
 
     }
 
-
 }
+
+
 
 //MODE UPDATE HANDLING
 var updateMode = function(data){
@@ -2446,7 +2475,7 @@ function settingsMode(data){
             }
 
             console.log('💎incoming💎 💎 ',obj);
-            updateMode(obj);              
+            updateMode(obj);
         })
 
     }).catch((e) => {
@@ -2482,10 +2511,8 @@ function addmemberMode(data){
             }
 
             console.log('💎incoming💎 💎 ',obj);
-            updateMode(obj);         
-
+            updateMode(obj);
         })
-
     }).catch((e) => {
         console.log(e);
         console.log(e.stack);
@@ -2501,11 +2528,10 @@ function collectMode(data){
 
     kipUser[data.source.id].conversations = "collect";
 
-    console.log('triggering kip collect, maybe if the person is an admin?')
-
     data.text = data.msg; //converting
 
     if (data.text.indexOf('<#C') >= 0) {
+        throw new Error('cannot do "collect #channel" right now')
         console.log('attempting to collect for one or more channels');
         var channels = data.text.match(/<#C[0-9A-Z]+>/g).map(function(markdown) {
           return markdown.replace('<#', '').replace('>', '');
@@ -2530,7 +2556,7 @@ function collectMode(data){
 
                 kipUser[data.source.id].conversations = 'shopping';
 
-                //fire same here as exit settings mode!!!! 
+                //fire same here as exit settings mode!!!!
 
                 // data.bucket;
                 // data.action;
@@ -2541,9 +2567,7 @@ function collectMode(data){
                 //     var obj = data;
                 //     obj.mode = msg;
                 // }
-                   
 
-    
               })
             }
           });
@@ -2555,8 +2579,8 @@ function collectMode(data){
           console.log('done collecting orders');
           kipUser[data.source.id].conversations = 'shopping';
 
-          sendTxtResponse(data,'Done sending last call to all Team Cart Members :)');
-          // updateMode();  
+          sendTxtResponse(data,'Done sending last call to all Team Cart Members 😊 Type `settings` for last call options');
+          // updateMode();
         })
     }
 }
@@ -2827,6 +2851,7 @@ module.exports.updateMode = updateMode;
 module.exports.newSlack = newSlack;
 module.exports.preProcess = preProcess;
 module.exports.slackUsers = slackUsers;
+module.exports.sendResponse = sendResponse;
 
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;

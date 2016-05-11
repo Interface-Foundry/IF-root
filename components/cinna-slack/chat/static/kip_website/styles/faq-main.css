@@ -1,0 +1,42 @@
+.get-kip-container {
+  width: 100%;
+  color: #ffffff;
+  margin-top: 30px;
+  background-color: #47a2fc;
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
+
+.get-kip-container input {
+  color: #000000;
+  min-width: 200px;
+}
+
+.get-kip-container label {
+  font-weight: normal;
+  min-width: 55px;
+  margin-right: 20px;
+  text-align: left;
+}
+
+.get-kip {
+  margin-bottom: 20px;
+}
+
+.get-kip > h2 {
+  color: #ffffff;
+  display: inline-block;
+  font-size: 25pt;
+  margin-left: 20px;
+}
+
+.kip-head {
+  vertical-align: bottom;
+  height: 50px;
+}
+
+#btnSend {
+  margin-top: 5px;
+  padding-left: 20px;
+  padding-right: 20px;
+}

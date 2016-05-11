@@ -722,6 +722,7 @@ function welcomeVid(response, convo) {
 function showSettings(response, convo, flag, done) {
   console.log('showing settings');
   var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
+
   co(function*() {
     var chatuser = yield db.Chatusers.findOne({id: convo.user_id});
     convo.chatuser = chatuser;
@@ -761,9 +762,18 @@ function showSettings(response, convo, flag, done) {
       office_gremlins[office_gremlins.length-1] += ' and ' + last;
     }
     console.log(office_gremlins);
-    var adminText = 'I am moderated by ' + office_gremlins.join(', ') + '.';
+
+    //no gremlins found! p2p mode
+    if(office_gremlins.length < 1){
+      var adminText = 'I\'m not managed by anyone right now.';
+    }else {
+      var adminText = 'I\'m managed by ' + office_gremlins.join(', ') + '.';
+    }
+    
     if (isAdmin) {
       adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
+    }else if (convo.slackbot.meta.office_assistants.length < 1){
+      adminText += '  You can *add admins* with `add @user`.'
     }
     attachments.push({text: adminText})
 
@@ -833,10 +843,22 @@ function showSettings(response, convo, flag, done) {
 
 function handleSettingsChange(response, convo) {
 
-  // we'll need to know if the user is an admin or not.
-  var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
+  // // we'll need to know if the user is an admin or not.
+  // var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
+
 
   co(function*() {
+
+    var slackbot = yield db.Slackbots.findOne({team_id: convo.slackbot.team_id}).exec();
+    convo.slackbot = slackbot;
+
+    var isAdmin = convo.slackbot.meta.office_assistants.indexOf(convo.user_id) >= 0;
+
+    //P2P
+    if(convo.slackbot.meta.office_assistants.length < 1){
+      isAdmin = true;
+    }
+
     //
     // Deal with the most complicated changes first, and finish up with the easy stuff
     // Start with the date changes, yikes
@@ -957,30 +979,27 @@ function handleSettingsChange(response, convo) {
         })
       } else if (tokens[0] === 'remove') {
         userIds.map((id) => {
-          if (id == convo.user_id) {
-            var attachments = [
-              {
-                text: "I'm sorry, but you can't remove yourself as an admin unless you add someone else as admin first.  Do you have any settings changes?"
-              }
-            ];
 
-            var resStatus = {
-              username: 'Kip',
-              text: "",
-              attachments: attachments,
-              fallback: 'Settings'
-            };
+          // if (id == convo.user_id) {
+          //   var attachments = [
+          //     {
+          //       text: "I'm sorry, but you can't remove yourself as an admin unless you add someone else as admin first.  Do you have any settings changes?"
+          //     }
+          //   ];
 
-            // showSettings(response, convo, 'noAsk', function(){});
+          //   var resStatus = {
+          //     username: 'Kip',
+          //     text: "",
+          //     attachments: attachments,
+          //     fallback: 'Settings'
+          //   };
 
-            convo.ask(resStatus, handleSettingsChange);
-            shouldReturn = true;
-            return convo.next();
-          }
+          //   // showSettings(response, convo, 'noAsk', function(){});
 
-          console.log('IDIDIDIDIDIDIDID ', id);
-
-          console.log('IDIDIDIDIDIDIDID ', convo.slackbot.meta.office_assistants);
+          //   convo.ask(resStatus, handleSettingsChange);
+          //   shouldReturn = true;
+          //   return convo.next();
+          // }
 
           if (convo.slackbot.meta.office_assistants.indexOf(id) >= 0) {
             var index = convo.slackbot.meta.office_assistants.indexOf(id);
