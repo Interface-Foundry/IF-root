@@ -1,6 +1,10 @@
 /*eslint-env es6*/
 var botkit = require('botkit');
 var controller = botkit.slackbot();
+var controllerFb = botkit.facebookbot({
+    access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD',
+    verify_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+})
 var db = require('db');
 var co = require('co');
 var datejs = require('./date');
@@ -29,41 +33,132 @@ module.exports.onboard = function(slackbot, user_id, done) {
     token: slackbot.bot.bot_access_token
   })
 
-  // probably time to refresh the team while messages fly back and forth
-  refreshTeam(slackbot.team_id);
 
-  bot.startRTM(function(err, bot, payload) {
-    if (err) {
-      throw new Error('Could not connect to Slack');
-    }
+  if (data.source && data.source.origin == 'slack') {
+      // probably time to refresh the team while messages fly back and forth
+      refreshTeam(slackbot.team_id);
 
-    bot.startPrivateConversation({user: user_id}, function(response, convo) {
-      // inject the slackbot into the convo so that we can save it in the db
-      convo.slackbot = slackbot;
-      convo.on('end', function() {
-        slackbot = convo.slackbot;
-        slackbot.save() //x_x saving onboard admins here
-        //console.log('FYI SAD _ _ _ _ _ _ _ _ _ _ _ _ ',convo.slackbot)
+      bot.startRTM(function(err, bot, payload) {
+        if (err) {
+          throw new Error('Could not connect to Slack');
+        }
 
-        bot.closeRTM();
+        bot.startPrivateConversation({user: user_id}, function(response, convo) {
+          // inject the slackbot into the convo so that we can save it in the db
+          convo.slackbot = slackbot;
+          convo.on('end', function() {
+            slackbot = convo.slackbot;
+            slackbot.save() //x_x saving onboard admins here
+            //console.log('FYI SAD _ _ _ _ _ _ _ _ _ _ _ _ ',convo.slackbot)
+
+            bot.closeRTM();
+            
+            var objData = {
+              mode:'shopping',
+              source: {
+                id: convo.slackbot.team_id + "_" + user_id,
+              }
+            };
+
+            ioKip.updateMode(objData);
+            done();
+          })
+
+          if (slackbot.meta.office_assistants.indexOf(user_id) < 0 && process.env.NODE_ENV === 'production') {
+            convo.say('Only the office admin can perform the onboarding process');
+            return convo.next();
+          } else {
+            askWhoManagesPurchases(response, convo);
+          }
+        });
+      });
+  } 
+  else if (data.source && data.source.origin == 'facebook') {
+    // var newFb = {
+    //         'source': {
+    //             'origin':'facebook',
+    //             'channel': sender.toString(),
+    //             'org': 'facebook',
+    //             'id':"facebook_" + sender.toString()
+    //         },
+    //         'msg': text,
+    //         'fb_access_token': '',
+    //         'mode': 'onboarding'
+    //     };
+
+    // var data = {
+    //         msg: 'welcome',
+    //         source: {
+    //           origin: 'facebook',
+    //           channel: addedBy.dm,
+    //           org: user.team_id,
+    //           id: user.team_id + '_' + addedBy.id,
+    //           user: addedBy.id
+    //         },
+    //         //action:'sendAttachment',
+    //         client_res: [],
+    //         botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+    //         botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot
+    //         mode: 'onboarding' //start onboarding mode
+    //     };   
+    // if(!kipUser[data.source.id]){
+    //    kipUser[data.source.id] = {}; //omg lol
+    // }
+    // co(function*() {
+    //   var group_chat = yield db.Groupchats.findOne({
+    //     team_id: data.source.id
+    //   }).exec();
+    //   kipUser[data.source.id].facebook = user; //transfer conversation to global
+    //   updateMode(data);
+    // })
+
+    //slackbot object 
+    var bot = controller.spawn({
+    });
+    controllerFb.createWebhookEndpoints(app, bot, function() {
+        console.log('Facebook botkit is online!!!');
         var objData = {
           mode:'shopping',
           source: {
-            id: convo.slackbot.team_id + "_" + user_id,
+            id: event.sender.id,
           }
         }
         ioKip.updateMode(objData);
-        done();
-      })
-
-      if (slackbot.meta.office_assistants.indexOf(user_id) < 0 && process.env.NODE_ENV === 'production') {
-        convo.say('Only the office admin can perform the onboarding process');
-        return convo.next();
-      } else {
-        askWhoManagesPurchases(response, convo);
-      }
+          if (bot.meta.office_assistants.indexOf(user_id) < 0 && process.env.NODE_ENV === 'production') {
+            convo.say('Only the office admin can perform the onboarding process');
+            return convo.next();
+          } else {
+            askWhoManagesPurchases(response, convo);
+          }
     });
-  });
+
+    // this is triggered when a user clicks the send-to-messenger plugin
+    controller.on('facebook_optin', function(bot, message) {
+        bot.reply(message, 'Welcome to my app!');
+          var objData = {
+              mode:'shopping',
+              source: {
+                id: convo.slackbot.team_id + "_" + user_id,
+              }
+            }
+            ioKip.updateMode(objData);
+    });
+
+    // user said hello
+    controller.hears(['hello'], 'message_received', function(bot, message) {
+        bot.reply(message, 'Hey there.');
+    });
+    controller.hears(['cookies'], 'message_received', function(bot, message) {
+        bot.startConversation(message, function(err, convo) {
+            convo.say('Did someone say cookies!?!!');
+            convo.ask('What is your favorite type of cookie?', function(response, convo) {
+                convo.say('Golly, I love ' + response.text + ' too!!!');
+                convo.next();
+            });
+        });
+    });
+
+  }
 }
 
 var settingsConvos = {};
@@ -77,7 +172,6 @@ module.exports.settings = function(slackbot, user_id, done, data) {
 
   // probably time to refresh the team while the messages go back and forth
   refreshTeam(slackbot.team_id);
-
 
   bot.startRTM(function(err, bot, payload) {
     if (err) {

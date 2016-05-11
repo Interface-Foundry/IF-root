@@ -33,9 +33,11 @@ var mongoose = require('mongoose');
 var db = require('db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
+var Groupchats = db.Groupchats;
 var Slackbots = db.Slackbots;
 
 var slackUsers = {};
+var groupchatUsers = {};
 var slackUsers_web = {};
 var slackUsers_botkit = {};
 var messageHistory = {}; //fake database, stores all users and their chat histories
@@ -43,12 +45,9 @@ var kipUser = {};
 var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
-// var BufferList = require('bufferlist').BufferList
 var upload = require('../../../../IF_services/upload.js');
-// var redisClient = require('../../../../redis.js');
-// var redis = require('redis');
-// var client = redis.createClient();
 var email = require('./email');
+var request = require('request');
 /////////// LOAD INCOMING ////////////////
 
 
@@ -202,6 +201,52 @@ var initSlackUsers = function(env) {
     }
 }
 
+// var initGroupchatUsers = function () {
+//     console.log('loading with env: ',env);
+//     cinnaEnv = env;
+
+//     if (env === 'development_mitsu'){
+//         var testUser = [{
+//             team_id:'T0HLZP09L',
+//             team_name:'mitsu_test',
+//             bot: {
+//                 type: 'facebook',
+//                 bot_user_id: 'cinnatest',
+//                 bot_access_token:'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+//             },
+//             meta: {
+//                 initialized: false
+//             }
+//         }];
+//         loadGroupchatUsers(testUser);
+//     } else {
+//         console.log('retrieving slackbots from mongo database ' + config.mongodb.url);
+//         Groupchats.find({
+//           // deleted: {$ne: true}
+//         }).exec(function(err, users) {
+//             if(err && process.env.NODE_ENV === 'production'){
+//                 console.log('saved slack bot retrieval error');
+//                 var mailOptions = {
+//                     to: 'Kip Server <hello@kipthis.com>',
+//                     from: 'Kip Server Status <server@kipthis.com>',
+//                     subject: 'mongo prob, restarting!',
+//                     text: 'Fix this ok thx'
+//                 };
+//                 mailerTransport.sendMail(mailOptions, function(err) {
+//                     if (err) console.log(err);
+//                     console.log('Server status email sent. Now restarting server.');
+//                     process.exit(1);
+//                 });
+//             }
+//             else {
+//                 console.log('found ' + users.length + ' slack teams in the db');
+//                 loadGroupchatUsers(users);
+//             }
+//         });
+//     }
+// }
+
+
 //fired when server gets /newslack route request
 var newSlack = function() {
     //find all bots not added to our system yet
@@ -216,6 +261,282 @@ var newSlack = function() {
         }
     });
 }
+
+// var loadGroupChats = function (users) {
+//  // var newFb = {
+//  //            'source': {
+//  //                'origin':'facebook',
+//  //                'channel': sender.toString(),
+//  //                'org': 'facebook',
+//  //                'id':"facebook_" + sender.toString()
+//  //            },
+//  //            'msg': text,
+//  //            'fb_access_token': '',
+//  //            'mode': 'onboarding'
+//  //        };
+
+//  //    var data = {
+//  //            msg: 'welcome',
+//  //            source: {
+//  //              origin: 'facebook',
+//  //              channel: addedBy.dm,
+//  //              org: user.team_id,
+//  //              id: user.team_id + '_' + addedBy.id,
+//  //              user: addedBy.id
+//  //            },
+//  //            //action:'sendAttachment',
+//  //            client_res: [],
+//  //            botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+//  //            botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot
+//  //            mode: 'onboarding' //start onboarding mode
+//  //        };   
+//  //    if(!kipUser[data.source.id]){
+//  //       kipUser[data.source.id] = {}; //omg lol
+//  //    }
+//  //    co(function*() {
+//  //      var group_chat = yield db.Groupchats.findOne({
+//  //        team_id: data.source.id
+//  //      }).exec();
+//  //      kipUser[data.source.id].facebook = user; //transfer conversation to global
+//  //      updateMode(data);
+//  //    })
+
+//        console.log('loading '+users.length+' Slack users');
+
+//     async.eachSeries(users, function(user, callback) {
+//         //* * * Adding Botkit to Kip IO ~ ~ ~//
+//         var bot = controller.spawn({
+//             token: user.bot.bot_access_token
+//         });
+//         bot.startRTM(function(err, bot, payload) {
+//             console.log('ADDED BOTKIT ! ! ! ! ! ! !  ! ! ! ! ! ! ! ! ! ! !  ! ! ! ! ! ! ! ! !  ! ! ! !')
+//             // console.log('bot ',bot);
+//             // console.log('payload ',payload)
+//             groupchatUsers[user.team_id] = bot;
+//         });
+//         // - - - - - - - - - - - - - - - - - //
+
+//             console.log('DEBUG: checking meta initialized: ', user.meta.initialized);
+//             //* * * * Welcome message * * * //
+//             //send welcome to new teams – dont spam all slack people on node reboot
+//             if (user.meta && user.meta.initialized == false){
+                
+//                     if(cinnaEnv !== "development_alyx"){
+//                         user.meta.initialized = true;
+//                     }
+                    
+//                     if (typeof user.save === 'function') {
+//                       user.save();
+//                     }
+
+//                     //
+//                     // Onboarding conversation
+
+//                     var data = {
+//                         msg: 'welcome',
+//                         source: {
+//                           origin: 'facebook',
+//                           channel: user.,
+//                           org: user.team_id,
+//                           id: user.team_id + '_' + addedBy.id,
+//                           user: addedBy.id
+//                         },
+//                         //action:'sendAttachment',
+//                         client_res: [],
+//                         botId: slackUsers[user.team_id].botId, //this is the name of the bot on the channel so we can @ the bot
+//                         botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot
+//                         mode: 'onboarding' //start onboarding mode
+//                     };   
+
+//                     if(!kipUser[data.source.id]){
+//                        kipUser[data.source.id] = {}; //omg lol
+//                     }
+//                     kipUser[data.source.id].slack = user; //transfer conversation to global
+//                     updateMode(data);
+
+//             }
+
+
+//     //on messages sent to Slack
+//         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
+//             console.log('🔥')
+
+
+//             //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71'
+//             // don't talk to urself  TODO why does data sometimes have a bot_id instead of user id?
+//             if (data.user === user.bot.bot_user_id || data.username === 'Kip') {
+//               console.log("don't talk to urself")
+//               return;
+//             }
+
+//             // Less cyncical comment: might be useful to have history here,
+//             // but idk how and we'll probably rewrite this segment to handle
+//             // multiple chat platforms sooner rather than later anyway.
+
+//             data.source = {
+//                 'origin':'slack',
+//                 'channel':data.channel, //channel id on slack
+//                 'org':data.team, //team id on slack
+//                 'id':data.team + "_" + data.user, //for retrieving chat history in node memory, //this is a kip id for user across message platforms
+//                 user: data.user //user id on slack
+//             }
+
+//             if(!kipUser[data.source.id]){
+//                kipUser[data.source.id] = {}; //omg lol
+//             }
+
+//             if (!kipUser[data.source.id].conversations){
+//                 kipUser[data.source.id].conversations = 'shopping';
+//             }
+
+//            // user.conversations = user.conversations || 'shopping';
+
+//            // console.log('🔥🔥 ',user.conversations)
+
+//            // var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
+
+//             kipUser[data.source.id].slack = user; //transfer conversation to global
+
+//             console.log('🔥🔥🔥🔥 ',kipUser[data.source.id])
+
+//             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
+
+//                 //public channel
+//                 if (data.channel && data.channel.charAt(0) == 'C' || data.channel.charAt(0) == 'G'){
+//                     //if contains bot user id, i.e. if bot is @ mentioned in channel (example user id: U0H6YHBNZ)
+
+//                     if (data.text && data.text.indexOf(slackUsers[user.team_id].botId) > -1){
+
+//                         //someone sent a file to Kip
+//                         if (data.subtype && data.subtype  == 'file_share'){
+
+//                             //get team id from private URL cause team id left out of API in file share (ugh wtf slack...)
+//                             if (data.file && data.file.url_private){
+//                                 var teamParse = data.file.url_private.replace('https://files.slack.com/files-pri/','');
+//                                 data.team = teamParse.substr(0, teamParse.indexOf('-'));
+//                             }
+
+//                             //it's an image, let's process it
+//                             if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'||data.file.filetype == 'svg'){
+//                                 //send typing event
+//                                 if (slackUsers[data.team]){
+//                                     slackUsers[data.team].sendTyping(data.channel);
+//                                 }
+//                                 processData.imageSearch(data,slackUsers[user.team_id]._token,function(res){
+//                                     data.text = res;
+//                                     data.imageTags = res;
+//                                     incomingSlack(data);
+//                                 });
+//                             }
+
+//                             //not an image file, let's return canned response
+//                             else {
+//                                 var newTxt = {
+//                                     source: {
+//                                         'origin':'slack',
+//                                         'channel':data.channel,
+//                                         'org':data.team,
+//                                         'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
+//                                         user: data.user
+//                                     }
+//                                 }
+//                                 newTxt.client_res = [];
+//                                 newTxt.client_res.push('Sorry, I\'m not very smart yet, I can only understand image files 👻');
+//                                 cannedBanter(newTxt);
+//                             }
+//                         }
+//                         //not a file share, process normally
+//                         else {
+//                             console.log('\n\n EXANPLE DATA EWJTWREGSEW', data)
+//                             data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+//                             if (data.text.charAt(0) == ':'){
+//                                 data.text = data.text.substr(1); //remove : from beginning of string
+//                             }
+//                             data.text = data.text.trim(); //remove extra spaces on edges of string
+//                             incomingSlack(data);
+//                         }
+
+//                     }
+//                 }
+//                 //direct message
+//                 else if (data.channel && data.channel.charAt(0) == 'D'){
+
+//                     //someone sent a file to Kip
+//                     if (data.subtype && data.subtype  == 'file_share'){
+
+//                         //get team id from private URL cause team id left out of API in file share (ugh wtf slack...)
+//                         if (data.file && data.file.url_private){
+//                             var teamParse = data.file.url_private.replace('https://files.slack.com/files-pri/','');
+//                             data.team = teamParse.substr(0, teamParse.indexOf('-'));
+//                         }
+
+//                         //it's an image, let's process it
+//                         if (data.file.filetype == 'png'||data.file.filetype == 'jpg'||data.file.filetype == 'jpeg'||data.file.filetype == 'gif'||data.file.filetype == 'svg'){
+//                             //send typing event
+//                             if (slackUsers[data.team]){
+//                                 slackUsers[data.team].sendTyping(data.channel);
+//                             }
+//                             processData.imageSearch(data,slackUsers[user.team_id]._token,function(res){
+//                                 data.text = res;
+//                                 data.imageTags = res;
+//                                 incomingSlack(data);
+//                             });
+//                         }
+//                         //not an image file, let's return canned response
+//                         else {
+//                             var newTxt = {
+//                                 source: {
+//                                     'origin':'slack',
+//                                     'channel':data.channel,
+//                                     'org':data.team,
+//                                     'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
+//                                     user: data.user
+//                                 }
+//                             }
+//                             newTxt.client_res = [];
+//                             newTxt.client_res.push('Sorry, I\'m not very smart yet, I can only understand image files 👻');
+//                             cannedBanter(newTxt);
+//                         }
+//                     }
+
+//                     //not a file share, process normally
+//                     else {
+//                         data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+//                         incomingSlack(data);
+//                     }
+//                 }
+//                 else {
+//                     console.log('error: not handling slack channel type ',data.channel);
+//                 }
+//             }
+//             function incomingSlack(data){
+//                 console.log('incoming slack 📬')
+//                 if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true ){
+//                     var newSl = {
+//                         source: {
+//                             'origin':'slack',
+//                             'channel':data.channel,
+//                             'org':data.team,
+//                             'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
+//                             user: data.user
+//                         },
+//                         'msg':data.text
+//                     }
+//                     //carry image tags over
+//                     if (data.imageTags){
+//                         newSl.imageTags = data.imageTags;
+//                     }
+//                     preProcess(newSl);
+//                 }
+//             }
+//         });
+
+//         callback();
+//     }, function done(){
+//         console.log('done loading slack users');
+//     });
+
+// }
 
 //load slack users into memory, adds them as slack bots
 function loadSlackUsers(users){
@@ -253,7 +574,7 @@ function loadSlackUsers(users){
             //* * * * Welcome message * * * //
             //send welcome to new teams – dont spam all slack people on node reboot
 
-            if (rtmStartData.self){
+            if (rtmStartData.self) {
                 slackUsers[user.team_id].botId = rtmStartData.self.id;
                 slackUsers[user.team_id].botName = rtmStartData.self.name;
             }
@@ -337,7 +658,8 @@ function loadSlackUsers(users){
                             botName: slackUsers[user.team_id].botName, //this is the name of the bot on the channel so we can @ the bot,
                             mode: 'onboarding' //start onboarding mode
                         };
-                    }else {
+                    } 
+                    else {
                         var data = {
                             msg: 'welcome',
                             source: {
@@ -857,10 +1179,10 @@ var incomingMsgAction = function(data,origin){
 
     //let's try to build a universal action button i/o for all platforms
     //deal with first action in action arr...more will happen later?
-    if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value){
+    if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value) {
 
         //get bucket/action
-        switch (parsedIn.actions[0].name){
+        switch (parsedIn.actions[0].name) {
 
             case 'cheaper':
                 kipObj.bucket = 'search';
@@ -889,6 +1211,7 @@ var incomingMsgAction = function(data,origin){
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'save';
                 break;
+
         }
 
         //get searchSelect
@@ -913,7 +1236,7 @@ var incomingMsgAction = function(data,origin){
 
         incomingAction(kipObj);
 
-    }else {
+    } else {
         console.error('Incoming Slack ERROR: missing actions[0].name or actions[0].value ',parsedIn);
     }
 
@@ -1280,6 +1603,12 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             var attachObj = {};
                             attachObj.photo = urlArr[count];
                             attachObj.message =  emoji + '[' + truncate(data.amazon[count].ItemAttributes[0].Title[0]) + ']('+ res[count] +')';
+                            data.client_res.push(attachObj);
+                        } else if (data.source.origin == 'facebook') {
+                           var attachObj = {};
+                            attachObj.photo = urlArr[count];
+                            attachObj.message =  emoji + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            attachObj.link = res[count];
                             data.client_res.push(attachObj);
                         }
                         count++;
@@ -1686,6 +2015,21 @@ var sendResponse = function(data,flag){
     else if (data.source && data.source.channel && data.source.origin == 'slack' && data.flags && data.flags.email) {
 
         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
+             // {
+      //   "object":"page",
+      //   "entry":[{"id":976386645706699,
+      //           "time":1462290198559,
+      //           "messaging":[{"sender":{"id":835675223228683},
+      //                         "recipient":{"id":976386645706699},
+      //                         "timestamp":1462290198521,
+      //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
+      //                         "seq":61,
+      //                         "text":"LELELELE"}}]
+      //             }]
+      //   }
+
+            
 
             var messages = [data.client_res[0]];
             data.client_res.shift();
@@ -1773,21 +2117,6 @@ var sendResponse = function(data,flag){
                 text: messages.join('\n\n'),
                 attachments: photos
             }, data);
-        }
-        else if (data.action == 'sendAttachment'){
-          // console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
-            // //remove first message from res arr
-            // var attachThis = data.client_res;
-            // attachThis = JSON.stringify(attachThis);
-
-            // var msgData = {
-            //   // attachments: [...],
-            //     icon_url:'http://kipthis.com/img/kip-icon.png',
-            //     username:'Kip',
-            //     attachments: attachThis
-            // };
-            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
         }
         else {
             //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
@@ -2068,6 +2397,278 @@ var sendResponse = function(data,flag){
                 attachments: photos
             }, data);
         }
+    }
+    //* * * * * * * *
+    // Facebook Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'facebook') {
+        var url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+          if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+            console.log(0, data.client_res);
+             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
+             // {
+              //   "object":"page",
+              //   "entry":[{"id":976386645706699,
+              //           "time":1462290198559,
+              //           "messaging":[{"sender":{"id":835675223228683},
+              //                         "recipient":{"id":976386645706699},
+              //                         "timestamp":1462290198521,
+              //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
+              //                         "seq":61,
+              //                         "text":"LELELELE"}}]
+              //             }]
+              //   }
+            var messages = [];
+            var photos = [];
+            var firstMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text": data.client_res[0]+ '\n'
+                },
+                "notification_type": "NO_PUSH"
+             };
+            request.post({
+                    url: url,
+                    method: "POST",
+                    json: true,
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                    body: firstMessage
+                },
+                function (err, res, body) {
+                    if (err) console.error('post err ',err);
+                    // console.log(1, body);
+                    data.client_res.shift();
+                    async.eachSeries(data.client_res, function iterator(object, callback) {
+                        // console.log(2, body);
+                        var textMessage = {
+                           "recipient": {"id": data.source.channel},
+                            "message": {
+                                 "attachment":{
+                                  "type":"template",
+                                  "payload":{
+                                    "template_type":"button",
+                                    "text": " ",
+                                    "buttons":[
+                                      {
+                                        "type":"web_url",
+                                        "url":object.link,
+                                        "title": object.message
+                                      }
+                                    ]
+                                  }
+                                }
+                            },
+                            "notification_type": "NO_PUSH"
+                         };
+                        request.post(
+                           { url: url,
+                            method: "POST",
+                            json: true,
+                            headers: {
+                                "content-type": "application/json",
+                            },
+                            body: textMessage
+                            },
+                            function (err, res, body) {
+                               if (err) console.error('post err ',err);
+                              
+                               var photoMessage = {
+                                    "recipient": {"id": data.source.channel},
+                                     "message": {
+                                     "attachment":{
+                                          "type":"image",
+                                          "payload":{
+                                            "url": object.photo
+                                          }
+                                        }
+                                     },
+                                     "notification_type": "NO_PUSH"
+                                 }
+
+                                request.post({url: url,
+                                    method: "POST",
+                                    json: true,
+                                    headers: {
+                                        "content-type": "application/json",
+                                    },
+                                    body: photoMessage
+                                    },
+                                function (err, res, body) {
+                                       if (err) console.error('post err ',err);
+                                      callback()
+                                });
+                          });
+                    }, function done() {
+
+                    })
+            });
+        }
+        else if (data.action == 'focus') {
+
+           console.log('facebook outgoing client_res:', data);
+
+           try {
+             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n' + data.client_res[1].split('|')[0].split('<')[1];
+             formatted = formatted.slice(0,-1);
+           } catch(err) {
+             console.log('io.js 1269 err: ',err);
+             return;
+           }
+          data.client_res[1] = formatted ? formatted : data.client_res[1];
+          var toSend = truncate(data.client_res[1]) + '\n' + (data.client_res[2] ? truncate(data.client_res[2]) : '') + '\n'  + (data.client_res[3] ? truncate(data.client_res[3]) : '') + '\n' + (data.client_res[4] ? truncate(data.client_res[4]) : '');
+          // console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
+             // var focusMessage = {
+             //    "recipient": {"id": data.source.channel},
+             //    "message": {
+             //         "text": toSend,
+             //         "attachment":{
+             //          "type":"template",
+             //          "payload":{
+             //            "template_type":"button",
+             //            "text": toSend,
+             //            "buttons":[
+             //              {
+             //                "type":"web_url",
+             //                "url": data.client_res[1].split('|')[0].split('<')[1],
+             //                "title": "See Product"
+             //              }
+             //            ]
+             //          }
+             //        }
+             //    },
+             //    "notification_type": "NO_PUSH"
+             // };
+
+            var focusMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                     "attachment":{
+                      "type":"template",
+                      "payload":{
+                        "template_type":"button",
+                        "buttons":[
+                          {
+                            "type":"web_url",
+                            "url": data.recallHistory.urlShorten[parseInt(data.msg.trim())-1],
+                            "title": "See Product"
+                          }
+                        ],
+                        "text": toSend
+                      }
+                    }
+                },
+                "notification_type": "NO_PUSH"
+             };
+            // console.log(url, focusMessage)
+            request.post(
+               { url: url,
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: focusMessage
+                },
+            function (err, res, body) {
+               if (err) console.error('post err ',err);
+               console.log(body)
+            })
+
+        }
+         else if (data.action == 'save') {
+              var messages = ['Awesome! I\'ve saved your item for you 😊'];
+                data.client_res.shift();
+              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                // console.log('\n\n\n', el)
+                messages.push(el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('messages ', messages.join('\n'), 'photos: ', photos);
+            var firstMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text":messages.join('\n')
+                },
+                "notification_type": "NO_PUSH"
+             };
+            request.post(
+               { url: url,
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: firstMessage
+                },
+            function (err, res, body) {
+               if (err) console.error('post err ',err);
+                
+                var photoMessage = {
+                    "recipient": {"id": data.source.channel},
+                     "message": {
+                     "attachment":{
+                          "type":"image",
+                          "payload":{
+                            "url": photos[0].thumb_url
+                          }
+                        }
+                     },
+                     "notification_type": "NO_PUSH"
+                 };
+                
+                request.post(
+                   { url: url,
+                    method: "POST",
+                    json: true,
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                    body: photoMessage
+                    },
+                function (err, res, body) {
+                       if (err) console.error('post err ',err);
+                       console.log(body)
+                })
+            })
+
+            email.reply({
+                to: data.emailInfo.to,
+                text: messages.join('\n\n'),
+                attachments: photos
+            }, data);
+        }
+        else if (data.action == 'checkout') {
+            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res.shift();
+            console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            // data.client_res = JSON.stringify(data.client_res);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                console.log('\n\n\n', el)
+                messages.push( el.text + '\n\n' );
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+            email.reply({
+                to: data.emailInfo.to,
+                text: messages.join('\n\n'),
+                attachments: photos
+            }, data);
+        }
+
+
+
+
+
     }
     //* * * * * * * *
     // Slack Outgoing
@@ -3033,76 +3634,6 @@ function encode_utf8(s) {
 }
 
 
-// client.on("connect", function(err) {
-//     console.log("Connected to email redis queue...");
-// });
-
-// var timer = new InvervalTimer(function() {
-//     client.lrange('chat_email', 0, -1, function(err, emails) {
-//             // console.log('Email Queue: ' + emails.length)
-//             if (emails.length > 0) {
-//                 console.log('Pausing timer')
-//                 timer.pause();
-//                 console.log(emails.length + ' email(s) for processing.')
-//                 async.eachSeries(emails, function iterator(email_str, callback) {
-//                     var envelope = JSON.parse(email_str);
-//                     console.log('Incoming email: ', JSON.stringify(envelope));
-//                     Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
-//                         console.log(0);
-//                         if(err){
-//                             console.log('saved chat user retrieval error');
-//                         } else {
-//                             if (!users || users.length == 0) {
-//                                 console.log(1);
-//                                 var mailOptions = {
-//                                     to: envelope.from_address,
-//                                     from: 'Kip Bot <hello@kip.ai>',
-//                                     subject: 'You are not currently in a chat!',
-//                                     text: 'You are currently not taking part in any Kip Bot chats...'
-//                                 };
-//                                 mailerTransport.sendMail(mailOptions, function(err) {
-//                                     if (err) console.log(err);
-//                                     console.log('User was not found in Chatusers db. Sent notification to user.');
-//                                 });
-//                             }
-//                             else if (users[0] && users[0].team_id ) {
-//                                 console.log(2);
-//                                var emailCommand = {
-//                                     source: {
-//                                         'origin':'slack',
-//                                         'channel':users[0].dm,
-//                                         'org':slackUsers[users[0].team_id].activeTeamId,
-//                                         'id':users[0].team_id + "_" + users[0].dm,
-//                                         'user': slackUsers[users[0].team_id].activeUserId
-//                                     },
-//                                     'msg': envelope.text.toString().trim(),
-//                                     'flags': {'email': true},
-//                                     'emailInfo': {
-//                                         to: envelope.from_address,
-//                                         from: 'Kip Bot <hello@kip.ai>',
-//                                         subject: 'Reply from Kip Bot!',
-//                                         text: ''
-//                                     }
-//                                 };
-//                                 preProcess(emailCommand);
-//                                 client.lrem('chat_email', 1, email_str);
-//                                 timer.resume()
-//                             } else {
-//                                 console.log(3);
-//                                 console.log('wtf mate: slackUsers: ', slackUsers, ' users: ', users);
-//                                 client.lrem('chat_email', 1, email_str);
-//                                 timer.resume()
-//                             }
-//                         }
-//                     });
-//                 }, function complete(err, results) {
-//                     console.log('Resuming timer!')
-//                     timer.resume()
-//                 });
-//             }
-//         }) // end of client lrange, callback)
-// }, 5000);
-
 
 function InvervalTimer(callback, interval) {
     var timerId, startTime, remaining = 0;
@@ -3145,7 +3676,6 @@ module.exports.newSlack = newSlack;
 module.exports.preProcess = preProcess;
 module.exports.slackUsers = slackUsers;
 module.exports.sendResponse = sendResponse;
-
 module.exports.incomingMsgAction = incomingMsgAction;
 module.exports.loadSocketIO = loadSocketIO;
 

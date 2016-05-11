@@ -322,7 +322,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'wtv') > 90:
         case textSimilar(input,'whatever') > 60:
             flag = 'basic'; //do this action
-            if (origin == 'slack' || data.source.origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'facebook'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -766,7 +766,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'wut') > 70:
         case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram'  || origin == 'facebook'){
                 res = 'I\'m Kip, your personal shopper.\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -975,7 +975,7 @@ var checkForCanned = function(input,callback,origin,source) {
 
         case 'top kek':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram'  || origin == 'facebook'){
                 res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
@@ -1210,7 +1210,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case '9':
         case '0':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram'  || origin == 'facebook'){
                 res = 'I\'m not very smart, did you mean :one:, :two: or :three:?';
             }
             else if (origin = 'socket.io'){
@@ -1220,9 +1220,9 @@ var checkForCanned = function(input,callback,origin,source) {
     }
 
     //PAPRIKA ACTION BUTTON TESTING
-    if (source && source.org == 'T02PN3B25'){
+    if (source && (source.org == 'T02PN3B25' || source.org == 'facebook')){
 
-        switch(input){
+        switch(input) {
 
             //add to cart
             case 'kip_cheaper':
@@ -1305,10 +1305,10 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➊</span>';
                 }
-                else if (data.flags && data.flags.email == true) {
-                    numEmoji = '1'
+                else if ((data.flags && data.flags.email == true)  || data.source.origin == 'facebook') {
+                    numEmoji = '1. '
                 }
-                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram' ){
                     numEmoji = ':one:';
                 } 
               
@@ -1317,10 +1317,10 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➋</span>';
                 }
-                else if (data.flags && data.flags.email == true) {
+                else if ((data.flags && data.flags.email == true) || data.source.origin == 'facebook') {
                     numEmoji = '2'
                 }
-                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
+                else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram') {
                     numEmoji = ':two:';
                 }
             
@@ -1329,7 +1329,7 @@ var getCinnaResponse = function(data,callback){
                 if (data.source.origin == 'socket.io'){
                     numEmoji = '<span style="font-size:26px;">➌</span>';
                 }
-                else if (data.flags && data.flags.email == true) {
+                else if ((data.flags && data.flags.email == true) || data.source.origin == 'facebook'){
                     numEmoji = '3'
                 }
                 else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
@@ -1342,7 +1342,7 @@ var getCinnaResponse = function(data,callback){
         case 'search':
             switch (data.action) {
                 case 'initial':
-                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'  || data.source.origin == 'facebook'){
                         if (data.imageTags){
                             res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
