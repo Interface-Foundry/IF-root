@@ -1607,7 +1607,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                         } else if (data.source.origin == 'facebook') {
                            var attachObj = {};
                             attachObj.photo = urlArr[count];
-                            attachObj.message =  emoji + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            attachObj.message =  (count+1) + '. ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
                             attachObj.link = res[count];
                             data.client_res.push(attachObj);
                         }
@@ -2135,9 +2135,10 @@ var sendResponse = function(data,flag){
     // Facebook Outgoing
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'facebook') {
+                    console.log(0, data.client_res);
+
         var url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
           if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
-            console.log(0, data.client_res);
              // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
              // {
               //   "object":"page",
@@ -2312,18 +2313,24 @@ var sendResponse = function(data,flag){
         }
          else if (data.action == 'save') {
               var messages = ['Awesome! I\'ve saved your item for you 😊'];
-                data.client_res.shift();
-              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+                data.client_res[0].shift();
+              console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
             // data.client_res = JSON.stringify(data.client_res);
             var photos = [];
             data.client_res[0].forEach(function(el, index) {
-                // console.log('\n\n\n', el)
-                messages.push(el.text + '\n\n' );
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
+                if (typeof el.text  == 'array') {
+                    el.text.forEach(function(txt){
+                        messages.push(txt + '\n');
+                    })
+                }
+                else {
+                    messages.push(el.text)
+                }
+               // if (el.thumb_url) {
+               //  photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               // }
             })
-            console.log('messages ', messages.join('\n'), 'photos: ', photos);
+            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'));
             var firstMessage = {
                 "recipient": {"id": data.source.channel},
                 "message": {
@@ -2343,44 +2350,39 @@ var sendResponse = function(data,flag){
             function (err, res, body) {
                if (err) console.error('post err ',err);
                 
-                var photoMessage = {
-                    "recipient": {"id": data.source.channel},
-                     "message": {
-                     "attachment":{
-                          "type":"image",
-                          "payload":{
-                            "url": photos[0].thumb_url
-                          }
-                        }
-                     },
-                     "notification_type": "NO_PUSH"
-                 };
+                // var photoMessage = {
+                //     "recipient": {"id": data.source.channel},
+                //      "message": {
+                //      "attachment":{
+                //           "type":"image",
+                //           "payload":{
+                //             "url": photos[0].path
+                //           }
+                //         }
+                //      },
+                //      "notification_type": "NO_PUSH"
+                //  };
                 
-                request.post(
-                   { url: url,
-                    method: "POST",
-                    json: true,
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                    body: photoMessage
-                    },
-                function (err, res, body) {
-                       if (err) console.error('post err ',err);
-                       console.log(body)
-                })
+                // request.post(
+                //    { url: url,
+                //     method: "POST",
+                //     json: true,
+                //     headers: {
+                //         "content-type": "application/json",
+                //     },
+                //     body: photoMessage
+                //     },
+                // function (err, res, body) {
+                //        if (err) console.error('post err ',err);
+                //        console.log(body)
+                // })
             })
 
-            email.reply({
-                to: data.emailInfo.to,
-                text: messages.join('\n\n'),
-                attachments: photos
-            }, data);
         }
         else if (data.action == 'checkout') {
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
             data.client_res.shift();
-            console.log('\n\n\nEMAIL SAVE: ',data.client_res);
+            console.log('\n\n\nFacebook CHECKOUT: ',data.client_res);
             // data.client_res = JSON.stringify(data.client_res);
             var photos = [];
             data.client_res[0].forEach(function(el, index) {
@@ -2951,12 +2953,22 @@ var saveToCart = function(data){
                   }
 
                   messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
-                  cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
+                  if (data.source.origin === 'slack') {
+                      cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd, false)
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
                         console.log(reason);
                         sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                       })
+                  } else {
+                    cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd, true)
+                      .catch(function(reason) {
+                        // could not add item to cart, make kip say something nice
+                        console.log(reason);
+                        sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
+                      })
+                  }
+            
               }
               // data.client_res = ['<' + cart.link + '|» View Cart>']
               // outgoingResponse(data, 'txt');
@@ -3015,7 +3027,7 @@ function viewCart(data, show_added_item) {
         return;
     }
 
-    console.log('view cart')
+    console.log('view cart', data.source)
     db.Metrics.log('cart.view', data);
 
     console.log(data.source)
@@ -3024,10 +3036,10 @@ function viewCart(data, show_added_item) {
 
     co(function*() {
       if (data.source.origin === 'slack') {
-          var cart = yield kipcart.getCart(data.source.org);
+          var cart = yield kipcart.getCart(data.source.org, false);
       } 
       else if (data.source.origin === 'facebook' || data.source.origin === 'telegram' || data.source.origin === 'socket.io') {
-          var cart = yield kipcart.getCart(data.source.user);
+          var cart = yield kipcart.getCart(data.source.org, true);
       }
 
       if (cart.items.length < 1) {
@@ -3106,9 +3118,10 @@ function viewCart(data, show_added_item) {
                 `_Added by: ${userString}_`
               ].join('\n');
            }
-           else {
+           else if (data.source.origin === 'facebook'){
              var text = [
-                processData.emoji[i+1][emojiType] + link + ' | ' + item.title,
+                (i+1) + '. ' + item.title,
+                link,
                 'Quantity: ' + item.quantity,
                 '_Added by: ' + userString
              ]
@@ -3124,24 +3137,24 @@ function viewCart(data, show_added_item) {
                 `_Added by: ${userString}_`
               ].join('\n');
           }
-          else {
+         else if (data.source.origin === 'facebook'){
              var text = [
-                processData.emoji[i+1][emojiType] + item.title,
+                (i+1) + '. ' + item.title,
                 'Quantity: ' + item.quantity,
                 '_Added by: ' + userString
-             ].join('\n');
-          }
+             ]
+           }
       }
 
-        cartObj.push({
-          text: text,
-          mrkdwn_in: ['text', 'pretext'],
-          color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
-          thumb_url: item.image
-         // actions: actionObj
-        })
+    cartObj.push({
+      text: text,
+      mrkdwn_in: ['text', 'pretext'],
+      color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
+      thumb_url: item.image
+     // actions: actionObj
+    })
 
-    }
+}
 
       // Only show the purchase link in the summary for office admins.
       if (isAdmin || isP2P || cart.personal) {
@@ -3154,9 +3167,9 @@ function viewCart(data, show_added_item) {
                         color: '#49d63a'
                     })
             }
-            else {
+            else if (data.source.origin === 'facebook'){
                  var summaryText = cart.personal ? '_Summary: Your Cart_ \n Total: ' + cart.total : '_Summary: Team Cart_ \n Total: ' + cart.total;
-                     summaryText += ' \n' + cart.link + '|» Purchase Items >';
+                     summaryText += ' \nPurchase Link: ' + cart.link;
                      cartObj.push({
                         text: summaryText,
                         mrkdwn_in: ['text', 'pretext'],
@@ -3215,7 +3228,7 @@ function viewCart(data, show_added_item) {
 
       //incrementally trying to cart with longer query time
       if (cartDelay < 16000){
-            cartDelay = cartDelay + 2000;
+            cartDelay = cartDelay + 5000;
             console.log('slowing view cart down ',cartDelay)
           setTimeout(function() {
             viewCart(data);

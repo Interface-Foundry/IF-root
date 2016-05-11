@@ -28,8 +28,8 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, user_id, item) {
-  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
+module.exports.addToCart = function(org_id, user_id, item, personal) {
+  console.log('adding item to cart for ' + org_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',item);
 
   //fixing bug to convert string to to int
@@ -48,13 +48,15 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var cart, personal; 
-    if (slack_id !== null) {
-      cart = yield getCart(slack_id);
+    var cart;
+    if (!personal) {
+      console.log('\n\n\n\n\nThis is a team cart...\n\n\n\n\n')
       personal = false;
+      cart = yield getCart(org_id, personal);
     } else {
-      cart = yield getCart(user_id);
+      console.log('\n\n\n\n\nTThis is a personal cart...\n\n\n\n\n')
       personal = true;
+      cart = yield getCart(org_id, personal);
     }
 
     console.log(cart);
@@ -71,20 +73,15 @@ module.exports.addToCart = function(slack_id, user_id, item) {
       rating: _.get(item, 'reviews.rating'),
       review_count: _.get(item, 'reviews.reviewCount'),
       added_by: user_id,
-      slack_id: slack_id,
-      source_json: JSON.stringify(item),
-      personal: personal
+      slack_id: org_id,
+      source_json: JSON.stringify(item)
     })).save();
 
     console.log('adding item ' + i._id + ' to cart ' + cart._id);
     cart.items.push(i._id);
     yield cart.save();
     console.log('calling getCart again to rebuild amazon cart');
-    if (slack_id !== null) {
-      return getCart(slack_id);
-    } else {
-      return getCart(user_id);
-    }
+    return getCart(org_id);
   })
 }
 
@@ -161,7 +158,7 @@ module.exports.removeFromCartByItem = function(item) {
 // amazon,
 // Returns a promise for yieldy things
 //
-var getCart = module.exports.getCart = function(slack_id) {
+var getCart = module.exports.getCart = function(slack_id, personal) {
   return co(function*() {
     //
     // Get the Kip mongodb cart first (amazon cart next)
@@ -175,7 +172,8 @@ var getCart = module.exports.getCart = function(slack_id) {
       console.log('no carts found, creating new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
-        items: []
+        items: [],
+        personal: personal
       })
     } else {
       // yay already have a cart
@@ -246,7 +244,8 @@ var getCart = module.exports.getCart = function(slack_id) {
       console.log('creating a new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
-        items: []
+        items: [],
+        personal: personal
       })
       console.log('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)

@@ -170,8 +170,9 @@ app.post('/facebook', function (req, res) {
             source: {
                 'origin':'facebook',
                 'channel': sender.toString(),
-                'org': 'facebook',
-                'id':"facebook_" + sender.toString()
+                'org': "facebook_" + sender.toString(),
+                'id':"facebook_" + sender.toString(),
+                'user': sender.toString()
             },
             'msg': text,
             'fb_access_token': ''

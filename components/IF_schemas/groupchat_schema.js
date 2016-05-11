@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 /**
  * Save slackbot integrations
  */
-var groupchatSchema = mongoose.Schema({
+var groupchat = mongoose.Schema({
     team_name: String,
     team_id: {
       type: String,
@@ -59,6 +59,6 @@ var groupchatSchema = mongoose.Schema({
     conversations: {}
 });
 
-var Groupchat = mongoose.model('Groupchat', groupchatSchema, 'groupchats');
+var Groupchat = mongoose.model('Groupchat', groupchat);
 
-module.exports = groupchatSchema;
+module.exports = Groupchat;

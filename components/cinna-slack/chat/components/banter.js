@@ -1220,7 +1220,7 @@ var checkForCanned = function(input,callback,origin,source) {
     }
 
     //PAPRIKA ACTION BUTTON TESTING
-    if (source && (source.org == 'T02PN3B25' || source.org == 'facebook')){
+    if (source && source.org == 'T02PN3B25'){
 
         switch(input) {
 
