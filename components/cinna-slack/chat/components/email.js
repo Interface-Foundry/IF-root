@@ -203,7 +203,7 @@ ${threadId}
 
     var payload = {
         to: address,
-        from: `Kip <${addr}>`,
+        from: `Kip Bot <${addr}>`,
         subject: 'Last Call for ' + team_name + ' Purchase Order',
         text: text,
         html: html
