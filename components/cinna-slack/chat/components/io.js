@@ -1,9 +1,9 @@
 /*eslint-env es6*/
 var async = require('async');
 var request = require('request');
-var co = require('co')
-var _ = require('lodash')
-var fs = require('fs')
+var co = require('co');
+var _ = require('lodash');
+var fs = require('fs');
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
@@ -993,7 +993,6 @@ function preProcess(data) {
                     data.client_res = [];
                     data.client_res.push(res);
                     cannedBanter(data);
-
                     //now search for item
                     data.tokens = [];
                     data.tokens.push(query); //search for this item
@@ -1303,13 +1302,11 @@ data.flags = data.flags ? data.flags : {};
             banterBucket(data);
             break;
         case 'purchase':
-
             // if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
             //     sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
             // }else {
                 purchaseBucket(data);
             // }
-
             break;
         case 'mode':
             modeBucket(data);
@@ -2015,22 +2012,6 @@ var sendResponse = function(data,flag){
     else if (data.source && data.source.channel && data.source.origin == 'slack' && data.flags && data.flags.email) {
 
         if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
-             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
-             // {
-      //   "object":"page",
-      //   "entry":[{"id":976386645706699,
-      //           "time":1462290198559,
-      //           "messaging":[{"sender":{"id":835675223228683},
-      //                         "recipient":{"id":976386645706699},
-      //                         "timestamp":1462290198521,
-      //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
-      //                         "seq":61,
-      //                         "text":"LELELELE"}}]
-      //             }]
-      //   }
-
-            
-
             var messages = [data.client_res[0]];
             data.client_res.shift();
             var photos = [];
@@ -2135,109 +2116,69 @@ var sendResponse = function(data,flag){
     // Facebook Outgoing
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'facebook') {
-                    console.log(0, data.client_res);
 
-        var url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+        var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
           if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
-             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
-             // {
-              //   "object":"page",
-              //   "entry":[{"id":976386645706699,
-              //           "time":1462290198559,
-              //           "messaging":[{"sender":{"id":835675223228683},
-              //                         "recipient":{"id":976386645706699},
-              //                         "timestamp":1462290198521,
-              //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
-              //                         "seq":61,
-              //                         "text":"LELELELE"}}]
-              //             }]
-              //   }
-            var messages = [];
-            var photos = [];
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text": data.client_res[0]+ '\n'
-                },
-                "notification_type": "NO_PUSH"
-             };
-            request.post({
-                    url: url,
-                    method: "POST",
-                    json: true,
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                    body: firstMessage
-                },
-                function (err, res, body) {
+        console.log(0, data.client_res);
+
+             var messageData = {
+                "attachment": {
+                  "type": "template",
+                  "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                      "title": data.client_res[1].message,
+                      "image_url": data.client_res[1].photo,
+                      "buttons": [{
+                        "type": "web_url",
+                        "url": data.client_res[1].link,
+                        "title": "Web url"
+                      }, {
+                        "type": "postback",
+                        "title": "Add to Cart",
+                        "payload": JSON.stringify({ selected: data.amazon[0] })
+                      }],
+                    },{
+                      "title": data.client_res[2].message,
+                      "image_url": data.client_res[2].photo,
+                      "buttons": [{
+                        "type": "web_url",
+                        "url": data.client_res[2].link,
+                        "title": "Web url"
+                      }, {
+                        "type": "postback",
+                        "title": "Add to Cart",
+                        "payload": JSON.stringify({ selected: data.amazon[1] })
+                      }],
+                    },{
+                      "title": data.client_res[3].message,
+                      "image_url": data.client_res[3].photo,
+                      "buttons": [{
+                        "type": "web_url",
+                        "url": data.client_res[3].link,
+                        "title": "Web url"
+                      }, {
+                        "type": "postback",
+                        "title": "Add to Cart",
+                        "payload": JSON.stringify({ selected: data.amazon[2] })
+                      }],
+                    }]
+                  }
+                }
+              };
+
+            request({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
+                method: 'POST',
+                json: {
+                  recipient: {id: data.source.channel},
+                  message: messageData,
+                }
+              }, function (err, res, body) {
                     if (err) console.error('post err ',err);
-                    // console.log(1, body);
-                    data.client_res.shift();
-                    async.eachSeries(data.client_res, function iterator(object, callback) {
-                        // console.log(2, body);
-                        var textMessage = {
-                           "recipient": {"id": data.source.channel},
-                            "message": {
-                                 "attachment":{
-                                  "type":"template",
-                                  "payload":{
-                                    "template_type":"button",
-                                    "text": " ",
-                                    "buttons":[
-                                      {
-                                        "type":"web_url",
-                                        "url":object.link,
-                                        "title": object.message
-                                      }
-                                    ]
-                                  }
-                                }
-                            },
-                            "notification_type": "NO_PUSH"
-                         };
-                        request.post(
-                           { url: url,
-                            method: "POST",
-                            json: true,
-                            headers: {
-                                "content-type": "application/json",
-                            },
-                            body: textMessage
-                            },
-                            function (err, res, body) {
-                               if (err) console.error('post err ',err);
-                              
-                               var photoMessage = {
-                                    "recipient": {"id": data.source.channel},
-                                     "message": {
-                                     "attachment":{
-                                          "type":"image",
-                                          "payload":{
-                                            "url": object.photo
-                                          }
-                                        }
-                                     },
-                                     "notification_type": "NO_PUSH"
-                                 }
-
-                                request.post({url: url,
-                                    method: "POST",
-                                    json: true,
-                                    headers: {
-                                        "content-type": "application/json",
-                                    },
-                                    body: photoMessage
-                                    },
-                                function (err, res, body) {
-                                       if (err) console.error('post err ',err);
-                                      callback()
-                                });
-                          });
-                    }, function done() {
-
-                    })
-            });
+                    console.log(body)
+             });
         }
         else if (data.action == 'focus') {
 
@@ -2252,29 +2193,6 @@ var sendResponse = function(data,flag){
            }
           data.client_res[1] = formatted ? formatted : data.client_res[1];
           var toSend = truncate(data.client_res[1]) + '\n' + (data.client_res[2] ? truncate(data.client_res[2]) : '') + '\n'  + (data.client_res[3] ? truncate(data.client_res[3]) : '') + '\n' + (data.client_res[4] ? truncate(data.client_res[4]) : '');
-          // console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
-             // var focusMessage = {
-             //    "recipient": {"id": data.source.channel},
-             //    "message": {
-             //         "text": toSend,
-             //         "attachment":{
-             //          "type":"template",
-             //          "payload":{
-             //            "template_type":"button",
-             //            "text": toSend,
-             //            "buttons":[
-             //              {
-             //                "type":"web_url",
-             //                "url": data.client_res[1].split('|')[0].split('<')[1],
-             //                "title": "See Product"
-             //              }
-             //            ]
-             //          }
-             //        }
-             //    },
-             //    "notification_type": "NO_PUSH"
-             // };
-
             var focusMessage = {
                 "recipient": {"id": data.source.channel},
                 "message": {
@@ -2296,8 +2214,9 @@ var sendResponse = function(data,flag){
                 "notification_type": "NO_PUSH"
              };
             // console.log(url, focusMessage)
-            request.post(
-               { url: url,
+            request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
                 method: "POST",
                 json: true,
                 headers: {
@@ -2312,10 +2231,9 @@ var sendResponse = function(data,flag){
 
         }
          else if (data.action == 'save') {
-              var messages = ['Awesome! I\'ve saved your item for you 😊'];
-                data.client_res[0].shift();
-              console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
-            // data.client_res = JSON.stringify(data.client_res);
+            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res[0].shift();
+            console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
             var photos = [];
             data.client_res[0].forEach(function(el, index) {
                 if (typeof el.text  == 'array') {
@@ -2323,14 +2241,14 @@ var sendResponse = function(data,flag){
                         messages.push(txt + '\n');
                     })
                 }
-                else {
+                else if (typeof el.text == 'string'){
                     messages.push(el.text)
                 }
-               // if (el.thumb_url) {
-               //  photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               // }
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
             })
-            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'));
+            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'), '\ndata.source: ', data.source);
             var firstMessage = {
                 "recipient": {"id": data.source.channel},
                 "message": {
@@ -2338,8 +2256,9 @@ var sendResponse = function(data,flag){
                 },
                 "notification_type": "NO_PUSH"
              };
-            request.post(
-               { url: url,
+            request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
                 method: "POST",
                 json: true,
                 headers: {
@@ -2348,251 +2267,28 @@ var sendResponse = function(data,flag){
                 body: firstMessage
                 },
             function (err, res, body) {
-               if (err) console.error('post err ',err);
-                
-                // var photoMessage = {
-                //     "recipient": {"id": data.source.channel},
-                //      "message": {
-                //      "attachment":{
-                //           "type":"image",
-                //           "payload":{
-                //             "url": photos[0].path
-                //           }
-                //         }
-                //      },
-                //      "notification_type": "NO_PUSH"
-                //  };
-                
-                // request.post(
-                //    { url: url,
-                //     method: "POST",
-                //     json: true,
-                //     headers: {
-                //         "content-type": "application/json",
-                //     },
-                //     body: photoMessage
-                //     },
-                // function (err, res, body) {
-                //        if (err) console.error('post err ',err);
-                //        console.log(body)
-                // })
+               if (err) console.log('post err ',err);
             })
-
         }
         else if (data.action == 'checkout') {
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
-            data.client_res.shift();
-            console.log('\n\n\nFacebook CHECKOUT: ',data.client_res);
-            // data.client_res = JSON.stringify(data.client_res);
+            data.client_res[0].shift();
+            console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
             var photos = [];
             data.client_res[0].forEach(function(el, index) {
-                console.log('\n\n\n', el)
-                messages.push( el.text + '\n\n' );
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
-            email.reply({
-                to: data.emailInfo.to,
-                text: messages.join('\n\n'),
-                attachments: photos
-            }, data);
-        }
-    }
-    //* * * * * * * *
-    // Facebook Outgoing
-    //* * * * * * * *
-    else if (data.source && data.source.channel && data.source.origin == 'facebook') {
-        var url = 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
-          if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
-            console.log(0, data.client_res);
-             // https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
-             // {
-              //   "object":"page",
-              //   "entry":[{"id":976386645706699,
-              //           "time":1462290198559,
-              //           "messaging":[{"sender":{"id":835675223228683},
-              //                         "recipient":{"id":976386645706699},
-              //                         "timestamp":1462290198521,
-              //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
-              //                         "seq":61,
-              //                         "text":"LELELELE"}}]
-              //             }]
-              //   }
-            var messages = [];
-            var photos = [];
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text": data.client_res[0]+ '\n'
-                },
-                "notification_type": "NO_PUSH"
-             };
-            request.post({
-                    url: url,
-                    method: "POST",
-                    json: true,
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                    body: firstMessage
-                },
-                function (err, res, body) {
-                    if (err) console.error('post err ',err);
-                    // console.log(1, body);
-                    data.client_res.shift();
-                    async.eachSeries(data.client_res, function iterator(object, callback) {
-                        // console.log(2, body);
-                        var textMessage = {
-                           "recipient": {"id": data.source.channel},
-                            "message": {
-                                 "attachment":{
-                                  "type":"template",
-                                  "payload":{
-                                    "template_type":"button",
-                                    "text": " ",
-                                    "buttons":[
-                                      {
-                                        "type":"web_url",
-                                        "url":object.link,
-                                        "title": object.message
-                                      }
-                                    ]
-                                  }
-                                }
-                            },
-                            "notification_type": "NO_PUSH"
-                         };
-                        request.post(
-                           { url: url,
-                            method: "POST",
-                            json: true,
-                            headers: {
-                                "content-type": "application/json",
-                            },
-                            body: textMessage
-                            },
-                            function (err, res, body) {
-                               if (err) console.error('post err ',err);
-                              
-                               var photoMessage = {
-                                    "recipient": {"id": data.source.channel},
-                                     "message": {
-                                     "attachment":{
-                                          "type":"image",
-                                          "payload":{
-                                            "url": object.photo
-                                          }
-                                        }
-                                     },
-                                     "notification_type": "NO_PUSH"
-                                 }
-
-                                request.post({url: url,
-                                    method: "POST",
-                                    json: true,
-                                    headers: {
-                                        "content-type": "application/json",
-                                    },
-                                    body: photoMessage
-                                    },
-                                function (err, res, body) {
-                                       if (err) console.error('post err ',err);
-                                      callback()
-                                });
-                          });
-                    }, function done() {
-
+                if (typeof el.text  == 'array') {
+                    el.text.forEach(function(txt){
+                        messages.push(txt + '\n');
                     })
-            });
-        }
-        else if (data.action == 'focus') {
-
-           console.log('facebook outgoing client_res:', data);
-
-           try {
-             var formatted = data.client_res[1].split('|')[1].split('>')[0] + '\n' + data.client_res[1].split('|')[0].split('<')[1];
-             formatted = formatted.slice(0,-1);
-           } catch(err) {
-             console.log('io.js 1269 err: ',err);
-             return;
-           }
-          data.client_res[1] = formatted ? formatted : data.client_res[1];
-          var toSend = truncate(data.client_res[1]) + '\n' + (data.client_res[2] ? truncate(data.client_res[2]) : '') + '\n'  + (data.client_res[3] ? truncate(data.client_res[3]) : '') + '\n' + (data.client_res[4] ? truncate(data.client_res[4]) : '');
-          // console.log('data.client_res[0] : ', decodeURIComponent(data.client_res[0]))
-             // var focusMessage = {
-             //    "recipient": {"id": data.source.channel},
-             //    "message": {
-             //         "text": toSend,
-             //         "attachment":{
-             //          "type":"template",
-             //          "payload":{
-             //            "template_type":"button",
-             //            "text": toSend,
-             //            "buttons":[
-             //              {
-             //                "type":"web_url",
-             //                "url": data.client_res[1].split('|')[0].split('<')[1],
-             //                "title": "See Product"
-             //              }
-             //            ]
-             //          }
-             //        }
-             //    },
-             //    "notification_type": "NO_PUSH"
-             // };
-
-            var focusMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                     "attachment":{
-                      "type":"template",
-                      "payload":{
-                        "template_type":"button",
-                        "buttons":[
-                          {
-                            "type":"web_url",
-                            "url": data.recallHistory.urlShorten[parseInt(data.msg.trim())-1],
-                            "title": "See Product"
-                          }
-                        ],
-                        "text": toSend
-                      }
-                    }
-                },
-                "notification_type": "NO_PUSH"
-             };
-            // console.log(url, focusMessage)
-            request.post(
-               { url: url,
-                method: "POST",
-                json: true,
-                headers: {
-                    "content-type": "application/json",
-                },
-                body: focusMessage
-                },
-            function (err, res, body) {
-               if (err) console.error('post err ',err);
-               console.log(body)
-            })
-
-        }
-         else if (data.action == 'save') {
-              var messages = ['Awesome! I\'ve saved your item for you 😊'];
-                data.client_res.shift();
-              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
-            // data.client_res = JSON.stringify(data.client_res);
-            var photos = [];
-            data.client_res[0].forEach(function(el, index) {
-                // console.log('\n\n\n', el)
-                messages.push(el.text + '\n\n' );
+                }
+                else if (typeof el.text == 'string'){
+                    messages.push(el.text)
+                }
                if (el.thumb_url) {
                 photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
                }
             })
-            console.log('messages ', messages.join('\n'), 'photos: ', photos);
+            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'), '\ndata.source: ', data.source);
             var firstMessage = {
                 "recipient": {"id": data.source.channel},
                 "message": {
@@ -2600,8 +2296,9 @@ var sendResponse = function(data,flag){
                 },
                 "notification_type": "NO_PUSH"
              };
-            request.post(
-               { url: url,
+            request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
                 method: "POST",
                 json: true,
                 headers: {
@@ -2610,67 +2307,9 @@ var sendResponse = function(data,flag){
                 body: firstMessage
                 },
             function (err, res, body) {
-               if (err) console.error('post err ',err);
-                
-                var photoMessage = {
-                    "recipient": {"id": data.source.channel},
-                     "message": {
-                     "attachment":{
-                          "type":"image",
-                          "payload":{
-                            "url": photos[0].thumb_url
-                          }
-                        }
-                     },
-                     "notification_type": "NO_PUSH"
-                 };
-                
-                request.post(
-                   { url: url,
-                    method: "POST",
-                    json: true,
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                    body: photoMessage
-                    },
-                function (err, res, body) {
-                       if (err) console.error('post err ',err);
-                       console.log(body)
-                })
+               if (err) console.log('post err ',err);
             })
-
-            email.reply({
-                to: data.emailInfo.to,
-                text: messages.join('\n\n'),
-                attachments: photos
-            }, data);
         }
-        else if (data.action == 'checkout') {
-            var messages = ['Awesome! I\'ve saved your item for you 😊'];
-            data.client_res.shift();
-            console.log('\n\n\nEMAIL SAVE: ',data.client_res);
-            // data.client_res = JSON.stringify(data.client_res);
-            var photos = [];
-            data.client_res[0].forEach(function(el, index) {
-                console.log('\n\n\n', el)
-                messages.push( el.text + '\n\n' );
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
-            email.reply({
-                to: data.emailInfo.to,
-                text: messages.join('\n\n'),
-                attachments: photos
-            }, data);
-        }
-
-
-
-
-
     }
     //* * * * * * * *
     // Slack Outgoing
@@ -3027,10 +2666,10 @@ function viewCart(data, show_added_item) {
         return;
     }
 
-    console.log('view cart', data.source)
+    console.log('view cart', data.source);
     db.Metrics.log('cart.view', data);
 
-    console.log(data.source)
+    console.log(data.source);
 
     var cartDelay = 2000;
 
@@ -3109,7 +2748,6 @@ function viewCart(data, show_added_item) {
 
 
         if (isAdmin || isP2P || cart.personal) {
-
            if (data.source.origin === 'slack') {
               var text = [
                 `${processData.emoji[i+1][emojiType]} <${link}|${item.title}>`,
@@ -3126,10 +2764,8 @@ function viewCart(data, show_added_item) {
                 '_Added by: ' + userString
              ]
            }
-
         } 
         else {
-
           if (data.source.origin === 'slack') {
              var text = [
                 `${processData.emoji[i+1][emojiType]} *${item.title}*`,
@@ -3137,7 +2773,7 @@ function viewCart(data, show_added_item) {
                 `_Added by: ${userString}_`
               ].join('\n');
           }
-         else if (data.source.origin === 'facebook'){
+         else if (data.source.origin === 'facebook') {
              var text = [
                 (i+1) + '. ' + item.title,
                 'Quantity: ' + item.quantity,
@@ -3204,8 +2840,8 @@ function viewCart(data, show_added_item) {
           if(res[0] && res[0].text && data.client_res[0]){
 
 
-                //console.log('RES TEXT ',res[0].text);
-                data.client_res[0].unshift(res[0]);
+             //console.log('RES TEXT ',res[0].text);
+             data.client_res[0].unshift(res[0]);
              // }
              // if (res.length == 1){
              //    console.log('RES TEXT ',res[0].text);
@@ -3221,24 +2857,26 @@ function viewCart(data, show_added_item) {
 
           console.log('CLIENT_RES ',data.client_res);
           sendResponse(data);
+
+        // var result = yield Promise.resolve(true);
+        // return result;
+
       });
       // sendResponse(data);
 
     }).catch(function(e) {
-
+      if(e) {
+            console.log('error retriving cart for view cart')
+            console.log(e.stack);
+      }
       //incrementally trying to cart with longer query time
       if (cartDelay < 16000){
-            cartDelay = cartDelay + 5000;
+            cartDelay = cartDelay + 2000;
             console.log('slowing view cart down ',cartDelay)
           setTimeout(function() {
             viewCart(data);
           }, cartDelay);           
-      }else {
-            console.log('error retriving cart for view cart')
-            console.log(e.stack);
       }
-
-
     })
 }
 

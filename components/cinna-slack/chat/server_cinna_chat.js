@@ -138,7 +138,8 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
 })
 
 app.get('/facebook', function (req, res) {
-  if (req.query['hub.verify_token'] === 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD') {
+  var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
+  if (req.query['hub.verify_token'] === fbtoken) {
     //bot stuff
     res.send(req.query['hub.challenge']);
   }
@@ -154,18 +155,6 @@ app.post('/facebook', function (req, res) {
     if (event.message && event.message.text) {
       text = event.message.text;
       console.log(JSON.stringify(req.body));
-      // {
-      //   "object":"page",
-      //   "entry":[{"id":976386645706699,
-      //           "time":1462290198559,
-      //           "messaging":[{"sender":{"id":835675223228683},
-      //                         "recipient":{"id":976386645706699},
-      //                         "timestamp":1462290198521,
-      //                         "message":{"mid":"mid.1462290198517:2bb9b166e3d1bb4d44",
-      //                         "seq":61,
-      //                         "text":"LELELELE"}}]
-      //             }]
-      //   }
       var newFb = {
             source: {
                 'origin':'facebook',
@@ -177,9 +166,25 @@ app.post('/facebook', function (req, res) {
             'msg': text,
             'fb_access_token': ''
         };
-        
       ioKip.preProcess(newFb);    
-
+    }
+    else if (event.postback) {
+       event.postback = JSON.parse(event.postback);
+       var postbackData = {
+            'msg': event.postback.msg,
+            'source': {
+                'origin':'facebook',
+                'channel': sender.toString(),
+                'org': "facebook_" + sender.toString(),
+                'id':"facebook_" + sender.toString(),
+                'user': sender.toString()
+            },
+            'searchSelect': [event.postback.selected],
+            'amazon': event.postback.amazon,
+            'recallHistory': event.postback.recallHistory,
+            'fb_access_token': ''
+        };
+      ioKip.preProcess(postbackData);
     }
   }
   res.sendStatus(200);

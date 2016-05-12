@@ -37,7 +37,6 @@ var slackbotSchema = mongoose.Schema({
             default: false
         },
         office_assistants: [String], // user ids of the office assistants, like U0R6H9BKN
-
         weekly_status_enabled: {
           type: Boolean,
           default: true
