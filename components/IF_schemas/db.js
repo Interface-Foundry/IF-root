@@ -107,6 +107,10 @@ var schemas = [{
     single: 'Project',
     plural: 'Projects'
 }, {
+    filename: 'pubsub_schema',
+    single: 'PubSub',
+    plural: 'PubSubs'
+}, {
     filename: 'serverwidgets_schema',
     single: 'ServerWidget',
     plural: 'ServerWidgets'
