@@ -1694,7 +1694,6 @@ var sendResponse = function(data,flag){
         console.log('error: cant save outgoing response, missing bucket or action');
     }
     /// / / / / / / / / / /
-console.log('CHOO CHOO CHOOOOOOOOOOOOOO', data)
     //* * * * * * * *
     // Socket.io Outgoing
     //* * * * * * * *
@@ -2115,8 +2114,8 @@ console.log('CHOO CHOO CHOOOOOOOOOOOOOO', data)
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'facebook') {
 
-        var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
-  if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more') {
+    var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+      if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more') {
         console.log(0, data.client_res);
 
              var messageData = {
@@ -2214,44 +2213,75 @@ console.log('CHOO CHOO CHOOOOOOOOOOOOOO', data)
             // console.log(url, focusMessage)
             request.post({ 
                 url: 'https://graph.facebook.com/v2.6/me/messages',
-                qs: {access_token: fbtoken},
+                qs: {access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'},
                 method: "POST",
                 json: true,
                 headers: {
                     "content-type": "application/json",
                 },
                 body: focusMessage
-                },
-            function (err, res, body) {
+            }, function (err, res, body) {
                if (err) console.error('post err ',err);
                console.log(body)
             })
 
         }
          else if (data.action == 'save') {
-            console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res)
-            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            // console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res[0])
+            var messages = ['Awesome! I\'ve saved your item for you 😊 \n'];
             data.client_res[0].shift();
-            console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
+            console.log('\n\n\nFacebook SAVE: ', JSON.stringify(data.client_res));
             var photos = [];
+            var titles = [];
+            var links = [];
+            var otherInfo = [];
             data.client_res[0].forEach(function(el, index) {
-                if (typeof el.text  == 'array') {
-                    el.text.forEach(function(txt){
-                        messages.push(txt + '\n');
-                    })
-                }
-                else if (typeof el.text == 'string'){
-                    messages.push(el.text)
+                if (el.text && el.text.constructor === Array) {
+                    var otherInfoString = ''
+                    for (var i = 0; i < el.text.length -1; i++) {
+                       if (i == 0) { titles.push(el.text[i]) } else { otherInfoString = otherInfoString.concat('\n' + el.text[i]) };
+                       if (el.text[i].indexOf('http:') > -1) links.push(el.text[i]);
+                       messages.push(el.text[i] + '\n');
+                    }
+                    otherInfo.push(otherInfoString);
                 }
                if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+                    photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
                }
             })
-            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'), '\ndata.source: ', data.source);
-            var firstMessage = {
+            console.log('\n\n\nMessages ', messages, '\ndata.source: ', data.source);
+
+            var cartDisplay = {
+                "attachment": {
+                  "type": "template",
+                  "payload": {
+                    "template_type": "generic",
+                    "elements": []
+                    }
+                }
+            };
+
+            for (var k = 0; k < titles.length; k++) {
+                var cart_item = {
+                  "title": truncate(titles[k]),
+                  "subtitle": otherInfo[k],
+                  "image_url": photos[k].path,
+                  "buttons": [{
+                    "type": "web_url",
+                    "url": links[k],
+                    "title": "Product Page"
+                  }]
+                }
+                cartDisplay.attachment.payload.elements.push(cart_item);
+              };
+
+              console.log('\n\n\n\n\nCART DISPLAY: ', JSON.stringify(cartDisplay), data.source)
+        
+              var firstMessage = {
                 "recipient": {"id": data.source.channel},
                 "message": {
-                    "text":messages.join('\n')
+                    "text": "Awesome! I've saved your item for you 😊\n\n Your Cart:"
+                    // messages.join('\n')
                 },
                 "notification_type": "NO_PUSH"
              };
@@ -2265,9 +2295,28 @@ console.log('CHOO CHOO CHOOOOOOOOOOOOOO', data)
                 },
                 body: firstMessage
                 },
-            function (err, res, body) {
-               if (err) console.log('post err ',err);
-            })
+                function (err, res, body) {
+                    if (err) console.log('post err ',err);
+                    console.log(body);
+                    request.post({ 
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {access_token: fbtoken},
+                        method: "POST",
+                        json: {
+                          recipient: {id: data.source.channel},
+                          message: cartDisplay,
+                        },
+                        headers: {
+                            "content-type": "application/json",
+                        }
+                    },
+                    function (err, res, body) {
+                       if (err) console.log('post err ',err);
+                       console.log(body);
+                    })
+                })
+
+           
         }
         else if (data.action == 'checkout') {
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
@@ -2294,19 +2343,20 @@ console.log('CHOO CHOO CHOOOOOOOOOOOOOO', data)
                     "text":messages.join('\n')
                 },
                 "notification_type": "NO_PUSH"
-             };
+             }; 
+
             request.post({ 
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {access_token: fbtoken},
                 method: "POST",
-                json: true,
-                headers: {
-                    "content-type": "application/json",
-                },
-                body: firstMessage
-                },
+                json: {
+                  recipient: {id: data.source.channel},
+                  message: cartDisplay,
+                }
+            },
             function (err, res, body) {
                if (err) console.log('post err ',err);
+               console.log(body)
             })
         }
     }
@@ -2572,9 +2622,10 @@ var saveToCart = function(data){
                   console.log('adding searchSelect ' + searchSelect);
 
                   // i am not sure what this does
-                  if (item.recallHistory && item.recallHistory.amazon){
+                  if (item.recallHistory && item.recallHistory.amazon) {
                       var itemToAdd = item.recallHistory.amazon[searchSelect - 1];
-                  } else {
+                  } 
+                  else {
                       itemToAdd = item.amazon[searchSelect - 1];
                   }
 
