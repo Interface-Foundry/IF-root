@@ -2136,7 +2136,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": JSON.stringify({ selected: data.amazon[0] })
+                        "payload": "1"
                       }],
                     },{
                       "title": data.client_res[2].message,
@@ -2148,7 +2148,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": JSON.stringify({ selected: data.amazon[1] })
+                        "payload": "2"
                       }],
                     },{
                       "title": data.client_res[3].message,
@@ -2160,7 +2160,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": JSON.stringify({ selected: data.amazon[2] })
+                        "payload": "3"
                       }],
                     }]
                   }
