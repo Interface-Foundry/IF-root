@@ -322,7 +322,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'wtv') > 90:
         case textSimilar(input,'whatever') > 60:
             flag = 'basic'; //do this action
-            if (origin == 'slack' || data.source.origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -535,6 +535,8 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'aight') > 80:
         case textSimilar(input,'alright') > 80:
         case textSimilar(input,'ok') > 80:
+        case textSimilar(input,'its ok') > 80:
+        case textSimilar(input,'im ok') > 80:
         case textSimilar(input,'k') > 80:
         case textSimilar(input,'kk') > 80:
             flag = 'basic';
@@ -766,7 +768,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'wut') > 70:
         case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
                 res = 'I\'m Kip, your personal shopper.\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -975,7 +977,7 @@ var checkForCanned = function(input,callback,origin,source) {
 
         case 'top kek':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
                 res = 'T O P\nK\n\nE\nK';
             }
             else if (origin = 'socket.io'){
@@ -1210,7 +1212,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case '9':
         case '0':
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram'){
+            if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
                 res = 'I\'m not very smart, did you mean :one:, :two: or :three:?';
             }
             else if (origin = 'socket.io'){
@@ -1310,7 +1312,10 @@ var getCinnaResponse = function(data,callback){
                 }
                 else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':one:';
-                } 
+                }
+                else if (data.source.origin == 'kik'){
+                    numEmoji = '1️⃣️';
+                }
               
                 break;
             case 2: //emoji #2
@@ -1322,6 +1327,9 @@ var getCinnaResponse = function(data,callback){
                 }
                 else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':two:';
+                }
+                else if (data.source.origin == 'kik'){
+                    numEmoji = '2⃣️';
                 }
             
                 break;
@@ -1335,6 +1343,9 @@ var getCinnaResponse = function(data,callback){
                 else if ((data.source.origin == 'slack' && !(data.flags && data.flags.email)) || data.source.origin == 'telegram'){
                     numEmoji = ':three:';
                 }
+                else if (data.source.origin == 'kik'){
+                    numEmoji = '3⃣️';
+                }
                 break;
         }
     }
@@ -1342,7 +1353,7 @@ var getCinnaResponse = function(data,callback){
         case 'search':
             switch (data.action) {
                 case 'initial':
-                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
+                    if (data.source.origin == 'slack' || data.source.origin == 'telegram' || data.source.origin == 'kik'){
                         if (data.imageTags){
                             res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }

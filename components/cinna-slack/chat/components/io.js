@@ -4,6 +4,7 @@ var request = require('request');
 var co = require('co')
 var _ = require('lodash')
 var fs = require('fs')
+var Kik = require('@kikinteractive/kik');
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
@@ -12,6 +13,7 @@ var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
 var WEB_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.WEB;
 
+var kipServer = require('../server_cinna_chat');
 var banter = require("./banter.js");
 var history = require("./history.js");
 var search = require("./search.js");
@@ -49,9 +51,14 @@ var upload = require('../../../../IF_services/upload.js');
 // var redis = require('redis');
 // var client = redis.createClient();
 var email = require('./email');
+var emojiText = require('emoji-text'); //convert emoji to text
+
+
+
 /////////// LOAD INCOMING ////////////////
 
 
+//- - - - - - - TELEGRAM - - - - - - //
 var telegram = require('telegram-bot-api');
 
 var telegramToken;
@@ -62,6 +69,7 @@ if (process.env.NODE_ENV == 'development_alyx'){
 }else{
     telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
 }
+
 
 if (process.env.NODE_ENV !== 'development') {
   var tg = new telegram({
@@ -98,6 +106,7 @@ if (process.env.NODE_ENV !== 'development') {
       }
   });
 }
+
 
 //get stored slack users from mongo
 var initSlackUsers = function(env){
@@ -607,7 +616,7 @@ var loadSocketIO = function(server){
 /////////// PROCESSING INCOMING //////////
 
 //pre process incoming messages for canned responses
-function preProcess(data){
+var preProcess = function(data){
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -793,6 +802,7 @@ function routeNLP(data){
     //sanitize msg before sending to NLP
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
     data.flags = data.flags ? data.flags : {};
+    data.msg = emojiText.convert(data.msg,{delimiter: ' '}); //convert all emojis to text
 
     if (data.msg){
 
@@ -1274,6 +1284,29 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             data.client_res.push(urlArr[count]);
                         }
+                        }else if (data.source.origin == 'kik'){
+
+                            //PUSH NEW EMOJI + TEXT
+                            //PUSH NEW IMAGE
+                            
+                            // - - - - - //
+
+                            // var item = response.amazon[i];
+
+                            // var kikMsg = Kik.Message
+                            //   .link(item.DetailPageURL[0])
+                            //   .setPicUrl(item.MediumImage[0].URL[0])
+                            //   .setText(`${item.realPrice} - ${item.ItemAttributes[0].Title[0]}`)
+                            //   .setTitle(item.ItemAttributes[0].Title[0]);
+
+                            // data.client_res.push()
+
+                            // data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
+                            // data.client_res.push(urlArr[count]);
+
+
+
+                        }
                         else if (data.source.origin == 'telegram'){
                             var attachObj = {};
                             attachObj.photo = urlArr[count];
@@ -1405,6 +1438,295 @@ var sendResponse = function(data,flag){
             console.log('error: socket io channel missing', data);
         }
     }
+
+    //* * * * * * * *
+    // Kik Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'kik'){
+
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
+            var message = data.client_res[0]; //use first item in client_res array as text message
+            console.log('INITIAL MESSAGE ',message);
+
+            //kipServer.sendToKik(data,message,'text')
+
+            //remove first message from res arr
+            var attachThis = data.client_res;
+            attachThis.shift();
+
+            console.log('ATTACH THESE ',attachThis);
+
+
+            attachThis.map(function(attach){ 
+                console.log('ATTACH ', attach)
+
+                console.log('kikMsg !_!_!_!_!_!_! ', kikMsg)
+
+                //kipServer.sendToKik(data,kikMsg,'search');
+            });
+
+            // async.eachSeries(attachThis, function(attach, callback) {
+            //     // console.log('photo ',attach.photo);
+            //     // console.log('message ',attach.message);
+
+            //     //kipServer.sendToKik(data,message,'text')
+
+            //      // upload.uploadPicture('telegram', attach.photo, 100, true).then(function(uploaded) {
+            //      //     tg.sendMessage({
+            //      //        chat_id: data.source.channel,
+            //      //        text: attach.message,
+            //      //        parse_mode: 'Markdown',
+            //      //        disable_web_page_preview: 'true'
+            //      //     }).then(function(datum){
+            //      //          tg.sendPhoto({
+            //      //            chat_id: encode_utf8(data.source.channel),
+            //      //            photo: encode_utf8(uploaded.outputPath)
+            //      //            }).then(function(datum){
+            //      //                if (uploaded.outputPath) {
+            //      //                    fs.unlink(uploaded.outputPath, function(err, res) {
+            //      //                        // if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                if (uploaded.inputPath) {
+            //      //                    fs.unlink(uploaded.inputPath, function(err, res) {
+            //      //                            // if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                callback();
+            //      //            }).catch(function(err){
+            //      //                if (err) { console.log('ios.js1259: err',err) }
+            //      //                if (uploaded.outputPath) {
+            //      //                    fs.unlink(outputPath, function(err, res) {
+            //      //                        if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                if (uploaded.inputPath) {
+            //      //                    fs.unlink(inputPath, function(err, res) {
+            //      //                            if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                callback();
+            //      //            })
+            //      //        }).catch(function(err){
+            //      //            if (err) {
+            //      //                console.log('ios.js1264: err',err)
+            //      //            }
+            //      //            callback();
+            //      //        })
+            //      //    }).catch(function(err) {
+            //      //        if (err)  console.log('\n\n\niojs image upload error: ',err,'\n\n\n')
+            //      //        callback();
+            //      //    })
+            // }, function done(){
+
+
+            // });
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+        // else if (data.action == 'focus'){
+
+        //        // console.log('client_res', data.client_res)
+
+        //    try {
+        //      var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
+        //      formatted = formatted.slice(0,-1)
+        //      formatted = formatted + ')'
+        //    } catch(err) {
+        //      console.log('io.js 1269 err: ',err)
+        //      return
+        //    }
+        //       data.client_res[1] = formatted ? formatted : data.client_res[1]
+        //       var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
+        //        // console.log('formatted : ',formatted)
+        //        upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
+        //          tg.sendPhoto({
+        //             chat_id: encode_utf8(data.source.channel),
+        //             photo: encode_utf8(uploaded.outputPath)
+        //           }).then(function(datum){
+        //             tg.sendMessage({
+        //                 chat_id: data.source.channel,
+        //                 text: toSend,
+        //                 parse_mode: 'Markdown',
+        //                 disable_web_page_preview: 'true'
+        //             })
+        //             if (uploaded.outputPath) {
+        //                 fs.unlink(uploaded.outputPath, function(err, res) {
+        //                     // if (err) console.log('fs error: ', err)
+        //                 })
+        //             }
+        //             if (uploaded.inputPath) {
+        //                 fs.unlink(uploaded.inputPath, function(err, res) {
+        //                         // if (err) console.log('fs error: ', err)
+        //                 })
+        //             }
+        //           })
+        //         }).catch(function(err){
+        //             if (err) { console.log('ios.js1285: err',err) }
+
+        //         })
+        // }
+        //  else if (data.action == 'save') {
+        //     console.log('\n\n\nSAVE: ',data.client_res)
+        //   try {
+        //      var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
+        //       // + data.client_res[0].text.split('>>')[1].split('>')[0]
+        //      // formatted = formatted.slice(0,-1)
+        //      // formatted = formatted + ')'
+        //    } catch(err) {
+        //      console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
+        //      return
+        //    }
+        //   // console.log('toSend:', toSend,'formatted: ',formatted)
+        //   tg.sendMessage({
+        //         chat_id: data.source.channel,
+        //         text: 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.',
+        //         parse_mode: 'Markdown',
+        //         disable_web_page_preview: 'true'
+        //     })
+        //     .then(function() {
+        //       if (formatted) {
+        //         console.log('\n\n\nFORMATTED: ', formatted)
+        //         tg.sendMessage({
+        //             chat_id: data.source.channel,
+        //             text: formatted,
+        //             parse_mode: 'Markdown',
+        //             disable_web_page_preview: 'true'
+        //         })
+        //       }
+        //     })
+        //     .catch(function(err) {
+        //         console.log('io.js 1307 err',err)
+        //     })
+        // }
+        // else if (data.action == 'checkout') {
+        //   console.log('\n\n\nCHECKOUT: ', data.client_res)
+        //      async.eachSeries(data.client_res[1], function iterator(item, callback) {
+        //         console.log('ITEM LEL: ',item)
+        //         if (item.text.indexOf('_Summary') > -1) {
+        //             return callback(item)
+        //         }
+        //          var itemLink = ''
+        //           try {
+        //             itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
+        //             itemLink = encode_utf8(itemLink)
+        //            } catch(err) {
+        //              console.log('io.js 1296 err:',err)
+        //              return callback(null)
+        //            }
+        //            tg.sendMessage({
+        //                 chat_id: data.source.channel,
+        //                 text: itemLink,
+        //                 parse_mode: 'Markdown',
+        //                 disable_web_page_preview: 'true'
+        //             }).then(function(){
+        //                  var extraInfo = item.text.split('$')[1]
+        //                  extraInfo = '\n $' + extraInfo
+        //                  extraInfo = extraInfo.replace('*','').replace('@','').replace('<','').replace('>','')
+        //                  tg.sendMessage({
+        //                     chat_id: data.source.channel,
+        //                     text: encode_utf8(extraInfo),
+        //                     parse_mode: 'Markdown',
+        //                         disable_web_page_preview: 'true'
+        //                     })
+        //                     .then(function(){
+        //                         callback(null)
+        //                     })
+        //                     .catch(function(err) {
+        //                         console.log('io.js 1354 err: ',err)
+        //                         callback(null)
+        //                     })
+        //             })
+        //       }, function done(thing) {
+        //         if (thing.text) {
+        //             // console.log('\n\n DONESKI!', thing)
+        //             var itemLink = ''
+        //               try {
+        //                 itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
+        //                 itemLink = encode_utf8(itemLink)
+        //                 tg.sendMessage({
+        //                     chat_id: data.source.channel,
+        //                     text: '_Summary: Team Cart_ \n Total: *$691.37* \n' + itemLink,
+        //                     parse_mode: 'Markdown',
+        //                     disable_web_page_preview: 'true'
+        //                 }).catch(function(err) {
+        //                  console.log('io.js 1353 err:',err)
+        //                })
+        //                } catch(err) {
+        //                  console.log('io.js 1356 err:',err)
+        //                }
+        //         } else {
+        //             // console.log('wtf is thing: ',thing)
+        //         }
+        //       })
+
+
+        //    // // var extraInfo = data.client_res[1][0].text.split('$')[1]
+        //    // // extraInfo = '\n $' + extraInfo
+        //    // // var finalSend = itemLink + extraInfo
+        //    // //      tg.sendMessage({
+        //    // //          chat_id: data.source.channel,
+        //    // //          text: data.client_res[0],
+        //    // //          parse_mode: 'Markdown',
+        //    // //          disable_web_page_preview: 'true'
+        //    // //      }).then(function(){
+        //    //         console.log('finalSend: ', itemLink)
+        //    //          tg.sendMessage({
+        //    //              chat_id: data.source.channel,
+        //    //              text: itemLink,
+        //    //              parse_mode: 'Markdown',
+        //    //              disable_web_page_preview: 'true'
+        //    //          }).then(function(){
+
+        //    //          // })
+        //    //      }).catch(function(err) {
+        //    //          console.log('io.js 1338 err',err)
+        //    //      })
+        // }
+        // else if (data.action == 'sendAttachment'){
+        //   console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
+        //     // //remove first message from res arr
+        //     // var attachThis = data.client_res;
+        //     // attachThis = JSON.stringify(attachThis);
+
+        //     // var msgData = {
+        //     //   // attachments: [...],
+        //     //     icon_url:'http://kipthis.com/img/kip-icon.png',
+        //     //     username:'Kip',
+        //     //     attachments: attachThis
+        //     // };
+        //     // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        // }
+        else {
+              console.log('\n\n\nKik ELSE : ', data,'\n\n\n')
+            //loop through responses in order
+            async.eachSeries(data.client_res, function(message, callback) {
+
+                // tg.sendMessage({
+                //     chat_id: data.source.channel,
+                //     text: message
+                // })
+                console.log('\n\n\nKik  : ', data,'\n\n\n')
+
+                kipServer.sendToKik(data,message,'banter')
+
+                callback();
+            }, function done(){
+            });
+        }
+
+    }
+
+
     //* * * * * * * *
     // Telegram Outgoing
     //* * * * * * * *
@@ -2156,7 +2478,7 @@ function viewCart(data, show_added_item){
       var cart = yield kipcart.getCart(data.source.org);
 
       if (cart.items.length < 1) {
-        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
+        return sendTxtResponse(data, 'Looks like you have not added anything to the Team Cart yet. Type `save 1` to add item :one:');
       }
 
       var slackbot = yield db.Slackbots.findOne({

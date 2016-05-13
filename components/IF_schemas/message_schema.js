@@ -22,7 +22,8 @@ var messageSchema = mongoose.Schema({
         org: String,
         id: { type: String, index: true },
         flag: String,
-        user: String
+        user: String,
+        username: String
     },
     client_res: [mongoose.Schema.Types.Mixed], //outgoing messages, if applicable
     ts: {
@@ -68,7 +69,8 @@ var messageSchema = mongoose.Schema({
     },
     slackData: {
         callback_id: String
-    }
+    },
+    kipData: mongoose.Schema.Types.Mixed
 });
 
 module.exports = mongoose.model('Message', messageSchema);

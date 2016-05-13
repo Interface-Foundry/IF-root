@@ -214,24 +214,29 @@ var searchAmazon = function(data, type, query, flag) {
                                                 parseAmazon(productGroup,browseNodes,function(res){
 
                                                     //* * * * * TEMPORARY TO HELP WITH CHEAPER RESULTS??????????? * * * * * //
-                                                    res.BrowseNode = res.BrowseNode.split(',');
-                                                    debug('arr ',res.BrowseNode);
-                                                    debug('ARRAY LENGTH ',res.BrowseNode.length);
-                                                    if (res.BrowseNode && res.BrowseNode.length >= 2){
-                                                        res.BrowseNode = res.BrowseNode.slice(0,2);
+                                                    if (res && res.BrowseNode){
+                                                        res.BrowseNode = res.BrowseNode.split(',');
+                                                        debug('arr ',res.BrowseNode);
+                                                        debug('ARRAY LENGTH ',res.BrowseNode.length);
+                                                        if (res.BrowseNode && res.BrowseNode.length >= 2){
+                                                            res.BrowseNode = res.BrowseNode.slice(0,2);
+                                                        }
+                                                        debug('arr ',res.BrowseNode);
+                                                        debug('ARRAY LENGTH ',res.BrowseNode.length);
+
+                                                        res.BrowseNode = res.BrowseNode.toString();
+                                                        //* * * * * * * * * * * END TEST * * * * * * * * * * * * * * * * * * //
+
+                                                        amazonParams.SearchIndex = res.SearchIndex;
+                                                        amazonParams.BrowseNode = res.BrowseNode;
+                                                        amazonParams.MaximumPrice = modPrice.toString();
+                                                        delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+                                                        doSearch();
+                                                    }else {
+                                                        console.error('ERROR: line 237 in search.js, browsenode not found')
+                                                        doSearch();
                                                     }
-                                                    debug('arr ',res.BrowseNode);
-                                                    debug('ARRAY LENGTH ',res.BrowseNode.length);
-
-                                                    res.BrowseNode = res.BrowseNode.toString();
-                                                    //* * * * * * * * * * * END TEST * * * * * * * * * * * * * * * * * * //
-
-
-                                                    amazonParams.SearchIndex = res.SearchIndex;
-                                                    amazonParams.BrowseNode = res.BrowseNode;
-                                                    amazonParams.MaximumPrice = modPrice.toString();
-                                                    delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
-                                                    doSearch();
+  
                                                 });
                                             }
                                             else {
