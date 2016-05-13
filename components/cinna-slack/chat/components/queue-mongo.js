@@ -23,17 +23,15 @@ function publish(topic, data) {
     throw new Error('cannot publish null message')
   }
 
-  var doc = new PubSub({
-    _id: getKey(topic, data),
-    topic: topic,
-    data: data
-  })
-
   // Upsert the thing
   return co(function*() {
     yield PubSub.update({
-      _id: doc._id
-    }, doc, {
+      _id: getKey(topic, data)
+    }, {
+      _id: getKey(topic, data),
+      topic: topic,
+      data: data
+    }, {
       upsert: true
     }).exec();
 
@@ -84,7 +82,7 @@ function topic(topic) {
       console.log('retry');
       PubSub.update({
         dispatched: true,
-        done: false,
+        done: { $ne: true },
         dispatch_time: { $lt: new Date() - 10000 },
         retries: { $lt: 3 }
       }, {
@@ -100,16 +98,19 @@ function topic(topic) {
 function* getNextMessage(topic) {
   var message = yield PubSub.findOne({
     topic: topic,
-    dispatched: false,
-    retries: { $lt: 3 },
-    done: false
+    dispatched: { $ne: true },
+    done: { $ne: true },
+    $or: [
+      {retries: {$exists: false}},
+      {retries: {$lt: 3}}
+    ]
   }).exec();
 
   if (!message) { return }
 
   var status = yield PubSub.update({
     _id: message._id,
-    dispatched: false
+    dispatched: { $ne: true }
   }, {
     $set: {
       dispatched: true,
