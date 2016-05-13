@@ -2685,14 +2685,17 @@ function viewCart(data, show_added_item) {
         return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
       }
 
-      if (data.source.origin == 'slack') {
-          var slackbot = yield db.Slackbots.findOne({
-            team_id: data.source.org
-          }).exec();
-         // admins have special rights
-          var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
-          var isP2P = slackbot.meta.office_assistants.length === 0;
+      var slackbot = yield db.Slackbots.findOne({
+        team_id: data.source.org
+      }).exec();
+
+      if (!slackbot){
+        return sendTxtResponse(data, 'My brain broke, sorry about that :( What did you say?');;
       }
+
+      // admins have special rights
+      var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
+      var isP2P = slackbot.meta.office_assistants.length === 0;
 
       // get the latest added item if we need to highlight it
       if (show_added_item) {

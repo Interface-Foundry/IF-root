@@ -289,7 +289,8 @@ function lastCall(response, convo) {
 
     // todo continue the conversation.  maybe say something like "you can extend the countdown by typing 'extend countdown'"
     console.log('done sending stuff');
-    convo.next();
+
+    convo.stop();
 
   }).catch((e) => {
     console.log(e.stack);
