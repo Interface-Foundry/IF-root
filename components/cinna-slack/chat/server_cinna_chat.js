@@ -44,6 +44,7 @@ var bodyParser = require('body-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
 var botkit = require('botkit');
+var db = require('db');
 
 //set env vars
 var config = require('config');
@@ -147,6 +148,8 @@ app.get('/facebook', function (req, res) {
 })
 
 
+
+
 app.post('/facebook', function (req, res) {
   messaging_events = req.body.entry[0].messaging;
   for (i = 0; i < messaging_events.length; i++) {
@@ -169,22 +172,52 @@ app.post('/facebook', function (req, res) {
       ioKip.preProcess(newFb);    
     }
     else if (event.postback) {
-       event.postback = JSON.parse(event.postback);
-       var postbackData = {
-            'msg': event.postback.msg,
-            'source': {
-                'origin':'facebook',
-                'channel': sender.toString(),
-                'org': "facebook_" + sender.toString(),
-                'id':"facebook_" + sender.toString(),
-                'user': sender.toString()
-            },
-            'searchSelect': [event.postback.selected],
-            'amazon': event.postback.amazon,
-            'recallHistory': event.postback.recallHistory,
-            'fb_access_token': ''
-        };
-      ioKip.preProcess(postbackData);
+       var postback= JSON.parse(event.postback.payload);
+       console.log('event.postback: ', event.postback)
+        db.Message.findById(postback.dataId, function (err, msg) {
+            if(err){
+                console.log('Error: Cannot find initial search for recallHistory');
+            }
+            else {
+                if (msg && msg.amazon){
+                    var tempArr = msg.amazon; //lmao amazon
+                    msg.amazon = [];
+                    async.eachSeries(tempArr, function(item, callback2) {
+                        msg.amazon.push(JSON.parse(item)); //ughhhh
+                        callback2();
+                    }, function done(err){
+                        if (err) console.error(err)
+                          // var postbackData = {
+                          //     'msg': event.postback.msg,
+                          //     'source': {
+                          //         'origin':'facebook',
+                          //         'channel': sender.toString(),
+                          //         'org': "facebook_" + sender.toString(),
+                          //         'id':"facebook_" + sender.toString(),
+                          //         'user': sender.toString()
+                          //     },
+                          //     'searchSelect': [event.postback.selected],
+                          //     'amazon': event.postback.amazon,
+                          //     'recallHistory': event.postback.recallHistory,
+                          //     'fb_access_token': ''
+                          // };
+                        var newMsg = {};
+                        newMsg.source = msg.source;
+                        newMsg.msg = 'save ' + postback.selected;
+                        newMsg.tokens = [msg.msg];
+                        newMsg.thread = msg.thread;
+                        newMsg.thread.sequence += 1;
+                        newMsg.incoming = true;
+                        newMsg.amazon = msg.amazon;
+                        console.log('I LOVE LIFE:  ', newMsg);
+                        ioKip.preProcess(newMsg);
+                    });
+                }
+                else {
+                  console.log('NO MSG FOUND OMG: ',event.postback.dataId)
+                }
+            }
+        });
     }
   }
   res.sendStatus(200);

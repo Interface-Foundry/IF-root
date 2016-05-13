@@ -1503,7 +1503,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
             processData.urlShorten(data,function(res){
                 var count = 0;
 
-                if (data.source.origin == 'slack') {
+                // if (data.source.origin == 'slack') {
 
                     //store a new mongo ID to pass in Slack callback
                     data.searchId = mongoose.Types.ObjectId();
@@ -1524,7 +1524,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                     // moreObj.fallback = 'Tap for more';
 
                     // client_res.push(moreObj);
-                }
+                // }
 
                 //put all result URLs into arr
                 async.eachSeries(res, function(i, callback) {
@@ -1694,7 +1694,7 @@ var sendResponse = function(data,flag){
         console.log('error: cant save outgoing response, missing bucket or action');
     }
     /// / / / / / / / / / /
-
+console.log('CHOO CHOO CHOOOOOOOOOOOOOO', data)
     //* * * * * * * *
     // Socket.io Outgoing
     //* * * * * * * *
@@ -1751,8 +1751,6 @@ var sendResponse = function(data,flag){
             //attachThis = JSON.stringify(attachThis);
 
             // console.log('attachthis ',attachThis);
-
-
 
             async.eachSeries(attachThis, function(attach, callback) {
                 // console.log('photo ',attach.photo);
@@ -2118,7 +2116,7 @@ var sendResponse = function(data,flag){
     else if (data.source && data.source.channel && data.source.origin == 'facebook') {
 
         var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
-          if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+  if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more') {
         console.log(0, data.client_res);
 
              var messageData = {
@@ -2136,7 +2134,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": "1"
+                        "payload": JSON.stringify({dataId: data.searchId, selected: 1})
                       }],
                     },{
                       "title": data.client_res[2].message,
@@ -2148,7 +2146,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": "2"
+                        "payload": JSON.stringify({dataId: data.searchId, selected: 2})
                       }],
                     },{
                       "title": data.client_res[3].message,
@@ -2160,7 +2158,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": "3"
+                        "payload": JSON.stringify({dataId: data.searchId, selected: 3})
                       }],
                     }]
                   }
@@ -2231,6 +2229,7 @@ var sendResponse = function(data,flag){
 
         }
          else if (data.action == 'save') {
+            console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res)
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
             data.client_res[0].shift();
             console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
@@ -2676,6 +2675,15 @@ function viewCart(data, show_added_item) {
     co(function*() {
       if (data.source.origin === 'slack') {
           var cart = yield kipcart.getCart(data.source.org, false);
+          var slackbot = yield db.Slackbots.findOne({
+            team_id: data.source.org
+          }).exec();
+          if (!slackbot){
+            return sendTxtResponse(data, 'My brain broke, sorry about that :( What did you say?');;
+          }
+          // admins have special rights
+          var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
+          var isP2P = slackbot.meta.office_assistants.length === 0;
       } 
       else if (data.source.origin === 'facebook' || data.source.origin === 'telegram' || data.source.origin === 'socket.io') {
           var cart = yield kipcart.getCart(data.source.org, true);
@@ -2684,18 +2692,6 @@ function viewCart(data, show_added_item) {
       if (cart.items.length < 1) {
         return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
       }
-
-      var slackbot = yield db.Slackbots.findOne({
-        team_id: data.source.org
-      }).exec();
-
-      if (!slackbot){
-        return sendTxtResponse(data, 'My brain broke, sorry about that :( What did you say?');;
-      }
-
-      // admins have special rights
-      var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
-      var isP2P = slackbot.meta.office_assistants.length === 0;
 
       // get the latest added item if we need to highlight it
       if (show_added_item) {
