@@ -32,15 +32,18 @@ var urlShorten = function(data,callback2) {
             //   }
             // });
 
-
-            googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
-            .then(function (shortUrl) {
-                callback2(shortUrl);
-            })
-            .catch(function (err) {
-                console.error(err.message);
-                callback2();
-            });
+            if (data.source.origin == 'kik'){
+                callback2('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+            }else {
+              googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+              .then(function (shortUrl) {
+                  callback2(shortUrl);
+              })
+              .catch(function (err) {
+                  console.error(err.message);
+                  callback2();
+              });              
+            }
 
         }
         else {
@@ -57,16 +60,22 @@ var urlShorten = function(data,callback2) {
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
 
-                googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
-                .then(function (shortUrl) {
-                    urlArr.push(shortUrl);
-                    callback();
-                })
-                .catch(function (err) {
-                    console.error(err.message);
-                    urlArr.push('http://kipthis.com');
-                    callback();
-                });
+                if (data.source.origin == 'kik'){
+                  urlArr.push('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                  callback()
+                }else {
+                  googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                  .then(function (shortUrl) {
+                      urlArr.push(shortUrl);
+                      callback();
+                  })
+                  .catch(function (err) {
+                      console.error(err.message);
+                      urlArr.push('http://kipthis.com');
+                      callback();
+                  });                  
+                }
+
 
             }
             else{
@@ -92,8 +101,8 @@ function getNumEmoji(data,number,callback){
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':one:';
             }
-            else if (data.source.origin == 'telegram'){
-                numEmoji = '1️⃣';
+            else {
+                numEmoji = '1⃣';
             }
             break;
         case 2: //emoji #2
@@ -106,8 +115,8 @@ function getNumEmoji(data,number,callback){
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':two:';
             }
-            else if (data.source.origin == 'telegram'){
-                numEmoji = '2️⃣';
+            else {
+                numEmoji = '2⃣';
             }
             break;
         case 3: //emoji #3
@@ -120,8 +129,8 @@ function getNumEmoji(data,number,callback){
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
                 numEmoji = ':three:';
             }
-            else if (data.source.origin == 'telegram'){
-                numEmoji = '3️⃣';
+            else {
+                numEmoji = '3⃣';
             }
             break;
     }

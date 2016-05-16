@@ -176,20 +176,22 @@ kik.onTextMessage((message) => {
   console.log('CHAT ID ',message.chatId)
   console.log('REGULAR ID ',message.id)
   console.log('MESSAGE FROM ',message.from)
+
   var kipObj = {
     msg: message.body.trim(),
     source: {
       origin: 'kik',
       channel: message.chatId,
-      org: message.id,
-      id: message.chatId + '_' + message.id,
-      user: message.id,
+      org: message.chatId,
+      id: message.chatId + '_' + message.from,
+      user: message.chatId,
       username: message.from
     },
     kikData: message
   };
   console.log('KIPOBJ ',kipObj)
-  ioKip.preProcess(kipObj);
+  ioKip.preProcess(kipObj);    
+
 });
 
 var sendToKik = function(data,message,type){
@@ -208,8 +210,14 @@ var sendToKik = function(data,message,type){
       break;
     case 'search':
       console.log('SEARCH MESSAGE ',message)
+
+      //insert keyboard into message
+
       data.kikData.reply(message);
       break;
+    default: 
+      console.log('DEFAULT????????????????')
+      data.kikData.reply(message)
   }
 }
 

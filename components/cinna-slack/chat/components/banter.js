@@ -228,6 +228,9 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'yep') > 90:
         case textSimilar(input,'yah') > 90:
         case textSimilar(input,'yeah') > 90:
+        case textSimilar(input,'same') > 90:
+        case textSimilar(input,'sammme') > 90:
+        case textSimilar(input,'saaame') > 90:
             flag = 'basic'; //do this action
             res = 'Cool';
             break;
@@ -253,6 +256,7 @@ var checkForCanned = function(input,callback,origin,source) {
              break;
 
         case textSimilar(input,'are you real') > 60:
+        case textSimilar(input,'are you alive') > 60:
             query = 'robot pets';
             flag = 'search.initial'; //do this action
             res = 'I\'m as real as you. Don\'t believe it? See here:';
@@ -317,10 +321,18 @@ var checkForCanned = function(input,callback,origin,source) {
             res = 'I\'m not that smart yet 🙃';
             break;
 
+        //expand for annoyed person detection, not understanding
         case textSimilar(input,'nevermind') > 60:
         case textSimilar(input,'nm') > 60:
         case textSimilar(input,'wtv') > 90:
         case textSimilar(input,'whatever') > 60:
+        case textSimilar(input,'that is not what i want') > 60:
+        case textSimilar(input,'wrong') > 90:
+        case textSimilar(input,'this is wrong') > 60:
+        case textSimilar(input,'not what i asked for') > 60:
+        case textSimilar(input,'i didnt ask for this') > 60:
+        case textSimilar(input,'this is not what i said') > 60:
+        case textSimilar(input,'this is not what i asked for') > 60:
             flag = 'basic'; //do this action
             if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
@@ -891,6 +903,20 @@ var checkForCanned = function(input,callback,origin,source) {
             res = 'Sorry, I\'ll try to help better next time';
             break;
 
+
+        //INTENDED FOR KIK CALLBACK FOCUS DETECTION 
+        case input.indexOf('1⃣') > -1:
+            flag = 'search.focus';
+            query = 1;
+            break;   
+         case input.indexOf('2⃣') > -1:
+            flag = 'search.focus';
+            query = 2;
+            break;   
+         case input.indexOf('3⃣') > -1:
+            flag = 'search.focus';
+            query = 3;
+            break;            
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 
