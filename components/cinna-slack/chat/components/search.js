@@ -990,7 +990,11 @@ var searchFocus = function(data) {
                 processData.getNumEmoji(data,searchSelect+1,function(res){
 
                     //data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-                    if (data.source.origin !== 'supervisor') {
+                    if(data.source.origin == 'kik'){
+                        data.client_res.push(data.recallHistory.urlShorten[searchSelect].trim())
+                        data.client_res.push(res + ' ' +  data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0]);
+                    }
+                    else if (data.source.origin !== 'supervisor') {
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
                     } else {
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[0].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
@@ -1006,7 +1010,7 @@ var searchFocus = function(data) {
                     var topStr;
 
                     //if realprice exists, add it to title
-                    if (data.recallHistory.amazon[searchSelect].realPrice){
+                    if (data.recallHistory.amazon[searchSelect].realPrice && data.source.origin !== 'kik'){
                         topStr = data.recallHistory.amazon[searchSelect].realPrice;
                     }
 
@@ -1059,8 +1063,58 @@ var searchFocus = function(data) {
                         else {
                             var reviewCounts = '';
                         }
-                        data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts);
+
+                        console.log('STARS ',starConvert(data.recallHistory.amazon[searchSelect].reviews.rating))
+                        data.client_res.push(starConvert(data.recallHistory.amazon[searchSelect].reviews.rating) + ' ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' stars ' + reviewCounts);
                     }
+
+                    function starConvert(rating){
+                        var stars;
+                        if (rating > 4.5){
+                            stars = '⭐️⭐️⭐️⭐️⭐';
+                        }
+                        else if (rating <= 4.5 && rating > 3.6){
+                            stars = '⭐️⭐️⭐️⭐️';
+                        }
+                        else if (rating <= 3.6 && rating > 2.6){
+                            stars = '⭐️⭐️⭐️';
+                        }
+                        else if (rating <= 2.6 && rating > 1.6){
+                            stars = '⭐️⭐️';
+                        }
+                        else {
+                            stars = '⭐️';
+                        }
+                        return stars;
+                    }
+                    
+                    //function { return emoji rating}
+
+
+                    //- - - - - - - KIK SPECIFIC STUFF - - - -  - //
+                    var buildKikEnd = '';
+
+                    if (data.recallHistory.amazon[searchSelect].realPrice && data.source.origin == 'kik'){
+                        buildKikEnd = buildKikEnd + data.recallHistory.amazon[searchSelect].realPrice;
+                    }
+
+                    // if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating && data.source.origin == 'kik'){
+               
+                    //     if(data.recallHistory.amazon[searchSelect].reviews.reviewCount){
+                    //         var reviewCounts = ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews';
+                    //     }
+                    //     else {
+                    //         var reviewCounts = '';
+                    //     }
+
+                    //     buildKikEnd = buildKikEnd + ' – ⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts;
+                    // }
+
+                    if (buildKikEnd){
+                        console.log('⭐️ ⭐️ ⭐️ ⭐️⭐️ BUILDING ',buildKikEnd)
+                        data.client_res.push(buildKikEnd)         
+                    }
+                    //-  --  - - - - - - END KIK SPECIFIC - - - - - - //
 
                       //----supervisor: making item detail info more digestable on supervisor end ---//
                       if (data.source.origin == 'supervisor') {

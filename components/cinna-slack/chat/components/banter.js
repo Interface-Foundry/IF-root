@@ -906,17 +906,58 @@ var checkForCanned = function(input,callback,origin,source) {
 
         //INTENDED FOR KIK CALLBACK FOCUS DETECTION 
         case input.indexOf('1⃣') > -1:
-            flag = 'search.focus';
-            query = 1;
+            switch(true){
+                case input.indexOf('⭐') > -1:
+                    flag = 'purchase.save';
+                    break;
+                case input.indexOf('💎') > -1:
+                    flag = 'search.cheaper';
+                    break;
+                case input.indexOf('⚡') > -1:
+                    flag = 'search.similar';
+                    break;
+                default:
+                    flag = 'search.focus';  
+            }
+            query = 1; 
             break;   
-         case input.indexOf('2⃣') > -1:
-            flag = 'search.focus';
+        case input.indexOf('2⃣') > -1:
+            switch(true){
+                case input.indexOf('⭐') > -1:
+                    flag = 'purchase.save';
+                    break;
+                case input.indexOf('💎') > -1:
+                    flag = 'search.cheaper';
+                    break;
+                case input.indexOf('⚡') > -1:
+                    flag = 'search.similar';
+                    break;
+                default:
+                    flag = 'search.focus';  
+            }
             query = 2;
             break;   
-         case input.indexOf('3⃣') > -1:
-            flag = 'search.focus';
+        case input.indexOf('3⃣') > -1:
+            switch(true){
+                case input.indexOf('⭐') > -1:
+                    flag = 'purchase.save';
+                    break;
+                case input.indexOf('💎') > -1:
+                    flag = 'search.cheaper';
+                    break;
+                case input.indexOf('⚡') > -1:
+                    flag = 'search.similar';
+                    break;
+                default:
+                    flag = 'search.focus';  
+            }
             query = 3;
-            break;            
+            break; 
+
+        case input.indexOf('⏩') > -1:
+            flag = 'search.more';
+            break;
+        
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 

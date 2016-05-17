@@ -173,9 +173,9 @@ kik.send('HIIII','alyxmxe')
 
 //incoming message from kik
 kik.onTextMessage((message) => {
-  console.log('CHAT ID ',message.chatId)
-  console.log('REGULAR ID ',message.id)
-  console.log('MESSAGE FROM ',message.from)
+  console.log('MESSAGE IN ',message)
+  // console.log('REGULAR ID ',message.id)
+  // console.log('MESSAGE FROM ',message.from)
 
   var kipObj = {
     msg: message.body.trim(),
