@@ -173,7 +173,7 @@ app.post('/facebook', function (req, res) {
     }
     else if (event.postback) {
        var postback= JSON.parse(event.postback.payload);
-       console.log('event.postback: ', event.postback)
+       console.log('postback: ', postback)
         db.Message.findById(postback.dataId, function (err, msg) {
             if(err){
                 console.log('Error: Cannot find initial search for recallHistory');
@@ -201,16 +201,69 @@ app.post('/facebook', function (req, res) {
                           //     'recallHistory': event.postback.recallHistory,
                           //     'fb_access_token': ''
                           // };
-                        var newMsg = {};
-                        newMsg.source = msg.source;
-                        newMsg.msg = 'save ' + postback.selected;
-                        newMsg.tokens = [msg.msg];
-                        newMsg.thread = msg.thread;
-                        newMsg.thread.sequence += 1;
-                        newMsg.incoming = true;
-                        newMsg.amazon = msg.amazon;
-                        console.log('I LOVE LIFE:  ', newMsg);
-                        ioKip.preProcess(newMsg);
+                        
+                        if (postback.action === 'add') {
+                          var newMsg = {};
+                          newMsg.source = msg.source;
+                          newMsg.msg = 'save ' + postback.selected;
+                          newMsg.tokens = [msg.msg];
+                          newMsg.thread = msg.thread;
+                          newMsg.thread.sequence += 1;
+                          newMsg.incoming = true;
+                          newMsg.amazon = msg.amazon;
+                          // newMsg.searchId = postback.dataId
+                          newMsg.source =  {
+                              'origin':'facebook',
+                              'channel': sender.toString(),
+                              'org': "facebook_" + sender.toString(),
+                              'id':"facebook_" + sender.toString(),
+                              'user': sender.toString()
+                          };
+                          ioKip.preProcess(newMsg);
+                        }
+                        else if (postback.action === 'remove') {
+                          var newMsg = {};
+                          newMsg.source = msg.source;
+                          newMsg.msg = 'remove ' + postback.selected;
+                          newMsg.flag = 'purchase.remove';
+                          newMsg.bucket = 'purchase';
+                          newMsg.action = 'remove';
+                          newMsg.tokens = [msg.msg];
+                          newMsg.thread = msg.thread;
+                          newMsg.thread.sequence += 1;
+                          newMsg.incoming = true;
+                          newMsg.amazon = msg.amazon;
+                          // newMsg.searchId = postback.dataId;
+                          newMsg.source =  {
+                              'origin':'facebook',
+                              'channel': sender.toString(),
+                              'org': "facebook_" + sender.toString(),
+                              'id':"facebook_" + sender.toString(),
+                              'user': sender.toString()
+                          };
+                          ioKip.preProcess(newMsg);
+                        }
+                        else if (postback.action === 'list') {
+                          var newMsg = {};
+                          newMsg.source = msg.source;
+                          newMsg.msg = 'view cart';
+                          newMsg.bucket = 'purchase';
+                          newMsg.action = 'purchase.list';
+                          newMsg.tokens = [newMsg.msg];
+                          newMsg.thread = msg.thread;
+                          newMsg.thread.sequence += 1;
+                          newMsg.incoming = true;
+                          newMsg.amazon = msg.amazon;
+                          // newMsg.searchId = postback.dataId;
+                          newMsg.source =  {
+                              'origin':'facebook',
+                              'channel': sender.toString(),
+                              'org': "facebook_" + sender.toString(),
+                              'id':"facebook_" + sender.toString(),
+                              'user': sender.toString()
+                          };
+                          ioKip.preProcess(newMsg);
+                        }
                     });
                 }
                 else {

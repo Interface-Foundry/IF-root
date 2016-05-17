@@ -48,6 +48,11 @@ var cinnaEnv;
 var upload = require('../../../../IF_services/upload.js');
 var email = require('./email');
 var request = require('request');
+// var fbsdk = require('../fbsdk');
+
+
+
+
 /////////// LOAD INCOMING ////////////////
 
 
@@ -1495,6 +1500,9 @@ var sendTxtResponse = function(data,msg,flag){
 var outgoingResponse = function(data,action,source) { //what we're replying to user with
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
+        
+    // data.searchId = mongoose.Types.ObjectId();
+
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(urlArr){
             //sending out stitched image response
@@ -1506,7 +1514,6 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                 // if (data.source.origin == 'slack') {
 
                     //store a new mongo ID to pass in Slack callback
-                    data.searchId = mongoose.Types.ObjectId();
 
                     // var moreObj = {};
                     // moreObj.actions = [{
@@ -1647,8 +1654,8 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
         });
     }
     else if (action == 'txt'){
-
         banter.getCinnaResponse(data,function(res){
+            // data.searchId = mongoose.Types.ObjectId();
             if(res && res !== 'null'){
                 // data.client_res = [];
                 // data.client_res.push(res);
@@ -1659,6 +1666,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
     }
     //no cinna response check
     else if (action == 'final'){
+        // data.searchId = mongoose.Types.ObjectId();
         sendResponse(data);
     }
 }
@@ -1681,7 +1689,7 @@ var checkOutgoingBanter = function(data){
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
-
+    data.searchId = mongoose.Types.ObjectId();
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE');
@@ -2133,7 +2141,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": JSON.stringify({dataId: data.searchId, selected: 1})
+                        "payload": JSON.stringify({dataId: data.searchId, action: "add", selected: 1})
                       }],
                     },{
                       "title": data.client_res[2].message,
@@ -2145,7 +2153,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": JSON.stringify({dataId: data.searchId, selected: 2})
+                        "payload": JSON.stringify({dataId: data.searchId, action: "add", selected: 2})
                       }],
                     },{
                       "title": data.client_res[3].message,
@@ -2157,7 +2165,7 @@ var sendResponse = function(data,flag){
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
-                        "payload": JSON.stringify({dataId: data.searchId, selected: 3})
+                        "payload": JSON.stringify({dataId: data.searchId, action: "add", selected: 3})
                       }],
                     }]
                   }
@@ -2227,55 +2235,42 @@ var sendResponse = function(data,flag){
 
         }
          else if (data.action == 'save') {
+
             // console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res[0])
             var messages = ['Awesome! I\'ve saved your item for you 😊 \n'];
             data.client_res[0].shift();
-            console.log('\n\n\nFacebook SAVE: ', JSON.stringify(data.client_res));
+            console.log('\n\n\nFacebook SAVE Client_res: ', JSON.stringify(data.client_res));
             var photos = [];
             var titles = [];
             var links = [];
             var otherInfo = [];
-            data.client_res[0].forEach(function(el, index) {
-                if (el.text && el.text.constructor === Array) {
-                    var otherInfoString = ''
-                    for (var i = 0; i < el.text.length -1; i++) {
-                       if (i == 0) { titles.push(el.text[i]) } else { otherInfoString = otherInfoString.concat('\n' + el.text[i]) };
-                       if (el.text[i].indexOf('http:') > -1) links.push(el.text[i]);
-                       messages.push(el.text[i] + '\n');
-                    }
-                    otherInfo.push(otherInfoString);
-                }
-               if (el.thumb_url) {
-                    photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            console.log('\n\n\nMessages ', messages, '\ndata.source: ', data.source);
-
             var cartDisplay = {
-                "attachment": {
-                  "type": "template",
-                  "payload": {
-                    "template_type": "generic",
-                    "elements": []
+                    "attachment": {
+                      "type": "template",
+                      "payload": {
+                        "template_type": "generic",
+                        "elements": []
+                      }
                     }
-                }
             };
-
-            for (var k = 0; k < titles.length; k++) {
-                var cart_item = {
-                  "title": truncate(titles[k]),
-                  "subtitle": otherInfo[k],
-                  "image_url": photos[k].path,
-                  "buttons": [{
-                    "type": "web_url",
-                    "url": links[k],
-                    "title": "Product Page"
-                  }]
+            data.client_res[0].forEach(function(el, index) {
+                if (el.text && el.text.title && el.text.price && el.text.quantity) {
+                    var cart_item = {
+                      "title": el.text.title,
+                      "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
+                      "buttons":[{ "type": "postback", "title": "➕", "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
+                      { "type": "postback", "title": "➖", "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index + 1) })}]
+                    }
+                    if (el.thumb_url) {
+                      cart_item.image_url =  el.thumb_url;
+                    }
+                     cartDisplay.attachment.payload.elements.push(cart_item);
                 }
-                cartDisplay.attachment.payload.elements.push(cart_item);
-              };
-
-              console.log('\n\n\n\n\nCART DISPLAY: ', JSON.stringify(cartDisplay), data.source)
+              
+               // if (!(Object.keys(cart_item).length === 0 && cart_item.constructor === Object)) {
+               // }
+               // console.log('CART_ITEM: ', cart_item)
+            })
         
               var firstMessage = {
                 "recipient": {"id": data.source.channel},
@@ -2316,7 +2311,6 @@ var sendResponse = function(data,flag){
                     })
                 })
 
-           
         }
         else if (data.action == 'checkout') {
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
@@ -2358,6 +2352,85 @@ var sendResponse = function(data,flag){
                if (err) console.log('post err ',err);
                console.log(body)
             })
+        }
+        else if (data.action === 'remove') {
+              // console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res[0])
+            // data.client_res[0].shift();
+            console.log('\n\n\nFacebook REMOVE Client_res: ', JSON.stringify(data.client_res));
+                var message = {
+                "recipient": {"id": data.source.channel},
+                "message":{
+                    "attachment":{
+                          "type":"template",
+                          "payload":{
+                            "template_type":"button",
+                            "text": "Removed item from your cart.",
+                            "buttons":[
+                              { "type": "postback", 
+                                "title": "View Cart", 
+                                "payload": JSON.stringify({"dataId": data.searchId, "action": "list"})
+                              }
+                            ]
+                          }
+                     }
+                   }
+              };
+            request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: message
+            },
+            function (err, res, body) {
+                if (err) console.log('post err ',err);
+                console.log(body);
+            })
+
+        }
+        else if (data.action === 'list'){
+            console.log('FACEBOOK LIST', data.client_res)
+             var messages = ['Your updated cart: '];
+            data.client_res.shift();
+            console.log('\n\n\nFacebook LIST: ',data.client_res[0]);
+            var photos = [];
+            data.client_res.forEach(function(el, index) {
+                if (typeof el.text  == 'array') {
+                    el.text.forEach(function(txt){
+                        messages.push(txt + '\n');
+                    })
+                }
+                else if (typeof el.text == 'string'){
+                    messages.push(el.text)
+                }
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'), '\ndata.source: ', data.source);
+            var firstMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text":messages.join('\n')
+                },
+                "notification_type": "NO_PUSH"
+             }; 
+
+            request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
+                method: "POST",
+                json: true,
+                body: firstMessage
+            },
+            function (err, res, body) {
+               if (err) console.log('post err ',err);
+               console.log(body)
+            })
+
         }
     }
     //* * * * * * * *
@@ -2694,8 +2767,12 @@ function removeCartItem(data){
       for (var index = 0; index < data.searchSelect.length; index++) {
           var searchSelect = data.searchSelect[index];
           console.log('removing searchSelect ' + searchSelect);
-
-          yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect);
+          if (data.source.origin === 'slack') {
+              yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, false);
+          }
+          else if (data.source.origin === 'facebook') {
+              yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, true);
+          }
       }
 
       data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart']
@@ -2807,12 +2884,11 @@ function viewCart(data, show_added_item) {
               ].join('\n');
            }
            else if (data.source.origin === 'facebook'){
-             var text = [
-                (i+1) + '. ' + item.title,
-                link,
-                'Quantity: ' + item.quantity,
-                '_Added by: ' + userString
-             ]
+             var text = {
+                title: item.title,
+                quantity: item.quantity, 
+                price: item.price
+             } 
            }
         } 
         else {
@@ -2824,11 +2900,11 @@ function viewCart(data, show_added_item) {
               ].join('\n');
           }
          else if (data.source.origin === 'facebook') {
-             var text = [
-                (i+1) + '. ' + item.title,
-                'Quantity: ' + item.quantity,
-                '_Added by: ' + userString
-             ]
+            var text = {
+                title: item.title,
+                quantity: item.quantity, 
+                price: item.price
+             } 
            }
       }
 

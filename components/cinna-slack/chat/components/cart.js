@@ -92,16 +92,18 @@ module.exports.addToCart = function(org_id, user_id, item, personal) {
 // user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, user_id, number) {
+module.exports.removeFromCart = function(slack_id, user_id, number, personal) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
-    if (slack_id !== null) {
-      var cart = yield getCart(slack_id);
+    if (!personal) {
+      personal = false;
+      var cart = yield getCart(slack_id, personal);
       var team = yield db.slackbots.findOne({team_id: slack_id});
       var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
     } else {
-      var cart = yield getCart(user_id);
+      personal = true;
+      var cart = yield getCart(user_id, personal);
     }
 
     // need to watch out for items that have multiple quantities
@@ -164,7 +166,7 @@ var getCart = module.exports.getCart = function(slack_id, personal) {
     // Get the Kip mongodb cart first (amazon cart next)
     //
     var cart;
-    console.log('getting team cart for ' + slack_id)
+    console.log('getting cart for ' + slack_id)
     var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items', '-source_json').exec();
 
     if (!team_carts || team_carts.length === 0) {

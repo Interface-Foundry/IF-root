@@ -1413,6 +1413,9 @@ var getCinnaResponse = function(data,callback){
                     case 'removeAll':
                         res = 'All items removed from your cart. To start a new search just chat me the item you\'re looking for';
                         break;
+                    case 'remove' :
+                        res = '';
+                        break;
                     case 'list':
                         res = [
                         {
