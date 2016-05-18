@@ -1,5 +1,5 @@
 /*eslint-env es6*/
-var db = require('db')
+var db = require('../../db')
 var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')

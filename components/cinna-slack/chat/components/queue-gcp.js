@@ -1,4 +1,4 @@
-var kip = require('kip');
+var kip = require('../../kip');
 var gcloud = require('gcloud');
 var rx = require('rx');
 

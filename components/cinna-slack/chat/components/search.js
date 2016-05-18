@@ -9,7 +9,7 @@ var amazonHTML = require('./amazonHTML');
 var history = require("./history.js");
 var processData = require("./process.js");
 var ioKip = require("./io.js");
-var kip = require('kip')
+var kip = require('../../kip')
 
 var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
 

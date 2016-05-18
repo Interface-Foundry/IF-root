@@ -1,7 +1,7 @@
 /*eslint-env es6*/
 var botkit = require('botkit');
 var controller = botkit.slackbot();
-var db = require('db');
+var db = require('../../db');
 var co = require('co');
 var datejs = require('./date');
 var momenttz = require('moment-timezone');

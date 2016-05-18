@@ -45,7 +45,7 @@ var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
 
 //set env vars
-var config = require('config');
+var config = require('../config');
 
 process.on('uncaughtException', function (err) {
   console.error('uncaught exception', new Date())

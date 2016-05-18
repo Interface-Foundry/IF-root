@@ -12,12 +12,12 @@
 // var sendgrid = require('sendgrid')(key);
 var co = require('co');
 require('promisify-global');
-var db = require('db');
+var db = require('../../db');
 var iokip = require('./io');
 var uuid = require('uuid');
 var _ = require('lodash');
 var linkify = require('linkifyjs');
-var send = require('../../../IF_mail/IF_mail.js').send;
+var send = require('../../mail/IF_mail.js').send;
 var juice = require('juice');
 var fs = require('fs');
 var parsereply = require('parse-reply');

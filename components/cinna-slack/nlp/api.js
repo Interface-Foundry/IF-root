@@ -1,5 +1,5 @@
 var request = require('request')
-var config = require('config')
+var config = require('../config')
 // var normalize = require('node-normalizer')
 // var qtypes = require('qtypes')
 var colors = require("./colors")

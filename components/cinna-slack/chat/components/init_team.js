@@ -1,5 +1,5 @@
-var db = require('db')
-var kip = require('kip')
+var db = require('../../db')
+var kip = require('../../kip')
 var request = require('request')
 var debug = require('debug')('chat')
 

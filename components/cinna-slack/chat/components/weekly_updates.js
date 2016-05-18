@@ -1,5 +1,5 @@
 /*eslint-env es6*/
-var db = require('db');
+var db = require('../../db');
 var Chatuser = db.Chatuser;
 var co = require('co');
 var cron = require('cron');
@@ -11,7 +11,7 @@ var promisify = require('promisify-node');
 var banter = require("./banter.js");
 var processData = require("./process.js");
 var validator = require('validator');
-var mailerTransport = require('../../../IF_mail/IF_mail.js');
+var mailerTransport = require('../../mail/IF_mail.js');
 var async = require('async');
 var _ = require('lodash');
 var email = require('./email');

@@ -1,5 +1,5 @@
 var request = require('request')
-var config = require('config')
+var config = require('../config')
 
 var stitch = module.exports = function(imageUrls, callback) {
   request({

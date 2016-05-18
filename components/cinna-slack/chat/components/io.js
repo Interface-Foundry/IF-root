@@ -25,12 +25,12 @@ var kipcart = require('./cart');
 var nlp = require('../../nlp/api');
 
 //set env vars
-var config = require('config');
-var mailerTransport = require('../../../IF_mail/IF_mail.js');
+var config = require('../../config');
+var mailerTransport = require('../../mail/IF_mail.js');
 
 //load mongoose models
 var mongoose = require('mongoose');
-var db = require('db');
+var db = require('../../db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
@@ -44,7 +44,7 @@ var io; //global socket.io var...probably a bad idea, idk lol
 var supervisor = require('./supervisor');
 var cinnaEnv;
 // var BufferList = require('bufferlist').BufferList
-var upload = require('../../../../IF_services/upload.js');
+var upload = require('./upload.js');
 // var redisClient = require('../../../../redis.js');
 // var redis = require('redis');
 // var client = redis.createClient();

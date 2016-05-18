@@ -2,11 +2,11 @@
 
 var request = require('request')
 var cheerio = require('cheerio')
-var kip = require('kip')
+var kip = require('../../kip')
 var debug = require('debug')('amazon')
 var memcache = require('memory-cache');
 var fs = require('fs')
-var mailerTransport = require('../../../IF_mail/IF_mail.js');
+var mailerTransport = require('../../mail/IF_mail.js');
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
