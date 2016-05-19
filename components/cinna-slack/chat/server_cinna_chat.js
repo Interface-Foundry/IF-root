@@ -213,8 +213,8 @@ app.post('/facebook', function (req, res) {
                           newMsg.source = msg.source;
                           newMsg.msg = 'remove ' + postback.selected;
                           // newMsg.flag = 'purchase.remove';
-                          // newMsg.bucket = 'purchase';
-                          // newMsg.action = 'remove';
+                          newMsg.bucket = 'purchase';
+                          newMsg.action = 'remove';
                           newMsg.tokens = [newMsg.msg];
                           newMsg.thread = msg.thread;
                           newMsg.thread.sequence += 1;
@@ -229,7 +229,7 @@ app.post('/facebook', function (req, res) {
                               'id':"facebook_" + sender.toString(),
                               'user': sender.toString()
                           };
-                          ioKip.preProcess(newMsg);
+                          ioKip.incomingAction(newMsg);
                         }
                         else if (postback.action === 'list') {
                           var newMsg = {};

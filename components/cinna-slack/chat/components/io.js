@@ -1292,8 +1292,8 @@ function incomingAction(data){
                 }
             }
    }
-data.flags = data.flags ? data.flags : {};
-//---------------------------------------------------------------------------//
+    data.flags = data.flags ? data.flags : {};
+    //---------------------------------------------------------------------------//
     history.saveHistory(data,true,function(res){
         supervisor.emit(res, true)
     });
@@ -2138,7 +2138,7 @@ var sendResponse = function(data,flag){
                       "buttons": [{
                         "type": "web_url",
                         "url": data.client_res[1].link,
-                        "title": "Web url"
+                        "title": "Product Link"
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
@@ -2150,7 +2150,7 @@ var sendResponse = function(data,flag){
                       "buttons": [{
                         "type": "web_url",
                         "url": data.client_res[2].link,
-                        "title": "Web url"
+                        "title": "Product Link"
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
@@ -2162,7 +2162,7 @@ var sendResponse = function(data,flag){
                       "buttons": [{
                         "type": "web_url",
                         "url": data.client_res[3].link,
-                        "title": "Web url"
+                        "title": "Product Link"
                       }, {
                         "type": "postback",
                         "title": "Add to Cart",
@@ -2350,60 +2350,18 @@ var sendResponse = function(data,flag){
         }
         else if (data.action === 'remove') {
 
-              var newMsg = {};
-              newMsg.source = data.source;
-              newMsg.msg = 'view cart';
-              newMsg.bucket = 'purchase';
-              newMsg.action = 'list';
-              newMsg.tokens = [newMsg.msg];
-              newMsg.thread = data.thread;
-              newMsg.thread.sequence += 1;
-              newMsg.incoming = true;
-              newMsg.amazon = data.amazon;
-              preProcess(newMsg);
+            data.msg = 'view cart';
+            data.bucket = 'purchase';
+            data.action = 'list';
+            incomingAction(data);
 
-
-
-            //  processData.urlShorten(data,function(res) {
-            //   data.client_res = [];
-            //   data.amazon.forEach(function(item, index) {
-            //       var attachObj = {};
-            //         attachObj.photo = res[index];
-            //         attachObj.message =  (index+1) + '. ' + truncate(data.amazon[index].ItemAttributes[0].Title[0]);
-            //         data.client_res.push(attachObj);
-            //   });
-            // console.log('\n\n\nFacebook REMOVE: ', data.client_res);
-            // var cartDisplay = {
-            //     "attachment": {
-            //         "type": "template",
-            //         "payload": {
-            //         "template_type": "generic",
-            //         "elements": []
-            //         }
-            //      }
-            // };
-            // data.client_res.forEach(function(el, index) {
-            //     if (el.text && el.text.title && el.text.price && el.text.quantity) {
-            //         var cart_item = {
-            //           "title": el.text.title,
-            //           "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
-            //           "buttons":[{ "type": "postback", "title": "➕", "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
-            //           { "type": "postback", "title": "➖", "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index +1) })}]
-            //         }
-            //         if (el.thumb_url) {
-            //           cart_item.image_url =  el.thumb_url;
-            //         }
-            //          cartDisplay.attachment.payload.elements.push(cart_item);
-            //     }
-            // })
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text": "We\'ve removed that item for you 😊"
-                    // messages.join('\n')
-                },
-                "notification_type": "NO_PUSH"
-             };
+            // var firstMessage = {
+            //     "recipient": {"id": data.source.channel},
+            //     "message": {
+            //         "text": "We\'ve removed that item for you 😊"
+            //     },
+            //     "notification_type": "NO_PUSH"
+            //  };
             // request.post({ 
             //     url: 'https://graph.facebook.com/v2.6/me/messages',
             //     qs: {access_token: fbtoken},
@@ -2417,29 +2375,13 @@ var sendResponse = function(data,flag){
             //     function (err, res, body) {
             //         if (err) console.log('post err ',err);
             //         console.log(body);
-                    // request.post({ 
-                    //     url: 'https://graph.facebook.com/v2.6/me/messages',
-                    //     qs: {access_token: fbtoken},
-                    //     method: "POST",
-                    //     json: {
-                    //       recipient: {id: data.source.channel},
-                    //       message: cartDisplay,
-                    //     },
-                    //     headers: {
-                    //         "content-type": "application/json",
-                    //     }
-                    // },
-                    // function (err, res, body) {
-                    //    if (err) console.log('post err ',err);
-                    //    console.log(body);
-                    // })
-                // })
-         // })
+            //     })
         }
         else if (data.action === 'list'){
             console.log('FACEBOOK LIST', data.client_res)
 
             if (data.client_res.length === 0) {
+                console.log('FACEBOOK LIST', data.action, data.bucket)
                 var emptyMessage = {
                     "recipient": {"id": data.source.channel},
                     "message": {
@@ -2493,44 +2435,48 @@ var sendResponse = function(data,flag){
                 }
             })
 
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text": "Your Cart:"
-                    // messages.join('\n')
-                },
-                "notification_type": "NO_PUSH"
-             };
             request.post({ 
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {access_token: fbtoken},
                 method: "POST",
-                json: true,
+                json: {
+                  recipient: {id: data.source.channel},
+                  message: cartDisplay,
+                },
                 headers: {
                     "content-type": "application/json",
+                }
+            },
+            function (err, res, body) {
+               if (err) console.log('post err ',err);
+               console.log(body);
+            })
+        }
+        else if (data.action == 'smallTalk') {
+            if (data.client_res[0] && data.client_res[0].indexOf('removed that item for you 😊') > -1) {
+                return
+            }
+         var message = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text": data.client_res[0]
                 },
-                body: firstMessage
-                },
-                function (err, res, body) {
-                    if (err) console.log('post err ',err);
-                    console.log(body);
-                    request.post({ 
-                        url: 'https://graph.facebook.com/v2.6/me/messages',
-                        qs: {access_token: fbtoken},
-                        method: "POST",
-                        json: {
-                          recipient: {id: data.source.channel},
-                          message: cartDisplay,
-                        },
-                        headers: {
-                            "content-type": "application/json",
-                        }
-                    },
-                    function (err, res, body) {
-                       if (err) console.log('post err ',err);
-                       console.log(body);
-                    })
-                })
+                "notification_type": "NO_PUSH"
+            };
+           request.post({ 
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {access_token: fbtoken},
+            method: "POST",
+            json: true,
+            headers: {
+                "content-type": "application/json",
+            },
+            body: message
+            },
+            function (err, res, body) {
+                if (err) console.log('post err ',err);
+                console.log(body);
+            })
         }
     }
     //* * * * * * * *
@@ -2871,17 +2817,12 @@ function removeCartItem(data){
               yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, false);
           }
           else if (data.source.origin === 'facebook') {
-              var yieldedcart = yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, true);
-              // console.log('iojs 2874: yielded cart: ', yieldedcart)
-              data.bucket = 'purchase';
-              data.action = 'list';
-              return sendResponse(data);
-
+              yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, true);
           }
       }
 
       data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart']
-      outgoingResponse(data, 'txt');
+      if (!(data.source.origin == 'facebook'))  outgoingResponse(data, 'txt');
       viewCart(data);
 
     }).then(function(){}).catch(function(err) {
@@ -2923,7 +2864,7 @@ function viewCart(data, show_added_item) {
       }
 
       if (cart.items.length < 1) {
-        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
+        return sendTxtResponse(data, 'Your cart is empty!');
       }
 
       // get the latest added item if we need to highlight it
@@ -3563,7 +3504,7 @@ function InvervalTimer(callback, interval) {
         timerId = setInterval(callback, interval);
         state = 1;
     };
-
+ 
     startTime = new Date();
     timerId = setInterval(callback, interval);
     state = 1;
@@ -3577,6 +3518,7 @@ module.exports.preProcess = preProcess;
 module.exports.slackUsers = slackUsers;
 module.exports.sendResponse = sendResponse;
 module.exports.incomingMsgAction = incomingMsgAction;
+module.exports.incomingAction = incomingAction;
 module.exports.loadSocketIO = loadSocketIO;
 
 module.exports.sendTxtResponse = sendTxtResponse;
