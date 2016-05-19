@@ -140,6 +140,11 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
             //new message mongo obj
             newMessage(data, function(msg){
 
+                //console.log('SAVING THIS NEW MESSAGE ',data);
+
+                if(msg.kikData){
+                    msg.kikData = JSON.stringify(msg.kikData);
+                }
 
                 if (msg.amazon){
                     msg.amazon = [];
@@ -196,6 +201,9 @@ var recallHistory = function(data,callback){
                 console.log('Error: Cannot find initial search for recallHistory');
             }
             else {
+                if(msg && msg.kikData){
+                    msg.kikData = JSON.parse(msg.kikData);
+                }
                 if (msg && msg.amazon){
                     var tempArr = msg.amazon; //lmao amazon
                     msg.amazon = [];
@@ -225,7 +233,9 @@ var recallHistory = function(data,callback){
                                 console.log('Error: Cannot find initial search for recallHistory');
                             }
                             else {
-
+                                if(msg && msg.kikData){
+                                    msg.kikData = JSON.parse(msg.kikData);
+                                }
                                 if (msg && msg.amazon){
                                     var tempArr = msg.amazon; //lmao amazon
                                     msg.amazon = [];
@@ -292,6 +302,10 @@ var recallContext = function(data,callback){
             console.log('Error: Cannot find initial search for recallHistory');
         }
         else {
+
+            if(msg && msg.kikData){
+                msg.kikData = JSON.parse(msg.kikData);
+            }
             if (msg && msg.amazon){
                 var tempArr = msg.amazon; //lmao amazon
                 msg.amazon = [];

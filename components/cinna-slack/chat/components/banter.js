@@ -191,6 +191,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'hi kip') > 60:
         case textSimilar(input,'hello kip') > 60:
         case textSimilar(input,'hey kip') > 60:
+        case textSimilar(input,'/start') > 90:
             flag = 'basic';
             res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
             break;     
@@ -905,15 +906,21 @@ var checkForCanned = function(input,callback,origin,source) {
 
 
         //INTENDED FOR KIK CALLBACK FOCUS DETECTION 
+        case input.indexOf('⏪') > -1:
+            if(origin=='kik'){
+
+                flag = 'kik.back';
+                break;
+            }
         case input.indexOf('1⃣') > -1:
             switch(true){
-                case input.indexOf('⭐') > -1:
+                case input.indexOf('Add to Cart') > -1:
                     flag = 'purchase.save';
                     break;
-                case input.indexOf('💎') > -1:
+                case input.indexOf('Cheaper') > -1:
                     flag = 'search.cheaper';
                     break;
-                case input.indexOf('⚡') > -1:
+                case input.indexOf('Similar') > -1:
                     flag = 'search.similar';
                     break;
                 default:
@@ -923,13 +930,13 @@ var checkForCanned = function(input,callback,origin,source) {
             break;   
         case input.indexOf('2⃣') > -1:
             switch(true){
-                case input.indexOf('⭐') > -1:
+                case input.indexOf('Add to Cart') > -1:
                     flag = 'purchase.save';
                     break;
-                case input.indexOf('💎') > -1:
+                case input.indexOf('Cheaper') > -1:
                     flag = 'search.cheaper';
                     break;
-                case input.indexOf('⚡') > -1:
+                case input.indexOf('Similar') > -1:
                     flag = 'search.similar';
                     break;
                 default:
@@ -939,13 +946,13 @@ var checkForCanned = function(input,callback,origin,source) {
             break;   
         case input.indexOf('3⃣') > -1:
             switch(true){
-                case input.indexOf('⭐') > -1:
+                case input.indexOf('Add to Cart') > -1:
                     flag = 'purchase.save';
                     break;
-                case input.indexOf('💎') > -1:
+                case input.indexOf('Cheaper') > -1:
                     flag = 'search.cheaper';
                     break;
-                case input.indexOf('⚡') > -1:
+                case input.indexOf('Similar') > -1:
                     flag = 'search.similar';
                     break;
                 default:
@@ -1381,7 +1388,7 @@ var getCinnaResponse = function(data,callback){
                     numEmoji = ':one:';
                 }
                 else if (data.source.origin == 'kik'){
-                    numEmoji = '1️⃣️';
+                    numEmoji = '1⃣️';
                 }
               
                 break;
@@ -1433,7 +1440,7 @@ var getCinnaResponse = function(data,callback){
                     }
                     break;
                 case 'similar':
-                    res = 'We found some options similar to '+numEmoji+', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                    res = 'I found some options similar to '+numEmoji+', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
                     break;
                 case 'modify':
                 case 'modified': //because the nlp json is wack

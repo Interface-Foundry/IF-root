@@ -70,7 +70,7 @@ var messageSchema = mongoose.Schema({
     slackData: {
         callback_id: String
     },
-    kipData: mongoose.Schema.Types.Mixed
+    kipData: String
 });
 
 module.exports = mongoose.model('Message', messageSchema);

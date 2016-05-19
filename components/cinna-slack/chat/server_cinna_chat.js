@@ -173,7 +173,7 @@ kik.send('HIIII','alyxmxe')
 
 //incoming message from kik
 kik.onTextMessage((message) => {
-  console.log('MESSAGE IN ',message)
+  //console.log('MESSAGE IN ',message)
   // console.log('REGULAR ID ',message.id)
   // console.log('MESSAGE FROM ',message.from)
 
@@ -189,15 +189,14 @@ kik.onTextMessage((message) => {
     },
     kikData: message
   };
-  console.log('KIPOBJ ',kipObj)
+  //console.log('KIPOBJ ',kipObj)
   ioKip.preProcess(kipObj);    
 
 });
 
 var sendToKik = function(data,message,type){
 
-  console.log('DATA INCOMING SEND TO KIK ',data)
-  console.log('MESSAGE INCOMING SEND TO KIK ',message)
+  //console.log('DATA INCOMING SEND TO KIK ',data)
 
   if(!data.kikData){
     console.error('error io.js: no kikData obj found in data.source')
@@ -216,7 +215,7 @@ var sendToKik = function(data,message,type){
       data.kikData.reply(message);
       break;
     default: 
-      console.log('DEFAULT????????????????')
+      //console.log('DEFAULT????????????????')
       data.kikData.reply(message)
   }
 }

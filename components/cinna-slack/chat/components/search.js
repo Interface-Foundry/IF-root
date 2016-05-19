@@ -31,7 +31,7 @@ var searchInitial = function(data,flag){
 }
 
 var searchSimilar = function(data){
-    if (data.dataModify && data.dataModify.val.length > 0){
+    if (data.dataModify && data.dataModify.val && data.dataModify.val.length > 0){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);
     }
@@ -1027,27 +1027,28 @@ var searchFocus = function(data) {
 
                     //get size
                     if (attribs.Size){
-                        cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                        cString = cString + '\n○ ' + "Size: " +  attribs.Size[0];
                     }
 
                     //get artist
                     if (attribs.Artist){
-                        cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                        cString = cString + '\n○ ' + "Artist: " +  attribs.Artist[0];
                     }
 
                     //get brand or manfacturer
                     if (attribs.Brand){
-                        cString = cString + ' ○ ' +  attribs.Brand[0];
+                        cString = cString + '\n○ ' +  attribs.Brand[0];
                     }
                     else if (attribs.Manufacturer){
-                        cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                        cString = cString + '\n○ ' +  attribs.Manufacturer[0];
                     }
 
                     //get all stuff in details box
                     if (attribs.Feature){
-                        cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
+                        cString = cString + '\n○ ' + attribs.Feature.join('\n░ ');
                     }
 
+                    cString = truncate(cString,260)
                     //done collecting details string, now send
                     if (cString){
                         data.client_res.push(cString);
@@ -1155,6 +1156,13 @@ var searchMore = function(data){
     if (data.recallHistory && data.recallHistory.amazon){
 
         var moreHist = data;
+        var kikData;
+
+        if(data.kikData){
+            kikData = data.kikData;
+        }
+
+
 
         //build new data obj so there's no mongo duplicate
         data = {};
@@ -1164,6 +1172,11 @@ var searchMore = function(data){
         data.action = moreHist.recallHistory.action;
         data.msg = moreHist.recallHistory.msg;
         data.tokens = moreHist.recallHistory.tokens;
+        if(kikData){
+            data.kikData = kikData;
+        }
+
+
          //----supervisor: reading flags ---//
          if (moreHist.flags) {
              data.flags = moreHist.flags
@@ -2048,12 +2061,18 @@ function traverseNodes(nodeList,findMe,callbackMM){
 
 
 //tools
+
 //trim a string to char #
-function truncate(string){
-   if (string.length > 48)
-      return string.substring(0,48)+'...';
-   else
-      return string;
+function truncate(string,l) {
+    if (l){
+        return string.substring(0,l);
+    }else {
+       if (string.length > 48)
+          return string.substring(0,48)+'...';
+       else
+          return string;        
+    }
+
 };
 
 /// exports

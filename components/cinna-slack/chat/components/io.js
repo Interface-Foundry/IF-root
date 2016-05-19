@@ -728,6 +728,26 @@ var preProcess = function(data){
                     incomingAction(data);
                     break;
 
+                case 'kik.back':
+
+                    console.log('OK O K O K  K K K K O O O O OKO KO KO KO KO ',data)
+
+                    data.bucket = 'search';
+
+                    history.recallHistory(data, function(res){
+                        // if (res){
+                        //     data.recallHistory = res;
+                        // }
+
+                        res.kikData = data.kikData;
+
+                        console.log('RECALL HIST BACK ',res)
+                        outgoingResponse(res,'stitch','amazon');
+                        //search.searchSimilar(data);
+                    });
+
+                    break;
+
                 //for testing in PAPRIKA
                 case 'slack.search':
                     // data.searchSelect = [];
@@ -1330,7 +1350,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                             // var item = response.amazon[count];
 
-                            console.log('ITEM ATTRIBS ',JSON.stringify(data.amazon[count].ItemAttributes[0]))
+                            //console.log('ITEM ATTRIBS ',JSON.stringify(data.amazon[count].ItemAttributes[0]))
 
 
                             //collect info for keyboard buttons
@@ -1366,7 +1386,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                             //kikMsg.keyboardData = collectInfo;
 
-                            console.log('KIK MSG BUILT ',kikMsg)
+                            //console.log('KIK MSG BUILT ',kikMsg)
 
                             data.client_res.push(kikMsg);
  
@@ -1386,15 +1406,13 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                         var keyboardObj = [{
                             "type": "suggested",
+                            "hidden":false,
                             "responses": []
                         }];
                         var counter = 1;
 
-                        console.log('HAMCLINE_RES ',data.client_res);
 
                         async.eachSeries(data.client_res, function(m, callback) {
-
-                            console.log('AMAZON RESULTS ',JSON.stringify(m));
 
                             keyboardObj[0].responses.push(
                                 {
@@ -1402,12 +1420,11 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                                   "body": truncate(m._state.text,17)
                                 }
                             )
-                            console.log('ZBZBZBZBZBZBZ ',keyboardObj[0]);
                             counter++;
                             callback()
 
                         }, function done(){
-                            console.log('MMMMMMMMMM ',keyboardObj)
+                        
                             if(data.client_res[0]){
 
                                 keyboardObj[0].responses.push(
@@ -1416,7 +1433,19 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                                       "body": "⏩ MORE"
                                     }
                                 )
+
+                                //dumb temp stuff here for assigning keyboards to items because what Kik documentation
                                 data.client_res[0]._state.keyboards = keyboardObj;
+                                if(data.client_res[1]){
+                                    data.client_res[1]._state.keyboards = keyboardObj;
+                                }
+                                if(data.client_res[2]){
+                                    data.client_res[2]._state.keyboards = keyboardObj;
+                                }
+                                if(data.client_res[3]){
+                                    data.client_res[3]._state.keyboards = keyboardObj;
+                                }
+
                             }else {
                                 console.error('some error go away')
                             }
@@ -1425,10 +1454,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                     }
                     else {
                         checkOutgoingBanter(data);
-                    }
-
-
-                    
+                    }   
                 });
             });
             // function compileResults(){
@@ -1483,6 +1509,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
+
             data.client_res.unshift(res); // add to beginning of message
              // console.log('mitsu6')
 
@@ -1497,6 +1524,8 @@ var checkOutgoingBanter = function(data){
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
+
+
 
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
@@ -1562,7 +1591,20 @@ var sendResponse = function(data,flag){
 
             var message = data.client_res[0]; //use first item in client_res array as text message
 
+            console.log('👺 👺 👺 👺 👺 👺 MESSAGE ',message)
+             console.log('👺 👺 👺 👺 👺 👺 CLIENT_RES[1] ',data.client_res[1])
+
+
             message = Kik.Message.text(message);
+
+            //dumb way to add keyboard to cinna response message so kik doesn't kill itself
+            if(!message._state.keyboards && data.client_res[1] && data.client_res[1]._state && data.client_res[1]._state.keyboards){
+
+                console.log('👺z👺z👺zz👺zz👺')
+
+                message._state.keyboards = data.client_res[1]._state.keyboards;
+            }
+
 
             okThis.push(message)
 
@@ -1732,9 +1774,9 @@ var sendResponse = function(data,flag){
                    //add pic
                     kikMsg = Kik.Message
                       .picture(pic)
-                      .setUrl(link)
+                      //.setUrl(link)
                       .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
-                      .setAttributionName('Amazon');
+                      .setAttributionName('View pic');
                       // .setTitle(picText)
                       // .setText(itemTitle)
                       //.setPicUrl(pic)
@@ -1800,27 +1842,39 @@ var sendResponse = function(data,flag){
                     
                     var keyboardObj = [{
                         "type": "suggested",
+                        "hidden":false,
                         "responses": [
                             {
                                 "type":"text",
-                                "body":emoji +" ░ ⭐ Add to Cart"
-                            },
-                            {
-                                "type":"text",
-                                "body":emoji +" ░ 💎 Cheaper"
-                            },
-                            {
-                                "type":"text",
-                                "body":emoji +" ░ ⚡ Similar"
-                            },
-                            {
-                                "type":"text",
                                 "body":"⏪ BACK" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
+                            },
+                            {
+                                "type":"text",
+                                "body":"Cheaper than "+emoji
+                            },
+                            {
+                                "type":"text",
+                                "body":"Similar to "+emoji
+                            },
+                            {
+                                "type":"text",
+                                "body":"Add "+emoji+" to Cart"
                             }
                         ]
                     }];   
 
+                    //kikRes[0]._state.keyboards = keyboardObj;
+
                     kikRes[0]._state.keyboards = keyboardObj;
+                    if(kikRes[1]){
+                        kikRes[1]._state.keyboards = keyboardObj;
+                    }
+                    if(kikRes[2]){
+                        kikRes[2]._state.keyboards = keyboardObj;
+                    }
+                    if(kikRes[3]){
+                        kikRes[3]._state.keyboards = keyboardObj;
+                    }
 
                     kipServer.sendToKik(data,kikRes,'search');
 
