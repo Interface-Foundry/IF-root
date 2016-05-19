@@ -186,32 +186,19 @@ app.post('/facebook', function (req, res) {
                         msg.amazon.push(JSON.parse(item)); //ughhhh
                         callback2();
                     }, function done(err){
-                        if (err) console.error(err)
-                          // var postbackData = {
-                          //     'msg': event.postback.msg,
-                          //     'source': {
-                          //         'origin':'facebook',
-                          //         'channel': sender.toString(),
-                          //         'org': "facebook_" + sender.toString(),
-                          //         'id':"facebook_" + sender.toString(),
-                          //         'user': sender.toString()
-                          //     },
-                          //     'searchSelect': [event.postback.selected],
-                          //     'amazon': event.postback.amazon,
-                          //     'recallHistory': event.postback.recallHistory,
-                          //     'fb_access_token': ''
-                          // };
-                        
+                        if (err) console.error(err);
+
                         if (postback.action === 'add') {
                           var newMsg = {};
                           newMsg.source = msg.source;
                           newMsg.msg = 'save ' + postback.selected;
-                          newMsg.tokens = [msg.msg];
+                          newMsg.tokens = [newMsg.msg];
                           newMsg.thread = msg.thread;
                           newMsg.thread.sequence += 1;
                           newMsg.incoming = true;
                           newMsg.amazon = msg.amazon;
-                          // newMsg.searchId = postback.dataId
+                          newMsg.searchSelect = [];
+                          newMsg.searchSelect.push(postback.selected);
                           newMsg.source =  {
                               'origin':'facebook',
                               'channel': sender.toString(),
@@ -225,15 +212,16 @@ app.post('/facebook', function (req, res) {
                           var newMsg = {};
                           newMsg.source = msg.source;
                           newMsg.msg = 'remove ' + postback.selected;
-                          newMsg.flag = 'purchase.remove';
-                          newMsg.bucket = 'purchase';
-                          newMsg.action = 'remove';
-                          newMsg.tokens = [msg.msg];
+                          // newMsg.flag = 'purchase.remove';
+                          // newMsg.bucket = 'purchase';
+                          // newMsg.action = 'remove';
+                          newMsg.tokens = [newMsg.msg];
                           newMsg.thread = msg.thread;
                           newMsg.thread.sequence += 1;
                           newMsg.incoming = true;
                           newMsg.amazon = msg.amazon;
-                          // newMsg.searchId = postback.dataId;
+                          newMsg.searchSelect = [];
+                          newMsg.searchSelect.push(postback.selected);
                           newMsg.source =  {
                               'origin':'facebook',
                               'channel': sender.toString(),
@@ -248,13 +236,12 @@ app.post('/facebook', function (req, res) {
                           newMsg.source = msg.source;
                           newMsg.msg = 'view cart';
                           newMsg.bucket = 'purchase';
-                          newMsg.action = 'purchase.list';
+                          newMsg.action = 'list';
                           newMsg.tokens = [newMsg.msg];
                           newMsg.thread = msg.thread;
                           newMsg.thread.sequence += 1;
                           newMsg.incoming = true;
                           newMsg.amazon = msg.amazon;
-                          // newMsg.searchId = postback.dataId;
                           newMsg.source =  {
                               'origin':'facebook',
                               'channel': sender.toString(),

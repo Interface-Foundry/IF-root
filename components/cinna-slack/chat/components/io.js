@@ -1599,7 +1599,8 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                             data.client_res.push(attachObj);
                             // '<'++' | ' + +'>';
-                        }else if (data.source.origin == 'socket.io'){
+                        }
+                        else if (data.source.origin == 'socket.io'){
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             data.client_res.push(urlArr[count]);
                         }
@@ -1692,7 +1693,7 @@ var sendResponse = function(data,flag){
     data.searchId = mongoose.Types.ObjectId();
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
-        console.log('SAVING OUTGOING RESPONSE');
+        console.log('SAVING OUTGOING RESPONSE', data.source, data.action);
         history.saveHistory(data,false,function(res){
             //whatever
         }); //saving outgoing message
@@ -2117,7 +2118,7 @@ var sendResponse = function(data,flag){
             // });
         }
     }
-        //* * * * * * * *
+    //* * * * * * * *
     // Facebook Outgoing
     //* * * * * * * *
     else if (data.source && data.source.channel && data.source.origin == 'facebook') {
@@ -2235,15 +2236,8 @@ var sendResponse = function(data,flag){
 
         }
          else if (data.action == 'save') {
-
-            // console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res[0])
-            var messages = ['Awesome! I\'ve saved your item for you 😊 \n'];
             data.client_res[0].shift();
             console.log('\n\n\nFacebook SAVE Client_res: ', JSON.stringify(data.client_res));
-            var photos = [];
-            var titles = [];
-            var links = [];
-            var otherInfo = [];
             var cartDisplay = {
                     "attachment": {
                       "type": "template",
@@ -2258,6 +2252,237 @@ var sendResponse = function(data,flag){
                     var cart_item = {
                       "title": el.text.title,
                       "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
+                      "buttons":[{ 
+                        "type": "postback", 
+                        "title": "➕", 
+                        "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
+                      { "type": "postback", 
+                        "title": "➖", 
+                        "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index +1) })}
+                        ]
+                    }
+                    if (el.thumb_url) {
+                      cart_item.image_url =  el.thumb_url;
+                    }
+                     cartDisplay.attachment.payload.elements.push(cart_item);
+                }
+            })
+            // var firstMessage = {
+            //     "recipient": {"id": data.source.channel},
+            //     "message": {
+            //         "text": "Awesome! I've saved your item for you 😊\n\n Your Cart:"
+            //     },
+            //     "notification_type": "NO_PUSH"
+            //  };
+            // request.post({ 
+            //     url: 'https://graph.facebook.com/v2.6/me/messages',
+            //     qs: {access_token: fbtoken},
+            //     method: "POST",
+            //     json: true,
+            //     headers: {
+            //         "content-type": "application/json",
+            //     },
+            //     body: firstMessage
+            //     },
+            //     function (err, res, body) {
+            //         if (err) console.log('post err ',err);
+            //         console.log(body);
+                    request.post({ 
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {access_token: fbtoken},
+                        method: "POST",
+                        json: {
+                          recipient: {id: data.source.channel},
+                          message: cartDisplay,
+                        },
+                        headers: {
+                            "content-type": "application/json",
+                        }
+                    },
+                    function (err, res, body) {
+                       if (err) console.log('post err ',err);
+                       console.log(body);
+                    })
+                // })
+
+        }
+        else if (data.action == 'checkout') {
+
+            var messages = ['Awesome! I\'ve saved your item for you 😊'];
+            data.client_res[0].shift();
+            console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
+            var photos = [];
+            data.client_res[0].forEach(function(el, index) {
+                if (typeof el.text  == 'array') {
+                    el.text.forEach(function(txt){
+                        messages.push(txt + '\n');
+                    })
+                }
+                else if (typeof el.text == 'string'){
+                    messages.push(el.text)
+                }
+               if (el.thumb_url) {
+                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
+               }
+            })
+            var firstMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text":messages.join('\n')
+                },
+                "notification_type": "NO_PUSH"
+             }; 
+
+            request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
+                method: "POST",
+                json: {
+                  recipient: {id: data.source.channel},
+                  message: cartDisplay,
+                }
+            },
+            function (err, res, body) {
+               if (err) console.log('post err ',err);
+               console.log(body)
+            })
+
+        }
+        else if (data.action === 'remove') {
+
+              var newMsg = {};
+              newMsg.source = data.source;
+              newMsg.msg = 'view cart';
+              newMsg.bucket = 'purchase';
+              newMsg.action = 'list';
+              newMsg.tokens = [newMsg.msg];
+              newMsg.thread = data.thread;
+              newMsg.thread.sequence += 1;
+              newMsg.incoming = true;
+              newMsg.amazon = data.amazon;
+              preProcess(newMsg);
+
+
+
+            //  processData.urlShorten(data,function(res) {
+            //   data.client_res = [];
+            //   data.amazon.forEach(function(item, index) {
+            //       var attachObj = {};
+            //         attachObj.photo = res[index];
+            //         attachObj.message =  (index+1) + '. ' + truncate(data.amazon[index].ItemAttributes[0].Title[0]);
+            //         data.client_res.push(attachObj);
+            //   });
+            // console.log('\n\n\nFacebook REMOVE: ', data.client_res);
+            // var cartDisplay = {
+            //     "attachment": {
+            //         "type": "template",
+            //         "payload": {
+            //         "template_type": "generic",
+            //         "elements": []
+            //         }
+            //      }
+            // };
+            // data.client_res.forEach(function(el, index) {
+            //     if (el.text && el.text.title && el.text.price && el.text.quantity) {
+            //         var cart_item = {
+            //           "title": el.text.title,
+            //           "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
+            //           "buttons":[{ "type": "postback", "title": "➕", "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
+            //           { "type": "postback", "title": "➖", "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index +1) })}]
+            //         }
+            //         if (el.thumb_url) {
+            //           cart_item.image_url =  el.thumb_url;
+            //         }
+            //          cartDisplay.attachment.payload.elements.push(cart_item);
+            //     }
+            // })
+            var firstMessage = {
+                "recipient": {"id": data.source.channel},
+                "message": {
+                    "text": "We\'ve removed that item for you 😊"
+                    // messages.join('\n')
+                },
+                "notification_type": "NO_PUSH"
+             };
+            // request.post({ 
+            //     url: 'https://graph.facebook.com/v2.6/me/messages',
+            //     qs: {access_token: fbtoken},
+            //     method: "POST",
+            //     json: true,
+            //     headers: {
+            //         "content-type": "application/json",
+            //     },
+            //     body: firstMessage
+            //     },
+            //     function (err, res, body) {
+            //         if (err) console.log('post err ',err);
+            //         console.log(body);
+                    // request.post({ 
+                    //     url: 'https://graph.facebook.com/v2.6/me/messages',
+                    //     qs: {access_token: fbtoken},
+                    //     method: "POST",
+                    //     json: {
+                    //       recipient: {id: data.source.channel},
+                    //       message: cartDisplay,
+                    //     },
+                    //     headers: {
+                    //         "content-type": "application/json",
+                    //     }
+                    // },
+                    // function (err, res, body) {
+                    //    if (err) console.log('post err ',err);
+                    //    console.log(body);
+                    // })
+                // })
+         // })
+        }
+        else if (data.action === 'list'){
+            console.log('FACEBOOK LIST', data.client_res)
+
+            if (data.client_res.length === 0) {
+                var emptyMessage = {
+                    "recipient": {"id": data.source.channel},
+                    "message": {
+                        "text": "Your Cart is empty!"
+                        // messages.join('\n')
+                    },
+                    "notification_type": "NO_PUSH"
+                };
+               request.post({ 
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {access_token: fbtoken},
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: emptyMessage
+                },
+                function (err, res, body) {
+                    if (err) console.log('post err ',err);
+                    console.log(body);
+
+                    })
+                   return;
+            }
+
+             var messages = ['Your updated cart: '];
+            data.client_res[0].shift();
+            data.client_res[0].shift();
+              var cartDisplay = {
+                "attachment": {
+                  "type": "template",
+                  "payload": {
+                    "template_type": "generic",
+                    "elements": []
+                  }
+                }
+            };
+            data.client_res[0].forEach(function(el, index) {
+                if (el.text && el.text.title && el.text.price && el.text.quantity) {
+                    var cart_item = {
+                      "title": el.text.title,
+                      "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
                       "buttons":[{ "type": "postback", "title": "➕", "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
                       { "type": "postback", "title": "➖", "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index + 1) })}]
                     }
@@ -2266,16 +2491,12 @@ var sendResponse = function(data,flag){
                     }
                      cartDisplay.attachment.payload.elements.push(cart_item);
                 }
-              
-               // if (!(Object.keys(cart_item).length === 0 && cart_item.constructor === Object)) {
-               // }
-               // console.log('CART_ITEM: ', cart_item)
             })
-        
-              var firstMessage = {
+
+            var firstMessage = {
                 "recipient": {"id": data.source.channel},
                 "message": {
-                    "text": "Awesome! I've saved your item for you 😊\n\n Your Cart:"
+                    "text": "Your Cart:"
                     // messages.join('\n')
                 },
                 "notification_type": "NO_PUSH"
@@ -2310,127 +2531,6 @@ var sendResponse = function(data,flag){
                        console.log(body);
                     })
                 })
-
-        }
-        else if (data.action == 'checkout') {
-            var messages = ['Awesome! I\'ve saved your item for you 😊'];
-            data.client_res[0].shift();
-            console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
-            var photos = [];
-            data.client_res[0].forEach(function(el, index) {
-                if (typeof el.text  == 'array') {
-                    el.text.forEach(function(txt){
-                        messages.push(txt + '\n');
-                    })
-                }
-                else if (typeof el.text == 'string'){
-                    messages.push(el.text)
-                }
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'), '\ndata.source: ', data.source);
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text":messages.join('\n')
-                },
-                "notification_type": "NO_PUSH"
-             }; 
-
-            request.post({ 
-                url: 'https://graph.facebook.com/v2.6/me/messages',
-                qs: {access_token: fbtoken},
-                method: "POST",
-                json: {
-                  recipient: {id: data.source.channel},
-                  message: cartDisplay,
-                }
-            },
-            function (err, res, body) {
-               if (err) console.log('post err ',err);
-               console.log(body)
-            })
-        }
-        else if (data.action === 'remove') {
-              // console.log('GETTING TO FACEBOOK SAVE!!!!!!!!', data.client_res[0])
-            // data.client_res[0].shift();
-            console.log('\n\n\nFacebook REMOVE Client_res: ', JSON.stringify(data.client_res));
-                var message = {
-                "recipient": {"id": data.source.channel},
-                "message":{
-                    "attachment":{
-                          "type":"template",
-                          "payload":{
-                            "template_type":"button",
-                            "text": "Removed item from your cart.",
-                            "buttons":[
-                              { "type": "postback", 
-                                "title": "View Cart", 
-                                "payload": JSON.stringify({"dataId": data.searchId, "action": "list"})
-                              }
-                            ]
-                          }
-                     }
-                   }
-              };
-            request.post({ 
-                url: 'https://graph.facebook.com/v2.6/me/messages',
-                qs: {access_token: fbtoken},
-                method: "POST",
-                json: true,
-                headers: {
-                    "content-type": "application/json",
-                },
-                body: message
-            },
-            function (err, res, body) {
-                if (err) console.log('post err ',err);
-                console.log(body);
-            })
-
-        }
-        else if (data.action === 'list'){
-            console.log('FACEBOOK LIST', data.client_res)
-             var messages = ['Your updated cart: '];
-            data.client_res.shift();
-            console.log('\n\n\nFacebook LIST: ',data.client_res[0]);
-            var photos = [];
-            data.client_res.forEach(function(el, index) {
-                if (typeof el.text  == 'array') {
-                    el.text.forEach(function(txt){
-                        messages.push(txt + '\n');
-                    })
-                }
-                else if (typeof el.text == 'string'){
-                    messages.push(el.text)
-                }
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            console.log('\n\n\n\n\n\nMessages ', messages.join('\n'), '\ndata.source: ', data.source);
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text":messages.join('\n')
-                },
-                "notification_type": "NO_PUSH"
-             }; 
-
-            request.post({ 
-                url: 'https://graph.facebook.com/v2.6/me/messages',
-                qs: {access_token: fbtoken},
-                method: "POST",
-                json: true,
-                body: firstMessage
-            },
-            function (err, res, body) {
-               if (err) console.log('post err ',err);
-               console.log(body)
-            })
-
         }
     }
     //* * * * * * * *
@@ -2771,7 +2871,12 @@ function removeCartItem(data){
               yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, false);
           }
           else if (data.source.origin === 'facebook') {
-              yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, true);
+              var yieldedcart = yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect, true);
+              // console.log('iojs 2874: yielded cart: ', yieldedcart)
+              data.bucket = 'purchase';
+              data.action = 'list';
+              return sendResponse(data);
+
           }
       }
 
@@ -2908,15 +3013,15 @@ function viewCart(data, show_added_item) {
            }
       }
 
-    cartObj.push({
-      text: text,
-      mrkdwn_in: ['text', 'pretext'],
-      color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
-      thumb_url: item.image
-     // actions: actionObj
-    })
+        cartObj.push({
+          text: text,
+          mrkdwn_in: ['text', 'pretext'],
+          color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
+          thumb_url: item.image
+         // actions: actionObj
+        })
 
-}
+    }
 
       // Only show the purchase link in the summary for office admins.
       if (isAdmin || isP2P || cart.personal) {

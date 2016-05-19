@@ -103,7 +103,7 @@ module.exports.removeFromCart = function(slack_id, user_id, number, personal) {
       var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
     } else {
       personal = true;
-      var cart = yield getCart(user_id, personal);
+      var cart = yield getCart(slack_id, personal);
     }
 
     // need to watch out for items that have multiple quantities
@@ -113,7 +113,6 @@ module.exports.removeFromCart = function(slack_id, user_id, number, personal) {
     if (!ASIN_to_remove) {
       return cart;
     }
-
 
     // first just try to remove one item that this user added
     var matching_items = cart.items.filter(function(i) {
