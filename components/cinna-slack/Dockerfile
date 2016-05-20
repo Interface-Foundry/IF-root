@@ -4,5 +4,5 @@ ADD . /opt/kip/
 WORKDIR /opt/kip
 RUN npm install
 EXPOSE 8000
-ENV NODE_ENV=development
+ENV NODE_ENV=kubernetes
 CMD ["node", "chat/server_cinna_chat.js"]
