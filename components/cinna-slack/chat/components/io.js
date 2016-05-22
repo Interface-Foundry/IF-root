@@ -701,6 +701,7 @@ var preProcess = function(data){
                     data.action = 'modify';
                     data.dataModify = { type: 'price', param: 'less' }
                     incomingAction(data);
+                    break;
                 case 'search.similar':
                     data.searchSelect = [];
                     data.searchSelect.push(query);
@@ -728,24 +729,22 @@ var preProcess = function(data){
                     incomingAction(data);
                     break;
 
-                case 'kik.back':
-
-                    console.log('OK O K O K  K K K K O O O O OKO KO KO KO KO ',data)
-
+                case 'search.random':
+                    var arr = ['emoji clothes','japanese fashion','robot'];
+                    data.tokens = [];
+                    data.tokens.push(arr[Math.floor(Math.random()*arr.length)]); //search for this item
                     data.bucket = 'search';
+                    data.action = 'initial';
+                    incomingAction(data);
+                    break;
 
+                //shows last search results in kik
+                case 'kik.back':
+                    data.bucket = 'search';
                     history.recallHistory(data, function(res){
-                        // if (res){
-                        //     data.recallHistory = res;
-                        // }
-
                         res.kikData = data.kikData;
-
-                        console.log('RECALL HIST BACK ',res)
                         outgoingResponse(res,'stitch','amazon');
-                        //search.searchSimilar(data);
                     });
-
                     break;
 
                 //for testing in PAPRIKA
@@ -1036,9 +1035,13 @@ data.flags = data.flags ? data.flags : {};
             break;
         case 'purchase':
 
-            if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram' || data.source.origin == 'kik'){
+            if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
                 sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
-            }else {
+            }
+            else if(data.source.origin == 'kik'){
+                sendTxtResponse(data,'Sorry, shopping cart coming soon! 😊');
+            }
+            else {
                 purchaseBucket(data);
             }
 

@@ -94,6 +94,12 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'show settings') > 90:
         case textSimilar(input,'show me settings') > 90:
         case textSimilar(input,'kip settings') > 90:
+        case textSimilar(input,'add admin') > 90:
+        case textSimilar(input,'add admins') > 90:
+        case textSimilar(input,'change admin') > 90:
+        case textSimilar(input,'change admins') > 90:
+        case textSimilar(input,'update admins') > 80:
+        case textSimilar(input,'remove admin') > 80:
             mode = 'settings';            
             break;
 
@@ -912,9 +918,13 @@ var checkForCanned = function(input,callback,origin,source) {
                 flag = 'kik.back';
                 break;
             }
+        case input.indexOf('🔮') > -1:
+            flag = 'search.random';
+            break;
+        
         case input.indexOf('1⃣') > -1:
             switch(true){
-                case input.indexOf('Add to Cart') > -1:
+                case input.indexOf('Add') > -1:
                     flag = 'purchase.save';
                     break;
                 case input.indexOf('Cheaper') > -1:
@@ -930,7 +940,7 @@ var checkForCanned = function(input,callback,origin,source) {
             break;   
         case input.indexOf('2⃣') > -1:
             switch(true){
-                case input.indexOf('Add to Cart') > -1:
+                case input.indexOf('Add') > -1:
                     flag = 'purchase.save';
                     break;
                 case input.indexOf('Cheaper') > -1:
@@ -946,7 +956,7 @@ var checkForCanned = function(input,callback,origin,source) {
             break;   
         case input.indexOf('3⃣') > -1:
             switch(true){
-                case input.indexOf('Add to Cart') > -1:
+                case input.indexOf('Add') > -1:
                     flag = 'purchase.save';
                     break;
                 case input.indexOf('Cheaper') > -1:

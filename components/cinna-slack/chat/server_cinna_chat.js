@@ -54,6 +54,7 @@ process.on('uncaughtException', function (err) {
 
 //load kip modules
 var ioKip = require("./components/io.js");
+var processData = require("./components/process.js");
 
 // website 🌏
 var express = require('express');
@@ -168,16 +169,103 @@ kik.onStartChattingMessage((message) => {
     kik.getUserProfile(message.from)
         .then((user) => {
 
-            //build new kik message here
-            //add keyboard
-            //then reply
-            message.reply(`Hey ${user.firstName}!`);
+          var kikRes = [];
+          var kikMsg;
 
+          kikMsg = Kik.Message
+            .link('http://www.kipthis.com')
+            .setPicUrl('http://kipthis.com/kip_modes/mode_welcome.png')
+            .setText("Hi "+user.firstName+"!")
+            .setTitle('')
+            .setAttributionIcon('http://kipthis.com/img/kip-find.png')
+            .setAttributionName('Kip');
+          
+          kikRes.push(kikMsg)
 
+          kikMsg = Kik.Message
+            .text("I'm Kip 😊 Tell me what you're looking for, I'll try my best to find it!" );
 
+          var keyboardObj = [{
+                "type": "suggested",
+                "hidden":false,
+                "responses": [
+                    {
+                        "type":"text",
+                        "body":"Find headphones" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
+                    },
+                    {
+                        "type":"text",
+                        "body":"Find dystopia books"
+                    },
+                    {
+                        "type":"text",
+                        "body":"Find LED gloves"
+                    },
+                    {
+                        "type":"text",
+                        "body":"🔮 Surprise me!"
+                    }
+                ]
+            }];  
+            kikMsg._state.keyboards = keyboardObj;
+            kikRes.push(kikMsg)
+            message.reply(kikRes);
         });
 });
 
+kik.onLinkMessage((message) => {
+  message.reply("Sorry, I can't deal with links right now! 😅");
+});
+
+kik.onPictureMessage((message) => {
+
+  console.log(message.picUrl)
+  processData.imageSearch(message.picUrl,'',function(res){
+
+      console.log('😅 ',res);
+      var kipObj = {
+        msg: res,
+        source: {
+          origin: 'kik',
+          channel: message.chatId,
+          org: message.chatId,
+          id: message.chatId + '_' + message.from,
+          user: message.chatId,
+          username: message.from
+        },
+        kikData: message
+      };
+      kipObj.text = res;
+      kipObj.imageTags = res;
+      ioKip.preProcess(kipObj);    
+  })
+
+
+});
+
+kik.onVideoMessage((message) => {
+ message.reply("Sorry, I can't deal with vids right now! 😅");
+});
+
+kik.onScanDataMessage((message) => {
+ message.reply("Sorry, I can't deal with scans right now! 😅");
+});
+
+kik.onStickerMessage((message) => {
+    kik.getUserProfile(message.from)
+        .then((user) => {
+
+        var kikMsg = Kik.Message
+          .link('http://www.kipthis.com')
+          .setPicUrl('http://kipthis.com/img/kip-find.png')
+          .setText("Hi "+user.firstName+"!!")
+          .setTitle('')
+          .setAttributionIcon('http://kipthis.com/img/kip-icon.png')
+          .setAttributionName('😅');
+
+        message.reply(kikMsg);
+    });
+});
 
 
 //kik.send('HIIII','alyxmxe')

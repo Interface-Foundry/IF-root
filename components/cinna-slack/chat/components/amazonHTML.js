@@ -72,9 +72,13 @@ async.eachSeries(count, function(c, callback) {
 
   setTimeout(function() {
     callback();
-  }, 20);
+  }, 5000);
+
 }, function done(){
-  sessionRenewer(); //start renewing sessions forever
+  setTimeout(function() {
+    sessionRenewer(); 
+  }, 30000);
+  //start renewing sessions forever
 }) 
 
 //pool new sessions over time
@@ -94,7 +98,7 @@ function sessionRenewer(){
             }else {
               console.log('🍹NOT CORRECT LENGTH!!')
 
-              while (proxyPool.length > 17){
+              while (proxyPool.length > 13){
                 proxyPool.shift()
                 console.log('REMOVED IN WHILE ',proxyPool)
               }
