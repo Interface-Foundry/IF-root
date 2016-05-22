@@ -405,7 +405,7 @@ var searchAmazon = function(data, type, query, flag) {
                                     getPrices(data.amazon[i],function(realPrice){
                                         data.amazon[i].realPrice = realPrice;
                                         callback();
-                                    });
+                                    },i);
                                 });
                             }
                             else {
@@ -508,7 +508,7 @@ var searchAmazon = function(data, type, query, flag) {
                                                data.amazon[i].altImage = altImage;
                                             }
                                             callback();
-                                        });
+                                        },i);
                                     });
                                 }
                                 else {
@@ -1209,7 +1209,7 @@ var searchMore = function(data){
                            data.amazon[i].altImage = altImage;
                         }
                         callback();
-                    });
+                    },i);
                 }
                 else {
                     callback();
@@ -1276,7 +1276,7 @@ var getReviews = function(ASIN,callback) {
     });
 };
 
-var getPrices = function(item,callback){
+var getPrices = function(item,callback,num){
 
     var url = item.DetailPageURL[0];
     var price;  // get price from API
@@ -1306,11 +1306,16 @@ var getPrices = function(item,callback){
     debug('price PRE PROCESS ',price);
 
     amazonHTML.basic(url, function(err, product) {
+
+
+      if(!product){
+        product = {};
+      }
       kip.err(err); // print error
 
       debug('& & & & & & & & & & & &PRODUCT OBJ ',product);
 
-      if (product.reviews){
+      if (product && product.reviews){
         reviews = product.reviews;
       }
 
@@ -1323,7 +1328,7 @@ var getPrices = function(item,callback){
         return callback(product.price,product.altImage,reviews)
       }
 
-      debug('product.price: ' + product.price + ', price: ' + price);
+      //debug('product.price: ' + product.price + ', price: ' + price);
 
       price = product.price || price || '';
       debug('final price: ' + price);
@@ -1333,7 +1338,7 @@ var getPrices = function(item,callback){
 
 
       callback(price,altImage,reviews);
-    })
+    },num)
 }
 
 
@@ -1357,7 +1362,7 @@ var getAmazonStuff = function(data,results,callback3){
                     obj.altImage = altImage;
                 }
                 callback(null,obj);
-            });
+            },0);
         },
 
         //* * item 2 * * *//
@@ -1371,7 +1376,7 @@ var getAmazonStuff = function(data,results,callback3){
                     obj.altImage = altImage;
                 }
                 callback(null,obj);
-            });
+            },1);
         },
 
         //* * item 3 * * *//
@@ -1385,7 +1390,7 @@ var getAmazonStuff = function(data,results,callback3){
                     obj.altImage = altImage;
                 }
                 callback(null,obj);
-            });
+            },2);
         }
     ],
     function(err, rez){

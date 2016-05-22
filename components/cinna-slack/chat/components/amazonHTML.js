@@ -6,7 +6,159 @@ var kip = require('kip')
 var debug = require('debug')('amazon')
 var memcache = require('memory-cache');
 var fs = require('fs')
+var async = require('async');
 var mailerTransport = require('../../../IF_mail/IF_mail.js');
+
+
+var requestPromise = require('request-promise');
+
+
+//CONNECTION POOLING HERE
+var proxyPool = []; //current good sessions
+
+var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36';
+
+
+//start
+
+//in AAMZON LOOP, grab any good sessions
+
+// function proxyPooling(){
+
+//   genSession(function(proxy,sessionId)){
+
+//     proxyPool[sessionId] = proxy;
+
+//     var options1 = {
+//       url: 'http://lumtest.com/myip.json',
+//       proxy: super_proxy,
+//       headers: {
+//           'User-Agent': user_agent
+//       }
+//     };
+
+//   }
+
+  
+
+//   requestPromise(options1).then(function(data){ 
+
+//     //ok session worked, save it to proxyPool
+
+
+//     console.timeEnd("concatenation");
+
+//   }, function(err){ 
+//     console.error(err); 
+//   });
+
+
+
+//   //always have 20 sessions going, because fuck it.
+
+// }
+
+
+/// / / / /  LUMINATI PROXY STUFF / / / / / / / 
+//so you charge $500 a month but your solution doesn't work out of the box ok ok luminati >_>
+
+//start with these sessions to pool
+var count = [1,2,3,4,5,6,7,8,9]; //lol
+async.eachSeries(count, function(c, callback) {
+
+  genSession(c,function(){
+    console.log('preloaded luminati session #'+c)
+  });
+
+  setTimeout(function() {
+    callback();
+  }, 20);
+}, function done(){
+  sessionRenewer(); //start renewing sessions forever
+}) 
+
+//pool new sessions over time
+function sessionRenewer(){
+  async.whilst(
+      function () { 
+        return true; 
+      },
+      function (callback) {
+          genSession((1000000 * Math.random()),function(){
+            console.log('REMOVE OLDEST SESSION ',proxyPool)
+            
+            if(proxyPool.length < 17){
+              console.log('🍹CORRECT LENGTH')
+              proxyPool.shift() // remove oldest session
+              console.log('REMOVED ',proxyPool)
+            }else {
+              console.log('🍹NOT CORRECT LENGTH!!')
+
+              while (proxyPool.length > 17){
+                proxyPool.shift()
+                console.log('REMOVED IN WHILE ',proxyPool)
+              }
+              // var bff = proxyPool.length - 16;
+
+              // if(bff > 0){
+              //   proxyPool.splice(0, bff);
+              // }       
+            }
+
+            
+
+          })
+          setTimeout(callback, 10000);//every 20 sec...
+      },
+      function (err) {
+          // 5 seconds have passed
+      }
+  ); 
+}
+
+//gen session for pool
+function genSession(num,callback){
+  var username = 'lum-customer-kipthis-zone-gen';
+  var password = 'e49d4efa2696';
+  var port = 22225;
+  var session_id = (1000000 * Math.random())|0; //the only important part 
+
+  var super_proxy = 'http://'+username+'-country-us-session-'+session_id+':'+password+'@zproxy.luminati.io:'+port;
+
+  var options = {
+    url: 'http://kipthis.com/img/kip_logo_new.svg',
+    proxy: super_proxy,
+    headers: {
+        'User-Agent': user_agent
+    }
+  };
+
+  requestPromise(options).then(function(data){ 
+
+    //ok session worked, save it to proxyPool
+    console.log('SESSION ID ',session_id)
+    console.log('SUPER_PROXY ',super_proxy)
+
+    //restict session pool size
+    //if (proxyPool.length < 12){
+      proxyPool.push(super_proxy);
+    //}
+    callback();
+
+  }, function(err){ 
+    //console.error(err); 
+    console.log('LUMINATI PROXY ERROR, trying genSession again')
+    setTimeout(function() {
+      genSession(num, function(){
+
+      });  
+    }, 20);
+
+  });
+  //callback(super_proxy,session_id);
+}
+// // / / / / LUMINATI PROXY end  / / /  
+
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
@@ -35,7 +187,7 @@ var cache = {
            full_html: ''
          }
  */
-module.exports.basic = function basic(url, callback) {
+module.exports.basic = function basic(url, callback, num) {
 
     //remove referral info just in case
     url = url.replace('%26tag%3Dbubboorev-20','');
@@ -56,57 +208,60 @@ module.exports.basic = function basic(url, callback) {
 
       debug('miss cache for url ' + url)
 
-      //PROXY SERVICE STUFF
-      var user = 'alyx';
-      var password = '9fSvNH@aB4Hs2s>qcatsoupkanyecandle';
-      var hostArr = ['us-dc.proxymesh.com','us-fl.proxymesh.com']; //avail proxies
-      var host = hostArr[Math.floor(Math.random()*hostArr.length)]; //get random host from array
-      var port = '31280';
-      var proxyUrl = "http://" + user + ":" + password + "@" + host + ":" + port;
+      if(!num){
+        num = 1;
+      }else {
+        num = num + 1;
+      }
+      console.log('+🍹 ',num)
+      console.log('🍹 ',proxyPool.length)
+      console.log('🍹🍹 ',proxyPool.length-num)
 
-      var proxiedRequest = request.defaults({
-        proxy: proxyUrl,
-        headers: {
-            'Accept': 'text/html,application/xhtml+xml',
-            //'Accept-Encoding':'gzip, deflate, sdch',
-            'Accept-Language':'en-US,en;q=0.8',
-            // 'Avail-Dictionary':'qHs1hh9Q',
-            'Cache-Control':'max-age=0',
-            'Connection':'keep-alive',
-            'Cookie': 'csm-hit='+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN+s-'+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN|'+Math.floor(Math.random() * 9999999999999) + 1111111111111+'; ubid-main=181-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'; session-id-time=20827'+Math.floor(Math.random() * 99999) + 11111+'l; session-id=187-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'',
-            'Host':'www.amazon.com',
-            'Origin':'http://www.amazon.com',
-            //'Pragma':'no-cache',
-            // 'Upgrade-Insecure-Requests':'1',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
-            // 'Referer':url
-        }
-      });
+      //we have luminati proxies in session pool
+      if (proxyPool[proxyPool.length-num]){
 
+        console.log('REQUEST🍹WITH🍹THIS🍹 ',proxyPool.length-num)
 
-        // headers: {
-        //     'Accept': '*/*',
-        //     'Accept-Encoding':'gzip, deflate',
-        //     'Accept-Language':'en-US,en;q=0.8',
-        //     // 'Avail-Dictionary':'qHs1hh9Q',
-        //     'Cache-Control':'max-age=0',
-        //     'Content-Length':7620,
-        //     'Connection':'keep-alive',
-        //     'Content-Type':'text/plain;charset=UTF-8',
-        //     // 'Cookie': 'csm-hit='+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN+s-'+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN|'+Math.floor(Math.random() * 9999999999999) + 1111111111111+'; ubid-main=181-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'; session-id-time=20827'+Math.floor(Math.random() * 99999) + 11111+'l; session-id=187-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'',
-        //     'Cookie':'skin=noskin; x-wl-uid=1ZkF/9DlKrGNXARXyoWaAKeH9OSn5mWPK7k8h9SNW1lQATtqZ9GthMaxV9Yh7iCDVJQblgK4+lM0=; session-token=AFXsr7dsTCgNkaqoJlQQt2p7zvIz4eGml/Bp8261MU7VhOJRh0pUJQPRPiFCSlSmRvn/yucYWpSOqD4afuFKVWsLmBhD1vvURM9fjGKH98hZPWyteX1jEXBcLR9rQbs7ETcuVp8WJXBYGfAgXLpdy/XsCOUXoPtb4h6qzFkAqqVWqCgPB2zABvUQ0MXxCDoyri6/iAFWY3beh8SO/YFjOAgIPaGr9E2QD0PJUy9dlVd7ArxfonLWn36+6vg/g67W; ubid-main=190-8589396-8276564; session-id-time=2082787201l; session-id=185-9694891-7040613',
+        var proxiedRequest = request.defaults({
+          proxy: proxyPool[proxyPool.length-num],
+          headers: {
+              'User-Agent': user_agent
+          }
+        }); 
 
-        //     'Host':'fls-na.amazon.com',
-        //     'Origin':'http://www.amazon.com',
-        //     'Pragma':'no-cache',
-        //     // 'Upgrade-Insecure-Requests':'1',
-        //     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
-        //     'Referer':url
-        // }
+      }
+      //no luminati proxies in pool, so use proxymesh instead
+      else {
+        //PROXYMESH PROXY 
+        var user = 'alyx';
+        var password = '9fSvNH@aB4Hs2s>qcatsoupkanyecandle';
+        var hostArr = ['us-dc.proxymesh.com','us-fl.proxymesh.com']; //avail proxies
+        var host = hostArr[Math.floor(Math.random()*hostArr.length)]; //get random host from array
+        var port = '31280';
+        var proxyUrl = "http://" + user + ":" + password + "@" + host + ":" + port;
+
+        var proxiedRequest = request.defaults({
+          proxy: proxyUrl,
+          headers: {
+              'Accept': 'text/html,application/xhtml+xml',
+              //'Accept-Encoding':'gzip, deflate, sdch',
+              'Accept-Language':'en-US,en;q=0.8',
+              // 'Avail-Dictionary':'qHs1hh9Q',
+              'Cache-Control':'max-age=0',
+              'Connection':'keep-alive',
+              'Cookie': 'csm-hit='+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN+s-'+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN|'+Math.floor(Math.random() * 9999999999999) + 1111111111111+'; ubid-main=181-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'; session-id-time=20827'+Math.floor(Math.random() * 99999) + 11111+'l; session-id=187-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'',
+              'Host':'www.amazon.com',
+              'Origin':'http://www.amazon.com',
+              //'Pragma':'no-cache',
+              // 'Upgrade-Insecure-Requests':'1',
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
+              // 'Referer':url
+          }
+        });      
+      }
+
 
       proxiedRequest.get(url, function(err, response, body) {
-
-
 
         if (kip.error(err)) {
           console.error('error amazon get url ' + url)
@@ -170,9 +325,9 @@ module.exports.basic = function basic(url, callback) {
           console.log('NO PRICE FOUND 😊😊😊😊😊😊😊 ',url);
 
 
-          console.log('🍹 ',err);
-          console.log('🍹 ',response);
-          console.log('🍹 ',body);
+          // console.log('🍹 ',err);
+          // console.log('🍹 ',response);
+          // console.log('🍹 ',body);
           //send email about this issue
           // var mailOptions = {
           //     to: 'Kip Server <hello@kipthis.com>',
@@ -194,6 +349,13 @@ module.exports.basic = function basic(url, callback) {
         //Get reviews
         var reviewCount = $('#acrCustomerReviewText').text().trim();
         var rating = $('#acrPopover').text().trim();
+
+        //amazon glitch
+        if(rating.length > 22){
+          rating = rating.split('stars')
+          rating = rating[0]
+        }
+
         if (rating && reviewCount){
           product.reviews = {
             rating: parseFloat(rating.match(/^[0-9.,\s]+/)[0].trim()),

@@ -1427,12 +1427,20 @@ var getCinnaResponse = function(data,callback){
         case 'search':
             switch (data.action) {
                 case 'initial':
-                    if (data.source.origin == 'slack' || data.source.origin == 'telegram' || data.source.origin == 'kik'){
+                    if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                         if (data.imageTags){
-                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                         else {
-                            res = 'Hi, here are some options you might like. Use `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                            res = 'Hi, here are some options you might like. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                        }
+                    }
+                    else if (data.source.origin == 'kik'){
+                        if (data.imageTags){
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'` 😊';
+                        }
+                        else {
+                            res = 'Hi, here are some options you might like 😊';
                         }
                     }
                     else if (data.source.origin == 'socket.io'){
@@ -1440,7 +1448,12 @@ var getCinnaResponse = function(data,callback){
                     }
                     break;
                 case 'similar':
-                    res = 'I found some options similar to '+numEmoji+', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                    if (data.source.origin == 'kik'){
+                        res = 'I found some options similar to '+numEmoji+' 😊';
+                    }
+                    else {
+                        res = 'I found some options similar to '+numEmoji+', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                    }
                     break;
                 case 'modify':
                 case 'modified': //because the nlp json is wack

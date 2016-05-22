@@ -139,8 +139,26 @@ var stitchResults = function(data,source,callback) {
               if(amazonObj.reviews && amazonObj.reviews.rating == 0){
                 delete amazonObj.reviews;
               }
+              else if (amazonObj.reviews && amazonObj.reviews.rating && !isNumber(amazonObj.reviews.rating)){
+                delete amazonObj.reviews;
+              }
 
-              console.log('REVIEWS ',amazonObj.reviews);
+
+              function isNumber(value) {
+                  if ((undefined === value) || (null === value)) {
+                      return false;
+                  }
+                  if (typeof value == 'number') {
+                      return true;
+                  }
+                  return !isNaN(value - 0);
+              }
+
+              // if(amazonObj.reviews && amazonObj.reviews.length > 25){
+              //   delete amazonObj.reviews;
+              // }
+
+              //console.log('REVIEWS ',amazonObj.reviews);
 
               //if itemattribs exists in amazon result
               if (amazonObj && amazonObj.ItemAttributes){

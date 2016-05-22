@@ -150,7 +150,6 @@ if (process.env.NODE_ENV == 'development_alyx'){
         baseUrl: 'https://7f41cf36.ngrok.io/'
     };
 }else{
-    console.log('??????')
     kikConfig.auth = {
         username: 'kipbot',
         apiKey: '4a181322-48ee-4b63-8b09-7ccec20bf4a5',
@@ -164,8 +163,24 @@ const kik = new Kik(kikConfig.auth);
 // update the config options
 kik.updateBotConfiguration();
 
-// / / / / / ADD ONBOARDING HERE / / / / / / //
-kik.send('HIIII','alyxmxe')
+// / / / / / ONBOARDING MESSAGE NEW KIK USER / / / / / / //
+kik.onStartChattingMessage((message) => {
+    kik.getUserProfile(message.from)
+        .then((user) => {
+
+            //build new kik message here
+            //add keyboard
+            //then reply
+            message.reply(`Hey ${user.firstName}!`);
+
+
+
+        });
+});
+
+
+
+//kik.send('HIIII','alyxmxe')
   // kik.getUserProfile(message.from)
   //     .then((user) => {
   //         message.reply(`Hey ${user.firstName}!`);

@@ -839,11 +839,12 @@ var preProcess = function(data){
 
 //pushing incoming messages to python
 function routeNLP(data){
-
-    //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
+        
     data.flags = data.flags ? data.flags : {};
     data.msg = emojiText.convert(data.msg,{delimiter: ' '}); //convert all emojis to text
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); //sanitize msg before sending to NLP
+
+    console.log('❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️ ',data.msg)
 
     if (data.msg){
 
@@ -874,7 +875,6 @@ function routeNLP(data){
         //we get this if we killed the whole user request (i.e. they sent a URL)
         sendTxtResponse(data,'Oops sorry, I didn\'t understand your request');
     }
-
 }
 
 //incoming action responses from Slack buttons
@@ -959,7 +959,7 @@ var incomingMsgAction = function(data,origin){
             flag: 'buttonAction'
         }
 
-        console.log('KIPOBJ ',kipObj);
+        //console.log('KIPOBJ ',kipObj);
 
         incomingAction(kipObj);
 
@@ -1005,7 +1005,7 @@ function incomingAction(data){
 
 
 
-    console.log('DATA DATA DATA ',data)
+    //console.log('DATA DATA DATA ',data)
 
 //------------------------supervisor stuff-----------------------------------//
   if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
@@ -1068,11 +1068,15 @@ function searchBucket(data){
 
         var searcher = {};
         searcher.source = data.source;
+        if(data.kikData){
+            searcher.kikData = data.kikData;
+        }
         sendTxtResponse(searcher,'Searching...','typing');
 
-        if (data.source.origin == 'slack' && slackUsers[data.source.org]){
-            slackUsers[data.source.org].sendTyping(data.source.channel);
-        }
+        //sends typing even to Slack, killed for now cause no mobile support
+        // if (data.source.origin == 'slack' && slackUsers[data.source.org]){
+        //     slackUsers[data.source.org].sendTyping(data.source.channel);
+        // }
     }
 
     console.log('* * * * * * * * * * * * ',data.bucket);
@@ -1591,16 +1595,10 @@ var sendResponse = function(data,flag){
 
             var message = data.client_res[0]; //use first item in client_res array as text message
 
-            console.log('👺 👺 👺 👺 👺 👺 MESSAGE ',message)
-             console.log('👺 👺 👺 👺 👺 👺 CLIENT_RES[1] ',data.client_res[1])
-
-
             message = Kik.Message.text(message);
 
             //dumb way to add keyboard to cinna response message so kik doesn't kill itself
             if(!message._state.keyboards && data.client_res[1] && data.client_res[1]._state && data.client_res[1]._state.keyboards){
-
-                console.log('👺z👺z👺zz👺zz👺')
 
                 message._state.keyboards = data.client_res[1]._state.keyboards;
             }
@@ -2109,9 +2107,22 @@ var sendResponse = function(data,flag){
                 //     chat_id: data.source.channel,
                 //     text: message
                 // })
-                console.log('\n\n\nKik  : ', data,'\n\n\n')
 
-                kipServer.sendToKik(data,message,'banter')
+                // message = Kik.Message.text(message);
+
+                // //dumb way to add keyboard to cinna response message so kik doesn't kill itself
+                // if(!message._state.keyboards && data.client_res[1] && data.client_res[1]._state && data.client_res[1]._state.keyboards){
+
+                //     message._state.keyboards = data.client_res[1]._state.keyboards;
+                // }
+
+
+                // okThis.push(message)
+
+
+                // console.log('\n\n\nKik  : ', message,'\n\n\n')
+
+                kipServer.sendToKik(data,Kik.Message.text(message),'banter')
 
                 callback();
             }, function done(){
