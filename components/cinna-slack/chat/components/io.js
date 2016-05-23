@@ -544,7 +544,7 @@ var newSlack = function() {
 // }
 
 //load slack users into memory, adds them as slack bots
-function loadSlackUsers(users){
+function loadSlackUsers(users) {
     console.log('loading '+users.length+' Slack users');
 
     async.eachSeries(users, function(user, callback) {
@@ -1094,6 +1094,10 @@ function preProcess(data) {
                             addmemberMode(data);
                             break;
 
+                        case 'familycart':
+                            familycartMode(data);
+                            break;
+
                         default:
                             shoppingMode(data);
                     }
@@ -1501,7 +1505,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
         
-    // data.searchId = mongoose.Types.ObjectId();
+    data.searchId = mongoose.Types.ObjectId();
 
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(urlArr){
@@ -1510,29 +1514,9 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
             data.urlShorten = [];
             processData.urlShorten(data,function(res){
                 var count = 0;
-
-                // if (data.source.origin == 'slack') {
-
-                    //store a new mongo ID to pass in Slack callback
-
-                    // var moreObj = {};
-                    // moreObj.actions = [{
-                    //   "name": "more",
-                    //   "text": "more",
-                    //   "style": "default",
-                    //   "type": "button",
-                    //   "value": 'more'
-                    // }];
-                    // moreObj.callback_id = 'sdfasdfasdfasdf'; //pass mongo id as callback id so we can access reference later
-                    // moreObj.image_url = urlArr[count];
-                    // moreObj.title = 'See more';
-                    // moreObj.title_link = res[count];
-                    // moreObj.color = "#45a5f4";
-                    // moreObj.fallback = 'Tap for more';
-
-                    // client_res.push(moreObj);
-                // }
-
+                if (data.source.origin == 'slack'){
+                // data.searchId = mongoose.Types.ObjectId();
+                }
                 //put all result URLs into arr
                 async.eachSeries(res, function(i, callback) {
                     data.urlShorten.push(i);//save shortened URLs
@@ -1690,9 +1674,12 @@ var checkOutgoingBanter = function(data){
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
-    data.searchId = mongoose.Types.ObjectId();
+    if (!data.searchId) {
+        data.searchId = mongoose.Types.ObjectId();
+    }
+
     //SAVE OUTGOING MESSAGES TO MONGO
-    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
+    if (data.bucket && data.action && !(data.flags && data.flags.searchResults)) {
         console.log('SAVING OUTGOING RESPONSE', data.source, data.action);
         history.saveHistory(data,false,function(res){
             //whatever
@@ -1814,15 +1801,6 @@ var sendResponse = function(data,flag){
 
 
             });
-
-            // var msgData = {
-            //   // attachments: [...],
-            //     icon_url:'http://kipthis.com/img/kip-icon.png',
-            //     username:'Kip',
-            //     attachments: attachThis
-            // };
-            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
-
         }
         else if (data.action == 'focus'){
 
@@ -1838,7 +1816,6 @@ var sendResponse = function(data,flag){
            }
               data.client_res[1] = formatted ? formatted : data.client_res[1]
               var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
-               // console.log('formatted : ',formatted)
                upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
                  tg.sendPhoto({
                     chat_id: encode_utf8(data.source.channel),
@@ -1852,12 +1829,10 @@ var sendResponse = function(data,flag){
                     })
                     if (uploaded.outputPath) {
                         fs.unlink(uploaded.outputPath, function(err, res) {
-                            // if (err) console.log('fs error: ', err)
                         })
                     }
                     if (uploaded.inputPath) {
                         fs.unlink(uploaded.inputPath, function(err, res) {
-                                // if (err) console.log('fs error: ', err)
                         })
                     }
                   })
@@ -1870,14 +1845,10 @@ var sendResponse = function(data,flag){
             console.log('\n\n\nSAVE: ',data.client_res)
           try {
              var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
-              // + data.client_res[0].text.split('>>')[1].split('>')[0]
-             // formatted = formatted.slice(0,-1)
-             // formatted = formatted + ')'
            } catch(err) {
              console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
              return
            }
-          // console.log('toSend:', toSend,'formatted: ',formatted)
           tg.sendMessage({
                 chat_id: data.source.channel,
                 text: 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.',
@@ -1939,7 +1910,6 @@ var sendResponse = function(data,flag){
                     })
               }, function done(thing) {
                 if (thing.text) {
-                    // console.log('\n\n DONESKI!', thing)
                     var itemLink = ''
                       try {
                         itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
@@ -1956,32 +1926,8 @@ var sendResponse = function(data,flag){
                          console.log('io.js 1356 err:',err)
                        }
                 } else {
-                    // console.log('wtf is thing: ',thing)
                 }
               })
-
-
-           // // var extraInfo = data.client_res[1][0].text.split('$')[1]
-           // // extraInfo = '\n $' + extraInfo
-           // // var finalSend = itemLink + extraInfo
-           // //      tg.sendMessage({
-           // //          chat_id: data.source.channel,
-           // //          text: data.client_res[0],
-           // //          parse_mode: 'Markdown',
-           // //          disable_web_page_preview: 'true'
-           // //      }).then(function(){
-           //         console.log('finalSend: ', itemLink)
-           //          tg.sendMessage({
-           //              chat_id: data.source.channel,
-           //              text: itemLink,
-           //              parse_mode: 'Markdown',
-           //              disable_web_page_preview: 'true'
-           //          }).then(function(){
-
-           //          // })
-           //      }).catch(function(err) {
-           //          console.log('io.js 1338 err',err)
-           //      })
         }
         else if (data.action == 'sendAttachment'){
           console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
@@ -2030,15 +1976,6 @@ var sendResponse = function(data,flag){
             email.results(data).catch((e) => {
               console.log(e.stack);
             });
-
-            // email.reply({
-            //   to: data.emailInfo.to,
-            //   text: messages.join('\n\n'),
-            //   attachments: photos
-            // }, data).catch((e) => {
-            //   console.log(e.stack);
-            // })
-
         }
         else if (data.action == 'focus') {
            console.log('EMAIL OUTGOING FOCUS client_res', data.client_res);
@@ -2067,10 +2004,8 @@ var sendResponse = function(data,flag){
               var messages = ['Awesome! I\'ve saved your item for you 😊'];
             data.client_res.shift();
               console.log('\n\n\nEMAIL SAVE: ',data.client_res);
-            // data.client_res = JSON.stringify(data.client_res);
             var photos = [];
             data.client_res[0].forEach(function(el, index) {
-                // console.log('\n\n\n', el)
                 messages.push(el.text + '\n\n' );
                if (el.thumb_url) {
                 photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
@@ -2106,16 +2041,7 @@ var sendResponse = function(data,flag){
             }, data);
         }
         else {
-            //   console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
-            // //loop through responses in order
-            // async.eachSeries(data.client_res, function(message, callback) {
-            //     tg.sendMessage({
-            //         chat_id: data.source.channel,
-            //         text: message
-            //     })
-            //     callback();
-            // }, function done(){
-            // });
+        
         }
     }
     //* * * * * * * *
@@ -2236,117 +2162,34 @@ var sendResponse = function(data,flag){
 
         }
          else if (data.action == 'save') {
-            data.client_res[0].shift();
             console.log('\n\n\nFacebook SAVE Client_res: ', JSON.stringify(data.client_res));
-            var cartDisplay = {
-                    "attachment": {
-                      "type": "template",
-                      "payload": {
-                        "template_type": "generic",
-                        "elements": []
-                      }
-                    }
-            };
-            data.client_res[0].forEach(function(el, index) {
-                if (el.text && el.text.title && el.text.price && el.text.quantity) {
-                    var cart_item = {
-                      "title": el.text.title,
-                      "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
-                      "buttons":[{ 
-                        "type": "postback", 
-                        "title": "➕", 
-                        "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
-                      { "type": "postback", 
-                        "title": "➖", 
-                        "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index +1) })}
-                        ]
-                    }
-                    if (el.thumb_url) {
-                      cart_item.image_url =  el.thumb_url;
-                    }
-                     cartDisplay.attachment.payload.elements.push(cart_item);
-                }
-            })
-            // var firstMessage = {
-            //     "recipient": {"id": data.source.channel},
-            //     "message": {
-            //         "text": "Awesome! I've saved your item for you 😊\n\n Your Cart:"
-            //     },
-            //     "notification_type": "NO_PUSH"
-            //  };
-            // request.post({ 
-            //     url: 'https://graph.facebook.com/v2.6/me/messages',
-            //     qs: {access_token: fbtoken},
-            //     method: "POST",
-            //     json: true,
-            //     headers: {
-            //         "content-type": "application/json",
-            //     },
-            //     body: firstMessage
-            //     },
-            //     function (err, res, body) {
-            //         if (err) console.log('post err ',err);
-            //         console.log(body);
-                    request.post({ 
-                        url: 'https://graph.facebook.com/v2.6/me/messages',
-                        qs: {access_token: fbtoken},
-                        method: "POST",
-                        json: {
-                          recipient: {id: data.source.channel},
-                          message: cartDisplay,
-                        },
-                        headers: {
-                            "content-type": "application/json",
-                        }
-                    },
-                    function (err, res, body) {
-                       if (err) console.log('post err ',err);
-                       console.log(body);
-                    })
-                // })
-
+            data.msg = 'view cart';
+            data.bucket = 'purchase';
+            data.action = 'list';
+            incomingAction(data);
         }
         else if (data.action == 'checkout') {
-
-            var messages = ['Awesome! I\'ve saved your item for you 😊'];
-            data.client_res[0].shift();
-            console.log('\n\n\nFacebook SAVE: ',data.client_res[0]);
-            var photos = [];
-            data.client_res[0].forEach(function(el, index) {
-                if (typeof el.text  == 'array') {
-                    el.text.forEach(function(txt){
-                        messages.push(txt + '\n');
-                    })
-                }
-                else if (typeof el.text == 'string'){
-                    messages.push(el.text)
-                }
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            var firstMessage = {
-                "recipient": {"id": data.source.channel},
-                "message": {
-                    "text":messages.join('\n')
-                },
-                "notification_type": "NO_PUSH"
-             }; 
-
+            var message = {
+                    "recipient": {"id": data.source.channel},
+                    "message": {
+                        "text": data.client_res[0][data.client_res[0].length-1].text
+                    },
+                    "notification_type": "NO_PUSH"
+                };
             request.post({ 
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {access_token: fbtoken},
                 method: "POST",
-                json: {
-                  recipient: {id: data.source.channel},
-                  message: cartDisplay,
-                }
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+            body: message
             },
             function (err, res, body) {
-               if (err) console.log('post err ',err);
-               console.log(body)
+                if (err) console.log('post err ',err);
+                console.log(body);
             })
-
         }
         else if (data.action === 'remove') {
 
@@ -2354,34 +2197,10 @@ var sendResponse = function(data,flag){
             data.bucket = 'purchase';
             data.action = 'list';
             incomingAction(data);
-
-            // var firstMessage = {
-            //     "recipient": {"id": data.source.channel},
-            //     "message": {
-            //         "text": "We\'ve removed that item for you 😊"
-            //     },
-            //     "notification_type": "NO_PUSH"
-            //  };
-            // request.post({ 
-            //     url: 'https://graph.facebook.com/v2.6/me/messages',
-            //     qs: {access_token: fbtoken},
-            //     method: "POST",
-            //     json: true,
-            //     headers: {
-            //         "content-type": "application/json",
-            //     },
-            //     body: firstMessage
-            //     },
-            //     function (err, res, body) {
-            //         if (err) console.log('post err ',err);
-            //         console.log(body);
-            //     })
         }
-        else if (data.action === 'list'){
-            console.log('FACEBOOK LIST', data.client_res)
-
+        else if (data.action === 'list') {
+            console.log('FACEBOOK LIST', JSON.stringify(data.client_res), data.action, data.bucket)
             if (data.client_res.length === 0) {
-                console.log('FACEBOOK LIST', data.action, data.bucket)
                 var emptyMessage = {
                     "recipient": {"id": data.source.channel},
                     "message": {
@@ -2408,7 +2227,6 @@ var sendResponse = function(data,flag){
                    return;
             }
 
-             var messages = ['Your updated cart: '];
             data.client_res[0].shift();
             data.client_res[0].shift();
               var cartDisplay = {
@@ -2420,18 +2238,28 @@ var sendResponse = function(data,flag){
                   }
                 }
             };
-            data.client_res[0].forEach(function(el, index) {
+            var count = 0;
+            data.client_res[0].forEach(function(el) {
                 if (el.text && el.text.title && el.text.price && el.text.quantity) {
                     var cart_item = {
                       "title": el.text.title,
                       "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
-                      "buttons":[{ "type": "postback", "title": "➕", "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (index + 1) })},
-                      { "type": "postback", "title": "➖", "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (index + 1) })}]
+                      "buttons":[
+                          { "type": "postback", 
+                            "title": "➕", 
+                            "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (count + 1) })
+                          },
+                          { "type": "postback", 
+                            "title": "➖", 
+                            "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (count + 1) })
+                          }
+                      ]
                     }
                     if (el.thumb_url) {
                       cart_item.image_url =  el.thumb_url;
                     }
                      cartDisplay.attachment.payload.elements.push(cart_item);
+                     count++;
                 }
             })
 
@@ -2452,10 +2280,8 @@ var sendResponse = function(data,flag){
                console.log(body);
             })
         }
-        else if (data.action == 'smallTalk') {
-            if (data.client_res[0] && data.client_res[0].indexOf('removed that item for you 😊') > -1) {
-                return
-            }
+        else if (data.action == 'smalltalk') {
+            console.log('GETTING TO SMALLTALK: ', data.client_res)
          var message = {
                 "recipient": {"id": data.source.channel},
                 "message": {
@@ -2686,37 +2512,36 @@ var saveToCart = function(data){
        //----supervisor: flag to skip history.recallHistory step below ---//
         if (data.flags && data.flags.recalled) {
             // console.log('\n\n\nDATA.FLAGS RECALLED!!!', data.flags)
-            var cartHistory = { cart: [] }
-              //async push items to cart
-            // async.eachSeries(data.searchSelect, function(searchSelect, callback) {
-                // if (item.recallHistory && item.recallHistory.amazon){
-                    // proxy.cart.push(data.amazon[data.searchSelect - 1]); //add selected items to cart
-                // }else {
-                   cartHistory.cart.push(data.amazon[data.searchSelect[0] - 1]); //add selected items to cart
-                // }
-                // callback();
-            // }, function done(){
-            console.log('\n\n\nio930: SUPERVISOR cartHistory: ', cartHistory,'\n\n\n')
-              if (cartHistory.cart.length == 0) {
-                console.log('No items in proxy cart: io.js : Line 933', cartHistory)
-                return
-            } else {
-                 // console.log('\n\n\n\n\n I mean brah it shouldnt be coming here....',data.source.id,messageHistory,'\n\n\n\n\n\n')
-                  purchase.outputCart(data, cartHistory,function(res){
-                    // processData.urlShorten(res, function(res2){
-                        res.client_res = [res.client_res];
-                        // res.client_res.push(res2);
-                        // console.log('Mitsu937ios: res2 = :',res2)
-                        // var proxy = res
-                        // delete proxy.amazon
-                        // console.log('Mitsu iojs935: ', JSON.stringify(res.client_res))
+         //    var cartHistory = { cart: [] }
+         //      //async push items to cart
+         //    async.eachSeries(data.searchSelect, function(searchSelect, callback) {
+         //        if (data.recallHistory && data.recallHistory.amazon){
+         //            cartHistory.cart.push(data.recallHistory[data.searchSelect[0] - 1]); //add selected items to cart
+         //        }else {
+         //           cartHistory.cart.push(data.amazon[data.searchSelect[0] - 1]); //add selected items to cart
+         //        }
+         //        callback();
+         //    }, function done(){
+         //    console.log('\n\n\ncartHistory FIRING: ', cartHistory,'\n\n\n')
+         //      if (cartHistory.cart.length == 0) {
+         //        console.log('No items in proxy cart: io.js : Line 933', cartHistory)
+         //        return
+         //    } else {
+         //          purchase.outputCart(data, cartHistory,function(res){
+         //            // processData.urlShorten(res, function(res2){
+         //                res.client_res = [res.client_res];
+         //                // res.client_res.push(res2);
+         //                // console.log('Mitsu937ios: res2 = :',res2)
+         //                // var proxy = res
+         //                // delete proxy.amazon
+         //                // console.log('Mitsu iojs935: ', JSON.stringify(res.client_res))
 
-                        outgoingResponse(res,'txt');
-                    });
-                // });
-            // });
-            return
-            }
+         //                outgoingResponse(res,'txt');
+         //            });
+         //        // });
+         //    return
+         //    }
+         // });
         }
         //-----------------------------------------------------------------//
 
@@ -2768,7 +2593,8 @@ var saveToCart = function(data){
                         console.log(reason);
                         sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                       })
-                  } else {
+                  } 
+                  else {
                     cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd, true)
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
@@ -3252,6 +3078,18 @@ function addmemberMode(data){
         console.log(e);
         console.log(e.stack);
     })
+
+}
+
+function familycartMode(data) {
+    data.bucket = 'mode';
+    data.action = 'familycart';
+    history.saveHistory(data,true,function(res){});
+
+    kipUser[data.source.id].conversations = 'familycart';
+
+    
+
 
 }
 

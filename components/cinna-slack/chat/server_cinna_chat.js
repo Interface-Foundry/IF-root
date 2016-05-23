@@ -192,13 +192,16 @@ app.post('/facebook', function (req, res) {
                           var newMsg = {};
                           newMsg.source = msg.source;
                           newMsg.msg = 'save ' + postback.selected;
+                           newMsg.bucket = 'purchase';
+                          newMsg.action = 'add';
                           newMsg.tokens = [newMsg.msg];
                           newMsg.thread = msg.thread;
                           newMsg.thread.sequence += 1;
                           newMsg.incoming = true;
-                          newMsg.amazon = msg.amazon;
-                          newMsg.searchSelect = [];
-                          newMsg.searchSelect.push(postback.selected);
+                          // newMsg.amazon = msg.amazon;
+                          newMsg.recallHistory = msg.recallHistory;
+                          // newMsg.searchSelect = [];
+                          // newMsg.searchSelect.push(postback.selected);
                           newMsg.source =  {
                               'origin':'facebook',
                               'channel': sender.toString(),
@@ -212,13 +215,13 @@ app.post('/facebook', function (req, res) {
                           var newMsg = {};
                           newMsg.source = msg.source;
                           newMsg.msg = 'remove ' + postback.selected;
-                          // newMsg.flag = 'purchase.remove';
                           newMsg.bucket = 'purchase';
                           newMsg.action = 'remove';
                           newMsg.tokens = [newMsg.msg];
                           newMsg.thread = msg.thread;
                           newMsg.thread.sequence += 1;
                           newMsg.incoming = true;
+                          newMsg.recallHistory = msg.recallHistory;
                           newMsg.amazon = msg.amazon;
                           newMsg.searchSelect = [];
                           newMsg.searchSelect.push(postback.selected);

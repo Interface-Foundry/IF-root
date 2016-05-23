@@ -116,6 +116,13 @@ var checkModes = function(inputObj,context,callback) {
             mode = 'shopping';
             break;
 
+        //* * * family cart mode
+        case textSimilar(input,'add family') > 90:
+        case textSimilar(input,'family cart') > 90:
+        case textSimilar(input,'group cart') > 90:
+            mode = 'familycart';
+            break;
+
         //* * * * add member mode
         case textSimilar(input,'addmember') > 90:
         case textSimilar(input,'add member') > 80:
