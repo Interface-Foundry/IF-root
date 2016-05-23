@@ -90,7 +90,7 @@ app.get('/newslack', function(req, res) {
 //incoming slack action
 app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
-    console.log('incoming Slack action BODY: ',req.body);
+    //console.log('incoming Slack action BODY: ',req.body);
 
     if (req.body && req.body.payload){
       var parsedIn = JSON.parse(req.body.payload);
@@ -117,7 +117,7 @@ app.post('/slackaction', function(req, res) {
     }
 
     // //SEND REQ.BODY: { payload: }
-    // ioKip.incomingMsgAction(req.body,'slack');
+    ioKip.incomingMsgAction(req.body,'slack');
 });
 
 

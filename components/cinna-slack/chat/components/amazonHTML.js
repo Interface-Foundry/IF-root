@@ -72,13 +72,13 @@ async.eachSeries(count, function(c, callback) {
 
   setTimeout(function() {
     callback();
-  }, 5000);
+  }, 15000);
 
 }, function done(){
   setTimeout(function() {
-    sessionRenewer(); 
-  }, 30000);
-  //start renewing sessions forever
+    sessionRenewer(); //start renewing sessions forever
+  }, 60000);
+  
 }) 
 
 //pool new sessions over time
@@ -123,14 +123,14 @@ function sessionRenewer(){
 //gen session for pool
 function genSession(num,callback){
   var username = 'lum-customer-kipthis-zone-gen';
-  var password = 'e49d4efa2696';
+  var password = 'e49d4ega1696';
   var port = 22225;
   var session_id = (1000000 * Math.random())|0; //the only important part 
 
   var super_proxy = 'http://'+username+'-country-us-session-'+session_id+':'+password+'@zproxy.luminati.io:'+port;
 
   var options = {
-    url: 'http://kipthis.com/img/kip_logo_new.svg',
+    url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
     proxy: super_proxy,
     headers: {
         'User-Agent': user_agent
@@ -156,7 +156,7 @@ function genSession(num,callback){
       genSession(num, function(){
 
       });  
-    }, 20);
+    }, 10000);
 
   });
   //callback(super_proxy,session_id);
@@ -264,13 +264,25 @@ module.exports.basic = function basic(url, callback, num) {
         });      
       }
 
+      var processing = true;
+
+      //this ensures we dont spend more than 3 seconds trying to scrape item
+      setTimeout(function() {
+        if (processing){
+          console.log('KILLED SEARCH!!!!🍹!!!!!!🍹!!!!!!!!🍹!!!')
+          callback(null,'WARNING: LUMINATI PROXY TOOK TOO LONG!');
+          return;
+        }
+      }, 3000);
 
       proxiedRequest.get(url, function(err, response, body) {
+
+        processing = false;
 
         if (kip.error(err)) {
           console.error('error amazon get url ' + url)
           callback(err);
-          return
+          return;
         }
         if(err){
           console.log('&^&^&^&^&^&^&^&^&^');

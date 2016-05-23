@@ -747,6 +747,34 @@ var preProcess = function(data){
                     });
                     break;
 
+                case 'kik.help':
+                    data.client_res = [];
+                    data.client_res.push(res);
+                    var keyboardObj = [{
+                        "type": "suggested",
+                        "hidden":false,
+                        "responses": [
+                            {
+                                "type":"text",
+                                "body":"Find headphones" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
+                            },
+                            {
+                                "type":"text",
+                                "body":"Find dystopia books"
+                            },
+                            {
+                                "type":"text",
+                                "body":"Find LED gloves"
+                            },
+                            {
+                                "type":"text",
+                                "body":"🔮 Surprise me!"
+                            }
+                        ]
+                    }];  
+                    cannedBanter(data,keyboardObj);
+                    break;
+
                 //for testing in PAPRIKA
                 case 'slack.search':
                     // data.searchSelect = [];
@@ -893,7 +921,6 @@ var incomingMsgAction = function(data,origin){
         console.error('Slack callback_id missing from Slack response');
         return;
     }
-    console.log('PARSED INCOMONG ',parsedIn);
 
     //build new incoming Kip obj
     var kipObj = {
@@ -938,29 +965,58 @@ var incomingMsgAction = function(data,origin){
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'save';
                 break;
+
+            case 'additem':
+                kipObj.bucket = 'purchase';
+                kipObj.action = 'save';
+                break;
+
+            case 'removeitem':
+                kipObj.bucket = 'purchase';
+                kipObj.action = 'remove';
+                break;
         }
 
-        //get searchSelect
-        var parseVal = parseInt(parsedIn.actions[0].value); //parse
-        if (!isNaN(parseVal) && parseVal > -1){ //check if real select number
-            parseVal = parseVal + 1; //normalize to rest of Kip of system
-            kipObj.searchSelect = [];
-            kipObj.searchSelect.push(parseVal);
+        //special cart commands
+        if (parsedIn.actions[0].name == 'additem'){
+
+            //REMOVE BY ITEM ID!!
+
+            console.log('PARSED INCOMONG ',kipObj);
+
+
+        }
+        else if (parsedIn.actions[0].name == 'removeitem'){
+
+            co(function*() {
+              yield kipcart.removeFromCart(kipObj.source.org, kipObj.source.user, kipObj.slackData.callback_id);
+              viewCart(kipObj);
+            }).then(function(){}).catch(function(err) {
+                console.error('couldnt remove item on button push')
+            })
+        }
+        else {
+            //get searchSelect
+            var parseVal = parseInt(parsedIn.actions[0].value); //parse
+            if (!isNaN(parseVal) && parseVal > -1){ //check if real select number
+                parseVal = parseVal + 1; //normalize to rest of Kip of system
+                kipObj.searchSelect = [];
+                kipObj.searchSelect.push(parseVal);
+            }
+
+            //build source
+            kipObj.source = {
+                origin: origin,
+                channel: parsedIn.channel.id,
+                org: parsedIn.team.id,
+                id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+                user: parsedIn.user.id,
+                flag: 'buttonAction'
+            }
+            incomingAction(kipObj);
         }
 
-        //build source
-        kipObj.source = {
-            origin: origin,
-            channel: parsedIn.channel.id,
-            org: parsedIn.team.id,
-            id: parsedIn.team.id +'_'+ parsedIn.channel.id,
-            user: parsedIn.user.id,
-            flag: 'buttonAction'
-        }
 
-        //console.log('KIPOBJ ',kipObj);
-
-        incomingAction(kipObj);
 
     }else {
         console.error('Incoming Slack ERROR: missing actions[0].name or actions[0].value ',parsedIn);
@@ -1216,9 +1272,12 @@ function purchaseBucket(data){
 
 //process canned message stuff
 //data: kip data object
-var cannedBanter = function(data){
+var cannedBanter = function(data,keyboard){
     data.bucket = 'banter';
     data.action = 'smalltalk';
+    if(keyboard){
+        data.keyboardButtons = keyboard;
+    }
     incomingAction(data);
 }
 
@@ -1281,48 +1340,42 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             var actionObj = [
                                 {
                                   "name": "addcart",
-                                  "text": "⭐ add to cart",
+                                  "text": "add to cart",
                                   "style": "primary",
                                   "type": "button",
                                   "value": count
-                                  // "confirm": {
-                                  //   "title": "Are you sure?",
-                                  //   "text": "This will approve the request.",
-                                  //   "ok_text": "Yes",
-                                  //   "dismiss_text": "No"
-                                  // }
                                 },
                                 {
                                   "name": "cheaper",
-                                  "text": "💎 cheaper",
+                                  "text": "cheaper",
                                   "style": "default",
                                   "type": "button",
                                   "value": count
                                 },
                                 {
                                   "name": "similar",
-                                  "text": "⚡ similar",
+                                  "text": "similar",
                                   "style": "default",
                                   "type": "button",
                                   "value": count
                                 },
-                                {
-                                  "name": "modify",
-                                  "text": "🌀 modify",
-                                  "style": "default",
-                                  "type": "button",
-                                  "value": count
-                                },
+                                // {
+                                //   "name": "modify",
+                                //   "text": "modify",
+                                //   "style": "default",
+                                //   "type": "button",
+                                //   "value": count
+                                // },
                                 {
                                   "name": "moreinfo",
-                                  "text": "💬 info",
+                                  "text": "more info",
                                   "style": "default",
                                   "type": "button",
                                   "value": count
                                 }
                             ];
-                            //attachObj.actions = actionObj;
-                            //attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
+                            attachObj.actions = actionObj;
+                            attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
 
                             attachObj.image_url = urlArr[count];
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
@@ -2125,7 +2178,15 @@ var sendResponse = function(data,flag){
 
                 // console.log('\n\n\nKik  : ', message,'\n\n\n')
 
-                kipServer.sendToKik(data,Kik.Message.text(message),'banter')
+                var kikRez = Kik.Message.text(message);
+
+                if(data.keyboardButtons){
+                    kikRez._state.keyboards = data.keyboardButtons;
+                }              
+
+                kipServer.sendToKik(data,kikRez,'banter')
+
+
 
                 callback();
             }, function done(){
@@ -2586,22 +2647,24 @@ var sendResponse = function(data,flag){
                 attachments[0].image_url = attachThis[0]; //add image search results to attachment
                 attachments[0].fallback = 'More information'; //fallback for search result
 
-                var actionObj = [
-                    {
-                      "name": "AddCart",
-                      "text": ":thumbsup: Add to Cart",
-                      "style": "primary",
-                      "type": "button",
-                      "value": "yes",
-                      "confirm": {
-                        "title": "Are you sure?",
-                        "text": "This will approve the request.",
-                        "ok_text": "Yes",
-                        "dismiss_text": "No"
-                      }
-                    }
-                ];
-                //attachments[0].actions = actionObj;
+                // var actionObj = [
+                //     {
+                //       "name": "AddCart",
+                //       "text": ":thumbsup: Add to Cart",
+                //       "style": "primary",
+                //       "type": "button",
+                //       "value": "yes",
+                //       "confirm": {
+                //         "title": "Are you sure?",
+                //         "text": "This will approve the request.",
+                //         "ok_text": "Yes",
+                //         "dismiss_text": "No"
+                //       }
+                //     }
+                // ];
+
+                console.log('FOCUS DATA ',data);
+
 
                 attachThis.shift(); //remove image from array
 
@@ -2618,6 +2681,47 @@ var sendResponse = function(data,flag){
 
                 }, function done(){
 
+
+                    var count = data.searchSelect[0] + 1;
+
+                    var actionObj = [
+                        {
+                          "name": "addcart",
+                          "text": "add to cart",
+                          "style": "primary",
+                          "type": "button",
+                          "value": count
+                        },
+                        {
+                          "name": "cheaper",
+                          "text": "cheaper",
+                          "style": "default",
+                          "type": "button",
+                          "value": count
+                        },
+                        {
+                          "name": "similar",
+                          "text": "similar",
+                          "style": "default",
+                          "type": "button",
+                          "value": count
+                        },
+                        {
+                          "name": "moreinfo",
+                          "text": "more info",
+                          "style": "default",
+                          "type": "button",
+                          "value": count
+                        }
+                    ];
+
+                    if(attachments[1]){
+                        attachments[1].actions = actionObj;
+                        if(data.slackData){
+                            attachments[1].callback_id = data.slackData.callback_id;
+                        }                        
+                    }
+                    
                     attachments = JSON.stringify(attachments);
 
                     var msgData = {
@@ -2647,8 +2751,6 @@ var sendResponse = function(data,flag){
             else {
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
-
-
 
                     //item is a string, send message
                     if (typeof message === 'string'){
@@ -2927,28 +3029,42 @@ function viewCart(data, show_added_item){
           console.log(link);
         }
 
-        var actionObj = [
-            {
-              "name": "RemoveItem",
-              "text": "➖",
-              "style": "danger",
-              "type": "button",
-              "value": "no",
-              "confirm": {
-                "title": "Are you sure?",
-                "text": "This will approve the request.",
-                "ok_text": "Yes",
-                "dismiss_text": "No"
-              }
-            },
-            {
-              "name": "AddItem",
-              "text": "➕",
-              "style": "primary",
-              "type": "button",
-              "value": "yes"
-            }
-        ];
+        //CONFIRM MESSAGE FOR REMOVE IF ITS THE LAST ITEM TO REMOVE
+
+        //ONLY SHOW ADD/REMOVE FOR 
+
+        //check if user added this item
+
+        //item.added_by
+
+    
+        if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
+            var actionObj = [
+                {
+                  "name": "removeitem",
+                  "text": "➖",
+                  "style": "danger",
+                  "type": "button",
+                  "value": "remove",
+                  // "confirm": {
+                  //   "title": "Are you sure?",
+                  //   "text": "This will remove",
+                  //   "ok_text": "Yes",
+                  //   "dismiss_text": "No"
+                  // }
+                },
+                {
+                  "name": "additem",
+                  "text": "➕",
+                  "style": "primary",
+                  "type": "button",
+                  "value": "add"
+                }
+            ];            
+        }else {
+            var actionObj = [];
+        }
+
 
         // add title, which is a link for admins/p2p and text otherwise
         var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
@@ -2971,8 +3087,9 @@ function viewCart(data, show_added_item){
           text: text,
           mrkdwn_in: ['text', 'pretext'],
           color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
-          thumb_url: item.image
-         // actions: actionObj
+          thumb_url: item.image,
+          actions: actionObj,
+          callback_id: i+1
         })
       }
 

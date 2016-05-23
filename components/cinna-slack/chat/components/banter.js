@@ -61,10 +61,10 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'wtf') > 70:
             if(context == 'settings'){
                 mode = 'settings';
-                res = 'SETTINGS HELP GOES HERE 😊';
+                res = 'Type `exit` to leave settings mode';
             }else if (context == 'collect'){
                 mode = 'collect';
-                res = 'COLLECT HELP GOES HERE 😊';
+                res = 'Type `exit` to leave collect mode';
             }
             break;
 
@@ -341,7 +341,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'this is not what i said') > 60:
         case textSimilar(input,'this is not what i asked for') > 60:
             flag = 'basic'; //do this action
-            if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
+            if (origin == 'slack' || origin == 'telegram'){
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -362,7 +362,15 @@ var checkForCanned = function(input,callback,origin,source) {
                 '`remove 3` : to remove item :three: from cart\n\n'+
 
                 '`help` : view guidelines\n'+
-                'Try it now! Maybe you need new headphones? Type `headphones` to start.';
+                'Try it now! Maybe you need new headphones? Type `headphones` to start';
+            }
+            else if (origin == 'kik'){
+                res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n'+
+
+                'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: 1⃣ 2⃣ or 3⃣ \n'+
+                'Tap the matching keyboard button for more info and options for each search result.\n\n'+
+                'Try it now! Maybe you need new headphones? Type `headphones` to start';
+                flag = 'kik.help';
             }
             else if (origin == 'socket.io'){
                 
@@ -386,7 +394,7 @@ var checkForCanned = function(input,callback,origin,source) {
                 '<span class="typer">remove 3</span> : remove item <span class="selector">➌</span> from cart<br><br>'+
 
                 '<span class="typer">help</span> : view guidelines<br>'+
-                'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.';
+                'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start';
             }
 
 
@@ -787,7 +795,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'wut') > 70:
         case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            if (origin == 'slack' || origin == 'telegram' || origin == 'kik'){
+            if (origin == 'slack' || origin == 'telegram'){
                 res = 'I\'m Kip, your personal shopper.\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
@@ -810,6 +818,12 @@ var checkForCanned = function(input,callback,origin,source) {
 
                 '`help` : view guidelines\n'+
                 'Try it now! Maybe you need new headphones? Type `headphones` to start.';
+            }
+            else if (origin == 'kik'){
+                res = 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: 1⃣ 2⃣ or 3⃣ \n'+
+                'Tap the matching keyboard button for more info and options for each search result.\n\n'+
+                'Try it now! Maybe you need new headphones? Type `headphones` to start';
+                flag = 'kik.help';
             }
             else if (origin == 'socket.io'){
                 
