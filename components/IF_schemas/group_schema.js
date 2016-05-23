@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 /**
  * Save slackbot integrations
  */
-var groupchat = mongoose.Schema({
+var groupSchema = mongoose.Schema({
     team_name: String,
     team_id: {
       type: String,
@@ -14,14 +14,19 @@ var groupchat = mongoose.Schema({
         channel: String,
         configuration_url: String
     },
-    bot: {
-        type: {type: String},
-        bot_user_id: String,
-        bot_access_token: String
-    },
-    //
-    // this is all kip-specific stuff
-    //
+    admins: [String], // user ids of the office assistants, like U0R6H9BKN
+    members: [
+        { member_id: String, 
+          bots: [{
+            type: {type: String},
+            activated: Boolean, 
+            notify: Boolean
+            bot_user_id: String,
+            bot_access_token: String,
+            platform_access_token: String
+           }],
+        }
+    ],
     meta: {
         dateAdded: {
             type: Date,
@@ -32,7 +37,6 @@ var groupchat = mongoose.Schema({
             type: Boolean,
             default: false
         },
-        office_assistants: [String], // user ids of the office assistants, like U0R6H9BKN
         weekly_status_enabled: {
           type: Boolean,
           default: true
@@ -59,6 +63,6 @@ var groupchat = mongoose.Schema({
     conversations: {}
 });
 
-var Groupchat = mongoose.model('Groupchat', groupchat);
+var Group = mongoose.model('Group', groupSchema);
 
-module.exports = Groupchat;
+module.exports = Group;
