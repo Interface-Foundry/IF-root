@@ -56,6 +56,7 @@ module.exports.prettyPrint = module.exports.log
  */
 module.exports.debug = function() {
     if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
+      arguments = ['debug:'.cyan].concat(Array.prototype.slice.call(arguments));
       module.exports.log.apply(null, arguments)
     }
 }
