@@ -10,6 +10,7 @@ var topics = {'incoming': 1, 'nlp': 2, 'picstitch': 3, 'outgoing.slack': 4};
 // publishes a message in the given topic. returns a promise
 //
 function publish(topic, data, key) {
+  kip.debug('publishing to topic', topic);
   if (typeof topic !== 'string') {
     throw new Error('pub/sub topic must be a string, ex queue.publish("messages", {})')
   }
@@ -25,7 +26,7 @@ function publish(topic, data, key) {
 
   // Upsert the thing
   return co(function*() {
-    yield PubSub.update({
+    return yield PubSub.update({
       _id: key
     }, {
       _id: key,
@@ -63,7 +64,7 @@ function topic(topic) {
         while (true) {
           var message = yield getNextMessage(topic);
           if (!message) { return }
-          kip.debug('dispatching message', message);
+          kip.debug('handling message', message);
           observer.onNext(message);
         }
       }).catch(kip.err)
