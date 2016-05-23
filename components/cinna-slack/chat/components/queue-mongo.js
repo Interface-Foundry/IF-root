@@ -4,12 +4,12 @@ var PubSub = require('../../db').PubSub;
 var rx = require('rx');
 
 
-var topics = {'messages': 1, 'nlp': 2, 'picstitch': 3};
+var topics = {'incoming': 1, 'nlp': 2, 'picstitch': 3, 'outgoing.slack': 4};
 
 //
 // publishes a message in the given topic. returns a promise
 //
-function publish(topic, data) {
+function publish(topic, data, key) {
   if (typeof topic !== 'string') {
     throw new Error('pub/sub topic must be a string, ex queue.publish("messages", {})')
   }
@@ -26,9 +26,9 @@ function publish(topic, data) {
   // Upsert the thing
   return co(function*() {
     yield PubSub.update({
-      _id: getKey(topic, data)
+      _id: key
     }, {
-      _id: getKey(topic, data),
+      _id: key,
       topic: topic,
       data: data
     }, {
@@ -38,14 +38,6 @@ function publish(topic, data) {
     // now alert the subscribers if there are any
     // TODO
   })
-}
-
-function getKey(topic, data) {
-  if (topic === 'messages') {
-    return data.user + '.' + data.channel + '.' + data.timestamp;
-  }
-
-  throw new Error("getKey not implemented for " + topic)
 }
 
 //
@@ -79,7 +71,6 @@ function topic(topic) {
 
     // Retry interval, retry if dispatched but not done and 10 seconds old.
     setInterval(() => {
-      console.log('retry');
       PubSub.update({
         dispatched: true,
         done: { $ne: true },
@@ -91,7 +82,7 @@ function topic(topic) {
       }, {
         multi: true
       }).exec();
-    }, 5000)
+    }, 10000)
   })
 }
 
@@ -125,12 +116,13 @@ function* getNextMessage(topic) {
   }
 }
 
-
-// testing
+//              T       S
+// testing        E   T
+//                  S
 if (!module.parent) {
   require('colors');
   topic('messages').subscribe(m => {
-    console.log(m.data.text);
+    console.log('ack-ing message'.green, m.data.text);
     m.ack();
   })
 
@@ -145,7 +137,7 @@ if (!module.parent) {
       text: "Hi i'm message " + i
     };
 
-    publish('messages', message).catch(kip.err)
+    publish('messages', message, message.user + '.' + message.timestamp).catch(kip.err)
   }, 2000)
 }
 
