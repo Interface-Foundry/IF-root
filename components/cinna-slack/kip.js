@@ -73,3 +73,21 @@ module.exports.exit = function(code) {
     process.exit();
   }
 }
+
+module.exports.assert = function(val) {
+  if (!val) {
+    throw new Error('assertion failed');
+  }
+  return true;
+}
+
+module.exports.assertProperties = function() {
+  var args = Array.prototype.slice.call(arguments);
+  var obj = args[0];
+  args.slice(1).map(p => {
+    if (!obj.hasOwnProperty(p)) {
+      throw new Error('assertProperties failed, property ' + p + ' does not exist');
+    }
+  })
+  return true;
+}

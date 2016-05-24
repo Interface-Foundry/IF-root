@@ -58,7 +58,11 @@ var slackbotSchema = mongoose.Schema({
         city: {
           type: String
         },
-        cart_channels: [String]
+        cart_channels: [String],
+        deleted: {
+          type: Boolean,
+          default: false
+        }
     },
     // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
     conversaitons: {}

@@ -4,7 +4,7 @@ var PubSub = require('../../db').PubSub;
 var rx = require('rx');
 
 
-var topics = {'incoming': 1, 'nlp': 2, 'picstitch': 3, 'outgoing.slack': 4};
+var topics = {'incoming': 1, 'nlp': 2, 'picstitch': 3, 'outgoing.slack': 4, 'outgoing.kik': 5};
 
 //
 // publishes a message in the given topic. returns a promise
@@ -113,6 +113,7 @@ function* getNextMessage(topic) {
   if (status.ok !== 1) {
     return getNextMessage(topic);
   } else {
+    message.dispatched = true;
     return message;
   }
 }

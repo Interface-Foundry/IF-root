@@ -4,8 +4,26 @@ var mongoose = require('mongoose');
 var amazonResult = mongoose.Schema;
 var modifyVal = mongoose.Schema;
 var messageSchema = mongoose.Schema({
+    thread_id: {
+      type: String,
+      index: true
+    },
+    ts: {
+      type: Date,
+      default: Date.now
+    },
+    resolved: {
+      type: Boolean,
+      default: false
+    },
+    user_id: String,
+    origin: String,
+    source: {},
     incoming: Boolean, //if true, incoming message, if false, outgoing message
-    msg: String, //raw incoming message (if applicable)
+
+
+    text: String, //incoming message (if applicable), pre-processed
+    original_text: String, //raw incoming message (if applicable)
     tokens: [String], //broken up incoming message (if applicable)
     bucket: { type: String, index: true},
     action: { type: String, index: true},
@@ -16,23 +34,7 @@ var messageSchema = mongoose.Schema({
         val: [mongoose.Schema.Types.Mixed],
         param: String
     },
-    source: {
-        origin: String,
-        channel: String,
-        org: String,
-        id: { type: String, index: true },
-        flag: String,
-        user: String
-    },
     client_res: [mongoose.Schema.Types.Mixed], //outgoing messages, if applicable
-    ts: {
-        type: Date,
-        default: Date.now
-    },
-    resolved: {
-        type: Boolean,
-        default: false
-    },
     parent:{
         id: String
     },
@@ -41,7 +43,7 @@ var messageSchema = mongoose.Schema({
         sequence: Number,
         isOpen: Boolean,
         ticket: {
-            id: String, 
+            id: String,
             isOpen: Boolean
         },
         parent: {
@@ -72,4 +74,3 @@ var messageSchema = mongoose.Schema({
 });
 
 module.exports = mongoose.model('Message', messageSchema);
-

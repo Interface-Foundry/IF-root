@@ -4,8 +4,12 @@ var mongoose = require('mongoose');
 var amazonResult = mongoose.Schema;
 var modifyVal = mongoose.Schema;
 var chatuserSchema = mongoose.Schema({
-    id: String,
-    type: { type: String }, // slack, telegram, skype, etc. 
+    id: {
+      type: String,
+      unique: true,
+      index: true
+    },
+    type: { type: String }, // slack, telegram, skype, etc.
     dm: String, // direct message channel id
     team_id: String,
     name: String,

@@ -57,13 +57,14 @@ var slackConnections = {};
 //
 co(function*() {
   var slackbots = yield db.Slackbots.find({
-    delete: { $ne: true }
+    'meta.deleted': {
+      $ne: true
+    }
   }).exec();
 
   kip.log('found', slackbots.length, 'slackbots');
 
   // Just need the RTM client to listen for messages
-  var slackConnections = {};
   slackbots.map((slackbot) => {
     var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '');
     rtm.start();
@@ -86,23 +87,32 @@ co(function*() {
       kip.log(reason); // is this even a thing?
     });
 
+
+    //
+    // Handle incoming slack messages.  Slack-specific pre-processing
+    //
     rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
-      data.origin = 'slack';
-      kip.debug('slack message sent to team', slackbot.team_id, 'from user', data.user, 'on channel', data.channel);
+
+      kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
       kip.debug(data);
 
-      //
-      // ignore some messages we won't respond to 😒
-      //
+      var message = new db.Message({
+        incoming: true,
+        thread_id: data.channel,
+        original_text: data.text,
+        user_id: data.user,
+        origin: 'slack',
+        source: data,
+      });
 
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
         kip.debug("don't talk to yourself");
-        return; // drop the message
+        return; // drop the message before saving.
       }
 
       // other random things
-      if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave'){ //settings.name = kip's slack username
+      if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
         kip.debug('will not handle this message');
         return;
       }
@@ -111,22 +121,25 @@ co(function*() {
       // 🖼 image search
       //
       if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'sgv'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
-        image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res){
-            data.text = res;
-            data.imageTags = res;
-            queue.publish('incoming', data, ['slack', data.channel, data.ts].join('.'));
+        return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
+          message.text = res;
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'));
+          });
         });
       }
 
       // clean up the text
-      data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-      if (data.text.charAt(0) == ':'){
-          data.text = data.text.substr(1); //remove : from beginning of string
+      message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+      if (message.text.charAt(0) == ':') {
+        message.text = message.text.substr(1); //remove : from beginning of string
       }
-      data.text = data.text.trim(); //remove extra spaces on edges of string
+      message.text = message.text.trim(); //remove extra spaces on edges of string
 
       // queue it up for processing
-      queue.publish('incoming', data, ['slack', data.channel, data.ts].join('.'))
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
+      });
     })
   });
 }).catch((e) => {
@@ -137,8 +150,18 @@ co(function*() {
 // Mechanism for responding to messages
 //
 kip.debug('subscribing to outgoing.slack hopefully');
-queue.topic('outgoing.slack').subscribe(msg => {
+queue.topic('outgoing.slack').subscribe(outgoing => {
   console.log('outgoing message');
-  console.log(msg.data);
-  msg.ack();
+  console.log(outgoing);
+  var message = outgoing.data;
+
+  var bot = slackConnections[message.source.team];
+  
+  if (typeof bot === 'undefined') {
+    throw new Error('rtm client not registered for slack team ' + message.source.team);
+  }
+
+  bot.sendMessage(message.text, message.source.channel, () => {
+    outgoing.ack();
+  })
 })
