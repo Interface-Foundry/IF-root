@@ -3225,8 +3225,6 @@ function viewCart(data, show_added_item){
             console.log('error retriving cart for view cart')
             console.log(e.stack);
       }
-
-
     })
 }
 
