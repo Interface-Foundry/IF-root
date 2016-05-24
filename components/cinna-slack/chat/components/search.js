@@ -31,7 +31,7 @@ var searchInitial = function(data,flag){
 }
 
 var searchSimilar = function(data){
-    if (data.dataModify && data.dataModify.val.length > 0){
+    if (data.dataModify && data.dataModify.val && data.dataModify.val.length > 0){
         data.action = 'modify'; //because NLP changed randomly =_=;
         searchModify(data);
     }
@@ -214,24 +214,29 @@ var searchAmazon = function(data, type, query, flag) {
                                                 parseAmazon(productGroup,browseNodes,function(res){
 
                                                     //* * * * * TEMPORARY TO HELP WITH CHEAPER RESULTS??????????? * * * * * //
-                                                    res.BrowseNode = res.BrowseNode.split(',');
-                                                    debug('arr ',res.BrowseNode);
-                                                    debug('ARRAY LENGTH ',res.BrowseNode.length);
-                                                    if (res.BrowseNode && res.BrowseNode.length >= 2){
-                                                        res.BrowseNode = res.BrowseNode.slice(0,2);
+                                                    if (res && res.BrowseNode){
+                                                        res.BrowseNode = res.BrowseNode.split(',');
+                                                        debug('arr ',res.BrowseNode);
+                                                        debug('ARRAY LENGTH ',res.BrowseNode.length);
+                                                        if (res.BrowseNode && res.BrowseNode.length >= 2){
+                                                            res.BrowseNode = res.BrowseNode.slice(0,2);
+                                                        }
+                                                        debug('arr ',res.BrowseNode);
+                                                        debug('ARRAY LENGTH ',res.BrowseNode.length);
+
+                                                        res.BrowseNode = res.BrowseNode.toString();
+                                                        //* * * * * * * * * * * END TEST * * * * * * * * * * * * * * * * * * //
+
+                                                        amazonParams.SearchIndex = res.SearchIndex;
+                                                        amazonParams.BrowseNode = res.BrowseNode;
+                                                        amazonParams.MaximumPrice = modPrice.toString();
+                                                        delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
+                                                        doSearch();
+                                                    }else {
+                                                        console.error('ERROR: line 237 in search.js, browsenode not found')
+                                                        doSearch();
                                                     }
-                                                    debug('arr ',res.BrowseNode);
-                                                    debug('ARRAY LENGTH ',res.BrowseNode.length);
-
-                                                    res.BrowseNode = res.BrowseNode.toString();
-                                                    //* * * * * * * * * * * END TEST * * * * * * * * * * * * * * * * * * //
-
-
-                                                    amazonParams.SearchIndex = res.SearchIndex;
-                                                    amazonParams.BrowseNode = res.BrowseNode;
-                                                    amazonParams.MaximumPrice = modPrice.toString();
-                                                    delete amazonParams.Keywords; //!\!\!\!\ remove so we query by browsenode
-                                                    doSearch();
+  
                                                 });
                                             }
                                             else {
@@ -400,7 +405,7 @@ var searchAmazon = function(data, type, query, flag) {
                                     getPrices(data.amazon[i],function(realPrice){
                                         data.amazon[i].realPrice = realPrice;
                                         callback();
-                                    });
+                                    },i);
                                 });
                             }
                             else {
@@ -503,7 +508,7 @@ var searchAmazon = function(data, type, query, flag) {
                                                data.amazon[i].altImage = altImage;
                                             }
                                             callback();
-                                        });
+                                        },i);
                                     });
                                 }
                                 else {
@@ -985,7 +990,12 @@ var searchFocus = function(data) {
                 processData.getNumEmoji(data,searchSelect+1,function(res){
 
                     //data.client_res.push('<'+res[count]+' | ' + emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'>');
-                    if (data.source.origin !== 'supervisor') {
+                    if(data.source.origin == 'kik'){
+                        data.client_res.push(data.recallHistory.urlShorten[searchSelect].trim())
+                        data.client_res.push(res + ' ' +  data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0]);
+                    }
+                    else if (data.source.origin !== 'supervisor') {
+                        console.log('RECALLED FOCUS ',data.recallHistory);
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
                     } else {
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[0].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
@@ -1001,7 +1011,7 @@ var searchFocus = function(data) {
                     var topStr;
 
                     //if realprice exists, add it to title
-                    if (data.recallHistory.amazon[searchSelect].realPrice){
+                    if (data.recallHistory.amazon[searchSelect].realPrice && data.source.origin !== 'kik'){
                         topStr = data.recallHistory.amazon[searchSelect].realPrice;
                     }
 
@@ -1018,27 +1028,28 @@ var searchFocus = function(data) {
 
                     //get size
                     if (attribs.Size){
-                        cString = cString + ' ○ ' + "Size: " +  attribs.Size[0];
+                        cString = cString + '\n○ ' + "Size: " +  attribs.Size[0];
                     }
 
                     //get artist
                     if (attribs.Artist){
-                        cString = cString + ' ○ ' + "Artist: " +  attribs.Artist[0];
+                        cString = cString + '\n○ ' + "Artist: " +  attribs.Artist[0];
                     }
 
                     //get brand or manfacturer
                     if (attribs.Brand){
-                        cString = cString + ' ○ ' +  attribs.Brand[0];
+                        cString = cString + '\n○ ' +  attribs.Brand[0];
                     }
                     else if (attribs.Manufacturer){
-                        cString = cString + ' ○ ' +  attribs.Manufacturer[0];
+                        cString = cString + '\n○ ' +  attribs.Manufacturer[0];
                     }
 
                     //get all stuff in details box
                     if (attribs.Feature){
-                        cString = cString + ' ○ ' + attribs.Feature.join(' ░ ');
+                        cString = cString + '\n○ ' + attribs.Feature.join('\n░ ');
                     }
 
+                    cString = truncate(cString,260)
                     //done collecting details string, now send
                     if (cString){
                         data.client_res.push(cString);
@@ -1054,8 +1065,58 @@ var searchFocus = function(data) {
                         else {
                             var reviewCounts = '';
                         }
-                        data.client_res.push('⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts);
+
+                        console.log('STARS ',starConvert(data.recallHistory.amazon[searchSelect].reviews.rating))
+                        data.client_res.push(starConvert(data.recallHistory.amazon[searchSelect].reviews.rating) + ' ' +  data.recallHistory.amazon[searchSelect].reviews.rating + ' stars ' + reviewCounts);
                     }
+
+                    function starConvert(rating){
+                        var stars;
+                        if (rating > 4.5){
+                            stars = '⭐️⭐️⭐️⭐️⭐';
+                        }
+                        else if (rating <= 4.5 && rating > 3.6){
+                            stars = '⭐️⭐️⭐️⭐️';
+                        }
+                        else if (rating <= 3.6 && rating > 2.6){
+                            stars = '⭐️⭐️⭐️';
+                        }
+                        else if (rating <= 2.6 && rating > 1.6){
+                            stars = '⭐️⭐️';
+                        }
+                        else {
+                            stars = '⭐️';
+                        }
+                        return stars;
+                    }
+                    
+                    //function { return emoji rating}
+
+
+                    //- - - - - - - KIK SPECIFIC STUFF - - - -  - //
+                    var buildKikEnd = '';
+
+                    if (data.recallHistory.amazon[searchSelect].realPrice && data.source.origin == 'kik'){
+                        buildKikEnd = buildKikEnd + data.recallHistory.amazon[searchSelect].realPrice;
+                    }
+
+                    // if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating && data.source.origin == 'kik'){
+               
+                    //     if(data.recallHistory.amazon[searchSelect].reviews.reviewCount){
+                    //         var reviewCounts = ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews';
+                    //     }
+                    //     else {
+                    //         var reviewCounts = '';
+                    //     }
+
+                    //     buildKikEnd = buildKikEnd + ' – ⭐️ ' +  data.recallHistory.amazon[searchSelect].reviews.rating + reviewCounts;
+                    // }
+
+                    if (buildKikEnd){
+                        console.log('⭐️ ⭐️ ⭐️ ⭐️⭐️ BUILDING ',buildKikEnd)
+                        data.client_res.push(buildKikEnd)         
+                    }
+                    //-  --  - - - - - - END KIK SPECIFIC - - - - - - //
 
                       //----supervisor: making item detail info more digestable on supervisor end ---//
                       if (data.source.origin == 'supervisor') {
@@ -1096,6 +1157,13 @@ var searchMore = function(data){
     if (data.recallHistory && data.recallHistory.amazon){
 
         var moreHist = data;
+        var kikData;
+
+        if(data.kikData){
+            kikData = data.kikData;
+        }
+
+
 
         //build new data obj so there's no mongo duplicate
         data = {};
@@ -1105,6 +1173,11 @@ var searchMore = function(data){
         data.action = moreHist.recallHistory.action;
         data.msg = moreHist.recallHistory.msg;
         data.tokens = moreHist.recallHistory.tokens;
+        if(kikData){
+            data.kikData = kikData;
+        }
+
+
          //----supervisor: reading flags ---//
          if (moreHist.flags) {
              data.flags = moreHist.flags
@@ -1137,7 +1210,7 @@ var searchMore = function(data){
                            data.amazon[i].altImage = altImage;
                         }
                         callback();
-                    });
+                    },i);
                 }
                 else {
                     callback();
@@ -1204,7 +1277,7 @@ var getReviews = function(ASIN,callback) {
     });
 };
 
-var getPrices = function(item,callback){
+var getPrices = function(item,callback,num){
 
     var url = item.DetailPageURL[0];
     var price;  // get price from API
@@ -1234,11 +1307,16 @@ var getPrices = function(item,callback){
     debug('price PRE PROCESS ',price);
 
     amazonHTML.basic(url, function(err, product) {
+
+
+      if(!product){
+        product = {};
+      }
       kip.err(err); // print error
 
       debug('& & & & & & & & & & & &PRODUCT OBJ ',product);
 
-      if (product.reviews){
+      if (product && product.reviews){
         reviews = product.reviews;
       }
 
@@ -1251,7 +1329,7 @@ var getPrices = function(item,callback){
         return callback(product.price,product.altImage,reviews)
       }
 
-      debug('product.price: ' + product.price + ', price: ' + price);
+      //debug('product.price: ' + product.price + ', price: ' + price);
 
       price = product.price || price || '';
       debug('final price: ' + price);
@@ -1261,7 +1339,7 @@ var getPrices = function(item,callback){
 
 
       callback(price,altImage,reviews);
-    })
+    },num)
 }
 
 
@@ -1285,7 +1363,7 @@ var getAmazonStuff = function(data,results,callback3){
                     obj.altImage = altImage;
                 }
                 callback(null,obj);
-            });
+            },0);
         },
 
         //* * item 2 * * *//
@@ -1299,7 +1377,7 @@ var getAmazonStuff = function(data,results,callback3){
                     obj.altImage = altImage;
                 }
                 callback(null,obj);
-            });
+            },1);
         },
 
         //* * item 3 * * *//
@@ -1313,7 +1391,7 @@ var getAmazonStuff = function(data,results,callback3){
                     obj.altImage = altImage;
                 }
                 callback(null,obj);
-            });
+            },2);
         }
     ],
     function(err, rez){
@@ -1989,12 +2067,18 @@ function traverseNodes(nodeList,findMe,callbackMM){
 
 
 //tools
+
 //trim a string to char #
-function truncate(string){
-   if (string.length > 48)
-      return string.substring(0,48)+'...';
-   else
-      return string;
+function truncate(string,l) {
+    if (l){
+        return string.substring(0,l);
+    }else {
+       if (string.length > 48)
+          return string.substring(0,48)+'...';
+       else
+          return string;        
+    }
+
 };
 
 /// exports

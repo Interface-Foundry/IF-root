@@ -4,6 +4,7 @@ var request = require('request');
 var co = require('co')
 var _ = require('lodash')
 var fs = require('fs')
+var Kik = require('@kikinteractive/kik');
 //slack stuff
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
@@ -12,6 +13,7 @@ var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
 var WEB_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.WEB;
 
+var kipServer = require('../server_cinna_chat');
 var banter = require("./banter.js");
 var history = require("./history.js");
 var search = require("./search.js");
@@ -49,9 +51,14 @@ var upload = require('../../../../IF_services/upload.js');
 // var redis = require('redis');
 // var client = redis.createClient();
 var email = require('./email');
+var emojiText = require('emoji-text'); //convert emoji to text
+
+
+
 /////////// LOAD INCOMING ////////////////
 
 
+//- - - - - - - TELEGRAM - - - - - - //
 var telegram = require('telegram-bot-api');
 
 var telegramToken;
@@ -62,6 +69,7 @@ if (process.env.NODE_ENV == 'development_alyx'){
 }else{
     telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
 }
+
 
 if (process.env.NODE_ENV !== 'development') {
   var tg = new telegram({
@@ -98,6 +106,7 @@ if (process.env.NODE_ENV !== 'development') {
       }
   });
 }
+
 
 //get stored slack users from mongo
 var initSlackUsers = function(env){
@@ -607,7 +616,7 @@ var loadSocketIO = function(server){
 /////////// PROCESSING INCOMING //////////
 
 //pre process incoming messages for canned responses
-function preProcess(data){
+var preProcess = function(data){
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -685,9 +694,31 @@ function preProcess(data){
                     data.action = 'focus';
                     incomingAction(data);
                     break;
+                case 'search.cheaper':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'search';
+                    data.action = 'modify';
+                    data.dataModify = { type: 'price', param: 'less' }
+                    incomingAction(data);
+                    break;
+                case 'search.similar':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'search';
+                    data.action = 'similar';
+                    incomingAction(data);
+                    break;
                 case 'search.more':
                     data.bucket = 'search';
                     data.action = 'more';
+                    incomingAction(data);
+                    break;
+                case 'purchase.save':
+                    data.searchSelect = [];
+                    data.searchSelect.push(query);
+                    data.bucket = 'purchase';
+                    data.action = 'save';
                     incomingAction(data);
                     break;
                 case 'purchase.remove':
@@ -696,6 +727,52 @@ function preProcess(data){
                     data.bucket = 'purchase';
                     data.action = 'remove';
                     incomingAction(data);
+                    break;
+
+                case 'search.random':
+                    var arr = ['emoji clothes','japanese fashion','robot'];
+                    data.tokens = [];
+                    data.tokens.push(arr[Math.floor(Math.random()*arr.length)]); //search for this item
+                    data.bucket = 'search';
+                    data.action = 'initial';
+                    incomingAction(data);
+                    break;
+
+                //shows last search results in kik
+                case 'kik.back':
+                    data.bucket = 'search';
+                    history.recallHistory(data, function(res){
+                        res.kikData = data.kikData;
+                        outgoingResponse(res,'stitch','amazon');
+                    });
+                    break;
+
+                case 'kik.help':
+                    data.client_res = [];
+                    data.client_res.push(res);
+                    var keyboardObj = [{
+                        "type": "suggested",
+                        "hidden":false,
+                        "responses": [
+                            {
+                                "type":"text",
+                                "body":"Find headphones" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
+                            },
+                            {
+                                "type":"text",
+                                "body":"Find dystopia books"
+                            },
+                            {
+                                "type":"text",
+                                "body":"Find LED gloves"
+                            },
+                            {
+                                "type":"text",
+                                "body":"🔮 Surprise me!"
+                            }
+                        ]
+                    }];  
+                    cannedBanter(data,keyboardObj);
                     break;
 
                 //for testing in PAPRIKA
@@ -789,10 +866,12 @@ function preProcess(data){
 
 //pushing incoming messages to python
 function routeNLP(data){
-
-    //sanitize msg before sending to NLP
-    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' ');
+        
     data.flags = data.flags ? data.flags : {};
+    data.msg = emojiText.convert(data.msg,{delimiter: ' '}); //convert all emojis to text
+    data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); //sanitize msg before sending to NLP
+
+    console.log('❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️ ',data.msg)
 
     if (data.msg){
 
@@ -823,7 +902,6 @@ function routeNLP(data){
         //we get this if we killed the whole user request (i.e. they sent a URL)
         sendTxtResponse(data,'Oops sorry, I didn\'t understand your request');
     }
-
 }
 
 //incoming action responses from Slack buttons
@@ -843,7 +921,6 @@ var incomingMsgAction = function(data,origin){
         console.error('Slack callback_id missing from Slack response');
         return;
     }
-    console.log('PARSED INCOMONG ',parsedIn);
 
     //build new incoming Kip obj
     var kipObj = {
@@ -853,6 +930,15 @@ var incomingMsgAction = function(data,origin){
         },
         tokens: ['kipfix'] //bad code check later on, hot fix here for now
     };
+
+    kipObj.source = {
+        origin: origin,
+        channel: parsedIn.channel.id,
+        org: parsedIn.team.id,
+        id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+        user: parsedIn.user.id,
+        flag: 'buttonAction'
+    }
 
     //let's try to build a universal action button i/o for all platforms
     //deal with first action in action arr...more will happen later?
@@ -888,29 +974,80 @@ var incomingMsgAction = function(data,origin){
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'save';
                 break;
+
+            case 'additem':
+                kipObj.bucket = 'purchase';
+                kipObj.action = 'save';
+                break;
+
+            case 'removeitem':
+                kipObj.bucket = 'purchase';
+                kipObj.action = 'remove';
+                break;
         }
 
-        //get searchSelect
-        var parseVal = parseInt(parsedIn.actions[0].value); //parse
-        if (!isNaN(parseVal) && parseVal > -1){ //check if real select number
-            parseVal = parseVal + 1; //normalize to rest of Kip of system
-            kipObj.searchSelect = [];
-            kipObj.searchSelect.push(parseVal);
+        //special cart commands
+        if (parsedIn.actions[0].name == 'additem'){
+
+            if(parsedIn.original_message){
+               kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
+            }
+
+            co(function*() {
+              var cartNum = parseInt(parsedIn.callback_id);
+              if (cartNum){
+                var cart = yield kipcart.getCart(parsedIn.team.id);
+                var item = cart.aggregate_items[cartNum - 1];
+                var itemAdded = yield kipcart.addExtraToCart(cart, parsedIn.team.id,parsedIn.user.id,item);
+
+                console.log('ITEM ADDED????????????????? ',itemAdded);
+
+                viewCart(kipObj);
+
+              }else {
+                console.error('no callback_id found to add cart item')
+              }
+
+            }).then(function(){}).catch(function(err) {
+                console.error(err)
+            })
+
+            //call back to slack to update view cart message here!
+
+        }
+        else if (parsedIn.actions[0].name == 'removeitem'){
+
+            co(function*() {
+              yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, parsedIn.callback_id);
+
+              //make viewcart into callback to message
+              viewCart(kipObj);
+            }).then(function(){}).catch(function(err) {
+                console.error('couldnt remove item on button push')
+            })
+        }
+        else {
+            //get searchSelect
+            var parseVal = parseInt(parsedIn.actions[0].value); //parse
+            if (!isNaN(parseVal) && parseVal > -1){ //check if real select number
+                parseVal = parseVal + 1; //normalize to rest of Kip of system
+                kipObj.searchSelect = [];
+                kipObj.searchSelect.push(parseVal);
+            }
+
+            //build source
+            // kipObj.source = {
+            //     origin: origin,
+            //     channel: parsedIn.channel.id,
+            //     org: parsedIn.team.id,
+            //     id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+            //     user: parsedIn.user.id,
+            //     flag: 'buttonAction'
+            // }
+            incomingAction(kipObj);
         }
 
-        //build source
-        kipObj.source = {
-            origin: origin,
-            channel: parsedIn.channel.id,
-            org: parsedIn.team.id,
-            id: parsedIn.team.id +'_'+ parsedIn.channel.id,
-            user: parsedIn.user.id,
-            flag: 'buttonAction'
-        }
 
-        console.log('KIPOBJ ',kipObj);
-
-        incomingAction(kipObj);
 
     }else {
         console.error('Incoming Slack ERROR: missing actions[0].name or actions[0].value ',parsedIn);
@@ -951,6 +1088,21 @@ var incomingMsgAction = function(data,origin){
 
 //sentence breakdown incoming from python
 function incomingAction(data){
+
+
+    // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / / 
+    if (!messageHistory[data.source.id]){ //new user, set up chat states
+        messageHistory[data.source.id] = {};
+        messageHistory[data.source.id].search = []; //random chats
+        messageHistory[data.source.id].banter = []; //search
+        messageHistory[data.source.id].purchase = []; //finalizing search and purchase
+        messageHistory[data.source.id].persona = []; //learn about our user
+        messageHistory[data.source.id].cart = []; //user shopping cart
+        messageHistory[data.source.id].allBuckets = []; //all buckets, chronological chat history
+    }
+    /// / / / / / / / / // /  / / / // /
+
+
 //------------------------supervisor stuff-----------------------------------//
   if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
 
@@ -982,7 +1134,11 @@ data.flags = data.flags ? data.flags : {};
 
             if (data.source.origin == 'socket.io' || data.source.origin  == 'telegram'){
                 sendTxtResponse(data,'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
-            }else {
+            }
+            else if(data.source.origin == 'kik'){
+                sendTxtResponse(data,'Sorry, shopping cart coming soon! 😊');
+            }
+            else {
                 purchaseBucket(data);
             }
 
@@ -1012,11 +1168,15 @@ function searchBucket(data){
 
         var searcher = {};
         searcher.source = data.source;
+        if(data.kikData){
+            searcher.kikData = data.kikData;
+        }
         sendTxtResponse(searcher,'Searching...','typing');
 
-        if (data.source.origin == 'slack' && slackUsers[data.source.org]){
-            slackUsers[data.source.org].sendTyping(data.source.channel);
-        }
+        //sends typing even to Slack, killed for now cause no mobile support
+        // if (data.source.origin == 'slack' && slackUsers[data.source.org]){
+        //     slackUsers[data.source.org].sendTyping(data.source.channel);
+        // }
     }
 
     console.log('* * * * * * * * * * * * ',data.bucket);
@@ -1153,9 +1313,12 @@ function purchaseBucket(data){
 
 //process canned message stuff
 //data: kip data object
-var cannedBanter = function(data){
+var cannedBanter = function(data,keyboard){
     data.bucket = 'banter';
     data.action = 'smalltalk';
+    if(keyboard){
+        data.keyboardButtons = keyboard;
+    }
     incomingAction(data);
 }
 
@@ -1179,12 +1342,13 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
             //sending out stitched image response
             data.client_res = [];
             data.urlShorten = [];
+
             processData.urlShorten(data,function(res){
                 var count = 0;
 
-                if (data.source.origin == 'slack'){
+                //if (data.source.origin == 'slack'){
                     //store a new mongo ID to pass in Slack callback
-                    data.searchId = mongoose.Types.ObjectId();
+                data.searchId = mongoose.Types.ObjectId();
 
                     // var moreObj = {};
                     // moreObj.actions = [{
@@ -1202,7 +1366,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                     // moreObj.fallback = 'Tap for more';
 
                     // client_res.push(moreObj);
-                }
+                //}
 
                 //put all result URLs into arr
                 async.eachSeries(res, function(i, callback) {
@@ -1217,48 +1381,42 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             var actionObj = [
                                 {
                                   "name": "addcart",
-                                  "text": "⭐ add to cart",
+                                  "text": "add to cart",
                                   "style": "primary",
                                   "type": "button",
                                   "value": count
-                                  // "confirm": {
-                                  //   "title": "Are you sure?",
-                                  //   "text": "This will approve the request.",
-                                  //   "ok_text": "Yes",
-                                  //   "dismiss_text": "No"
-                                  // }
                                 },
                                 {
                                   "name": "cheaper",
-                                  "text": "💎 cheaper",
+                                  "text": "cheaper",
                                   "style": "default",
                                   "type": "button",
                                   "value": count
                                 },
                                 {
                                   "name": "similar",
-                                  "text": "⚡ similar",
+                                  "text": "similar",
                                   "style": "default",
                                   "type": "button",
                                   "value": count
                                 },
-                                {
-                                  "name": "modify",
-                                  "text": "🌀 modify",
-                                  "style": "default",
-                                  "type": "button",
-                                  "value": count
-                                },
+                                // {
+                                //   "name": "modify",
+                                //   "text": "modify",
+                                //   "style": "default",
+                                //   "type": "button",
+                                //   "value": count
+                                // },
                                 {
                                   "name": "moreinfo",
-                                  "text": "💬 info",
+                                  "text": "more info",
                                   "style": "default",
                                   "type": "button",
                                   "value": count
                                 }
                             ];
-                            //attachObj.actions = actionObj;
-                            //attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
+                            attachObj.actions = actionObj;
+                            attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
 
                             attachObj.image_url = urlArr[count];
                             attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
@@ -1274,6 +1432,66 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             data.client_res.push(emoji + '<a target="_blank" href="'+res[count]+'"> ' + truncate(data.amazon[count].ItemAttributes[0].Title[0])+'</a>');
                             data.client_res.push(urlArr[count]);
                         }
+                        else if (data.source.origin == 'kik'){
+
+                            //PUSH NEW EMOJI + TEXT
+                            //PUSH NEW IMAGE
+
+
+                            // attachObj.image_url = urlArr[count];
+                            // attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            // attachObj.title_link = res[count];
+                            // attachObj.color = "#45a5f4";
+                            // attachObj.fallback = 'Here are some options you might like';
+
+
+                            //BUILD NEW MESSAGE ARRAY OBJ FOR 5+ messages
+                            
+                            // - - - - - //
+
+                            // var item = response.amazon[count];
+
+                            //console.log('ITEM ATTRIBS ',JSON.stringify(data.amazon[count].ItemAttributes[0]))
+
+
+                            //collect info for keyboard buttons
+                            //var collectInfo = emoji;
+
+                            // if(data.amazon[count].ItemAttributes[0].Brand[0]){
+                            //     collectInfo = collectInfo + ' ' + data.amazon[count].ItemAttributes[0].Brand[0];
+                            // }
+                            // if (data.amazon[count].ItemAttributes[0].Color[0]){
+                            //     collectInfo = collectInfo + ' ' + data.amazon[count].ItemAttributes[0].Color[0];
+                            // }
+                            // if (data.amazon[count].ItemAttributes[0].ProductGroup[0]){
+                            //     collectInfo = collectInfo + ' ' + data.amazon[count].ItemAttributes[0].ProductGroup[0];
+                            // }
+
+                            var kikMsg = Kik.Message
+                              .link(res[count])
+                              .setPicUrl(urlArr[count])
+                              .setText(emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]))
+                              // .setText(`${item.realPrice} - ${item.ItemAttributes[0].Title[0]}`)
+                              .setTitle('')
+                              .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                              .setAttributionName('Amazon')
+                              .setKikJsData({"callback_id": data.searchId});
+
+                            // kikMsg.kikJsData = {
+                            //     "callback_id":data.searchId
+                            // }
+                            // kikMsg.attribution = {
+                            //     name: 'Amazon',
+                            //     iconUrl: 'http://i.stack.imgur.com/0Ck6a.png'
+                            // }
+
+                            //kikMsg.keyboardData = collectInfo;
+
+                            //console.log('KIK MSG BUILT ',kikMsg)
+
+                            data.client_res.push(kikMsg);
+ 
+                        }
                         else if (data.source.origin == 'telegram'){
                             var attachObj = {};
                             attachObj.photo = urlArr[count];
@@ -1284,7 +1502,60 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                         callback();
                     });
                 }, function done(){
-                    checkOutgoingBanter(data);
+
+                    if (data.source.origin == 'kik'){
+
+                        var keyboardObj = [{
+                            "type": "suggested",
+                            "hidden":false,
+                            "responses": []
+                        }];
+                        var counter = 1;
+
+
+                        async.eachSeries(data.client_res, function(m, callback) {
+
+                            keyboardObj[0].responses.push(
+                                {
+                                  "type": "text",
+                                  "body": truncate(m._state.text,17)
+                                }
+                            )
+                            counter++;
+                            callback()
+
+                        }, function done(){
+                        
+                            if(data.client_res[0]){
+
+                                keyboardObj[0].responses.push(
+                                    {
+                                      "type": "text",
+                                      "body": "⏩ MORE"
+                                    }
+                                )
+
+                                //dumb temp stuff here for assigning keyboards to items because what Kik documentation
+                                data.client_res[0]._state.keyboards = keyboardObj;
+                                if(data.client_res[1]){
+                                    data.client_res[1]._state.keyboards = keyboardObj;
+                                }
+                                if(data.client_res[2]){
+                                    data.client_res[2]._state.keyboards = keyboardObj;
+                                }
+                                if(data.client_res[3]){
+                                    data.client_res[3]._state.keyboards = keyboardObj;
+                                }
+
+                            }else {
+                                console.error('some error go away')
+                            }
+                            checkOutgoingBanter(data);
+                        })                     
+                    }
+                    else {
+                        checkOutgoingBanter(data);
+                    }   
                 });
             });
             // function compileResults(){
@@ -1339,6 +1610,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 var checkOutgoingBanter = function(data){
     banter.getCinnaResponse(data,function(res){
         if(res && res !== 'null'){
+
             data.client_res.unshift(res); // add to beginning of message
              // console.log('mitsu6')
 
@@ -1353,6 +1625,8 @@ var checkOutgoingBanter = function(data){
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
+
+
 
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
@@ -1405,6 +1679,564 @@ var sendResponse = function(data,flag){
             console.log('error: socket io channel missing', data);
         }
     }
+
+    //* * * * * * * *
+    // Kik Outgoing
+    //* * * * * * * *
+    else if (data.source && data.source.channel && data.source.origin == 'kik'){
+
+
+        if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more'){
+
+            var okThis = [];
+
+            var message = data.client_res[0]; //use first item in client_res array as text message
+
+            message = Kik.Message.text(message);
+
+            //dumb way to add keyboard to cinna response message so kik doesn't kill itself
+            if(!message._state.keyboards && data.client_res[1] && data.client_res[1]._state && data.client_res[1]._state.keyboards){
+
+                message._state.keyboards = data.client_res[1]._state.keyboards;
+            }
+
+
+            okThis.push(message)
+
+            // var kikMsg = Kik.Message
+            //   .text(message)
+            //   .setPicUrl(urlArr[count])
+            //   .setText(emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]))
+            //   // .setText(`${item.realPrice} - ${item.ItemAttributes[0].Title[0]}`)
+            //   .setTitle('')
+            //   .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+            //   .setAttributionName('Amazon')
+            //   .setKikJsData({"callback_id": data.searchId});
+
+
+            // data.client_res[0] = 
+
+            //kipServer.sendToKik(data,message,'text')
+
+            //remove first message from res arr
+            var attachThis = data.client_res;
+            attachThis.shift();
+
+
+
+            //FLIP ARRAYS HERE!
+            if(attachThis.length == 3){
+                var first = attachThis[0];
+                var last = attachThis[2];
+                var middle = attachThis[1];
+                okThis.push(last,middle,first);
+            }
+            else if(attachThis.length == 2){
+                var first = attachThis[0];
+                var last = attachThis[1];
+                okThis.push(last,first);
+            }else {
+                okThis.push(attachThis[0])
+            }
+
+            //console.log('ATTACH THESE ',attachThis);
+
+            kipServer.sendToKik(data,okThis,'search');
+
+
+
+            // attachThis.map(function(attach){ 
+            //     console.log('ATTACH ', attach)
+
+            //    // console.log('kikMsg !_!_!_!_!_!_! ', kikMsg)
+
+            //     kipServer.sendToKik(data,,'search');
+            // });
+
+            // async.eachSeries(attachThis, function(attach, callback) {
+            //     // console.log('photo ',attach.photo);
+            //     // console.log('message ',attach.message);
+
+            //     //kipServer.sendToKik(data,message,'text')
+
+            //      // upload.uploadPicture('telegram', attach.photo, 100, true).then(function(uploaded) {
+            //      //     tg.sendMessage({
+            //      //        chat_id: data.source.channel,
+            //      //        text: attach.message,
+            //      //        parse_mode: 'Markdown',
+            //      //        disable_web_page_preview: 'true'
+            //      //     }).then(function(datum){
+            //      //          tg.sendPhoto({
+            //      //            chat_id: encode_utf8(data.source.channel),
+            //      //            photo: encode_utf8(uploaded.outputPath)
+            //      //            }).then(function(datum){
+            //      //                if (uploaded.outputPath) {
+            //      //                    fs.unlink(uploaded.outputPath, function(err, res) {
+            //      //                        // if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                if (uploaded.inputPath) {
+            //      //                    fs.unlink(uploaded.inputPath, function(err, res) {
+            //      //                            // if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                callback();
+            //      //            }).catch(function(err){
+            //      //                if (err) { console.log('ios.js1259: err',err) }
+            //      //                if (uploaded.outputPath) {
+            //      //                    fs.unlink(outputPath, function(err, res) {
+            //      //                        if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                if (uploaded.inputPath) {
+            //      //                    fs.unlink(inputPath, function(err, res) {
+            //      //                            if (err) console.log('fs error: ', err)
+            //      //                    })
+            //      //                }
+            //      //                callback();
+            //      //            })
+            //      //        }).catch(function(err){
+            //      //            if (err) {
+            //      //                console.log('ios.js1264: err',err)
+            //      //            }
+            //      //            callback();
+            //      //        })
+            //      //    }).catch(function(err) {
+            //      //        if (err)  console.log('\n\n\niojs image upload error: ',err,'\n\n\n')
+            //      //        callback();
+            //      //    })
+            // }, function done(){
+
+
+            // });
+
+            // var msgData = {
+            //   // attachments: [...],
+            //     icon_url:'http://kipthis.com/img/kip-icon.png',
+            //     username:'Kip',
+            //     attachments: attachThis
+            // };
+            // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        }
+
+        ///FOR FOCUS HERE----> 
+        //ALL FOCUS QUERIES WILL SHOW FOCUS KEYBOARD FOR THAT ITEM 
+
+        else if (data.action == 'focus'){
+
+
+                console.log('KIK FOCUS ',data)
+
+                //send pic
+
+                var kikRes = [];
+
+                var link = data.client_res[1];
+                var pic = data.client_res[0];
+                var picText = data.client_res.pop();
+                var endKik = data.client_res.pop();
+                console.log('/!/!/!/!/!/!/!/!/!/!/!/!/!NEW MESSAGE ',data.client_res)
+
+                var kikEdit = data.client_res;
+                kikEdit.shift();
+                kikEdit.shift();
+                var itemTitle = kikEdit[0];
+                kikEdit.shift();
+                kikEdit = kikEdit.join(' ');
+                
+                processData.getNumEmoji(data,data.searchSelect[0],function(emoji){
+
+                    var kikMsg;
+
+                    //link
+
+                   kikMsg = Kik.Message
+                      .text(itemTitle + '\n\n' +kikEdit.trim());
+                      //.setKikJsData({"callback_select": data.searchSelect[0]});
+                      // .setTitle(emoji)
+                      // .setText(.replace(emoji,''))
+                      //.setPicUrl(pic)
+                      // .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                      // .setAttributionName('Amazon');
+                    kikRes.push(kikMsg)
+
+                    
+                    // kikMsg = Kik.Message.text(emoji + ' ' + );
+                    // kikRes.push(kikMsg)
+
+
+                   //add pic
+                    kikMsg = Kik.Message
+                      .picture(pic)
+                      //.setUrl(link)
+                      .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                      .setAttributionName('View pic');
+                      // .setTitle(picText)
+                      // .setText(itemTitle)
+                      //.setPicUrl(pic)
+                      // .setAttributionIcon('http://www.transparenttextures.com/patterns/ag-square.png')
+                      // .setAttributionName(emoji);
+                    kikRes.push(kikMsg)
+
+                    // kikMsg = Kik.Message.text();
+                    // kikRes.push(kikMsg)
+
+
+                   // kikMsg = Kik.Message
+                   //    .link(link)
+                   //    .setTitle(emoji + ' ' + picText)
+                   //    .setText(endKik)
+                   //    //.setPicUrl(pic)
+                   //    .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                   //    .setAttributionName('Amazon');
+                   //  kikRes.push(kikMsg)
+
+                   if(!endKik){
+                    endKik = '';
+                   }
+
+                   kikMsg = Kik.Message
+                      .link(link)
+                      .setTitle(emoji + ' ' + picText)
+                      .setText(endKik + '\n✅ View on Amazon')
+                      //.setText(endKik)
+                      //.setPicUrl(pic)
+                      .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                      .setAttributionName('Amazon');
+                    kikRes.push(kikMsg)
+
+                    // kikMsg = Kik.Message
+                    //   .link(link);
+                    //   // .setTitle(emoji + ' ' + picText)
+                    //   // .setText(endKik)
+                    //   //.setPicUrl(pic)
+                    //   // .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                    //   // .setAttributionName('Amazon');
+                    // kikRes.push(kikMsg)
+
+                    //add amazon link message
+                    // kikMsg = Kik.Message
+                    //   .link(link)
+                    //   .setText(kikEdit + ' ' +  endKik)
+                    //   .setAttributionIcon()
+                    //   .setAttributionName('Amazon');
+                    // kikRes.push(kikMsg)
+
+                    // var spacer;
+                    // switch(data.searchSelect[0]){
+                    //     case 1:
+                    //         spacer = ' ';
+                    //     case 2:
+                    //         spacer = '  ';
+                    //     case 3:
+                    //         spacer = '   ';
+                    //     default:
+                    //         spacer = ' ';
+                    // }
+                    
+                    var keyboardObj = [{
+                        "type": "suggested",
+                        "hidden":false,
+                        "responses": [
+                            {
+                                "type":"text",
+                                "body":"⏪ BACK" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
+                            },
+                            {
+                                "type":"text",
+                                "body":"Cheaper than "+emoji
+                            },
+                            {
+                                "type":"text",
+                                "body":"Similar to "+emoji
+                            },
+                            {
+                                "type":"text",
+                                "body":"Add "+emoji+" to Cart"
+                            }
+                        ]
+                    }];   
+
+                    //kikRes[0]._state.keyboards = keyboardObj;
+
+                    kikRes[0]._state.keyboards = keyboardObj;
+                    if(kikRes[1]){
+                        kikRes[1]._state.keyboards = keyboardObj;
+                    }
+                    if(kikRes[2]){
+                        kikRes[2]._state.keyboards = keyboardObj;
+                    }
+                    if(kikRes[3]){
+                        kikRes[3]._state.keyboards = keyboardObj;
+                    }
+
+                    kipServer.sendToKik(data,kikRes,'search');
+
+                })
+
+
+                // var counter = 1;
+
+                // console.log('HAMCLINE_RES ',data.client_res);
+
+                // async.eachSeries(data.client_res, function(m, callback) {
+
+                //     console.log('AMAZON RESULTS ',JSON.stringify(m));
+
+                //     keyboardObj[0].responses.push(
+                //         {
+                //           "type": "text",
+                //           "body": truncate(m._state.text,17)
+                //         }
+                //     )
+
+                // var kikMsg = Kik.Message
+                //   .picture()
+                //   .setPicUrl(data.client_res[0])
+                //   //.setText(emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]))
+                //   // .setText(`${item.realPrice} - ${item.ItemAttributes[0].Title[0]}`)
+                //   .setTitle('')
+                //   .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                //   .setAttributionName('Amazon');
+
+                
+
+
+
+                  //.setKikJsData({"callback_id": data.searchId});
+
+                //send text link
+
+
+            // try {
+            //  var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
+            //  formatted = formatted.slice(0,-1)
+            //  formatted = formatted + ')'
+            // } catch(err) {
+            //  console.log('io.js 1269 err: ',err)
+            //  return
+            // }
+              //data.client_res[1] = formatted ? formatted : data.client_res[1]
+              //var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
+                //console.log('formatted : ',toSend)
+
+
+                //SEND PICTURE
+
+
+
+                //SEND TEXT
+
+
+
+
+
+
+
+
+               // upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
+               //   tg.sendPhoto({
+               //      chat_id: encode_utf8(data.source.channel),
+               //      photo: encode_utf8(uploaded.outputPath)
+               //    }).then(function(datum){
+               //      tg.sendMessage({
+               //          chat_id: data.source.channel,
+               //          text: toSend,
+               //          parse_mode: 'Markdown',
+               //          disable_web_page_preview: 'true'
+               //      })
+               //      if (uploaded.outputPath) {
+               //          fs.unlink(uploaded.outputPath, function(err, res) {
+               //              // if (err) console.log('fs error: ', err)
+               //          })
+               //      }
+               //      if (uploaded.inputPath) {
+               //          fs.unlink(uploaded.inputPath, function(err, res) {
+               //                  // if (err) console.log('fs error: ', err)
+               //          })
+               //      }
+               //    })
+               //  }).catch(function(err){
+               //      if (err) { console.log('ios.js1285: err',err) }
+
+               //  })
+
+        }
+        //  else if (data.action == 'save') {
+        //     console.log('\n\n\nSAVE: ',data.client_res)
+        //   try {
+        //      var formatted = '[View Cart](' + data.client_res[1][data.client_res[1].length-1].text.split('|')[0].split('<')[1] + ')'
+        //       // + data.client_res[0].text.split('>>')[1].split('>')[0]
+        //      // formatted = formatted.slice(0,-1)
+        //      // formatted = formatted + ')'
+        //    } catch(err) {
+        //      console.log('\n\n\nio.js 1316-err: ',err,'\n\n\n')
+        //      return
+        //    }
+        //   // console.log('toSend:', toSend,'formatted: ',formatted)
+        //   tg.sendMessage({
+        //         chat_id: data.source.channel,
+        //         text: 'Awesome! I\'ve saved your item for you 😊 Use `checkout` anytime to checkout or `help` for more options.',
+        //         parse_mode: 'Markdown',
+        //         disable_web_page_preview: 'true'
+        //     })
+        //     .then(function() {
+        //       if (formatted) {
+        //         console.log('\n\n\nFORMATTED: ', formatted)
+        //         tg.sendMessage({
+        //             chat_id: data.source.channel,
+        //             text: formatted,
+        //             parse_mode: 'Markdown',
+        //             disable_web_page_preview: 'true'
+        //         })
+        //       }
+        //     })
+        //     .catch(function(err) {
+        //         console.log('io.js 1307 err',err)
+        //     })
+        // }
+        // else if (data.action == 'checkout') {
+        //   console.log('\n\n\nCHECKOUT: ', data.client_res)
+        //      async.eachSeries(data.client_res[1], function iterator(item, callback) {
+        //         console.log('ITEM LEL: ',item)
+        //         if (item.text.indexOf('_Summary') > -1) {
+        //             return callback(item)
+        //         }
+        //          var itemLink = ''
+        //           try {
+        //             itemLink = '[' + item.text.split('|')[1].split('>')[0] + '](' + item.text.split('|')[0].split('<')[1] + ')'
+        //             itemLink = encode_utf8(itemLink)
+        //            } catch(err) {
+        //              console.log('io.js 1296 err:',err)
+        //              return callback(null)
+        //            }
+        //            tg.sendMessage({
+        //                 chat_id: data.source.channel,
+        //                 text: itemLink,
+        //                 parse_mode: 'Markdown',
+        //                 disable_web_page_preview: 'true'
+        //             }).then(function(){
+        //                  var extraInfo = item.text.split('$')[1]
+        //                  extraInfo = '\n $' + extraInfo
+        //                  extraInfo = extraInfo.replace('*','').replace('@','').replace('<','').replace('>','')
+        //                  tg.sendMessage({
+        //                     chat_id: data.source.channel,
+        //                     text: encode_utf8(extraInfo),
+        //                     parse_mode: 'Markdown',
+        //                         disable_web_page_preview: 'true'
+        //                     })
+        //                     .then(function(){
+        //                         callback(null)
+        //                     })
+        //                     .catch(function(err) {
+        //                         console.log('io.js 1354 err: ',err)
+        //                         callback(null)
+        //                     })
+        //             })
+        //       }, function done(thing) {
+        //         if (thing.text) {
+        //             // console.log('\n\n DONESKI!', thing)
+        //             var itemLink = ''
+        //               try {
+        //                 itemLink = '[Purchase Items](' + thing.text.split('|')[0].split('<')[1] + ')'
+        //                 itemLink = encode_utf8(itemLink)
+        //                 tg.sendMessage({
+        //                     chat_id: data.source.channel,
+        //                     text: '_Summary: Team Cart_ \n Total: *$691.37* \n' + itemLink,
+        //                     parse_mode: 'Markdown',
+        //                     disable_web_page_preview: 'true'
+        //                 }).catch(function(err) {
+        //                  console.log('io.js 1353 err:',err)
+        //                })
+        //                } catch(err) {
+        //                  console.log('io.js 1356 err:',err)
+        //                }
+        //         } else {
+        //             // console.log('wtf is thing: ',thing)
+        //         }
+        //       })
+
+
+           // // var extraInfo = data.client_res[1][0].text.split('$')[1]
+           // // extraInfo = '\n $' + extraInfo
+           // // var finalSend = itemLink + extraInfo
+           // //      tg.sendMessage({
+           // //          chat_id: data.source.channel,
+           // //          text: data.client_res[0],
+           // //          parse_mode: 'Markdown',
+           // //          disable_web_page_preview: 'true'
+           // //      }).then(function(){
+           //         console.log('finalSend: ', itemLink)
+           //          tg.sendMessage({
+           //              chat_id: data.source.channel,
+           //              text: itemLink,
+           //              parse_mode: 'Markdown',
+           //              disable_web_page_preview: 'true'
+           //          }).then(function(){
+
+           //          // })
+           //      }).catch(function(err) {
+           //          console.log('io.js 1338 err',err)
+           //      })
+        //}
+        // else if (data.action == 'sendAttachment'){
+        //   console.log('\n\n\nTelegram sendAttachment data: ', data,'\n\n\n')
+        //     // //remove first message from res arr
+        //     // var attachThis = data.client_res;
+        //     // attachThis = JSON.stringify(attachThis);
+
+        //     // var msgData = {
+        //     //   // attachments: [...],
+        //     //     icon_url:'http://kipthis.com/img/kip-icon.png',
+        //     //     username:'Kip',
+        //     //     attachments: attachThis
+        //     // };
+        //     // slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+
+        // }
+        else {
+              console.log('\n\n\nKik ELSE : ', data,'\n\n\n')
+            //loop through responses in order
+            async.eachSeries(data.client_res, function(message, callback) {
+
+                // tg.sendMessage({
+                //     chat_id: data.source.channel,
+                //     text: message
+                // })
+
+                // message = Kik.Message.text(message);
+
+                // //dumb way to add keyboard to cinna response message so kik doesn't kill itself
+                // if(!message._state.keyboards && data.client_res[1] && data.client_res[1]._state && data.client_res[1]._state.keyboards){
+
+                //     message._state.keyboards = data.client_res[1]._state.keyboards;
+                // }
+
+
+                // okThis.push(message)
+
+
+                // console.log('\n\n\nKik  : ', message,'\n\n\n')
+
+                var kikRez = Kik.Message.text(message);
+
+                if(data.keyboardButtons){
+                    kikRez._state.keyboards = data.keyboardButtons;
+                }              
+
+                kipServer.sendToKik(data,kikRez,'banter')
+
+
+
+                callback();
+            }, function done(){
+            });
+        }
+
+    }
+
+
     //* * * * * * * *
     // Telegram Outgoing
     //* * * * * * * *
@@ -1856,22 +2688,24 @@ var sendResponse = function(data,flag){
                 attachments[0].image_url = attachThis[0]; //add image search results to attachment
                 attachments[0].fallback = 'More information'; //fallback for search result
 
-                var actionObj = [
-                    {
-                      "name": "AddCart",
-                      "text": ":thumbsup: Add to Cart",
-                      "style": "primary",
-                      "type": "button",
-                      "value": "yes",
-                      "confirm": {
-                        "title": "Are you sure?",
-                        "text": "This will approve the request.",
-                        "ok_text": "Yes",
-                        "dismiss_text": "No"
-                      }
-                    }
-                ];
-                //attachments[0].actions = actionObj;
+                // var actionObj = [
+                //     {
+                //       "name": "AddCart",
+                //       "text": ":thumbsup: Add to Cart",
+                //       "style": "primary",
+                //       "type": "button",
+                //       "value": "yes",
+                //       "confirm": {
+                //         "title": "Are you sure?",
+                //         "text": "This will approve the request.",
+                //         "ok_text": "Yes",
+                //         "dismiss_text": "No"
+                //       }
+                //     }
+                // ];
+
+                console.log('FOCUS DATA ',data);
+
 
                 attachThis.shift(); //remove image from array
 
@@ -1888,6 +2722,42 @@ var sendResponse = function(data,flag){
 
                 }, function done(){
 
+
+                    var count = data.searchSelect[0] - 1;
+
+                    console.log(count);
+
+                    var actionObj = [
+                        {
+                          "name": "addcart",
+                          "text": "add to cart",
+                          "style": "primary",
+                          "type": "button",
+                          "value": count
+                        },
+                        {
+                          "name": "cheaper",
+                          "text": "cheaper",
+                          "style": "default",
+                          "type": "button",
+                          "value": count
+                        },
+                        {
+                          "name": "similar",
+                          "text": "similar",
+                          "style": "default",
+                          "type": "button",
+                          "value": count
+                        }
+                    ];
+
+                    if(attachments[1]){
+                        attachments[1].actions = actionObj;
+                        if(data.slackData){
+                            attachments[1].callback_id = data.slackData.callback_id;
+                        }                        
+                    }
+                    
                     attachments = JSON.stringify(attachments);
 
                     var msgData = {
@@ -1917,8 +2787,6 @@ var sendResponse = function(data,flag){
             else {
                 //loop through responses in order
                 async.eachSeries(data.client_res, function(message, callback) {
-
-
 
                     //item is a string, send message
                     if (typeof message === 'string'){
@@ -1951,7 +2819,7 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
-                        console.log('ATTACH ',message);
+                        
                         var attachThis = message;
                         attachThis = JSON.stringify(attachThis);
 
@@ -1960,9 +2828,34 @@ var sendResponse = function(data,flag){
                             username:'Kip',
                             attachments: attachThis
                         };
-                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
-                            callback();
-                        });
+
+                        console.log('data.ts ',data.button_ts)
+
+                        // if (data.button_ts){
+                        //     //update a message by timestamp
+
+
+                        //     msgData.as_user = true;
+                        //     msgData.parse = 'full';
+                        //     msgData.link_names = '1';
+
+                        //     console.log('SEND DATA NOW _ BUTTON ',msgData);
+
+                        //     slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, msgData, {}, function(err,res) {
+                        //         console.log('EDIT CART ERROR ',err)
+                        //         console.log('EDIT CART RES ',res)
+                        //     });
+
+                        // }
+                        // else {
+                            //normal attach send
+
+                            console.log('SEND DATA NOW _ NORMAL ',msgData);
+                            slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
+                                callback();
+                            });            
+                        //}
+
                     }
 
                 }, function done(){
@@ -2080,7 +2973,8 @@ var saveToCart = function(data){
                     })
                   }
 
-                  messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
+                  //messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
+
                   cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
@@ -2145,10 +3039,10 @@ function viewCart(data, show_added_item){
         return;
     }
 
+    console.log('VIEW CART data.ts ',data.button_ts)
+
     console.log('view cart')
     db.Metrics.log('cart.view', data);
-
-    console.log(data.source)
 
     var cartDelay = 2000;
 
@@ -2156,7 +3050,7 @@ function viewCart(data, show_added_item){
       var cart = yield kipcart.getCart(data.source.org);
 
       if (cart.items.length < 1) {
-        return sendTxtResponse(data, 'Looks like you have not added anything to your cart yet');
+        return sendTxtResponse(data, 'Looks like you have not added anything to the Team Cart yet. Type `save 1` to add item :one:');
       }
 
       var slackbot = yield db.Slackbots.findOne({
@@ -2197,28 +3091,42 @@ function viewCart(data, show_added_item){
           console.log(link);
         }
 
-        var actionObj = [
-            {
-              "name": "RemoveItem",
-              "text": "➖",
-              "style": "danger",
-              "type": "button",
-              "value": "no",
-              "confirm": {
-                "title": "Are you sure?",
-                "text": "This will approve the request.",
-                "ok_text": "Yes",
-                "dismiss_text": "No"
-              }
-            },
-            {
-              "name": "AddItem",
-              "text": "➕",
-              "style": "primary",
-              "type": "button",
-              "value": "yes"
-            }
-        ];
+        //CONFIRM MESSAGE FOR REMOVE IF ITS THE LAST ITEM TO REMOVE
+
+        //ONLY SHOW ADD/REMOVE FOR 
+
+        //check if user added this item
+
+        //item.added_by
+
+    
+        if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
+            var actionObj = [
+                {
+                  "name": "removeitem",
+                  "text": "➖",
+                  "style": "danger",
+                  "type": "button",
+                  "value": "remove",
+                  // "confirm": {
+                  //   "title": "Are you sure?",
+                  //   "text": "This will remove",
+                  //   "ok_text": "Yes",
+                  //   "dismiss_text": "No"
+                  // }
+                },
+                {
+                  "name": "additem",
+                  "text": "➕",
+                  "style": "primary",
+                  "type": "button",
+                  "value": "add"
+                }
+            ];            
+        }else {
+            var actionObj = [];
+        }
+
 
         // add title, which is a link for admins/p2p and text otherwise
         var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
@@ -2241,8 +3149,9 @@ function viewCart(data, show_added_item){
           text: text,
           mrkdwn_in: ['text', 'pretext'],
           color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
-          thumb_url: item.image
-         // actions: actionObj
+          thumb_url: item.image,
+          actions: actionObj,
+          callback_id: i+1
         })
       }
 
@@ -2732,11 +3641,16 @@ function reportMode(data){
 /////TOOLS
 
 //trim a string to char #
-function truncate(string) {
-   if (string.length > 80)
-      return string.substring(0,80)+'...';
-   else
-      return string;
+function truncate(string,l) {
+    if (l){
+        return string.substring(0,l);
+    }else {
+       if (string.length > 80)
+          return string.substring(0,80)+'...';
+       else
+          return string;        
+    }
+
 };
 
 function encode_utf8(s) {

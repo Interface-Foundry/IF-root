@@ -1,3 +1,7 @@
+body {
+  overflow-x:hidden;
+}
+
 .header-section {
   background-color: #fe9b00;
   margin: 0;
@@ -47,6 +51,16 @@
 
 .kip-nav-bar > #navFriends:hover > a{
   color: #49d63a;
+}
+
+.kip-nav-bar > #navFamily:hover {
+  color: #000;
+  border-bottom: solid 5px;
+  font-weight: bold;
+}
+
+.kip-nav-bar > #navFamily:hover > a{
+  color: #000;
 }
 
 .kip-nav-bar > #navPartner:hover {
