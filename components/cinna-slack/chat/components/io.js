@@ -931,6 +931,15 @@ var incomingMsgAction = function(data,origin){
         tokens: ['kipfix'] //bad code check later on, hot fix here for now
     };
 
+    kipObj.source = {
+        origin: origin,
+        channel: parsedIn.channel.id,
+        org: parsedIn.team.id,
+        id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+        user: parsedIn.user.id,
+        flag: 'buttonAction'
+    }
+
     //let's try to build a universal action button i/o for all platforms
     //deal with first action in action arr...more will happen later?
     if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value){
@@ -980,16 +989,38 @@ var incomingMsgAction = function(data,origin){
         //special cart commands
         if (parsedIn.actions[0].name == 'additem'){
 
-            //REMOVE BY ITEM ID!!
+            if(parsedIn.original_message){
+               kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
+            }
 
-            console.log('PARSED INCOMONG ',kipObj);
+            co(function*() {
+              var cartNum = parseInt(parsedIn.callback_id);
+              if (cartNum){
+                var cart = yield kipcart.getCart(parsedIn.team.id);
+                var item = cart.aggregate_items[cartNum - 1];
+                var itemAdded = yield kipcart.addExtraToCart(cart, parsedIn.team.id,parsedIn.user.id,item);
 
+                console.log('ITEM ADDED????????????????? ',itemAdded);
+
+                viewCart(kipObj);
+
+              }else {
+                console.error('no callback_id found to add cart item')
+              }
+
+            }).then(function(){}).catch(function(err) {
+                console.error(err)
+            })
+
+            //call back to slack to update view cart message here!
 
         }
         else if (parsedIn.actions[0].name == 'removeitem'){
 
             co(function*() {
-              yield kipcart.removeFromCart(kipObj.source.org, kipObj.source.user, kipObj.slackData.callback_id);
+              yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, parsedIn.callback_id);
+
+              //make viewcart into callback to message
               viewCart(kipObj);
             }).then(function(){}).catch(function(err) {
                 console.error('couldnt remove item on button push')
@@ -1005,14 +1036,14 @@ var incomingMsgAction = function(data,origin){
             }
 
             //build source
-            kipObj.source = {
-                origin: origin,
-                channel: parsedIn.channel.id,
-                org: parsedIn.team.id,
-                id: parsedIn.team.id +'_'+ parsedIn.channel.id,
-                user: parsedIn.user.id,
-                flag: 'buttonAction'
-            }
+            // kipObj.source = {
+            //     origin: origin,
+            //     channel: parsedIn.channel.id,
+            //     org: parsedIn.team.id,
+            //     id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+            //     user: parsedIn.user.id,
+            //     flag: 'buttonAction'
+            // }
             incomingAction(kipObj);
         }
 
@@ -1059,8 +1090,18 @@ var incomingMsgAction = function(data,origin){
 function incomingAction(data){
 
 
+    // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / / 
+    if (!messageHistory[data.source.id]){ //new user, set up chat states
+        messageHistory[data.source.id] = {};
+        messageHistory[data.source.id].search = []; //random chats
+        messageHistory[data.source.id].banter = []; //search
+        messageHistory[data.source.id].purchase = []; //finalizing search and purchase
+        messageHistory[data.source.id].persona = []; //learn about our user
+        messageHistory[data.source.id].cart = []; //user shopping cart
+        messageHistory[data.source.id].allBuckets = []; //all buckets, chronological chat history
+    }
+    /// / / / / / / / / // /  / / / // /
 
-    //console.log('DATA DATA DATA ',data)
 
 //------------------------supervisor stuff-----------------------------------//
   if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
@@ -2682,7 +2723,9 @@ var sendResponse = function(data,flag){
                 }, function done(){
 
 
-                    var count = data.searchSelect[0] + 1;
+                    var count = data.searchSelect[0] - 1;
+
+                    console.log(count);
 
                     var actionObj = [
                         {
@@ -2702,13 +2745,6 @@ var sendResponse = function(data,flag){
                         {
                           "name": "similar",
                           "text": "similar",
-                          "style": "default",
-                          "type": "button",
-                          "value": count
-                        },
-                        {
-                          "name": "moreinfo",
-                          "text": "more info",
                           "style": "default",
                           "type": "button",
                           "value": count
@@ -2783,7 +2819,7 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
-                        console.log('ATTACH ',message);
+                        
                         var attachThis = message;
                         attachThis = JSON.stringify(attachThis);
 
@@ -2792,9 +2828,34 @@ var sendResponse = function(data,flag){
                             username:'Kip',
                             attachments: attachThis
                         };
-                        slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
-                            callback();
-                        });
+
+                        console.log('data.ts ',data.button_ts)
+
+                        // if (data.button_ts){
+                        //     //update a message by timestamp
+
+
+                        //     msgData.as_user = true;
+                        //     msgData.parse = 'full';
+                        //     msgData.link_names = '1';
+
+                        //     console.log('SEND DATA NOW _ BUTTON ',msgData);
+
+                        //     slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, msgData, {}, function(err,res) {
+                        //         console.log('EDIT CART ERROR ',err)
+                        //         console.log('EDIT CART RES ',res)
+                        //     });
+
+                        // }
+                        // else {
+                            //normal attach send
+
+                            console.log('SEND DATA NOW _ NORMAL ',msgData);
+                            slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
+                                callback();
+                            });            
+                        //}
+
                     }
 
                 }, function done(){
@@ -2912,7 +2973,8 @@ var saveToCart = function(data){
                     })
                   }
 
-                  messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
+                  //messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
+
                   cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
@@ -2977,10 +3039,10 @@ function viewCart(data, show_added_item){
         return;
     }
 
+    console.log('VIEW CART data.ts ',data.button_ts)
+
     console.log('view cart')
     db.Metrics.log('cart.view', data);
-
-    console.log(data.source)
 
     var cartDelay = 2000;
 

@@ -89,30 +89,15 @@ function sessionRenewer(){
       },
       function (callback) {
           genSession((1000000 * Math.random()),function(){
-            console.log('REMOVE OLDEST SESSION ',proxyPool)
-            
             if(proxyPool.length < 17){
-              console.log('🍹CORRECT LENGTH')
               proxyPool.shift() // remove oldest session
-              console.log('REMOVED ',proxyPool)
             }else {
-              console.log('🍹NOT CORRECT LENGTH!!')
-
               while (proxyPool.length > 13){
                 proxyPool.shift()
-                console.log('REMOVED IN WHILE ',proxyPool)
-              }
-              // var bff = proxyPool.length - 16;
-
-              // if(bff > 0){
-              //   proxyPool.splice(0, bff);
-              // }       
+              }  
             }
-
-            
-
           })
-          setTimeout(callback, 10000);//every 20 sec...
+          setTimeout(callback, 7000);//every 7 sec...
       },
       function (err) {
           // 5 seconds have passed
@@ -136,30 +121,16 @@ function genSession(num,callback){
         'User-Agent': user_agent
     }
   };
-
   requestPromise(options).then(function(data){ 
-
-    //ok session worked, save it to proxyPool
-    console.log('SESSION ID ',session_id)
-    console.log('SUPER_PROXY ',super_proxy)
-
-    //restict session pool size
-    //if (proxyPool.length < 12){
-      proxyPool.push(super_proxy);
-    //}
+    proxyPool.push(super_proxy);
     callback();
-
   }, function(err){ 
-    //console.error(err); 
     console.log('LUMINATI PROXY ERROR, trying genSession again')
     setTimeout(function() {
       genSession(num, function(){
-
       });  
-    }, 10000);
-
+    }, 10000); //wait to try gen session again
   });
-  //callback(super_proxy,session_id);
 }
 // // / / / / LUMINATI PROXY end  / / /  
 

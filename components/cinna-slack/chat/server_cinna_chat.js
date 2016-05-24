@@ -97,8 +97,16 @@ app.post('/slackaction', function(req, res) {
 
       /// FOR INITIAL SEARCHES
 
+
+      //IF team cart action, send back modified message with updated quantities
+
+      //call for cart, modded
+
+
       //sends back original chat
       if (parsedIn.response_url && parsedIn.original_message){
+
+        console.log('ORIGINAL MESSAGE ',parsedIn.original_message);
         var stringOrig = JSON.stringify(parsedIn.original_message);
         request.post(
             parsedIn.response_url,

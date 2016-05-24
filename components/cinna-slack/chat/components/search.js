@@ -995,6 +995,7 @@ var searchFocus = function(data) {
                         data.client_res.push(res + ' ' +  data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0]);
                     }
                     else if (data.source.origin !== 'supervisor') {
+                        console.log('RECALLED FOCUS ',data.recallHistory);
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
                     } else {
                      data.client_res.push(res +' <'+ data.recallHistory.urlShorten[0].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');

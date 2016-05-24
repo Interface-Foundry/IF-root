@@ -75,6 +75,62 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   })
 }
 
+
+// Add an item already in cart to the db by increasing quantity 
+// slack_id: either the team id or the user id if a personal cart
+// user_id: the user who added the item
+// item: the item from getCart aggregate item
+//
+module.exports.addExtraToCart = function(cart, slack_id, user_id, item) {
+  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
+  console.log('ITEM ZZZZ ',item)
+  console.log('CART ZZZZ ',cart)
+
+
+  //fixing bug to convert string to to int
+  // if (item.reviews && item.reviews.reviewCount){
+  //   item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
+  // }
+
+  // // Handle the case where the search api returns items that we can't add to cart
+  // var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
+  // if (total_offers === 0) {
+  //   // This item is not available.  According to the amazon documentation, the search
+  //   // api can and will return items that you cannot buy.  So we have to just
+  //   // ignore these things.
+  //   // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
+  //   return Promise.reject('Item not available');
+  // }
+
+  return co(function*() {
+    // var cart = yield getCart(slack_id);
+    // console.log(cart);
+
+    console.log('creating item in database')
+
+    var i = yield (new db.Item({
+      cart_id: cart._id,
+      ASIN: item.ASIN,
+      title: item.title,
+      link: item.link, // so obviously converted to json from xml
+      image: item.image,
+      price: item.price,
+      rating: item.rating,
+      review_count: item.review_count,
+      added_by: user_id,
+      slack_id: slack_id,
+      // source_json: JSON.stringify(item)
+    })).save();
+
+    console.log('adding item ' + i._id + ' to cart ' + cart._id);
+    cart.items.push(i._id);
+    yield cart.save();
+
+    console.log('calling getCart again to rebuild amazon cart')
+    return getCart(slack_id);
+  })
+}
+
 //
 
 // Remove item from the db
@@ -116,6 +172,7 @@ module.exports.removeFromCart = function(slack_id, user_id, number) {
     return module.exports.removeFromCartByItem(matching_items.pop());
   })
 }
+
 
 //
 // Removes one item from the cart at a time
