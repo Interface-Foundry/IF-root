@@ -54,6 +54,27 @@ function default_reply(message) {
   })
 }
 
+// get a simple text message
+function text_reply(message, text) {
+  var msg = default_reply(message);
+  msg.text = text;
+  return msg
+}
+
+// sends a simple text reply
+function send_text_reply(message, text) {
+  var msg = text_reply(message, text);
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random()*100).toString().slice(3)).toString(36))
+}
+
+// Make it look like Kip is typing
+function typing(message) {
+  var msg = {
+    action: 'typing'
+  };
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random()*100).toString().slice(3)).toString(36))
+}
+
 
 
 
@@ -71,8 +92,6 @@ queue.topic('incoming').subscribe(incoming => {
         $lte: incoming.data.ts
       }
     }).sort('-ts').limit(20);
-
-    console.log(history)
 
     var message = history[0];
     message.history = history.slice(1);
@@ -95,7 +114,7 @@ queue.topic('incoming').subscribe(incoming => {
 
     yield replies.map(r => r.save());
     yield replies.map((r, i) => {
-      queue.publish('outgoing.' + r.origin, r, incoming._id + 'reply.' + i)
+      queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
     });
     incoming.ack();
   }).catch(kip.err);
@@ -130,43 +149,35 @@ function simple_response(message) {
   if (reply.flag) {
     switch (reply.flag) {
       case 'basic': //just respond, no actions
-        //send message
-        var msg = default_reply(message);
-        msg.text = reply.res;
-        replies.push(msg);
-        return replies;
+        return [text_reply(message, reply.res)];
 
       case 'search.initial':
-        //send message
-        message.client_res.push(res);
-        return cannedBanter(message);
+        //send a reply right away
+        send_text_reply(message, reply.res);
 
-        //now search for item
-        message.tokens = [];
-        message.tokens.push(query); //search for this item
-        message.bucket = 'search';
+        //now also search for item
+        message.tokens = [query]
+        message.mode = 'shopping';
         message.action = 'initial';
-        return incomingAction(message);
+        incomingAction(message);
         break;
 
       case 'search.focus':
-        message.searchSelect = [];
-        message.searchSelect.push(query);
-        message.bucket = 'search';
+        message.searchSelect = [query];
+        message.mode = 'shopping';
         message.action = 'focus';
         incomingAction(message);
         break;
 
       case 'search.more':
-        message.bucket = 'search';
+        message.mode = 'shopping';
         message.action = 'more';
         incomingAction(message);
         break;
 
-      case 'purchase.remove':
-        message.searchSelect = [];
-        message.searchSelect.push(query);
-        message.bucket = 'purchase';
+      case 'cart.remove':
+        message.searchSelect = [query];
+        message.mode = 'cart';
         message.action = 'remove';
         incomingAction(message);
         break;
@@ -174,7 +185,7 @@ function simple_response(message) {
       //for testing in PAPRIKA
       case 'slack.search':
       // message.searchSelect = [];
-      // data.bucket = 'search';
+      // data.mode = 'search';
 
         var slackTester;
 
@@ -316,11 +327,11 @@ var incomingMsgAction = function(data) {
   //deal with first action in action arr...more will happen later?
   if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value) {
 
-    //get bucket/action
+    //get Mode/action
     switch (parsedIn.actions[0].name) {
 
       case 'cheaper':
-        kipObj.bucket = 'search';
+        kipObj.mode = 'shopping';
         kipObj.action = 'modify';
         kipObj.dataModify = {
           type: 'price',
@@ -329,13 +340,13 @@ var incomingMsgAction = function(data) {
         break;
 
       case 'similar':
-        kipObj.bucket = 'search';
+        kipObj.mode = 'shopping';
         kipObj.action = 'similar';
         break;
 
       //uses default blue for now
       case 'modify':
-        kipObj.bucket = 'search';
+        kipObj.mode = 'shopping';
         kipObj.action = 'modify';
         kipObj.dataModify = {
           type: 'genericDetail',
@@ -344,12 +355,12 @@ var incomingMsgAction = function(data) {
         break;
 
       case 'moreinfo':
-        kipObj.bucket = 'search';
+        kipObj.mode = 'shopping';
         kipObj.action = 'focus';
         break;
 
       case 'addcart':
-        kipObj.bucket = 'purchase';
+        kipObj.mode = 'cart';
         kipObj.action = 'save';
         break;
     }
@@ -415,81 +426,43 @@ var incomingMsgAction = function(data) {
 
 //sentence breakdown incoming from python
 function incomingAction(data) {
-  //------------------------supervisor stuff-----------------------------------//
-  if (data.bucket === 'response' || (data.flags && data.flags.toClient)) {
-
-    if (data.bucket === 'response' || data.action === 'focus') {
-      return sendResponse(data)
-    } else {
-      if (data.action === 'checkout') {
-        return outgoingResponse(data, 'txt');
-      } else {
-        return outgoingResponse(data, 'txt', 'amazon');
-      }
-    }
-  }
-  data.flags = data.flags ? data.flags : {};
-  //---------------------------------------------------------------------------//
-  history.saveHistory(data, true, function(res) {
-    supervisor.emit(res, true)
-  });
-  delete data.flags.toSupervisor
-  //sort context bucket (search vs. banter vs. purchase)
-  switch (data.bucket) {
-    case 'search':
-      searchBucket(data);
+  //sort context Mode (search vs. banter vs. purchase)
+  switch (data.mode) {
+    case 'shopping':
+      searchMode(data);
       break;
     case 'banter':
-      banterBucket(data);
+      banterMode(data);
       break;
-    case 'purchase':
-
-      if (data.source.origin == 'socket.io' || data.source.origin == 'telegram') {
-        sendTxtResponse(data, 'Sorry, shopping cart features are only available with Kip for Slack and Email right now');
-      } else {
-        purchaseBucket(data);
-      }
-
+    case 'cart':
+      purchaseMode(data);
       break;
     case 'mode':
-      modeBucket(data);
+      modeMode(data);
       break;
     case 'supervisor':
     //route to supervisor chat window
     default:
-      searchBucket(data);
+      searchMode(data);
   }
 }
 
-//* * * * * ACTION CONTEXT BUCKETS * * * * * * *//
+//* * * * * ACTION CONTEXT ModeS * * * * * * *//
 
-function modeBucket(data) {
-
+function modeMode(data) {
+  // whoa meta a mode to switch modes
 
 }
 
 
-function searchBucket(data) {
+function searchMode(data) {
 
   //* * * * typing event
   if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more') {
-
-    var searcher = {};
-    searcher.source = data.source;
-    sendTxtResponse(searcher, 'Searching...', 'typing');
-
-    if (data.source.origin == 'slack' && slackUsers[data.source.org]) {
-      slackUsers[data.source.org].sendTyping(data.source.channel);
-    }
+    typing();
   }
 
-  console.log('* * * * * * * * * * * * ', data.bucket);
-
-  if (data.bucket == 'purchase') {
-    var searcher = {};
-    searcher.source = data.source;
-    sendTxtResponse(searcher, 'Thinking...', 'typing');
-  }
+  console.log('* * * * * * * * * * * * ', data.mode);
 
   //sort search action type
   switch (data.action) {
@@ -577,7 +550,7 @@ function searchBucket(data) {
   }
 }
 
-function banterBucket(data) {
+function banterMode(data) {
   //sort search action type
   switch (data.action) {
     case 'question':
@@ -589,7 +562,7 @@ function banterBucket(data) {
   }
 }
 
-function purchaseBucket(data) {
+function purchaseMode(data) {
   //sort purchase action
   switch (data.action) {
     case 'save':
@@ -608,7 +581,7 @@ function purchaseBucket(data) {
       viewCart(data);
       break;
     default:
-      console.log('error: no purchase bucket action selected');
+      console.log('error: no purchase Mode action selected');
   }
 }
 
@@ -618,7 +591,7 @@ function purchaseBucket(data) {
 //process canned message stuff
 //data: kip data object
 var cannedBanter = function(data) {
-  data.bucket = 'banter';
+  data.mode = 'banter';
   data.action = 'smalltalk';
   incomingAction(data);
 }
@@ -788,14 +761,14 @@ var checkOutgoingBanter = function(data) {
 var sendResponse = function(data, flag) {
 
   //SAVE OUTGOING MESSAGES TO MONGO
-  if (data.bucket && data.action && !(data.flags && data.flags.searchResults)) {
+  if (data.mode && data.action && !(data.flags && data.flags.searchResults)) {
     console.log('SAVING OUTGOING RESPONSE');
     history.saveHistory(data, false, function(res) {
       //whatever
     }); //saving outgoing message
   //});
   } else {
-    console.log('error: cant save outgoing response, missing bucket or action');
+    console.log('error: cant save outgoing response, missing Mode or action');
   }
   /// / / / / / / / / / /
 
@@ -1486,10 +1459,10 @@ var saveToCart = function(data) {
   }
   //-----------------------------------------------------------------//
 
-  data.bucket = 'search'; //modifying bucket to recall search history. a hack for now
+  data.mode = 'search'; //modifying Mode to recall search history. a hack for now
 
   history.recallHistory(data, function(item) {
-    data.bucket = 'purchase'; //modifying bucket. a hack for now
+    data.mode = 'purchase'; //modifying Mode. a hack for now
     // console.log('\n\n\nio1288 ok for real doe whats item: ',item)
     //no saved history search object
     if (!item) {
@@ -1761,8 +1734,8 @@ function recallHistory(data, callback, steps) {
     if (!steps) {
       var steps = 1;
     }
-    //get by bucket type
-    switch (data.bucket) {
+    //get by Mode type
+    switch (data.mode) {
       case 'search':
       //console.log(data);
 
@@ -1880,7 +1853,7 @@ var updateMode = function(data) {
 
 //* * * * MODE FUNCTIONS * * * * //
 function settingsMode(data) {
-  data.bucket = 'mode';
+  data.mode = 'mode';
   data.action = 'settings';
   history.saveHistory(data, true, function(res) {});
 
@@ -1893,7 +1866,7 @@ function settingsMode(data) {
     }).exec();
 
     return conversation_botkit.settings(slackbot, data.source.user, function(msg) {
-      data.bucket;
+      data.mode;
       data.action;
 
       if (typeof msg === 'object') {
@@ -1916,7 +1889,7 @@ function settingsMode(data) {
 
 
 function addmemberMode(data) {
-  data.bucket = 'mode';
+  data.mode = 'mode';
   data.action = 'addmember';
   history.saveHistory(data, true, function(res) {});
 
@@ -1929,7 +1902,7 @@ function addmemberMode(data) {
 
       console.log('done adding members');
 
-      data.bucket;
+      data.mode;
       data.action;
 
       if (typeof msg === 'object') {
@@ -1951,7 +1924,7 @@ function addmemberMode(data) {
 
 function collectMode(data) {
 
-  data.bucket = 'mode';
+  data.mode = 'mode';
   data.action = 'collect';
   history.saveHistory(data, true, function(res) {});
 
@@ -1987,7 +1960,7 @@ function collectMode(data) {
 
             //fire same here as exit settings mode!!!!
 
-            // data.bucket;
+            // data.mode;
             // data.action;
 
             // if(typeof msg === 'object'){
@@ -2018,7 +1991,7 @@ function onboardingMode(data) {
 
   console.log('ONBOARDING FIRED 💎 💎 💎 💎')
 
-  data.bucket = 'mode';
+  data.mode = 'mode';
   data.action = 'onboarding';
   history.saveHistory(data, true, function(res) {});
 
@@ -2036,7 +2009,7 @@ function shoppingMode(data) {
 
   console.log('SHOPPING MODE FIRED 💎 💎 💎 💎');
 
-  data.bucket = 'mode';
+  data.mode = 'mode';
   data.action = 'shopping';
   history.saveHistory(data, true, function(res) {});
 
@@ -2063,7 +2036,7 @@ function shoppingMode(data) {
 }
 
 function reportMode(data) {
-  data.bucket = 'mode';
+  data.mode = 'mode';
   data.action = 'report';
   history.saveHistory(data, true, function(res) {});
 

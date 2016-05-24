@@ -25,9 +25,8 @@ var messageSchema = mongoose.Schema({
     text: String, //incoming message (if applicable), pre-processed
     original_text: String, //raw incoming message (if applicable)
     tokens: [String], //broken up incoming message (if applicable)
-    bucket: { type: String, index: true},
+    mode: { type: String, index: true},
     action: { type: String, index: true},
-    mode: String,
     amazon: [mongoose.Schema.Types.Mixed], //amazon search results
     dataModify: {
         type: {type: String},
