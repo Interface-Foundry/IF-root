@@ -125,7 +125,7 @@ function genSession(num,callback){
     proxyPool.push(super_proxy);
     callback();
   }, function(err){ 
-    console.log('LUMINATI PROXY ERROR, trying genSession again')
+    //console.log('LUMINATI PROXY ERROR, trying genSession again')
     setTimeout(function() {
       genSession(num, function(){
       });  
