@@ -63,76 +63,76 @@ var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like G
 //so you charge $500 a month but your solution doesn't work out of the box ok ok luminati >_>
 
 //start with these sessions to pool
-var count = [1,2,3,4,5,6,7,8,9]; //lol
-async.eachSeries(count, function(c, callback) {
+// var count = [1,2,3,4,5,6,7,8,9]; //lol
+// async.eachSeries(count, function(c, callback) {
 
-  genSession(c,function(){
-    console.log('preloaded luminati session #'+c)
-  });
+//   genSession(c,function(){
+//     console.log('preloaded luminati session #'+c)
+//   });
 
-  setTimeout(function() {
-    callback();
-  }, 15000);
+//   setTimeout(function() {
+//     callback();
+//   }, 15000);
 
-}, function done(){
-  setTimeout(function() {
-    sessionRenewer(); //start renewing sessions forever
-  }, 60000);
+// }, function done(){
+//   setTimeout(function() {
+//     sessionRenewer(); //start renewing sessions forever
+//   }, 60000);
   
-}) 
+// }) 
 
-//pool new sessions over time
-function sessionRenewer(){
-  async.whilst(
-      function () { 
-        return true; 
-      },
-      function (callback) {
-          genSession((1000000 * Math.random()),function(){
-            if(proxyPool.length < 17){
-              proxyPool.shift() // remove oldest session
-            }else {
-              while (proxyPool.length > 13){
-                proxyPool.shift()
-              }  
-            }
-          })
-          setTimeout(callback, 7000);//every 7 sec...
-      },
-      function (err) {
-          // 5 seconds have passed
-      }
-  ); 
-}
+// //pool new sessions over time
+// function sessionRenewer(){
+//   async.whilst(
+//       function () { 
+//         return true; 
+//       },
+//       function (callback) {
+//           genSession((1000000 * Math.random()),function(){
+//             if(proxyPool.length < 17){
+//               proxyPool.shift() // remove oldest session
+//             }else {
+//               while (proxyPool.length > 13){
+//                 proxyPool.shift()
+//               }  
+//             }
+//           })
+//           setTimeout(callback, 7000);//every 7 sec...
+//       },
+//       function (err) {
+//           // 5 seconds have passed
+//       }
+//   ); 
+// }
 
-//gen session for pool
-function genSession(num,callback){
-  var username = 'lum-customer-kipthis-zone-gen';
-  var password = 'e49d4ega1696';
-  var port = 22225;
-  var session_id = (1000000 * Math.random())|0; //the only important part 
+// //gen session for pool
+// function genSession(num,callback){
+//   var username = 'lum-customer-kipthis-zone-gen';
+//   var password = 'e49d4ega1696';
+//   var port = 22225;
+//   var session_id = (1000000 * Math.random())|0; //the only important part 
 
-  var super_proxy = 'http://'+username+'-country-us-session-'+session_id+':'+password+'@zproxy.luminati.io:'+port;
+//   var super_proxy = 'http://'+username+'-country-us-session-'+session_id+':'+password+'@zproxy.luminati.io:'+port;
 
-  var options = {
-    url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
-    proxy: super_proxy,
-    headers: {
-        'User-Agent': user_agent
-    }
-  };
-  requestPromise(options).then(function(data){ 
-    proxyPool.push(super_proxy);
-    callback();
-  }, function(err){ 
-    //console.log('LUMINATI PROXY ERROR, trying genSession again')
-    setTimeout(function() {
-      genSession(num, function(){
-      });  
-    }, 10000); //wait to try gen session again
-  });
-}
-// // / / / / LUMINATI PROXY end  / / /  
+//   var options = {
+//     url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
+//     proxy: super_proxy,
+//     headers: {
+//         'User-Agent': user_agent
+//     }
+//   };
+//   requestPromise(options).then(function(data){ 
+//     proxyPool.push(super_proxy);
+//     callback();
+//   }, function(err){ 
+//     //console.log('LUMINATI PROXY ERROR, trying genSession again')
+//     setTimeout(function() {
+//       genSession(num, function(){
+//       });  
+//     }, 10000); //wait to try gen session again
+//   });
+// }
+// // // / / / / LUMINATI PROXY end  / / /  
 
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
@@ -192,8 +192,12 @@ module.exports.basic = function basic(url, callback, num) {
       console.log('🍹 ',proxyPool.length)
       console.log('🍹🍹 ',proxyPool.length-num)
 
+      var falsy = false;
+
       //we have luminati proxies in session pool
-      if (proxyPool[proxyPool.length-num]){
+
+      //if (proxyPool[proxyPool.length-num])
+      if (falsy == true){
 
         console.log('REQUEST🍹WITH🍹THIS🍹 ',proxyPool.length-num)
 
@@ -238,13 +242,13 @@ module.exports.basic = function basic(url, callback, num) {
       var processing = true;
 
       //this ensures we dont spend more than 3 seconds trying to scrape item
-      setTimeout(function() {
-        if (processing){
-          console.log('KILLED SEARCH!!!!🍹!!!!!!🍹!!!!!!!!🍹!!!')
-          callback(null,'WARNING: LUMINATI PROXY TOOK TOO LONG!');
-          return;
-        }
-      }, 3000);
+      // setTimeout(function() {
+      //   if (processing){
+      //     console.log('KILLED SEARCH!!!!🍹!!!!!!🍹!!!!!!!!🍹!!!')
+      //     callback(null,'WARNING: LUMINATI PROXY TOOK TOO LONG!');
+      //     return;
+      //   }
+      // }, 3000);
 
       proxiedRequest.get(url, function(err, response, body) {
 

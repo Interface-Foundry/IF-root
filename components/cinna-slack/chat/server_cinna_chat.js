@@ -156,13 +156,13 @@ if (process.env.NODE_ENV == 'development_alyx'){
     kikConfig.auth = {
         username: 'kipbot.dev',
         apiKey: '2365ecea-4aa4-421a-a923-253c2e5dcd52',
-        baseUrl: 'https://7f41cf36.ngrok.io/'
+        baseUrl: 'https://04d3a7ea.ngrok.io/'
     };
 }else{
     kikConfig.auth = {
         username: 'kipbot',
         apiKey: '4a181322-48ee-4b63-8b09-7ccec20bf4a5',
-        baseUrl: 'https://kipapp.co/'
+        baseUrl: 'https://kipapp.co:8033/'
     };
 }
 

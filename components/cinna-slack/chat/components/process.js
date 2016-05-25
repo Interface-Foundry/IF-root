@@ -467,7 +467,7 @@ var modeHandle = function(input,context,callback){
 //BUILDS KIP DATA OBJECT FROM NLP RESPONSES
 var buildKipObject = function(res,callback){
 
-    console.log('INCOMING BUILD KIP OBJ ',res);
+    //console.log('INCOMING BUILD KIP OBJ ',res);
 
 
     var data = {};
