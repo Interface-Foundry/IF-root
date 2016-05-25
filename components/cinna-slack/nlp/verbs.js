@@ -33,11 +33,11 @@ module.exports.getAction = function(v) {
   }
 }
 
-module.exports.getBucket = function(v) {
+module.exports.getMode = function(v) {
   v = v.toLowerCase();
   if (purchase.indexOf(v) >= 0) {
-    return 'purchase'
+    return 'cart'
   } else if (search.indexOf(v) >= 0) {
-    return 'search'
+    return 'shopping'
   }
 }

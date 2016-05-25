@@ -5,6 +5,7 @@ var _ = require('lodash');
 
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = require('./amazonHTML');
+var db = require('../../db');
 
 var history = require("./history.js");
 var processData = require("./process.js");
@@ -26,8 +27,16 @@ var client = amazon.createClient({
   awsTag: "quic0b-20"
 });
 
-var searchInitial = function(data,flag){
-    searchAmazon(data,data.action,'none',flag);
+var searchInitial = function(message) {
+  return Promise.resolve(new db.Message({
+    incoming: false,
+    text: '_search result placeholder_',
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source
+  }))
 }
 
 var searchSimilar = function(data){
