@@ -33,7 +33,7 @@ var mongoose = require('mongoose');
 var db = require('db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
-var Groupchats = db.Groupchats;
+var Groups = db.Groups;
 var Slackbots = db.Slackbots;
 
 var slackUsers = {};

@@ -115,9 +115,9 @@ var schemas = [{
     single: 'Slackbot',
     plural: 'Slackbots'
 }, {
-    filename: 'groupchat_schema',
-    single: 'Groupchat',
-    plural: 'Groupchats'
+    filename: 'group_schema',
+    single: 'Group',
+    plural: 'Groups'
 }, {
     filename: 'sticker_schema',
     single: 'Sticker',

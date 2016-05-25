@@ -9,22 +9,30 @@ var groupSchema = mongoose.Schema({
       type: String,
       unique: true
     },
+    cart_id: { 
+      type: String,
+      unique: true 
+    },
     incoming_webhook: {
         url: String,
         channel: String,
         configuration_url: String
     },
-    admins: [String], // user ids of the office assistants, like U0R6H9BKN
     members: [
-        { member_id: String, 
-          bots: [{
+        {
+         member_id: String,
+         admin: Boolean, 
+         active: Boolean,
+         bots: [{
             type: {type: String},
             activated: Boolean, 
-            notify: Boolean
+            notify: Boolean,
             bot_user_id: String,
             bot_access_token: String,
-            platform_access_token: String
-           }],
+            platform_access_token: String,
+            conversations: {},
+            flags: {}
+          }]
         }
     ],
     meta: {
