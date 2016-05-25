@@ -119,8 +119,7 @@ queue.topic('incoming').subscribe(incoming => {
 
 
 //pre process incoming messages for canned responses
-function simple_response(message) {
-  return co(function*() {
+function* simple_response(message) {
     var replies = [];
 
     //check for canned responses/actions before routing to NLP
@@ -244,7 +243,6 @@ function simple_response(message) {
         }
       });
     }
-  });
 }
 
 //pushing incoming messages to python
@@ -274,15 +272,13 @@ function routeNLP(data) {
 
 
 // use nlp to deterine the intent of the user
-function nlp_response(message) {
-  return co(function*() {
+function* nlp_response(message) {
 
     // the nlp api adds the processing data to the message
     yield nlp.parse(message);
 
     console.log(message.execute);
     return [text_reply(message, '_nlp placeholder_ `' + JSON.stringify(message.execute[0]) + '`')];
-  })
 }
 
 
