@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 var amazonResult = mongoose.Schema;
 var modifyVal = mongoose.Schema;
 var messageSchema = mongoose.Schema({
+
     thread_id: {
       type: String,
       index: true
@@ -20,20 +21,30 @@ var messageSchema = mongoose.Schema({
     origin: String,
     source: {},
     incoming: Boolean, //if true, incoming message, if false, outgoing message
-
-
-    text: String, //incoming message (if applicable), pre-processed
     original_text: String, //raw incoming message (if applicable)
+
+    //
+    // Kip processing stuff
+    //
+    text: String, //incoming message (if applicable), pre-processed
     tokens: [String], //broken up incoming message (if applicable)
-    mode: { type: String, index: true},
-    action: { type: String, index: true},
+    execute: [{
+      mode: String,
+      action: String,
+      params: {}
+    }],
     amazon: [mongoose.Schema.Types.Mixed], //amazon search results
-    dataModify: {
-        type: {type: String},
-        val: [mongoose.Schema.Types.Mixed],
-        param: String
-    },
+
+    //
+    // Response
+    //
     client_res: [mongoose.Schema.Types.Mixed], //outgoing messages, if applicable
+    mode: String, // the mode we left off in
+    action: String, // the last action we did
+
+    //
+    // Miscellaneous probably will get removed eventually
+    //
     parent:{
         id: String
     },

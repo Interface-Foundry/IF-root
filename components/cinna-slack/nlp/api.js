@@ -36,7 +36,7 @@ var ACTION = {
  sampleRes = {
         mode: 'search',
         action: actionS, //initial, similar, modified, focus, more, back
-        searchSelect: [1,2,3], //which item for search select
+        focus: [1,2,3], //which item for search select
         tokens: msg,
         channel: '3EL18A0M' //example of slack channel (the user who is chatting) --> please send back from python
     };
@@ -66,9 +66,9 @@ var parse = module.exports.parse = function(message) {
       }
     });
 
-    res = nlpToResult(res);
-    debug(res)
-    return res;
+    // welp we'll mutate the shit out of the message here.
+    nlpToResult(res, message);
+    return message;
   })
 }
 
@@ -107,7 +107,9 @@ function quickparse(text) {
     result = {execute: [{
       mode: 'shopping',
       action: 'initial',
-      query: text.replace(re, '').trim()
+      params: {
+        query: text.replace(re, '').trim()
+      }
     }]}
   })
 
@@ -162,12 +164,8 @@ input be like:
   text: 'cheapest 32" monitor',
   verbs: [] }}
 */
-function nlpToResult(nlp) {
+function nlpToResult(nlp, message) {
   debug(nlp)
-
-  var res = {
-    execute: []
-  };
 
   nlp.focus = nlp.focus || [];
 
@@ -192,12 +190,12 @@ function nlpToResult(nlp) {
   if (nlp.focus.length === 1) {
     if (nlp.text.indexOf('about') >= 0) {
       debug('about triggered')
-      res.exec.push({
+      message.execute.push({
         mode: MODE.shopping,
         action: ACTION.focus,
-        searchSelect: nlp.focus[0]
+        focus: nlp.focus[0]
       })
-      return res;
+      return
     }
   }
 
@@ -206,12 +204,12 @@ function nlpToResult(nlp) {
     for (var i = 0; i < nlp.parts_of_speech.length; i++) {
       if (nlp.parts_of_speech[i][0] === 'more') {
         debug('more triggered')
-        res.execute.push({
+        message.execute.push({
           mode: MODE.shopping,
           action: ACTION.similar,
-          searchSelect: nlp.focus[0]
+          focus: nlp.focus[0]
         })
-        return res;
+        return;
       }
     }
   }
@@ -224,22 +222,24 @@ function nlpToResult(nlp) {
     }
 
     if (nlp.focus.length >= 1) {
-      exec.searchSelect = nlp.focus[0];
+      exec.focus = nlp.focus[0];
     }
-    res.execute.push(exec)
-    return res;
+    message.execute.push(exec)
+    return;
   }
 
   if (nlp.ss.length === 1 && nlp.focus.length === 0) {
     var s = nlp.ss[0];
     if (!s.isQuestion) {
       debug('simple case initial triggered');
-      res.execute.push({
+      message.execute.push({
         mode: MODE.shopping,
         action: ACTION.initial,
-        val: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
-          return stopwords.indexOf(n) < 0;
-        })).join(' ')
+        params: {
+          query: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
+            return stopwords.indexOf(n) < 0;
+          })).join(' ')
+        }
       })
     }
   }
@@ -251,28 +251,28 @@ function nlpToResult(nlp) {
     var exec = {
       mode: MODE.shopping,
       action: ACTION.modify,
-      dataModify: priceModifier,
+      params: priceModifier,
     };
     if (nlp.focus.length >= 1) {
-      exec.searchSelect = nlp.focus[0];
+      exec.focus = nlp.focus[0];
     }
-    res.execute.push(exec);
+    message.execute.push(exec);
   }
 
   // get all the nouns and adjectives
   var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
-  if (nlp.focus.length === 1 && modifierWords.length === 1 && res.execute.length == 0) {
+  if (nlp.focus.length === 1 && modifierWords.length === 1 && message.execute.length == 0) {
     debug('single focus, single modifier triggered')
     var exec = {
       mode: MODE.shopping,
       action: ACTION.modify,
-      dataModify: getModifier(modifierWords[0]),
-      searchSelect: nlp.focus[0]
+      params: getModifier(modifierWords[0]),
+      focus: nlp.focus[0]
     }
-    res.execute.push(exec);
-    return res;
+    message.execute.push(exec);
+    return;
   }
 
   // break out the entities into stores, locations, etc
@@ -288,7 +288,7 @@ function nlpToResult(nlp) {
   }
 
   debug('returning at the end');
-  return res;
+  return;
 }
 
 
@@ -296,12 +296,14 @@ function nlpToResult(nlp) {
 // for testing
 //
 if (!module.parent) {
+  require('colors')
   console.log('testing nlp api');
   request(config.nlp + '/reload')
 
   if (process.argv.length > 2) {
     var m = {
-      text: process.argv.slice(2).join(' ')
+      text: process.argv.slice(2).join(' '),
+      execute: [],
     }
     parse(m).then(r => {
       console.log(JSON.stringify(r, null, 2))
@@ -332,10 +334,11 @@ if (!module.parent) {
     ];
     sentences.map(function(a) {
       a = {
-        text: a
+        text: a,
+        execute: []
       };
       parse(a).then(function(res) {
-        console.log(a);
+        console.log(a.text.cyan);
         console.log(JSON.stringify(res, null, 2));
       }, e => {
         console.log(e.stack);

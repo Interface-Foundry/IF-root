@@ -71,7 +71,7 @@ function typing(message) {
   var msg = {
     action: 'typing'
   };
-  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random()*100).toString().slice(3)).toString(36))
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random()*100).toString().slice(3)).toString(36))
 }
 
 
@@ -277,9 +277,11 @@ function routeNLP(data) {
 function nlp_response(message) {
   return co(function*() {
 
-    var res = yield nlp.parse(message);
+    // the nlp api adds the processing data to the message
+    yield nlp.parse(message);
 
-    return [text_reply(message, '_nlp placeholder_ `' + JSON.stringify(res.execute[0]) + '`')];
+    console.log(message.execute);
+    return [text_reply(message, '_nlp placeholder_ `' + JSON.stringify(message.execute[0]) + '`')];
   })
 }
 
