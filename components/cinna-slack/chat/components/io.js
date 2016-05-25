@@ -1415,7 +1415,6 @@ var sendResponse = function(data,flag){
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
 
-
             //remove first message from res arr
             var attachThis = data.client_res;
             attachThis.shift();
