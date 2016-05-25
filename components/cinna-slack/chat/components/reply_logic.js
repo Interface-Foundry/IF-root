@@ -8,6 +8,7 @@ var fs = require('fs')
 var banter = require("./banter.js");
 // var history = require("./history.js");
 var search = require("./search.js");
+var amazon_search = require('./amazon_search.js');
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
@@ -139,7 +140,7 @@ function* simple_response(message) {
           message.tokens = [reply.query]
           message.mode = 'shopping';
           message.action = 'initial';
-          var msg = yield search.searchInitial(message, reply.query);
+          var results = yield amazon_search.search(message, reply.query);
           return [msg];
 
         case 'search.focus':
@@ -278,11 +279,33 @@ function* nlp_response(message) {
     yield nlp.parse(message);
 
     console.log(message.execute);
-    return [text_reply(message, '_nlp placeholder_ `' + JSON.stringify(message.execute[0]) + '`')];
+    var debug_message = text_reply(message, '_nlp placeholder_ `' + JSON.stringify(message.execute[0]) + '`');
+
+    var messages = yield execute(message);
+
+    return [debug_message].concat(messages);
 }
 
-
-
+// do the thing
+function* execute(message) {
+  return yield message.execute.map(exec => {
+    return co(function*() {
+      if (exec.action === 'initial') {
+        var results = yield amazon_search.search(exec.params);
+        return new db.Message({
+          incoming: false,
+          text: '_search result placeholder_',
+          thread_id: message.thread_id,
+          resolved: true,
+          user_id: 'kip',
+          origin: message.origin,
+          source: message.source,
+          amazon: JSON.stringify(results)
+        })
+      }
+    })
+  });
+}
 
 
 //sentence breakdown incoming from python
