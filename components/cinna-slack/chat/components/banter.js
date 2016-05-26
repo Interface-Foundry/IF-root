@@ -184,7 +184,7 @@ var checkForCanned = function(input,callback,origin,source) {
 
         //basic weight system for percentage similarity for string matching
         case textSimilar(input,'hi') > 60:
-        case textSimilar(input,'hello') > 60:
+        case textSimilar(input,'hello') > 90:
         case textSimilar(input,'hey') > 60:
         case textSimilar(input,'hej') > 60:
         case textSimilar(input,'hey you') > 60:

@@ -2,6 +2,10 @@
   background-color: #6f52d8;
 }
 
+hr {
+  background-color: #6f52d8;
+}
+
 .kip-nav-bar > li.active {
   color: #6f52d8;
 }
@@ -60,4 +64,35 @@
   margin-top: 5px;
   padding-left: 20px;
   padding-right: 20px;
+}
+
+
+@media (max-width: 767px) {
+  .partner-cropper{
+    margin: 66px 0 11px 0;
+    width: 290px;
+  }
+}
+
+@media (min-width: 767px) {
+  .partner-cropper{
+    margin: 55px 0 0 0;
+    width: 290px;
+  }
+}
+
+
+@media (min-width: 992px) {
+  .partner-cropper{
+    margin: 33px 53px 0 0;
+
+    width: 290px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .partner-cropper{
+    margin: 0 170px 0 0;
+    width: 290px;
+  }
 }

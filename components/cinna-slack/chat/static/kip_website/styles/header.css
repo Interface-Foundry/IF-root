@@ -10,11 +10,11 @@ body {
 }
 
 .header-text {
-  padding-top: 130px;
+  padding-top: 119px;
 }
 
 .header-text-pull-left {
-  margin-left: -145px;
+  margin-left: -66px;
 }
 
 .kip-nav-bar {
@@ -31,6 +31,7 @@ body {
   display: inline-block;
   padding: 10px 50px;
   font-size: 13pt;
+  padding-top: 13px;
 }
 
 .kip-nav-bar > #navWork:hover {
@@ -54,13 +55,13 @@ body {
 }
 
 .kip-nav-bar > #navFamily:hover {
-  color: #000;
+  color: #7ae1fb;
   border-bottom: solid 5px;
   font-weight: bold;
 }
 
 .kip-nav-bar > #navFamily:hover > a{
-  color: #000;
+  color: #7ae1fb;
 }
 
 .kip-nav-bar > #navPartner:hover {
@@ -77,15 +78,18 @@ body {
   color: #fe9b00;
   border-bottom: solid 5px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .kip-nav-bar > li > a {
   color: #a3a3a3;
   font-weight: bold;
+  letter-spacing: 0.7px;
 }
 
 .kip-nav-bar > li.active > a {
   color: #fe9b00;
+
 }
 
 @media (min-width: 1200px) .kip-nav-container {

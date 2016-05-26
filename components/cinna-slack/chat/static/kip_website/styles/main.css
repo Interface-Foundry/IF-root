@@ -1,14 +1,29 @@
 body{
   font-family: 'PT Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size:16px;
+}
+
+h1 {
+  line-height: 36px;
+  word-spacing: -1px;
+  letter-spacing: 0.8px;
+}
+
+h2 {
+  color: #47a2fc;
 }
 
 h3 {
   color: #47a2fc;
 }
 
-h2 {
-  color: #47a2fc;
+h5 {
+  margin-top: 21px;
+  letter-spacing: 0.29px;
+  font-size: 18px;
 }
+
+
 
 a {
   color: #47a2fc 
@@ -25,4 +40,30 @@ hr
 
 .max-width-image {
   max-width: 100%;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+  cursor: pointer;
+}
+
+.noselect a{
+  cursor: pointer;
+}
+
+.kip_logo_text{
+  width: 104px;
+  position: absolute;
+  padding-left: 0.8em;
+  padding-top: 0.8em;
+}
+
+.product {
+  border: 1.7px solid #d3d3d3;
 }
