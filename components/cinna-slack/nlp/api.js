@@ -193,7 +193,7 @@ function nlpToResult(nlp, message) {
       message.execute.push({
         mode: MODE.shopping,
         action: ACTION.focus,
-        focus: nlp.focus[0]
+        params: {focus: nlp.focus[0]}
       })
       return
     }
@@ -207,7 +207,7 @@ function nlpToResult(nlp, message) {
         message.execute.push({
           mode: MODE.shopping,
           action: ACTION.similar,
-          focus: nlp.focus[0]
+          params: { focus: nlp.focus[0]}
         })
         return;
       }
@@ -222,7 +222,7 @@ function nlpToResult(nlp, message) {
     }
 
     if (nlp.focus.length >= 1) {
-      exec.focus = nlp.focus[0];
+      exec.params = {focus:  nlp.focus[0]};
     }
     message.execute.push(exec)
     return;
@@ -268,9 +268,9 @@ function nlpToResult(nlp, message) {
     var exec = {
       mode: MODE.shopping,
       action: ACTION.modify,
-      params: getModifier(modifierWords[0]),
-      focus: nlp.focus[0]
+      params: getModifier(modifierWords[0])
     }
+    exec.params.focus = nlp.focus;
     message.execute.push(exec);
     return;
   }

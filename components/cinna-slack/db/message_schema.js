@@ -9,6 +9,7 @@ var messageSchema = mongoose.Schema({
       type: String,
       index: true
     },
+    cart_reference_id: String, // not the mongo _id of a cart object, but like the slack team_id
     ts: {
       type: Date,
       default: Date.now
@@ -42,6 +43,7 @@ var messageSchema = mongoose.Schema({
     mode: String, // the mode we left off in
     action: String, // the last action we did
     focus: Number,
+    data: {},
 
     //
     // Miscellaneous probably will get removed eventually

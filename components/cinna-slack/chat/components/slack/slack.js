@@ -51,6 +51,7 @@ var db = require('../../../db')
 var image_search = require('../image_search');
 var search_results = require('./search_results');
 var focus = require('./focus');
+var cart = require('./cart');
 var slackConnections = {};
 
 //
@@ -73,7 +74,8 @@ co(function*() {
 
     slackConnections[slackbot.team_id] = {
       rtm: rtm,
-      web: web
+      web: web,
+      slackbot: slackbot
     };
 
     // TODO figure out how to tell when auth is invalid
@@ -179,6 +181,11 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
     if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
       msgData.attachments = yield focus(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
+
+    if (message.mode === 'cart' && message.action === 'view') {
+      msgData.attachments = yield cart(message, bot.slackbot, false);
       return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
     }
 

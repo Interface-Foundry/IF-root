@@ -74,6 +74,9 @@ cart.virtual('total').get(function() {
   }, 0))
 })
 
+cart.set('toObject', { getters: true, virtuals: true });
+cart.set('toJSON', { getters: true, virtuals: true });
+
 var Cart = mongoose.model('Cart', cart);
 
 module.exports = Cart;

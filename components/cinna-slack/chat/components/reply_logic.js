@@ -276,19 +276,45 @@ function* nlp_response(message) {
 // do the things
 function execute(message) {
   return co(function*() {
-    return yield message.execute.map((exec) => {
-        var route = exec.mode + '.' + exec.action;
-        if (!handlers[route]) {
-          throw new Error(route + ' handler not implemented');
-        }
+    var messages = yield message.execute.reduce((messages, exec) => {
+      var route = exec.mode + '.' + exec.action;
+      if (!handlers[route]) {
+        throw new Error(route + ' handler not implemented');
+      }
 
-        return handlers[route](message, exec);
-      }, [])
+      var new_messages = handlers[route](message, exec);
+      if (new_messages instanceof Array) {
+        messages = messages.concat(new_messages)
+      } else {
+        messages.push(new_messages)
+      }
+      return messages;
+    }, [])
+
+    kip.debug('messages', messages);
+
+    // only return messages
+    return messages.filter(m => m instanceof db.Message);
   })
 }
 
 
+;`
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+    ＿＿＿＿＿
+　 ／＼＿＿＿＿＼
+　|￣＼∩・ω・)＼
+　|　 ｜￣￣∪￣｜ ﾁﾗｯ
+`
+
+//
 // Handlers take something from the message.execute array and turn it into new messages
+//
 var handlers = {};
 
 handlers['shopping.initial'] = function*(message, exec) {
@@ -315,31 +341,7 @@ handlers['shopping.focus'] = function*(message, exec) {
   }
 
   // find the search results this focus query is referencing
-  var results, i = 0;
-  while (!results) {
-    if (!message.history[i]) {
-      var more_history = yield db.Messages.find({
-        thread_id: message.thread_id,
-        ts: {
-          $lte: message.ts
-        }
-      }).sort('-ts').skip(i).limit(20);
-
-      if (more_history.length === 0) {
-        return default_reply(message);
-      }
-
-      message.history = message.history.concat(more_history);
-    }
-
-    if (message.history[i].amazon) {
-      results = message.history[i].amazon;
-    }
-
-    i++;
-  }
-
-  console.log(results);
+  var results = yield getLatestAmazonResults(message);
 
   return new db.Message({
     incoming: false,
@@ -353,6 +355,105 @@ handlers['shopping.focus'] = function*(message, exec) {
     action: 'focus',
     focus: exec.params.focus
   })
+};
+
+handlers['cart.save'] = function*(message, exec) {
+  if (!exec.params.focus) {
+    throw new Error('no focus for saving to cart');
+  }
+
+  var results = yield getLatestAmazonResults(message);
+  var result_array = JSON.parse(results);
+  var cart_id = message.cart_reference_id || message.source.team; // TODO make this available for other platforms
+  try {
+    yield kipcart.addToCart(cart_id, message.user_id, result_array[exec.params.focus - 1])
+  } catch (e) {
+    kip.err(e);
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+  }
+  kip.debug('hereasdfsaf')
+
+  // view the cart
+  return yield handlers['cart.view'](message, exec);
+};
+
+handlers['cart.view'] = function*(message, exec) {
+  kip.debug('cart.view');
+  var res = new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    mode: 'cart',
+    action: 'view',
+    focus: exec && _.get(exec, 'params.focus')
+  })
+  var cart_reference_id = message.cart_reference_id || message.source.team; // TODO
+  res.data = yield kipcart.getCart(cart_reference_id);
+  res.data = res.data.toObject();
+  if (res.data.items.length < 1) {
+    return text_reply(message, 'It looks like you have not added anything to your cart yet.');
+  }
+  kip.debug('view cart message', res);
+  return res;
+};
+
+
+;`
+                         __
+           ---_ ...... _/_ -
+          /  .      ./ .'*\ \
+          : '         /__-'   \.
+         /                      )
+       _/                  >   .'
+     /   .   .       _.-" /  .'
+     \           __/"     /.'/|
+       \ '--  .-" /     //' |\|
+        \|  \ | /     //_ _ |/|
+          .  \:     //|_ _ _|\|
+         | \/.    //  | _ _ |/| ASH
+          \_ | \/ /    \ _ _ \\\
+              \__/      \ _ _ \|\
+`
+
+
+
+
+
+
+
+//
+// Returns the amazon results as it is stored in the db (json string)
+// Recalls more history from the db if it needs to, and the history is just appended
+// to the existing history so you don't need to worry about stuff getting too messed up.
+//
+function* getLatestAmazonResults(message) {
+  var results, i = 0;
+  while (!results) {
+    if (!message.history[i]) {
+      var more_history = yield db.Messages.find({
+        thread_id: message.thread_id,
+        ts: {
+          $lte: message.ts
+        }
+      }).sort('-ts').skip(i).limit(20);
+
+      if (more_history.length === 0) {
+        throw new Error('Could not find amazon results in message history for message ' + message._id)
+      }
+
+      message.history = message.history.concat(more_history);
+    }
+
+    if (message.history[i].amazon) {
+      results = message.history[i].amazon;
+    }
+
+    i++;
+  }
+  return results;
 }
 
 

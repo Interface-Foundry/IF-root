@@ -5,7 +5,8 @@ var _ = require('lodash');
 var debug = process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
 var kip = require('../../kip');
 
-var picstitch = require('./picstitch')
+var processData = require('./process');
+var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = promisify(require('./amazonHTML'));
 var client = amazon.createClient({
@@ -83,7 +84,7 @@ var search = function*(params) {
 
   for (var i = 0; i < 3; i ++) {
     results[i].picstitch_url = urls[i];
-    results[i].shortened_url = yield getItemLink(results[i].DetailPageURL[0]);
+    results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
 
   // cool i've got the results now...
