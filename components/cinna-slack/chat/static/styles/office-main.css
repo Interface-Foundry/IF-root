@@ -15,7 +15,7 @@
 }
 
 .get-kip-container {
-  margin-bottom: 80px;
+  margin-bottom: 61px;
 }
 
 .get-kip {
@@ -29,4 +29,22 @@
 .kip-head {
   vertical-align: bottom;
   height: 50px;
+}
+
+@media (max-width: 767px) {
+  .header-top{
+    margin-top: -20%;
+  }
+}
+
+@media (min-width: 992px) {
+  .img-cropper{
+    margin: 0 0 -147px 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .img-cropper{
+    margin: 0 0 -228px 0;
+  }
 }

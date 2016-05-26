@@ -50,3 +50,33 @@
   display: inline-block;
   padding: 0px 20px;
 }
+
+@media (max-width: 767px) {
+  .friend-cropper{
+    margin: 0 0 -26% 0px;
+  }
+}
+
+@media (min-width: 767px) {
+  .friend-cropper{
+    margin: 21px -115px -157px -433px;
+    width:608px;
+    max-width: none;
+  }
+}
+
+
+@media (min-width: 992px) {
+  .friend-cropper{
+    margin: 16px 22px -153px 0px;
+    max-width: 100%;
+
+  }
+}
+
+@media (min-width: 1200px) {
+  .friend-cropper{
+    margin: 18px 39px -162px 0;
+    max-width: 100%;
+  }
+}

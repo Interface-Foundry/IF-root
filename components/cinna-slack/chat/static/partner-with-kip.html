@@ -2,7 +2,7 @@
 <html>
   <head>
 
-    <title>Kip - Artificial Intelligence chat assistant for group shopping</title>
+    <title>Kip - AI chat assistant for group shopping</title>
     <!-- The fin on MUDKIP’s head acts as highly sensitive radar. Using this fin to sense movements of water and air, this POKéMON can determine what is taking place around it without using its eyes. -->
     <meta name="description" content="AI chat assistant for group shopping">
     <meta property="og:title" content="Kip" />
@@ -39,10 +39,12 @@
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="/styles/header.css">
     <link rel="stylesheet" href="/styles/footer.css">
-    <link rel="stylesheet" href="/styles/friends-main.css">
+    <link rel="stylesheet" href="/styles/partner-main.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
   </head>
   <body>
+  	
+
     <header>
       <div class="header-section">
 	<div class="container">
@@ -50,18 +52,19 @@
 	    <div class="col-sm-12">
 	      <div class="row">
 		<div class="col-sm-8">
-		  <img class="pull-right header-image max-width-image" src="/images/sample_penguins-01.png" alt="">
+		  <img class="kip_logo_text" src='/img/kip_logo_new.svg'>
+		  <img class="pull-right header-image max-width-image partner-cropper" src="/images/header_partners.png" draggable="false" alt="">
 		</div>
 		<div class="hidden-sm hidden-xs col-md-4 text-left header-text header-text-pull-left">
 		  <div class="pull-left">
-		    <h1>Lorem Ipsum</h1>
-		    <h5>Lorem Ipsume dolar sumut</h5>
+		    <h1>Conversational Commerce for Brands</h1>
+		    <h5>Create authentic experiences to connect users </h5>
 		  </div>
 		</div>
 		<div class="hidden-md hidden-lg col-sm-4 header-text">
 		  <div class="text-center">
-		    <h1>Lorem Ipsum</h1>
-		    <h5>Lorem Ipsume dolar sumut</h5>
+		    <h1>Conversational Commerce for Brands</h1>
+		    <h5>Create authentic experiences to connect users </h5>
 		  </div>
 		</div>
 	      </div>
@@ -73,10 +76,10 @@
 	<div class="row">
 	  <div class="col-sm-12">
 	    <ul class="kip-nav-bar">
-	      <li id="navWork"><a href="/index.html">Kip at Work</a></li>
-	      <li id="navFriends" class="active"><a href="#">Kip with Friends</a></li>
-	      <li id="navFamily"><a href="/kip-with-family.html">Kip with Family</a></li>
-	      <li id="navPartner"><a href="/partner-with-kip.html">Partner with Kip</a></li>
+	      <li id="navWork" onclick="window.location.href='/index.html'" class="noselect"><a href="/index.html">Kip at Work</a></li>
+	      <li id="navFriends" onclick="window.location.href='/kip-with-friends.html'" class="noselect"><a href="/kip-with-friends.html">Kip with Friends</a></li>
+	      <li id="navFamily" onclick="window.location.href='/kip-with-family.html'" class="noselect" ><a href="/kip-with-family.html">Kip with Family</a></li>
+	      <li id="navPartner" class="active noselect"><a href="#">Partner with Kip</a></li>
 	    </ul>
 	  </div>
 	</div>
@@ -88,12 +91,10 @@
 	  <img class="max-width-image" src="/images/sampleimage-00.png" alt="">
 	</div>
 	<div class="col-md-6 col-sm-12">
-	  <h3>Find Things You Love</h3>
-	  <p>Chat with text or emojis for what you want</p>
-	  <p>Lorem ipsume dolor sumut<br/>
-	  est es summus estis unt loremtLorem ipsume</p>
-	  <p><a>Add Kip to Kik LINK</a></p>
-	  <p><a>Add Kip to Messenger LINK</a></p>
+	  <h3>Connect on Multiple Platforms</h3>
+	  <p>Kip provides a true omnichannel experience for your brand</p>
+	  <p>Launch products on multiple social networks with one bot<br/>
+	  <a style="text-decoration: underline;" href="#contact">Contact Us</a>
 	</div>
       </div>
       <div class="row">
@@ -104,9 +105,10 @@
       <div class="row">
 	<div class="col-sm-12"><img class="max-width=image" width="80%" src="/images/sampleimage-01.png" alt=""></div>
 	<div class="col-sm-5">
-	  <h3>Buy Gifts for Friends</h3>
-	  <p>Dolor sumu est es summus estis unt loremt</p>
-	  <img src="/images/image.png" alt="">
+	  <h3>Conversational Commerce</h3>
+	  <p>Kip’s proprietary 3-choice model guides users through different product choices</p>
+	  <p>Proven to increase engagement and create lasting impressions</p>
+	  <p><img style="margin-bottom:-14px;" class="kip-head" src="/images/kip_head.png" alt=""><a style="text-decoration: underline;" href="http://kipthis.com/chat">Try shopping now with Kip!</a></p>
 	</div>
       </div>
       <div class="row">
@@ -119,33 +121,51 @@
 	  <img class="max-width-image" src="/images/sampleimage-00.png" alt="">
 	</div>
 	<div class="col-md-6 col-sm-12">
-	  <h3>Earn Stickers</h3>
-	  <p>Lorem ipsume dolor sumut<br/>
-	  est es summus estis unt loremt<br/>
-	  est es summus estis unt loremtLorem ipsume</p>
+	  <h3>Get Insights about your Customers</h3>
+	  <p>Reach out to consumers by initiating conversations<br/>
+	  Go viral with interactive buttons, stickers and gifs for users to share with friends</p>
 	</div>
       </div>
     </div>
-    <div class="container get-kip-container text-center">
+    <div class="container kip-partners-container" style="border-bottom:8px white solid;">
+      <div class="row" >
+		<div class="col-sm-12">
+	  		<img class="img-responsive center-block" src="/images/partner-logos.png" alt="Kip Partner Logos">
+		</div>
+      </div>
+    </div>
+    <div id="contact" class="container get-kip-container text-center">
       <div class="row">
         <div class="col-sm-12 get-kip">
-          <img class="kip-head" src="/images/kip-penguin-head.png" alt="">
-          <h2>Chat with Kip</h2>
+          <img class="kip-head" src="/images/kip_head.png" alt="">
+          <h2>Contact Us</h2>
         </div>
       </div>
       <div class="row">
 	<div class="col-sm-12">
-	  <ul class="add-kip-button-list">
-	    <li>
-	      <img src="/images/image.png" alt="">
-	    </li>
-	    <li>
-	      <img src="/images/image.png" alt="">
-	    </li>
-	    <li>
-	      <img src="/images/image.png" alt="">
-	    </li>
-	  </ul>
+	  <form>
+	    <div class="row">
+	      <div class="col-lg-3 col-lg-offset-3 col-sm-4 col-sm-offset-2 form-horizontal">
+		<div class="form-group">
+		  <label for="txtName">Name</label>
+		  <input id="txtName" name="name" placeholder="Your name" type="text">
+		</div>
+		<div class="form-group">
+		  <label for="txtCompany">Company</label>
+		  <input id="txtCompany" name="company" placeholder="Your company/org" type="text">
+		</div>
+		<div class="form-group">
+		  <label for="txtEmail">Email</label>
+		  <input id="txtEmail" name="email" placeholder="me@site.com"  type="email">
+		</div>
+	      </div>
+	      <div class="col-lg-2 col-sm-2 text-left">
+		<label for="txtMessage">Type your message here</label>
+		<textarea id="txtMessage" class="form-control" name="message" cols="30" rows="10"></textarea>
+		<button id="btnSend" class="btn btn-sm btn-danger pull-right" type="button">Send</button>
+	      </div>
+	    </div>
+	  </form>
 	</div>
       </div>
     </div>
@@ -166,12 +186,19 @@
 	    </ul>
 	  </div>
 	  <div class="col-sm-7">
-	    <ul class="action-links center-block text-center">
-	      <li><a href="/faq.html">FAQs</a></li>
-	      <li><a href="/legal.html">Privacy</a></li>
-	      <li><a href="/legal.html">Terms</a></li>
-	      <li><a href="#">Contact Us</a></li>
+	  	<ul class="top-nav action-links text-center center-block">
+	      <li><a href="/index.html">Kip Work</a></li>
+	      <li><a href="/kip-with-friends.html">Kip Friends</a></li>
+	      <li><a href="/kip-with-family.html">Kip Family</a></li>
+	      <li><a href="/partner-with-kip.html">Kip Partners</a></li>
 	    </ul>
+	    <ul class="bottom-nav action-links text-center center-block">
+	      <li><a href="http://kipthis.com/chat">Demo</a></li>
+	      <li><a href="/faq.html">FAQs</a></li>
+	      <li><a href="/legal.html">Privacy & Terms</a></li>
+	      <li><a href="/faq.html#contact">Contact Us</a></li>
+	    </ul>
+	    <p class="copyright">Kip © 2016</p>
 	  </div>
 	  <div class="col-sm-1">
 	    <div class="bot-text-container center-block">

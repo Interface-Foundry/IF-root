@@ -2,7 +2,7 @@
 <html>
   <head>
 
-    <title>Kip - Artificial Intelligence chat assistant for group shopping</title>
+    <title>Kip - AI chat assistant for group shopping</title>
     <!-- The fin on MUDKIP’s head acts as highly sensitive radar. Using this fin to sense movements of water and air, this POKéMON can determine what is taking place around it without using its eyes. -->
     <meta name="description" content="AI chat assistant for group shopping">
     <meta property="og:title" content="Kip" />
@@ -34,12 +34,12 @@
     <meta content="ie=edge,chrome=1" http-equiv="x-ua-compatible">
     <meta content="width=device-width,initial-scale=1,maximum-scale=1" name="viewport">
     <meta name="google-site-verification" content="uBbpuQCjD0yodlyurtKAnR-JfDtTXGsnPOaI7_SqQYE" />
-
+    
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="/styles/header.css">
     <link rel="stylesheet" href="/styles/footer.css">
-    <link rel="stylesheet" href="/styles/office-main.css">
+    <link rel="stylesheet" href="/styles/family-main.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
   </head>
   <body>
@@ -49,19 +49,20 @@
 	  <div class="row">
 	    <div class="col-sm-12">
 	      <div class="row">
-		<div class="col-sm-8">
-		  <img class="pull-right header-image max-width-image" src="/images/sample_penguins-01.png" alt="">
+		<div class="col-sm-8" style="overflow: hidden;">
+			<img class="kip_logo_text" src='/img/kip_logo_new.svg'>
+		  <img class="pull-right header-image max-width-image family-cropper" src="/images/header_family.png" draggable="false" alt="">
 		</div>
 		<div class="hidden-sm hidden-xs col-md-4 text-left header-text header-text-pull-left">
 		  <div class="pull-left">
-		    <h1>Lorem Ipsum</h1>
-		    <h5>Lorem Ipsume dolar sumut</h5>
+		    <h1>Group shopping for Families</h1>
+		    <h5>Coming Soon</h5>
 		  </div>
 		</div>
 		<div class="hidden-md hidden-lg col-sm-4 header-text">
 		  <div class="text-center">
-		    <h1>Lorem Ipsum</h1>
-		    <h5>Lorem Ipsume dolar sumut</h5>
+		    <h1>Group shopping for Families</h1>
+		    <h5>Coming Soon</h5>
 		  </div>
 		</div>
 	      </div>
@@ -73,81 +74,29 @@
 	<div class="row">
 	  <div class="col-sm-12">
 	    <ul class="kip-nav-bar">
-	      <li id="navWork" class="active"><a href="#">Kip at Work</a></li>
-	      <li id="navFriends"><a href="/kip-with-friends.html">Kip with Friends</a></li>
-	      <li id="navFamily"><a href="/kip-with-family.html">Kip with Family</a></li>
-	      <li id="navPartner"><a href="/partner-with-kip.html">Partner with Kip</a></li>
+	      <li id="navWork" onclick="window.location.href='/index.html'" class="noselect"><a href="/index.html">Kip at Work</a></li>
+	      <li id="navFriends" onclick="window.location.href='/kip-with-friends.html'" class="noselect"><a href="/kip-with-friends.html">Kip with Friends</a></li>
+	      <li id="navFamily" class="active noselect" ><a href="#">Kip with Family</a></li>
+	      <li id="navPartner" onclick="window.location.href='/partner-with-kip.html'" class="noselect"><a href="/partner-with-kip.html">Partner with Kip</a></li>
 	    </ul>
 	  </div>
 	</div>
       </div>
     </header>
-    <div class="container office-main-content">
+
+    <div class="container text-center">
       <div class="row">
-	<div class="col-md-6 col-sm-10">
-	  <img class="max-width-image" src="/images/sampleimage-00.png" alt="">
-	</div>
-	<div class="col-md-6 col-sm-12">
-	  <h3>Coordinate Team Purchases</h3>
-	  <p>One checkout link for all your office needs</p>
-	  <p>Lorem ipsume dolor sumut<br/>
-	  est es summus estis unt loremtLorem ipsume</p>
-	  <a>Add Kip to Slack LINK</a>
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12">
-	  <hr size="100">
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12"><img class="max-width=image" width="80%" src="/images/sampleimage-01.png" alt=""></div>
-	<div class="col-sm-5">
-	  <h3>Adding to Team Cart</h3>
-	  <p>dolor sumu est es summus estis unt loremt</p>
-	  <img src="/images/image.png" alt="">
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12">
-	  <hr size="100">
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-md-6 col-sm-12">
-	  <img class="max-width-image" src="/images/sampleimage-00.png" alt="">
-	</div>
-	<div class="col-md-6 col-sm-12">
-	  <h3>Get Weekly Reports</h3>
-	  <p>Lorem ipsume dolor sumut<br/>
-	  est es summus estis unt loremt<br/>
-	  est es summus estis unt loremtLorem ipsume</p>
-	</div>
-      </div>
-    </div>
-    <div class="container kip-quote-container">
-      <div class="row">
-	<div class="col-sm-12 text-center">
-	  <p class="kip-quote">“Everything works in a straightforward way. You ask Kip for something that you need...and get three options to choose from; you can save one of them to your cart or get more alternatives...you have a cart filled with products for your company, which can then be accessed by an office manager who can order specific items. Good job, Kip!”</p>
-	  <a style="color:#fff;" href="https://medium.com/chat-bots/shopping-in-messengers-may-2016-c4d28841a817"><p>- Ivan Suvorov, Chatbots Magazine</p></a>
-	</div>
-      </div>
-    </div>
-    <div class="container get-kip-container text-center">
-      <div class="row">
-        <div class="col-sm-12 get-kip">
-          <img class="kip-head" src="/images/kip-penguin-head.png" alt="">
-          <h2>Get Kip for Free</h2>
+        <div class="col-sm-12 get-kip" >
+          <img class="kip-head" style="margin-top:23px;" src="/images/facebook-messenger.svg" alt="">
+          <br>
+          <h2>Kip for Facebook Messenger <br> coming soon!</h2>
+          
         </div>
       </div>
-      <div class="row">
-	<div class="col-sm-12">
-	  <img src="/images/image.png" alt="">
-	</div>
-      </div>
+
     </div>
-    <footer>
-      <div class="container">
+    <footer style="outline:8px white solid;"> 
+      <div class="container" style="margin-top:15%;">
 	<div class="row">
 	  <div class="col-sm-4">
 	    <ul class="social-links center-block">
@@ -160,14 +109,21 @@
 	      <li>
 			<a href="https://www.facebook.com/kipstyles"><i class="fa fa-facebook-official fa-lg"></i></a>
 	      </li>
+	      <p class="copyright">Kip © 2016</p>
 	    </ul>
 	  </div>
 	  <div class="col-sm-7">
-	    <ul class="action-links text-center center-block">
+	  	<ul class="top-nav action-links text-center center-block">
+	      <li><a href="/index.html">Kip Work</a></li>
+	      <li><a href="/kip-with-friends.html">Kip Friends</a></li>
+	      <li><a href="/kip-with-family.html">Kip Family</a></li>
+	      <li><a href="/partner-with-kip.html">Kip Partners</a></li>
+	    </ul>
+	    <ul class="bottom-nav action-links text-center center-block">
+	      <li><a href="http://kipthis.com/chat">Demo</a></li>
 	      <li><a href="/faq.html">FAQs</a></li>
-	      <li><a href="/legal.html">Privacy</a></li>
-	      <li><a href="/legal.html">Terms</a></li>
-	      <li><a href="#">Contact Us</a></li>
+	      <li><a href="/legal.html">Privacy & Terms</a></li>
+	      <li><a href="/faq.html#contact">Contact Us</a></li>
 	    </ul>
 	  </div>
 	  <div class="col-sm-1">

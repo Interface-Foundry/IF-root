@@ -1,0 +1,49 @@
+body{
+  font-family: 'PT Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size:16px;
+}
+
+h3 {
+  color: #47a2fc;
+}
+
+h2 {
+  color: #47a2fc;
+}
+
+a {
+  color: #47a2fc 
+}
+
+hr
+{
+    background-color: #999;
+    border: 0 none;
+    color: #eee;
+    height: 1px;
+    margin: 50px 0px;
+}
+
+.max-width-image {
+  max-width: 100%;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+  cursor: pointer;
+}
+
+.noselect a{
+  cursor: pointer;
+}
+
+.kip_logo_text{
+  width: 104px;
+  position: absolute;
+}
