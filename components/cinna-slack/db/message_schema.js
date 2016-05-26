@@ -33,7 +33,7 @@ var messageSchema = mongoose.Schema({
       action: String,
       params: {}
     }],
-    amazon: [mongoose.Schema.Types.Mixed], //amazon search results
+    amazon: String, //amazon search results, stringified
 
     //
     // Response
@@ -41,6 +41,7 @@ var messageSchema = mongoose.Schema({
     client_res: [mongoose.Schema.Types.Mixed], //outgoing messages, if applicable
     mode: String, // the mode we left off in
     action: String, // the last action we did
+    focus: Number,
 
     //
     // Miscellaneous probably will get removed eventually

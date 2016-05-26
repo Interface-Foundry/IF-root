@@ -50,6 +50,7 @@ var queue = require('../queue-mongo');
 var db = require('../../../db')
 var image_search = require('../image_search');
 var search_results = require('./search_results');
+var focus = require('./focus');
 var slackConnections = {};
 
 //
@@ -173,6 +174,11 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
     if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
       msgData.attachments = yield search_results(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
+
+    if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+      msgData.attachments = yield focus(message);
       return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
     }
 

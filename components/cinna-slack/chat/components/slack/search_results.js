@@ -63,7 +63,7 @@ var emojis = {
 // Generate the slack reponse for the search results
 //
 function* results(message) {
-  var amazon = JSON.parse(message.amazon || {});
+  var amazon = JSON.parse(message.amazon);
   console.log(amazon);
 
   var results = amazon.map((r, i) => {
@@ -72,6 +72,7 @@ function* results(message) {
       color: '#45a5f4',
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
+      fallback: 'Search Results'
     }
   });
 
