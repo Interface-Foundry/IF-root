@@ -1,198 +1,62 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Kip is an AI-powered personal shopper that finds what you're looking for">
 
-    <title>Kip - AI chat assistant for group shopping</title>
-    <!-- The fin on MUDKIP’s head acts as highly sensitive radar. Using this fin to sense movements of water and air, this POKéMON can determine what is taking place around it without using its eyes. -->
-    <meta name="description" content="AI chat assistant for group shopping">
-    <meta property="og:title" content="Kip" />
-    <meta property="og:url" content="http://kipthis.com" />
-    <meta property="og:description" content="AI chat assistant for group shopping" />
-    <meta property="og:image" content="http://kipthis.com/img/social_media_image_preview.png" />
-    <meta property="og:site_name" content="Kip AI" />
-    <meta property="og:type" content="website" />
-    <link rel="apple-touch-icon" sizes="57x57" href="img/favicon/apple-touch-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="img/favicon/apple-touch-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="img/favicon/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="img/favicon/apple-touch-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="img/favicon/apple-touch-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="img/favicon/apple-touch-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="img/favicon/apple-touch-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="img/favicon/apple-touch-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon-180x180.png">
-    <link rel="icon" type="image/png" href="img/favicon/favicon-32x32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="img/favicon/favicon-194x194.png" sizes="194x194">
-    <link rel="icon" type="image/png" href="img/favicon/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="img/favicon/android-chrome-192x192.png" sizes="192x192">
-    <link rel="icon" type="image/png" href="img/favicon/favicon-16x16.png" sizes="16x16">
-    <link rel="manifest" href="img/favicon/manifest.json">
-    <link rel="mask-icon" href="img/favicon/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="msapplication-TileImage" content="img/favicon/mstile-144x144.png">
-    <meta name="theme-color" content="#ffffff">
-    <meta charset="utf8">
-    <meta content="ie=edge,chrome=1" http-equiv="x-ua-compatible">
-    <meta content="width=device-width,initial-scale=1,maximum-scale=1" name="viewport">
-    <meta name="google-site-verification" content="uBbpuQCjD0yodlyurtKAnR-JfDtTXGsnPOaI7_SqQYE" />
+    <!-- twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@kipsearch" />
+    <meta name="twitter:title" content="Meet Kip, Your New Personal Shopper" />
+    <meta name="twitter:description" content="Kip is an AI-powered personal shopper that finds what you're looking for. Compare prices from online and offline stores, refine your item choices and find the perfect match to what you are looking for." />
+    <meta name="twitter:image" content="https://s3.amazonaws.com/if-server-avatars/twitter.png" />
 
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/styles/main.css">
-    <link rel="stylesheet" href="/styles/header.css">
-    <link rel="stylesheet" href="/styles/footer.css">
-    <link rel="stylesheet" href="/styles/office-main.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicon/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/favicon/manifest.json">
+
+    <link rel="stylesheet" href="/normalize.css" />
+    <link rel="stylesheet" href="/skeleton.css" />
+    <link rel="stylesheet" href="/chat.css" />
   </head>
+
   <body>
-    <header>
-      <div class="header-section">
-	<div class="container">
-	  <div class="row">
-	    <div class="col-sm-12">
-	      <div class="row">
-		<div class="col-sm-8" style="overflow: hidden;">
-		  <img class="kip_logo_text" src='/img/kip_logo_new.svg'>
-		  <img class="pull-right header-image max-width-image img-cropper" src="/images/header_office.png" draggable="false" alt="">
-		</div>
-
-		<div class="hidden-sm hidden-xs col-md-4 text-left header-text header-text-pull-left">
-
-		  <div class="pull-left">
-		    <h1>AI Assistant for Team Shopping</h1>
-		    <h5>Save time coordinating office purchases</h5>
-		  </div>
-		</div>
-		<div class="hidden-md hidden-lg col-sm-4 header-text">
-		  <div class="text-center header-top">
-		    <h1>Kip is your AI Assistant for Team Shopping</h1>
-		    <h5>Save time coordinating office purchases</h5>
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
+    <div class="container">
+      <div id="chatwindow" class="chats">
+        <!-- <div class="chatscroll"> -->
+          <ul class="chat-messages">
+          </ul>
+        <!-- </div> -->
       </div>
-      <div class="container kip-nav-container">
-	<div class="row">
-	  <div class="col-sm-12">
-	    <ul class="kip-nav-bar">
-	      <li id="navWork" class="active noselect"><a href="">Kip at Work</a></li>
-	      <li id="navFriends" onclick="window.location.href='/kip-with-friends.html'" class="noselect"><a href="/kip-with-friends.html">Kip with Friends</a></li>
-	      <li id="navFamily" onclick="window.location.href='/kip-with-family.html'" class="noselect"><a href="/kip-with-family.html">Kip with Family</a></li>
-	      <li id="navPartner" onclick="window.location.href='/partner-with-kip.html'" class="noselect"><a href="/partner-with-kip.html">Partner with Kip</a></li>
-	    </ul>
-	  </div>
-	</div>
-      </div>
-    </header>
-    <div class="container office-main-content">
-      <div class="row">
-	<div class="col-md-6 col-sm-10">
-	  <img class="max-width-image" src="/images/sampleimage-00.png" alt="">
-	</div>
-	<div class="col-md-6 col-sm-12">
-	  <h3>Coordinate Team Purchases</h3>
-		
-	  <p>Use Kip to ping team members for their office needs</p>
-	  <p>Add items throughout the week to the standing order<br/>
-	  Check-out with one click</p>
-	  <a style="text-decoration: underline;" href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459">Add Kip on Slack</a>
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12">
-	  <hr size="100">
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12"><img class="max-width=image" width="80%" src="/images/sampleimage-01.png" alt=""></div>
-	<div class="col-sm-5">
-	  <h3>Add to Team Cart</h3>
-	  <p>Make work life simpler and more productive</p>
-	  <p>Team members can add items to office standing order with Kip</p>
-
-	  <p><img style="margin-bottom:-14px;" class="kip-head" src="/images/kip_head.png" alt=""><a style="text-decoration: underline;" href="http://kipthis.com/chat">Try shopping now with Kip!</a></p>
-	 <!--  <img width="200" src="/images/button_web.png" alt=""></a> -->
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12">
-	  <hr size="100">
-	</div>
-      </div>
-      <div class="row">
-	<div class="col-md-6 col-sm-12">
-	  <img class="max-width-image" src="/images/sampleimage-00.png" alt="">
-	</div>
-	<div class="col-md-6 col-sm-12">
-	  <h3>Free Expense Reports</h3>
-	  <p>Kip makes tracking your office spend simple<br/>
-	  Get free reports on what your team purchased delivered by email</p>
-	</div>
+      <div style="display: flex;">
+        <input type="text" id="msg" onkeydown="if (event.keyCode == 13) document.getElementById('sendbutton').click()"/>
+        <button id="sendbutton" onclick="sendMessage()" >Search</button>
       </div>
     </div>
-    <div class="container kip-quote-container">
-      <div class="row">
-	<div class="col-sm-12 text-center">
-	  <p class="kip-quote">“Everything works in a straightforward way...you have a cart filled with products for your company, which can then be accessed by an office manager who can order specific items. Good job, Kip!”</p>
-	  <a style="color:#fff;" href="https://medium.com/chat-bots/shopping-in-messengers-may-2016-c4d28841a817"><p>- Ivan Suvorov, Chatbots Magazine</p></a>
-	</div>
-      </div>
-    </div>
-    <div class="container get-kip-container text-center">
-      <div class="row" style="margin-top:-13px;">
-        <div class="col-sm-12 get-kip">
-          <img class="kip-head" src="/images/kip_head.png" alt="">
-          <h2>Get Kip for Free</h2>
-        </div>
-      </div>
-      <div class="row">
-	<div class="col-sm-12">
-	  <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459"><img width="200" src="/images/button_slack.png" alt=""></a>
-	</div>
-      </div>
-    </div>
-    <footer>
-      <div class="container">
-	<div class="row">
-	  <div class="col-sm-4">
-	    <ul class="social-links center-block">
-	      <li>
-			<a href="https://medium.com/@kipsearch"><i class="fa fa-medium fa-lg"></i></a>
-	      </li>
-	      <li>
-			<a href="https://twitter.com/kipsearch"><i class="fa fa-twitter fa-lg"></i></a>
-	      </li>
-	      <li>
-			<a href="https://www.facebook.com/kipstyles"><i class="fa fa-facebook-official fa-lg"></i></a>
-	      </li>
-	      <p class="copyright">Kip © 2016</p>
-	    </ul>
 
-	  </div>
-	  <div class="col-sm-7">
-	  	<ul class="top-nav action-links text-center center-block">
-	      <li><a href="/index.html">Kip Work</a></li>
-	      <li><a href="/kip-with-friends.html">Kip Friends</a></li>
-	      <li><a href="/kip-with-family.html">Kip Family</a></li>
-	      <li><a href="/partner-with-kip.html">Kip Partners</a></li>
-	    </ul>
-	    <ul class="bottom-nav action-links text-center center-block">
-	      <li><a href="http://kipthis.com/chat">Demo</a></li>
-	      <li><a href="/faq.html">FAQs</a></li>
-	      <li><a href="/legal.html">Privacy & Terms</a></li>
-	      <li><a href="/faq.html#contact">Contact Us</a></li>
-	    </ul>
-	  </div>
-	  <div class="col-sm-1">
-	    <div class="bot-text-container center-block">
-	      <img src="/images/100-bot.png" alt="100% Bot">
-	    </div>
-	  </div>
-	</div>
-      </div>
-    </footer>
-    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/chat.js"></script>
+    <script>
+     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+     ga('create', 'UA-51752546-9', 'auto');
+     ga('send', 'pageview');
+    </script>
   </body>
 </html>

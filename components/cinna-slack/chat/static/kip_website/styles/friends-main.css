@@ -2,6 +2,10 @@
   background-color: #49d63a;
 }
 
+hr {
+  background-color: #49d63a;
+}
+
 .kip-nav-bar > li.active {
   color: #49d63a;
 }
