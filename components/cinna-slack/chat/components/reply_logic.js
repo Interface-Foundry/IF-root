@@ -246,30 +246,6 @@ function* simple_response(message) {
     }
 }
 
-//pushing incoming messages to python
-function routeNLP(data) {
-
-  //sanitize msg before sending to NLP
-  data.text = data.text.replace(/[^0-9a-zA-Z.]/g, ' ');
-
-  if (!data.text) {
-    return sendTxtResponse(data, 'Oops, sorry, I didn\'t understand your request')
-  }
-
-  nlp.parse(data, function(e, res) {
-    if (e) {
-      console.log('NLP error ', e);
-      // Route to supervisor
-      data.flags.toSupervisor = true;
-      incomingAction(data);
-    } else {
-      data = _.merge({}, data, res)
-      processData.buildKipObject(data, function(res) {
-        incomingAction(_.merge({}, data, res));
-      });
-    }
-  })
-}
 
 
 // use nlp to deterine the intent of the user
@@ -292,15 +268,18 @@ function* execute(message) {
     return co(function*() {
       if (exec.action === 'initial') {
         var results = yield amazon_search.search(exec.params);
+
         return new db.Message({
           incoming: false,
-          text: '_search result placeholder_',
           thread_id: message.thread_id,
           resolved: true,
           user_id: 'kip',
           origin: message.origin,
           source: message.source,
-          amazon: JSON.stringify(results)
+          text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+          amazon: JSON.stringify(results),
+          mode: 'shopping',
+          action: 'results'
         })
       }
     })

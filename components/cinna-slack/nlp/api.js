@@ -13,7 +13,7 @@ var price = require('./price')
 var stopwords = require('./stopwords');
 
 var MODE = {
-  shopping: 'search',
+  shopping: 'shopping',
   smalltalk: 'smalltalk',
   cart: 'cart'
 }
