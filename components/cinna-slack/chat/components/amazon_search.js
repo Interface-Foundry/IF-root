@@ -2,8 +2,8 @@
 var promisify = require('promisify-node');
 var co = require('co');
 var _ = require('lodash');
-var debug = process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
-var verbose = process.env.VERBOSE ? console.log.bind(console) : function(){};
+var debug = process.env.NODE_ENV == 'production' ? function() {} : console.log.bind(console);
+var verbose = process.env.VERBOSE ? console.log.bind(console) : function() {};
 var kip = require('../../kip');
 
 var processData = require('./process');
@@ -45,13 +45,13 @@ var search = function*(params) {
 
   var skip = 0;
   if (params.skip > 0) {
-    amazonParams.ItemPage = 1 + params.skip/9|0; // 9 results per page
+    amazonParams.ItemPage = 1 + params.skip / 9 | 0; // 9 results per page
     skip = params.skip % 9; // if skip = 3, page=1 and skip = 3
-    // assumes skip is a multiple of 3
-    // skip = 0: p1, s0
-    // skip = 3: p1, s3
-    // skip = 6: p1, s6
-    // skip = 9; p2, s0
+  // assumes skip is a multiple of 3
+  // skip = 0: p1, s0
+  // skip = 3: p1, s3
+  // skip = 6: p1, s6
+  // skip = 9; p2, s0
   }
 
   debug('🔍 do the amazon search! 🔎 ')
@@ -66,9 +66,62 @@ var search = function*(params) {
     // TODO do the weak search thing.  looks like the weak search thing
     // just removes some words from the search query.
     throw new Error('no results found');
-    // results = yield weakSearch(params); TODO
-    // results = results.slice(skip, 3); // yeah whatevers
+  // results = yield weakSearch(params); TODO
+  // results = results.slice(skip, 3); // yeah whatevers
   }
+
+  return yield enhance_results(results);
+}
+
+
+/*
+params:
+asin
+skip
+*/
+var similar = function*(params) {
+  params.asin = params.asin || params.ASIN; // because freedom.
+  if (!params.asin) {
+    throw new Error('no ASIN specified');
+  }
+
+  if (!params.skip) {
+    params.skip = 0;
+  }
+
+  if (params.skip > 6) {
+    throw new Error('similar items page stops at 10 total by default')
+    // TODO make a similar search querystring and get more results that way.
+    // like function similarQuery(item, params)
+  }
+
+  amazonParams = {
+    responseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
+    ItemId: params.asin
+  };
+
+  debug('🔍 do the amazon search! 🔎 ')
+  debug('input params', params);
+  debug('amazon params', amazonParams);
+
+  var results = yield client.similarityLookup(amazonParams);
+  results = results.slice(params.skip, params.skip + 3);
+
+  // if there aren't enough results... do a weaker search
+  if (results.length < 1) {
+    // TODO do the weak search thing.  looks like the weak search thing
+    // just removes some words from the search query.
+    throw new Error('no results found');
+  // results = yield weakSearch(params); TODO
+  // results = results.slice(skip, 3); // yeah whatevers
+  }
+
+  return yield enhance_results(results);
+}
+
+
+// Decorates the results for a party 🎉
+function* enhance_results(results) {
 
   // enhance the results, naturally.
   yield results.map(r => {
@@ -87,74 +140,73 @@ var search = function*(params) {
 
   var urls = yield picstitch.stitchResultsPromise(results); // no way i'm refactoring this right now
 
-  for (var i = 0; i < 3; i ++) {
+  for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
-
   // cool i've got the results now...
 
   return results;
+
 }
 
-var getPrices = function(item,callback){
 
-    var url = item.DetailPageURL[0];
-    var price;  // get price from API
-    var altImage;
-    var reviews;
+var getPrices = function(item, callback) {
 
-    var formattedPrice = _.get(item, 'Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice');
-    if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
-        //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-        verbose('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
+  var url = item.DetailPageURL[0];
+  var price; // get price from API
+  var altImage;
+  var reviews;
 
-        price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
+  var formattedPrice = _.get(item, 'Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice');
+  if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice) {
+    //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
+    verbose('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
 
+    price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
+
+  } else if (item.ItemAttributes[0].ListPrice) {
+
+    verbose('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
+
+    if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0') {
+      price = '';
+    } else {
+      // add price
+      price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
     }
-    else if (item.ItemAttributes[0].ListPrice){
+  }
 
-        verbose('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
+  verbose('price PRE PROCESS ', price);
 
-        if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
-            price = '';
-        }
-        else {
-          // add price
-          price = item.ItemAttributes[0].ListPrice[0].FormattedPrice[0];
-        }
+  amazonHTML.basic(url, function(err, product) {
+    kip.err(err); // print error
+
+    verbose('& & & & & & & & & & & &PRODUCT OBJ ', product);
+
+    if (product.reviews) {
+      reviews = product.reviews;
     }
 
-    verbose('price PRE PROCESS ',price);
+    if (product && product.price) {
+      verbose('returning early with price: ' + product.price);
+      verbose('returning early with rice ' + product.altImage);
+      // if(product.altImage){
+      //   altImage = product.altImage;
+      // }
+      return callback(product.price, product.altImage, reviews)
+    }
 
-    amazonHTML.basic(url, function(err, product) {
-      kip.err(err); // print error
+    verbose('product.price: ' + product.price + ', price: ' + price);
 
-      verbose('& & & & & & & & & & & &PRODUCT OBJ ',product);
+    price = product.price || price || '';
+    verbose('final price: ' + price);
+    if (product.altImage) {
+      altImage = product.altImage;
+    }
 
-      if (product.reviews){
-        reviews = product.reviews;
-      }
-
-      if (product && product.price) {
-        verbose('returning early with price: ' + product.price);
-        verbose('returning early with rice ' + product.altImage);
-          // if(product.altImage){
-          //   altImage = product.altImage;
-          // }
-        return callback(product.price,product.altImage,reviews)
-      }
-
-      verbose('product.price: ' + product.price + ', price: ' + price);
-
-      price = product.price || price || '';
-      verbose('final price: ' + price);
-      if(product.altImage){
-        altImage = product.altImage;
-      }
-
-      callback(price,altImage,reviews);
-    })
+    callback(price, altImage, reviews);
+  })
 }
 
 ////////////// lol //////////////////
@@ -171,6 +223,8 @@ var getPricesPromise = function(item) {
   })
 }
 
+
+module.exports.similar = similar;
 module.exports.search = search;
 
 /*  TESTING
