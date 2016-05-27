@@ -2098,15 +2098,15 @@ function InvervalTimer(callback, interval) {
 }
 
 /// exports
-module.exports.initSlackUsers = initSlackUsers;
+// module.exports.initSlackUsers = initSlackUsers;
 module.exports.updateMode = updateMode;
-module.exports.newSlack = newSlack;
-module.exports.preProcess = preProcess;
-module.exports.slackUsers = slackUsers;
+// module.exports.newSlack = newSlack;
+// module.exports.preProcess = preProcess;
+// module.exports.slackUsers = slackUsers;
 module.exports.sendResponse = sendResponse;
 
-module.exports.incomingMsgAction = incomingMsgAction;
-module.exports.loadSocketIO = loadSocketIO;
+// module.exports.incomingMsgAction = incomingMsgAction;
+// module.exports.loadSocketIO = loadSocketIO;
 
 module.exports.sendTxtResponse = sendTxtResponse;
 module.exports.cannedBanter = cannedBanter;
