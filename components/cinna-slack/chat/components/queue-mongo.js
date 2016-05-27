@@ -68,7 +68,7 @@ function topic(topic) {
           observer.onNext(message);
         }
       }).catch(kip.err)
-    }, 1000);
+    }, 100);
 
     // Retry interval, retry if dispatched but not done and 10 seconds old.
     setInterval(() => {

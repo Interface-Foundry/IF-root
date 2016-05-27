@@ -70,7 +70,9 @@ function send_text_reply(message, text) {
 // Make it look like Kip is typing
 function typing(message) {
   var msg = {
-    action: 'typing'
+    action: 'typing',
+    source: message.source,
+    origin: message.origin
   };
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
@@ -100,11 +102,11 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     var replies = yield simple_response(message);
-    kip.debug('simple replies'.cyan, replies);
+    // kip.debug('simple replies'.cyan, replies);
 
     if (!replies || replies.length === 0) {
       replies = yield nlp_response(message);
-      kip.debug('nlp replies'.cyan, replies);
+      // kip.debug('nlp replies'.cyan, replies);
     }
 
     if (!replies || replies.length === 0) {
@@ -112,6 +114,7 @@ queue.topic('incoming').subscribe(incoming => {
       replies = [default_reply(message)];
     }
 
+    yield message.save(); // the incoming message has had some stuff added to it :)
     yield replies.map(r => r.save());
     yield replies.map((r, i) => {
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
@@ -123,11 +126,14 @@ queue.topic('incoming').subscribe(incoming => {
 
 //pre process incoming messages for canned responses
 function* simple_response(message) {
+  kip.debug('simple_response begin'.cyan)
   var replies = [];
 
   //check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
   var reply = banter.checkForCanned(message);
+
+  kip.debug('prefab reply from banter.js', reply);
 
   if (!reply.flag) {
     return
@@ -169,14 +175,22 @@ function* simple_response(message) {
     case 'search.more':
       message.mode = 'shopping';
       message.action = 'more';
-      incomingAction(message);
+      message.execute.push({
+        mode: 'shopping',
+        action: 'more'
+      })
       break;
 
     case 'cart.remove':
-      message.searchSelect = [reply.query];
       message.mode = 'cart';
       message.action = 'remove';
-      incomingAction(message);
+      message.execute.pusH({
+        mode: 'cart',
+        action: 'remove',
+        prams: {
+          focus: reply.query
+        }
+      })
       break;
 
     //for testing in PAPRIKA
@@ -227,11 +241,10 @@ function* simple_response(message) {
 
 // use nlp to deterine the intent of the user
 function* nlp_response(message) {
-
+  kip.debug('nlp_response begin'.cyan)
   // the nlp api adds the processing data to the message
   yield nlp.parse(message);
 
-  console.log(message.execute);
   var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
 
   var messages = yield execute(message);
@@ -241,6 +254,7 @@ function* nlp_response(message) {
 
 // do the things
 function execute(message) {
+  kip.debug('exec', message.execute);
   return co(function*() {
     var messages = yield message.execute.reduce((messages, exec) => {
       var route = exec.mode + '.' + exec.action;
@@ -294,6 +308,7 @@ handlers['shopping.initial'] = function*(message, exec) {
     user_id: 'kip',
     origin: message.origin,
     source: message.source,
+    execute: [exec],
     text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
@@ -322,6 +337,33 @@ handlers['shopping.focus'] = function*(message, exec) {
     action: 'focus',
     focus: exec.params.focus
   })
+};
+
+// "more"
+handlers['shopping.more'] = function*(message, exec) {
+  exec.params = yield getLatestAmazonQuery(message);
+  exec.params.skip = (exec.params.skip || 0) + 3; // TODO make sure to save message somewhere
+  var results = yield amazon_search.search(exec.params);
+
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    execute: [exec],
+    text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    amazon: JSON.stringify(results),
+    mode: 'shopping',
+    action: 'results'
+  })
+}
+
+// "cheaper" and "more like 2" and "like 2 but blue"
+handlers['shopping.modify'] = function*(message, exec) {
+  exec.params = yield getLatestAmazonQuery(message);
+  throw new Error('Not implemented');
 };
 
 handlers['cart.save'] = function*(message, exec) {
@@ -423,8 +465,36 @@ function* getLatestAmazonResults(message) {
   return results;
 }
 
+//
+// Gets the most recent set of params used to search amazon
+//
+function* getLatestAmazonQuery(message) {
+  var params, i = 0;
+  while (!params) {
+    if (!message.history[i]) {
+      var more_history = yield db.Messages.find({
+        thread_id: message.thread_id,
+        ts: {
+          $lte: message.ts
+        }
+      }).sort('-ts').skip(i).limit(20);
 
+      if (more_history.length === 0) {
+        throw new Error('Could not find amazon results in message history for message ' + message._id)
+      }
 
+      message.history = message.history.concat(more_history);
+    }
+
+    var m = message.history[i];
+    if (m.mode === 'shopping' && m.action === 'results') {
+      params = m.execute[0].params;
+    }
+
+    i++;
+  }
+  return params;
+}
 
 
 
