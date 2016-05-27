@@ -114,9 +114,12 @@ queue.topic('incoming').subscribe(incoming => {
       replies = [default_reply(message)];
     }
 
+    kip.debug('num replies', replies.length);
+
     yield message.save(); // the incoming message has had some stuff added to it :)
     yield replies.map(r => r.save());
     yield replies.map((r, i) => {
+      kip.debug('reply', r.mode, r.action);
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
     });
     incoming.ack();
@@ -233,6 +236,7 @@ function* simple_response(message) {
   }
 
   var messages = yield execute(message);
+  kip.debug('simple replies', messages.length);
 
   return messages;
 }
@@ -262,19 +266,28 @@ function execute(message) {
         throw new Error(route + ' handler not implemented');
       }
 
-      var new_messages = handlers[route](message, exec);
-      if (new_messages instanceof Array) {
-        messages = messages.concat(new_messages)
+      var message_promises = handlers[route](message, exec);
+      kip.debug('got', message_promises, 'from route', route);
+
+      if (message_promises instanceof Array) {
+        messages = messages.concat(message_promises)
       } else {
-        messages.push(new_messages)
+        messages.push(message_promises)
       }
       return messages;
     }, [])
 
-    kip.debug('messages', messages);
-
     // only return messages
-    return messages.filter(m => m instanceof db.Message);
+    return messages.reduce((all, m) => {
+      console.log(typeof m);
+      debugger;
+      if (m instanceof Array) {
+        all = all.concat(m);
+      } else {
+        all.push(m);
+      }
+      return all;
+    }, []);
   })
 }
 
@@ -408,19 +421,31 @@ handlers['cart.save'] = function*(message, exec) {
   }
 
   var results = yield getLatestAmazonResults(message);
-  var result_array = JSON.parse(results);
   var cart_id = message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   try {
-    yield kipcart.addToCart(cart_id, message.user_id, result_array[exec.params.focus - 1])
+    yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1])
   } catch (e) {
     kip.err(e);
     return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
-  kip.debug('hereasdfsaf')
 
   // view the cart
   return yield handlers['cart.view'](message, exec);
 };
+
+handlers['cart.remove'] = function*(message, exec) {
+  if (!exec.params.focus) {
+    throw new Error('no focus for removing from cart')
+  }
+
+  var cart_id = message.cart_reference_id || message.source.team;
+  yield kipcart.removeFromCart(cart_id, message.user_id, exec.params.focus);
+  var confirmation = text_reply(message, `Item ${exec.params.focus} removed from your cart`);
+  var viewcart = yield handlers['cart.view'](message);
+  debugger;
+  return [confirmation, viewcart];
+};
+
 
 handlers['cart.view'] = function*(message, exec) {
   kip.debug('cart.view');
@@ -439,7 +464,7 @@ handlers['cart.view'] = function*(message, exec) {
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
-    return text_reply(message, 'It looks like you have not added anything to your cart yet.');
+    return text_reply(message, 'It looks like your cart is empty.');
   }
   kip.debug('view cart message', res);
   return res;
