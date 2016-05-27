@@ -3,6 +3,7 @@ var promisify = require('promisify-node');
 var co = require('co');
 var _ = require('lodash');
 var debug = process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
+var verbose = process.env.VERBOSE ? console.log.bind(console) : function(){};
 var kip = require('../../kip');
 
 var processData = require('./process');
@@ -106,14 +107,14 @@ var getPrices = function(item,callback){
     var formattedPrice = _.get(item, 'Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice');
     if (item.Offers && item.Offers[0] && item.Offers[0].Offer && item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price && item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice){
         //&& item.Offers[0].Offer[0].OfferListing && item.Offers[0].Offer[0].OfferListing[0].Price
-        debug('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
+        verbose('/!/!!! warning: no webscrape price found for amazon item, using Offer array');
 
         price = item.Offers[0].Offer[0].OfferListing[0].Price[0].FormattedPrice[0];
 
     }
     else if (item.ItemAttributes[0].ListPrice){
 
-        debug('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
+        verbose('/!/!!! warning: no webscrape price found for amazon item, using ListPrice array');
 
         if (item.ItemAttributes[0].ListPrice[0].Amount[0] == '0'){
             price = '';
@@ -124,30 +125,30 @@ var getPrices = function(item,callback){
         }
     }
 
-    debug('price PRE PROCESS ',price);
+    verbose('price PRE PROCESS ',price);
 
     amazonHTML.basic(url, function(err, product) {
       kip.err(err); // print error
 
-      debug('& & & & & & & & & & & &PRODUCT OBJ ',product);
+      verbose('& & & & & & & & & & & &PRODUCT OBJ ',product);
 
       if (product.reviews){
         reviews = product.reviews;
       }
 
       if (product && product.price) {
-        debug('returning early with price: ' + product.price);
-        debug('returning early with rice ' + product.altImage);
+        verbose('returning early with price: ' + product.price);
+        verbose('returning early with rice ' + product.altImage);
           // if(product.altImage){
           //   altImage = product.altImage;
           // }
         return callback(product.price,product.altImage,reviews)
       }
 
-      debug('product.price: ' + product.price + ', price: ' + price);
+      verbose('product.price: ' + product.price + ', price: ' + price);
 
       price = product.price || price || '';
-      debug('final price: ' + price);
+      verbose('final price: ' + price);
       if(product.altImage){
         altImage = product.altImage;
       }

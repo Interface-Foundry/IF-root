@@ -102,11 +102,11 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     var replies = yield simple_response(message);
-    kip.debug('simple replies'.cyan, replies);
+    // kip.debug('simple replies'.cyan, replies);
 
     if (!replies || replies.length === 0) {
       replies = yield nlp_response(message);
-      kip.debug('nlp replies'.cyan, replies);
+      // kip.debug('nlp replies'.cyan, replies);
     }
 
     if (!replies || replies.length === 0) {

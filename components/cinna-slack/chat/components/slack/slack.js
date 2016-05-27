@@ -175,6 +175,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     };
     co(function*() {
 
+      if (message.action === 'typing') {
+        return bot.rtm.sendMessage('typing...', message.source.channel, () => {
+          outgoing.ack();
+        })
+      }
+
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         msgData.attachments = yield search_results(message);
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);

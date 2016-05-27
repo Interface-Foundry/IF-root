@@ -114,7 +114,7 @@ module.exports.basic = function basic(url, callback) {
           return
         }
         if(err){
-          console.log('&^&^&^&^&^&^&^&^&^');
+          debug('&^&^&^&^&^&^&^&^&^');
           console.error('^^$%$% ERROR ' + err);
         }
 
@@ -146,33 +146,33 @@ module.exports.basic = function basic(url, callback) {
         //sort scraped price
         //try for miniATF
         if ($('#miniATF_price').text()){  //excluding scrapes with multiple prices (-) in field
-            console.log('😊 kk');
+            debug('😊 kk');
             amazonSitePrice = $('#miniATF_price').text().trim();
         }
         //if no miniATF, try for priceblock_ourprice
         else if ($('#priceblock_ourprice').text()){
-            console.log('😊 kk');
+            debug('😊 kk');
             amazonSitePrice = $('#priceblock_ourprice').text().trim();
         }
         else if ($('.buybox-price').text()){
-            console.log('😊 kk');
+            debug('😊 kk');
             amazonSitePrice = $('.buybox-price').text().trim();
             amazonSitePrice = amazonSitePrice.split("\n");
             amazonSitePrice = amazonSitePrice[0];
         }
         else if ($('#priceblock_saleprice').text()){
-            console.log('😊 kk');
+            debug('😊 kk');
             amazonSitePrice = $('#priceblock_saleprice').text().trim();
             amazonSitePrice = amazonSitePrice.split("\n");
             amazonSitePrice = amazonSitePrice[0];
         }
         else {
-          console.log('NO PRICE FOUND 😊😊😊😊😊😊😊 ',url);
+          debug('NO PRICE FOUND 😊😊😊😊😊😊😊 ',url);
 
 
-          console.log('🍹 ',err);
-          console.log('🍹 ',response);
-          console.log('🍹 ',body);
+          debug('🍹 ',err);
+          debug('🍹 ',response);
+          debug('🍹 ',body);
           //send email about this issue
           // var mailOptions = {
           //     to: 'Kip Server <hello@kipthis.com>',
@@ -181,7 +181,7 @@ module.exports.basic = function basic(url, callback) {
           //     text: url
           // };
           // mailerTransport.sendMail(mailOptions, function(err) {
-          //     if (err) console.log(err);
+          //     if (err) debug(err);
           // });
         }
         //* * * * * * * * * *//
@@ -199,7 +199,7 @@ module.exports.basic = function basic(url, callback) {
             rating: parseFloat(rating.match(/^[0-9.,\s]+/)[0].trim()),
             reviewCount: reviewCount.match(/^[0-9.,\s]+/)[0].trim()
           }
-          console.log('& & & &  ',product.reviews);
+          debug('& & & &  ',product.reviews);
         }else {
           console.error('no match for review ',rating)
           console.error('no match for review ',reviewCount)
@@ -209,7 +209,7 @@ module.exports.basic = function basic(url, callback) {
         if($('#imgTagWrapperId').children('img').attr('data-old-hires')){
           product.altImage = $('#imgTagWrapperId').children('img').attr('data-old-hires');
         }else if ($('#imgTagWrapperId').children('img').attr('src') && checkURL($('#imgTagWrapperId').children('img').attr('src'))){
-          console.log('wow we found an image url um ok, proceed....proceed...');
+          debug('wow we found an image url um ok, proceed....proceed...');
           product.altImage = $('#imgTagWrapperId').children('img').attr('src');
         }
 
