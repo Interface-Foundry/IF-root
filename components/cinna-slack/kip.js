@@ -19,7 +19,7 @@ module.exports.err = function(e, message) {
   if (e.stack) {
     console.error(e.stack.toString().red);
   } else {
-    console.error(e.toString().red);
+    console.error(JSON.stringify(e).red);
   }
 
   return true;
