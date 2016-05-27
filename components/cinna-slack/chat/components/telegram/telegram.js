@@ -1,6 +1,7 @@
 var telegram = require('telegram-bot-api');
 var co = require('co');
 var kip = require('kip');
+var async = require('async');
 var queue = require('../queue-mongo');
 var db = require('../../../db')
 var _ = require('lodash');
@@ -55,27 +56,22 @@ tg.on('message', function(msg) {
   // date: 1464202890,
   // text: 'Shoes' }
 
-
-      var message = {
+      var message = new db.Message({
           incoming: true,
           thread_id: msg.chat.id,
           original_text: msg.text,
           user_id: 'telegram' + "_" + msg.from.id,
+          origin: 'telegram',
           source: {
               'origin':'telegram',
               'channel':msg.from.id.toString(),
               'org':'telegram',
               'id':'telegram' + "_" + msg.from.id, //for retrieving chat history in node memory,
           }
-      }
+      })
 
-      console.log('LINE 60 TELEGRAM: ', msg)
+      console.log('Received message from telegram: ', msg);
 
-      // clean up the text
-      message.text = msg.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-      if (message.text.charAt(0) == ':') {
-        message.text = message.text.substr(1); //remove : from beginning of string
-      }
       message.text = message.text.trim(); //remove extra spaces on edges of string
 
       // queue it up for processing
@@ -84,12 +80,12 @@ tg.on('message', function(msg) {
       });
 })
 
-kip.debug('subscribing to outgoing.telegram hopefully');
+kip.debug('subscribing to outgoing.telegram');
 queue.topic('outgoing.telegram').subscribe(outgoing => {
-    console.log('outgoing message');
+    console.log('outgoing telegram message');
     console.log(outgoing);
     var data = outgoing.data;
-    console.log('DATA YO:', data)
+    // console.log('D:', data)
     if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more') {
             var message = data.client_res[0]; //use first item in client_res array as text message
             console.log('attachthis ',message);
@@ -266,13 +262,13 @@ queue.topic('outgoing.telegram').subscribe(outgoing => {
         }
         else {
             console.log('\n\n\nTelegram ELSE : ', data,'\n\n\n')
-            async.eachSeries(data.client_res, function(message, callback) {
+            // async.eachSeries(data.client_res, function(message, callback) {
                 tg.sendMessage({
                     chat_id: data.source.channel,
-                    text: message
+                    text: data.text
                 })
-                callback();
-            }, function done(){
-            });
+            //     callback();
+            // }, function done(){
+            // });
         }
 });
