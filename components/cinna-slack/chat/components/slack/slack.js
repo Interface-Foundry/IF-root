@@ -49,7 +49,9 @@ var _ = require('lodash');
 var queue = require('../queue-mongo');
 var db = require('../../../db')
 var image_search = require('../image_search');
-
+var search_results = require('./search_results');
+var focus = require('./focus');
+var cart = require('./cart');
 var slackConnections = {};
 
 //
@@ -68,8 +70,13 @@ co(function*() {
   slackbots.map((slackbot) => {
     var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '');
     rtm.start();
+    var web = new slack.WebClient(slackbot.bot.bot_access_token || '');
 
-    slackConnections[slackbot.team_id] = rtm;
+    slackConnections[slackbot.team_id] = {
+      rtm: rtm,
+      web: web,
+      slackbot: slackbot
+    };
 
     // TODO figure out how to tell when auth is invalid
     // right now the library just console.log's a message and I can't figure out
@@ -156,12 +163,44 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
   var message = outgoing.data;
 
   var bot = slackConnections[message.source.team];
-  
+
   if (typeof bot === 'undefined') {
     throw new Error('rtm client not registered for slack team ' + message.source.team);
   }
 
-  bot.sendMessage(message.text, message.source.channel, () => {
+  var msgData = {
+      icon_url:'http://kipthis.com/img/kip-icon.png',
+      username:'Kip'
+  };
+  co(function*() {
+
+    if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+      msgData.attachments = yield search_results(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
+
+    if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+      msgData.attachments = yield focus(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
+
+    if (message.mode === 'cart' && message.action === 'view') {
+      msgData.attachments = yield cart(message, bot.slackbot, false);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
+
+
+    bot.rtm.sendMessage(message.text, message.source.channel, () => {
+      outgoing.ack();
+    })
+
+  }).then(() => {
     outgoing.ack();
+  }).catch(e => {
+    console.log(e.stack);
+    bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
+      outgoing.ack();
+    })
   })
+
 })

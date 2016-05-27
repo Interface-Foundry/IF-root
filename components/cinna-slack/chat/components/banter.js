@@ -162,8 +162,8 @@ var checkModes = function(inputObj, context, callback) {
 
 
 
-var checkForCanned = function(input, origin, source) {
-
+var checkForCanned = function(message) {
+  var input = message.text;
   var res;
   var flag;
   var query;
@@ -322,54 +322,27 @@ var checkForCanned = function(input, origin, source) {
     case textSimilar(input, 'wtv') > 90:
     case textSimilar(input, 'whatever') > 60:
       flag = 'basic'; //do this action
-      if (origin == 'slack' || data.source.origin == 'telegram') {
-        res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n' +
+      res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?\n' +
 
-          'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n' +
-          'Use commands to refine your search, for example:\n\n' +
+        'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n' +
+        'Use commands to refine your search, for example:\n\n' +
 
-          '`more` : view more search results\n' +
-          '`more like 3` : find similar items to search result :three:\n\n' +
+        '`more` : view more search results\n' +
+        '`more like 3` : find similar items to search result :three:\n\n' +
 
-          '`2` : check for product details for item :two:\n' +
-          '`1 but cheaper` : finds :one: or similar in a lower price\n' +
-          '`2 but in XL` : finds :two: or similar in size XL\n' +
-          '`3 but in blue` : finds :three: or similar in color blue\n' +
-          '`2 but in wool` : finds :two: or similar with wool fabric\n\n' +
+        '`2` : check for product details for item :two:\n' +
+        '`1 but cheaper` : finds :one: or similar in a lower price\n' +
+        '`2 but in XL` : finds :two: or similar in size XL\n' +
+        '`3 but in blue` : finds :three: or similar in color blue\n' +
+        '`2 but in wool` : finds :two: or similar with wool fabric\n\n' +
 
-          '`buy 1` : to buy item :one:\n' +
-          '`save 2` : save item :two: to cart\n' +
-          '`view cart` : see all items in the cart\n' +
-          '`remove 3` : to remove item :three: from cart\n\n' +
+        '`buy 1` : to buy item :one:\n' +
+        '`save 2` : save item :two: to cart\n' +
+        '`view cart` : see all items in the cart\n' +
+        '`remove 3` : to remove item :three: from cart\n\n' +
 
-          '`help` : view guidelines\n' +
-          'Try it now! Maybe you need new headphones? Type `headphones` to start.';
-      } else if (origin == 'socket.io') {
-
-        res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?<br>' +
-
-          'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>' +
-          'Use commands to refine your search, for example:<br><br>' +
-
-          '<span class="typer">more</span> : view more search results<br>' +
-          '<span class="typer">more like 3</span> : find similar items to search result ➌<br><br>' +
-
-          '<span class="typer">2</span> : check for product details for item <span class="selector">➋</span><br>' +
-          '<span class="typer">1 but cheaper</span> : finds <span class="selector">➊</span> or similar in a lower price<br>' +
-          '<span class="typer">2 but in XL</span> : finds <span class="selector">➋</span> or similar in size XL<br>' +
-          '<span class="typer">3 but in blue</span> : finds <span class="selector">➌</span> or similar in color blue<br>' +
-          '<span class="typer">2 but in wool</span> : finds <span class="selector">➋</span> or similar with wool fabric<br><br>' +
-
-          '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>' +
-          '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br>' +
-          '<span class="typer">view cart</span> : see all items in the cart <br>' +
-          '<span class="typer">remove 3</span> : remove item <span class="selector">➌</span> from cart<br><br>' +
-
-          '<span class="typer">help</span> : view guidelines<br>' +
-          'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.';
-      }
-
-
+        '`help` : view guidelines\n' +
+        'Try it now! Maybe you need new headphones? Type `headphones` to start.';
       break;
 
     case textSimilar(input, 'What\'s your hobby') > 60:
@@ -787,31 +760,6 @@ var checkForCanned = function(input, origin, source) {
 
         '`help` : view guidelines\n' +
         'Try it now! Maybe you need new headphones? Type `headphones` to start.';
-        // else if (origin == 'socket.io'){
-        //
-        //       res = 'I\'m Kip, your personal shopper.<br>'+
-        //
-        //       'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
-        //       'Use commands to refine your search, for example:<br><br>'+
-        //
-        //       '<span class="typer">more</span> : view more search results<br>'+
-        //       '<span class="typer">more like 3</span> : find similar items to search result ➌<br><br>'+
-        //
-        //       '<span class="typer">2</span> : check for product details for item <span class="selector">➋</span><br>'+
-        //       '<span class="typer">1 but cheaper</span> : finds <span class="selector">➊</span> or similar in a lower price<br>'+
-        //       '<span class="typer">2 but in XL</span> : finds <span class="selector">➋</span> or similar in size XL<br>'+
-        //       '<span class="typer">3 but in blue</span> : finds <span class="selector">➌</span> or similar in color blue<br>'+
-        //       '<span class="typer">2 but in wool</span> : finds <span class="selector">➋</span> or similar with wool fabric<br><br>'+
-        //
-        //       '<span class="typer">buy 1</span> : to buy item <span class="selector">➊</span><br>'+
-        //       '<span class="typer">save 2</span> : save item <span class="selector">➋</span> to cart<br>'+
-        //       '<span class="typer">view cart</span> : view all items in cart <br>'+
-        //       '<span class="typer">remove 3</span> : remove item <span class="selector">➌</span> from cart<br><br>'+
-        //
-        //       '<span class="typer">help</span> : view guidelines<br>'+
-        //       'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.';
-        //   }
-
       break;
 
     case textSimilar(input, 'trending now') > 90:
@@ -885,57 +833,6 @@ var checkForCanned = function(input, origin, source) {
       flag = 'basic';
       res = 'Sorry, I\'ll try to help better next time';
       break;
-
-
-      /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
-
-      //* * * * TEMP FOR TESTING * * * *//
-      // case textSimilar(data.msg,'similar') > 60:
-      //     var res = {};
-      //     res.bucket = 'search';
-      //     res.channel = data.channelId;
-      //     res.org = data.orgId;
-      //     res.action = 'similar';
-      //     res.searchSelect = [1];
-      //     res.tokens = data.msg;
-      //     incomingAction(res);
-      //     break;
-      // case textSimilar(data.msg,'focus') > 60:
-      //     var res = {};
-      //     res.bucket = 'search';
-      //     res.channel = data.channelId;
-      //     res.org = data.orgId;
-      //     res.action = 'focus';
-      //     res.searchSelect = [1];
-      //     res.tokens = data.msg;
-      //     incomingAction(res);
-      //     break;
-      // case textSimilar(data.msg,'modify') > 60:
-      //     var res = {};
-      //     res.bucket = 'search';
-      //     res.channel = data.channelId;
-      //     res.org = data.orgId;
-      //     res.action = 'modify';
-      //     res.searchSelect = [1];
-      //     res.tokens = data.msg;
-      //     incomingAction(res);
-      //     break;
-
-      // case 'save':
-      //     saveToCart(data);
-      //     break;
-      // case 'remove':
-      //     removeFromCart(data);
-      //     break;
-      // case 'removeAll':
-      //     removeAllCart(data);
-      //     break;
-      // case 'list':
-      //     listCart(data);
-      //     break;
-      // case 'checkout':
-
-  //* * * * * END TESTING * * * * *//
   }
 
   switch (input) {
@@ -972,11 +869,7 @@ var checkForCanned = function(input, origin, source) {
 
     case 'top kek':
       flag = 'basic'; //do this action
-      if (origin == 'slack' || origin == 'telegram') {
-        res = 'T O P\nK\n\nE\nK';
-      } else if (origin = 'socket.io') {
-        res = 'T O P<br>K<br>E<br>K';
-      }
+      res = 'T O P\n\nK\n\nE\n\nK';
       break;
 
     case 'k':
@@ -1215,7 +1108,7 @@ var checkForCanned = function(input, origin, source) {
   }
 
   //PAPRIKA ACTION BUTTON TESTING
-  if (source && source.org == 'T02PN3B25') {
+  if (message.source && message.source.org == 'T02PN3B25') {
 
     switch (input) {
 

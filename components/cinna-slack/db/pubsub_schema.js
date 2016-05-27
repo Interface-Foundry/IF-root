@@ -27,7 +27,8 @@ var pubSubSchema = mongoose.Schema({
 
     topic: {
       type: String,
-      required: true
+      required: true,
+      index: true
     },
 
     data: {},
@@ -40,11 +41,12 @@ var pubSubSchema = mongoose.Schema({
     dispatched: {
       type: Boolean,
       default: false,
+      index: true
     },
 
     // When was it dispatched (need it to re-try if message not handled in 10 seconds or something)
     dispatch_time: {
-      type: Date,
+      type: Date
     },
 
     // Number of time to re-try dispatching
@@ -56,7 +58,7 @@ var pubSubSchema = mongoose.Schema({
     // the message has been processed.  This can be safely archived now.
     done: {
       type: Boolean,
-      default: false,
+      default: false
     }
 });
 

@@ -6,17 +6,17 @@ var _ = require('lodash')
 var fs = require('fs')
 
 var banter = require("./banter.js");
-var history = require("./history.js");
+// var history = require("./history.js");
 var search = require("./search.js");
+var amazon_search = require('./amazon_search.js');
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
-var init_team = require("./init_team.js");
-var conversation_botkit = require('./conversation_botkit');
-var weekly_updates = require('./weekly_updates');
+// var init_team = require("./init_team.js");
+// var conversation_botkit = require('./conversation_botkit');
+// var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
 var nlp = require('../../nlp/api');
-
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
@@ -64,7 +64,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
-  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random()*100).toString().slice(3)).toString(36))
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
 // Make it look like Kip is typing
@@ -72,10 +72,8 @@ function typing(message) {
   var msg = {
     action: 'typing'
   };
-  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random()*100).toString().slice(3)).toString(36))
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
-
-
 
 
 //
@@ -101,10 +99,12 @@ queue.topic('incoming').subscribe(incoming => {
       throw new Error('correct message not retrieved from db');
     }
 
-    var replies = simple_response(message);
+    var replies = yield simple_response(message);
+    kip.debug('simple replies'.cyan, replies);
 
     if (!replies || replies.length === 0) {
       replies = yield nlp_response(message);
+      kip.debug('nlp replies'.cyan, replies);
     }
 
     if (!replies || replies.length === 0) {
@@ -114,311 +114,321 @@ queue.topic('incoming').subscribe(incoming => {
 
     yield replies.map(r => r.save());
     yield replies.map((r, i) => {
-      queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
+      queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
     });
     incoming.ack();
   }).catch(kip.err);
 });
 
 
-function nlp_response(message) {
-  return new Promise(function(resolve, reject) {
-    resolve([new db.Message({
-      text: 'lol',
-      origin: 'slack',
-      source: message.source
-    })])
-  })
-}
-
-
-
-
-
-//- - - - - - //
-
-/////////// PROCESSING INCOMING //////////
-
 //pre process incoming messages for canned responses
-function simple_response(message) {
+function* simple_response(message) {
   var replies = [];
+
   //check for canned responses/actions before routing to NLP
-  var reply = banter.checkForCanned(message.text, message.source.origin, message.source);
+  // this adds mode and action to the message
+  var reply = banter.checkForCanned(message);
 
-  //found canned response
-  if (reply.flag) {
-    switch (reply.flag) {
-      case 'basic': //just respond, no actions
-        return [text_reply(message, reply.res)];
-
-      case 'search.initial':
-        //send a reply right away
-        send_text_reply(message, reply.res);
-
-        //now also search for item
-        message.tokens = [query]
-        message.mode = 'shopping';
-        message.action = 'initial';
-        incomingAction(message);
-        break;
-
-      case 'search.focus':
-        message.searchSelect = [query];
-        message.mode = 'shopping';
-        message.action = 'focus';
-        incomingAction(message);
-        break;
-
-      case 'search.more':
-        message.mode = 'shopping';
-        message.action = 'more';
-        incomingAction(message);
-        break;
-
-      case 'cart.remove':
-        message.searchSelect = [query];
-        message.mode = 'cart';
-        message.action = 'remove';
-        incomingAction(message);
-        break;
-
-      //for testing in PAPRIKA
-      case 'slack.search':
-      // message.searchSelect = [];
-      // data.mode = 'search';
-
-        var slackTester;
-
-        if (res == 'cheaper') {
-          slackTester = {
-            payload: '{"actions":[{"name":"cheaper","value":"1"}],"callback_id":"57081aeed625bc9f8a359926","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460148983.486353","message_ts":"1460148974.000406","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/ZM0ZP8V7RNXDY81DH4L1HQ7S.png","image_width":400,"image_height":175,"image_bytes":34155,"callback_id":"57081aeed625bc9f8a359926","title":":one: Women\'s Military Up Buckle Combat Boots Mid Knee High E...","id":1,"title_link":"http:\\/\\/goo.gl\\/VgkoLs","color":"45a5f4","actions":[{"id":"1","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"Similar","text":"\\u27b0 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/CPY561LDJDMINVXX6OI1ICNM.png","image_width":400,"image_height":175,"image_bytes":26562,"callback_id":"57081aeed625bc9f8a359926","title":":two: COCO 1 Womens Buckle Riding Knee High Boots,Coco-01v4.0...","id":2,"title_link":"http:\\/\\/goo.gl\\/u8EY7U","color":"45a5f4","actions":[{"id":"6","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"Similar","text":"\\u27b0 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WQSCP0BWTPXYHBTXR7E2PIPS.png","image_width":400,"image_height":175,"image_bytes":22442,"callback_id":"57081aeed625bc9f8a359926","title":":three: Forever Mango-21 Women\'s Winkle Back Shaft Side Zip Kne...","id":3,"title_link":"http:\\/\\/goo.gl\\/teZTD5","color":"45a5f4","actions":[{"id":"11","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"Similar","text":"\\u27b0 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460148974.000406"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33282428390\\/2Sq4RdP8qAJKRp5JrXfNoGP1"}'
-          };
-        } else if (res == 'addcart') {
-          slackTester = {
-            payload: '{"actions":[{"name":"addcart","value":"1"}],"callback_id":"570c721cd365f919d8e2d42d","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460433491.790565","message_ts":"1460433437.000476","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Q3QUY8L4W7M800SX5VX0ZJPZ.png","image_width":400,"image_height":175,"image_bytes":44065,"callback_id":"570c721cd365f919d8e2d42d","title":":one: Poop Emoji Pillow Emoticon Stuffed Plush Toy Doll Smile...","id":1,"title_link":"http:\\/\\/goo.gl\\/tUkU8X","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/JVK7D21JRMI3W166JGZY3E9E.png","image_width":400,"image_height":175,"image_bytes":43405,"callback_id":"570c721cd365f919d8e2d42d","title":":two: ToLuLu\\u00ae Soft Emoji Bedding Pillow Cushion Car Sofa Pill...","id":2,"title_link":"http:\\/\\/goo.gl\\/slwuZ2","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/QUKE3JMMCWAOFCVSTTFL8WYE.png","image_width":400,"image_height":175,"image_bytes":25642,"callback_id":"570c721cd365f919d8e2d42d","title":":three: Emoji Shirt Smiley - Money Mouth Face - Doller Sign - F...","id":3,"title_link":"http:\\/\\/goo.gl\\/vCPV35","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460433437.000476"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33838187251\\/zVu3xcqUIvln4FbwLLC51zIR"}'
-          };
-        } else if (res == 'similar') {
-          slackTester = {
-            payload: '{"actions":[{"name":"similar","value":"2"}],"callback_id":"570c6cef64513dd7d7b1fd24","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460433572.400826","message_ts":"1460432112.000473","attachment_id":"3","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/K8JSSSW1PUVP4IZJLP4M2ZP1.png","image_width":400,"image_height":175,"image_bytes":42014,"callback_id":"570c6cef64513dd7d7b1fd24","title":":one: Poop Emoji Pillow Emoticon Stuffed Plush Toy Doll Smile...","id":1,"title_link":"http:\\/\\/goo.gl\\/tUkU8X","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/IS52N2SHFGP2RD9BDRKWWXBG.png","image_width":400,"image_height":175,"image_bytes":43405,"callback_id":"570c6cef64513dd7d7b1fd24","title":":two: ToLuLu\\u00ae Soft Emoji Bedding Pillow Cushion Car Sofa Pill...","id":2,"title_link":"http:\\/\\/goo.gl\\/slwuZ2","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/VTCYNQ0V06PZVODX85ORIE1C.png","image_width":400,"image_height":175,"image_bytes":25642,"callback_id":"570c6cef64513dd7d7b1fd24","title":":three: Emoji Shirt Smiley - Money Mouth Face - Doller Sign - F...","id":3,"title_link":"http:\\/\\/goo.gl\\/vCPV35","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460432112.000473"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33887511719\\/sh4EXEcx5h2HVAjz5dIIG50i"}'
-          };
-        } else if (res == 'modify') {
-          slackTester = {
-            payload: '{"actions":[{"name":"modify","value":"1"}],"callback_id":"570c75d7d365f919d8e2d431","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434417.593489","message_ts":"1460434392.000484","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/6BSZE72GXWKRR0Y79V72NBC7.png","image_width":400,"image_height":175,"image_bytes":39117,"callback_id":"570c75d7d365f919d8e2d431","title":":one: Youngin\' Blues: The Story of Reed and RaKeem","id":1,"title_link":"http:\\/\\/goo.gl\\/dG0mQm","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/UWF0QVNWH4I4LOA7V9PJX270.png","image_width":400,"image_height":175,"image_bytes":44919,"callback_id":"570c75d7d365f919d8e2d431","title":":two: 2015-16 Totally Certified Roll Call Mirror Camo RC Auto...","id":2,"title_link":"http:\\/\\/goo.gl\\/0UHjD5","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/K89N9L5QU3SVLH3T7QE4YRZN.png","image_width":400,"image_height":175,"image_bytes":48795,"callback_id":"570c75d7d365f919d8e2d431","title":":three: Rakeem Interlude (feat. Merc)","id":3,"title_link":"http:\\/\\/goo.gl\\/XWkxKp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434392.000484"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33879490084\\/KY3oPL33C2V4W9V7B45xWEMA"}'
-          };
-        } else if (res == 'moreinfo') {
-          slackTester = {
-            payload: '{"actions":[{"name":"moreinfo","value":"0"}],"callback_id":"570c7611d365f919d8e2d433","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434463.610937","message_ts":"1460434449.000488","attachment_id":"1","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/OBIAI1M7VY2U2BGWWAA3VIZB.png","image_width":400,"image_height":175,"image_bytes":52377,"callback_id":"570c7611d365f919d8e2d433","title":":one: Greatest Hits","id":1,"title_link":"http:\\/\\/goo.gl\\/vpf4iz","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Z9RGCV9RBFGATNUWVSRUKT7X.png","image_width":400,"image_height":175,"image_bytes":35445,"callback_id":"570c7611d365f919d8e2d433","title":":two: ZZ Way - Spring ZigZag Craft Game","id":2,"title_link":"http:\\/\\/goo.gl\\/W9si1L","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WOIKXKZKL7JO3J6IR9L8YFJ5.png","image_width":400,"image_height":175,"image_bytes":52322,"callback_id":"570c7611d365f919d8e2d433","title":":three: Til The Casket Drops [Explicit]","id":3,"title_link":"http:\\/\\/goo.gl\\/tDTjNp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434449.000488"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33890435429\\/zRrVRvLmlnN8PEDyvMcQWNIx"}'
-          };
-        }
-
-        incomingMsgAction(slackTester);
-        break;
-      case 'cancel': //just respond, no actions
-        //send message
-        console.log('Kip response cancelled');
-        break;
-      default:
-        console.log('error: canned action flag missing');
-    }
+  if (!reply.flag) {
+    return
   }
-  //nothing found in cannedbanter, now check for mode strings
-  else {
 
-    //check for mode switch, coming from shopping (default) context
-    banter.checkModes(message, 'shopping', function(mode, res) {
-      if (mode) {
-        switch (mode) {
-          //* * MODES * *
-          case 'settings':
-            settingsMode(message);
-            break;
+  switch (reply.flag) {
+    case 'basic': //just respond, no actions
+      return [text_reply(message, reply.res)];
 
-          case 'collect':
-            collectMode(message);
-            break;
+    case 'search.initial':
+      //send a reply right away
+      send_text_reply(message, reply.res);
+      typing(message);
 
-          case 'onboarding':
-            onboardingMode(message);
-            break;
-
-          case 'shopping':
-            shoppingMode(message);
-            break;
-
-          case 'food_ordering':
-
-            break;
-
-          case 'report':
-            reportMode(message);
-            break;
-
-          case 'addmember':
-            addmemberMode(message);
-            break;
-
-          default:
-            shoppingMode(message);
+      //now also search for item
+      message.mode = 'shopping';
+      message.action = 'initial';
+      message.execute.push({
+        mode: 'shopping',
+        action: 'initial',
+        params: {
+          query: reply.query
         }
-      } else {
-        //proceed to NLP instead
-        if (message) {
-          routeNLP(message);
-        } else {
-          console.log('NOT PROCESSING, DATA NOT FOUND')
-        }
+      })
+      break;
 
+    case 'search.focus':
+      message.mode = 'shopping';
+      message.action = 'focus';
+      message.execute.push({
+        mode: 'shopping',
+        action: 'focus',
+        params: {
+          focus: reply.query
+        }
+      })
+      break;
+
+    case 'search.more':
+      message.mode = 'shopping';
+      message.action = 'more';
+      incomingAction(message);
+      break;
+
+    case 'cart.remove':
+      message.searchSelect = [reply.query];
+      message.mode = 'cart';
+      message.action = 'remove';
+      incomingAction(message);
+      break;
+
+    //for testing in PAPRIKA
+    case 'slack.search':
+    // message.searchSelect = [];
+    // data.mode = 'search';
+
+      var slackTester;
+
+      if (res == 'cheaper') {
+        slackTester = {
+          payload: '{"actions":[{"name":"cheaper","value":"1"}],"callback_id":"57081aeed625bc9f8a359926","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460148983.486353","message_ts":"1460148974.000406","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/ZM0ZP8V7RNXDY81DH4L1HQ7S.png","image_width":400,"image_height":175,"image_bytes":34155,"callback_id":"57081aeed625bc9f8a359926","title":":one: Women\'s Military Up Buckle Combat Boots Mid Knee High E...","id":1,"title_link":"http:\\/\\/goo.gl\\/VgkoLs","color":"45a5f4","actions":[{"id":"1","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"Similar","text":"\\u27b0 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/CPY561LDJDMINVXX6OI1ICNM.png","image_width":400,"image_height":175,"image_bytes":26562,"callback_id":"57081aeed625bc9f8a359926","title":":two: COCO 1 Womens Buckle Riding Knee High Boots,Coco-01v4.0...","id":2,"title_link":"http:\\/\\/goo.gl\\/u8EY7U","color":"45a5f4","actions":[{"id":"6","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"Similar","text":"\\u27b0 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WQSCP0BWTPXYHBTXR7E2PIPS.png","image_width":400,"image_height":175,"image_bytes":22442,"callback_id":"57081aeed625bc9f8a359926","title":":three: Forever Mango-21 Women\'s Winkle Back Shaft Side Zip Kne...","id":3,"title_link":"http:\\/\\/goo.gl\\/teZTD5","color":"45a5f4","actions":[{"id":"11","name":"AddCart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"Cheaper","text":"\\ud83d\\udcb8 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"Similar","text":"\\u27b0 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"Modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"Moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460148974.000406"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33282428390\\/2Sq4RdP8qAJKRp5JrXfNoGP1"}'
+        };
+      } else if (res == 'addcart') {
+        slackTester = {
+          payload: '{"actions":[{"name":"addcart","value":"1"}],"callback_id":"570c721cd365f919d8e2d42d","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460433491.790565","message_ts":"1460433437.000476","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Q3QUY8L4W7M800SX5VX0ZJPZ.png","image_width":400,"image_height":175,"image_bytes":44065,"callback_id":"570c721cd365f919d8e2d42d","title":":one: Poop Emoji Pillow Emoticon Stuffed Plush Toy Doll Smile...","id":1,"title_link":"http:\\/\\/goo.gl\\/tUkU8X","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/JVK7D21JRMI3W166JGZY3E9E.png","image_width":400,"image_height":175,"image_bytes":43405,"callback_id":"570c721cd365f919d8e2d42d","title":":two: ToLuLu\\u00ae Soft Emoji Bedding Pillow Cushion Car Sofa Pill...","id":2,"title_link":"http:\\/\\/goo.gl\\/slwuZ2","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/QUKE3JMMCWAOFCVSTTFL8WYE.png","image_width":400,"image_height":175,"image_bytes":25642,"callback_id":"570c721cd365f919d8e2d42d","title":":three: Emoji Shirt Smiley - Money Mouth Face - Doller Sign - F...","id":3,"title_link":"http:\\/\\/goo.gl\\/vCPV35","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460433437.000476"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33838187251\\/zVu3xcqUIvln4FbwLLC51zIR"}'
+        };
+      } else if (res == 'similar') {
+        slackTester = {
+          payload: '{"actions":[{"name":"similar","value":"2"}],"callback_id":"570c6cef64513dd7d7b1fd24","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460433572.400826","message_ts":"1460432112.000473","attachment_id":"3","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/K8JSSSW1PUVP4IZJLP4M2ZP1.png","image_width":400,"image_height":175,"image_bytes":42014,"callback_id":"570c6cef64513dd7d7b1fd24","title":":one: Poop Emoji Pillow Emoticon Stuffed Plush Toy Doll Smile...","id":1,"title_link":"http:\\/\\/goo.gl\\/tUkU8X","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/IS52N2SHFGP2RD9BDRKWWXBG.png","image_width":400,"image_height":175,"image_bytes":43405,"callback_id":"570c6cef64513dd7d7b1fd24","title":":two: ToLuLu\\u00ae Soft Emoji Bedding Pillow Cushion Car Sofa Pill...","id":2,"title_link":"http:\\/\\/goo.gl\\/slwuZ2","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/VTCYNQ0V06PZVODX85ORIE1C.png","image_width":400,"image_height":175,"image_bytes":25642,"callback_id":"570c6cef64513dd7d7b1fd24","title":":three: Emoji Shirt Smiley - Money Mouth Face - Doller Sign - F...","id":3,"title_link":"http:\\/\\/goo.gl\\/vCPV35","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":"\\ud83e\\udd11 cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460432112.000473"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33887511719\\/sh4EXEcx5h2HVAjz5dIIG50i"}'
+        };
+      } else if (res == 'modify') {
+        slackTester = {
+          payload: '{"actions":[{"name":"modify","value":"1"}],"callback_id":"570c75d7d365f919d8e2d431","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434417.593489","message_ts":"1460434392.000484","attachment_id":"2","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/6BSZE72GXWKRR0Y79V72NBC7.png","image_width":400,"image_height":175,"image_bytes":39117,"callback_id":"570c75d7d365f919d8e2d431","title":":one: Youngin\' Blues: The Story of Reed and RaKeem","id":1,"title_link":"http:\\/\\/goo.gl\\/dG0mQm","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/UWF0QVNWH4I4LOA7V9PJX270.png","image_width":400,"image_height":175,"image_bytes":44919,"callback_id":"570c75d7d365f919d8e2d431","title":":two: 2015-16 Totally Certified Roll Call Mirror Camo RC Auto...","id":2,"title_link":"http:\\/\\/goo.gl\\/0UHjD5","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/K89N9L5QU3SVLH3T7QE4YRZN.png","image_width":400,"image_height":175,"image_bytes":48795,"callback_id":"570c75d7d365f919d8e2d431","title":":three: Rakeem Interlude (feat. Merc)","id":3,"title_link":"http:\\/\\/goo.gl\\/XWkxKp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434392.000484"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33879490084\\/KY3oPL33C2V4W9V7B45xWEMA"}'
+        };
+      } else if (res == 'moreinfo') {
+        slackTester = {
+          payload: '{"actions":[{"name":"moreinfo","value":"0"}],"callback_id":"570c7611d365f919d8e2d433","team":{"id":"T02PN3B25","domain":"kipsearch"},"channel":{"id":"D0GRF5J4T","name":"directmessage"},"user":{"id":"U02PN3T5R","name":"alyx"},"action_ts":"1460434463.610937","message_ts":"1460434449.000488","attachment_id":"1","token":"obnfDfOpF3e4zKd24pSa9FHg","original_message":{"text":"Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2` or `3` to get it now :blush:","username":"Kip","icons":{"image_48":"https:\\/\\/s3-us-west-2.amazonaws.com\\/slack-files2\\/bot_icons\\/2015-12-08\\/16204337716_48.png"},"bot_id":"B0GRE31MK","attachments":[{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/OBIAI1M7VY2U2BGWWAA3VIZB.png","image_width":400,"image_height":175,"image_bytes":52377,"callback_id":"570c7611d365f919d8e2d433","title":":one: Greatest Hits","id":1,"title_link":"http:\\/\\/goo.gl\\/vpf4iz","color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"similar","text":"\\u26a1 similar","type":"button","value":"0","style":"default"},{"id":"4","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"0","style":"default"},{"id":"5","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"0","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/Z9RGCV9RBFGATNUWVSRUKT7X.png","image_width":400,"image_height":175,"image_bytes":35445,"callback_id":"570c7611d365f919d8e2d433","title":":two: ZZ Way - Spring ZigZag Craft Game","id":2,"title_link":"http:\\/\\/goo.gl\\/W9si1L","color":"45a5f4","actions":[{"id":"6","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"1","style":"primary"},{"id":"7","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"1","style":"default"},{"id":"8","name":"similar","text":"\\u26a1 similar","type":"button","value":"1","style":"default"},{"id":"9","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"1","style":"default"},{"id":"10","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"1","style":"default"}]},{"fallback":"Here are some options you might like","image_url":"https:\\/\\/s3.amazonaws.com\\/if-kip-chat-images\\/WOIKXKZKL7JO3J6IR9L8YFJ5.png","image_width":400,"image_height":175,"image_bytes":52322,"callback_id":"570c7611d365f919d8e2d433","title":":three: Til The Casket Drops [Explicit]","id":3,"title_link":"http:\\/\\/goo.gl\\/tDTjNp","color":"45a5f4","actions":[{"id":"11","name":"addcart","text":"\\u2b50 add to cart","type":"button","value":"2","style":"primary"},{"id":"12","name":"cheaper","text":":money_mouth_face: cheaper","type":"button","value":"2","style":"default"},{"id":"13","name":"similar","text":"\\u26a1 similar","type":"button","value":"2","style":"default"},{"id":"14","name":"modify","text":"\\ud83c\\udf00 modify","type":"button","value":"2","style":"default"},{"id":"15","name":"moreinfo","text":"\\ud83d\\udcac info","type":"button","value":"2","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1460434449.000488"},"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33890435429\\/zRrVRvLmlnN8PEDyvMcQWNIx"}'
+        };
       }
 
-    });
+      incomingMsgAction(slackTester);
+      break;
+    case 'cancel': //just respond, no actions
+      //send message
+      console.log('Kip response cancelled');
+      break;
+    default:
+      console.log('error: canned action flag missing');
   }
+
+  var messages = yield execute(message);
+
+  return messages;
 }
 
-//pushing incoming messages to python
-function routeNLP(data) {
 
-  //sanitize msg before sending to NLP
-  data.text = data.text.replace(/[^0-9a-zA-Z.]/g, ' ');
-  if (!data.text) {
-    return sendTxtResponse(data, 'Oops, sorry, I didn\'t understand your request')
-  }
 
-  nlp.parse(data, function(e, res) {
-    if (e) {
-      console.log('NLP error ', e);
-      // Route to supervisor
-      data.flags.toSupervisor = true;
-      incomingAction(data);
-    } else {
-      data = _.merge({}, data, res)
-      processData.buildKipObject(data, function(res) {
-        incomingAction(_.merge({}, data, res));
-      });
-    }
+// use nlp to deterine the intent of the user
+function* nlp_response(message) {
+
+  // the nlp api adds the processing data to the message
+  yield nlp.parse(message);
+
+  console.log(message.execute);
+  var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
+
+  var messages = yield execute(message);
+
+  return [debug_message].concat(messages);
+}
+
+// do the things
+function execute(message) {
+  return co(function*() {
+    var messages = yield message.execute.reduce((messages, exec) => {
+      var route = exec.mode + '.' + exec.action;
+      if (!handlers[route]) {
+        throw new Error(route + ' handler not implemented');
+      }
+
+      var new_messages = handlers[route](message, exec);
+      if (new_messages instanceof Array) {
+        messages = messages.concat(new_messages)
+      } else {
+        messages.push(new_messages)
+      }
+      return messages;
+    }, [])
+
+    kip.debug('messages', messages);
+
+    // only return messages
+    return messages.filter(m => m instanceof db.Message);
   })
 }
 
-//incoming action responses from Slack buttons
-var incomingMsgAction = function(data) {
 
-  console.log('incoming Slack action req.body ', data);
+;`
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+LIFE OF  NEKO
+    ＿＿＿＿＿
+　 ／＼＿＿＿＿＼
+　|￣＼∩・ω・)＼
+　|　 ｜￣￣∪￣｜ ﾁﾗｯ
+`
 
+//
+// Handlers take something from the message.execute array and turn it into new messages
+//
+var handlers = {};
 
-  //"response_url":"https:\\/\\/hooks.slack.com\\/actions\\/T02PN3B25\\/33282428390\\/2Sq4RdP8qAJKRp5JrXfNoGP1";
+handlers['shopping.initial'] = function*(message, exec) {
+  typing(message);
+  var results = yield amazon_search.search(exec.params);
 
-  var parsedIn = JSON.parse(data.payload); // wtf
-
-  if (!parsedIn.callback_id) {
-    console.error('Slack callback_id missing from Slack response');
-    return;
-  }
-  console.log('PARSED INCOMONG ', parsedIn);
-
-  //build new incoming Kip obj
-  var kipObj = {
-    client_res: [],
-    slackData: {
-      callback_id: parsedIn.callback_id
-    },
-    tokens: ['kipfix'] //bad code check later on, hot fix here for now
-  };
-
-  //let's try to build a universal action button i/o for all platforms
-  //deal with first action in action arr...more will happen later?
-  if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value) {
-
-    //get Mode/action
-    switch (parsedIn.actions[0].name) {
-
-      case 'cheaper':
-        kipObj.mode = 'shopping';
-        kipObj.action = 'modify';
-        kipObj.dataModify = {
-          type: 'price',
-          param: 'less'
-        };
-        break;
-
-      case 'similar':
-        kipObj.mode = 'shopping';
-        kipObj.action = 'similar';
-        break;
-
-      //uses default blue for now
-      case 'modify':
-        kipObj.mode = 'shopping';
-        kipObj.action = 'modify';
-        kipObj.dataModify = {
-          type: 'genericDetail',
-          val: ['blue']
-        };
-        break;
-
-      case 'moreinfo':
-        kipObj.mode = 'shopping';
-        kipObj.action = 'focus';
-        break;
-
-      case 'addcart':
-        kipObj.mode = 'cart';
-        kipObj.action = 'save';
-        break;
-    }
-
-    //get searchSelect
-    var parseVal = parseInt(parsedIn.actions[0].value); //parse
-    if (!isNaN(parseVal) && parseVal > -1) { //check if real select number
-      parseVal = parseVal + 1; //normalize to rest of Kip of system
-      kipObj.searchSelect = [];
-      kipObj.searchSelect.push(parseVal);
-    }
-
-    //build source
-    kipObj.source = {
-      origin: origin,
-      channel: parsedIn.channel.id,
-      org: parsedIn.team.id,
-      id: parsedIn.team.id + '_' + parsedIn.channel.id,
-      user: parsedIn.user.id,
-      flag: 'buttonAction'
-    }
-
-    console.log('KIPOBJ ', kipObj);
-
-    incomingAction(kipObj);
-
-  } else {
-    console.error('Incoming Slack ERROR: missing actions[0].name or actions[0].value ', parsedIn);
-  }
-
-  // var fakeAction = {
-  //   "actions": [
-  //     {
-  //       "name": "approve",
-  //       "value": "yes"
-  //     }
-  //   ],
-  //   "callback_id": "approval_2715",
-  //   "team": {
-  //     "id": "2147563693",
-  //     "domain": "igloohat"
-  //   },
-  //   "channel": {
-  //     "id": "C065W1189",
-  //     "name": "solipsistic-slide"
-  //   },
-  //   "user": {
-  //     "id": "U045VRZFT",
-  //     "name": "episod"
-  //   },
-  //   "action_ts": "1458170917.164398",
-  //   "message_ts": "1458170866.000004",
-  //   "attachment_id": "1",
-  //   "token": "xAB3yVzGS4BQ3O9FACTa8Ho4",
-  //   "response_url": "https://hooks.dev.slack.com/actions/T021BE7LD/6204672533/x7ZLaiVMoECAW50GwtZYAXEM"
-  // }
-
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    amazon: JSON.stringify(results),
+    mode: 'shopping',
+    action: 'results'
+  })
 }
+
+handlers['shopping.focus'] = function*(message, exec) {
+  if (!exec.params.focus) {
+    kip.err('no focus supplied');
+    return default_reply(message);
+  }
+
+  // find the search results this focus query is referencing
+  var results = yield getLatestAmazonResults(message);
+
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    amazon: results,
+    mode: 'shopping',
+    action: 'focus',
+    focus: exec.params.focus
+  })
+};
+
+handlers['cart.save'] = function*(message, exec) {
+  if (!exec.params.focus) {
+    throw new Error('no focus for saving to cart');
+  }
+
+  var results = yield getLatestAmazonResults(message);
+  var result_array = JSON.parse(results);
+  var cart_id = message.cart_reference_id || message.source.team; // TODO make this available for other platforms
+  try {
+    yield kipcart.addToCart(cart_id, message.user_id, result_array[exec.params.focus - 1])
+  } catch (e) {
+    kip.err(e);
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+  }
+  kip.debug('hereasdfsaf')
+
+  // view the cart
+  return yield handlers['cart.view'](message, exec);
+};
+
+handlers['cart.view'] = function*(message, exec) {
+  kip.debug('cart.view');
+  var res = new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    mode: 'cart',
+    action: 'view',
+    focus: exec && _.get(exec, 'params.focus')
+  })
+  var cart_reference_id = message.cart_reference_id || message.source.team; // TODO
+  res.data = yield kipcart.getCart(cart_reference_id);
+  res.data = res.data.toObject();
+  if (res.data.items.length < 1) {
+    return text_reply(message, 'It looks like you have not added anything to your cart yet.');
+  }
+  kip.debug('view cart message', res);
+  return res;
+};
+
+
+;`
+                         __
+           ---_ ...... _/_ -
+          /  .      ./ .'*\ \
+          : '         /__-'   \.
+         /                      )
+       _/                  >   .'
+     /   .   .       _.-" /  .'
+     \           __/"     /.'/|
+       \ '--  .-" /     //' |\|
+        \|  \ | /     //_ _ |/|
+          .  \:     //|_ _ _|\|
+         | \/.    //  | _ _ |/| ASH
+          \_ | \/ /    \ _ _ \\\
+              \__/      \ _ _ \|\
+`
+
+
+
+
+
+
+
+//
+// Returns the amazon results as it is stored in the db (json string)
+// Recalls more history from the db if it needs to, and the history is just appended
+// to the existing history so you don't need to worry about stuff getting too messed up.
+//
+function* getLatestAmazonResults(message) {
+  var results, i = 0;
+  while (!results) {
+    if (!message.history[i]) {
+      var more_history = yield db.Messages.find({
+        thread_id: message.thread_id,
+        ts: {
+          $lte: message.ts
+        }
+      }).sort('-ts').skip(i).limit(20);
+
+      if (more_history.length === 0) {
+        throw new Error('Could not find amazon results in message history for message ' + message._id)
+      }
+
+      message.history = message.history.concat(more_history);
+    }
+
+    if (message.history[i].amazon) {
+      results = message.history[i].amazon;
+    }
+
+    i++;
+  }
+  return results;
+}
+
+
+
+
+
+
+
 
 
 
@@ -426,16 +436,18 @@ var incomingMsgAction = function(data) {
 
 //sentence breakdown incoming from python
 function incomingAction(data) {
+  kip.debug('in mode', data.mode)
+
   //sort context Mode (search vs. banter vs. purchase)
   switch (data.mode) {
     case 'shopping':
-      searchMode(data);
+      shoppingMode(data);
       break;
     case 'banter':
-      banterMode(data);
+      smalltalkMode(data);
       break;
     case 'cart':
-      purchaseMode(data);
+      cartMode(data);
       break;
     case 'mode':
       modeMode(data);
@@ -455,14 +467,12 @@ function modeMode(data) {
 }
 
 
-function searchMode(data) {
+function shoppingMode(data) {
 
   //* * * * typing event
   if (data.action == 'initial' || data.action == 'similar' || data.action == 'modify' || data.action == 'more') {
     typing();
   }
-
-  console.log('* * * * * * * * * * * * ', data.mode);
 
   //sort search action type
   switch (data.action) {
@@ -470,87 +480,35 @@ function searchMode(data) {
       search.searchInitial(data);
       break;
     case 'similar':
-      //----supervisor: flag to skip history.recallHistory step below ---//
-      if (data.flags && data.flags.recalled) {
-        // console.log('Flagged "recalled", skipping recallHistory...')
-        search.searchSimilar(data);
-      }
-      //-----------------------------------------------------------------//
-      else {
-        history.recallHistory(data, function(res) {
-          if (res) {
-            data.recallHistory = res;
-          }
-          search.searchSimilar(data);
-        });
-      }
-
+      search.searchSimilar(data);
       break;
     case 'modify':
     case 'modified': //because the nlp json is wack
 
-      //fix NLP bug
+      //fix NLP bug TODO
       if (data.dataModify && data.dataModify.val && Array.isArray(data.dataModify.val)) {
         if (data.dataModify.val[0] == 'cheeper' || data.dataModify.val[0] == 'cheper' || data.dataModify.val[0] == 'chiper' || data.dataModify.val[0] == 'chaper' || data.dataModify.val[0] == 'chaeper') {
           data.dataModify.type = 'price';
           data.dataModify.param = 'less';
         }
       }
-
-      //----supervisor: flag to skip history.recallHistory step below ---//
-      if (data.flags && data.flags.recalled) {
-        // console.log('Flagged "recalled", skipping recallHistory...')
-        search.searchModify(data);
-      }
-      //-----------------------------------------------------------------//
-      else {
-        history.recallHistory(data, function(res) {
-          if (res) {
-            data.recallHistory = res;
-          }
-          search.searchModify(data);
-        });
-      }
+      search.searchModify(data);
       break;
     case 'focus':
-      //----supervisor: flag to skip history.recallHistory step below ---//
-      if (data.flags && data.flags.recalled) {
-        // console.log('Flagged "recalled", skipping recallHistory...')
-        search.searchFocus(data);
-      }
-      //-----------------------------------------------------------------//
-      else {
-        history.recallHistory(data, function(res) {
-          if (res) {
-            data.recallHistory = res;
-          }
-          search.searchFocus(data);
-        });
-      }
+      search.searchFocus(data);
       break;
     case 'back':
       //search.searchBack(data);
       break;
     case 'more':
-      //----supervisor: flag to skip history.recallHistory step below ---//
-      if (data.flags && data.flags.recalled) {
-        // console.log('Flagged "recalled", skipping recallHistory...')
-        search.searchMore(data);
-      }
-      //-----------------------------------------------------------------//
-      history.recallHistory(data, function(res) {
-        if (res) {
-          data.recallHistory = res;
-        }
-        search.searchMore(data); //Search more from same query
-      });
+      search.searchMore(data); //Search more from same query
       break;
     default:
       search.searchInitial(data);
   }
 }
 
-function banterMode(data) {
+function smalltalkMode(data) {
   //sort search action type
   switch (data.action) {
     case 'question':
@@ -562,7 +520,7 @@ function banterMode(data) {
   }
 }
 
-function purchaseMode(data) {
+function cartMode(data) {
   //sort purchase action
   switch (data.action) {
     case 'save':
@@ -623,22 +581,6 @@ var outgoingResponse = function(data, action, source) { //what we're replying to
           //store a new mongo ID to pass in Slack callback
           data.searchId = mongoose.Types.ObjectId();
 
-          // var moreObj = {};
-          // moreObj.actions = [{
-          //   "name": "more",
-          //   "text": "more",
-          //   "style": "default",
-          //   "type": "button",
-          //   "value": 'more'
-          // }];
-          // moreObj.callback_id = 'sdfasdfasdfasdf'; //pass mongo id as callback id so we can access reference later
-          // moreObj.image_url = urlArr[count];
-          // moreObj.title = 'See more';
-          // moreObj.title_link = res[count];
-          // moreObj.color = "#45a5f4";
-          // moreObj.fallback = 'Tap for more';
-
-        // client_res.push(moreObj);
         }
 
         //put all result URLs into arr
@@ -842,9 +784,6 @@ var sendResponse = function(data, flag) {
 
 
       async.eachSeries(attachThis, function(attach, callback) {
-        // console.log('photo ',attach.photo);
-        // console.log('message ',attach.message);
-        // console.log('client_res', data.client_res)
         upload.uploadPicture('telegram', attach.photo, 100, true).then(function(uploaded) {
           tg.sendMessage({
             chat_id: data.source.channel,
@@ -2011,28 +1950,7 @@ function shoppingMode(data) {
 
   data.mode = 'mode';
   data.action = 'shopping';
-  history.saveHistory(data, true, function(res) {});
-
-  kipUser[data.source.id].conversations = 'shopping';
-
-  // data.action = 'sendAttachment';
-
-// data.client_res = [
-//   {
-//     "image_url":"http://i.imgur.com/PqrtJmD.png",
-//     "text":"",
-//     "color":"#45a5f4"
-//   },
-//   {
-//       "text": "Tell me what you're looking for, or use `help` for more options",
-//       "mrkdwn_in": [
-//           "text",
-//           "pretext"
-//       ],
-//       "color":"#49d63a"
-//   }
-// ];
-// sendResponse(data);
+// kipUser[data.source.id].conversations = 'shopping';
 }
 
 function reportMode(data) {
@@ -2141,77 +2059,6 @@ function truncate(string) {
 function encode_utf8(s) {
   return unescape(encodeURIComponent(s));
 }
-
-
-// client.on("connect", function(err) {
-//     console.log("Connected to email redis queue...");
-// });
-
-// var timer = new InvervalTimer(function() {
-//     client.lrange('chat_email', 0, -1, function(err, emails) {
-//             // console.log('Email Queue: ' + emails.length)
-//             if (emails.length > 0) {
-//                 console.log('Pausing timer')
-//                 timer.pause();
-//                 console.log(emails.length + ' email(s) for processing.')
-//                 async.eachSeries(emails, function iterator(email_str, callback) {
-//                     var envelope = JSON.parse(email_str);
-//                     console.log('Incoming email: ', JSON.stringify(envelope));
-//                     Chatuser.find({'profile.email':{$regex: envelope.from_address.toString().trim(), $options:'i'}}).exec(function(err, users) {
-//                         console.log(0);
-//                         if(err){
-//                             console.log('saved chat user retrieval error');
-//                         } else {
-//                             if (!users || users.length == 0) {
-//                                 console.log(1);
-//                                 var mailOptions = {
-//                                     to: envelope.from_address,
-//                                     from: 'Kip Bot <hello@kip.ai>',
-//                                     subject: 'You are not currently in a chat!',
-//                                     text: 'You are currently not taking part in any Kip Bot chats...'
-//                                 };
-//                                 mailerTransport.sendMail(mailOptions, function(err) {
-//                                     if (err) console.log(err);
-//                                     console.log('User was not found in Chatusers db. Sent notification to user.');
-//                                 });
-//                             }
-//                             else if (users[0] && users[0].team_id ) {
-//                                 console.log(2);
-//                                var emailCommand = {
-//                                     source: {
-//                                         'origin':'slack',
-//                                         'channel':users[0].dm,
-//                                         'org':slackUsers[users[0].team_id].activeTeamId,
-//                                         'id':users[0].team_id + "_" + users[0].dm,
-//                                         'user': slackUsers[users[0].team_id].activeUserId
-//                                     },
-//                                     'msg': envelope.text.toString().trim(),
-//                                     'flags': {'email': true},
-//                                     'emailInfo': {
-//                                         to: envelope.from_address,
-//                                         from: 'Kip Bot <hello@kip.ai>',
-//                                         subject: 'Reply from Kip Bot!',
-//                                         text: ''
-//                                     }
-//                                 };
-//                                 preProcess(emailCommand);
-//                                 client.lrem('chat_email', 1, email_str);
-//                                 timer.resume()
-//                             } else {
-//                                 console.log(3);
-//                                 console.log('wtf mate: slackUsers: ', slackUsers, ' users: ', users);
-//                                 client.lrem('chat_email', 1, email_str);
-//                                 timer.resume()
-//                             }
-//                         }
-//                     });
-//                 }, function complete(err, results) {
-//                     console.log('Resuming timer!')
-//                     timer.resume()
-//                 });
-//             }
-//         }) // end of client lrange, callback)
-// }, 5000);
 
 
 function InvervalTimer(callback, interval) {

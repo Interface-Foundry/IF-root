@@ -64,7 +64,7 @@ function topic(topic) {
         while (true) {
           var message = yield getNextMessage(topic);
           if (!message) { return }
-          kip.debug('handling message', message);
+          kip.debug('handling message', message._id);
           observer.onNext(message);
         }
       }).catch(kip.err)
@@ -76,7 +76,10 @@ function topic(topic) {
         dispatched: true,
         done: { $ne: true },
         dispatch_time: { $lt: new Date() - 10000 },
-        retries: { $lt: 3 }
+        $or: [
+          {retries: {$exists: false}},
+          {retries: {$lt: 3}}
+        ]
       }, {
         $set: { dispatched: false },
         $inc: { retries: 1 }

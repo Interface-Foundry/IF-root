@@ -1,6 +1,16 @@
 stitch = require('../../image_processing/api.js');
 var async = require('async');
 
+var stitchResultsPromise = function(items) {
+  return new Promise((resolve, reject) => {
+    stitchResults({
+      amazon: items
+    }, 'amazon', function(urls) {
+      resolve(urls);
+    })
+  })
+}
+
 var stitchResults = function(data,source,callback) {
 
     var stitchURLs = [];
@@ -10,7 +20,7 @@ var stitchResults = function(data,source,callback) {
     switch (source) {
         case 'amazon':
             //adding images for stiching
-            
+
 
             //only do parallel for 3 item results
             if (data.amazon.length >= 3){
@@ -67,7 +77,7 @@ var stitchResults = function(data,source,callback) {
                   console.error('ERROR: IMAGE MISSING in Amazon result');
                   callback();
                 }
-                
+
               }, function done(){
                   //fireStitch();
                   console.log('peeell222 ',stitchURLs);
@@ -88,7 +98,7 @@ var stitchResults = function(data,source,callback) {
                 price = amazonObj.realPrice;
               }
               //resort to api price here
-              else{ 
+              else{
 
                 //USE OFFER FIRST, then fallback to listprice
 
@@ -105,7 +115,7 @@ var stitchResults = function(data,source,callback) {
                         //convert to $0.00
                         //price = addDecimal(price);
                     }
-                }                     
+                }
               }
 
               //check for non price, remove
@@ -135,7 +145,7 @@ var stitchResults = function(data,source,callback) {
                   imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
               }
 
-              //removing 
+              //removing
               if(amazonObj.reviews && amazonObj.reviews.rating == 0){
                 delete amazonObj.reviews;
               }
@@ -267,7 +277,7 @@ var stitchResults = function(data,source,callback) {
 
                 if(cString.length < 1){
                   cString.push('');
-                } 
+                }
 
                 toStitch.push({
                     url: imageURL,
@@ -275,7 +285,7 @@ var stitchResults = function(data,source,callback) {
                     prime: primeAvail, //is prime available?
                     name: cString, //TRIM NAME HERE
                     reviews: amazonObj.reviews
-                });                      
+                });
               }
               else {
                 toStitch.push({
@@ -284,7 +294,7 @@ var stitchResults = function(data,source,callback) {
                     prime: primeAvail, //is prime available?
                     name: '',
                     reviews: amazonObj.reviews
-                });                       
+                });
               }
               fireStitch(tracker,function(){
                 console.log('BUILD IMAGE3333333^ ^ ^ ^ ^ ^ ^ ^ ');
@@ -293,7 +303,7 @@ var stitchResults = function(data,source,callback) {
 
           }
         break;
-            
+
     }
     function fireStitch(tracker,callback2){
         //call to stitch service
@@ -330,3 +340,4 @@ function truncate(string,count){
 
 /// exports
 module.exports.stitchResults = stitchResults;
+module.exports.stitchResultsPromise = stitchResultsPromise;
