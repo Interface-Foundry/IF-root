@@ -42,9 +42,10 @@ var search = function*(params) {
     Keywords: params.query
   };
 
+  var skip = 0;
   if (params.skip > 0) {
     amazonParams.ItemPage = 1 + params.skip/9|0; // 9 results per page
-    var skip = params.skip % 9; // if skip = 3, page=1 and skip = 3
+    skip = params.skip % 9; // if skip = 3, page=1 and skip = 3
     // assumes skip is a multiple of 3
     // skip = 0: p1, s0
     // skip = 3: p1, s3
@@ -52,9 +53,12 @@ var search = function*(params) {
     // skip = 9; p2, s0
   }
 
-  console.log('🔍 do the amazon search! 🔎 ')
+  debug('🔍 do the amazon search! 🔎 ')
+  debug('input params', params);
+  debug('amazon params', amazonParams);
+
   var results = yield client.itemSearch(amazonParams);
-  results = results.slice(skip, 3);
+  results = results.slice(skip, skip + 3);
 
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {

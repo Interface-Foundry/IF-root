@@ -1,3 +1,5 @@
+var kip = require('../../kip');
+
 
 var checkExitMode = function(input) {
 
@@ -1138,7 +1140,7 @@ var checkForCanned = function(message) {
 
     }
   }
-
+  
   return {
     res: res,
     flag: flag,
