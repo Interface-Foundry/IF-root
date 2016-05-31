@@ -450,6 +450,7 @@ function* getLatestAmazonResults(message) {
       }).sort('-ts').skip(i).limit(20);
 
       if (more_history.length === 0) {
+        console.log(message);
         throw new Error('Could not find amazon results in message history for message ' + message._id)
       }
 
@@ -639,6 +640,10 @@ var sendTxtResponse = function(data, msg, flag) {
 var outgoingResponse = function(data, action, source) { //what we're replying to user with
   // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
   //stitch images before send to user
+  // if (!data.searchId) {
+    data.searchId = mongoose.Types.ObjectId();
+  // }    
+
   if (action == 'stitch') {
     picstitch.stitchResults(data, source, function(urlArr) {
       //sending out stitched image response
@@ -647,11 +652,10 @@ var outgoingResponse = function(data, action, source) { //what we're replying to
       processData.urlShorten(data, function(res) {
         var count = 0;
 
-        if (data.source.origin == 'slack') {
-          //store a new mongo ID to pass in Slack callback
-          data.searchId = mongoose.Types.ObjectId();
-
-        }
+        // if (data.source.origin == 'slack' || data.source.origin == 'facebook') {
+        //   //store a new mongo ID to pass in Slack callback
+        //   data.searchId = mongoose.Types.ObjectId();
+        // }
 
         //put all result URLs into arr
         async.eachSeries(res, function(i, callback) {
@@ -771,7 +775,9 @@ var checkOutgoingBanter = function(data) {
 
 //send back msg to user, based on source.origin
 var sendResponse = function(data, flag) {
-
+   if (!data.searchId) {
+    data.searchId = mongoose.Types.ObjectId();
+  }    
   //SAVE OUTGOING MESSAGES TO MONGO
   if (data.mode && data.action && !(data.flags && data.flags.searchResults)) {
     console.log('SAVING OUTGOING RESPONSE');

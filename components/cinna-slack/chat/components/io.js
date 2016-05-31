@@ -1174,6 +1174,11 @@ var sendTxtResponse = function(data,msg,flag){
 var outgoingResponse = function(data,action,source) { //what we're replying to user with
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
+        if (!data.searchId) {
+        data.searchId = mongoose.Types.ObjectId();
+        }
+
+
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(urlArr){
             //sending out stitched image response
@@ -1184,7 +1189,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                 if (data.source.origin == 'slack'){
                     //store a new mongo ID to pass in Slack callback
-                    data.searchId = mongoose.Types.ObjectId();
+                    // data.searchId = mongoose.Types.ObjectId();
 
                     // var moreObj = {};
                     // moreObj.actions = [{
