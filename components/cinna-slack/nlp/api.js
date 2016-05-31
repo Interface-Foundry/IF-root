@@ -53,6 +53,7 @@ var parse = module.exports.parse = function(message) {
     var simpleResult = quickparse(text);
     if (simpleResult) {
       debug('found simple result')
+      message.execute = [simpleResult];
       return simpleResult;
     }
 
@@ -80,37 +81,55 @@ function quickparse(text) {
   text = text.replace(/^kip[,:;.! ]/i, '')
 
   // check for initial search queries
-  regexes = [
-    /^can you find me a\b/i,
-    /^can you find me\b/i,
-    /^find me a\b/i,
-    /^find me\b/i,
-    /^find\b/i,
-    /^search for a\b/i,
-    /^search for\b/,
-    /^search\b/i,
-    /^i need a\b/i,
-    /^i need\b/i
-  ];
+  regexes = [{
+    mode: 'shopping',
+    action: 'initial',
+    regexes: [
+      /^can you find me a\b/i,
+      /^can you find me\b/i,
+      /^find me a\b/i,
+      /^find me\b/i,
+      /^find\b/i,
+      /^search for a\b/i,
+      /^search for\b/,
+      /^search\b/i,
+      /^i need a\b/i,
+      /^i need\b/i
+    ]
+  }, {
+    mode: 'cart',
+    action: 'view',
+    regexes: [
+      /^view cart\b/i,
+      /^cart$/i,
+      /^checkout/i,
+      /^check out/i
+    ]
+  }];
 
   var result = false;
-  regexes.map(function(re) {
+  regexes.map(function(handler) {
     if (result) {
       return;
     }
 
-    if (!text.match(re)) {
-      return;
-    }
+    for (var i = 0; i < handler.regexes.length; i++) {
+      var re = handler.regexes[i];
+      if (text.match(re)) {
+        result = {
+          mode: handler.mode,
+          action: handler.action
+        };
 
-    // didn't not find it...
-    result = {execute: [{
-      mode: 'shopping',
-      action: 'initial',
-      params: {
-        query: text.replace(re, '').trim()
+        if (handler.action === 'initial') {
+          result.params = {
+            query: text.replace(re, '').trim()
+          }
+        }
+
+        return;
       }
-    }]}
+    }
   })
 
   return result;
