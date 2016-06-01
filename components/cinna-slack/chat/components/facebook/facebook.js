@@ -79,6 +79,7 @@ var app = express();
 var server = require('http').createServer(app);
 var search_results = require('./search_results');
 var focus = require('./focus');
+var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
 
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
@@ -97,7 +98,6 @@ server.listen(8000, function(e) {
 })
 
 app.get('/facebook', function(req, res) {
-    var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
     if (req.query['hub.verify_token'] === fbtoken) {
         //bot stuff
         res.send(req.query['hub.challenge']);
@@ -151,40 +151,87 @@ app.post('/facebook', function(req, res) {
                 } else if (messages[0]) {
                     co(function*() {
                         var msg = messages[0];
+                         //
+                        // Returns the amazon results as it is stored in the db (json string)
+                        // Recalls more history from the db if it needs to, and the history is just appended
+                        // to the existing history so you don't need to worry about stuff getting too messed up.
+                        //
+                        function* getLatestAmazonResults(message) {
+                            message.history = [];
+                            var results,
+                                i = 0;
+                            while (!results) {
+                                console.log('message.thread_id: ', message.thread_id)
+                                if (!message.history[i]) {
+                                    var more_history = yield db.Messages.find({
+                                        thread_id: message.thread_id,
+                                        ts: {
+                                            $lte: message.ts
+                                        }
+                                    }).sort('-ts').skip(i).limit(20);
+
+                                    if (more_history.length === 0) {
+                                        console.log(message);
+                                        throw new Error('Could not find amazon results in message history for message ' + message._id)
+                                    }
+                                    message.history = message.history.concat(more_history);
+                                }
+
+                                if (message.history[i].amazon) {
+                                    results = message.history[i].amazon;
+                                }
+                                i++;
+                            }
+                            return results;
+                        }
                         var amazon = yield getLatestAmazonResults(msg);
                         msg.amazon = amazon;
                         if (msg && msg.amazon) {
-                            var tempArr = msg.amazon; //lmao amazon
-                            msg.amazon = [];
-                            async.eachSeries(tempArr, function(item, callback2) {
-                                msg.amazon.push(JSON.parse(item)); //ughhhh
-                                callback2();
-                            }, function done(err) {
-                                if (err) console.error(err);
+                            console.log(0, postback.action);
+                                if (typeof msg.amazon  == 'string') {
+                                    //WHERE I LEFT OFF
+                                    msg.amazon = JSON.parse(msg.amazon); //lmao amazon
+                                }
                                 if (postback.action === 'add') {
-                                    var newMsg = {};
-                                    newMsg.source = msg.source;
-                                    newMsg.msg = 'save ' + postback.selected;
-                                    newMsg.bucket = 'purchase';
-                                    newMsg.action = 'add';
-                                    newMsg.tokens = [newMsg.msg];
-                                    newMsg.thread = msg.thread;
-                                    newMsg.thread.sequence += 1;
-                                    newMsg.incoming = true;
+                                    console.log(1)
+                                     var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: 'kip',
+                                        origin: msg.origin,
+                                        text: 'save ' + postback.selected,
+                                        source: msg.source,
+                                        amazon: msg.amazon,
+                                        searchSelect: [postback.selected]
+                                      });
+                                    // var newMsg = {};
+                                    // newMsg.source = msg.source;
+                                    // newMsg.thread_id = msg.thread_id
+                                    // newMsg.msg = 'save ' + postback.selected;
+                                    // newMsg.text = newMsg.msg;
+                                    // newMsg.bucket = 'purchase';
+                                    // newMsg.action = 'add';
+                                    // newMsg.tokens = [newMsg.msg];
+                                    // newMsg.thread = msg.thread;
+                                    // newMsg.thread.sequence += 1;
+                                    // newMsg.incoming = true;
                                     // newMsg.amazon = msg.amazon;
-                                    newMsg.recallHistory = msg.recallHistory;
+                                    // newMsg.recallHistory = msg.amazon;
                                     // newMsg.searchSelect = [];
                                     // newMsg.searchSelect.push(postback.selected);
-                                    newMsg.source = {
-                                        'origin': 'facebook',
-                                        'channel': sender.toString(),
-                                        'org': "facebook_" + sender.toString(),
-                                        'id': "facebook_" + sender.toString(),
-                                        'user': sender.toString()
-                                    };
+                                    // newMsg.source = {
+                                    //     'origin': 'facebook',
+                                    //     'channel': sender.toString(),
+                                    //     'org': "facebook_" + sender.toString(),
+                                    //     'id': "facebook_" + sender.toString(),
+                                    //     'user': sender.toString()
+                                    // };
                                     // queue it up for processing
-                                    var message = new db.Message(newMsg);
+                                    var message = new db.Message(new_message);
                                     message.save().then(() => {
+                                        console.log(3)
+
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
                                 // ioKip.preProcess(newMsg);
@@ -230,7 +277,6 @@ app.post('/facebook', function(req, res) {
                                     };
                                     ioKip.preProcess(newMsg);
                                 }
-                            }) // end of async
                         }
                     }) // end of co
                 }
@@ -271,14 +317,12 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             }
 
             if (message.mode === 'cart' && message.action === 'view') {
-                // msgData.attachments = yield cart(message, bot.slackbot, false);
-                // return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+                return send_cart(message.source.channel, message.text, outgoing); 
             }
 
 
-            // bot.rtm.sendMessage(message.text, message.source.channel, () => {
+
             outgoing.ack();
-            // })
 
         }).then(() => {
             outgoing.ack();
@@ -306,7 +350,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         "buttons": [{
                             "type": "web_url",
                             "url": results[0].title_link,
-                            "title": "Product Link"
+                            "title": "View on Amazon"
                         }, {
                             "type": "postback",
                             "title": "Add to Cart",
@@ -323,7 +367,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         "buttons": [{
                             "type": "web_url",
                             "url": results[1].title_link,
-                            "title": "Product Link"
+                            "title": "View on Amazon"
                         }, {
                             "type": "postback",
                             "title": "Add to Cart",
@@ -340,7 +384,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         "buttons": [{
                             "type": "web_url",
                             "url": results[2].title_link,
-                            "title": "Product Link"
+                            "title": "View Amazon"
                         }, {
                             "type": "postback",
                             "title": "Add to Cart",
@@ -416,41 +460,146 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         })
     }
 
-
-    //
-    // Returns the amazon results as it is stored in the db (json string)
-    // Recalls more history from the db if it needs to, and the history is just appended
-    // to the existing history so you don't need to worry about stuff getting too messed up.
-    //
-    function* getLatestAmazonResults(message) {
-        var results,
-            i = 0;
-        while (!results) {
-            if (!message.history[i]) {
-                var more_history = yield db.Messages.find({
-                    thread_id: message.thread_id,
-                    ts: {
-                        $lte: message.ts
-                    }
-                }).sort('-ts').skip(i).limit(20);
-
-                if (more_history.length === 0) {
-                    console.log(message);
-                    throw new Error('Could not find amazon results in message history for message ' + message._id)
+    function send_cart(channel, text, outgoing) {
+          var cart = outgoing.data.data;
+          console.log(cart);
+          var cartDisplay = {
+              "attachment": {
+                "type": "template",
+                "payload": {
+                  "template_type": "generic",
+                  "elements": []
                 }
+              }
+          };
+        for (var i = 0; i < cart.aggregate_items.length; i++) {
+            var item = cart.aggregate_items[i];
+            var userString = item.added_by.map(function(u) {
+              return 'u';
+            }).join(', ');
+            var cart_item = {
+                "title":  `${item.title} added by: ${userString}`,
+                "subtitle": 'Price: ' + item.price + "\nQuantity:" + item.quantity,
+                "image_url": item.image,
+                "buttons":[
+                    { "type": "postback", 
+                      "title": "➕", 
+                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "add" ,"selected": (i + 1) })
+                    },
+                    { "type": "postback", 
+                      "title": "➖", 
+                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "remove" ,"selected": (i + 1) })
+                    }
+                ]
+              }
+            cartDisplay.attachment.payload.elements.push(cart_item);
+          }
 
-                message.history = message.history.concat(more_history);
-            }
+        request.post({ 
+              url: 'https://graph.facebook.com/v2.6/me/messages',
+              qs: {access_token: fbtoken},
+              method: "POST",
+              json: {
+                recipient: {id: channel},
+                message: cartDisplay,
+              },
+              headers: {
+                  "content-type": "application/json",
+              }
+          },
+          function (err, res, body) {
+             if (err) console.log('post err ',err);
+             console.log(body);
+          })
 
-            if (message.history[i].amazon) {
-                results = message.history[i].amazon;
-            }
 
-            i++;
-        }
-        return results;
+        // console.log('firing send_cart: ', JSON.stringify(cart));
+        // { _id: 574f2acf49b8bac669c05f81,
+        //      __v: 0,
+        //      amazon:
+        //       { Request: [Object],
+        //         CartId: [Object],
+        //         HMAC: [Object],
+        //         URLEncodedHMAC: [Object],
+        //         PurchaseURL: [Object],
+        //         SubTotal: [Object],
+        //         CartItems: [Object] },
+        //      link: 'http://goo.gl/n6SeM6',
+        //      created_date: Wed Jun 01 2016 14:34:55 GMT-0400 (EDT),
+        //      deleted: false,
+        //      purchased: false,
+        //      items: [ [Object] ],
+        //      total: '$19.43',
+        //      aggregate_items: [ [Object] ],
+        //      id: '574f2acf49b8bac669c05f81' },
+        //   __v: 0 }
+
+    //       if (data.client_res.length === 0) {
+    //           var emptyMessage = {
+    //               "recipient": {"id": data.source.channel},
+    //               "message": {
+    //                   "text": "Your Cart is empty!"
+    //                   // messages.join('\n')
+    //               },
+    //               "notification_type": "NO_PUSH"
+    //           };
+    //          request.post({ 
+    //           url: 'https://graph.facebook.com/v2.6/me/messages',
+    //           qs: {access_token: fbtoken},
+    //           method: "POST",
+    //           json: true,
+    //           headers: {
+    //               "content-type": "application/json",
+    //           },
+    //           body: emptyMessage
+    //           },
+    //           function (err, res, body) {
+    //               if (err) console.log('post err ',err);
+    //               console.log(body);
+
+    //               })
+    //              return;
+    //       }
+
+    //       data.client_res[0].shift();
+    //       data.client_res[0].shift();
+    //         var cartDisplay = {
+    //           "attachment": {
+    //             "type": "template",
+    //             "payload": {
+    //               "template_type": "generic",
+    //               "elements": []
+    //             }
+    //           }
+    //       };
+    //       var count = 0;
+    //       data.client_res[0].forEach(function(el) {
+    //           if (el.text && el.text.title && el.text.price && el.text.quantity) {
+    //               var cart_item = {
+    //                 "title": el.text.title,
+    //                 "subtitle": 'Price: ' + el.text.price + "\nQuantity:" + el.text.quantity,
+    //                 "buttons":[
+    //                     { "type": "postback", 
+    //                       "title": "➕", 
+    //                       "payload": JSON.stringify({"dataId": data.searchId, "action": "add" ,"selected": (count + 1) })
+    //                     },
+    //                     { "type": "postback", 
+    //                       "title": "➖", 
+    //                       "payload": JSON.stringify({"dataId": data.searchId, "action": "remove" ,"selected": (count + 1) })
+    //                     }
+    //                 ]
+    //               }
+    //               if (el.thumb_url) {
+    //                 cart_item.image_url =  el.thumb_url;
+    //               }
+    //                cartDisplay.attachment.payload.elements.push(cart_item);
+    //                count++;
+    //           }
+    //       })
+
+    
+
     }
-
 
 
 
