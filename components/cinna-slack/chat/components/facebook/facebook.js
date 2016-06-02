@@ -147,21 +147,15 @@ app.post('/facebook', function(req, res) {
             }).sort('-ts').exec(function(err, messages) {
                 if (err) return console.error(err);
                 if (messages.length == 0) {
-                    return console.log('NO MSG FOUND OMG: ', event.postback.dataId)
+                    return console.log('No message found')
                 } else if (messages[0]) {
                     co(function*() {
                         var msg = messages[0];
-                         //
-                        // Returns the amazon results as it is stored in the db (json string)
-                        // Recalls more history from the db if it needs to, and the history is just appended
-                        // to the existing history so you don't need to worry about stuff getting too messed up.
-                        //
                         function* getLatestAmazonResults(message) {
                             message.history = [];
                             var results,
                                 i = 0;
                             while (!results) {
-                                console.log('message.thread_id: ', message.thread_id)
                                 if (!message.history[i]) {
                                     var more_history = yield db.Messages.find({
                                         thread_id: message.thread_id,
@@ -187,13 +181,7 @@ app.post('/facebook', function(req, res) {
                         var amazon = yield getLatestAmazonResults(msg);
                         msg.amazon = amazon;
                         if (msg && msg.amazon) {
-                            console.log(0, postback.action);
-                                if (typeof msg.amazon  == 'string') {
-                                    //WHERE I LEFT OFF
-                                    msg.amazon = JSON.parse(msg.amazon); //lmao amazon
-                                }
-                                if (postback.action === 'add') {
-                                    console.log(1)
+                                if (postback.action == 'add') {
                                      var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -205,21 +193,54 @@ app.post('/facebook', function(req, res) {
                                         amazon: msg.amazon,
                                         searchSelect: [postback.selected]
                                       });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
+                                } else if (postback.action === 'remove') {
+                                     var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: 'kip',
+                                        origin: msg.origin,
+                                        text: 'remove ' + postback.selected,
+                                        source: msg.source,
+                                        amazon: msg.amazon,
+                                        searchSelect: [postback.selected]
+                                      });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
+                                } else if (postback.action === 'list') {
+                                      var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: 'kip',
+                                        origin: msg.origin,
+                                        text: 'view cart',
+                                        source: msg.source,
+                                        amazon: msg.amazon
+                                      });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
                                     // var newMsg = {};
                                     // newMsg.source = msg.source;
-                                    // newMsg.thread_id = msg.thread_id
-                                    // newMsg.msg = 'save ' + postback.selected;
-                                    // newMsg.text = newMsg.msg;
+                                    // newMsg.msg = 'view cart';
                                     // newMsg.bucket = 'purchase';
-                                    // newMsg.action = 'add';
+                                    // newMsg.action = 'list';
                                     // newMsg.tokens = [newMsg.msg];
                                     // newMsg.thread = msg.thread;
                                     // newMsg.thread.sequence += 1;
                                     // newMsg.incoming = true;
                                     // newMsg.amazon = msg.amazon;
-                                    // newMsg.recallHistory = msg.amazon;
-                                    // newMsg.searchSelect = [];
-                                    // newMsg.searchSelect.push(postback.selected);
                                     // newMsg.source = {
                                     //     'origin': 'facebook',
                                     //     'channel': sender.toString(),
@@ -227,55 +248,7 @@ app.post('/facebook', function(req, res) {
                                     //     'id': "facebook_" + sender.toString(),
                                     //     'user': sender.toString()
                                     // };
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        console.log(3)
-
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
-                                // ioKip.preProcess(newMsg);
-                                } else if (postback.action === 'remove') {
-                                    var newMsg = {};
-                                    newMsg.source = msg.source;
-                                    newMsg.msg = 'remove ' + postback.selected;
-                                    newMsg.bucket = 'purchase';
-                                    newMsg.action = 'remove';
-                                    newMsg.tokens = [newMsg.msg];
-                                    newMsg.thread = msg.thread;
-                                    newMsg.thread.sequence += 1;
-                                    newMsg.incoming = true;
-                                    newMsg.recallHistory = msg.recallHistory;
-                                    newMsg.amazon = msg.amazon;
-                                    newMsg.searchSelect = [];
-                                    newMsg.searchSelect.push(postback.selected);
-                                    newMsg.source = {
-                                        'origin': 'facebook',
-                                        'channel': sender.toString(),
-                                        'org': "facebook_" + sender.toString(),
-                                        'id': "facebook_" + sender.toString(),
-                                        'user': sender.toString()
-                                    };
-                                    ioKip.incomingAction(newMsg);
-                                } else if (postback.action === 'list') {
-                                    var newMsg = {};
-                                    newMsg.source = msg.source;
-                                    newMsg.msg = 'view cart';
-                                    newMsg.bucket = 'purchase';
-                                    newMsg.action = 'list';
-                                    newMsg.tokens = [newMsg.msg];
-                                    newMsg.thread = msg.thread;
-                                    newMsg.thread.sequence += 1;
-                                    newMsg.incoming = true;
-                                    newMsg.amazon = msg.amazon;
-                                    newMsg.source = {
-                                        'origin': 'facebook',
-                                        'channel': sender.toString(),
-                                        'org': "facebook_" + sender.toString(),
-                                        'id': "facebook_" + sender.toString(),
-                                        'user': sender.toString()
-                                    };
-                                    ioKip.preProcess(newMsg);
+                                    // ioKip.preProcess(newMsg);
                                 }
                         }
                     }) // end of co

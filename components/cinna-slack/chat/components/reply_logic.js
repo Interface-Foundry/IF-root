@@ -372,7 +372,8 @@ handlers['cart.save'] = function*(message, exec) {
   }
 
   var results = yield getLatestAmazonResults(message);
-  var result_array = JSON.parse(results);
+
+  var result_array = typeof results == 'array' ? results : JSON.parse(results);
   var cart_id = message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   try {
     yield kipcart.addToCart(cart_id, message.user_id, result_array[exec.params.focus - 1])
