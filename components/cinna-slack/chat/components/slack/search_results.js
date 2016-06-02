@@ -68,7 +68,7 @@ function* results(message) {
 
   var results = amazon.map((r, i) => {
     return {
-      title: emojis[i] + ' ' + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
+      title: emojis[i+1] + ' ' + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
       color: '#45a5f4',
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
