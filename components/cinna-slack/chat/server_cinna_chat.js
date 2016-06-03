@@ -93,6 +93,9 @@ app.post('/slackaction', function(req, res) {
     //console.log('incoming Slack action BODY: ',req.body);
 
     if (req.body && req.body.payload){
+
+      //res.sendStatus(200);
+
       var parsedIn = JSON.parse(req.body.payload);
 
       /// FOR INITIAL SEARCHES
@@ -108,6 +111,7 @@ app.post('/slackaction', function(req, res) {
 
         console.log('ORIGINAL MESSAGE ',parsedIn.original_message);
         var stringOrig = JSON.stringify(parsedIn.original_message);
+        
         request.post(
             parsedIn.response_url,
             { payload: stringOrig },

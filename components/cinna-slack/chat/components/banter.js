@@ -1065,7 +1065,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.7.0 Paprika';
+            res = 'I\'m a penguin running Kip v0.7.1 Paprika';
             break;
 
         case '/':
@@ -1319,38 +1319,6 @@ var checkForCanned = function(input,callback,origin,source) {
             break;
     }
 
-    //PAPRIKA ACTION BUTTON TESTING
-    if (source && source.org == 'T02PN3B25'){
-
-        switch(input){
-
-            //add to cart
-            case 'kip_cheaper':
-                flag = 'slack.search'; //do this action
-                res = 'cheaper';
-                break;
-            case 'kip_addcart':
-                flag = 'slack.search'; //do this action
-                res = 'addcart';
-                break;
-            case 'kip_moreinfo':
-                flag = 'slack.search'; //do this action
-                res = 'moreinfo';
-                break;
-            case 'kip_similar':
-                flag = 'slack.search'; //do this action
-                res = 'similar';
-                break;
-            case 'kip_modify':
-                flag = 'slack.search'; //do this action
-                res = 'modify';
-                break;
-
-            //- - - - -  END TESTING - - - - - -//
-
-        }
-    }
-
     callback(res,flag,query);
 };
 
@@ -1453,10 +1421,10 @@ var getCinnaResponse = function(data,callback){
                 case 'initial':
                     if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                         if (data.imageTags){
-                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Tap `Add to Cart` to add to the Team Cart 😊';
                         }
                         else {
-                            res = 'Hi, here are some options you might like. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                            res = 'Hi, here are some options you might like. Tap `Add to Cart` to save to the Team Cart 😊';
                         }
                     }
                     else if (data.source.origin == 'kik'){
