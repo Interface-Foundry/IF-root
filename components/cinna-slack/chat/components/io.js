@@ -771,7 +771,7 @@ var preProcess = function(data){
                                 "body":"🔮 Surprise me!"
                             }
                         ]
-                    }];  
+                    }];
                     cannedBanter(data,keyboardObj);
                     break;
 
@@ -866,7 +866,7 @@ var preProcess = function(data){
 
 //pushing incoming messages to python
 function routeNLP(data){
-        
+
     data.flags = data.flags ? data.flags : {};
     data.msg = emojiText.convert(data.msg,{delimiter: ' '}); //convert all emojis to text
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); //sanitize msg before sending to NLP
@@ -1090,7 +1090,7 @@ var incomingMsgAction = function(data,origin){
 function incomingAction(data){
 
 
-    // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / / 
+    // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / /
     if (!messageHistory[data.source.id]){ //new user, set up chat states
         messageHistory[data.source.id] = {};
         messageHistory[data.source.id].search = []; //random chats
@@ -1446,7 +1446,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
 
                             //BUILD NEW MESSAGE ARRAY OBJ FOR 5+ messages
-                            
+
                             // - - - - - //
 
                             // var item = response.amazon[count];
@@ -1490,7 +1490,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             //console.log('KIK MSG BUILT ',kikMsg)
 
                             data.client_res.push(kikMsg);
- 
+
                         }
                         else if (data.source.origin == 'telegram'){
                             var attachObj = {};
@@ -1525,7 +1525,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             callback()
 
                         }, function done(){
-                        
+
                             if(data.client_res[0]){
 
                                 keyboardObj[0].responses.push(
@@ -1551,11 +1551,11 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                                 console.error('some error go away')
                             }
                             checkOutgoingBanter(data);
-                        })                     
+                        })
                     }
                     else {
                         checkOutgoingBanter(data);
-                    }   
+                    }
                 });
             });
             // function compileResults(){
@@ -1714,7 +1714,7 @@ var sendResponse = function(data,flag){
             //   .setKikJsData({"callback_id": data.searchId});
 
 
-            // data.client_res[0] = 
+            // data.client_res[0] =
 
             //kipServer.sendToKik(data,message,'text')
 
@@ -1745,7 +1745,7 @@ var sendResponse = function(data,flag){
 
 
 
-            // attachThis.map(function(attach){ 
+            // attachThis.map(function(attach){
             //     console.log('ATTACH ', attach)
 
             //    // console.log('kikMsg !_!_!_!_!_!_! ', kikMsg)
@@ -1820,8 +1820,8 @@ var sendResponse = function(data,flag){
 
         }
 
-        ///FOR FOCUS HERE----> 
-        //ALL FOCUS QUERIES WILL SHOW FOCUS KEYBOARD FOR THAT ITEM 
+        ///FOR FOCUS HERE---->
+        //ALL FOCUS QUERIES WILL SHOW FOCUS KEYBOARD FOR THAT ITEM
 
         else if (data.action == 'focus'){
 
@@ -1844,7 +1844,7 @@ var sendResponse = function(data,flag){
                 var itemTitle = kikEdit[0];
                 kikEdit.shift();
                 kikEdit = kikEdit.join(' ');
-                
+
                 processData.getNumEmoji(data,data.searchSelect[0],function(emoji){
 
                     var kikMsg;
@@ -1861,7 +1861,7 @@ var sendResponse = function(data,flag){
                       // .setAttributionName('Amazon');
                     kikRes.push(kikMsg)
 
-                    
+
                     // kikMsg = Kik.Message.text(emoji + ' ' + );
                     // kikRes.push(kikMsg)
 
@@ -1934,7 +1934,7 @@ var sendResponse = function(data,flag){
                     //     default:
                     //         spacer = ' ';
                     // }
-                    
+
                     var keyboardObj = [{
                         "type": "suggested",
                         "hidden":false,
@@ -1956,7 +1956,7 @@ var sendResponse = function(data,flag){
                                 "body":"Add "+emoji+" to Cart"
                             }
                         ]
-                    }];   
+                    }];
 
                     //kikRes[0]._state.keyboards = keyboardObj;
 
@@ -2000,7 +2000,7 @@ var sendResponse = function(data,flag){
                 //   .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
                 //   .setAttributionName('Amazon');
 
-                
+
 
 
 
@@ -2223,7 +2223,7 @@ var sendResponse = function(data,flag){
 
                 if(data.keyboardButtons){
                     kikRez._state.keyboards = data.keyboardButtons;
-                }              
+                }
 
                 kipServer.sendToKik(data,kikRez,'banter')
 
@@ -2755,9 +2755,9 @@ var sendResponse = function(data,flag){
                         attachments[1].actions = actionObj;
                         if(data.slackData){
                             attachments[1].callback_id = data.slackData.callback_id;
-                        }                        
+                        }
                     }
-                    
+
                     attachments = JSON.stringify(attachments);
 
                     var msgData = {
@@ -2819,7 +2819,7 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
-                        
+
                         var attachThis = message;
                         attachThis = JSON.stringify(attachThis);
 
@@ -2853,7 +2853,7 @@ var sendResponse = function(data,flag){
                             console.log('SEND DATA NOW _ NORMAL ',msgData);
                             slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
                                 callback();
-                            });            
+                            });
                         //}
 
                     }
@@ -3080,26 +3080,30 @@ function viewCart(data, show_added_item){
             image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
         })
 
+      var links = [];
+      if (isAdmin || isP2P) {
+        links = yield cart.aggregate_items.map(i => {
+          return processData.getItemLink(i.link, data.source.user, i._id.toString());
+        })
+      }
+
       for (var i = 0; i < cart.aggregate_items.length; i++) {
         var item = cart.aggregate_items[i];
         var userString = item.added_by.map(function(u) {
           return '<@' + u + '>';
         }).join(', ');
 
-        if (isAdmin || isP2P) {
-          var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
-          console.log(link);
-        }
+        var link = links[i];
 
         //CONFIRM MESSAGE FOR REMOVE IF ITS THE LAST ITEM TO REMOVE
 
-        //ONLY SHOW ADD/REMOVE FOR 
+        //ONLY SHOW ADD/REMOVE FOR
 
         //check if user added this item
 
         //item.added_by
 
-    
+
         if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
             var actionObj = [
                 {
@@ -3122,7 +3126,7 @@ function viewCart(data, show_added_item){
                   "type": "button",
                   "value": "add"
                 }
-            ];            
+            ];
         }else {
             var actionObj = [];
         }
@@ -3184,7 +3188,7 @@ function viewCart(data, show_added_item){
       data.client_res.push(cartObj);
       console.log('done with cartObj');
 
-      //reset cart delay 
+      //reset cart delay
       cartDelay = 2000;
 
       banter.getCinnaResponse(data,function(res){
@@ -3220,7 +3224,7 @@ function viewCart(data, show_added_item){
             console.log('slowing view cart down ',cartDelay)
           setTimeout(function() {
             viewCart(data);
-          }, cartDelay);           
+          }, cartDelay);
       }else {
             console.log('error retriving cart for view cart')
             console.log(e.stack);
@@ -3646,7 +3650,7 @@ function truncate(string,l) {
        if (string.length > 80)
           return string.substring(0,80)+'...';
        else
-          return string;        
+          return string;
     }
 
 };
