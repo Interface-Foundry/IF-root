@@ -72,7 +72,7 @@ footer li {
 
 .action-links > li:first {
   padding: 0px 40px;
-  color: #fffr
+  color: #fff;
   line-height: 80px;
   font-size: 20px;
 }
@@ -91,14 +91,29 @@ footer li {
 }
 
 .bot-text-container img{
-  width:67px; 
+  width:67px;
   margin-top:7px;
 }
 
-.copyright { 
-  color:white;
+.copyright {
+  color: #fff;;
   font-size: 13px;
   margin-left: 12px;
+}
+
+.mobile-copyright {
+  color: #fff;;
+  font-size: 13px;
+  margin-left: -30px;
+}
+
+.mobile-action-links li {
+  display: block;
+  padding: 5px 0px;
+}
+
+.mobile-action-links a{
+  color: #fff;
 }
 
 /* @media (max-width: 770px) { */
