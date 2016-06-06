@@ -186,7 +186,7 @@ app.post('/facebook', function(req, res) {
                                         incoming: true,
                                         thread_id: msg.thread_id,
                                         resolved: false,
-                                        user_id: 'kip',
+                                        user_id: msg.user_id,
                                         origin: msg.origin,
                                         text: 'save ' + postback.selected,
                                         source: msg.source,
@@ -203,7 +203,7 @@ app.post('/facebook', function(req, res) {
                                         incoming: true,
                                         thread_id: msg.thread_id,
                                         resolved: false,
-                                        user_id: 'kip',
+                                        user_id: msg.user_id,
                                         origin: msg.origin,
                                         text: 'remove ' + postback.selected,
                                         source: msg.source,
@@ -220,7 +220,7 @@ app.post('/facebook', function(req, res) {
                                         incoming: true,
                                         thread_id: msg.thread_id,
                                         resolved: false,
-                                        user_id: 'kip',
+                                        user_id: msg.user_id,
                                         origin: msg.origin,
                                         text: 'view cart',
                                         source: msg.source,
@@ -231,7 +231,57 @@ app.post('/facebook', function(req, res) {
                                     message.save().then(() => {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
+                                } else if (postback.action === 'focus') {
+                                      var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: msg.user_id,
+                                        origin: msg.origin,
+                                        text: postback.selected,
+                                        source: msg.source,
+                                        amazon: msg.amazon
+                                      });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
                                 }
+                                else if (postback.action === 'similar') {
+                                      var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: msg.user_id,
+                                        origin: msg.origin,
+                                        text: 'similar ' + postback.selected,
+                                        source: msg.source,
+                                        amazon: msg.amazon
+                                      });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
+                                }
+                               else if (postback.action === 'more') {
+                                  var new_message = new db.Message({
+                                    incoming: true,
+                                    thread_id: msg.thread_id,
+                                    resolved: false,
+                                    user_id: msg.user_id,
+                                    origin: msg.origin,
+                                    text: 'more',
+                                    source: msg.source,
+                                    amazon: msg.amazon
+                                  });
+                                // queue it up for processing
+                                var message = new db.Message(new_message);
+                                message.save().then(() => {
+                                    queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                });
+                            }
                         }
                     }) // end of co
                 }
@@ -275,8 +325,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 return send_cart(message.source.channel, message.text, outgoing); 
             }
 
-
-
             outgoing.ack();
 
         }).then(() => {
@@ -293,7 +341,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
 
     function send_results(channel, text, results, outgoing) {
-        // console.log('\n\ndataId: ', outgoing.data.searchId, '\n\n');
+        // console.log('\n\nimage_url: ', results[0].image_url, '\n\n');
         var messageData = {
             "attachment": {
                 "type": "template",
@@ -301,12 +349,8 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     "template_type": "generic",
                     "elements": [{
                         "title": results[0].title,
-                        "image_url": results[0].image_url,
+                        "image_url": (results[0].image_url.indexOf('http') > -1 ? results[0].image_url : 'http://kipthis.com/images/header_partners.png'),
                         "buttons": [{
-                            "type": "web_url",
-                            "url": results[0].title_link,
-                            "title": "View on Amazon"
-                        }, {
                             "type": "postback",
                             "title": "Add to Cart",
                             "payload": JSON.stringify({
@@ -315,15 +359,26 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                 selected: 1,
                                 ts: outgoing.data.ts
                             })
+                        },
+                        {
+                            "type": "web_url",
+                            "url": results[0].title_link,
+                            "title": "View on Amazon"
+                        }, 
+                        {
+                            "type": "postback",
+                            "title": "Details",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "focus",
+                                selected: 1,
+                                ts: outgoing.data.ts
+                            })
                         }],
                     }, {
                         "title": results[1].title,
-                        "image_url": results[1].image_url,
+                        "image_url": (results[1].image_url.indexOf('http') > -1 ? results[1].image_url : 'http://kipthis.com/images/header_partners.png'),
                         "buttons": [{
-                            "type": "web_url",
-                            "url": results[1].title_link,
-                            "title": "View on Amazon"
-                        }, {
                             "type": "postback",
                             "title": "Add to Cart",
                             "payload": JSON.stringify({
@@ -332,21 +387,69 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                 selected: 2,
                                 ts: outgoing.data.ts
                             })
+                        },
+                        {
+                            "type": "web_url",
+                            "url": results[1].title_link,
+                            "title": "View on Amazon"
+                        }, 
+                        {
+                            "type": "postback",
+                            "title": "Details",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "focus",
+                                selected: 2,
+                                ts: outgoing.data.ts
+                            })
                         }],
                     }, {
                         "title": results[2].title,
-                        "image_url": results[2].image_url,
+                        "image_url": ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png'),
                         "buttons": [{
-                            "type": "web_url",
-                            "url": results[2].title_link,
-                            "title": "View Amazon"
-                        }, {
                             "type": "postback",
                             "title": "Add to Cart",
                             "payload": JSON.stringify({
                                 dataId: outgoing.data.thread_id,
                                 action: "add",
                                 selected: 3,
+                                ts: outgoing.data.ts
+                            })
+                        },
+                        {
+                            "type": "web_url",
+                            "url": results[2].title_link,
+                            "title": "View on Amazon"
+                        }, 
+                        {
+                            "type": "postback",
+                            "title": "Details",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "focus",
+                                selected: 3,
+                                ts: outgoing.data.ts
+                            })
+                        }],
+                    },
+                    {
+                        "title": 'Are you enjoying Kip?',
+                        "image_url":  'http://kipthis.com/images/header_family.png',
+                        "buttons": [{
+                            "type": "postback",
+                            "title": "See More Results",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "more",
+                                ts: outgoing.data.ts
+                            })
+                        },
+                        {
+                            "type": "postback",
+                            "title": "🐧",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "🐧",
                                 ts: outgoing.data.ts
                             })
                         }],
@@ -369,14 +472,32 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             }
         }, function(err, res, body) {
             if (err) console.error('post err ', err);
-            console.log(body)
+            console.log(body, results[1].image_url);
             outgoing.ack();
         });
 
     }
 
-    function send_focus(channel, text, results, outgoing) {
-        var messageData = {
+    function send_focus(channel, text, focus_info, outgoing) {
+
+        var img_card = {
+             "recipient": {
+                "id": channel
+            }, 
+            "message":{
+                "attachment":{
+                  "type":"image",
+                  "payload":{
+                    "url": focus_info.image_url,
+                   "text": focus_info.title
+                  }
+                },
+               "text": focus_info.title
+              },
+              "notification_type": "NO_PUSH"
+        }
+
+        var focus_card = {
             "recipient": {
                 "id": channel
             },
@@ -385,20 +506,39 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     "type": "template",
                     "payload": {
                         "template_type": "button",
-                        "buttons": [
-                            {
+                        "buttons": [{
+                            "type": "postback",
+                            "title": "Add to Cart",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "add",
+                                selected: focus_info.selected,
+                                ts: outgoing.data.ts
+                            })
+                        },
+                        {
+                            "type": "postback",
+                            "title": "Similar",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "similar",
+                                selected: focus_info.selected,
+                                ts: outgoing.data.ts
+                            })
+                        },{
                                 "type": "web_url",
-                                "url": results[0].title_link,
-                                "title": "See Product"
+                                "url": focus_info.title_link,
+                                "title": 'View on Amazon'
                             }
                         ],
-                        "text": results[1].text
+                        "text": (focus_info.title + '\n' + focus_info.price + '\n' + focus_info.description).substring(0,300)
                     }
                 }
             },
             "notification_type": "NO_PUSH"
         };
-        request.post({
+
+         request.post({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
                 access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
@@ -408,10 +548,25 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             headers: {
                 "content-type": "application/json",
             },
-            body: messageData
+            body: img_card
         }, function(err, res, body) {
             if (err) console.error('post err ', err);
             console.log(body)
+            request.post({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {
+                    access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                },
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: focus_card
+            }, function(err, res, body) {
+                if (err) console.error('post err ', err);
+                console.log(body)
+            })
         })
     }
 
