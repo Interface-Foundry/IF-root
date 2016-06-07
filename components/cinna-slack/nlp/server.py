@@ -28,7 +28,6 @@ def parse_message():
     data.blob = TextBlob(data.text)
     data.doc = nlp(u"{}".format(data.text), tag=True, parse=True, entity=True)
     parsed_data = parser.parse(data)
-    print(parsed_data)  # debugging
     return jsonify(parsed_data)
 
 
