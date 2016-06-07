@@ -202,6 +202,7 @@ var checkForCanned = function(input,callback,origin,source) {
             res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
             break;     
         case textSimilar(input,'what you up to') > 60:
+        case textSimilar(input,'what\'s up') > 60:
         case textSimilar(input,'whats up') > 60:
         case textSimilar(input,'sup') > 60:
         case textSimilar(input,'how are you') > 60:
@@ -227,7 +228,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'i\'m doing well') > 80:
         case textSimilar(input,'i\'m fine') > 80:
         case textSimilar(input,'i\'m ok') > 90:
-            query = 'today\'s deals on amazon';
+            query = 'best sellers';
             flag = 'search.initial'; //do this action
             res = 'That\'s good to hear. It\'s a hard life being in retail, want to help a bot out and buy something? We have discounts! 😊';
             break;
@@ -254,6 +255,11 @@ var checkForCanned = function(input,callback,origin,source) {
             query = 'champagne';
             flag = 'search.initial'; //do this action
             res = 'Love you too. How about we get some champagne and make it a date? 😉';
+            break;
+
+        case textSimilar(input,'kip say hi to nytm') > 60:
+            flag = 'basic'; //do this action
+            res = 'http://kipthis.com/kip_modes/nytm.png';
             break;
 
         case textSimilar(input,'why') > 90:
@@ -854,7 +860,7 @@ var checkForCanned = function(input,callback,origin,source) {
 
         case textSimilar(input,'trending now') > 90:
         case textSimilar(input,'trending') > 90:
-        case textSimilar(input,'what\’s new') > 60:
+        case textSimilar(input,'what\'s new') > 60:
         case textSimilar(input,'deals') > 90:
         case textSimilar(input,'what\'s good') > 60:
             res = 'Here\'s what\'s trending now';   
@@ -1421,10 +1427,12 @@ var getCinnaResponse = function(data,callback){
                 case 'initial':
                     if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                         if (data.imageTags){
-                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Tap `Add to Cart` to add to the Team Cart 😊';
+                            //res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Tap `Add to Cart` to add to the Team Cart 😊';
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                         else {
-                            res = 'Hi, here are some options you might like. Tap `Add to Cart` to save to the Team Cart 😊';
+                            //res = 'Hi, here are some options you might like. Tap `Add to Cart` to save to the Team Cart 😊';
+                            res = 'Hi, here are some cool options you might like. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                     }
                     else if (data.source.origin == 'kik'){
@@ -1432,11 +1440,11 @@ var getCinnaResponse = function(data,callback){
                             res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'` 😊';
                         }
                         else {
-                            res = 'Hi, here are some options you might like 😊';
+                            res = 'Hi, here are some cool options you might like 😊';
                         }
                     }
                     else if (data.source.origin == 'socket.io'){
-                        res = 'Hi, here are some options you might like. Use <span class="typer">more</span> to see more options or <span class="typer">buy 1</span>, <span class="typer">2</span> or <span class="typer">3</span> to get it now 😊';
+                        res = 'Hi, here are some cool options you might like. Use <span class="typer">more</span> to see more options or <span class="typer">buy 1</span>, <span class="typer">2</span> or <span class="typer">3</span> to get it now 😊';
                     }
                     break;
                 case 'similar':

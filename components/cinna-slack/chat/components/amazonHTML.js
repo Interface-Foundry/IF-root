@@ -32,17 +32,27 @@ async.whilst(
           proxy: 'http://127.0.0.1:23000'
         };
         requestPromise(options).then(function(data){ 
-          console.log('LUMINATI SUCCESS')
+          //console.log('LUMINATI SUCCESS')
           luminatiReady = true;
           //proxyPool.push(super_proxy);
-          callback();
+          //callback();
+          setTimeout(function () {
+            callback()
+          }, 10000);
         }, function(err){ 
 
-          console.log('LUMINATI ERROR ',err)
+          //console.log('LUMINATI ERROR ')
           luminatiReady = false;
+
+          setTimeout(function () {
+            callback()
+          }, 10000);
+
         });
 
-        setTimeout(callback, 20000);//every 20 sec...
+        // setTimeout(callback, 10000);//every 20 sec...
+
+
     },
     function (err) {
         // 5 seconds have passed
