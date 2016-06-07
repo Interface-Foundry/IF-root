@@ -28,6 +28,8 @@ def parse_message():
     data.blob = TextBlob(data.text)
     data.doc = nlp(u"{}".format(data.text), tag=True, parse=True, entity=True)
     parsed_data = parser.parse(data)
+    # print(parsed_data)  # testing
+    print('allow debugging?')
     return jsonify(parsed_data)
 
 
@@ -40,4 +42,4 @@ def reload_parse():
 if __name__ == '__main__':
     print('running app on port 8083')
     app.run(host="0.0.0.0", port=8083, use_debugger=True,
-            debug=True, use_reloader=False)
+            debug=True, use_reloader=True)
