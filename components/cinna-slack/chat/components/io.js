@@ -220,7 +220,7 @@ var newSlack = function() {
         else {
             loadSlackUsers(users);
             console.log('DEBUG: new slack team added with this data: ',users);
-            res.send('slack user added');
+            //res.send('slack user added');
         }
     });
 }
