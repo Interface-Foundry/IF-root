@@ -25,6 +25,7 @@ var conversation_botkit = require('./conversation_botkit');
 var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
 var nlp = require('../../nlp/api');
+var kip = require('kip');
 
 //set env vars
 var config = require('config');
@@ -1520,7 +1521,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                         })
                     }
                     else if (data.source.origin == 'slack'){
-                        
+
 
                         //inserting bottom navigation attachment (More, Other Options)
                         var attachObj = {};
@@ -1561,7 +1562,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             //   "type": "button",
                             //   "value": count
                             // }
-                            
+
                         ];
                         attachObj.actions = actionObj;
                         // attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
@@ -1890,7 +1891,7 @@ var sendResponse = function(data,flag){
                       //.setUrl(link)
                       .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
                       .setAttributionName('View pic');
- 
+
                     kikRes.push(kikMsg)
 
 
@@ -2717,7 +2718,7 @@ var sendResponse = function(data,flag){
                         attachments[0].actions = actionObj;
                         if(data.slackData){
                             attachments[0].callback_id = data.slackData.callback_id;
-                        }                        
+                        }
                     }
 
                     attachments = JSON.stringify(attachments);
@@ -3004,12 +3005,14 @@ function viewCart(data, show_added_item){
     console.log('VIEW CART data.ts ',data.button_ts)
 
     console.log('view cart')
+    var timer = kip.timer('view cart');
     db.Metrics.log('cart.view', data);
 
     var cartDelay = 2000;
 
     co(function*() {
       var cart = yield kipcart.getCart(data.source.org);
+      timer('got cart');
 
       if (cart.items.length < 1) {
         return sendTxtResponse(data, 'Looks like you have not added anything to the Team Cart yet. Type `save 1` to add item :one:');
@@ -3018,6 +3021,7 @@ function viewCart(data, show_added_item){
       var slackbot = yield db.Slackbots.findOne({
         team_id: data.source.org
       }).exec();
+      timer('found slackbot');
 
       if (!slackbot){
         return sendTxtResponse(data, 'My brain broke, sorry about that :( What did you say?');;
@@ -3044,9 +3048,11 @@ function viewCart(data, show_added_item){
 
       var links = [];
       if (isAdmin || isP2P) {
+        timer('getting item links');
         links = yield cart.aggregate_items.map(i => {
           return processData.getItemLink(i.link, data.source.user, i._id.toString());
         })
+        timer('got item links');
       }
 
       for (var i = 0; i < cart.aggregate_items.length; i++) {
@@ -3112,7 +3118,7 @@ function viewCart(data, show_added_item){
                   "text": "Remove All",
                   "style": "default",
                   "type": "button",
-                  "value": "add",                  
+                  "value": "add",
                   "confirm": {
                     "title": "Are you sure?",
                     "text": "This will remove all orders for "+text,
@@ -3121,7 +3127,7 @@ function viewCart(data, show_added_item){
                   }
                 },
 
-            ];            
+            ];
 
         }else {
             var actionObj = [];
@@ -3169,6 +3175,7 @@ function viewCart(data, show_added_item){
       //reset cart delay
       cartDelay = 2000;
 
+      timer('getCinnaResponse');
       banter.getCinnaResponse(data,function(res){
 
           if(res[0] && res[0].text && data.client_res[0]){
@@ -3190,6 +3197,7 @@ function viewCart(data, show_added_item){
           console.log('CINNARES ',res);
 
           console.log('CLIENT_RES ',data.client_res);
+          timer('send response');
           sendResponse(data);
       });
       // sendResponse(data);

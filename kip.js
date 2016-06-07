@@ -6,11 +6,23 @@ require('colors');
  *  if (kip.err(e)) return;
  *  }
  */
-module.exports.err = function(e) {
-    if (e) {
-        console.error(e.toString().red);
-        return true;
-    }
+module.exports.err = function(e, message) {
+  // only do stuff when there is an error`
+  if (!e) {
+    return false;
+  }
+
+  if (message) {
+    console.error(('ERROR: ' + message).red);
+  }
+
+  if (e.stack) {
+    console.error(e.stack.toString().red);
+  } else {
+    console.error(JSON.stringify(e).red);
+  }
+
+  return true;
 };
 module.exports.error = module.exports.err;
 
@@ -26,25 +38,26 @@ module.exports.fatal = function(e) {
     }
 }
 
-// fun alias
-module.exports.ohshit = module.exports.fatal;
-
 /**
  * Prints a nice log message
  */
-module.exports.log = function(o) {
-    console.log(JSON.stringify(o, null, 2));
+module.exports.log = function() {
+    var args = Array.prototype.slice.call(arguments).map((o) => {
+      return ['string', 'number', 'boolean'].indexOf(typeof o) >= 0 ? o : JSON.stringify(o, null, 2);
+    });
+    console.log.apply(console, args);
 }
 
 // fun alias
 module.exports.prettyPrint = module.exports.log
 
 /**
- * Only prints if you have the -v flag set
+ * Does not print in production unless DEBUG=verbose
  */
-module.exports.debug = function(o) {
-    if (process.NODE_ENV !== 'production') {
-        console.log(JSON.stringify(o, null, 2));
+module.exports.debug = function() {
+    if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
+      arguments = ['debug:'.cyan].concat(Array.prototype.slice.call(arguments));
+      module.exports.log.apply(null, arguments)
     }
 }
 
@@ -60,3 +73,32 @@ module.exports.exit = function(code) {
     process.exit();
   }
 }
+
+module.exports.assert = function(val) {
+  if (!val) {
+    throw new Error('assertion failed');
+  }
+  return true;
+}
+
+module.exports.assertProperties = function() {
+  var args = Array.prototype.slice.call(arguments);
+  var obj = args[0];
+  args.slice(1).map(p => {
+    if (!obj.hasOwnProperty(p)) {
+      throw new Error('assertProperties failed, property ' + p + ' does not exist');
+    }
+  })
+  return true;
+}
+
+module.exports.timer = function(name) {
+  name = name || '';
+  var now = +new Date()
+  module.exports.debug(('starting timer: ' + name).green);
+  return function(text) {
+    text = text || '';
+    module.exports.debug(('timer:' + name + ':' + text).green, +new Date() - now);
+  }
+}
+module.exports.time = module.exports.timer;
