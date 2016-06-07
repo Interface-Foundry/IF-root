@@ -17,6 +17,78 @@ var requestPromise = require('request-promise');
 var proxyPool = []; //current good sessions
 
 var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36';
+var luminatiReady = false;
+//starting luminati process
+
+//lets check if luminati dies, forever
+async.whilst(
+    function () { 
+      return true; 
+    },
+    function (callback) {
+
+        var options = {
+          url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
+          proxy: 'http://127.0.0.1:23000'
+        };
+        requestPromise(options).then(function(data){ 
+          //console.log('LUMINATI SUCCESS')
+          luminatiReady = true;
+          //proxyPool.push(super_proxy);
+          //callback();
+          setTimeout(function () {
+            callback()
+          }, 10000);
+        }, function(err){ 
+
+          //console.log('LUMINATI ERROR ')
+          luminatiReady = false;
+
+          setTimeout(function () {
+            callback()
+          }, 10000);
+
+        });
+
+        // setTimeout(callback, 10000);//every 20 sec...
+
+
+    },
+    function (err) {
+        // 5 seconds have passed
+
+
+    }
+); 
+
+// var util = require('util')
+// var exec = require('child_process').exec;
+// var child;
+// // executes `pwd`
+// child = exec("luminati-proxy --customer lum-customer-kipthis-zone-gen --password e49d4ega1696 --pool_size 9 --session_timeout 60000 --max_requests 100", function (error, stdout, stderr) {
+//   util.print('stdout: ' + stdout);
+//   util.print('stderr: ' + stderr);
+//   if (error !== null) {
+//     console.log('exec error: ' + error);
+//   }
+// });
+
+
+
+
+// var exec = require('child_process').exec;
+
+// var cmd = 'luminati-proxy --customer lum-customer-kipthis-zone-gen --password e49d4ega1696 --pool_size 9 --session_timeout 60000 --max_requests 100';
+// console.log(cmd);
+// exec(cmd, function(error, stdout, stderr) {
+//   // command output is in stdout
+//   console.log('LUMINATI OUTPUT ',stdout)
+//   if (!error && !stderr){
+//     console.log('LUMINATI READY')
+//     luminatiReady = true;
+//   }
+// });
+// - - - - - - - - -  - -//
 
 
 //start
@@ -112,7 +184,7 @@ var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like G
 //   var port = 22225;
 //   var session_id = (1000000 * Math.random())|0; //the only important part 
 
-//   var super_proxy = 'http://'+username+'-country-us-session-'+session_id+':'+password+'@zproxy.luminati.io:'+port;
+//   var super_proxy = 'http://'+username+'-country-us-session-'+session_id+':'+password+'@45.55.206.5:22225';
 
 //   var options = {
 //     url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
@@ -191,18 +263,20 @@ module.exports.basic = function basic(url, callback, num) {
       console.log('+🍹 ',num)
       console.log('🍹 ',proxyPool.length)
       console.log('🍹🍹 ',proxyPool.length-num)
+      console.log('🍹🍹🍹 ',luminatiReady)
 
-      var falsy = false;
+      //var falsy = false;
 
       //we have luminati proxies in session pool
 
-      //if (proxyPool[proxyPool.length-num])
-      if (falsy == true){
+      if (luminatiReady){
+      //if (falsy == true){
 
+        //http://127.0.0.1:23000
         console.log('REQUEST🍹WITH🍹THIS🍹 ',proxyPool.length-num)
 
         var proxiedRequest = request.defaults({
-          proxy: proxyPool[proxyPool.length-num],
+          proxy: 'http://127.0.0.1:23000',
           headers: {
               'User-Agent': user_agent
           }

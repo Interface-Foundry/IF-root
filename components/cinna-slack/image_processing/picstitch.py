@@ -23,8 +23,8 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
-CHAT_WIDTH = 365
-CHAT_HEIGHT = 140
+CHAT_WIDTH = 345
+CHAT_HEIGHT = 120
 # MOBILE_WIDTH = 0 # TODO
 # MOBILE_HEIGHT = 800 # TODO
 
@@ -65,10 +65,10 @@ def index():
     biggest_width = 0
     biggest_height = 0
     thumbnails = []
-    PIC_SIZE = 130, 130
-    PIC_COORDS = [{'x': 14, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
+    PIC_SIZE = 120, 120
+    PIC_COORDS = [{'x': 5, 'y': 0},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
-    TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
+    TEXTBOX_COORDS = [{'x': 165, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
     #add images
     for i, data in enumerate(images):
@@ -106,7 +106,7 @@ def index():
         if im[u'prime'] == '1':
             img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
 
-        last_y = last_y + 27
+        last_y = last_y + 22
 
         if 'reviews' in im and 'rating' in im[u'reviews']:   
             # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
@@ -136,7 +136,7 @@ def index():
             if 'reviewCount' in im[u'reviews']:  
                 draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
 
-            last_y = last_y + 20
+            last_y = last_y + 15
 
         last_y = last_y + 5
 
@@ -147,9 +147,11 @@ def index():
             for line in textwrap.wrap(z, width=30):
                 countLines += 1
                 if countLines < 3:
+                    print countLines
                     filler = ''
                     if countLines == 3:
                         filler = '...'
+
                     draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
                     last_y += font2.getsize(line)[1]
                     last_y = last_y + 2

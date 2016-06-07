@@ -154,13 +154,16 @@ function askWhoManagesPurchases(response, convo) {
       },
       {
         // "pretext": "Ok thanks! Done with cart members 😊",
-        "text":"Well done! *Kip* has been enabled for your team 😊",
+        "text":"Kudos! *Kip* is now officially a member of your team 😊",
         "color":"#45a5f4",
         "mrkdwn_in": ["text"],
         "fallback":"Success"
       },
       {
-          "text": 'Who manages the office purchases? Type something like `me` or `me and @jane`',
+
+          
+
+          "text": 'Now, tell me, who manages office purchases? \n Tip: Type something like `me` or `@me and @jane`',
           "mrkdwn_in": [
               "text",
               "pretext"
@@ -204,14 +207,14 @@ function listenOnboard(response, convo){
     user_is_admin = true;
 
     var attachments = [
+        // {
+        //   "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+        //   "color":"#45a5f4",
+        //   "fallback":"Welcome",
+        //   'text':''
+        // },
         {
-          "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
-          "color":"#45a5f4",
-          "fallback":"Welcome",
-          'text':''
-        },
-        {
-          "pretext": "Great!  I'll keep you up-to-date on what your team members are adding to the office shopping cart 😊",
+          "pretext": "Awesome! I’ll keep you and the other admins up-to-date on what other team members are adding to the office shopping cart 😊",
           // "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
           "text":"",
           "color":"#45a5f4",
@@ -239,14 +242,14 @@ function listenOnboard(response, convo){
     user_is_admin = true;
 
     var attachments = [
+        // {
+        //   "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+        //   "color":"#45a5f4",
+        //   "fallback":"Welcome",
+        //   'text':''
+        // },
         {
-          "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
-          "color":"#45a5f4",
-          "fallback":"Welcome",
-          'text':''
-        },
-        {
-          "text": "Great!  I'll keep you and the other admins up-to-date on what your team members are adding to the office shopping cart 😊",
+          "text": "Awesome! I’ll keep you and the other admins up-to-date on what other team members are adding to the office shopping cart 😊",
           // "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
           "color":"#45a5f4",
           "fallback":"Welcome"
@@ -272,12 +275,12 @@ function listenOnboard(response, convo){
     user_is_admin = true;
 
     var attachments = [
-        {
-          "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
-          "color":"#45a5f4",
-          "fallback":"Welcome",
-          'text':''
-        },
+        // {
+        //   "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
+        //   "color":"#45a5f4",
+        //   "fallback":"Welcome",
+        //   'text':''
+        // },
         {
           "text": "Ok, then I'll keep you on as office admin 😊",
           "color":"#45a5f4",
@@ -307,7 +310,7 @@ function listenOnboard(response, convo){
 
     var attachments = [
         {
-          "text": "Sorry, I don't understand. Who manages office purchases? Type something like `me` or `me and @jane`. Or type `skip` 😊",
+          "text": "Sorry, maybe I had a brain freeze! Try typing something like `me` or `me and @jane`. Or type `skip` 😊",
           "color":"#fe9b00",
           "fallback":"Welcome",
           "mrkdwn_in": [
@@ -579,7 +582,7 @@ function listenOnboard(response, convo){
                     "fallback":"Welcome"
                   },
                   {
-                      "text": "Hi I'm *Kip*, your shopping helper bot! <@$user> made you an admin, so I'll keep you updated on what other members are adding to your Team Shopping Cart 😊".replace('$user', user_id),
+                      "text": "Hi, I’m *Kip*, your shopping assistant bot! <@$user> made you an admin, so I’ll keep you updated on what other team members are adding to your Team Cart 😊".replace('$user', user_id),
                       "mrkdwn_in": [
                           "text",
                           "pretext"
@@ -607,7 +610,7 @@ function listenOnboard(response, convo){
                       "fallback":"Welcome"
                   },
                   {
-                      "text": "• Type `members` to add Slack channels and emails for Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
+                      "text": "• Type `members` to add Slack channels and emails to your Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
                       "mrkdwn_in": [
                           "text",
                           "pretext"
@@ -821,7 +824,7 @@ function showSettings(response, convo, flag, done) {
       convo.ask({
         username: 'Kip',
         attachments: [{
-          text: 'Have any changes? Type `exit` to quit settings',
+          text: 'Don’t have any changes? Type `exit` to quit settings',
           color:'#49d63a',
           mrkdwn_in: ['text'],
           fallback:'Settings'
@@ -1105,7 +1108,7 @@ function handleSettingsChange(response, convo) {
             //FUNCTION 
             var attachments = [
                 {
-                  "pretext": "Ok thanks! Done with settings 😊",
+                  "pretext": "We’re all set. Now Kip shopping! 😊",
                   "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
                   "text":"",
                   "color":"#45a5f4"

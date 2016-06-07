@@ -257,7 +257,7 @@ function lastCall(response, convo) {
               "mrkdwn_in": ["text"]        
           },{
               "fallback": "Last Call",
-              "text":'Hi!  <@' + admin + '> wanted to let you know that they will be placing the office supply order soon, so add something to the cart before it\'s too late! \n The clock\'s ticking! You have *60* minutes',
+              "text":'Hi!  <@' + admin + '> wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never! You have *60* minutes left',
               "color": "#45a5f4",
               "mrkdwn_in": ["text"]
           }]
@@ -1029,7 +1029,7 @@ function viewCartMembers(convo,callback,flag){
 
     if (flag !== 'noPrompt'){
       var endpart = {
-        "text":"Update group cart members? Type `view cart` to view group cart. Or type `exit`",
+        "text":"Update group cart members? Or type `exit`",
         "mrkdwn_in": ["fields","text"],
         "color":"#49d63a"
       };

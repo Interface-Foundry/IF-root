@@ -996,9 +996,13 @@ var searchFocus = function(data) {
                     }
                     else if (data.source.origin !== 'supervisor') {
                         console.log('RECALLED FOCUS ',data.recallHistory);
-                     data.client_res.push(res +' <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
+
+                     var printCount = searchSelect+1;
+                     data.client_res.push('*'+ printCount +'.* <'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | *' + data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0]+'*>');
+                     data.client_res.push('<'+ data.recallHistory.urlShorten[searchSelect].trim() + ' | View on Amazon >');
+
                     } else {
-                     data.client_res.push(res +' <'+ data.recallHistory.urlShorten[0].trim() + ' | ' + truncate(data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0])+'>');
+                     data.client_res.push('*'+searchSelect+1 +'.* <'+ data.recallHistory.urlShorten[0].trim() + ' | *' + data.recallHistory.amazon[searchSelect].ItemAttributes[0].Title[0]+'*>');
                     }
                     dumbFunction(); //fire after get
                 })
