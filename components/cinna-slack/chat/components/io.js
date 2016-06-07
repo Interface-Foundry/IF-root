@@ -771,7 +771,7 @@ var preProcess = function(data){
                                 "body":"🔮 Surprise me!"
                             }
                         ]
-                    }];  
+                    }];
                     cannedBanter(data,keyboardObj);
                     break;
 
@@ -841,7 +841,7 @@ var preProcess = function(data){
 
 //pushing incoming messages to python
 function routeNLP(data){
-        
+
     data.flags = data.flags ? data.flags : {};
     data.msg = emojiText.convert(data.msg,{delimiter: ' '}); //convert all emojis to text
     data.msg = data.msg.replace(/[^0-9a-zA-Z.]/g, ' '); //sanitize msg before sending to NLP
@@ -1068,7 +1068,7 @@ var incomingMsgAction = function(data,origin){
 function incomingAction(data){
 
 
-    // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / / 
+    // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / /
     if (!messageHistory[data.source.id]){ //new user, set up chat states
         messageHistory[data.source.id] = {};
         messageHistory[data.source.id].search = []; //random chats
@@ -1412,6 +1412,39 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                         }
                         else if (data.source.origin == 'kik'){
 
+                            //PUSH NEW EMOJI + TEXT
+                            //PUSH NEW IMAGE
+
+
+                            // attachObj.image_url = urlArr[count];
+                            // attachObj.title = emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]);
+                            // attachObj.title_link = res[count];
+                            // attachObj.color = "#45a5f4";
+                            // attachObj.fallback = 'Here are some options you might like';
+
+
+                            //BUILD NEW MESSAGE ARRAY OBJ FOR 5+ messages
+
+                            // - - - - - //
+
+                            // var item = response.amazon[count];
+
+                            //console.log('ITEM ATTRIBS ',JSON.stringify(data.amazon[count].ItemAttributes[0]))
+
+
+                            //collect info for keyboard buttons
+                            //var collectInfo = emoji;
+
+                            // if(data.amazon[count].ItemAttributes[0].Brand[0]){
+                            //     collectInfo = collectInfo + ' ' + data.amazon[count].ItemAttributes[0].Brand[0];
+                            // }
+                            // if (data.amazon[count].ItemAttributes[0].Color[0]){
+                            //     collectInfo = collectInfo + ' ' + data.amazon[count].ItemAttributes[0].Color[0];
+                            // }
+                            // if (data.amazon[count].ItemAttributes[0].ProductGroup[0]){
+                            //     collectInfo = collectInfo + ' ' + data.amazon[count].ItemAttributes[0].ProductGroup[0];
+                            // }
+
                             var kikMsg = Kik.Message
                               .link(res[count])
                               .setPicUrl(urlArr[count])
@@ -1423,7 +1456,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                               .setKikJsData({"callback_id": data.searchId});
 
                             data.client_res.push(kikMsg);
- 
+
                         }
                         else if (data.source.origin == 'telegram'){
                             var attachObj = {};
@@ -1458,7 +1491,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             callback()
 
                         }, function done(){
-                        
+
                             if(data.client_res[0]){
 
                                 keyboardObj[0].responses.push(
@@ -1484,7 +1517,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                                 console.error('some error go away')
                             }
                             checkOutgoingBanter(data);
-                        })                     
+                        })
                     }
                     else if (data.source.origin == 'slack'){
                         
@@ -1546,7 +1579,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                     }
                     else {
                         checkOutgoingBanter(data);
-                    }   
+                    }
                 });
             });
             // function compileResults(){
@@ -1705,7 +1738,7 @@ var sendResponse = function(data,flag){
             //   .setKikJsData({"callback_id": data.searchId});
 
 
-            // data.client_res[0] = 
+            // data.client_res[0] =
 
             //kipServer.sendToKik(data,message,'text')
 
@@ -1736,7 +1769,7 @@ var sendResponse = function(data,flag){
 
 
 
-            // attachThis.map(function(attach){ 
+            // attachThis.map(function(attach){
             //     console.log('ATTACH ', attach)
 
             //    // console.log('kikMsg !_!_!_!_!_!_! ', kikMsg)
@@ -1811,8 +1844,8 @@ var sendResponse = function(data,flag){
 
         }
 
-        ///FOR FOCUS HERE----> 
-        //ALL FOCUS QUERIES WILL SHOW FOCUS KEYBOARD FOR THAT ITEM 
+        ///FOR FOCUS HERE---->
+        //ALL FOCUS QUERIES WILL SHOW FOCUS KEYBOARD FOR THAT ITEM
 
         else if (data.action == 'focus'){
 
@@ -1834,7 +1867,7 @@ var sendResponse = function(data,flag){
                 var itemTitle = kikEdit[0];
                 kikEdit.shift();
                 kikEdit = kikEdit.join(' ');
-                
+
                 processData.getNumEmoji(data,data.searchSelect[0],function(emoji){
 
                     var kikMsg;
@@ -1846,7 +1879,9 @@ var sendResponse = function(data,flag){
 
                     kikRes.push(kikMsg)
 
- 
+
+                    // kikMsg = Kik.Message.text(emoji + ' ' + );
+                    // kikRes.push(kikMsg)
 
 
                    //add pic
@@ -1871,6 +1906,36 @@ var sendResponse = function(data,flag){
                       .setAttributionName('Amazon');
                     kikRes.push(kikMsg)
 
+
+                    // kikMsg = Kik.Message
+                    //   .link(link);
+                    //   // .setTitle(emoji + ' ' + picText)
+                    //   // .setText(endKik)
+                    //   //.setPicUrl(pic)
+                    //   // .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                    //   // .setAttributionName('Amazon');
+                    // kikRes.push(kikMsg)
+
+                    //add amazon link message
+                    // kikMsg = Kik.Message
+                    //   .link(link)
+                    //   .setText(kikEdit + ' ' +  endKik)
+                    //   .setAttributionIcon()
+                    //   .setAttributionName('Amazon');
+                    // kikRes.push(kikMsg)
+
+                    // var spacer;
+                    // switch(data.searchSelect[0]){
+                    //     case 1:
+                    //         spacer = ' ';
+                    //     case 2:
+                    //         spacer = '  ';
+                    //     case 3:
+                    //         spacer = '   ';
+                    //     default:
+                    //         spacer = ' ';
+                    // }
+
                     var keyboardObj = [{
                         "type": "suggested",
                         "hidden":false,
@@ -1892,7 +1957,7 @@ var sendResponse = function(data,flag){
                                 "body":"Add "+emoji+" to Cart"
                             }
                         ]
-                    }];   
+                    }];
 
                     kikRes[0]._state.keyboards = keyboardObj;
                     if(kikRes[1]){
@@ -1908,6 +1973,95 @@ var sendResponse = function(data,flag){
                     kipServer.sendToKik(data,kikRes,'search');
 
                 })
+
+
+                // var counter = 1;
+
+                // console.log('HAMCLINE_RES ',data.client_res);
+
+                // async.eachSeries(data.client_res, function(m, callback) {
+
+                //     console.log('AMAZON RESULTS ',JSON.stringify(m));
+
+                //     keyboardObj[0].responses.push(
+                //         {
+                //           "type": "text",
+                //           "body": truncate(m._state.text,17)
+                //         }
+                //     )
+
+                // var kikMsg = Kik.Message
+                //   .picture()
+                //   .setPicUrl(data.client_res[0])
+                //   //.setText(emoji + ' ' + truncate(data.amazon[count].ItemAttributes[0].Title[0]))
+                //   // .setText(`${item.realPrice} - ${item.ItemAttributes[0].Title[0]}`)
+                //   .setTitle('')
+                //   .setAttributionIcon('http://i.stack.imgur.com/0Ck6a.png')
+                //   .setAttributionName('Amazon');
+
+
+
+
+
+                  //.setKikJsData({"callback_id": data.searchId});
+
+                //send text link
+
+
+            // try {
+            //  var formatted = '[' + data.client_res[1].split('|')[1].split('>')[0] + '](' + data.client_res[1].split('|')[0].split('<')[1]
+            //  formatted = formatted.slice(0,-1)
+            //  formatted = formatted + ')'
+            // } catch(err) {
+            //  console.log('io.js 1269 err: ',err)
+            //  return
+            // }
+              //data.client_res[1] = formatted ? formatted : data.client_res[1]
+              //var toSend = data.client_res[1] + '\n' + data.client_res[2] + '\n' + truncate(data.client_res[3]) + '\n' + (data.client_res[4] ? data.client_res[4] : '')
+                //console.log('formatted : ',toSend)
+
+
+                //SEND PICTURE
+
+
+
+                //SEND TEXT
+
+
+
+
+
+
+
+
+               // upload.uploadPicture('telegram', data.client_res[0],100, true).then(function(uploaded) {
+               //   tg.sendPhoto({
+               //      chat_id: encode_utf8(data.source.channel),
+               //      photo: encode_utf8(uploaded.outputPath)
+               //    }).then(function(datum){
+               //      tg.sendMessage({
+               //          chat_id: data.source.channel,
+               //          text: toSend,
+               //          parse_mode: 'Markdown',
+               //          disable_web_page_preview: 'true'
+               //      })
+               //      if (uploaded.outputPath) {
+               //          fs.unlink(uploaded.outputPath, function(err, res) {
+               //              // if (err) console.log('fs error: ', err)
+               //          })
+               //      }
+               //      if (uploaded.inputPath) {
+               //          fs.unlink(uploaded.inputPath, function(err, res) {
+               //                  // if (err) console.log('fs error: ', err)
+               //          })
+               //      }
+               //    })
+               //  }).catch(function(err){
+               //      if (err) { console.log('ios.js1285: err',err) }
+
+               //  })
+
+
         }
         //  else if (data.action == 'save') {
         //     console.log('\n\n\nSAVE: ',data.client_res)
@@ -2050,7 +2204,7 @@ var sendResponse = function(data,flag){
 
                 if(data.keyboardButtons){
                     kikRez._state.keyboards = data.keyboardButtons;
-                }              
+                }
 
                 kipServer.sendToKik(data,kikRez,'banter')
 
@@ -2565,7 +2719,7 @@ var sendResponse = function(data,flag){
                             attachments[0].callback_id = data.slackData.callback_id;
                         }                        
                     }
-                    
+
                     attachments = JSON.stringify(attachments);
 
                     var msgData = {
@@ -2627,7 +2781,7 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
-                        
+
                         var attachThis = message;
                         attachThis = JSON.stringify(attachThis);
 
@@ -2661,7 +2815,7 @@ var sendResponse = function(data,flag){
                             console.log('SEND DATA NOW _ NORMAL ',msgData);
                             slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
                                 callback();
-                            });            
+                            });
                         //}
 
                     }
@@ -2888,25 +3042,28 @@ function viewCart(data, show_added_item){
             image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
         })
 
+      var links = [];
+      if (isAdmin || isP2P) {
+        links = yield cart.aggregate_items.map(i => {
+          return processData.getItemLink(i.link, data.source.user, i._id.toString());
+        })
+      }
+
       for (var i = 0; i < cart.aggregate_items.length; i++) {
         var item = cart.aggregate_items[i];
         var userString = item.added_by.map(function(u) {
           return '<@' + u + '>';
         }).join(', ');
 
-        if (isAdmin || isP2P) {
-          var link = yield processData.getItemLink(item.link, data.source.user, item._id.toString());
-          console.log(link);
-        }
+        var link = links[i];
 
         //CONFIRM MESSAGE FOR REMOVE IF ITS THE LAST ITEM TO REMOVE
 
-        //ONLY SHOW ADD/REMOVE FOR 
+        //ONLY SHOW ADD/REMOVE FOR
 
         //check if user added this item
 
         //item.added_by
-
 
         // add title, which is a link for admins/p2p and text otherwise
         var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
@@ -2926,6 +3083,7 @@ function viewCart(data, show_added_item){
             `*Quantity:* ${item.quantity}`
           ].join('\n');
         }
+
 
         if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
             var actionObj = [
@@ -2964,6 +3122,7 @@ function viewCart(data, show_added_item){
                 },
 
             ];            
+
         }else {
             var actionObj = [];
         }
@@ -3007,7 +3166,7 @@ function viewCart(data, show_added_item){
       data.client_res.push(cartObj);
       console.log('done with cartObj');
 
-      //reset cart delay 
+      //reset cart delay
       cartDelay = 2000;
 
       banter.getCinnaResponse(data,function(res){
@@ -3043,7 +3202,7 @@ function viewCart(data, show_added_item){
             console.log('slowing view cart down ',cartDelay)
           setTimeout(function() {
             viewCart(data);
-          }, cartDelay);           
+          }, cartDelay);
       }else {
             console.log('error retriving cart for view cart')
             console.log(e.stack);
@@ -3473,7 +3632,7 @@ function truncate(string,l,opt) {
        if (string.length > 80)
           return string.substring(0,80)+'…';
        else
-          return string;        
+          return string;
     }
 
 };
