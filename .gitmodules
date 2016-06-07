@@ -1,0 +1,3 @@
+[submodule "components/cinna-slack/nlp2/UD_English"]
+	path = components/cinna-slack/nlp2/UD_English
+	url = git@github.com:UniversalDependencies/UD_English.git
