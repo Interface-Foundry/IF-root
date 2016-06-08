@@ -1,7 +1,7 @@
 from __future__ import print_function
 from easydict import EasyDict as edict
 
-import parser
+import mcparser
 
 from textblob import TextBlob
 from flask import (
