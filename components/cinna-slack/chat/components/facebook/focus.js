@@ -23,11 +23,12 @@ module.exports = function*(message) {
     // make the description text
     var attrs = _.get(r, 'ItemAttributes[0]');
     var description = [
-      _.get(attrs, 'Size[0]') ? ' ○ Size: ' + _.get(attrs, 'Size[0]') : false,
-      _.get(attrs, 'Artist[0]') ? ' ○ Artist: ' + _.get(attrs, 'Artist[0]') : false,
+      _.get(attrs, 'Size[0]') ? ' ○ Size: ' + _.get(attrs, 'Size[0]') : '',
+      _.get(attrs, 'Artist[0]') ? ' ○ Artist: ' + _.get(attrs, 'Artist[0]') : '',
       _.get(attrs, 'Brand[0]') ? ' ○ ' + _.get(attrs, 'Brand[0]') : false,
-      _.get(attrs, 'Manufacturer[0]') ? ' ○ ' + _.get(attrs, 'Manufacturer[0]') : false,
-      _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join(', ') : false
+      _.get(attrs, 'Manufacturer[0]') ? ' ○ ' + _.get(attrs, 'Manufacturer[0]') :  (_.get(attrs, 'Publisher[0]') ? ' ○ ' + _.get(attrs, 'Publisher[0]') : ''),
+,
+      _.get(attrs, 'Feature[0]') ? ' ○ ' + attrs.Feature.join(', ') : ''
     ].filter(Boolean).join('\n');
 
     if (_.get(r, 'reviews.rating') && _.get(r, 'reviews.reviewCount')) {
@@ -46,8 +47,8 @@ module.exports = function*(message) {
       price: r.realPrice,
       image_url: _.get(r, 'LargeImage[0].URL[0]') || _.get(r, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]'),
       title_link: r.shortened_url,
-      description: final_description,
-      reviews: review_line, 
+      description: final_description ? final_description : '',
+      reviews: review_line ? review_line :  '', 
       fallback: 'More Information',
       selected: message.focus
     }

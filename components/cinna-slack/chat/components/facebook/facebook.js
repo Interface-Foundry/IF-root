@@ -108,6 +108,7 @@ app.get('/facebook', function(req, res) {
 })
 
 app.post('/facebook', function(req, res) {
+    // console.log('\n\n\n\n\n\nRES: ', res,'\n\n\n\n\n\n\n')
     messaging_events = req.body.entry[0].messaging;
     for (i = 0; i < messaging_events.length; i++) {
         event = req.body.entry[0].messaging[i];
@@ -147,7 +148,7 @@ app.post('/facebook', function(req, res) {
             }).sort('-ts').exec(function(err, messages) {
                 if (err) return console.error(err);
                 if (messages.length == 0) {
-                    return console.log('No message found')
+                    return console.log('No message found');
                 } else if (messages[0]) {
                     co(function*() {
                         var msg = messages[0];
@@ -166,7 +167,7 @@ app.post('/facebook', function(req, res) {
 
                                     if (more_history.length === 0) {
                                         console.log(message);
-                                        throw new Error('Could not find amazon results in message history for message ' + message._id)
+                                        throw new Error('Could not find amazon results in message history for message ' + message._id);
                                     }
                                     message.history = message.history.concat(more_history);
                                 }
@@ -242,11 +243,11 @@ app.post('/facebook', function(req, res) {
                                                 amazon: msg.amazon,
                                                 searchSelect: [postback.selected]
                                           });
-                                            // queue it up for processing
-                                            var message = new db.Message(new_message);
-                                            message.save().then(() => {
-                                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                            });
+                                        // queue it up for processing
+                                        var message = new db.Message(new_message);
+                                        message.save().then(() => {
+                                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                        });
                                     }
                         
                                 } else if (postback.action === 'remove') {
@@ -372,7 +373,7 @@ app.post('/facebook', function(req, res) {
                                             "template_type": "generic",
                                             "elements": [{
                                                 "title": "Home Screen",
-                                                "image_url": "http://kipthis.com/kip_modes/mode_settings.png",
+                                                "image_url": "http://kipthis.com/kip_modes/mode_shopping.png",
                                                  "buttons": [{
                                                     "type": "postback",
                                                     "title": "View Cart",
@@ -504,6 +505,9 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
     }
 
     function send_results(channel, text, results, outgoing) {
+
+        console.log('this is what a non-clothing product looks like: ', JSON.stringify(results[0]));
+
         var messageData = {
             "attachment": {
                 "type": "template",
@@ -759,7 +763,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
               return 'u';
             }).join(', ');
             var cart_item = {
-                "title":  `${item.title} added by: ${userString}`,
+                "title":  `${item.title}`,
                 "subtitle": 'Price: ' + item.price + "\nQuantity:" + item.quantity,
                 "image_url": item.image,
                 "buttons":[
