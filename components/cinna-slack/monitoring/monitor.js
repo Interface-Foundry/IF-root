@@ -67,7 +67,7 @@ var mongo = Monitor({
   check: function *() {
     var MongoClient = require('mongodb').MongoClient;
 
-    var db = yield MongoClient.connect('mongodb://' + config.mongodb.url);
+    var db = yield MongoClient.connect(config.mongodb.url);
     var messages = db.collection('messages');
     var m = yield messages.findOne({});
     assert(m);

@@ -3,7 +3,7 @@ debugger;
 var token = 'xoxb-50573012182-9gJAJ1IBPDRjM3xrfcIFdTO1';
 var web = new slack.WebClient(token);
 
-var channel = 'D1GGV0CMU'; // back-end devs
+var channel = 'G06BTTZGW'; // back-end devs
 
 module.exports.say = function(text) {
   var data = {
