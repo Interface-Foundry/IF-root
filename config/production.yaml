@@ -1,7 +1,7 @@
 env: production
 isProduction: true
 mongodb:
-  url: mongodb://jolteon.internal.kipapp.co/foundry?&connectTimeoutMS=600000&socketTimeoutMS=600000
+  url: mongodb://jolteon.internal.kipapp.co/foundry?connectTimeoutMS=600000&socketTimeoutMS=600000
   backuphost: jolteon.internal.kipapp.co
   options:
     replset:
