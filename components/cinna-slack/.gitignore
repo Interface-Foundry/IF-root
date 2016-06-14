@@ -2,3 +2,5 @@
 *.err
 venv-nlp/
 node_modules/
+TrainingCorpus/
+components/cinna-slack/nlp2/build/

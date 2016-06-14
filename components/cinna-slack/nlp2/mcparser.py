@@ -28,3 +28,7 @@ class McParser:
         given user, return last three messages from dataframe
         '''
         pass
+
+
+
+# from seq2seq
