@@ -1,44 +1,44 @@
 /*
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNh/-.    .-+ymMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNs.     ``     .smMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMd/   `-:////:-`   :hMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMNNMMMMMMMMMMMMMMm/   .//////////-   /dMMMMMMNMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMNdo/:-:--+ymNMMMMMMMMh`  `////////////.   odhs/--.-:+sdMMMMMMMMMMMMM
-MMMMMMMMMMNs-          `:omMMMMMMh`  `/////////////`  ``          `-hNMMMMMMMMMM
-MMMMMMMMMh:   `-//+//-`   :hMMMMMd/   -////////////-    `..-:::-.`   :dMMMMMMMMM
-MMMMMMMMy-   :oooooooo+:   -hMMMMMy.   :///////////+:-:://///////:.   :dMMMMMMMM
-MMMMMMMN+   :ooooooooooo:   +mNmhy+-   `/////+oosssss//////////////.   +MMMMMMMM
-MMMMMMMd:   /oooooooooooo.  `:-`      `./ossssssssssso/////////////-   +MMMMMMMM
-MMMMMMMN+   -oooooooooooo+      `..-::///sssssssssssss+///////////:   .yMMMMMMMM
-MMMMMMMMd:   /oooooooooooo/..-:://///////+sssssssssssss////////::.   .sMMMMMMMMM
-MMMMMMNmd+`  `+oooooooossss+//////////////osssssssssssso/::-..`    .+dMMMMMMMMMM
-MMMms/-.      -oosssssssssss///////////////ssssssssssoo+-      `./odMMMMMMMMMMMM
-Mmo.    ``.-::/osssssssssssso//////////////+sssso++//////`   /ydNMMMMMMMMMMMMMMM
-h:   `-:////////sssssssssssss+//////////::-.:////////////:   :dMMMMMMMMMMMMMMMMM
-/   -///////////+sssssssssssss////::-.``     :////////////.   /NMMNmdddhdmMMMMMM
-   `/////////////ossssssssssss+..`           `/////////////`  `++:.`    `.:sdMMM
+SLACKSLACKSLACKSLACKSLACKSLACKSLACKSLAh/-.    .-+ySLACKSLACKSLACKSLACKSLACKSLACK
+SLACKSLACKSLACKSLACKSLACKSLACKSLACKNs.     ``     .sSLACKSLACKSLACKSLACKSLACKSLA
+SLACKSLACKSLACKSLACKSLACKSLACKSLACd/   `-:////:-`   :hSLACKSLACKSLACKSLACKSLACKM
+SLACKSLACKSLACKSLANSLACKSLACKSLACK/   .//////////-   /dSLACKSLSLACKSLACKSLACKSLA
+SLACKSLACKSLAdo/:-:--+ymNSLACKSLAh`  `////////////.   odhs/--.-:+sdSLACKSLACKSLA
+SLACKSLACKNs-          `:oSLACKSLh`  `/////////////`  ``          `-hNSLACKSLACK
+SLACKSLACh:   `-//+//-`   :hSLACKd/   -////////////-    `..-:::-.`   :dSLACKSLAC
+SLACKSLAy-   :oooooooo+:   -hSLACKy.   :///////////+:-:://///////:.   :dSLACKSLA
+SLACKSLA+   :ooooooooooo:   +mNmhy+-   `/////+oosssss//////////////.   +SLACKSLA
+SLACKSLd:   /oooooooooooo.  `:-`      `./ossssssssssso/////////////-   +SLACKSLA
+SLACKSLA+   -oooooooooooo+      `..-::///sssssssssssss+///////////:   .ySLACKSLA
+SLACKSLAd:   /oooooooooooo/..-:://///////+sssssssssssss////////::.   .sSLACKSLAC
+SLACKSLmd+`  `+oooooooossss+//////////////osssssssssssso/::-..`    .+dSLACKSLACK
+SLAms/-.      -oosssssssssss///////////////ssssssssssoo+-      `./odSLACKSLACKSL
+Mmo.    ``.-::/osssssssssssso//////////////+sssso++//////`   /ydNSLACKSLACKSLACK
+h:   `-:////////sssssssssssss+//////////::-.:////////////:   :dSLACKSLACKSLACKSL
+/   -///////////+sssssssssssss////::-.``     :////////////.   /SLACKSLACKSLACKSL
+   `/////////////ossssssssssss+..`           `/////////////`  `++:.`    `.:sdSLA
    `//////////////ssssssssooooo.              -////////////:        `..`    .+mM
 /   -////////////:/sooooooooooo+`              :////////////. `.:/ossssss+-   -y
 d-   `-::::::-.`   /oooooooooooo:              `/////////+ossssssssssssssss+   /
-MNo.               `+oooooooooooo.              -//+ossyhhhhhyssssssssssssss-
-MMMNh+--.`..-:oys   -oooooooooooo+`          .-/+yhhhhhhhhhhhhysssssssssssss.  `
-MMMMMMMmdmmmNMMMd/   /oooooooooooo:    .-/+osssssyhhhhhhhhhhhhhysssssssssss:   /
-MMMMMMMMMMMMMMMMMy.  `+oooooooooooy++ossssssssssssyhhhhhhhhhhhhyssssssso+-`   /d
-MMMMMMMMMMMMMMdhs+-   -ooooosyhdmmmmyssssssssssssssyhhhhhhhhhhhhyo+/-.     `:yNM
-MMMMMMMMMMMms-.      `-shdmmmmmmmmmmdssssssssssssssyhhhhhhhysso+/`    `.-/sdMMMM
-MMMMMMMMMms`   `.:/osssymmmmmmmmmmmmmhssssssssssssssyyyso+///////:   :smMMMMMMMM
-MMMMMMMMd+   .+ssssssssshmmmmmmmmmmmmmyssssssssso/:-`:////////////.   oNMMMMMMMM
-MMMMMMMMo   -ssssssssssssdmmmmmmmmmmmmdssso+:-`      `/////////////`  .yMMMMMMMM
-MMMMMMMd/   +ssssssssssssymmmmmmmmmmdhy/.      `.::   -////////////-   +MMMMMMMM
-MMMMMMMN+   /ssssssssssssshmmmddhysoooo+`  `/shmNMh-   :///////////.  `sMMMMMMMM
-MMMMMMMMy-   /sssssssssss+/osoooooooooo+/   :dMMMMMo`  `://///////.   +mMMMMMMMM
-MMMMMMMMMy-   `:/+o+/:.`   `+oooooooooooo.   sMMMMMMs.   `-::::-.    +mMMMMMMMMM
-MMMMMMMMMMms-           `   .oooooooooooo+   /hMMMMMMdo-          `:hMMMMMMMMMMM
-MMMMMMMMMMMMNds+:---:+ydy/   /ooooooooooo+   /hMMMMMMMMNho:--:--/ymMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMy.  `/ooooooooo+.   oNMMMMMMMMMMMMMNNMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMo.   -/+oooo+:`  `+NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMdo.    ```    `-hNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMdo/..   `--+hNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+SLo.               `+oooooooooooo.              -//+ossyhhhhhyssssssssssssss-
+MSLAh+--.`..-:oys   -oooooooooooo+`          .-/+yhhhhhhhhhhhhysssssssssssss.  `
+SLACKSLmdmmmNSLAd/   /oooooooooooo:    .-/+osssssyhhhhhhhhhhhhhysssssssssss:   /
+SLACKSLACKSLACKSLy.  `+oooooooooooy++ossssssssssssyhhhhhhhhhhhhyssssssso+-`   /d
+SLACKSLACKSLACdhs+-   -ooooosyhdmmmmyssssssssssssssyhhhhhhhhhhhhyo+/-.     `:yNM
+SLACKSLACKMms-.      `-shdmmmmmmmmmmdssssssssssssssyhhhhhhhysso+/`    `.-/sdSLAC
+SLACKSLACKs`   `.:/osssymmmmmmmmmmmmmhssssssssssssssyyyso+///////:   :sSLACKSLAC
+SLACKSLAd+   .+ssssssssshmmmmmmmmmmmmmyssssssssso/:-`:////////////.   oNSLACKSLA
+SLACKSLAo   -ssssssssssssdmmmmmmmmmmmmdssso+:-`      `/////////////`  .ySLACKSLA
+SLACKSLd/   +ssssssssssssymmmmmmmmmmdhy/.      `.::   -////////////-   +SLACKSLA
+SLACKSLA+   /ssssssssssssshmmmddhysoooo+`  `/shmNMh-   :///////////.  `sSLACKSLA
+SLACKSLAy-   /sssssssssss+/osoooooooooo+/   :dSLACKo`  `://///////.   +SLACKSLAC
+SLACKSLACy-   `:/+o+/:.`   `+oooooooooooo.   sSLACKMs.   `-::::-.    +SLACKSLACK
+SLACKSLACKms-           `   .oooooooooooo+   /hSLACKMdo-          `:hSLACKSLACKM
+SLACKSLACKSLAds+:---:+ydy/   /ooooooooooo+   /hSLACKMSLAho:--:--/ySLACKSLACKSLAC
+SLACKSLACKSLACKSLACKSLACKy.  `/ooooooooo+.   oNSLACKSLACKMSLANSLACKSLACKSLACKSLA
+SLACKSLACKSLACKSLACKSLACKMo.   -/+oooo+:`  `+NSLACKSLACKSLACKSLACKSLACKSLACKSLAC
+SLACKSLACKSLACKSLACKSLACKSLdo.    ```    `-hNSLACKSLACKSLACKSLACKSLACKSLACKSLACK
+SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 */
 
 var slack = require('@slack/client');
