@@ -251,34 +251,34 @@ app.post('/facebook', function(req, res) {
                                     // }
                         
                                 } else if (postback.action === 'remove') {
-                                         var img_card = {
-                                             "recipient": {
-                                                "id": msg.source.channel
-                                            }, 
-                                            "message":{
-                                                "attachment":{
-                                                  "type":"image",
-                                                  "payload":{
-                                                    "url": 'http://kipthis.com/kip_modes/mode_success.png'
-                                                  }
-                                                }
-                                              },
-                                              "notification_type": "NO_PUSH"
-                                        };
-                                        request.post({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
-                                            },
-                                            method: "POST",
-                                            json: true,
-                                            headers: {
-                                                "content-type": "application/json",
-                                            },
-                                            body: img_card
-                                        }, function(err, res, body) {
-                                            if (err) console.error('post err ', err);
-                                            console.log(body);
+                                        //  var img_card = {
+                                        //      "recipient": {
+                                        //         "id": msg.source.channel
+                                        //     }, 
+                                        //     "message":{
+                                        //         "attachment":{
+                                        //           "type":"image",
+                                        //           "payload":{
+                                        //             "url": 'http://kipthis.com/kip_modes/mode_success.png'
+                                        //           }
+                                        //         }
+                                        //       },
+                                        //       "notification_type": "NO_PUSH"
+                                        // };
+                                        // request.post({
+                                        //     url: 'https://graph.facebook.com/v2.6/me/messages',
+                                        //     qs: {
+                                        //         access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                                        //     },
+                                        //     method: "POST",
+                                        //     json: true,
+                                        //     headers: {
+                                        //         "content-type": "application/json",
+                                        //     },
+                                        //     body: img_card
+                                        // }, function(err, res, body) {
+                                        //     if (err) console.error('post err ', err);
+                                        //     console.log(body);
                                             var new_message = new db.Message({
                                                 incoming: true,
                                                 thread_id: msg.thread_id,
@@ -295,7 +295,7 @@ app.post('/facebook', function(req, res) {
                                             message.save().then(() => {
                                                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                             });
-                                        })
+                                        // })
                                 
                                 } else if (postback.action === 'list') {
                                       var new_message = new db.Message({

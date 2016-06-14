@@ -443,7 +443,7 @@ handlers['cart.remove'] = function*(message, exec) {
     throw new Error('no focus for removing from cart')
   }
 
-  var cart_id = message.cart_reference_id || message.source.team;
+  var cart_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team;
 
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
