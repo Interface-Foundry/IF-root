@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import pandas as pd
 import re
 from pymongo import MongoClient
@@ -39,18 +38,3 @@ def word_to_v(df, debug_=False):
     words = df.text.str.split(' ').values
     model = Word2Vec(words)
     return model
-=======
-'''
-various
-'''
-import pandas as pd
-
-
-def retrieve_from_db(table_name='messages'):
-    from pymongo import MongoClient
-    client = MongoClient()
-    db = client.foundry
-    cursor = db[table_name].find({})
-    df = pd.DataFrame(list(cursor))
-    return df
->>>>>>> Stashed changes
