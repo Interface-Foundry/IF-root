@@ -5,6 +5,7 @@ var moment = require('moment')
 var co = require('co')
 var sleep = require('co-sleep')
 var natural = require('natural')
+var async = require('async')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -120,6 +121,40 @@ module.exports.removeFromCart = function(slack_id, user_id, number, type) {
 }
 
 //
+// Removes all items in the cart
+//
+module.exports.emptyCart = function(cart_id) {
+  return co(function*() {
+    var cart = yield db.Carts.findOne({"slack_id": cart_id}).exec();
+    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart);
+
+    async.eachSeries(cart.items, function iterator(id, callback) {
+        db.Item.findById(id).then(function(err, item){
+          if (item) {
+             item.deleted = true;
+              item.save(function(err, saved) {
+                callback();
+              })
+            } else {
+              callback();
+            }
+        });
+       
+      },function done (err) {
+        if (err) console.log(err);
+    });
+
+     console.log('ids: ',cart.slack_id, cart_id)
+        cart.items = [];
+        yield cart.save()
+        // rebuild the cart
+        return getCart(cart.slack_id);
+
+  
+  })
+}
+
+//
 // Removes one item from the cart at a time
 //
 module.exports.removeFromCartByItem = function(item) {
@@ -139,6 +174,7 @@ module.exports.removeFromCartByItem = function(item) {
     return getCart(cart.slack_id);
   })
 }
+
 
 //
 // Syncs cart with amazon and returns a nicely formatted object
@@ -191,12 +227,12 @@ var getCart = module.exports.getCart = function(slack_id, type) {
 
     // create a new cart if they don't have one
     if (!cart.amazon) {
-      console.log('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
       console.log(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
       cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
+            console.log('creating new cart in amazon, cart: ', cart)
 
       return cart;
     }

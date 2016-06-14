@@ -184,54 +184,54 @@ app.post('/facebook', function(req, res) {
                         if (msg && msg.amazon) {
                                 if (postback.action == 'add') {
                                     console.log('add --> postback: ', postback);
-                                    if (!postback.initial) {
-                                         var img_card = {
-                                             "recipient": {
-                                                "id": msg.source.channel
-                                            }, 
-                                            "message":{
-                                                "attachment":{
-                                                  "type":"image",
-                                                  "payload":{
-                                                    "url": 'http://kipthis.com/kip_modes/mode_success.png'
-                                                  }
-                                                }
-                                              },
-                                              "notification_type": "NO_PUSH"
-                                        };
+                                    // if (!postback.initial) {
+                                    //      var img_card = {
+                                    //          "recipient": {
+                                    //             "id": msg.source.channel
+                                    //         }, 
+                                    //         "message":{
+                                    //             "attachment":{
+                                    //               "type":"image",
+                                    //               "payload":{
+                                    //                 "url": 'http://kipthis.com/kip_modes/mode_success.png'
+                                    //               }
+                                    //             }
+                                    //           },
+                                    //           "notification_type": "NO_PUSH"
+                                    //     };
 
-                                        request.post({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
-                                            },
-                                            method: "POST",
-                                            json: true,
-                                            headers: {
-                                                "content-type": "application/json",
-                                            },
-                                            body: img_card
-                                        }, function(err, res, body) {
-                                            if (err) console.error('post err ', err);
-                                            console.log(body);
-                                            var new_message = new db.Message({
-                                                incoming: true,
-                                                thread_id: msg.thread_id,
-                                                resolved: false,
-                                                user_id: msg.user_id,
-                                                origin: msg.origin,
-                                                text: 'save ' + postback.selected,
-                                                source: msg.source,
-                                                amazon: msg.amazon,
-                                                searchSelect: [postback.selected]
-                                          });
-                                            // queue it up for processing
-                                            var message = new db.Message(new_message);
-                                            message.save().then(() => {
-                                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                            });
-                                        })
-                                    } else {
+                                    //     request.post({
+                                    //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                    //         qs: {
+                                    //             access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                                    //         },
+                                    //         method: "POST",
+                                    //         json: true,
+                                    //         headers: {
+                                    //             "content-type": "application/json",
+                                    //         },
+                                    //         body: img_card
+                                    //     }, function(err, res, body) {
+                                    //         if (err) console.error('post err ', err);
+                                    //         console.log(body);
+                                    //         var new_message = new db.Message({
+                                    //             incoming: true,
+                                    //             thread_id: msg.thread_id,
+                                    //             resolved: false,
+                                    //             user_id: msg.user_id,
+                                    //             origin: msg.origin,
+                                    //             text: 'save ' + postback.selected,
+                                    //             source: msg.source,
+                                    //             amazon: msg.amazon,
+                                    //             searchSelect: [postback.selected]
+                                    //       });
+                                    //         // queue it up for processing
+                                    //         var message = new db.Message(new_message);
+                                    //         message.save().then(() => {
+                                    //             queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    //         });
+                                    //     })
+                                    // } else {
                                            var new_message = new db.Message({
                                                 incoming: true,
                                                 thread_id: msg.thread_id,
@@ -248,7 +248,7 @@ app.post('/facebook', function(req, res) {
                                         message.save().then(() => {
                                             queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                         });
-                                    }
+                                    // }
                         
                                 } else if (postback.action === 'remove') {
                                          var img_card = {
@@ -313,7 +313,8 @@ app.post('/facebook', function(req, res) {
                                     message.save().then(() => {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
-                                } else if (postback.action === 'focus') {
+                                } 
+                                else if (postback.action === 'focus') {
                                       var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -347,6 +348,23 @@ app.post('/facebook', function(req, res) {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
                                 }
+                                else if (postback.action === 'empty') {
+                                      var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: msg.user_id,
+                                        origin: msg.origin,
+                                        text: 'empty cart',
+                                        source: msg.source,
+                                        amazon: msg.amazon
+                                      });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
+                                }
                                else if (postback.action === 'more') {
                                   var new_message = new db.Message({
                                     incoming: true,
@@ -365,7 +383,7 @@ app.post('/facebook', function(req, res) {
                                 });
                             }
                             else if (postback.action === 'home') {
-                                console.log('hitting 367', msg);
+                                // console.log('hitting 367', msg);
                                  var home_card = {
                                     "attachment": {
                                         "type": "template",
@@ -602,7 +620,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         }],
                     },
                     {
-                        "title": 'Are you enjoying Kip?',
+                        "title": 'Click the See More button to view more results from Kip',
                         "image_url":  'http://kipthis.com/images/header_family.png',
                         "buttons": [{
                             "type": "postback",
@@ -747,7 +765,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
     function send_cart(channel, text, outgoing) {
           var cart = outgoing.data.data;
-          console.log(cart);
+          // console.log(cart);
           var cartDisplay = {
               "attachment": {
                 "type": "template",
@@ -757,6 +775,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 }
               }
           };
+          console.log('facebook.js-send_cart()-cart: ', cart)
         for (var i = 0; i < cart.aggregate_items.length; i++) {
             var item = cart.aggregate_items[i];
             var userString = item.added_by.map(function(u) {
@@ -774,6 +793,10 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     { "type": "postback", 
                       "title": "➖", 
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "remove" ,"selected": (i + 1), initial: false})
+                    },
+                    { "type": "postback", 
+                      "title": "Empty Cart", 
+                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "empty", initial: false})
                     }
                 ]
               }
