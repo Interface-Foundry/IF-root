@@ -1,8 +1,8 @@
 env: default
 isProduction: false
 mongodb:
-  url: mongodb://pikachu.kipapp.co:27017/foundry
-  backuphost: pikachu.kipapp.co
+  url: mongodb://localhost:27017/foundry
+  backuphost: localhost
   options:
     server:
       poolSize: 5
