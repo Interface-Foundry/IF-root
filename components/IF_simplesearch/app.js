@@ -84,12 +84,21 @@ app.get('/newslack', function(req, res) {
         console.log('body was', body)
         console.log('response was', b)
         var bot = new db.Slackbot(b)
-        db.Slackbots.find({team_id: b.team_id}, function(e, bots) {
+        db.Slackbots.findOne({team_id: b.team_id, deleted: {$ne: true}}, function(e, old_bot) {
           if (e) { console.error(e) }
 
-          if (bots && bots.length > 0) {
-            console.log('already have a bot for this team')
-            return;  
+          if (old_bot) {
+            console.log('already have a bot for this team', b.team_id)
+            console.log('updating i guess')
+            _.merge(old_bot, b);
+            old_bot.save(e => {
+              kip.err(e);
+              request(slackbot_reload_url, function(e, r, b) {
+                  if (e) {
+                      console.error('error triggering chat server slackbot update')
+                  }
+              })
+            });
           } else {
             bot.save(function(e) {
                 kip.err(e);
