@@ -3002,9 +3002,9 @@ function viewCart(data, show_added_item){
         return;
     }
 
-    console.log('VIEW CART data.ts ',data.button_ts)
+    kip.debug('VIEW CART data.ts ',data.button_ts)
 
-    console.log('view cart')
+    kip.debug('view cart')
     var timer = kip.timer('view cart');
     db.Metrics.log('cart.view', data);
 
@@ -3170,7 +3170,6 @@ function viewCart(data, show_added_item){
 
       data.client_res = [];
       data.client_res.push(cartObj);
-      console.log('done with cartObj');
 
       //reset cart delay
       cartDelay = 2000;
@@ -3194,9 +3193,9 @@ function viewCart(data, show_added_item){
              // }
           }
 
-          console.log('CINNARES ',res);
+          kip.debug('CINNARES ',res);
 
-          console.log('CLIENT_RES ',data.client_res);
+          kip.debug('CLIENT_RES ',data.client_res);
           timer('send response');
           sendResponse(data);
       });

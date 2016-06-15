@@ -19,6 +19,7 @@ var client = amazon.createClient({
 
 var getCartLink = require('./process').getCartLink;
 var fs = require('fs')
+var kip = require('kip');
 
 module.exports = {};
 
@@ -76,7 +77,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 }
 
 
-// Add an item already in cart to the db by increasing quantity 
+// Add an item already in cart to the db by increasing quantity
 // slack_id: either the team id or the user id if a personal cart
 // user_id: the user who added the item
 // item: the item from getCart aggregate item
@@ -201,18 +202,20 @@ module.exports.removeFromCartByItem = function(item) {
 // amazon,
 // Returns a promise for yieldy things
 //
-var getCart = module.exports.getCart = function(slack_id) {
+var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
+  var timer = kip.timer('get cart');
   return co(function*() {
     //
     // Get the Kip mongodb cart first (amazon cart next)
     //
     var cart;
-    console.log('getting team cart for ' + slack_id)
+    kip.log('getting team cart for ' + slack_id)
     var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items', '-source_json').exec();
+    timer('fetched team_cart from db if exists');
 
     if (!team_carts || team_carts.length === 0) {
       // create a new cart
-      console.log('no carts found, creating new cart for ' + slack_id)
+      kip.log('no carts found, creating new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
         items: []
@@ -245,9 +248,9 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     // create a new cart if they don't have one
     if (!cart.amazon) {
-      console.log('creating new cart in amazon')
+      kip.debug('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
-      console.log(JSON.stringify(amazonCart, null, 2))
+      kip.debug(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
       cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
@@ -258,14 +261,15 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     // otherwize rebuild their current cart
     // make sure the cart has not been checked out (purchased) yet
+    timer('getting cart from amazon');
     var amazonCart = yield client.getCart({
       'CartId': _.get(cart, 'amazon.CartId.0'),
       'HMAC': _.get(cart, "amazon.HMAC[0]")
     })
+    timer('got cart from amazon');
 
     // console.log(JSON.stringify(amazonCart, null, 2))
-    console.log('got amazon cart')
-    console.log(amazonCart)
+    kip.debug(amazonCart)
 
     // If the amazon cart is empty but
 
@@ -273,7 +277,7 @@ var getCart = module.exports.getCart = function(slack_id) {
     // Although maybe the cart has expired? TODO
     // mark cart as purchased and create a new one
     if (!amazonCart.Request[0].IsValid[0] || amazonCart.Request[0].Errors) {
-      console.log('cart has already been purchased')
+      kip.log('cart has already been purchased')
       cart.purchased = true;
       cart.purchased_date = new Date();
       yield cart.save();
@@ -283,12 +287,12 @@ var getCart = module.exports.getCart = function(slack_id) {
         return i.save();
       })
 
-      console.log('creating a new cart for ' + slack_id)
+      kip.debug('creating a new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
         items: []
       })
-      console.log('creating new cart in amazon')
+      kip.debug('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
 
       // console.log(amazonCart.Request[0].Errors[0].Message[0]);
@@ -298,10 +302,10 @@ var getCart = module.exports.getCart = function(slack_id) {
       //ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
       if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Error && amazonCart.Request[0].Errors[0].Error[0].Message && amazonCart.Request[0].Errors[0].Error[0].Message[0].indexOf('not eligible to be added to the cart') > -1){
 
-        console.log('ERR: Amazon item is not eligible to be added to the cart');
+        kip.err('ERR: Amazon item is not eligible to be added to the cart');
         //cart.amazon = amazonCart;
 
-        console.log('# cart ',cart);
+        kip.debug('# cart ',cart);
         //console.log('# amz ',cart.amazon);
 
         //cart.link =
@@ -312,7 +316,7 @@ var getCart = module.exports.getCart = function(slack_id) {
       }
       //no error adding item to cart
       else {
-        console.log(JSON.stringify(amazonCart, null, 2))
+        kip.debug(JSON.stringify(amazonCart, null, 2))
         cart.amazon = amazonCart;
         cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         yield cart.save()
@@ -321,22 +325,58 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     }
 
-    // rebuild amazon cart off of the contents we have in the db
-    console.log('clearing cart for rebuild ' + cart.amazon.CartId)
-    yield client.clearCart({
-      'CartId': cart.amazon.CartId[0],
-      'HMAC': cart.amazon.HMAC[0]
+    //
+    // "SubTotal": [
+    //   {
+    //     "Amount": [
+    //       "15435"
+    //     ],
+    //     "CurrencyCode": [
+    //       "USD"
+    //     ],
+    //     "FormattedPrice": [
+    //       "$154.35"
+    //     ]
+    //   }
+    // ],
+
+    // check items and quantities to see if they match
+    var cart_items_hash = cart.aggregate_items.reduce((hash, i) => {
+      hash[i.ASIN] = i.quantity;
+      return hash;
+    }, {});
+    var needs_rebuild = false;
+    var amazon_items = _.get(amazonCart, 'CartItems[0].CartItem') || [];
+    amazon_items = amazon_items.map(i => {
+      if (cart_items_hash[i.ASIN[0]] !== parseInt(i.Quantity[0])) {
+        needs_rebuild = true;
+      }
     })
+    if (!needs_rebuild) {
+      kip.debug('cart not changed');
+    } else {
+      kip.debug(_.get(amazonCart, 'SubTotal[0].FormattedPrice[0]'), cart.total);
+      // rebuild amazon cart off of the contents we have in the db
+      kip.debug('clearing cart for rebuild ' + cart.amazon.CartId);
+      timer('clearing cart for rebuild');
+      yield client.clearCart({
+        'CartId': cart.amazon.CartId[0],
+        'HMAC': cart.amazon.HMAC[0]
+      })
+      timer('cleared');
 
-    yield sleep(8); //prevent amazon throttle
+      yield sleep(8); //prevent amazon throttle
 
-    console.log('rebuilding cart ' + cart.amazon.CartId)
-    yield client.addCart(_.merge({}, cart_items, {
-      CartId: cart.amazon.CartId[0],
-      HMAC: cart.amazon.HMAC[0],
-    }))
+      timer('rebuilding cart ' + cart.amazon.CartId)
+      console.log('rebuilding cart');
+      yield client.addCart(_.merge({}, cart_items, {
+        CartId: cart.amazon.CartId[0],
+        HMAC: cart.amazon.HMAC[0],
+      }))
+      timer('rebuilt, saving')
 
-    yield cart.save()
+      cart.save() // don't have to wait for cart to save
+    }
     return cart;
   })
 }
