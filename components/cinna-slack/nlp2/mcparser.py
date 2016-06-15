@@ -1,34 +1,44 @@
-import pandas as pd
+import subprocess
+
+DEBUG_ = True
 
 
-def retrieve_from_db():
-    from pymongo import MongoClient
-    client = MongoClient()
-    db = client.foundry
-    cursor = db.messages.find({})
-    df_messages = pd.DataFrame(list(cursor))
-
-    return df_messages
+def syntaxnet_array(t):
+    '''
+    pass text argument to syntaxnet, get dependency tree, must have
+    '''
+    # demo.sh for testing, parser.sh irl
+    if DEBUG_:
+        script_location = "syntaxnet/demo.sh"
+    else:
+        script_location = "parser.sh"
+    t = "echo " + t + " | " + script_location
+    p = subprocess.Popen(t, stdout=subprocess.PIPE, shell=True)
+    out = p.stdout.read().splitlines()
+    # last item in array is ' ' for some reason
+    out.pop()
+    return out
 
 
 class McParser:
     '''
-    mcparser class that parses similar to current spacy oriented parser
     '''
-
     def __init__(self, text):
         self.text = text
-        pass
+        self.dependency_array = self.array_form()
+        self.root = self.root()
 
-    def parser_text():
-        pass
-
-    def last_three_messages(self):
+    def root(self):
         '''
-        given user, return last three messages from dataframe
+        not really necessary but for future use depending on modifiers
         '''
-        pass
+        for i in self.dependency_array:
+            if i[7] == 'ROOT':
+                return i[1]
 
-
-
-# from seq2seq
+    def array_form(self):
+        dependency_array = []
+        # d_array =
+        for line in syntaxnet_array(self.text):
+            dependency_array.append(line.split('\t'))
+        return dependency_array

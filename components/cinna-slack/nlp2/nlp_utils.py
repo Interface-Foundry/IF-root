@@ -13,10 +13,25 @@ def retrieve_from_prod_db():
     client = MongoClient()
     db = client.prod
     cursor = db.messages.find({})
-    df_messages = pd.DataFrame(list(cursor))
-    df_messages = df_messages.join(
-        pd.DataFrame(df_messages.source.to_dict()).T)
-    return df_messages
+    return pd.DataFrame(list(cursor))
+
+
+def retrieve_from_test_db():
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.foundry
+    cursor = db.messages.find({})
+    df = pd.DataFrame(list(cursor))
+    return df
+
+
+def dict_to_cols(df, cols=['source', 'thread']):
+    '''
+    some columns have dict/json within the rows
+    '''
+    for c in cols:
+        df.join(pd.DataFrame(df.source.to_dict()).T)
+    return df
 
 
 def text_look(df, skip_words=skip_words):
@@ -38,3 +53,11 @@ def word_to_v(df, debug_=False):
     words = df.text.str.split(' ').values
     model = Word2Vec(words)
     return model
+
+
+def array_of_threads(df):
+    '''
+    incorporate into seqgen later
+    creates array of sequential topics
+    '''
+    pass
