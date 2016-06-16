@@ -826,6 +826,7 @@ var preProcess = function(data){
                 }else {
                     //proceed to NLP instead
                     if (data){
+                        console.log(data)
                         routeNLP(data);
                     }
                     else {
@@ -963,6 +964,11 @@ var incomingMsgAction = function(data,origin){
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'remove';
                 break;
+
+            case 'more':
+                kipObj.bucket = 'search';
+                kipObj.action = 'more';
+                break;
         }
 
         //special cart commands
@@ -979,7 +985,7 @@ var incomingMsgAction = function(data,origin){
                 var item = cart.aggregate_items[cartNum - 1];
                 var itemAdded = yield kipcart.addExtraToCart(cart, parsedIn.team.id,parsedIn.user.id,item);
 
-                console.log('ITEM ADDED????????????????? ',itemAdded);
+                console.log('ITEM ADDED????????????????? ',kipObj);
 
                 viewCart(kipObj);
 
@@ -996,6 +1002,10 @@ var incomingMsgAction = function(data,origin){
         }
         else if (parsedIn.actions[0].name == 'removeitem'){
 
+            if(parsedIn.original_message){
+               kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
+            }
+
             co(function*() {
               yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, parsedIn.callback_id);
 
@@ -1004,6 +1014,21 @@ var incomingMsgAction = function(data,origin){
             }).then(function(){}).catch(function(err) {
                 console.error('couldnt remove item on button push')
             })
+        }
+        else if (parsedIn.actions[0].name == 'removeall'){
+
+            // if(parsedIn.original_message){
+            //    kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
+            // }
+            
+            // co(function*() {
+            //   yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, parsedIn.callback_id);
+
+            //   //make viewcart into callback to message
+            //   viewCart(kipObj);
+            // }).then(function(){}).catch(function(err) {
+            //     console.error('couldnt remove item on button push')
+            // })
         }
         else {
             //get searchSelect
@@ -1528,18 +1553,18 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                         var actionObj = [
                             {
-                              "name": "addcart",
+                              "name": "more",
                               "text": "View More",
                               "style": "default",
                               "type": "button",
-                              "value": count
+                              "value": "more"
                             },
                             {
-                              "name": "cheaper",
+                              "name": "home",
                               "text": "🐧",
                               "style": "default",
                               "type": "button",
-                              "value": count
+                              "value": "home"
                             },
                             // {
                             //   "name": "cheaper",
@@ -1565,7 +1590,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
 
                         ];
                         attachObj.actions = actionObj;
-                        // attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
+                        attachObj.callback_id = data.searchId; //pass mongo id as callback id so we can access reference later
 
                         //attachObj.title_link = res[count];
                         attachObj.color = "#53B987";
@@ -2649,7 +2674,10 @@ var sendResponse = function(data,flag){
                   // attachments: [...],
                     icon_url:'http://kipthis.com/img/kip-icon.png',
                     username:'Kip',
-                    attachments: attachThis
+                    attachments: attachThis,
+                    // replace_original: false,
+                    // delete_original: false,
+                    response_type: "in_channel"
                 };
                 slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
             }
@@ -2711,6 +2739,13 @@ var sendResponse = function(data,flag){
                           "style": "default",
                           "type": "button",
                           "value": count
+                        },
+                        {
+                          "name": "home",
+                          "text": "🐧",
+                          "style": "default",
+                          "type": "button",
+                          "value": "home"
                         }
                     ];
 
@@ -2784,6 +2819,7 @@ var sendResponse = function(data,flag){
 
 
                         var attachThis = message;
+
                         attachThis = JSON.stringify(attachThis);
 
                         var msgData = {
@@ -2792,32 +2828,32 @@ var sendResponse = function(data,flag){
                             attachments: attachThis
                         };
 
-                        console.log('data.ts ',data.button_ts)
+                        //console.log('data.ts ',data.button_ts)
 
-                        // if (data.button_ts){
-                        //     //update a message by timestamp
+                        if (data.button_ts){
 
+                            msgData.as_user = true;
+                            msgData.parse = 'full';
+                            msgData.link_names = '1';
 
-                        //     msgData.as_user = true;
-                        //     msgData.parse = 'full';
-                        //     msgData.link_names = '1';
+                            //console.log('SEND DATA NOW _ BUTTON ',msgData);
 
-                        //     console.log('SEND DATA NOW _ BUTTON ',msgData);
+                            slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, '', msgData, function(err,res) {
+                                console.log('EDIT CART ERROR ',err)
+                                console.log('EDIT CART RES ',res)
+                            });
 
-                        //     slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, msgData, {}, function(err,res) {
-                        //         console.log('EDIT CART ERROR ',err)
-                        //         console.log('EDIT CART RES ',res)
-                        //     });
-
-                        // }
-                        // else {
+                        }
+                        else {
                             //normal attach send
 
-                            console.log('SEND DATA NOW _ NORMAL ',msgData);
+                            msgData.attachments = attachThis;
+
+                            //console.log('SEND DATA NOW _ NORMAL ',msgData);
                             slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
                                 callback();
                             });
-                        //}
+                        }
 
                     }
 
@@ -3112,22 +3148,24 @@ function viewCart(data, show_added_item){
                   //   "ok_text": "Yes",
                   //   "dismiss_text": "No"
                   // }
-                },
-                {
+                }
+            ];
+
+            if (item.quantity > 1){
+                actionObj.push({
                   "name": "removeall",
                   "text": "Remove All",
                   "style": "default",
                   "type": "button",
-                  "value": "add",
+                  "value": "removeall",
                   "confirm": {
                     "title": "Are you sure?",
-                    "text": "This will remove all orders for "+text,
-                    "ok_text": "Yes",
-                    "dismiss_text": "No"
+                    "text": "This will remove all orders for "+item.title,
+                    "ok_text": "Confirm",
+                    "dismiss_text": "Cancel"
                   }
-                },
-
-            ];
+                });
+            }
 
         }else {
             var actionObj = [];
@@ -3198,6 +3236,9 @@ function viewCart(data, show_added_item){
 
           //kip.debug('CLIENT_RES ',data.client_res);
           timer('send response');
+
+          kip.debug('VIEW CART2 2 2 2 2 2  data.ts ',data.button_ts)
+
           sendResponse(data);
       });
       // sendResponse(data);
