@@ -3203,6 +3203,8 @@ function viewCart(data, show_added_item){
 
     }).catch(function(e) {
 
+      kip.err(e);
+
       //incrementally trying to cart with longer query time
       if (cartDelay < 16000){
             cartDelay = cartDelay + 2000;
