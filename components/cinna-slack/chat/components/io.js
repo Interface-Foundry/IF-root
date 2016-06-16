@@ -3174,6 +3174,7 @@ function viewCart(data, show_added_item){
       //reset cart delay
       cartDelay = 2000;
 
+
       timer('getCinnaResponse');
       banter.getCinnaResponse(data,function(res){
 
@@ -3193,9 +3194,9 @@ function viewCart(data, show_added_item){
              // }
           }
 
-          kip.debug('CINNARES ',res);
+          //kip.debug('CINNARES ',res);
 
-          kip.debug('CLIENT_RES ',data.client_res);
+          //kip.debug('CLIENT_RES ',data.client_res);
           timer('send response');
           sendResponse(data);
       });

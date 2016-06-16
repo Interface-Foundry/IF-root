@@ -174,6 +174,43 @@ module.exports.removeFromCart = function(slack_id, user_id, number) {
   })
 }
 
+// Removes all of an item from the db
+// slack_id: either the team id or the user id if a personal cart
+// number: the item to remove in cart array, as listed in View Carts
+//
+module.exports.removeAllOfItem = function(slack_id, number) {
+  console.log(`removing item #${number} from cart`)
+
+  return co(function*() {
+    var cart = yield getCart(slack_id);
+    console.log('got cart');
+
+    // need to watch out for items that have multiple quantities
+    // check to make sure this item exists
+    var ASIN_to_remove = _.get(cart, `aggregate_items[${number - 1}].ASIN`);
+    console.log('asin to remove is', ASIN_to_remove);
+
+    if (!ASIN_to_remove) {
+      kip.err('no asin found');
+      return cart;
+    }
+
+    yield cart.items.filter(i => {
+      return i.ASIN === ASIN_to_remove
+    }).map(i => {
+      i.deleted = true;
+      return i.save();
+    });
+
+    cart.items = cart.items.filter(i => {
+      return i.ASIN !== ASIN_to_remove;
+    });
+
+    yield cart.save();
+    return getCart(slack_id);
+  })
+}
+
 
 //
 // Removes one item from the cart at a time
@@ -269,7 +306,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
     timer('got cart from amazon');
 
     // console.log(JSON.stringify(amazonCart, null, 2))
-    kip.debug(amazonCart)
+    // kip.debug(amazonCart))
 
     // If the amazon cart is empty but
 
@@ -377,6 +414,13 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
 
       cart.save() // don't have to wait for cart to save
     }
+
+    //pretty print a nice cart
+    kip.debug('final cart summary:', {
+      team: cart.slack_id,
+      total: cart.total,
+      items: cart.aggregate_items.map(i => {return { ASIN: i.ASIN, title: i.title, quantity: i.quantity}})
+    });
     return cart;
   })
 }
@@ -518,9 +562,11 @@ var report = module.exports.report = function(slack_id, days) {
 //
 if (!module.parent) {
   co(function*() {
-    var item = yield db.Items.findById('56f2c006d045b96c1eb14acb').select('-source_json');
-    var cart = yield module.exports.removeFromCart(item)
-    console.log(item);
+    var cart = yield getCart('T0R6J00JW');
     console.log(cart);
+    var cart = yield module.exports.removeAllOfItem('T0R6J00JW', 5);
+    console.log(cart);
+  }).catch(e => {
+    kip.err(e);
   })
 }
