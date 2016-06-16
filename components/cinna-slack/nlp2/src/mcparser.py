@@ -1,9 +1,13 @@
 import subprocess
+import logging
+
+logger = logging.getLogger()
+
 
 DEBUG_ = True
 
 
-def syntaxnet_array(t):
+def syntaxnet_array(text):
     '''
     pass text argument to syntaxnet, get dependency tree, must have
     '''
@@ -12,17 +16,19 @@ def syntaxnet_array(t):
         script_location = "syntaxnet/demo.sh"
     else:
         script_location = "parser.sh"
-    t = "echo " + t + " | " + script_location
+    t = "echo " + text + " | " + script_location
     p = subprocess.Popen(t, stdout=subprocess.PIPE, shell=True)
     out = p.stdout.read().splitlines()
     # last item in array is ' ' for some reason
     out.pop()
     return out
 
-def syntax_no_script(t):
+
+def syntax_no_script(text):
     '''
     '''
     pass
+
 
 class McParser:
     '''

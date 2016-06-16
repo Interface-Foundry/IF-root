@@ -14,12 +14,12 @@
 # USAGE:
 #
 
-FROM graham/parsey:latest
+FROM grahama/parsey:alt
 
 MAINTAINER grahama <graham.annett@gmail.com>
 
 ADD src /root/
 
-RUN cp /root/src/parser.sh /root/models/syntaxnet/syntaxnet/parser.sh
+RUN chmod +x /root/parser.sh
 
 # start python services, follow dockerfile from old nlp folder
