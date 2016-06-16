@@ -28,7 +28,7 @@ Texts being used
 
 ## Dockerfile
 
-Using Docker for Mac, seems to require 8gb RAM min to build
+Building dockerfile requires 12+ gb of RAM?  Building on remote server but should set up something.
 
 
 ## Using syntaxnet
