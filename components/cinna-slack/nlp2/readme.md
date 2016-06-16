@@ -53,3 +53,6 @@ example:
 
 > `['1', 'hey', '_', 'X', 'UH', '_', '5', 'discourse', '_', '_']`
 
+
+Explanation of some of the terms (POSTAG, DEPREL, etc): [Dependencies Manual](http://nlp.stanford.edu/software/dependencies_manual.pdf)
+

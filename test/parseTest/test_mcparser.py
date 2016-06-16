@@ -36,7 +36,8 @@ shopping_cart = [
     'Let me checkout',
     'Id like to checkout',
     'Take me to checkout',
-    'Checkout'
+    'Checkout',
+    'Take me to checkout please',
 ]
 
 
