@@ -28,6 +28,8 @@ var parsereply = require('parse-reply');
 var template_collect = fs.readFileSync(__dirname + '/email-collect.html', 'utf8');
 var template_generic = fs.readFileSync(__dirname + '/email-generic.html', 'utf8');
 var template_results = fs.readFileSync(__dirname + '/email-results.html', 'utf8');
+var template_add = fs.readFileSync(__dirname + '/email-add.html', 'utf8');
+
 
 var addr = {
   production: 'kip@kip.ai',
@@ -53,14 +55,14 @@ kip@kip.ai
 //
 var processEmail = module.exports.process = function(message) {
   return co(function*() {
-    console.log(message);
+    console.log('email received! ', message);
 
     // parse the threadId from the email message
     message.text = message.text || '';
     var chainId = message.text.match(/email-chain-[a-z0-9\-]+/i);
     console.log(chainId);
     if (!chainId) {
-      return;
+      chainId = 'email-chain-' + uuid.v4()
     } else {
       chainId = chainId[0];
     }
@@ -260,7 +262,7 @@ var reply = module.exports.reply = function(payload, data) {
 //
 var results = module.exports.results = function(data) {
   return co(function*() {
-    console.log('sending results to thread', data.source.id);
+    console.log('sending results to thread', data.source.id, 'client_res: ',data.client_res[0]);
 
     var payload = {
       to: data.emailInfo.to,
@@ -291,6 +293,33 @@ var results = module.exports.results = function(data) {
     return send(payload);
   })
 }
+
+//
+// Replies with added item confirmation, boo-ya!
+//
+var confirmation = module.exports.confirmation = function(data) {
+  return co(function*() {
+    var payload = {
+      to: data.emailInfo.to,
+      from: `Kip <${addr}>`,
+      subject: data.emailInfo.subject
+    };
+
+    payload.html = template_add
+      .replace(/\$ID/g, data.source.id)
+      .replace(/\$ADDED_ITEM/g, data.client_res[0][data.client_res[0].length-2].text.slice(4, data.client_res[0][data.client_res[0].length-2].text.length).split('*\n*Added by')[0]);
+
+    var email = new db.Email(_.merge({}, payload, {
+      chain: data.source.id,
+      sequence: data.thread.sequence + 1,
+      team: data.source.org
+    }))
+
+    yield email.save();
+    return send(payload);
+  })
+}
+
 
 
 if (!module.parent) {

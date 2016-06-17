@@ -136,6 +136,7 @@ app.post('/slackaction', function(req, res) {
 // incoming email from sendgrid
 // In development we're currently using peter's sendgrid api key etc
 app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
+  console.log('hitting /emailincoming')
     req.body = {};
     req.busboy.on('field', (k, v) => {
       req.body[k] = v;
