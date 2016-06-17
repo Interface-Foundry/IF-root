@@ -11,11 +11,20 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 //   awsSecret: "aR0IgLL0vuTllQ6HJc4jBPffdsmshLjDYCVanSCN",
 //   awsTag: "bubboorev-20"
 // });
-var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
-});
+
+
+// could use multiple amazon ids to relieve the load on the carts
+var aws_clients = {
+  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
+    awsId: "AKIAIKMXJTAV2ORZMWMQ",
+    awsSecret: "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",
+    awsTag: "quic0b-20"
+  })
+};
+
+var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+
+var aws_client_id_list = ['AKIAIKMXJTAV2ORZMWMQ'];
 
 var getCartLink = require('./process').getCartLink;
 var fs = require('fs')
@@ -255,13 +264,15 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       kip.log('no carts found, creating new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
-        items: []
+        items: [],
+        aws_client: aws_client_id_list[(Math.random()*aws_client_id_list.length)|0]
       })
     } else {
       // yay already have a cart
       cart = team_carts[0];
     }
 
+    var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
 
     //
     // get the amazon cart for this Kip cart
