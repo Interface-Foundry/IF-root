@@ -469,6 +469,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'(:') > 90:
         case textSimilar(input,':grinning:') > 90:
         case textSimilar(input,':simple_smile:') > 90:
+        case textSimilar(input,':slightly_smiling_face:') > 90:
         case textSimilar(input,':smile:') > 90:
         case textSimilar(input,':smiley:') > 90:
         case textSimilar(input,':100:') > 90:
@@ -1421,18 +1422,20 @@ var getCinnaResponse = function(data,callback){
                 break;
         }
     }
+
+    var selectNum = data.searchSelect + 1;
     switch (data.bucket) {
         case 'search':
             switch (data.action) {
                 case 'initial':
                     if (data.source.origin == 'slack' || data.source.origin == 'telegram'){
                         if (data.imageTags){
-                            //res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Tap `Add to Cart` to add to the Team Cart 😊';
-                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                            res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Tap `Add to Cart` to add to the Team Cart 😊';
+                            //res = 'Hi, I searched using your pic containing `'+data.imageTags.trim()+'`. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                         else {
-                            //res = 'Hi, here are some options you might like. Tap `Add to Cart` to save to the Team Cart 😊';
-                            res = 'Hi, here are some cool options you might like. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
+                            res = 'Hi, here are some options you might like. Tap `Add to Cart` to save to the Team Cart 😊';
+                            //res = 'Hi, here are some cool options you might like. Type `more` to see more options or `save 1`, `2` or `3` to add to Team Cart 😊';
                         }
                     }
                     else if (data.source.origin == 'kik'){
@@ -1452,7 +1455,7 @@ var getCinnaResponse = function(data,callback){
                         res = 'I found some options similar to '+numEmoji+' 😊';
                     }
                     else {
-                        res = 'I found some options similar to '+numEmoji+', would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
+                        res = 'I found some options similar to *'+ selectNum +'*, would you like to see their product info? Just use `1`, `2` or `3` or `help` for more options';
                     }
                     break;
                 case 'modify':

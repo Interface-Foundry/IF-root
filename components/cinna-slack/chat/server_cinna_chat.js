@@ -109,16 +109,97 @@ app.post('/slackaction', function(req, res) {
       //sends back original chat
       if (parsedIn.response_url && parsedIn.original_message){
 
-        console.log('ORIGINAL MESSAGE ',parsedIn.original_message);
-        var stringOrig = JSON.stringify(parsedIn.original_message);
+        // console.log('ORIGINAL MESSAGE ',parsedIn.original_message);
         
-        request.post(
-            parsedIn.response_url,
-            { payload: stringOrig },
-            function (err, res, body) {
-              console.error('post err ',err);
+        
+
+        console.log('PARSED INCOMING!!!!!!!!!!!!!!!!!!!!!!! ',parsedIn.original_message.attachments[3].actions)
+        
+        //res.sendStatus(200);
+
+
+        //penguin nav button
+        if (parsedIn.actions[0].name == 'home'){
+
+          //find attachment arry index that contains home buton, replace buttons with menu. 
+
+
+         // var extract = _.find(parsedIn.original_message.attachments, 'description', view);
+
+
+          var reformattedArray = parsedIn.original_message.attachments.map(function(obj){ 
+
+            if (obj.actions){
+
+               obj.actions.map(function(obj2){
+                  if(obj2.name == 'home'){
+
+                    obj.actions = [ { id: '10',
+                       name: 'more',
+                       text: 'Back',
+                       type: 'button',
+                       value: 'more',
+                       style: 'default' },
+                     { id: '11',
+                       name: 'home',
+                       text: 'View Cart',
+                       type: 'button',
+                       value: 'home',
+                       style: 'default' } ];
+                  }
+               })
             }
-        );
+           
+            console.log('I I I I I ',obj);
+
+             return obj;
+          });
+
+          console.log(reformattedArray);
+
+          var newRes = parsedIn.original_message;
+          newRes.attachments = reformattedArray;
+
+          var stringOrig = JSON.stringify(reformattedArray);
+
+          console.log(stringOrig);
+
+          request.post(
+              parsedIn.response_url,
+              { payload: stringOrig },
+              function (err, res, body) {
+                console.error('post err ',err);
+              }
+          );
+
+        }
+
+        //else if (back) button
+
+        else {
+
+          var stringOrig = JSON.stringify(parsedIn.original_message);
+
+          request.post(
+              parsedIn.response_url,
+              { payload: stringOrig },
+              function (err, res, body) {
+                console.error('post err ',err);
+              }
+          );
+
+          ioKip.incomingMsgAction(req.body,'slack');
+
+        }
+
+
+
+        // res.status(200).json({ error: 'message' });
+
+        // res.json({payload: stringOrig});
+
+        //res.sendStatus(200);
+
       }else {
         console.error('slack buttons broke, need a response_url');
         return;
@@ -129,7 +210,7 @@ app.post('/slackaction', function(req, res) {
     }
 
     // //SEND REQ.BODY: { payload: }
-    ioKip.incomingMsgAction(req.body,'slack');
+   
 });
 
 

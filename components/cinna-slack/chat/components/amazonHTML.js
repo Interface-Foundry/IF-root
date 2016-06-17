@@ -20,46 +20,52 @@ var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like G
 var luminatiReady = false;
 //starting luminati process
 
+
+
+/// - - - - - REMVOED LUMINATI CHECKER FOR NOW - - - - - ///
 //lets check if luminati dies, forever
-async.whilst(
-    function () { 
-      return true; 
-    },
-    function (callback) {
+// async.whilst(
+//     function () { 
+//       return true; 
+//     },
+//     function (callback) {
 
-        var options = {
-          url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
-          proxy: 'http://127.0.0.1:23000'
-        };
-        requestPromise(options).then(function(data){ 
-          //console.log('LUMINATI SUCCESS')
-          luminatiReady = true;
-          //proxyPool.push(super_proxy);
-          //callback();
-          setTimeout(function () {
-            callback()
-          }, 10000);
-        }, function(err){ 
+//         var options = {
+//           url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
+//           proxy: 'http://127.0.0.1:23000'
+//         };
+//         requestPromise(options).then(function(data){ 
+//           //console.log('LUMINATI SUCCESS')
+//           luminatiReady = true;
+//           //proxyPool.push(super_proxy);
+//           //callback();
+//           setTimeout(function () {
+//             callback()
+//           }, 10000);
+//         }, function(err){ 
 
-          //console.log('LUMINATI ERROR ')
-          luminatiReady = false;
+//           //console.log('LUMINATI ERROR ')
+//           luminatiReady = false;
 
-          setTimeout(function () {
-            callback()
-          }, 10000);
+//           setTimeout(function () {
+//             callback()
+//           }, 10000);
 
-        });
+//         });
 
-        // setTimeout(callback, 10000);//every 20 sec...
-
-
-    },
-    function (err) {
-        // 5 seconds have passed
+//         // setTimeout(callback, 10000);//every 20 sec...
 
 
-    }
-); 
+//     },
+//     function (err) {
+//         // 5 seconds have passed
+
+
+//     }
+// ); 
+
+//// - - - - - - - - - - - END LUMINATI CHECKER - - - - - - /////
+
 
 // var util = require('util')
 // var exec = require('child_process').exec;
