@@ -55,6 +55,7 @@ process.on('uncaughtException', function (err) {
 //load kip modules
 var ioKip = require("./components/io.js");
 var processData = require("./components/process.js");
+var buttonTemplate = require("./components/button_templates.js");
 
 // website 🌏
 var express = require('express');
@@ -92,6 +93,12 @@ app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
     //console.log('incoming Slack action BODY: ',req.body);
 
+    //validating real button call  
+    // if(req.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
+    //   console.log('HACKER? 👻')
+    //   return;
+    // } 
+
     if (req.body && req.body.payload){
 
       //res.sendStatus(200);
@@ -99,7 +106,6 @@ app.post('/slackaction', function(req, res) {
       var parsedIn = JSON.parse(req.body.payload);
 
       /// FOR INITIAL SEARCHES
-
 
       //IF team cart action, send back modified message with updated quantities
 
@@ -109,12 +115,9 @@ app.post('/slackaction', function(req, res) {
       //sends back original chat
       if (parsedIn.response_url && parsedIn.original_message){
 
-        // console.log('ORIGINAL MESSAGE ',parsedIn.original_message);
+       console.log('PASSED IN ',parsedIn);
         
-        
-
-        console.log('PARSED INCOMING!!!!!!!!!!!!!!!!!!!!!!! ',parsedIn.original_message.attachments[3].actions)
-        
+      
         //res.sendStatus(200);
 
 
@@ -131,21 +134,11 @@ app.post('/slackaction', function(req, res) {
 
             if (obj.actions){
 
+
+              //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
                obj.actions.map(function(obj2){
                   if(obj2.name == 'home'){
-
-                    obj.actions = [ { id: '10',
-                       name: 'more',
-                       text: 'Back',
-                       type: 'button',
-                       value: 'more',
-                       style: 'default' },
-                     { id: '11',
-                       name: 'home',
-                       text: 'View Cart',
-                       type: 'button',
-                       value: 'home',
-                       style: 'default' } ];
+                    obj.actions = buttonTemplate.slack_home;
                   }
                })
             }
@@ -155,22 +148,36 @@ app.post('/slackaction', function(req, res) {
              return obj;
           });
 
-          console.log(reformattedArray);
+          console.log('I+ I+ I+ I+ ',reformattedArray);
+
+
+          //KEEP TRACK OF PREVIOUS BUTTON HISTORY, PUSH TO USER GLOBAL ARR. revert last button on 
 
           var newRes = parsedIn.original_message;
           newRes.attachments = reformattedArray;
 
-          var stringOrig = JSON.stringify(reformattedArray);
+          var stringOrig = JSON.stringify(newRes);
 
-          console.log(stringOrig);
+          console.log('STRING ORG1 1 1 1 ',stringOrig);
 
-          request.post(
-              parsedIn.response_url,
-              { payload: stringOrig },
-              function (err, res, body) {
-                console.error('post err ',err);
-              }
-          );
+
+          // msgData.as_user = true;
+          // msgData.parse = 'full';
+          // msgData.link_names = '1';
+          // slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, '', msgData, function(err,res) {
+          //     console.log('EDIT CART ERROR ',err)
+          //     console.log('EDIT CART RES ',res)
+          // });
+
+          res.json(newRes);
+
+          // request.post(
+          //     parsedIn.response_url,
+          //     { payload: stringOrig },
+          //     function (err, res, body) {
+          //       console.error('post err ',err);
+          //     }
+          // );
 
         }
 
@@ -178,8 +185,15 @@ app.post('/slackaction', function(req, res) {
 
         else {
 
+
+
           var stringOrig = JSON.stringify(parsedIn.original_message);
 
+         // res.sendStatus(200);
+
+
+
+          console.log('STRING ORG22222 ',stringOrig)
           request.post(
               parsedIn.response_url,
               { payload: stringOrig },

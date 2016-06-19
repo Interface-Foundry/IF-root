@@ -1017,6 +1017,20 @@ var incomingMsgAction = function(data,origin){
         }
         else if (parsedIn.actions[0].name == 'removeall'){
 
+
+            if(parsedIn.original_message){
+               kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
+            }
+
+            co(function*() {
+              yield kipcart.removeAllOfItem(parsedIn.team.id, parsedIn.callback_id);
+
+              //make viewcart into callback to message
+              viewCart(kipObj);
+            }).then(function(){}).catch(function(err) {
+                console.error('couldnt remove item on button push')
+            })
+
             // if(parsedIn.original_message){
             //    kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
             // }
@@ -2700,6 +2714,8 @@ var sendResponse = function(data,flag){
                 var attachments = [
                     {
                         "color": "#45a5f4",
+                        "footer": "Kip",
+                        "footer_icon":"http://corozal.com/imgs/icons/social/16px/amazon.png",
                         "fields":[],
                         "image_url":attachThis[0],
                         "fallback":"More Information",

@@ -1,0 +1,35 @@
+
+var slack_home = module.exports.slack_home = [
+ { id: '11',
+   name: 'viewcart',
+   text: 'View Cart',
+   type: 'button',
+   value: 'viewcart',
+   style: 'default' },
+ { id: '12',
+   name: 'members',
+   text: 'Cart Members',
+   type: 'button',
+   value: 'members',
+   style: 'default' },
+ { id: '13',
+   name: 'home',
+   text: 'Settings',
+   type: 'button',
+   value: 'home',
+   style: 'default' },
+ { id: '12',
+   name: 'help',
+   text: 'Help',
+   type: 'button',
+   value: 'help',
+   style: 'default' },
+{ id: '10',
+   name: 'back',
+   text: '< Back',
+   type: 'button',
+   value: 'back',
+   style: 'default' }];
+
+
+
