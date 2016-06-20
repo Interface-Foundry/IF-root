@@ -36,6 +36,8 @@ var cart = mongoose.Schema({
     type: Date
   },
 
+  type: String,
+
   link: String
 
 });

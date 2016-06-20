@@ -5,6 +5,7 @@ var moment = require('moment')
 var co = require('co')
 var sleep = require('co-sleep')
 var natural = require('natural')
+var async = require('async')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
@@ -28,7 +29,7 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, user_id, item) {
+module.exports.addToCart = function(slack_id, user_id, item, type) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',item)
 
@@ -48,7 +49,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var cart = yield getCart(slack_id);
+    var cart = yield getCart(slack_id, type);
     console.log(cart);
 
     console.log('creating item in database')
@@ -82,13 +83,15 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 // user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, user_id, number) {
+module.exports.removeFromCart = function(slack_id, user_id, number, type) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
-    var cart = yield getCart(slack_id);
-    var team = yield db.slackbots.findOne({team_id: slack_id});
-    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    var cart = yield getCart(slack_id, type);
+    if (type == 'team') {
+      var team = yield db.slackbots.findOne({team_id: slack_id});
+      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    }
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
@@ -118,6 +121,40 @@ module.exports.removeFromCart = function(slack_id, user_id, number) {
 }
 
 //
+// Removes all items in the cart
+//
+module.exports.emptyCart = function(cart_id) {
+  return co(function*() {
+    var cart = yield db.Carts.findOne({"slack_id": cart_id}).exec();
+    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart);
+
+    async.eachSeries(cart.items, function iterator(id, callback) {
+        db.Item.findById(id).then(function(err, item){
+          if (item) {
+             item.deleted = true;
+              item.save(function(err, saved) {
+                callback();
+              })
+            } else {
+              callback();
+            }
+        });
+       
+      },function done (err) {
+        if (err) console.log(err);
+    });
+
+     console.log('ids: ',cart.slack_id, cart_id)
+        cart.items = [];
+        yield cart.save()
+        // rebuild the cart
+        return getCart(cart.slack_id);
+
+  
+  })
+}
+
+//
 // Removes one item from the cart at a time
 //
 module.exports.removeFromCartByItem = function(item) {
@@ -138,13 +175,14 @@ module.exports.removeFromCartByItem = function(item) {
   })
 }
 
+
 //
 // Syncs cart with amazon and returns a nicely formatted object
 // Right now there is no saved amazon cart, so if they delete something from
 // amazon,
 // Returns a promise for yieldy things
 //
-var getCart = module.exports.getCart = function(slack_id) {
+var getCart = module.exports.getCart = function(slack_id, type) {
   return co(function*() {
     //
     // Get the Kip mongodb cart first (amazon cart next)
@@ -158,7 +196,8 @@ var getCart = module.exports.getCart = function(slack_id) {
       console.log('no carts found, creating new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
-        items: []
+        items: [],
+        type: type
       })
     } else {
       // yay already have a cart
@@ -188,12 +227,12 @@ var getCart = module.exports.getCart = function(slack_id) {
 
     // create a new cart if they don't have one
     if (!cart.amazon) {
-      console.log('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
       console.log(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
       cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
+            console.log('creating new cart in amazon, cart: ', cart)
 
       return cart;
     }
@@ -229,7 +268,8 @@ var getCart = module.exports.getCart = function(slack_id) {
       console.log('creating a new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
-        items: []
+        items: [],
+        type: type
       })
       console.log('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)

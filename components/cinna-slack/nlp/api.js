@@ -105,6 +105,13 @@ function quickparse(text) {
       /^checkout/i,
       /^check out/i
     ]
+  }, {
+    mode: 'cart',
+    action: 'empty',
+    regexes: [
+      /^empty cart\b/i,
+      /^delete cart\b/i
+    ]
   }];
 
   var result = false;

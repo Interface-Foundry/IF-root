@@ -420,8 +420,13 @@ handlers['cart.save'] = function*(message, exec) {
     throw new Error('no focus for saving to cart');
   }
 
-  var results = yield getLatestAmazonResults(message);
-  var cart_id = message.cart_reference_id || message.source.team; // TODO make this available for other platforms
+  var raw_results = yield getLatestAmazonResults(message);
+console.log('raw_results: ', typeof raw_results, raw_results);
+ var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
+
+  var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
+  
+
   try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1])
   } catch (e) {
@@ -438,8 +443,12 @@ handlers['cart.remove'] = function*(message, exec) {
     throw new Error('no focus for removing from cart')
   }
 
-  var cart_id = message.cart_reference_id || message.source.team;
-  yield kipcart.removeFromCart(cart_id, message.user_id, exec.params.focus);
+  var cart_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team;
+
+  //Diverting team vs. personal cart based on source origin for now
+  var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
+
+  yield kipcart.removeFromCart(cart_id, message.user_id, exec.params.focus, cart_type);
   var confirmation = text_reply(message, `Item ${exec.params.focus} removed from your cart`);
   var viewcart = yield handlers['cart.view'](message);
   debugger;
@@ -460,13 +469,37 @@ handlers['cart.view'] = function*(message, exec) {
     action: 'view',
     focus: exec && _.get(exec, 'params.focus')
   })
-  var cart_reference_id = message.cart_reference_id || message.source.team; // TODO
+  var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
+  console.log('reply-473: cart_reference_id: ', cart_reference_id)
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
     return text_reply(message, 'It looks like your cart is empty.');
   }
   kip.debug('view cart message', res);
+  return res;
+};
+
+handlers['cart.empty'] = function*(message, exec) {
+  kip.debug('cart.empty');
+  var res = new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    mode: 'cart',
+    action: 'empty'
+  });
+  var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
+  console.log('reply_logic cart.empty handler: cart_reference_id: ', cart_reference_id, ' message: ', message.source);
+  res.data = yield kipcart.emptyCart(cart_reference_id);
+  res.data = res.data.toObject();
+  if (res.data.items.length < 1) {
+    return text_reply(message, 'Your cart is now empty.');
+  }
+  kip.debug('empty cart message', res);
   return res;
 };
 
@@ -511,6 +544,7 @@ function* getLatestAmazonResults(message) {
       }).sort('-ts').skip(i).limit(20);
 
       if (more_history.length === 0) {
+        console.log(message);
         throw new Error('Could not find amazon results in message history for message ' + message._id)
       }
 
