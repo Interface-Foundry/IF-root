@@ -452,7 +452,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       timer('rebuilt, saving')
 
       console.log('cart stuff', cart.amazon.CartId[0], cart._id);
-      cart.link = yield getCartLink(cart.amazon.CartId[0], cart._id);
+      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id);
       cart.save() // don't have to wait for cart to save
     }
 
