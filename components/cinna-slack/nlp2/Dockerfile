@@ -20,6 +20,12 @@ MAINTAINER grahama <graham.annett@gmail.com>
 
 ADD src /root/
 
+RUN pip install spacy easydict flask textblob && \
+    python -m spacy.en.download
+
 RUN chmod +x /root/parser.sh
 
 # start python services, follow dockerfile from old nlp folder
+WORKDIR /root
+
+CMD python server.py

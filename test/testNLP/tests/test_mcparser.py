@@ -1,4 +1,5 @@
 from ..mcparser import McParser
+import pytest
 
 from test_queries import (
     multiple_query_search_with_modifiers,
@@ -16,7 +17,7 @@ lists = [
     shopping_cart]
 
 
-def test_parse(self):
+def test_parse():
     pass
 
 
@@ -26,9 +27,9 @@ def test_shopping_cart():
 
 def test_irregulars():
     for line in irregulars:
-        McParser(line)
+        parsed = McParser(line)
+        assert parsed.root
         # assert 'irregular' == McParser(line)
-
 
 
 def test_complex_comparisons():
@@ -38,14 +39,5 @@ def test_complex_comparisons():
 def test_multiple_query():
     pass
 
-
-def func(x):
-    return x + 1
-
-
-def test_answer():
-    assert func(3) == 4
-
-
-# if __name__ == '__main__':
-#     pytest.main([__file__])
+if __name__ == '__main__':
+    pytest.main([__file__])

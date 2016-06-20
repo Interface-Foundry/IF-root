@@ -6,12 +6,14 @@ multiple_query_search_with_modifiers = [
     u'Find an office chair with extra back support, below $100 and at least 3 stars.',
 ]
 
+# (quantity vs version vs descriptor)
 multiple_query_search_with_different_types = [
     u'Find a 42" monitor thats below $1000',
     u'Find 42 monitors thats below $1000',
     u'Find iOS 8 cable at least 1.5ft long for new lighting port',
 ]
 
+# (superlatives, comparatives)
 complex_comparisons = [
     u'Best chocolate',
     u'Most inexpensive chocolate',
@@ -26,6 +28,7 @@ complex_comparisons = [
     u'Best seller chocolate',
 ]
 
+# (irregular adjectives, comparatives)
 irregulars = [
     u'White dress everything but bridal',
     u'Little black dress in size 2',

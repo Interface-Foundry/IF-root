@@ -2,6 +2,8 @@ import pandas as pd
 import re
 from pymongo import MongoClient
 from gensim.models import Word2Vec
+from __future__ import print_function
+from easydict import EasyDict as edict
 
 skip_words = ['nan', 'hi', 'Hi', 'hehe', 'hey', 'help']
 
