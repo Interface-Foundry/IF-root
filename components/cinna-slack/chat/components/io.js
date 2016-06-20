@@ -3109,7 +3109,7 @@ function viewCart(data, show_added_item){
         }).join(', ');
         if (userString.indexOf('28_') > -1 ) {
             try {
-                userString = userString.split('_')[1].split('_')[0]
+                userString = userString.split('_')[1].split('_')[0].concat('(email)')
 
             } catch(err) {
 
