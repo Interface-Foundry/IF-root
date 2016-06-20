@@ -166,6 +166,9 @@ var emoji = {
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink(url, cart_id) {
+
+    console.log('CART IDDDDDDDDD ',url)
+
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
 }
 
@@ -173,6 +176,8 @@ function getCartLink(url, cart_id) {
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink(url, user_id, item_id) {
+  console.log('ITEM IDDDDDDDDD ',url)
+
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
 }
 
