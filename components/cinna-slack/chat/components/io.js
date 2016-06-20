@@ -3107,6 +3107,14 @@ function viewCart(data, show_added_item){
         var userString = item.added_by.map(function(u) {
           return '<@' + u + '>';
         }).join(', ');
+        if (userString.indexOf('28_') > -1 ) {
+            try {
+                userString = userString.split('_')[1].split('_')[0]
+
+            } catch(err) {
+
+            }
+        }
 
         var link = links[i];
 
@@ -3122,6 +3130,7 @@ function viewCart(data, show_added_item){
         var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
         if (isAdmin || isP2P) {
           var printNum = i+1;
+          // console.log('io.js line 3125 checking data.source!!!!! \n\n\n\n\n', data)
           var text = [
             `*${printNum}.* <${link}|*${item.title}*> \n`,
             `*Price:* ${item.price} each`,
@@ -3201,7 +3210,7 @@ function viewCart(data, show_added_item){
             mrkdwn_in: ['text', 'pretext'],
             color: '#53B987'
         })
-      }else {
+      } else {
         //var officeAdmins = slackbot.meta.office_assistants.join(' ')
 
         if(slackbot.meta.office_assistants && slackbot.meta.office_assistants[0]){

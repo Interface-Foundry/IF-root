@@ -127,7 +127,8 @@ var processEmail = module.exports.process = function(message) {
         channel: 'none',
         org: team.team_id,
         id: chainId,
-        user: user.id
+        user: user.id,
+        name: user.profile.email.split('_')[1]
       },
       flags: {email: true},
       emailInfo: {
