@@ -43,7 +43,7 @@ var aws_client_id_list = Object.keys(aws_clients);
 
 console.log("AWS LCIENTS ",aws_client_id_list)
 
-var getCartLink = require('./process').getCartLink;
+  var getCartLink = require('./process').getCartLink;
 var fs = require('fs')
 var kip = require('kip');
 
@@ -410,9 +410,20 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       hash[i.ASIN] = i.quantity;
       return hash;
     }, {});
-    var needs_rebuild = false;
     var amazon_items = _.get(amazonCart, 'CartItems[0].CartItem') || [];
+    console.log('amazon_items', amazon_items);
+    debugger;
+
+    /*
+    { Request: [ { IsValid: [Object], CartGetRequest: [Object] } ],
+  HMAC: [ '6Axr5aN7FLqoEVtNWknoyzf1JdI=' ],
+  CartId: [ '182-6172169-7031558' ],
+  URLEncodedHMAC: [ '6Axr5aN7FLqoEVtNWknoyzf1JdI%3D' ] }
+  */
+
+    var needs_rebuild = amazon_items.length !== cart.aggregate_items.length;
     amazon_items = amazon_items.map(i => {
+      console.log(cart_items_hash[i.ASIN[0]], parseInt(i.Quantity[0]));
       if (cart_items_hash[i.ASIN[0]] !== parseInt(i.Quantity[0])) {
         needs_rebuild = true;
       }
@@ -440,11 +451,14 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       }))
       timer('rebuilt, saving')
 
+      console.log('cart stuff', cart.amazon.CartId[0], cart._id);
+      cart.link = yield getCartLink(cart.amazon.CartId[0], cart._id);
       cart.save() // don't have to wait for cart to save
     }
 
     //pretty print a nice cart
     kip.debug('final cart summary:', {
+      link: cart.link,
       team: cart.slack_id,
       total: cart.total,
       items: cart.aggregate_items.map(i => {return { ASIN: i.ASIN, title: i.title, quantity: i.quantity}})
