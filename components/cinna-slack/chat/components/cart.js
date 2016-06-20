@@ -19,12 +19,29 @@ var aws_clients = {
     awsId: "AKIAIKMXJTAV2ORZMWMQ",
     awsSecret: "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",
     awsTag: "quic0b-20"
+  }),
+  AKIAILD2WZTCJPBMK66A: amazon.createClient({
+    awsId: "AKIAILD2WZTCJPBMK66A",
+    awsSecret: "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",
+    awsTag: "bubboorev-20"
+  }),
+  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
+    awsId: "AKIAIM4IKQAE2WF4MJUQ",
+    awsSecret: "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",
+    awsTag: "krista03-20"
+  }),
+  AKIAIYTURL6C5PID2GZA: amazon.createClient({
+    awsId: "AKIAIYTURL6C5PID2GZA",
+    awsSecret: "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",
+    awsTag: "krista08-20"
   })
 };
 
 var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
 
-var aws_client_id_list = ['AKIAIKMXJTAV2ORZMWMQ'];
+var aws_client_id_list = Object.keys(aws_clients);
+
+console.log("AWS LCIENTS ",aws_client_id_list)
 
 var getCartLink = require('./process').getCartLink;
 var fs = require('fs')

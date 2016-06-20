@@ -93,17 +93,22 @@ app.post('/slackaction', function(req, res) {
     // ioKip.newSlack();
     //console.log('incoming Slack action BODY: ',req.body);
 
-    //validating real button call  
-    // if(req.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
-    //   console.log('HACKER? 👻')
-    //   return;
-    // } 
+
 
     if (req.body && req.body.payload){
+
+
 
       //res.sendStatus(200);
 
       var parsedIn = JSON.parse(req.body.payload);
+
+
+      //validating real button call  
+      if(parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
+        console.log('HACKER? 👻')
+        return;
+      } 
 
       /// FOR INITIAL SEARCHES
 
