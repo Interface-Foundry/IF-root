@@ -273,13 +273,13 @@ var results = module.exports.results = function(data) {
 
     payload.html = template_results
       .replace(/\$ID/g, data.source.id)
-      .replace(/\$FIRST_NAME/g, data.client_res[0].title.replace(/^1. /, ''))
+      .replace(/\$FIRST_NAME/g, data.client_res[0].title4fb.replace(/^1. /, ''))
       .replace(/\$FIRST_LINK/g, data.client_res[0].title_link)
       .replace(/\$FIRST_IMAGE/g, data.client_res[0].image_url)
-      .replace(/\$SECOND_NAME/g, data.client_res[1].title.replace(/^2. /, ''))
+      .replace(/\$SECOND_NAME/g, data.client_res[1].title4fb.replace(/^2. /, ''))
       .replace(/\$SECOND_LINK/g, data.client_res[1].title_link)
       .replace(/\$SECOND_IMAGE/g, data.client_res[1].image_url)
-      .replace(/\$THIRD_NAME/g, data.client_res[2].title.replace(/^3. /, ''))
+      .replace(/\$THIRD_NAME/g, data.client_res[2].title4fb.replace(/^3. /, ''))
       .replace(/\$THIRD_LINK/g, data.client_res[2].title_link)
       .replace(/\$THIRD_IMAGE/g, data.client_res[2].image_url)
       .replace(/\$SEARCH_TERM/g, data.tokens)

@@ -1531,7 +1531,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             //attachObj.title_link = res[count];
 
                             var cleanText = data.amazon[count].ItemAttributes[0].Title[0].replace(/\*/g,'');
-                            //attachObj.title = cleanText;
+                            attachObj.title4fb = cleanText;
                             attachObj.color = "#45a5f4";
                             attachObj.text = '*' + itemCount + '.* <'+res[count]+'|' + '*' + truncate(cleanText,70,true) + "*>\n <"+res[count]+"|View on Amazon>"
                             attachObj.mrkdwn_in = ['text'],
