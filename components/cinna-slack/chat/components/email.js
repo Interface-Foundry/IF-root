@@ -76,7 +76,7 @@ var processEmail = module.exports.process = function(message) {
     }).sort('-sequence').exec();
 
     if (!last_message) {
-      throw new Error('No last message found, so no team sorry cannot do this it\'s just over.')
+      // throw new Error('No last message found, so no team sorry cannot do this it\'s just over.')
       last_message = {
         chain: 'email-chain-' + uuid.v4(),
         sequence: 0

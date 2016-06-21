@@ -1531,7 +1531,7 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                             //attachObj.title_link = res[count];
 
                             var cleanText = data.amazon[count].ItemAttributes[0].Title[0].replace(/\*/g,'');
-
+                            attachObj.title = cleanText;
                             attachObj.color = "#45a5f4";
                             attachObj.text = '*' + itemCount + '.* <'+res[count]+'|' + '*' + truncate(cleanText,70,true) + "*>\n <"+res[count]+"|View on Amazon>"
                             attachObj.mrkdwn_in = ['text'],
@@ -2679,26 +2679,13 @@ var sendResponse = function(data,flag){
 
         }
          else if (data.action == 'save') {
-              var messages = ['Awesome! I\'ve saved your item for you 😊'];
-            data.client_res.shift();
-              console.log('\n\n\nEMAIL SAVE: ',data.client_res);
-            // data.client_res = JSON.stringify(data.client_res);
-            var photos = [];
-            data.client_res[0].forEach(function(el, index) {
-                // console.log('\n\n\n', el)
-                messages.push(el.text + '\n\n' );
-               if (el.thumb_url) {
-                photos.push({filename: index.toString() + '.jpg', path: el.thumb_url});
-               }
-            })
-            console.log('messages ', messages.join('\n\n'), 'photos: ', photos);
+                  console.log('hitting email outgoing SAVE: ', data.client_res)
+
+             email.confirmation(data).catch((e) => {
+              console.log(e.stack);
+            });
 
 
-            email.reply({
-                to: data.emailInfo.to,
-                text: messages.join('\n\n'),
-                attachments: photos
-            }, data);
         }
         else if (data.action == 'checkout') {
             var messages = ['Awesome! I\'ve saved your item for you 😊'];
