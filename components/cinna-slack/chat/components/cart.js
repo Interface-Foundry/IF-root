@@ -52,13 +52,32 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     var cart = yield getCart(slack_id, type);
     console.log(cart);
 
+
+       var imageURL;
+      if (item.MediumImage && item.MediumImage[0].URL[0]){
+          imageURL = item.MediumImage[0].URL[0];
+      }
+      else if (item.ImageSets && item.ImageSets[0].ImageSet && item.ImageSets[0].ImageSet[0].MediumImage && item.ImageSets[0].ImageSet[0].MediumImage[0]){
+          imageURL = item.ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
+      }
+      else if (item.altImage){
+          imageURL = item.altImage;
+          console.log('OMG OMG using scraped image URL ', imageURL);
+      }
+      else {
+          console.log('NO IMAGE FOUND ', item);
+          imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
+      }
+
+      // item.altImage || _.get(item, 'SmallImage[0].URL[0]')
+
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
       title: _.get(item, 'ItemAttributes[0].Title'),
       link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
-      image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
+      image: imageURL,
       price: item.realPrice,
       rating: _.get(item, 'reviews.rating'),
       review_count: _.get(item, 'reviews.reviewCount'),

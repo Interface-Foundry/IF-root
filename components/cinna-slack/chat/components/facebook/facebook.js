@@ -783,6 +783,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             var userString = item.added_by.map(function(u) {
               return 'u';
             }).join(', ');
+            debugger;
             var cart_item = {
                 "title":  `${item.title}`,
                 "subtitle": 'Price: ' + item.price + "\nQuantity:" + item.quantity,
