@@ -77,6 +77,7 @@ server.listen(8000, function(e) {
 
 //globals
 var messageHistory = {}; //fake database, stores all users and their chat histories
+var navHistory = {}; //keep track of each user in each channel nav history for buttons
 
 //load incoming chat clients
 ioKip.initSlackUsers(app.get('env'));
@@ -89,26 +90,20 @@ app.get('/newslack', function(req, res) {
 });
 
 //incoming slack action
-app.post('/slackaction', function(req, res) {
-    // ioKip.newSlack();
-    //console.log('incoming Slack action BODY: ',req.body);
-
-
+app.post('/slackaction', function(req, res) { 
 
     if (req.body && req.body.payload){
 
-
-
-      //res.sendStatus(200);
-
       var parsedIn = JSON.parse(req.body.payload);
-
 
       //validating real button call  
       if(parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
         console.log('HACKER? 👻')
         return;
       } 
+
+      var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
+
 
       /// FOR INITIAL SEARCHES
 
@@ -120,25 +115,18 @@ app.post('/slackaction', function(req, res) {
       //sends back original chat
       if (parsedIn.response_url && parsedIn.original_message){
 
-       console.log('PASSED IN ',parsedIn);
+        console.log('PASSED IN ',parsedIn);
         
-      
-        //res.sendStatus(200);
-
-
         //penguin nav button
         if (parsedIn.actions[0].name == 'home'){
 
-          //find attachment arry index that contains home buton, replace buttons with menu. 
+                console.log('👻 ',parsedIn.original_message)
 
 
-         // var extract = _.find(parsedIn.original_message.attachments, 'description', view);
-
+          navHistory[navId] = parsedIn.original_message; //saving current nav
 
           var reformattedArray = parsedIn.original_message.attachments.map(function(obj){ 
-
             if (obj.actions){
-
 
               //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
                obj.actions.map(function(obj2){
@@ -148,45 +136,41 @@ app.post('/slackaction', function(req, res) {
                })
             }
            
-            console.log('I I I I I ',obj);
+           // console.log('I I I I I ',obj);
 
-             return obj;
+            return obj;
           });
 
-          console.log('I+ I+ I+ I+ ',reformattedArray);
 
 
           //KEEP TRACK OF PREVIOUS BUTTON HISTORY, PUSH TO USER GLOBAL ARR. revert last button on 
 
+
+
+
           var newRes = parsedIn.original_message;
           newRes.attachments = reformattedArray;
 
-          var stringOrig = JSON.stringify(newRes);
+          //var stringOrig = JSON.stringify(newRes);
 
-          console.log('STRING ORG1 1 1 1 ',stringOrig);
-
-
-          // msgData.as_user = true;
-          // msgData.parse = 'full';
-          // msgData.link_names = '1';
-          // slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, '', msgData, function(err,res) {
-          //     console.log('EDIT CART ERROR ',err)
-          //     console.log('EDIT CART RES ',res)
-          // });
+          //console.log('STRING ORG1 1 1 1 ',stringOrig);
 
           res.json(newRes);
 
-          // request.post(
-          //     parsedIn.response_url,
-          //     { payload: stringOrig },
-          //     function (err, res, body) {
-          //       console.error('post err ',err);
-          //     }
-          // );
-
         }
 
-        //else if (back) button
+       
+        else if (parsedIn.actions[0].name == 'back'){
+
+          //var stringOrig = JSON.stringify(navHistory[navId]);
+
+          console.log('*&^*(&Z^*&Z^*&^ ',navId)
+          console.log('&&&&&&^ ',navHistory[navId])
+          // console.log('090909090909090909090909090909090 ',stringOrig);
+
+          res.json(navHistory[navId]);
+
+        }
 
         else {
 
