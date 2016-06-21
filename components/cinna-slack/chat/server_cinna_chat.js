@@ -162,6 +162,7 @@ app.post('/slackaction', function(req, res) {
 
         else {
 
+          console.log('REZ REZZ ',JSON.stringify(parsedIn.original_message))
           res.json(parsedIn.original_message);
 
          //  var stringOrig = JSON.stringify(parsedIn.original_message);
