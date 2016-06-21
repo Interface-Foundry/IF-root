@@ -24,6 +24,7 @@ var ioKip = require("./io.js");
 // According to the internet, cron jobs are commonly referred to as "jerbs"
 //
 var jerbs = {};
+var bots = {};
 
 //
 // Initialize the jobs for each team on server startup
@@ -298,7 +299,23 @@ function lastCall(response, convo) {
   });
 }
 
-module.exports.addMembers = function(team_id, person_id, channel_id, done) {
+module.exports.addMembers = function(team_id, person_id, channel_id, done, opt) {
+   //var bot;
+
+   // MAKE THIS BOT A GLOBAL KEY VAL :::::: team_id, person_id, channel_id
+
+   var incomingId = team_id + '_' + person_id + '_' + channel_id;
+
+   if (opt == 'CLOSE'){
+      if(bots[incomingId]){ //is there a bot in global?
+        console.log('CLOSNING TIME * * * * * ** * ')
+        bots[incomingId].closeRTM();
+        delete bots[incomingId];
+        done();
+      }
+      return;
+   }
+
    // um let's refresh the slackbot just in case...
    co(function*() {
     console.log('team_id: ',team_id,'person_id: ',person_id, '')
@@ -319,11 +336,14 @@ module.exports.addMembers = function(team_id, person_id, channel_id, done) {
     var bot = controller.spawn({ token: slackbot.bot.bot_access_token });
     bot.startRTM(function(e, bot, payload) {
       bot.startPrivateConversation({user: person_id}, function(response, convo) {
+        bots[incomingId] = bot; //adding this bot obj to global state so we can end bot outside of scope
         convo.slackbot = slackbot;
         convo.bot = bot;
         convo.user_id = person_id;
         convo.on('end', function() {
+          console.log('IS THIS FIRING?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!')
           console.log('ending addmember convo');
+          delete bots[incomingId];
           bot.closeRTM();
           done(convo.parsedKip);
         });
