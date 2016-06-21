@@ -297,7 +297,7 @@ module.exports.basic = function basic(url, callback, num) {
         var hostArr = ['us-dc.proxymesh.com','us-fl.proxymesh.com']; //avail proxies
 
         //'us-il.proxymesh.com','us-ny.proxymesh.com','us-ca.proxymesh.com'
-
+        
         var host = hostArr[Math.floor(Math.random()*hostArr.length)]; //get random host from array
         var port = '31280';
         var proxyUrl = "http://" + user + ":" + password + "@" + host + ":" + port;

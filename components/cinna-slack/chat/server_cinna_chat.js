@@ -98,8 +98,8 @@ app.post('/slackaction', function(req, res) {
 
       //validating real button call  
       if(parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
-        console.log('HACKER? 👻')
-        return;
+        console.log('HACKER? 👻 ',parsedIn.token)
+        //return;
       } 
 
       var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
