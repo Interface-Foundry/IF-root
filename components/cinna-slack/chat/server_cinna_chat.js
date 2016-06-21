@@ -140,6 +140,8 @@ app.post('/slackaction', function(req, res) {
 
           newRes.attachments = reformattedArray;
 
+          console.log('PARSE OUT ',newRes)
+
           res.json(newRes);
 
         }
@@ -160,7 +162,7 @@ app.post('/slackaction', function(req, res) {
 
         else {
 
-
+          //res.json(parsedIn.original_message);
 
           var stringOrig = JSON.stringify(parsedIn.original_message);
 

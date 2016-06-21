@@ -1022,29 +1022,32 @@ var incomingMsgAction = function(data,origin){
                 break;
 
             case 'help':
-                console.log('Z Z Z Z Z Z Z Z Z  Z Z Z Z Z Z Z Z Z Z Z 2222 ')
                 kipObj.msg = 'help';
+                closeCurrentMode('shopping');
                 preProcess(kipObj);
                 break;
         }
 
         function closeCurrentMode(switchMode){
+
             if (!kipUser[kipObj.source.id]){
                 kipUser[kipObj.source.id] = {};
             }
             if (!kipUser[kipObj.source.id].conversations){
                 kipUser[kipObj.source.id].conversations = 'shopping';
             }
+
+            console.log('CLOSING THIS ',kipUser[kipObj.source.id].conversations)
+
             switch(kipUser[kipObj.source.id].conversations){
                 case 'settings':
                     var newObj = {
                         team_id:parsedIn.team.id,
-                        person_id:parsedIn.user.id,
-                        channel_id:parsedIn.channel.id
+                        person_id:parsedIn.user.id
                     };
-                    conversation_botkit.settings(newObj,'CLOSE');
+                    conversation_botkit.settings('CLOSE','','',newObj);
                     kipObj.mode = switchMode;
-                    updateMode(switchMode);
+                    updateMode(kipObj);
                     break;
 
                 case 'addmember':
@@ -1052,7 +1055,7 @@ var incomingMsgAction = function(data,origin){
                     weekly_updates.addMembers(parsedIn.team.id,parsedIn.user.id,parsedIn.channel.id,function(){
                         console.log('DONE!!!')
                         kipObj.mode = switchMode;
-                        updateMode(switchMode);
+                        updateMode(kipObj);
                     },'CLOSE');
                     break;
 
@@ -3514,6 +3517,11 @@ function settingsMode(data){
         // um let's refresh the slackbot just in case...
         var slackbot = yield db.Slackbots.findOne({team_id: data.source.org}).exec();
 
+        var newObj = {
+            team_id:data.source.org,
+            person_id:data.source.user
+        };
+
         return conversation_botkit.settings(slackbot, data.source.user, function(msg) {
 
             if (!msg){
@@ -3532,7 +3540,7 @@ function settingsMode(data){
 
             console.log('💎incoming💎 💎 ',obj);
             updateMode(obj);
-        })
+        },newObj)
 
     }).catch((e) => {
         console.log(e);

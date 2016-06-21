@@ -307,6 +307,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, done, opt) 
    var incomingId = team_id + '_' + person_id + '_' + channel_id;
 
    if (opt == 'CLOSE'){
+      console.log('😅 CLOSE TIME MEMBERS')
       if(bots[incomingId]){ //is there a bot in global?
         console.log('CLOSNING TIME * * * * * ** * ')
         bots[incomingId].closeRTM();

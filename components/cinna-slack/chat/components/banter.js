@@ -1072,7 +1072,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'Version':
         case 'version':
             flag = 'basic';
-            res = 'I\'m a penguin running Kip v0.7.1 Paprika';
+            res = 'I\'m a penguin running Kip v0.7.2 Paprika';
             break;
 
         case '/':
@@ -1423,7 +1423,8 @@ var getCinnaResponse = function(data,callback){
         }
     }
 
-    var selectNum = data.searchSelect + 1;
+    var selectNum = parseInt(data.searchSelect);
+    
     switch (data.bucket) {
         case 'search':
             switch (data.action) {
