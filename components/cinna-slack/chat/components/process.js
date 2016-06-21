@@ -168,7 +168,7 @@ var aws_associate_id = 'quic0b-20';
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink(url, cart_id) {
-  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]/, '%26associate-id%3Dquic0b-20');
+  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
   console.log('CART IDDDDDDDDD ',url)
 
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
@@ -178,7 +178,7 @@ function getCartLink(url, cart_id) {
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink(url, user_id, item_id) {
-  url = url.replace(/(%26|\&)tag(%3D|=)[^%]/, '%26tag%3Dquic0b-20');
+  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
