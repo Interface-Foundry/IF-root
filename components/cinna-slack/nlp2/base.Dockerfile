@@ -1,10 +1,13 @@
-# VERSION:        0.2
+# VERSION:        0.3
 # REPO/TAG:       grahama/parsey:latest
-# DESCRIPTION:    parsey with tensorflow
+# DESCRIPTION:    parsey
 # AUTHOR:         graham annett
 # COMMENTS:
-#     copied from dockerbuilds but building remote.  just posted here as reference
-#     and may be behind actual dockerfile
+#     parsey with tensorflow, not using GPU
+# SETUP:
+#
+# USAGE:
+#
 
 FROM ubuntu:15.10
 
@@ -42,7 +45,9 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     update-ca-certificates -f && \
-    pip install -U protobuf==3.0.0b2 && pip install -U asciitree
+    pip install -U protobuf==3.0.0b2 && \
+    pip install -U asciitree spacy easydict flask textblob && \
+    python -m spacy.en.download
 
 # Set up Bazel.
 
@@ -64,6 +69,4 @@ RUN git clone --recursive https://github.com/tensorflow/models.git /root/models 
     cd /root/models/syntaxnet/tensorflow && echo | ./configure && \
     cd /root/models/syntaxnet && bazel test syntaxnet/... util/utf8/...
 
-WORKDIR /root/models/syntaxnet/
-
-# todo: CMD + with flask
+WORKDIR /root/

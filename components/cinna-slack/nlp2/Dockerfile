@@ -1,5 +1,5 @@
 # VERSION:        0.1
-# REPO/TAG:       grahama/parsey:latest
+# REPO/TAG:       grahama/kip:latest
 # DESCRIPTION:    using parsey but able to build upon locally
 # AUTHOR:         graham annett
 # COMMENTS:
@@ -14,18 +14,16 @@
 # USAGE:
 #
 
-FROM grahama/parsey:alt
+FROM grahama/kip:parsey
 
 MAINTAINER grahama <graham.annett@gmail.com>
 
+RUN pip install ipython # just for testing rn
+
 ADD src /root/
 
-RUN pip install spacy easydict flask textblob && \
-    python -m spacy.en.download
-
-RUN chmod +x /root/parser.sh
-
-# start python services, follow dockerfile from old nlp folder
 WORKDIR /root
 
-CMD python server.py
+# uncomment once done testing
+# start python services, follow dockerfile from old nlp folder
+# CMD python server.py

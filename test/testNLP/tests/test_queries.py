@@ -3,7 +3,8 @@
 multiple_query_search_with_modifiers = [
     u'Find an office chair with the highest reviews and highest price',
     u'Find an office chair with good reviews and below $100',
-    u'Find an office chair with extra back support, below $100 and at least 3 stars.',
+    u'Find an office chair with extra back support, below $100 and at ' +
+    'least 3 stars.',
 ]
 
 # (quantity vs version vs descriptor)

@@ -1,5 +1,6 @@
 import subprocess
 import logging
+from easydict import EasyDict
 
 logger = logging.getLogger()
 
@@ -46,38 +47,70 @@ class McParser:
     '''
 
     def __init__(self, text):
+        '''
+        # self.terms = EasyDict({'item_descriptors': [], 'had_find': False})
+        '''
         self.text = text
-        self.terms = {'item_descriptors': [], 'had_find': False}
+        self.focus = []
+        self.nouns = []
+        self.verbs = []
+        self.adjectives = []
+        self.item_descriptors = []
+        self.had_find = False
+        self.isQuestion = False
         self.process_text()
 
     def process_text(self):
         '''
-        takes base text, pass into syntaxnet_array and then
+        takes base text, pass into syntaxnet_array, put into array form, and
+        parse the terms into accessible object
+
+        Notes:
+            find ruins 'root' parser, possibly remove
         '''
-        # find ruins root of parser
+        #
         if 'find' in self.text.lower():
             self.terms['had_find'] = True
-            self.text = self.text.lower().replace('find', '')
-
+            # self.text = self.text.lower().replace('find', '')
         self.d_array = syntaxnet_array(self.text)
         self.array_form()
-        self.find_search_terms()
-        if self.dobj:
-            self.search_object = self.dobj
-        elif self.root:
-            self.search_object = self.root
+        self.parse_terms()
 
     def array_form(self):
-        a = []
+        '''
+        '''
+        self.dependency_array = []
         for line in self.d_array:
-            a.append(line.split('\t'))
-        self.dependency_array = a
+            self.dependency_array.append(line.split('\t'))
+        self.dependency_array.sort(key=lambda x: x[6])
 
-    def find_search_terms(self):
+    def parse_terms(self):
+        '''
+        '''
         for i in self.dependency_array:
-            if i[7] == 'ROOT':
-                self.terms['root'] = i[7]
-            if i[7] == 'dobj':
-                self.terms['dobj'] = i[7]
-            if i[7] == 'dep':
-                self.terms['item_descriptors'].append(i[7])
+            if i[3] in ['NOUN', 'PRON']:
+                self.nouns.append(i[1])
+            if i[3] in ['VERB']:
+                self.verbs.append(i[1])
+            if i[3] in ['ADJ']:
+                self.adjectives.append(i[1])
+
+            # could potentially move these within nouns/verbs/etc stuff
+            if i[7] in ['ROOT']:
+                self.terms.root = i[1]
+                self.search_object = i[1]
+            if i[7] in ['dobj']:
+                self.terms.dobj = i[1]
+                self.search_object = i[1]
+            if i[7] in ['dep']:
+                self.terms.item_descriptors.append(i[7])
+            if i[7] in ['punct']:
+                if i[1] in ['?']:
+                    self.isQuestion = True
+            # focus thing
+            if i[1].lower() in ['one', '1', 'first']:
+                self.focus.append(1)
+            if i[1].lower() in ['two', '2', 'second']:
+                self.focus.append(2)
+            if i[1].lower() in ['three', '3', 'third']:
+                self.focus.append(3)
