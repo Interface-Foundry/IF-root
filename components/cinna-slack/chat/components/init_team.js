@@ -44,14 +44,15 @@ var scrape_team_info = function(bot, callback) {
 
       r.body = JSON.parse(r.body)
 
-      if (!r.body.user_id) {
+      if (!r.body.user_id && typeof bot.meta.addedBy === 'undefined') {
         return kip.error('Could not find the user who added slackbot ' + bot._id)
+      } else {
+        bot.meta.addedBy = r.body.user_id || bot.meta.addedBy;
       }
 
-      bot.meta.addedBy = r.body.user_id;
-      bot.meta.office_assistants = [r.body.user_id];
+      bot.meta.office_assistants = [bot.meta.addedBy];
       console.log('ASSISTANTS HERE!!!!!! ',bot.meta.office_assistants);
-      
+
       if (typeof bot.save === 'function') {
         bot.save();
       } else {
