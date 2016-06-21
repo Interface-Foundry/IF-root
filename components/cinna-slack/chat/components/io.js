@@ -619,6 +619,8 @@ var loadSocketIO = function(server){
 //pre process incoming messages for canned responses
 var preProcess = function(data){
 
+    console.log('Z Z Z Z Z Z Z Z Z  Z Z Z Z Z Z Z Z Z Z Z 3 3 33333 ',data)
+
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
         console.log('missing channel or org Id 1');
@@ -928,52 +930,137 @@ var incomingMsgAction = function(data,origin){
         switch (parsedIn.actions[0].name){
 
             case 'cheaper':
+                closeCurrentMode('shopping');(kipObj);
+
                 kipObj.bucket = 'search';
                 kipObj.action = 'modify';
                 kipObj.dataModify = { type: 'price', param: 'less' };
                 break;
 
             case 'similar':
+                closeCurrentMode('shopping');
+
                 kipObj.bucket = 'search';
                 kipObj.action = 'similar';
                 break;
 
             //uses default blue for now
             case 'modify':
+                closeCurrentMode('shopping');
+
                 kipObj.bucket = 'search';
                 kipObj.action = 'modify';
                 kipObj.dataModify = { type: 'genericDetail', val: ['blue'] };
                 break;
 
             case 'moreinfo':
+                closeCurrentMode('shopping');
+
                 kipObj.bucket = 'search';
                 kipObj.action = 'focus';
                 break;
 
             case 'addcart':
+                closeCurrentMode('shopping');
+
+
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'save';
                 break;
 
             case 'additem':
+                closeCurrentMode('shopping');
+                // kipObj.mode = 'shopping';
+                // updateMode(kipObj);
+
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'save';
                 break;
 
             case 'removeitem':
+                closeCurrentMode('shopping');
+                // kipObj.mode = 'shopping';
+                // updateMode(kipObj);
+
                 kipObj.bucket = 'purchase';
                 kipObj.action = 'remove';
                 break;
 
             case 'more':
+                closeCurrentMode('shopping');
+                // kipObj.mode = 'shopping';
+                // updateMode(kipObj);
+
                 kipObj.bucket = 'search';
                 kipObj.action = 'more';
                 break;
 
             case 'settings':
-                kipObj.mode = 'settings';
-                updateMode(kipObj);
+                //cancel current mode
+                closeCurrentMode('settings');
+                // kipObj.mode = 'settings';
+                // updateMode(kipObj);
                 break;
+
+            case 'viewcart':
+                closeCurrentMode('shopping');
+                // kipObj.mode = 'shopping';
+                // updateMode(kipObj);
+                viewCart(kipObj);
+                break;
+
+            case 'shopping':
+                closeCurrentMode('shopping');
+                // kipObj.mode = 'shopping';
+                // updateMode(kipObj);
+                break;
+
+            case 'members':
+                closeCurrentMode('addmember');
+                // kipObj.mode = 'addmember';
+                // updateMode(kipObj);
+                break;
+
+            case 'help':
+                console.log('Z Z Z Z Z Z Z Z Z  Z Z Z Z Z Z Z Z Z Z Z 2222 ')
+                kipObj.msg = 'help';
+                preProcess(kipObj);
+                break;
+        }
+
+        function closeCurrentMode(switchMode){
+            if (!kipUser[kipObj.source.id]){
+                kipUser[kipObj.source.id] = {};
+            }
+            if (!kipUser[kipObj.source.id].conversations){
+                kipUser[kipObj.source.id].conversations = 'shopping';
+            }
+            switch(kipUser[kipObj.source.id].conversations){
+                case 'settings':
+                    var newObj = {
+                        team_id:parsedIn.team.id,
+                        person_id:parsedIn.user.id,
+                        channel_id:parsedIn.channel.id
+                    };
+                    conversation_botkit.settings(newObj,'CLOSE');
+                    kipObj.mode = switchMode;
+                    updateMode(switchMode);
+                    break;
+
+                case 'addmember':
+
+                    weekly_updates.addMembers(parsedIn.team.id,parsedIn.user.id,parsedIn.channel.id,function(){
+                        console.log('DONE!!!')
+                        kipObj.mode = switchMode;
+                        updateMode(switchMode);
+                    },'CLOSE');
+                    break;
+
+                default: 
+                    kipObj.mode = switchMode;
+                    updateMode(kipObj);
+
+            }
         }
 
         //special cart commands
@@ -2777,6 +2864,8 @@ var sendResponse = function(data,flag){
 
                     attachments = JSON.stringify(attachments);
 
+                    console.log('FOCUS ATTACHEMNTS !!!!!! ! ! ! ! ! ! ',attachments)
+
                     var msgData = {
                       // attachments: [...],
                         icon_url:'http://kipthis.com/img/kip-icon.png',
@@ -3343,11 +3432,10 @@ function recallHistory(data,callback,steps){
 }
 
 
-
 //MODE UPDATE HANDLING
 var updateMode = function(data){
 
-    console.log('UPDATE MODE DATA ',data);
+    console.log('UPDATE MODE DATA💅💅💅 ',data);
 
     if(!kipUser[data.source.id]){
         kipUser[data.source.id] = {};
@@ -3436,6 +3524,11 @@ function settingsMode(data){
         var slackbot = yield db.Slackbots.findOne({team_id: data.source.org}).exec();
 
         return conversation_botkit.settings(slackbot, data.source.user, function(msg) {
+
+            if (!msg){
+                return;
+            }
+
             data.bucket;
             data.action;
 
@@ -3469,6 +3562,10 @@ function addmemberMode(data){
 
         //var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
         return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function(msg) {
+
+            if (!msg){
+                return;
+            }
 
             console.log('done adding members');
 

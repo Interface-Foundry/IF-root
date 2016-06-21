@@ -13,7 +13,7 @@ var banter = require("./banter.js");
 var refreshTeam = require('./refresh_team');
 var ioKip = require("./io.js");
 
-
+var bots = {};
 /*
 slackbot: slackbot_schema
 message: slack message { type: 'message',
@@ -69,6 +69,27 @@ module.exports.onboard = function(slackbot, user_id, done) {
 var settingsConvos = {};
 
 module.exports.settings = function(slackbot, user_id, done, data) {
+   // if (user_id == 'CLOSE'){
+   //    console.log('SETTINGS SPAWNER ',controller);
+   //    // var slackbot = yield db.Slackbots.findOne({team_id: slackbot}).exec();
+   //    // var bot = controller.spawn({ token: slackbot.bot.bot_access_token });
+
+   //    // bot.closeRTM();
+   //    // done();
+   //    return;
+   // }
+
+   var incomingId = slackbot.team_id + '_' + slackbot.person_id;
+
+   if (user_id == 'CLOSE'){
+      if(bots[incomingId]){ //is there a bot in global?
+        console.log('CLOSNING TIME * * settings * * * ** * ')
+        bots[incomingId].closeRTM();
+        delete bots[incomingId];
+        //done();
+      }
+      return;
+   }
 
   console.log('passing in data 😅😅 ',data);
   var bot = controller.spawn({
@@ -89,6 +110,7 @@ module.exports.settings = function(slackbot, user_id, done, data) {
     // only do the settings thing once!
     var started = false;
     bot.startPrivateConversation({user: user_id}, function(response, convo) {
+      bots[incomingId] = bot;
       if (!started) {
         started = true;
       } else {
@@ -99,8 +121,9 @@ module.exports.settings = function(slackbot, user_id, done, data) {
       convo.user_id = user_id;
       settingsConvos[user_id] = convo;
       convo.on('end', function() {
-
+        console.log('IS THIS FIRING?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!')
         bot.closeRTM();
+        delete bots[incomingId];
         done(convo.parsedKip);
 
         // if (convo.status=='completed'){

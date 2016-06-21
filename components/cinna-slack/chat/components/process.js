@@ -42,7 +42,7 @@ var urlShorten = function(data,callback2) {
               .catch(function (err) {
                   console.error(err.message);
                   callback2();
-              });              
+              });
             }
 
         }
@@ -73,7 +73,7 @@ var urlShorten = function(data,callback2) {
                       console.error(err.message);
                       urlArr.push('http://kipthis.com');
                       callback();
-                  });                  
+                  });
                 }
 
 
@@ -162,12 +162,14 @@ var emoji = {
 }
 
 
+var aws_associate_id = 'quic0b-20';
+
 //
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink(url, cart_id) {
-
-    console.log('CART IDDDDDDDDD ',url)
+  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+  console.log('CART IDDDDDDDDD ',url)
 
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
 }
@@ -176,6 +178,7 @@ function getCartLink(url, cart_id) {
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink(url, user_id, item_id) {
+  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
@@ -381,7 +384,7 @@ var imageSearch = function(data,token,callback){
     // }
 
 }
-  
+
 //check if string contains a mode, then build kip object
 //context here is for which conversation this modeHandle called from, i.e. from 'settings mode'
 var modeHandle = function(input,context,callback){
@@ -390,12 +393,12 @@ var modeHandle = function(input,context,callback){
     var inputTxt = {msg:input.toLowerCase().trim()};
 
 
-    banter.checkModes(inputTxt,context,function(mode,res){  
+    banter.checkModes(inputTxt,context,function(mode,res){
 
       console.log('MODE FROM BANTER.JS ',mode);
       console.log('RES FROM BANTER.JS ',res);
 
-      //nothing found in canned 
+      //nothing found in canned
       if(!mode && !res){
           //try for NLP parse
           nlp.parse(inputTxt, function(e, res) {
@@ -412,7 +415,7 @@ var modeHandle = function(input,context,callback){
                       mode:'shopping',
                       res:rez
                     }
-                    obj.res.mode = 'shopping'; //ugh, whatev 
+                    obj.res.mode = 'shopping'; //ugh, whatev
                     callback(obj);
                   }
                   else {
@@ -438,7 +441,7 @@ var modeHandle = function(input,context,callback){
         callback(obj);
       }
       else {
-        
+
         console.log('NO MODE FOUND!!!!! heres mode: ',mode)
         callback();
       }
@@ -461,7 +464,7 @@ var modeHandle = function(input,context,callback){
 //             break;
 //             case 'search':
 //             break;
-            
+
 //         }
 //     }else {
 //         console.error('Error: missing data.bucket or data.action in findMode()');
@@ -594,4 +597,3 @@ module.exports.emoji = emoji;
 module.exports.imageSearch = imageSearch;
 module.exports.buildKipObject = buildKipObject;
 module.exports.modeHandle = modeHandle;
-

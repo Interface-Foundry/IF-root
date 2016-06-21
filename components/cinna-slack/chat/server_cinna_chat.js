@@ -77,6 +77,7 @@ server.listen(8000, function(e) {
 
 //globals
 var messageHistory = {}; //fake database, stores all users and their chat histories
+var navHistory = {}; //keep track of each user in each channel nav history for buttons
 
 //load incoming chat clients
 ioKip.initSlackUsers(app.get('env'));
@@ -89,26 +90,20 @@ app.get('/newslack', function(req, res) {
 });
 
 //incoming slack action
-app.post('/slackaction', function(req, res) {
-    // ioKip.newSlack();
-    //console.log('incoming Slack action BODY: ',req.body);
-
-
+app.post('/slackaction', function(req, res) { 
 
     if (req.body && req.body.payload){
 
-
-
-      //res.sendStatus(200);
-
       var parsedIn = JSON.parse(req.body.payload);
-
 
       //validating real button call  
       if(parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
-        console.log('HACKER? 👻')
-        return;
+        console.log('HACKER? 👻 ',parsedIn.token)
+        //return;
       } 
+
+      var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
+
 
       /// FOR INITIAL SEARCHES
 
@@ -120,25 +115,15 @@ app.post('/slackaction', function(req, res) {
       //sends back original chat
       if (parsedIn.response_url && parsedIn.original_message){
 
-       console.log('PASSED IN ',parsedIn);
+        console.log('PASSED IN ',parsedIn);
         
-      
-        //res.sendStatus(200);
-
-
         //penguin nav button
         if (parsedIn.actions[0].name == 'home'){
 
-          //find attachment arry index that contains home buton, replace buttons with menu. 
-
-
-         // var extract = _.find(parsedIn.original_message.attachments, 'description', view);
-
+          navHistory[navId] = JSON.stringify(parsedIn.original_message); //saving current nav
 
           var reformattedArray = parsedIn.original_message.attachments.map(function(obj){ 
-
             if (obj.actions){
-
 
               //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
                obj.actions.map(function(obj2){
@@ -147,46 +132,31 @@ app.post('/slackaction', function(req, res) {
                   }
                })
             }
-           
-            console.log('I I I I I ',obj);
-
-             return obj;
+            return obj;
           });
 
-          console.log('I+ I+ I+ I+ ',reformattedArray);
-
-
-          //KEEP TRACK OF PREVIOUS BUTTON HISTORY, PUSH TO USER GLOBAL ARR. revert last button on 
 
           var newRes = parsedIn.original_message;
+
           newRes.attachments = reformattedArray;
-
-          var stringOrig = JSON.stringify(newRes);
-
-          console.log('STRING ORG1 1 1 1 ',stringOrig);
-
-
-          // msgData.as_user = true;
-          // msgData.parse = 'full';
-          // msgData.link_names = '1';
-          // slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, '', msgData, function(err,res) {
-          //     console.log('EDIT CART ERROR ',err)
-          //     console.log('EDIT CART RES ',res)
-          // });
 
           res.json(newRes);
 
-          // request.post(
-          //     parsedIn.response_url,
-          //     { payload: stringOrig },
-          //     function (err, res, body) {
-          //       console.error('post err ',err);
-          //     }
-          // );
-
         }
 
-        //else if (back) button
+       
+        else if (parsedIn.actions[0].name == 'back'){
+
+          //console.log('090909090909090909090909090909090 ',navHistory[navId]);
+
+          //res.json(navHistory[navId]);
+
+         //var parsed = JSON.parse('{"text":"","username":"Kip","icons":{"image_48":"https://s3-us-west-2.amazonaws.com/slack-files2/bot_icons/2015-12-08/16204337716_48.png"},"bot_id":"B0YTP5GUD","attachments":[{"fallback":"Here are some options you might like","image_url":"https://s3.amazonaws.com/if-kip-chat-images/7UNLH75BPC8FWXN92YHZ0FGP.png","image_width":345,"image_height":120,"image_bytes":19056,"callback_id":"5768bad04bf101a08ae43ceb","text":"*1.* <http://goo.gl/eEQ1GA|*SYMA X5C Explorers 2.4G 4CH 6-Axis Gyro RC Quadcopter With HD Camera…*>\n <http://goo.gl/eEQ1GA|View on Amazon>","id":1,"color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"Add to Cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":"Find Cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"moreinfo","text":"More Info","type":"button","value":"0","style":"default"}],"mrkdwn_in":["text"]},{"fallback":"Here are some options you might like","image_url":"https://s3.amazonaws.com/if-kip-chat-images/5WYY81SPBQ0TAU7BUOLST9OQ.png","image_width":345,"image_height":120,"image_bytes":18403,"callback_id":"5768bad04bf101a08ae43ceb","text":"*2.* <http://goo.gl/u32Q8m|*Cheerwing Syma X5SW FPV Explorers2 2.4Ghz 4CH 6-Axis Gyro RC Headless …*>\n <http://goo.gl/u32Q8m|View on Amazon>","id":2,"color":"45a5f4","actions":[{"id":"4","name":"addcart","text":"Add to Cart","type":"button","value":"1","style":"primary"},{"id":"5","name":"cheaper","text":"Find Cheaper","type":"button","value":"1","style":"default"},{"id":"6","name":"moreinfo","text":"More Info","type":"button","value":"1","style":"default"}],"mrkdwn_in":["text"]},{"fallback":"Here are some options you might like","image_url":"https://s3.amazonaws.com/if-kip-chat-images/LKXW2QTB6234T5GZQN4UJMN8.png","image_width":345,"image_height":120,"image_bytes":25137,"callback_id":"5768bad04bf101a08ae43ceb","text":"*3.* <http://goo.gl/9xQhxn|*Syma X5SW 4 Channel Remote Controlled Quadcopter with HD Camera for Re…*>\n <http://goo.gl/9xQhxn|View on Amazon>","id":3,"color":"45a5f4","actions":[{"id":"7","name":"addcart","text":"Add to Cart","type":"button","value":"2","style":"primary"},{"id":"8","name":"cheaper","text":"Find Cheaper","type":"button","value":"2","style":"default"},{"id":"9","name":"moreinfo","text":"More Info","type":"button","value":"2","style":"default"}],"mrkdwn_in":["text"]},{"callback_id":"5768bad04bf101a08ae43ceb","fallback":"More Options","id":4,"color":"53B987","actions":[{"id":"10","name":"more","text":"View More","type":"button","value":"more","style":"default"},{"id":"11","name":"home","text":"🐧","type":"button","value":"home","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1466481359.000085"}');
+          if (navHistory[navId]){
+            res.json(JSON.parse(navHistory[navId]));
+          }
+          
+        }
 
         else {
 
@@ -195,8 +165,6 @@ app.post('/slackaction', function(req, res) {
           var stringOrig = JSON.stringify(parsedIn.original_message);
 
          // res.sendStatus(200);
-
-
 
           console.log('STRING ORG22222 ',stringOrig)
           request.post(
