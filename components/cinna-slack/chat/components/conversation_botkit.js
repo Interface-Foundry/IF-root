@@ -79,9 +79,13 @@ module.exports.settings = function(slackbot, user_id, done, data) {
    //    return;
    // }
 
-   var incomingId = slackbot.team_id + '_' + slackbot.person_id;
+   
+   var incomingId = data.team_id + '_' + data.person_id;
+   console.log('😅ID😅 ',incomingId)
 
-   if (user_id == 'CLOSE'){
+   if (slackbot == 'CLOSE'){
+      console.log('😅 CLOSE TIME ',slackbot)
+      //console.log('😅😅 ',bots[incomingId])
       if(bots[incomingId]){ //is there a bot in global?
         console.log('CLOSNING TIME * * settings * * * ** * ')
         bots[incomingId].closeRTM();
@@ -91,7 +95,7 @@ module.exports.settings = function(slackbot, user_id, done, data) {
       return;
    }
 
-  console.log('passing in data 😅😅 ',data);
+  //console.log('passing in data 😅😅 ',data);
   var bot = controller.spawn({
     token: slackbot.bot.bot_access_token
   });
@@ -394,25 +398,33 @@ function listenOnboard(response, convo){
             "fallback":"Welcome"
         },
         {
-            "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+            "text": "• You can search for things your team needs and save to Team Cart. Try typing `headphones` below and you'll see 3 choices",
             "mrkdwn_in": [
                 "text"
             ],
             "color":"#49d63a",
             "fallback":"Welcome"
-        },
-        {
-          "mrkdwn_in": [
-              "fields"
-          ],
-          "fields": [
-              {
-                  "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
-                  "short": false
-              }
-          ],
-          "fallback":"Welcome"
         }
+        // {
+        //     "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+        //     "mrkdwn_in": [
+        //         "text"
+        //     ],
+        //     "color":"#49d63a",
+        //     "fallback":"Welcome"
+        // },
+        // {
+        //   "mrkdwn_in": [
+        //       "fields"
+        //   ],
+        //   "fields": [
+        //       {
+        //           "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
+        //           "short": false
+        //       }
+        //   ],
+        //   "fallback":"Welcome"
+        // }
     ];
 
     var resStatus = {
@@ -642,25 +654,25 @@ function listenOnboard(response, convo){
                       "fallback":"Welcome"
                   },
                   {
-                      "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
+                      "text": "• You can search for things your team needs and save to Team Cart. Try typing `headphones` below and you'll see 3 choices",
                       "mrkdwn_in": [
                           "text"
                       ],
                       "color":"#49d63a",
                       "fallback":"Welcome"
-                  },
-                  {
-                    "mrkdwn_in": [
-                        "fields"
-                    ],
-                    "fields": [
-                        {
-                            "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
-                            "short": false
-                        }
-                    ],
-                    "fallback":"Welcome"
                   }
+                  // {
+                  //   "mrkdwn_in": [
+                  //       "fields"
+                  //   ],
+                  //   "fields": [
+                  //       {
+                  //           "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
+                  //           "short": false
+                  //       }
+                  //   ],
+                  //   "fallback":"Welcome"
+                  // }
               ];
 
               var resStatus = {
@@ -771,10 +783,10 @@ function showSettings(response, convo, flag, done) {
     //
     if (chatuser.settings.last_call_alerts) {
       attachments.push({
-        text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'
+        text: 'You are *receiving last-call alerts* for company orders.  \n Say `no last call` to stop this.'
       })
     } else {
-      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
+      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. \n Say `yes last call` to receive them.'})
     }
 
     //
@@ -791,9 +803,9 @@ function showSettings(response, convo, flag, done) {
 
     //no gremlins found! p2p mode
     if(office_gremlins.length < 1){
-      var adminText = 'I\'m not managed by anyone right now.';
+      var adminText = 'I\'m not managed by anyone right now.\n';
     }else {
-      var adminText = 'I\'m managed by ' + office_gremlins.join(', ') + '.';
+      var adminText = 'I\'m managed by ' + office_gremlins.join(', ') + '.\n';
     }
     
     if (isAdmin) {
@@ -820,7 +832,7 @@ function showSettings(response, convo, flag, done) {
         var job_time_user_tz = job_time_bot_tz.tz(convo.chatuser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())
-        attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + convo.chatuser.tz.replace(/_/g, ' ') + '*'
+        attachments.push({text: 'You are receiving weekly cart status updates every \n*' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + convo.chatuser.tz.replace(/_/g, ' ') + '*'
           + ')\nYou can turn this off by saying `no weekly status`'
           + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
       } else {
