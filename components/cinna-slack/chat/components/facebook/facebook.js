@@ -80,6 +80,7 @@ var server = require('http').createServer(app);
 var search_results = require('./search_results');
 var focus = require('./focus');
 var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
+var emojiText = require('emoji-text'); //convert emoji to text
 
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
@@ -115,6 +116,7 @@ app.post('/facebook', function(req, res) {
         sender = event.sender.id;
         if (event.message && event.message.text) {
             text = event.message.text;
+            text = emojiText.convert(text,{delimiter: ' '});
             console.log(JSON.stringify(req.body));
             var message = new db.Message({
                 incoming: true,
