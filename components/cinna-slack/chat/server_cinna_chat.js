@@ -162,20 +162,20 @@ app.post('/slackaction', function(req, res) {
 
         else {
 
-          //res.json(parsedIn.original_message);
+          res.json(parsedIn.original_message);
 
-          var stringOrig = JSON.stringify(parsedIn.original_message);
+         //  var stringOrig = JSON.stringify(parsedIn.original_message);
 
-         // res.sendStatus(200);
+         // // res.sendStatus(200);
 
-          console.log('STRING ORG22222 ',stringOrig)
-          request.post(
-              parsedIn.response_url,
-              { payload: stringOrig },
-              function (err, res, body) {
-                console.error('post err ',err);
-              }
-          );
+         //  console.log('STRING ORG22222 ',stringOrig)
+         //  request.post(
+         //      parsedIn.response_url,
+         //      { payload: stringOrig },
+         //      function (err, res, body) {
+         //        console.error('post err ',err);
+         //      }
+         //  );
 
           ioKip.incomingMsgAction(req.body,'slack');
 

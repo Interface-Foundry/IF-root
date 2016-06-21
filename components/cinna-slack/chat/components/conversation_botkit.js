@@ -809,9 +809,9 @@ function showSettings(response, convo, flag, done) {
     }
     
     if (isAdmin) {
-      adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
+      adminText += ' You can *add and remove admins* with `add @user` and `remove @user`.'
     }else if (convo.slackbot.meta.office_assistants.length < 1){
-      adminText += '  You can *add admins* with `add @user`.'
+      adminText += ' You can *add admins* with `add @user`.'
     }else {
       adminText += ' Only admins can add other admins.'
     }
