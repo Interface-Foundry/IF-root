@@ -619,7 +619,6 @@ var loadSocketIO = function(server){
 //pre process incoming messages for canned responses
 var preProcess = function(data){
 
-    console.log('Z Z Z Z Z Z Z Z Z  Z Z Z Z Z Z Z Z Z Z Z 3 3 33333 ',data)
 
     //setting up all the data for this user / org
     if (!data.source.org || !data.source.channel){
@@ -668,13 +667,20 @@ var preProcess = function(data){
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
 
+
+            console.log('# # # # # #  # # # # ## 3333 ')
+
+
         //found canned response
         if(flag){
+            
             switch(flag){
                 case 'basic': //just respond, no actions
                     //send message
                     data.client_res = [];
                     data.client_res.push(res);
+                        console.log('# # # # # # BASIC # # # # ## 3333 ')
+
                     cannedBanter(data);
                     break;
                 case 'search.initial':
@@ -930,7 +936,7 @@ var incomingMsgAction = function(data,origin){
         switch (parsedIn.actions[0].name){
 
             case 'cheaper':
-                closeCurrentMode('shopping');(kipObj);
+                closeCurrentMode('shopping');
 
                 kipObj.bucket = 'search';
                 kipObj.action = 'modify';
@@ -1023,6 +1029,12 @@ var incomingMsgAction = function(data,origin){
 
             case 'help':
                 kipObj.msg = 'help';
+                closeCurrentMode('shopping');
+                preProcess(kipObj);
+                break;
+
+            case 'search':
+                kipObj.msg = parsedIn.actions[0].value;
                 closeCurrentMode('shopping');
                 preProcess(kipObj);
                 break;
@@ -1202,6 +1214,7 @@ var incomingMsgAction = function(data,origin){
 //sentence breakdown incoming from python
 function incomingAction(data){
 
+    console.log('Z Z Z INCOMING ACTION Z Z Z ',data)
 
     // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / /
     if (!messageHistory[data.source.id]){ //new user, set up chat states
@@ -1241,6 +1254,8 @@ data.flags = data.flags ? data.flags : {};
             searchBucket(data);
             break;
         case 'banter':
+            console.log('# # # # # BANTER SORT #  # # # # ## 3333 ')
+
             banterBucket(data);
             break;
         case 'purchase':
@@ -1392,6 +1407,8 @@ function banterBucket(data){
         case 'question':
             break;
         case 'smalltalk':
+            console.log('# # # # # # SMALL TALK # # # # ## 3333 ')
+
             outgoingResponse(data,'txt');
             break;
         default:
@@ -1427,6 +1444,8 @@ function purchaseBucket(data){
 //process canned message stuff
 //data: kip data object
 var cannedBanter = function(data,keyboard){
+        console.log('# CAN CAN CANNNED # # # # #  # # # # ## 3333 ')
+
     data.bucket = 'banter';
     data.action = 'smalltalk';
     if(keyboard){
@@ -1450,6 +1469,8 @@ var sendTxtResponse = function(data,msg,flag){
 var outgoingResponse = function(data,action,source) { //what we're replying to user with
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
+        console.log('# # # # # # OUTOGING RESPONSE # # # # ## 3333 ')
+
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(urlArr){
             //sending out stitched image response
@@ -1756,11 +1777,16 @@ var outgoingResponse = function(data,action,source) { //what we're replying to u
                 // data.client_res.push(res);
                 data.client_res.unshift(res);
             }
+
+                console.log('# # # # # # TXT TXT # # # # ## 3333 ')
+
             sendResponse(data);
         });
     }
     //no cinna response check
     else if (action == 'final'){
+            console.log('# # # # # # FINAL  # # # # ## 3333 ')
+
         sendResponse(data);
     }
 }
@@ -1785,6 +1811,7 @@ var checkOutgoingBanter = function(data){
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
 
+        console.log('# # # # # # SEND RESPONSE # # # # ## 3333 ')
 
 
     //SAVE OUTGOING MESSAGES TO MONGO
@@ -2882,10 +2909,16 @@ var sendResponse = function(data,flag){
             }
             else {
                 //loop through responses in order
+
+                console.log('data.client_resdata.client_resdata.client_res ',data.client_res)
                 async.eachSeries(data.client_res, function(message, callback) {
+
+                        console.log('# # # # # # OUTGING ARRAY # # # # ## 3333 ')
 
                     //item is a string, send message
                     if (typeof message === 'string'){
+                            console.log('# # # # # # STRING OUT  # # # # ## 3333 ')
+
                         var msgData = {
                           // attachments: [...],
                             icon_url:'http://kipthis.com/img/kip-icon.png',
@@ -2915,6 +2948,9 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
+                            console.log('# # # # # # OBJECT OUT # # # # ## 3333 ')
+
+
 
                         var attachThis = message;
 
@@ -2929,6 +2965,8 @@ var sendResponse = function(data,flag){
                         //console.log('data.ts ',data.button_ts)
 
                         if (data.button_ts){
+
+                                console.log('# # # # # # BUTTON TS # # # # ## 3333 ')
 
                             msgData.as_user = true;
                             msgData.parse = 'full';
@@ -2945,6 +2983,8 @@ var sendResponse = function(data,flag){
                         else {
                             //normal attach send
 
+                                console.log('# # # # # # NORMAL SEND # # # # ## 3333 ')
+
                             msgData.attachments = attachThis;
 
                             //console.log('SEND DATA NOW _ NORMAL ',msgData);
@@ -2956,6 +2996,7 @@ var sendResponse = function(data,flag){
                     }
 
                 }, function done(){
+
 
                     var msgData = {
                         icon_url:'http://kipthis.com/img/kip-icon.png',

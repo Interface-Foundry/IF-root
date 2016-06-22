@@ -371,7 +371,12 @@ function listenOnboard(response, convo){
             "fallback":"Welcome"
         },
         {
-            "text": "• Type `settings` to add other admins, edit standing orders and reminders",
+            "color":"#49d63a",  
+            "title":"<https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.9lqkesi56|• Check out the Kip Tutorial>",
+            "fallback":"Welcome"
+        },
+        {
+            "text": "• Type `settings` to add other admins, edit standing orders and reminders\n• Type `cart` to view Team Cart\n• Type `members` to add Slack channels and emails for Team Cart.\nKip will ping team members via email to collect orders if they are not on Slack \n• You can search for things your team needs and save to Team Cart.",
             "mrkdwn_in": [
                 "text",
                 "pretext"
@@ -380,51 +385,45 @@ function listenOnboard(response, convo){
             "fallback":"Welcome"
         },
         {
-            "text": "• Type `cart` to view Team Cart",
+            "text": "Try typing `headphones` below and you'll see 3 choices",
             "mrkdwn_in": [
                 "text",
                 "pretext"
             ],
             "color":"#49d63a",
-            "fallback":"Welcome"
-        },
-        {
-            "text": "• Type `members` to add Slack channels and emails for Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
-            "mrkdwn_in": [
-                "text",
-                "pretext"
+            "fallback":"Welcome",
+            "actions": [
+                {
+                  "name": "search",
+                  "text": "Headphones",
+                  "style": "default",
+                  "type": "button",
+                  "value": "headphones"
+                },
+                {
+                  "name": "search",
+                  "text": "Coding Books",
+                  "style": "default",
+                  "type": "button",
+                  "value": "coding books"
+                },
+                {
+                  "name": "search",
+                  "text": "Healthy Snacks",
+                  "style": "default",
+                  "type": "button",
+                  "value": "healthy snacks"
+                },
+                {
+                  "name": "home",
+                  "text": "🐧",
+                  "style": "default",
+                  "type": "button",
+                  "value": "home"
+                }
             ],
-            "color":"#49d63a",
-            "fallback":"Welcome"
-        },
-        {
-            "text": "• You can search for things your team needs and save to Team Cart. Try typing `headphones` below and you'll see 3 choices",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "color":"#49d63a",
-            "fallback":"Welcome"
+            callback_id: 'none'
         }
-        // {
-        //     "text": "• If you want to make sure everyone gets the memo, feel free to post this message in a channel where everyone will see it:",
-        //     "mrkdwn_in": [
-        //         "text"
-        //     ],
-        //     "color":"#49d63a",
-        //     "fallback":"Welcome"
-        // },
-        // {
-        //   "mrkdwn_in": [
-        //       "fields"
-        //   ],
-        //   "fields": [
-        //       {
-        //           "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
-        //           "short": false
-        //       }
-        //   ],
-        //   "fallback":"Welcome"
-        // }
     ];
 
     var resStatus = {
@@ -502,6 +501,7 @@ function listenOnboard(response, convo){
           }
         });
         console.log('1🔸',office_gremlins)
+        
 
         if (office_gremlins.length > 1) {
           var last = office_gremlins.pop();
@@ -627,7 +627,12 @@ function listenOnboard(response, convo){
                       "fallback":"Welcome"
                   },
                   {
-                      "text": "• Type `settings` to add other admins, edit standing orders and reminders",
+                      "color":"#49d63a",  
+                      "title":"<https://medium.com/@kipsearch/kip-for-slack-edc84908f298#.9lqkesi56|• Check out the Kip Tutorial>",
+                      "fallback":"Welcome"
+                  },
+                  {
+                      "text": "• Type `settings` to add other admins, edit standing orders and reminders\n• Type `cart` to view Team Cart\n• Type `members` to add Slack channels and emails for Team Cart.\nKip will ping team members via email to collect orders if they are not on Slack \n• You can search for things your team needs and save to Team Cart.",
                       "mrkdwn_in": [
                           "text",
                           "pretext"
@@ -636,43 +641,45 @@ function listenOnboard(response, convo){
                       "fallback":"Welcome"
                   },
                   {
-                      "text": "• Type `cart` to view Team Cart",
+                      "text": "Try typing `headphones` below and you'll see 3 choices",
                       "mrkdwn_in": [
                           "text",
                           "pretext"
                       ],
                       "color":"#49d63a",
-                      "fallback":"Welcome"
-                  },
-                  {
-                      "text": "• Type `members` to add Slack channels and emails to your Team Cart. Kip will ping team members via email to collect orders if they are not on Slack",
-                      "mrkdwn_in": [
-                          "text",
-                          "pretext"
+                      "fallback":"Welcome",
+                      "actions": [
+                          {
+                            "name": "search",
+                            "text": "Headphones",
+                            "style": "default",
+                            "type": "button",
+                            "value": "headphones"
+                          },
+                          {
+                            "name": "search",
+                            "text": "Coding Books",
+                            "style": "default",
+                            "type": "button",
+                            "value": "coding books"
+                          },
+                          {
+                            "name": "search",
+                            "text": "Healthy Snacks",
+                            "style": "default",
+                            "type": "button",
+                            "value": "healthy snacks"
+                          },
+                          {
+                            "name": "home",
+                            "text": "🐧",
+                            "style": "default",
+                            "type": "button",
+                            "value": "home"
+                          }
                       ],
-                      "color":"#49d63a",
-                      "fallback":"Welcome"
-                  },
-                  {
-                      "text": "• You can search for things your team needs and save to Team Cart. Try typing `headphones` below and you'll see 3 choices",
-                      "mrkdwn_in": [
-                          "text"
-                      ],
-                      "color":"#49d63a",
-                      "fallback":"Welcome"
+                      callback_id: 'none'
                   }
-                  // {
-                  //   "mrkdwn_in": [
-                  //       "fields"
-                  //   ],
-                  //   "fields": [
-                  //       {
-                  //           "value": "_Hey <@channel>, I just enabled <@"+convo.slackbot.bot.bot_user_id+"> for our team, so you can search for things we need and save to Team Cart_ \n\n\n _Tell *Kip* what you\'re looking for, like `headphones`, and you\'ll see three options: :one: :two: or :three:_\n\n _See more results with `more`. Type `save 1` to add item :one: to Team Cart_ \n\n _Type `help` to <@"+convo.slackbot.bot.bot_user_id+"> for more info_",
-                  //           "short": false
-                  //       }
-                  //   ],
-                  //   "fallback":"Welcome"
-                  // }
               ];
 
               var resStatus = {
