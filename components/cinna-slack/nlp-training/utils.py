@@ -1,8 +1,9 @@
 from __future__ import print_function
+
 import pandas as pd
 import re
 from pymongo import MongoClient
-from gensim.models import Word2Vec
+
 
 
 skip_words = ['nan', 'hi', 'Hi', 'hehe', 'hey', 'help']
@@ -45,16 +46,16 @@ def text_look(df, skip_words=skip_words):
     return df
 
 
-def word_to_v(df, debug_=False):
-    # remove
-    if debug_:  # debug uses df.text not df.msg
-        pass
-    else:
-        words = df.msg.str.split(' ').values
-    # df = df[df.text.str.contains('_debug') == 'False']  # _debug w kip_tester
-    words = df.text.str.split(' ').values
-    model = Word2Vec(words)
-    return model
+# def word_to_v(df, debug_=False):
+#     # remove
+#     if debug_:  # debug uses df.text not df.msg
+#         pass
+#     else:
+#         words = df.msg.str.split(' ').values
+#     # df = df[df.text.str.contains('_debug') == 'False']  # _debug w kip_tester
+#     words = df.text.str.split(' ').values
+#     model = Word2Vec(words)
+#     return model
 
 
 def array_of_threads(df):
