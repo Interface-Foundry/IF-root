@@ -115,6 +115,7 @@ app.post('/facebook', function(req, res) {
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
         if (event.message && event.message.text) {
+            console.log('FB Messenger raw message event:  ',  req)
             text = event.message.text;
             text = emojiText.convert(text,{delimiter: ' '});
             console.log(JSON.stringify(req.body));
