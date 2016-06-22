@@ -243,7 +243,7 @@ app.post('/slackaction', function(req, res) {
     //   }
     // );
 
-    res.sendStatus(200);
+    res.send(parsedIn.original_message);
 
     ioKip.incomingMsgAction(req.body, 'slack');
 
