@@ -138,21 +138,9 @@ class McParser:
         'entities': [[u'first', u'ORDINAL']],
         'focus': [1],
         'nouns': [],
-        'parts_of_speech': [
-            [u'first', u'ADV'],
-            [u'but', u'CONJ'],
-            [u'darker', u'ADJ']
-            ],
-        'ss': [{
-            'focus': [1],
-            'isQuestion': False,
-            'noun_phrases': [],
-            'parts_of_speech': [[u'first', u'ADV'],
-                                [u'but', u'CONJ'],
-                                [u'darker', u'ADJ']],
-            'sentiment_polarity': 0.25,
-            'sentiment_subjectivity': 0.3333333333333333
-        }],
+        'parts_of_speech': [[u'first', u'ADV'],[u'but', u'CONJ'],...],
+        'ss': [{'focus': [1],'isQuestion': False,'noun_phrases': [],
+        'parts_of_speech': [[u'first', u'ADV'],[u'but', u'CONJ'],[u'darker', u'ADJ']],'sentiment_polarity': 0.25,'sentiment_subjectivity': 0.3333333333333333}],
         'text': 'first but darker',
         'verbs': []}
         '''

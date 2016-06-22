@@ -56,3 +56,4 @@ example:
 
 Explanation of some of the terms (POSTAG, DEPREL, etc): [Dependencies Manual](http://nlp.stanford.edu/software/dependencies_manual.pdf)
 
+Another explanation: [temrs](https://cs.nyu.edu/grishman/jet/guide/PennPOS.html)

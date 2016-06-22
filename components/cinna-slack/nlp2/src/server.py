@@ -1,63 +1,69 @@
 from __future__ import print_function
-from easydict import EasyDict as edict
+from easydict import EasyDict
 from flask import Flask, request, jsonify
-from textblob import TextBlob
-from spacy.en import English
-
-import time
-
+import logging
 import parser
 
 from mcparser import McParser
 
+orig_ = True
 port_num = 8083
-
-# print('loading data, ~10 seconds')
-
-# might change when not in docker
-nlp_data_dir = '/usr/local/lib/python2.7/dist-packages/spacy/data/en-1.1.0'
-time1 = time.time()
-nlp = English(data_dir=nlp_data_dir)
-print('loading took %0.9f s' % (time.time() - time1))
-
 app = Flask(__name__)
 
 
+# ---- Logging prefs -----
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+if orig_:
+    logging.info('using spacy')
+    from spacy.en import English
+    from textblob import TextBlob
+    nlp_data_dir = '/usr/local/lib/python2.7/dist-packages/spacy/data/en-1.1.0'
+    nlp = English(data_dir=nlp_data_dir)
+
+
 @app.route('/parse', methods=['GET', 'POST'])
-def parse_message():
-    print('at parse_message')
-    print(request.json)
-    data = edict({})
+def parse_message(orig_parser=orig_):
+    '''
+    '''
+    data = EasyDict({})
     data.text = request.json['text']
-    time1 = time.time()
-    data.blob = TextBlob(data.text)
-    data.doc = nlp(u"{}".format(data.text), tag=True, parse=True, entity=True)
-    print('spacy took %0.9f s' % (time.time() - time1))
 
-    time1 = time.time()
-    b = McParser(data.text)
-    b.to_JSON()
-    print('mcparser1 took %0.9f s' % (time.time() - time1))
+    # ------------------------------------------------------------------------
+    # original parser
+    if orig_parser:
+        logging.debug('using old parser')
+        data.blob = TextBlob(data.text)
+        data.doc = nlp(u"{}".format(data.text),
+                       tag=True, parse=True, entity=True)
+        try:
+            resp = jsonify(parser.parse(data))
+        except:
+            logging.critical('didnt work with orig parser')
 
-    time1 = time.time()
-    b = McParser(data.text)
-    b.output_form()
-    print('mcparser2 output_form took %0.9f s' % (time.time() - time1))
-
-    return jsonify(parser.parse(data))
+    # ------------------------------------------------------------------------
+    # syntaxnet parser
+    else:
+        logging.debug('using mcparser')
+        data.doc = McParser(data.text).output_form()
+        try:
+            resp = jsonify(data)
+        except:
+            logging.critical('didnt work with syntaxnet parser')
+    logging.debug('returning results...')
+    return resp
 
 
 @app.route('/reload')
 def reload_parse():
+    logging.debug('trying to reload........')
     reload(parser)
     return 'ok'
 
-# @app.route('/parsey', methods=['GET', 'POST'])
-# def parsey():
-
 if __name__ == '__main__':
-    print('using syntaxnet parser and other, testing time')
-    print('running app on port ', port_num)
+    logging.info('running app on port ' + str(port_num))
     app.run(host="0.0.0.0",
             port=port_num,
             use_debugger=True,
