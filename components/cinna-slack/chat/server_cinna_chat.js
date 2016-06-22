@@ -43,6 +43,9 @@ var async = require('async');
 var bodyParser = require('body-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
+var kip = require('kip');
+var db = require('db');
+var _ = require('lodash');
 
 //set env vars
 var config = require('config');
@@ -83,24 +86,91 @@ var navHistory = {}; //keep track of each user in each channel nav history for b
 ioKip.initSlackUsers(app.get('env'));
 ioKip.loadSocketIO(server);
 
-
-//incoming new slack user
+//
+// Slack app registration
+// to test this, go to https://api.slack.com/docs/slack-button and deselect "incoming webhook" and select "bot"
+//
 app.get('/newslack', function(req, res) {
+  // omg fucking shoot me
+  console.log('new slack integration request');
+  res.redirect('https://kipsearch.com/thanks');
+
+  if (!req.query.code) {
     ioKip.newSlack();
+    return kip.err('no code in the request, cannot process team add to slack');
+  }
+
+  var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : '52946721872.53047577702';
+  var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : '7989b267194bfa98782340007c08d088';
+  var redirect_uri = process.env.NODE_ENV === 'production' ? 'https://kipsearch.com/newslack' : 'https://5947ceef.ngrok.io/newslack';
+
+  var body = {
+    code: req.query.code,
+    redirect_uri: redirect_uri
+  }
+
+  request({
+    url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
+    method: 'POST',
+    form: body
+  }, function(e, r, b) {
+      if (e) {
+        console.log('error connecting to slack api');
+        console.log(e);
+      }
+      if (typeof b === 'string') {
+          b = JSON.parse(b);
+      }
+      if (!b.ok) {
+          console.error('error connecting with slack, ok = false')
+          console.error('body was', body)
+          console.error('response was', b)
+          return;
+      } else if (!b.access_token || !b.scope) {
+          console.error('error connecting with slack, missing prop')
+          console.error('body was', body)
+          console.error('response was', b)
+          return;
+      }
+
+      console.log('got positive response from slack')
+      console.log('body was', body)
+      console.log('response was', b)
+      var bot = new db.Slackbot(b)
+      db.Slackbots.findOne({team_id: b.team_id, deleted: {$ne: true}}, function(e, old_bot) {
+        if (e) { console.error(e) }
+
+        if (old_bot) {
+          console.log('already have a bot for this team', b.team_id)
+          console.log('updating i guess')
+          _.merge(old_bot, b);
+          old_bot.save(e => {
+            kip.err(e);
+            ioKip.newSlack();
+          });
+        } else {
+          bot.save(function(e) {
+              kip.err(e);
+              ioKip.newSlack();
+          })
+        }
+      })
+    });
 });
 
+
 //incoming slack action
-app.post('/slackaction', function(req, res) { 
+app.post('/slackaction', function(req, res) {
 
     if (req.body && req.body.payload){
 
       var parsedIn = JSON.parse(req.body.payload);
 
-      //validating real button call  
+      //validating real button call
       if(parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
         console.log('HACKER? 👻 ',parsedIn.token)
         //return;
-      } 
+      }
 
       var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
 
@@ -116,13 +186,13 @@ app.post('/slackaction', function(req, res) {
       if (parsedIn.response_url && parsedIn.original_message){
 
         console.log('PASSED IN ',parsedIn);
-        
+
         //penguin nav button
         if (parsedIn.actions[0].name == 'home'){
 
           navHistory[navId] = JSON.stringify(parsedIn.original_message); //saving current nav
 
-          var reformattedArray = parsedIn.original_message.attachments.map(function(obj){ 
+          var reformattedArray = parsedIn.original_message.attachments.map(function(obj){
             if (obj.actions){
 
               //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
@@ -146,7 +216,7 @@ app.post('/slackaction', function(req, res) {
 
         }
 
-       
+
         else if (parsedIn.actions[0].name == 'back'){
 
           //console.log('090909090909090909090909090909090 ',navHistory[navId]);
@@ -157,7 +227,7 @@ app.post('/slackaction', function(req, res) {
           if (navHistory[navId]){
             res.json(JSON.parse(navHistory[navId]));
           }
-          
+
         }
 
         else {
@@ -200,7 +270,7 @@ app.post('/slackaction', function(req, res) {
     }
 
     // //SEND REQ.BODY: { payload: }
-   
+
 });
 
 
@@ -263,7 +333,7 @@ kik.onStartChattingMessage((message) => {
             .setTitle('')
             .setAttributionIcon('http://kipthis.com/img/kip-find.png')
             .setAttributionName('Kip');
-          
+
           kikRes.push(kikMsg)
 
           kikMsg = Kik.Message
@@ -290,7 +360,7 @@ kik.onStartChattingMessage((message) => {
                         "body":"🔮 Surprise me!"
                     }
                 ]
-            }];  
+            }];
             kikMsg._state.keyboards = keyboardObj;
             kikRes.push(kikMsg)
             message.reply(kikRes);
@@ -321,7 +391,7 @@ kik.onPictureMessage((message) => {
       };
       kipObj.text = res;
       kipObj.imageTags = res;
-      ioKip.preProcess(kipObj);    
+      ioKip.preProcess(kipObj);
   })
 
 
@@ -377,7 +447,7 @@ kik.onTextMessage((message) => {
     kikData: message
   };
   //console.log('KIPOBJ ',kipObj)
-  ioKip.preProcess(kipObj);    
+  ioKip.preProcess(kipObj);
 
 });
 
@@ -401,7 +471,7 @@ var sendToKik = function(data,message,type){
 
       data.kikData.reply(message);
       break;
-    default: 
+    default:
       //console.log('DEFAULT????????????????')
       data.kikData.reply(message)
   }
