@@ -1,5 +1,6 @@
-import subprocess
+import json
 import logging
+import subprocess
 from easydict import EasyDict
 
 logger = logging.getLogger()
@@ -22,7 +23,12 @@ def syntaxnet_array(text):
     p = subprocess.Popen(t, stdout=subprocess.PIPE, shell=True)
     out = p.stdout.read().splitlines()
     # last item in array is ' ' for some reason
-    out.pop()
+    try:
+        out.pop()
+    except IndexError:
+        print('Not Parsed correctly')
+        return None
+
     return out
 
 
@@ -55,7 +61,9 @@ class McParser:
         self.nouns = []
         self.verbs = []
         self.adjectives = []
+        self.parts_of_speech = []
         self.item_descriptors = []
+        self.entities = []
         self.had_find = False
         self.isQuestion = False
         self.process_text()
@@ -86,31 +94,82 @@ class McParser:
 
     def parse_terms(self):
         '''
+        not sure if i should use unicode(i[1]) or u"{}",format(i[1])" so using
+        cur_word
         '''
         for i in self.dependency_array:
+            cur_word = unicode(i[1])
+            self.parts_of_speech.append([cur_word, unicode(i[3])])
             if i[3] in ['NOUN', 'PRON']:
-                self.nouns.append(i[1])
+                self.nouns.append(cur_word)
             if i[3] in ['VERB']:
-                self.verbs.append(i[1])
+                self.verbs.append(cur_word)
             if i[3] in ['ADJ']:
-                self.adjectives.append(i[1])
+                self.adjectives.append(cur_word)
 
             # could potentially move these within nouns/verbs/etc stuff
             if i[7] in ['ROOT']:
-                self.terms.root = i[1]
-                self.search_object = i[1]
+                self.root = cur_word
+                self.search_object = cur_word
             if i[7] in ['dobj']:
-                self.terms.dobj = i[1]
-                self.search_object = i[1]
+                self.dobj = cur_word
+                self.search_object = cur_word
             if i[7] in ['dep']:
-                self.terms.item_descriptors.append(i[7])
+                self.item_descriptors.append(cur_word)
+
+            # store punctuation
             if i[7] in ['punct']:
-                if i[1] in ['?']:
+                if cur_word in ['?']:
                     self.isQuestion = True
+
             # focus thing
-            if i[1].lower() in ['one', '1', 'first']:
+            if cur_word.lower() in ['one', '1', 'first']:
                 self.focus.append(1)
-            if i[1].lower() in ['two', '2', 'second']:
+            if cur_word.lower() in ['two', '2', 'second']:
                 self.focus.append(2)
-            if i[1].lower() in ['three', '3', 'third']:
+            if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append(3)
+
+    def output_form(self):
+        '''
+        Put into correct json format for api.js:
+        {
+        'adjectives': [u'darker'],
+        'entities': [[u'first', u'ORDINAL']],
+        'focus': [1],
+        'nouns': [],
+        'parts_of_speech': [
+            [u'first', u'ADV'],
+            [u'but', u'CONJ'],
+            [u'darker', u'ADJ']
+            ],
+        'ss': [{
+            'focus': [1],
+            'isQuestion': False,
+            'noun_phrases': [],
+            'parts_of_speech': [[u'first', u'ADV'],
+                                [u'but', u'CONJ'],
+                                [u'darker', u'ADJ']],
+            'sentiment_polarity': 0.25,
+            'sentiment_subjectivity': 0.3333333333333333
+        }],
+        'text': 'first but darker',
+        'verbs': []}
+        '''
+        response = EasyDict()
+        response.adjectives = self.adjectives
+        response.entities = self.entities
+        response.focus = self.focus
+        response.nouns = self.nouns
+        response.parts_of_speech = self.parts_of_speech
+        response.text = self.text.lower()
+        response.verbs = self.verbs
+        return response
+
+    def to_JSON(self):
+        '''
+        possibly easier than output_form, but 100 micro seconds slower
+        '''
+        return json.dumps(self,
+                          default=lambda o: o.__dict__,
+                          sort_keys=True)

@@ -33,7 +33,7 @@ Building dockerfile requires 12+ gb of RAM?  Building on remote server but shoul
 
 ## Using syntaxnet
 
-without tree form is:
+without tree form is (# index is -1 of these values for python indexing):
 
 
 |#  | What?| Description |

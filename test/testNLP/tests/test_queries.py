@@ -1,4 +1,5 @@
-# test cases
+# test cases in list form
+
 # started on basic tests, trying to use tests based on prod db msgs
 multiple_query_search_with_modifiers = [
     u'Find an office chair with the highest reviews and highest price',
@@ -41,4 +42,17 @@ shopping_cart = [
     u'Take me to checkout',
     u'Checkout',
     u'Take me to checkout please',
+]
+
+shopping_simple_regexes = [
+    u'can you find me a',
+    u'can you find me',
+    u'find me a',
+    u'find me',
+    u'find',
+    u'search for a',
+    u'search f',
+    u'search',
+    u'i need a',
+    u'i need',
 ]

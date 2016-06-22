@@ -22,6 +22,8 @@ RUN pip install ipython # just for testing rn
 
 ADD src /root/
 
+RUN chmod +x /root/parser.sh
+
 WORKDIR /root
 
 # uncomment once done testing
