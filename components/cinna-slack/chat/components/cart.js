@@ -62,7 +62,6 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   if (item.reviews && item.reviews.reviewCount){
     item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
   }
-  debugger;
 
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
@@ -130,7 +129,19 @@ module.exports.addToCart = function(slack_id, user_id, item) {
     yield cart.save();
 
     console.log('calling getCart again to rebuild amazon cart')
-    getCart(slack_id);
+    try {
+      yield getCart(slack_id);
+    } catch (e) {
+      // didn't work, so remove the item and say sorry
+      cart.items = cart.items.filter(item => {
+        console.log(item);
+        console.log(i._id);
+        return item !== i._id;
+      })
+      cart.save();
+      i.remove();
+      throw new Error('could not add item to cart')
+    }
   })
 }
 
@@ -481,7 +492,6 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       });
       // kip.debug(items_to_add);
       var res = yield client.addCart(items_to_add);
-      // kip.debug('res', res);
       kip.debug('errors', _.get(res, 'Request[0].Errors'));
       timer('rebuilt')
     }
