@@ -1,3 +1,4 @@
+/*eslint-env es6*/
 var async = require('async');
 var request = require('request');
 var fs = require('fs');
@@ -21,7 +22,9 @@ var urlShorten = function(data,callback2) {
         // console.log('Mitsuprocess10: ',data.client_res)
         if (data.client_res){
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
-           var escapeAmazon = querystring.escape(data.client_res);
+           var url = data.client_res;
+           url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+           var escapeAmazon = querystring.escape(url);
 
             // request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
             //   if(err){
@@ -58,7 +61,11 @@ var urlShorten = function(data,callback2) {
         async.eachSeries(loopLame, function(i, callback) {
             if (data.amazon[i]){
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
-               var escapeAmazon = querystring.escape(data.amazon[i].DetailPageURL[0]);
+               var url = data.amazon[i].DetailPageURL[0];
+               console.log(url);
+               url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
+               console.log(url);
+               var escapeAmazon = querystring.escape(url);
 
                 if (data.source.origin == 'kik'){
                   urlArr.push('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
@@ -75,8 +82,6 @@ var urlShorten = function(data,callback2) {
                       callback();
                   });
                 }
-
-
             }
             else{
                 callback();
