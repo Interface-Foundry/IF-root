@@ -3116,22 +3116,14 @@ var saveToCart = function(data){
 
                   //messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
 
-                  cart = yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
+                  yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
                       .catch(function(reason) {
                         // could not add item to cart, make kip say something nice
                         console.log(reason);
                         sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                       })
               }
-              // data.client_res = ['<' + cart.link + '|» View Cart>']
-              // outgoingResponse(data, 'txt');
-              // View cart after adding item TODO doesn't display for some reason
-              // Even after adding in 500 ms which solves any amazon rate limiting problems
-              if (cart) {
-                setTimeout(function() {
-                  viewCart(data, true);
-                }, 500)
-              }
+              viewCart(data, true);
             }).then(function(){}).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)

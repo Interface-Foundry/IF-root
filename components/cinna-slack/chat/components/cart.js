@@ -74,7 +74,12 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var cart = yield getCart(slack_id);
+    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('-source_json').exec();
+    if (team_carts.length === 1) {
+      var cart = team_carts[0];
+    } else {
+      cart = yield getCart(slack_id);
+    }
     console.log(cart);
 
     var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
@@ -99,7 +104,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
     yield cart.save();
 
     console.log('calling getCart again to rebuild amazon cart')
-    return getCart(slack_id);
+    getCart(slack_id);
   })
 }
 
