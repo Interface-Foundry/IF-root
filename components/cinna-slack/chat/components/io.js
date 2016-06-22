@@ -3174,7 +3174,151 @@ function removeCartItem(data){
     })
 }
 
-function viewCart(data, show_added_item){
+
+//
+// Build the cart response object
+// returns a promise
+//
+function buildCart(cart, isAdmin, isP2P) {
+  kip.debug('build cart', isAdmin, isP2P);
+  return co(function*() {
+    var attachments = [];
+
+    // Sticker!
+    attachments.push({
+        text: '',
+        color:'#45a5f4',
+        image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
+    });
+
+    // check for empty cart
+    if (cart.aggregate_items.length === 0) {
+      attachments.push({
+        text: 'It looks like you have not added anything to the Team Cart yet.',
+        color: '#ffff00',
+      });
+      return attachments;
+    }
+
+    // Item list
+    for (var i = 0; i < cart.aggregate_items.length; i++) {
+      var item = cart.aggregate_items[i];
+      var userString = item.added_by.map(function(u) {
+        return '<@' + u + '>';
+      }).join(', ');
+      if (userString.indexOf('28_') > -1 ) {
+          try {
+              userString = userString.split('_')[1].split('_')[0].concat('(email)')
+
+          } catch(err) {
+
+          }
+      }
+
+      // add title, which is a link for admins/p2p and text otherwise
+      var emojiType = 'slack';
+      if (isAdmin || isP2P) {
+        var printNum = i+1;
+        // console.log('io.js line 3125 checking data.source!!!!! \n\n\n\n\n', data)
+        var text = [
+          `*${printNum}.* <${item.link}|*${item.title}*> \n`,
+          `*Price:* ${item.price} each`,
+          `*Added by:* ${userString}`,
+          `*Quantity:* ${item.quantity}`
+        ].join('\n');
+      } else {
+        var printNum = i+1;
+        var text = [
+          `*${printNum}. ${item.title}*`,
+          `*Added by:* ${userString}`,
+          `*Quantity:* ${item.quantity}`
+        ].join('\n');
+      }
+
+      if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
+          var actionObj = [
+              {
+                "name": "additem",
+                "text": "+",
+                "style": "default",
+                "type": "button",
+                "value": "add"
+              },
+              {
+                "name": "removeitem",
+                "text": "—",
+                "style": "default",
+                "type": "button",
+                "value": "remove",
+                // "confirm": {
+                //   "title": "Are you sure?",
+                //   "text": "This will remove",
+                //   "ok_text": "Yes",
+                //   "dismiss_text": "No"
+                // }
+              }
+          ];
+
+          if (item.quantity > 1){
+              actionObj.push({
+                "name": "removeall",
+                "text": "Remove All",
+                "style": "default",
+                "type": "button",
+                "value": "removeall",
+                "confirm": {
+                  "title": "Are you sure?",
+                  "text": "This will remove all orders for "+item.title,
+                  "ok_text": "Confirm",
+                  "dismiss_text": "Cancel"
+                }
+              });
+          }
+
+      } else {
+          var actionObj = [];
+      }
+
+      attachments.push({
+        text: text,
+        mrkdwn_in: ['text', 'pretext'],
+        color: '#45a5f4',
+        thumb_url: item.image,
+        actions: actionObj,
+        callback_id: i+1
+      })
+    }
+
+
+    // Summary
+    if (isAdmin || isP2P) {
+      var summaryText = `*Team Cart Summary* \n\n *Total:* ${cart.total}`;
+      summaryText += ` \n\n <${cart.link}| *➤ Click Here to Checkout* >`;
+      attachments.push({
+          text: summaryText,
+          mrkdwn_in: ['text', 'pretext'],
+          color: '#53B987'
+      })
+    } else {
+
+      attachments.push({
+          text: '_Ask your office admin to checkout the Team Cart_',
+          mrkdwn_in: ['text', 'pretext'],
+          color: '#49d63a'
+      })
+    }
+
+    return attachments;
+  });
+}
+
+
+
+
+//
+// view cart......... some complicated logic here to make it faster
+//
+function viewCart(data, show_added_item) {
 
     if (data.source.origin == 'socket.io' || data.source.origin == 'telegram'){
         return;
@@ -3189,210 +3333,33 @@ function viewCart(data, show_added_item){
     var cartDelay = 2000;
 
     co(function*() {
-      var cart = yield kipcart.getCart(data.source.org);
-      timer('got cart');
-
-      if (cart.items.length < 1) {
-        return sendTxtResponse(data, 'Looks like you have not added anything to the Team Cart yet. Type `save 1` to add item :one:');
-      }
-
-      var slackbot = yield db.Slackbots.findOne({
-        team_id: data.source.org
-      }).exec();
-      timer('found slackbot');
-
-      if (!slackbot){
-        return sendTxtResponse(data, 'My brain broke, sorry about that :( What did you say?');;
-      }
-
       // admins have special rights
+      var slackbot = yield db.Slackbots.findOne({team_id: data.source.org});
       var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
       var isP2P = slackbot.meta.office_assistants.length === 0;
+      // var team_carts = yield db.Carts.find({slack_id: data.source.org, purchased: false, deleted: false}).populate('items', '-source_json').exec();
+      // if (team_carts.length === 1 && team_carts[0].aggregate_items.length > 0) {
+      //   // send a quick response
+      //   kip.debug('sending a quick response');
+      //   var attachments = yield buildCart(team_carts[0], isAdmin, isP2P);
+      //   data.client_res = [attachments];
+      //   sendResponse(data);
+      // }
 
-      // get the latest added item if we need to highlight it
-      if (show_added_item) {
-        var added_item = cart.items[cart.items.length - 1];
-        var added_asin = added_item.ASIN;
-      }
+      kip.debug('rebuilding cart')
+      // now rebuild the cart and update the message
+      var cart = yield kipcart.getCart(data.source.org);
+      var attachments = yield buildCart(cart, isAdmin, isP2P);
 
-      var cartObj = [];
-
-        //add mode sticker
-        cartObj.push({
-            text: '',
-            color:'#45a5f4',
-            image_url: 'http://kipthis.com/kip_modes/mode_teamcart_view.png'
-        })
-
-      var links = [];
-      if (isAdmin || isP2P) {
-        timer('getting item links');
-        links = yield cart.aggregate_items.map(i => {
-          return processData.getItemLink(i.link, data.source.user, i._id.toString());
-        })
-        timer('got item links');
-      }
-
-      for (var i = 0; i < cart.aggregate_items.length; i++) {
-        var item = cart.aggregate_items[i];
-        var userString = item.added_by.map(function(u) {
-          return '<@' + u + '>';
-        }).join(', ');
-        if (userString.indexOf('28_') > -1 ) {
-            try {
-                userString = userString.split('_')[1].split('_')[0].concat('(email)')
-
-            } catch(err) {
-
-            }
+      // now update the message somehow.......
+      data.client_res = [attachments];
+      banter.getCinnaResponse(data, res => {
+        if(res[0] && res[0].text && data.client_res[0]){
+          // what the fuck is this bullshit.
+          data.client_res[0].unshift(res[0]);
         }
-
-        var link = links[i];
-
-        //CONFIRM MESSAGE FOR REMOVE IF ITS THE LAST ITEM TO REMOVE
-
-        //ONLY SHOW ADD/REMOVE FOR
-
-        //check if user added this item
-
-        //item.added_by
-
-        // add title, which is a link for admins/p2p and text otherwise
-        var emojiType = (data.flags && data.flags.email) ? 'email' : 'slack';
-        if (isAdmin || isP2P) {
-          var printNum = i+1;
-          // console.log('io.js line 3125 checking data.source!!!!! \n\n\n\n\n', data)
-          var text = [
-            `*${printNum}.* <${link}|*${item.title}*> \n`,
-            `*Price:* ${item.price} each`,
-            `*Added by:* ${userString}`,
-            `*Quantity:* ${item.quantity}`
-          ].join('\n');
-        } else {
-          var printNum = i+1;
-          var text = [
-            `*${printNum}. ${item.title}*`,
-            `*Added by:* ${userString}`,
-            `*Quantity:* ${item.quantity}`
-          ].join('\n');
-        }
-
-
-        if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
-            var actionObj = [
-                {
-                  "name": "additem",
-                  "text": "+",
-                  "style": "default",
-                  "type": "button",
-                  "value": "add"
-                },
-                {
-                  "name": "removeitem",
-                  "text": "—",
-                  "style": "default",
-                  "type": "button",
-                  "value": "remove",
-                  // "confirm": {
-                  //   "title": "Are you sure?",
-                  //   "text": "This will remove",
-                  //   "ok_text": "Yes",
-                  //   "dismiss_text": "No"
-                  // }
-                }
-            ];
-
-            if (item.quantity > 1){
-                actionObj.push({
-                  "name": "removeall",
-                  "text": "Remove All",
-                  "style": "default",
-                  "type": "button",
-                  "value": "removeall",
-                  "confirm": {
-                    "title": "Are you sure?",
-                    "text": "This will remove all orders for "+item.title,
-                    "ok_text": "Confirm",
-                    "dismiss_text": "Cancel"
-                  }
-                });
-            }
-
-        }else {
-            var actionObj = [];
-        }
-
-        cartObj.push({
-          text: text,
-          mrkdwn_in: ['text', 'pretext'],
-          color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
-          thumb_url: item.image,
-          actions: actionObj,
-          callback_id: i+1
-        })
-      }
-
-      // Only show the purchase link in the summary for office admins.
-      if (isAdmin || isP2P) {
-        var summaryText = `*Team Cart Summary* \n\n *Total:* ${cart.total}`;
-        summaryText += ` \n\n <${cart.link}| *➤ Click Here to Checkout* >`;
-        cartObj.push({
-            text: summaryText,
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#53B987'
-        })
-      } else {
-        //var officeAdmins = slackbot.meta.office_assistants.join(' ')
-
-        if(slackbot.meta.office_assistants && slackbot.meta.office_assistants[0]){
-             var officeAdmins = '<@'+slackbot.meta.office_assistants[0]+'>';
-        }else {
-            var officeAdmins = '';
-        }
-
-        cartObj.push({
-            text: '_Office admins '+officeAdmins+' can checkout the Team Cart_',
-            mrkdwn_in: ['text', 'pretext'],
-            color: '#49d63a'
-        })
-      }
-
-      data.client_res = [];
-      data.client_res.push(cartObj);
-
-      //reset cart delay
-      cartDelay = 2000;
-
-
-      timer('getCinnaResponse');
-      banter.getCinnaResponse(data,function(res){
-
-          if(res[0] && res[0].text && data.client_res[0]){
-
-
-                //console.log('RES TEXT ',res[0].text);
-                data.client_res[0].unshift(res[0]);
-             // }
-             // if (res.length == 1){
-             //    console.log('RES TEXT ',res[0].text);
-             //    data.client_res[0].unshift(res[0].text);
-             // }else {
-             //    for (var x = 0; x < res.length; x++) {
-             //        data.client_res[0].unshift(res[x].text);
-             //    }
-             // }
-          }
-
-          //kip.debug('CINNARES ',res);
-
-          //kip.debug('CLIENT_RES ',data.client_res);
-          timer('send response');
-
-          kip.debug('VIEW CART2 2 2 2 2 2  data.ts ',data.button_ts)
-
-          sendResponse(data);
+        sendResponse(data);
       });
-      // sendResponse(data);
 
     }).catch(function(e) {
 
@@ -3411,6 +3378,10 @@ function viewCart(data, show_added_item){
       }
     })
 }
+
+
+
+
 
 //get user history
 function recallHistory(data,callback,steps){

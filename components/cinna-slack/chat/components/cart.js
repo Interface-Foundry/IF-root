@@ -42,8 +42,7 @@ var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
 var aws_client_id_list = Object.keys(aws_clients);
 
 console.log("AWS LCIENTS ",aws_client_id_list)
-
-  var getCartLink = require('./process').getCartLink;
+var processData = require('./process');
 var fs = require('fs')
 var kip = require('kip');
 
@@ -78,12 +77,14 @@ module.exports.addToCart = function(slack_id, user_id, item) {
     var cart = yield getCart(slack_id);
     console.log(cart);
 
+    var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
+
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
       title: _.get(item, 'ItemAttributes[0].Title'),
-      link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
+      link: link,
       image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
       price: item.realPrice,
       rating: _.get(item, 'reviews.rating'),
@@ -317,7 +318,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       var amazonCart = yield client.createCart(cart_items)
       kip.debug(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
-      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+      cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
 
       return cart;
@@ -383,7 +384,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       else {
         kip.debug(JSON.stringify(amazonCart, null, 2))
         cart.amazon = amazonCart;
-        cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         yield cart.save()
         return cart;
       }
@@ -452,7 +453,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       timer('rebuilt, saving')
 
       console.log('cart stuff', cart.amazon.CartId[0], cart._id);
-      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id);
+      cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id);
       cart.save() // don't have to wait for cart to save
     }
 
