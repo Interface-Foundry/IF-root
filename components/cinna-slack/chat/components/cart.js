@@ -56,12 +56,13 @@ module.exports = {};
 //
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
-  console.log('ITEM ZZZZ ',item)
+  console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
   //fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount){
     item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
   }
+  debugger;
 
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
@@ -81,6 +82,28 @@ module.exports.addToCart = function(slack_id, user_id, item) {
       cart = yield getCart(slack_id);
     }
     console.log(cart);
+
+    // make sure we can add this item to the cart
+    // know it's ok if the item already exists in the cart
+    var ok = false;
+    cart.aggregate_items.map(i => {
+      if (i.ASIN === item.ASIN[0] && i.quantity > 1) {
+        ok = true;
+      }
+    });
+
+    if (!ok) {
+      // attempt to add the item to the cart for the first time, check for errors
+      var res = yield client.addCart({
+        CartId: cart.amazon.CartId[0],
+        HMAC: cart.amazon.HMAC[0],
+        'Item.0.ASIN': item.ASIN[0],
+        'Item.0.quantity': 1
+      });
+      if (_.get(res, 'Request[0].Errors')) {
+        throw new Error('Cannot add this item to cart');
+      }
+    }
 
     var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
 
@@ -417,8 +440,6 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       return hash;
     }, {});
     var amazon_items = _.get(amazonCart, 'CartItems[0].CartItem') || [];
-    console.log('amazon_items', amazon_items);
-    debugger;
 
     /*
     { Request: [ { IsValid: [Object], CartGetRequest: [Object] } ],
@@ -451,15 +472,15 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
 
       timer('rebuilding cart ' + cart.amazon.CartId)
       console.log('rebuilding cart');
-      yield client.addCart(_.merge({}, cart_items, {
+      var items_to_add = _.merge({}, cart_items, {
         CartId: cart.amazon.CartId[0],
         HMAC: cart.amazon.HMAC[0],
-      }))
-      timer('rebuilt, saving')
-
-      console.log('cart stuff', cart.amazon.CartId[0], cart._id);
-      cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id);
-      cart.save() // don't have to wait for cart to save
+      });
+      // kip.debug(items_to_add);
+      var res = yield client.addCart(items_to_add);
+      // kip.debug('res', res);
+      kip.debug('errors', _.get(res, 'Request[0].Errors'));
+      timer('rebuilt')
     }
 
     //pretty print a nice cart

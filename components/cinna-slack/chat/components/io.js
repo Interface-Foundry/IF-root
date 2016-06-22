@@ -3116,23 +3116,17 @@ var saveToCart = function(data){
 
                   //messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
 
-                  yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd)
-                      .catch(function(reason) {
-                        // could not add item to cart, make kip say something nice
-                        console.log(reason);
-                        sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
-                      })
+                  yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd);
               }
-              viewCart(data, true);
-            }).then(function(){}).catch(function(err) {
+            }).catch(function(err) {
                 console.log(err);
                 console.log(err.stack)
-                sendTxtResponse(data, err);
+                sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                 //send email about this issue
                 var mailOptions = {
                     to: 'Kip Server <hello@kipthis.com>',
                     from: 'Kip save tp cart broke <server@kipthis.com>',
-                    subject: 'Kip save tp cart broke',
+                    subject: 'Kip save to cart broke',
                     text: 'Fix this ok thx'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
