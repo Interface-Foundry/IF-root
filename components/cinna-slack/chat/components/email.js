@@ -237,6 +237,7 @@ var reply = module.exports.reply = function(payload, data) {
   payload.subject = data.emailInfo.subject,
   payload.html = template_generic
     .replace(/\$ID/g, data.source.id)
+    // .replace(.)
     .replace(/\$MESSAGE/, payload.text)
   payload.text = payload.text + plaintext_signature + data.source.id;
 
@@ -263,7 +264,7 @@ var reply = module.exports.reply = function(payload, data) {
 //
 var results = module.exports.results = function(data) {
   return co(function*() {
-    console.log('sending results to thread', data.source.id, 'client_res: ',data.client_res[0]);
+    console.log('sending results to thread', data);
 
     var payload = {
       to: data.emailInfo.to,
@@ -273,6 +274,7 @@ var results = module.exports.results = function(data) {
 
     payload.html = template_results
       .replace(/\$ID/g, data.source.id)
+      .replace(/\$EMAIL/g, data.emailInfo.to.replace('@','-at-'))
       .replace(/\$FIRST_NAME/g, data.client_res[0].title4fb.replace(/^1. /, ''))
       .replace(/\$FIRST_LINK/g, data.client_res[0].title_link)
       .replace(/\$FIRST_IMAGE/g, data.client_res[0].image_url)
@@ -308,6 +310,7 @@ var confirmation = module.exports.confirmation = function(data) {
 
     payload.html = template_add
       .replace(/\$ID/g, data.source.id)
+      .replace(/\$EMAIL/g, data.emailInfo.to.replace('@','-at-'))
       .replace(/\$ADDED_ITEM/g, data.client_res[0][data.client_res[0].length-2].text.slice(4, data.client_res[0][data.client_res[0].length-2].text.length).split('*\n*Added by')[0]);
 
     var email = new db.Email(_.merge({}, payload, {
@@ -328,6 +331,7 @@ if (!module.parent) {
 
   var template2 = template
     .replace(/\$ID/g, 'email-chain-13f8jasf04fjakdf9320jk')
+    .replace(/\$EMAIL/g, data.emailInfo.to.replace('@','-at-'))
     .replace(/\$SLACKBOT_NAME/g, 'slytherin')
 
   // juice it

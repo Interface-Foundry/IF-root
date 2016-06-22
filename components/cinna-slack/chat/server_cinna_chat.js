@@ -221,6 +221,14 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
     })
 })
 
+//user hit unsubsctibe link in email 
+app.get('/unsubscribe', function(req, res) {
+  console.log('hitting /unsubscribe ', req.params, req.body);
+  
+
+
+});
+
 
 // - - - - - KIK's special snowflake playpen ❄️ ❄️ - - - - - //
 
