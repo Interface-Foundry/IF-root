@@ -667,13 +667,12 @@ var preProcess = function(data){
     //check for canned responses/actions before routing to NLP
     banter.checkForCanned(data.msg,function(res,flag,query){
 
-
             console.log('# # # # # #  # # # # ## 3333 ')
-
+      kip.debug(res, flag, query);
 
         //found canned response
         if(flag){
-            
+
             switch(flag){
                 case 'basic': //just respond, no actions
                     //send message
@@ -1071,7 +1070,7 @@ var incomingMsgAction = function(data,origin){
                     },'CLOSE');
                     break;
 
-                default: 
+                default:
                     kipObj.mode = switchMode;
                     updateMode(kipObj);
 
@@ -1141,7 +1140,7 @@ var incomingMsgAction = function(data,origin){
             // if(parsedIn.original_message){
             //    kipObj.button_ts = parsedIn.original_message.ts; //to update the cart view in sendResponse
             // }
-            
+
             // co(function*() {
             //   yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, parsedIn.callback_id);
 
@@ -1169,6 +1168,11 @@ var incomingMsgAction = function(data,origin){
             //     user: parsedIn.user.id,
             //     flag: 'buttonAction'
             // }
+
+            // tbh idk wtf is going on here.  was getting repeat help commands
+            if (kipObj.msg === 'help') {
+              return; // omg effffff
+            }
             incomingAction(kipObj);
         }
 
@@ -1213,8 +1217,7 @@ var incomingMsgAction = function(data,origin){
 
 //sentence breakdown incoming from python
 function incomingAction(data){
-
-    console.log('Z Z Z INCOMING ACTION Z Z Z ',data)
+  kip.debug('incomingAction, bucket', data.bucket, 'action', data.action, 'flags', data.flags);
 
     // / / / / DUPLICATE CODE TO FIX SLACK BUTTON BUG TEMP!! / / / / /
     if (!messageHistory[data.source.id]){ //new user, set up chat states
@@ -1249,6 +1252,7 @@ data.flags = data.flags ? data.flags : {};
     });
     delete data.flags.toSupervisor
     //sort context bucket (search vs. banter vs. purchase)
+    kip.debug('bucket', data.bucket)
     switch (data.bucket) {
         case 'search':
             searchBucket(data);
@@ -1444,8 +1448,7 @@ function purchaseBucket(data){
 //process canned message stuff
 //data: kip data object
 var cannedBanter = function(data,keyboard){
-        console.log('# CAN CAN CANNNED # # # # #  # # # # ## 3333 ')
-
+    kip.debug('cannedBanter');
     data.bucket = 'banter';
     data.action = 'smalltalk';
     if(keyboard){
@@ -1469,8 +1472,8 @@ var sendTxtResponse = function(data,msg,flag){
 var outgoingResponse = function(data,action,source) { //what we're replying to user with
 // console.log('Mitsu: iojs668: OUTGOINGRESPONSE DATA ', data)
     //stitch images before send to user
-        console.log('# # # # # # OUTOGING RESPONSE # # # # ## 3333 ')
 
+    kip.debug('outgoingResponse', action)
     if (action == 'stitch'){
         picstitch.stitchResults(data,source,function(urlArr){
             //sending out stitched image response
