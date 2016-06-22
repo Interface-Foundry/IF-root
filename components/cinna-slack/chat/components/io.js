@@ -3117,6 +3117,7 @@ var saveToCart = function(data){
                   //messageHistory[data.source.id].cart.push(itemToAdd); //add selected items to cart
 
                   yield kipcart.addToCart(data.source.org, data.source.user, itemToAdd);
+                  viewCart(data)
               }
             }).catch(function(err) {
                 console.log(err);

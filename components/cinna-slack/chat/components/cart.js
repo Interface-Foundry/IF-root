@@ -75,7 +75,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('-source_json').exec();
+    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
     if (team_carts.length === 1) {
       var cart = team_carts[0];
     } else {
@@ -92,15 +92,18 @@ module.exports.addToCart = function(slack_id, user_id, item) {
       }
     });
 
-    if (!ok) {
+    // TODO can't check if an item is okay to add if it's their first item in the cart...
+    if (!ok && _.get(cart, 'amazon.CartId[0]')) {
+      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
       // attempt to add the item to the cart for the first time, check for errors
       var res = yield client.addCart({
         CartId: cart.amazon.CartId[0],
         HMAC: cart.amazon.HMAC[0],
         'Item.0.ASIN': item.ASIN[0],
-        'Item.0.quantity': 1
+        'Item.0.Quantity': 1
       });
       if (_.get(res, 'Request[0].Errors')) {
+        console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
         throw new Error('Cannot add this item to cart');
       }
     }
