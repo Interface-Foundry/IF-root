@@ -4,10 +4,9 @@ from easydict import EasyDict as edict
 # data.text is the original text
 # data.blob is the output of TextBlob
 # data.doc is the output of spaCy
-def parse(data):
-    print('entering parser method')
-    print(data.text)
 
+
+def parse(data):
     # Create the object we will return from the api
     res = edict({})
     res.text = data.text
@@ -71,7 +70,6 @@ def parse(data):
     for token in data.doc[:]:
         pos.append([token.orth_, token.pos_])
     res.parts_of_speech = pos
-
 
     # ALL nouns
     res.nouns = set()

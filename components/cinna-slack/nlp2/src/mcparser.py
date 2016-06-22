@@ -1,13 +1,9 @@
-import json
 import logging
 import subprocess
 from easydict import EasyDict
 
-logger = logging.getLogger()
-
-
-# True uses their parser script, ruins root and stuff
 DEBUG_ = False
+logger = logging.getLogger()
 
 
 def syntaxnet_array(text):
@@ -132,32 +128,24 @@ class McParser:
 
     def output_form(self):
         '''
-        Put into correct json format for api.js:
-        {
-        'adjectives': [u'darker'],
-        'entities': [[u'first', u'ORDINAL']],
-        'focus': [1],
-        'nouns': [],
-        'parts_of_speech': [[u'first', u'ADV'],[u'but', u'CONJ'],...],
-        'ss': [{'focus': [1],'isQuestion': False,'noun_phrases': [],
-        'parts_of_speech': [[u'first', u'ADV'],[u'but', u'CONJ'],[u'darker', u'ADJ']],'sentiment_polarity': 0.25,'sentiment_subjectivity': 0.3333333333333333}],
-        'text': 'first but darker',
-        'verbs': []}
+        Put into correct json format for api.js
         '''
         response = EasyDict()
+        response.nouns = [' '.join(self.adjectives + self.nouns)]
         response.adjectives = self.adjectives
         response.entities = self.entities
         response.focus = self.focus
-        response.nouns = self.nouns
         response.parts_of_speech = self.parts_of_speech
         response.text = self.text.lower()
         response.verbs = self.verbs
-        return response
+        # add ss
+        ss = {}
+        ss['focus'] = self.focus
+        ss['isQuestion'] = self.isQuestion
+        ss['noun_phrases'] = [' '.join(self.nouns + self.adjectives)]
+        ss['parts_of_speech'] = self.parts_of_speech
+        ss['sentiment_polarity'] = 0.0
+        ss['sentiment_subjectivity'] = 0.0
+        response.ss = [ss]
 
-    def to_JSON(self):
-        '''
-        possibly easier than output_form, but 100 micro seconds slower
-        '''
-        return json.dumps(self,
-                          default=lambda o: o.__dict__,
-                          sort_keys=True)
+        return response

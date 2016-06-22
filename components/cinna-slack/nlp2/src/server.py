@@ -6,7 +6,7 @@ import parser
 
 from mcparser import McParser
 
-orig_ = True
+orig_ = False
 port_num = 8083
 app = Flask(__name__)
 
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 if orig_:
-    logging.info('using spacy')
+    logging.debug('------using spacy------')
     from spacy.en import English
     from textblob import TextBlob
     nlp_data_dir = '/usr/local/lib/python2.7/dist-packages/spacy/data/en-1.1.0'
@@ -30,7 +30,7 @@ def parse_message(orig_parser=orig_):
     '''
     data = EasyDict({})
     data.text = request.json['text']
-
+    logging.info('query: ' + data.text)
     # ------------------------------------------------------------------------
     # original parser
     if orig_parser:
@@ -38,29 +38,27 @@ def parse_message(orig_parser=orig_):
         data.blob = TextBlob(data.text)
         data.doc = nlp(u"{}".format(data.text),
                        tag=True, parse=True, entity=True)
-        try:
-            resp = jsonify(parser.parse(data))
-        except:
-            logging.critical('didnt work with orig parser')
-
+        resp = parser.parse(data)
+        logging.debug(resp)
     # ------------------------------------------------------------------------
     # syntaxnet parser
     else:
         logging.debug('using mcparser')
-        data.doc = McParser(data.text).output_form()
-        try:
-            resp = jsonify(data)
-        except:
-            logging.critical('didnt work with syntaxnet parser')
-    logging.debug('returning results...')
-    return resp
+        resp = McParser(data.text)
+
+        logging.debug(resp.dependency_array)
+        resp = resp.output_form()
+        logging.debug(resp)
+
+    logging.debug('------returning results------')
+    return jsonify(resp)
 
 
 @app.route('/reload')
 def reload_parse():
-    logging.debug('trying to reload........')
+    logging.debug('------trying to reload------')
     reload(parser)
-    return 'ok'
+
 
 if __name__ == '__main__':
     logging.info('running app on port ' + str(port_num))
