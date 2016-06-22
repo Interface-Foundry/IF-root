@@ -2,6 +2,7 @@ var db = require('db')
 var kip = require('kip')
 var request = require('request')
 var debug = require('debug')('chat')
+var refresh_team = require('./refresh_team')
 
 // Needs scopes 'identify,team:read,users:read,im:read,bot'
 // (bot+users%3Aread+im%3Aread+team%3Aread)
@@ -59,37 +60,8 @@ var scrape_team_info = function(bot, callback) {
         console.error('Could not save addedBy as ' + r.body.user_id + ' for bot ' + bot._id);
       }
 
-      request('https://slack.com/api/users.list?token=' + bot.bot.bot_access_token, function(e, r, b) {
-        if (kip.error(e)) return;
-
-        r.body = JSON.parse(r.body)
-        console.log(r.body);
-        // save each user
-
-        var userhash = {};
-        var users = r.body.members.map(function(u) {
-          userhash[u.id] = new db.Chatuser(u);
-          userhash[u.id].save();
-          return userhash[u.id];
-        })
-
-        request('https://slack.com/api/im.list?token=' + bot.bot.bot_access_token, function(e, r, b) {
-          if (kip.error(e)) return;
-
-          r.body = JSON.parse(r.body)
-          console.log(r.body);
-
-          // save each user again
-          r.body.ims.map(function(u) {
-            userhash[u.user].dm = u.id;
-            userhash[u.user].save()
-          })
-
-          callback(null, users);
-
-        })
-      })
-
-
+      refresh_team(bot.team_id).then(u => {
+        callback(null, u);
+      }, callback);
     })
 }
