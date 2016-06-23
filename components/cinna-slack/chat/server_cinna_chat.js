@@ -43,13 +43,16 @@ var async = require('async');
 var bodyParser = require('body-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
+var kip = require('kip');
+var db = require('db');
+var _ = require('lodash');
 
 //set env vars
 var config = require('config');
 
-process.on('uncaughtException', function (err) {
-  console.error('uncaught exception', new Date())
-  console.error(err.stack);
+process.on('uncaughtException', function(err) {
+  kip.error('uncaught exception', new Date())
+  kip.error(err.stack);
 });
 
 //load kip modules
@@ -62,17 +65,21 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 app.use(express.static(__dirname + '/static'))
-app.get('/healthcheck', function (req, res) {
+app.get('/healthcheck', function(req, res) {
   res.send('💬 🌏')
 })
 
 //parse incoming body
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 server.listen(8000, function(e) {
-  if (e) { console.error(e) }
-  console.log('chat app listening on port 8000 🌏 💬')
+  if (e) {
+    kip.error(e)
+  }
+  kip.debug('chat app listening on port 8000 🌏 💬')
 })
 
 //globals
@@ -83,142 +90,184 @@ var navHistory = {}; //keep track of each user in each channel nav history for b
 ioKip.initSlackUsers(app.get('env'));
 ioKip.loadSocketIO(server);
 
-
-//incoming new slack user
+//
+// Slack app registration
+// to test this, go to https://api.slack.com/docs/slack-button and deselect "incoming webhook" and select "bot"
+//
 app.get('/newslack', function(req, res) {
+  // omg fucking shoot me
+  kip.debug('new slack integration request');
+  res.redirect('https://kipsearch.com/thanks');
+
+  if (!req.query.code) {
     ioKip.newSlack();
-});
+    return kip.err('no code in the request, cannot process team add to slack');
+  }
 
-//incoming slack action
-app.post('/slackaction', function(req, res) { 
+  var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : '52946721872.53047577702';
+  var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : '7989b267194bfa98782340007c08d088';
+  var redirect_uri = process.env.NODE_ENV === 'production' ? 'https://kipsearch.com/newslack' : 'https://5947ceef.ngrok.io/newslack';
 
-    if (req.body && req.body.payload){
+  var body = {
+    code: req.query.code,
+    redirect_uri: redirect_uri
+  }
 
-      var parsedIn = JSON.parse(req.body.payload);
-
-      //validating real button call  
-      if(parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP'){
-        console.log('HACKER? 👻 ',parsedIn.token)
-        //return;
-      } 
-
-      var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
-
-
-      /// FOR INITIAL SEARCHES
-
-      //IF team cart action, send back modified message with updated quantities
-
-      //call for cart, modded
-
-
-      //sends back original chat
-      if (parsedIn.response_url && parsedIn.original_message){
-
-        console.log('PASSED IN ',parsedIn);
-        
-        //penguin nav button
-        if (parsedIn.actions[0].name == 'home'){
-
-          navHistory[navId] = JSON.stringify(parsedIn.original_message); //saving current nav
-
-          var reformattedArray = parsedIn.original_message.attachments.map(function(obj){ 
-            if (obj.actions){
-
-              //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
-               obj.actions.map(function(obj2){
-                  if(obj2.name == 'home'){
-                    obj.actions = buttonTemplate.slack_home;
-                  }
-               })
-            }
-            return obj;
-          });
-
-
-          var newRes = parsedIn.original_message;
-
-          newRes.attachments = reformattedArray;
-
-          console.log('PARSE OUT ',newRes)
-
-          res.json(newRes);
-
-        }
-
-       
-        else if (parsedIn.actions[0].name == 'back'){
-
-          //console.log('090909090909090909090909090909090 ',navHistory[navId]);
-
-          //res.json(navHistory[navId]);
-
-         //var parsed = JSON.parse('{"text":"","username":"Kip","icons":{"image_48":"https://s3-us-west-2.amazonaws.com/slack-files2/bot_icons/2015-12-08/16204337716_48.png"},"bot_id":"B0YTP5GUD","attachments":[{"fallback":"Here are some options you might like","image_url":"https://s3.amazonaws.com/if-kip-chat-images/7UNLH75BPC8FWXN92YHZ0FGP.png","image_width":345,"image_height":120,"image_bytes":19056,"callback_id":"5768bad04bf101a08ae43ceb","text":"*1.* <http://goo.gl/eEQ1GA|*SYMA X5C Explorers 2.4G 4CH 6-Axis Gyro RC Quadcopter With HD Camera…*>\n <http://goo.gl/eEQ1GA|View on Amazon>","id":1,"color":"45a5f4","actions":[{"id":"1","name":"addcart","text":"Add to Cart","type":"button","value":"0","style":"primary"},{"id":"2","name":"cheaper","text":"Find Cheaper","type":"button","value":"0","style":"default"},{"id":"3","name":"moreinfo","text":"More Info","type":"button","value":"0","style":"default"}],"mrkdwn_in":["text"]},{"fallback":"Here are some options you might like","image_url":"https://s3.amazonaws.com/if-kip-chat-images/5WYY81SPBQ0TAU7BUOLST9OQ.png","image_width":345,"image_height":120,"image_bytes":18403,"callback_id":"5768bad04bf101a08ae43ceb","text":"*2.* <http://goo.gl/u32Q8m|*Cheerwing Syma X5SW FPV Explorers2 2.4Ghz 4CH 6-Axis Gyro RC Headless …*>\n <http://goo.gl/u32Q8m|View on Amazon>","id":2,"color":"45a5f4","actions":[{"id":"4","name":"addcart","text":"Add to Cart","type":"button","value":"1","style":"primary"},{"id":"5","name":"cheaper","text":"Find Cheaper","type":"button","value":"1","style":"default"},{"id":"6","name":"moreinfo","text":"More Info","type":"button","value":"1","style":"default"}],"mrkdwn_in":["text"]},{"fallback":"Here are some options you might like","image_url":"https://s3.amazonaws.com/if-kip-chat-images/LKXW2QTB6234T5GZQN4UJMN8.png","image_width":345,"image_height":120,"image_bytes":25137,"callback_id":"5768bad04bf101a08ae43ceb","text":"*3.* <http://goo.gl/9xQhxn|*Syma X5SW 4 Channel Remote Controlled Quadcopter with HD Camera for Re…*>\n <http://goo.gl/9xQhxn|View on Amazon>","id":3,"color":"45a5f4","actions":[{"id":"7","name":"addcart","text":"Add to Cart","type":"button","value":"2","style":"primary"},{"id":"8","name":"cheaper","text":"Find Cheaper","type":"button","value":"2","style":"default"},{"id":"9","name":"moreinfo","text":"More Info","type":"button","value":"2","style":"default"}],"mrkdwn_in":["text"]},{"callback_id":"5768bad04bf101a08ae43ceb","fallback":"More Options","id":4,"color":"53B987","actions":[{"id":"10","name":"more","text":"View More","type":"button","value":"more","style":"default"},{"id":"11","name":"home","text":"🐧","type":"button","value":"home","style":"default"}]}],"type":"message","subtype":"bot_message","ts":"1466481359.000085"}');
-          if (navHistory[navId]){
-            res.json(JSON.parse(navHistory[navId]));
-          }
-          
-        }
-
-        else {
-
-          console.log('REZ REZZ ',JSON.stringify(parsedIn.original_message))
-          res.json(parsedIn.original_message);
-
-         //  var stringOrig = JSON.stringify(parsedIn.original_message);
-
-         // // res.sendStatus(200);
-
-         //  console.log('STRING ORG22222 ',stringOrig)
-         //  request.post(
-         //      parsedIn.response_url,
-         //      { payload: stringOrig },
-         //      function (err, res, body) {
-         //        console.error('post err ',err);
-         //      }
-         //  );
-
-          ioKip.incomingMsgAction(req.body,'slack');
-
-        }
-
-
-
-        // res.status(200).json({ error: 'message' });
-
-        // res.json({payload: stringOrig});
-
-        //res.sendStatus(200);
-
-      }else {
-        console.error('slack buttons broke, need a response_url');
-        return;
-      }
-    }else {
-      console.log('nah');
-      res.sendStatus(200);
+  request({
+    url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
+    method: 'POST',
+    form: body
+  }, function(e, r, b) {
+    if (e) {
+      kip.debug('error connecting to slack api');
+      kip.debug(e);
+    }
+    if (typeof b === 'string') {
+      b = JSON.parse(b);
+    }
+    if (!b.ok) {
+      kip.error('error connecting with slack, ok = false')
+      kip.error('body was', body)
+      kip.error('response was', b)
+      return;
+    } else if (!b.access_token || !b.scope) {
+      kip.error('error connecting with slack, missing prop')
+      kip.error('body was', body)
+      kip.error('response was', b)
+      return;
     }
 
-    // //SEND REQ.BODY: { payload: }
-   
+    kip.debug('got positive response from slack')
+    kip.debug('body was', body)
+    kip.debug('response was', b)
+    var bot = new db.Slackbot(b)
+    db.Slackbots.findOne({
+      team_id: b.team_id,
+      deleted: {
+        $ne: true
+      }
+    }, function(e, old_bot) {
+      if (e) {
+        kip.error(e)
+      }
+
+      if (old_bot) {
+        kip.debug('already have a bot for this team', b.team_id)
+        kip.debug('updating i guess')
+        _.merge(old_bot, b);
+        old_bot.save(e => {
+          kip.err(e);
+          ioKip.newSlack();
+        });
+      } else {
+        bot.save(function(e) {
+          kip.err(e);
+          ioKip.newSlack();
+        })
+      }
+    })
+  });
+});
+
+
+//
+// incoming slack action
+//
+app.post('/slackaction', function(req, res) {
+  if (!req.body || !req.body.payload) {
+    kip.err('slack action did not have a body or payload');
+    res.sendStatus(500);
+  }
+
+  var parsedIn = JSON.parse(req.body.payload);
+  kip.debug('got slack action', parsedIn.actions[0].name);
+
+  //validating real button call
+  if (parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP') {
+    kip.debug('slack action token did not match 👻 ', parsedIn.token)
+  }
+
+  if (!parsedIn.response_url || !parsedIn.original_message) {
+    kip.error('slack buttons broke, need a response_url and original_message');
+    res.sendStatus(500);
+    return;
+  }
+
+  var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
+
+  //penguin nav button
+  if (parsedIn.actions[0].name == 'home') {
+
+    navHistory[navId] = JSON.stringify(parsedIn.original_message); //saving current nav
+
+    var reformattedArray = parsedIn.original_message.attachments.map(function(obj) {
+      if (obj.actions) {
+
+        //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
+        obj.actions.map(function(obj2) {
+          if (obj2.name == 'home') {
+            obj.actions = buttonTemplate.slack_home;
+          }
+        })
+      }
+      return obj;
+    });
+
+
+    var newRes = parsedIn.original_message;
+
+    newRes.attachments = reformattedArray;
+
+    kip.debug('PARSE OUT ', newRes)
+
+    res.json(newRes);
+
+  } else if (parsedIn.actions[0].name == 'back') {
+
+    if (navHistory[navId]) {
+      res.json(JSON.parse(navHistory[navId]));
+    }
+
+  } else {
+
+    // var stringOrig = JSON.stringify(parsedIn.original_message);
+
+    // kip.debug('STRING ORG22222 ', stringOrig)
+    // request.post(
+    //   parsedIn.response_url,
+    //   {
+    //     payload: stringOrig
+    //   },
+    //   function(err, res, body) {
+    //     kip.err(err, 'error posting to slack api in response to the slack action');
+    //   }
+    // );
+
+    res.send(parsedIn.original_message);
+
+    ioKip.incomingMsgAction(req.body, 'slack');
+
+  }
 });
 
 
 // incoming email from sendgrid
 // In development we're currently using peter's sendgrid api key etc
-app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
-  console.log('hitting /emailincoming')
-    req.body = {};
-    req.busboy.on('field', (k, v) => {
-      req.body[k] = v;
-    })
+app.post('/emailincoming', busboy({
+  immediate: true
+}), function(req, res) {
+  kip.debug('hitting /emailincoming')
+  req.body = {};
+  req.busboy.on('field', (k, v) => {
+    req.body[k] = v;
+  })
 
-    req.busboy.on('finish', () => {
-      email.process(req.body).catch((e) => {
-        console.log(e.stack);
-      })
-      res.sendStatus(200);
+  req.busboy.on('finish', () => {
+    email.process(req.body).catch((e) => {
+      kip.debug(e.stack);
     })
+    res.sendStatus(200);
+  })
 })
 
 //user hit unsubsctibe link in email 
@@ -253,18 +302,18 @@ var Kik = require('@kikinteractive/kik');
 
 const kikConfig = {};
 
-if (process.env.NODE_ENV == 'development_alyx'){
-    kikConfig.auth = {
-        username: 'kipbot.dev',
-        apiKey: '2365ecea-4aa4-421a-a923-253c2e5dcd52',
-        baseUrl: 'https://04d3a7ea.ngrok.io/'
-    };
-}else{
-    kikConfig.auth = {
-        username: 'kipbot',
-        apiKey: '4a181322-48ee-4b63-8b09-7ccec20bf4a5',
-        baseUrl: 'https://kipapp.co:8033/'
-    };
+if (process.env.NODE_ENV == 'development_alyx') {
+  kikConfig.auth = {
+    username: 'kipbot.dev',
+    apiKey: '2365ecea-4aa4-421a-a923-253c2e5dcd52',
+    baseUrl: 'https://04d3a7ea.ngrok.io/'
+  };
+} else {
+  kikConfig.auth = {
+    username: 'kipbot',
+    apiKey: '4a181322-48ee-4b63-8b09-7ccec20bf4a5',
+    baseUrl: 'https://kipapp.co:8033/'
+  };
 }
 
 // configure the bot
@@ -275,51 +324,51 @@ kik.updateBotConfiguration();
 
 // / / / / / ONBOARDING MESSAGE NEW KIK USER / / / / / / //
 kik.onStartChattingMessage((message) => {
-    kik.getUserProfile(message.from)
-        .then((user) => {
+  kik.getUserProfile(message.from)
+    .then((user) => {
 
-          var kikRes = [];
-          var kikMsg;
+      var kikRes = [];
+      var kikMsg;
 
-          kikMsg = Kik.Message
-            .link('http://www.kipthis.com')
-            .setPicUrl('http://kipthis.com/kip_modes/mode_welcome.png')
-            .setText("Hi "+user.firstName+"!")
-            .setTitle('')
-            .setAttributionIcon('http://kipthis.com/img/kip-find.png')
-            .setAttributionName('Kip');
-          
-          kikRes.push(kikMsg)
+      kikMsg = Kik.Message
+        .link('http://www.kipthis.com')
+        .setPicUrl('http://kipthis.com/kip_modes/mode_welcome.png')
+        .setText("Hi " + user.firstName + "!")
+        .setTitle('')
+        .setAttributionIcon('http://kipthis.com/img/kip-find.png')
+        .setAttributionName('Kip');
 
-          kikMsg = Kik.Message
-            .text("I'm Kip 😊 Tell me what you're looking for, I'll try my best to find it!" );
+      kikRes.push(kikMsg)
 
-          var keyboardObj = [{
-                "type": "suggested",
-                "hidden":false,
-                "responses": [
-                    {
-                        "type":"text",
-                        "body":"Find headphones" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
-                    },
-                    {
-                        "type":"text",
-                        "body":"Find dystopia books"
-                    },
-                    {
-                        "type":"text",
-                        "body":"Find LED gloves"
-                    },
-                    {
-                        "type":"text",
-                        "body":"🔮 Surprise me!"
-                    }
-                ]
-            }];  
-            kikMsg._state.keyboards = keyboardObj;
-            kikRes.push(kikMsg)
-            message.reply(kikRes);
-        });
+      kikMsg = Kik.Message
+        .text("I'm Kip 😊 Tell me what you're looking for, I'll try my best to find it!");
+
+      var keyboardObj = [{
+        "type": "suggested",
+        "hidden": false,
+        "responses": [
+          {
+            "type": "text",
+            "body": "Find headphones" //BACK BUTTON REDISPLAYS PREVIOUS SEARCH RESULTS
+          },
+          {
+            "type": "text",
+            "body": "Find dystopia books"
+          },
+          {
+            "type": "text",
+            "body": "Find LED gloves"
+          },
+          {
+            "type": "text",
+            "body": "🔮 Surprise me!"
+          }
+        ]
+      }];
+      kikMsg._state.keyboards = keyboardObj;
+      kikRes.push(kikMsg)
+      message.reply(kikRes);
+    });
 });
 
 kik.onLinkMessage((message) => {
@@ -328,66 +377,66 @@ kik.onLinkMessage((message) => {
 
 kik.onPictureMessage((message) => {
 
-  console.log(message.picUrl)
-  processData.imageSearch(message.picUrl,'',function(res){
+  kip.debug(message.picUrl)
+  processData.imageSearch(message.picUrl, '', function(res) {
 
-      console.log('😅 ',res);
-      var kipObj = {
-        msg: res,
-        source: {
-          origin: 'kik',
-          channel: message.chatId,
-          org: message.chatId,
-          id: message.chatId + '_' + message.from,
-          user: message.chatId,
-          username: message.from
-        },
-        kikData: message
-      };
-      kipObj.text = res;
-      kipObj.imageTags = res;
-      ioKip.preProcess(kipObj);    
+    kip.debug('😅 ', res);
+    var kipObj = {
+      msg: res,
+      source: {
+        origin: 'kik',
+        channel: message.chatId,
+        org: message.chatId,
+        id: message.chatId + '_' + message.from,
+        user: message.chatId,
+        username: message.from
+      },
+      kikData: message
+    };
+    kipObj.text = res;
+    kipObj.imageTags = res;
+    ioKip.preProcess(kipObj);
   })
 
 
 });
 
 kik.onVideoMessage((message) => {
- message.reply("Sorry, I can't deal with vids right now! 😅");
+  message.reply("Sorry, I can't deal with vids right now! 😅");
 });
 
 kik.onScanDataMessage((message) => {
- message.reply("Sorry, I can't deal with scans right now! 😅");
+  message.reply("Sorry, I can't deal with scans right now! 😅");
 });
 
 kik.onStickerMessage((message) => {
-    kik.getUserProfile(message.from)
-        .then((user) => {
+  kik.getUserProfile(message.from)
+    .then((user) => {
 
-        var kikMsg = Kik.Message
-          .link('http://www.kipthis.com')
-          .setPicUrl('http://kipthis.com/img/kip-find.png')
-          .setText("Hi "+user.firstName+"!!")
-          .setTitle('')
-          .setAttributionIcon('http://kipthis.com/img/kip-icon.png')
-          .setAttributionName('😅');
+      var kikMsg = Kik.Message
+        .link('http://www.kipthis.com')
+        .setPicUrl('http://kipthis.com/img/kip-find.png')
+        .setText("Hi " + user.firstName + "!!")
+        .setTitle('')
+        .setAttributionIcon('http://kipthis.com/img/kip-icon.png')
+        .setAttributionName('😅');
 
-        message.reply(kikMsg);
+      message.reply(kikMsg);
     });
 });
 
 
 //kik.send('HIIII','alyxmxe')
-  // kik.getUserProfile(message.from)
-  //     .then((user) => {
-  //         message.reply(`Hey ${user.firstName}!`);
-  //     });
+// kik.getUserProfile(message.from)
+//     .then((user) => {
+//         message.reply(`Hey ${user.firstName}!`);
+//     });
 
 //incoming message from kik
 kik.onTextMessage((message) => {
-  //console.log('MESSAGE IN ',message)
-  // console.log('REGULAR ID ',message.id)
-  // console.log('MESSAGE FROM ',message.from)
+  //kip.debug('MESSAGE IN ',message)
+  // kip.debug('REGULAR ID ',message.id)
+  // kip.debug('MESSAGE FROM ',message.from)
 
   var kipObj = {
     msg: message.body.trim(),
@@ -401,41 +450,43 @@ kik.onTextMessage((message) => {
     },
     kikData: message
   };
-  //console.log('KIPOBJ ',kipObj)
-  ioKip.preProcess(kipObj);    
+  //kip.debug('KIPOBJ ',kipObj)
+  ioKip.preProcess(kipObj);
 
 });
 
-var sendToKik = function(data,message,type){
+var sendToKik = function(data, message, type) {
 
-  //console.log('DATA INCOMING SEND TO KIK ',data)
+  //kip.debug('DATA INCOMING SEND TO KIK ',data)
 
-  if(!data.kikData){
-    console.error('error io.js: no kikData obj found in data.source')
+  if (!data.kikData) {
+    kip.error('error io.js: no kikData obj found in data.source')
     return;
   }
 
-  switch(type){
+  switch (type) {
     case 'banter':
       data.kikData.reply(message)
       break;
     case 'search':
-      console.log('SEARCH MESSAGE ',message)
+      kip.debug('SEARCH MESSAGE ', message)
 
       //insert keyboard into message
 
       data.kikData.reply(message);
       break;
-    default: 
-      //console.log('DEFAULT????????????????')
+    default:
+      //kip.debug('DEFAULT????????????????')
       data.kikData.reply(message)
   }
 }
 
 //kik is a lil' special snowflake, aren't ch'ya kik hmmmm?? -____-
-var kikServer = require('http').createServer(kik.incoming()).listen(8033, function(e){
-  if (e) { console.error(e) }
-  console.log('lil kik snowflake listening on 8033 ❄️ ❄️ ❄️')
+var kikServer = require('http').createServer(kik.incoming()).listen(8033, function(e) {
+  if (e) {
+    kip.error(e)
+  }
+  kip.debug('lil kik snowflake listening on 8033 ❄️ ❄️ ❄️')
 });
 
 // - - - - - - - - - - -  end kik playpen - - - - - - - - - - - - - - - - //
@@ -460,7 +511,7 @@ module.exports.sendToKik = sendToKik;
 
 //incoming kik message
 // app.post('/kikincoming', function(req, res) {
-//     console.log('incoming Kik BODY: ',req.body);
+//     kip.debug('incoming Kik BODY: ',req.body);
 //     res.sendStatus(200);
 //     //ioKip.incomingMsgAction(req.body,'kik');
 //     res.sendStatus(200);

@@ -1071,6 +1071,30 @@ function viewCartMembers(convo,callback,flag){
     if (flag !== 'noPrompt'){
       var endpart = {
         "text":"Update group cart members? Or type `exit`",
+        "actions": [
+            {
+              "name": "exit",
+              "text": "Exit Members",
+              "style": "primary",
+              "type": "button",
+              "value": "exit"
+            },              
+            {
+              "name": "help",
+              "text": "Help",
+              "style": "default",
+              "type": "button",
+              "value": "help"
+            },
+            {
+              "name": "home",
+              "text": "🐧",
+              "style": "default",
+              "type": "button",
+              "value": "home"
+            }
+        ],
+        "callback_id": 'none',
         "mrkdwn_in": ["fields","text"],
         "color":"#49d63a"
       };

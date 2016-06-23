@@ -19,22 +19,12 @@ var aws_clients = {
     awsId: "AKIAIKMXJTAV2ORZMWMQ",
     awsSecret: "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",
     awsTag: "quic0b-20"
+  }),
+  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
+    awsId: "AKIAIM4IKQAE2WF4MJUQ",
+    awsSecret: "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",
+    awsTag: "quic0b-20"
   })
-  // AKIAILD2WZTCJPBMK66A: amazon.createClient({
-  //   awsId: "AKIAILD2WZTCJPBMK66A",
-  //   awsSecret: "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",
-  //   awsTag: "bubboorev-20"
-  // }),
-  // AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
-  //   awsId: "AKIAIM4IKQAE2WF4MJUQ",
-  //   awsSecret: "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",
-  //   awsTag: "krista03-20"
-  // }),
-  // AKIAIYTURL6C5PID2GZA: amazon.createClient({
-  //   awsId: "AKIAIYTURL6C5PID2GZA",
-  //   awsSecret: "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",
-  //   awsTag: "krista08-20"
-  // })
 };
 
 var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
@@ -42,8 +32,7 @@ var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
 var aws_client_id_list = Object.keys(aws_clients);
 
 console.log("AWS LCIENTS ",aws_client_id_list)
-
-  var getCartLink = require('./process').getCartLink;
+var processData = require('./process');
 var fs = require('fs')
 var kip = require('kip');
 
@@ -57,7 +46,7 @@ module.exports = {};
 //
 module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
-  console.log('ITEM ZZZZ ',item)
+  console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
   //fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount){
@@ -75,15 +64,47 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var cart = yield getCart(slack_id);
+    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
+    if (team_carts.length === 1) {
+      var cart = team_carts[0];
+    } else {
+      cart = yield getCart(slack_id);
+    }
     console.log(cart);
+
+    // make sure we can add this item to the cart
+    // know it's ok if the item already exists in the cart
+    var ok = false;
+    cart.aggregate_items.map(i => {
+      if (i.ASIN === item.ASIN[0] && i.quantity > 1) {
+        ok = true;
+      }
+    });
+
+    // TODO can't check if an item is okay to add if it's their first item in the cart...
+    if (!ok && _.get(cart, 'amazon.CartId[0]')) {
+      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+      // attempt to add the item to the cart for the first time, check for errors
+      var res = yield client.addCart({
+        CartId: cart.amazon.CartId[0],
+        HMAC: cart.amazon.HMAC[0],
+        'Item.0.ASIN': item.ASIN[0],
+        'Item.0.Quantity': 1
+      });
+      if (_.get(res, 'Request[0].Errors')) {
+        console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
+        throw new Error('Cannot add this item to cart');
+      }
+    }
+
+    var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
 
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
       title: _.get(item, 'ItemAttributes[0].Title'),
-      link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
+      link: link,
       image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
       price: item.realPrice,
       rating: _.get(item, 'reviews.rating'),
@@ -98,7 +119,19 @@ module.exports.addToCart = function(slack_id, user_id, item) {
     yield cart.save();
 
     console.log('calling getCart again to rebuild amazon cart')
-    return getCart(slack_id);
+    try {
+      yield getCart(slack_id);
+    } catch (e) {
+      // didn't work, so remove the item and say sorry
+      cart.items = cart.items.filter(item => {
+        console.log(item);
+        console.log(i._id);
+        return item !== i._id;
+      })
+      cart.save();
+      i.remove();
+      throw new Error('could not add item to cart')
+    }
   })
 }
 
@@ -317,7 +350,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       var amazonCart = yield client.createCart(cart_items)
       kip.debug(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
-      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+      cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
 
       return cart;
@@ -383,7 +416,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       else {
         kip.debug(JSON.stringify(amazonCart, null, 2))
         cart.amazon = amazonCart;
-        cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         yield cart.save()
         return cart;
       }
@@ -411,8 +444,6 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       return hash;
     }, {});
     var amazon_items = _.get(amazonCart, 'CartItems[0].CartItem') || [];
-    console.log('amazon_items', amazon_items);
-    debugger;
 
     /*
     { Request: [ { IsValid: [Object], CartGetRequest: [Object] } ],
@@ -445,15 +476,14 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
 
       timer('rebuilding cart ' + cart.amazon.CartId)
       console.log('rebuilding cart');
-      yield client.addCart(_.merge({}, cart_items, {
+      var items_to_add = _.merge({}, cart_items, {
         CartId: cart.amazon.CartId[0],
         HMAC: cart.amazon.HMAC[0],
-      }))
-      timer('rebuilt, saving')
-
-      console.log('cart stuff', cart.amazon.CartId[0], cart._id);
-      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id);
-      cart.save() // don't have to wait for cart to save
+      });
+      // kip.debug(items_to_add);
+      var res = yield client.addCart(items_to_add);
+      kip.debug('errors', _.get(res, 'Request[0].Errors'));
+      timer('rebuilt')
     }
 
     //pretty print a nice cart
