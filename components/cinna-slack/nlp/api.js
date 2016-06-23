@@ -272,7 +272,6 @@ function nlpToResult(nlp, message) {
     }
   }
 
-
   var priceModifier = price(nlp.text);
   if (priceModifier) {
     debug('priceModifier triggered')
@@ -282,7 +281,7 @@ function nlpToResult(nlp, message) {
       params: priceModifier,
     };
     if (nlp.focus.length >= 1) {
-      exec.focus = nlp.focus[0];
+      exec.params.focus = nlp.focus[0];
     }
     message.execute.push(exec);
   }
