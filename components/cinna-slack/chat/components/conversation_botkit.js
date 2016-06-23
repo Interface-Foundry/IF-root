@@ -190,7 +190,7 @@ function askWhoManagesPurchases(response, convo) {
 
           
 
-          "text": 'Now, tell me, who manages office purchases? \n Tip: Type something like `me` or `@me and @jane`',
+          "text": 'Now, tell me, who manages office purchases? \n Tip: Type something like `me` or `me and @jane`',
           "mrkdwn_in": [
               "text",
               "pretext"
@@ -501,7 +501,7 @@ function listenOnboard(response, convo){
           }
         });
         console.log('1🔸',office_gremlins)
-        
+
 
         if (office_gremlins.length > 1) {
           var last = office_gremlins.pop();
@@ -842,6 +842,7 @@ function showSettings(response, convo, flag, done) {
         attachments.push({text: 'You are receiving weekly cart status updates every \n*' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + convo.chatuser.tz.replace(/_/g, ' ') + '*'
           + ')\nYou can turn this off by saying `no weekly status`'
           + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
+
       } else {
         attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'})
       }
@@ -869,11 +870,38 @@ function showSettings(response, convo, flag, done) {
           text: 'Don’t have any changes? Type `exit` to quit settings',
           color:'#49d63a',
           mrkdwn_in: ['text'],
-          fallback:'Settings'
+          fallback:'Settings',
+          actions: [
+              {
+                "name": "exit",
+                "text": "Exit Settings",
+                "style": "primary",
+                "type": "button",
+                "value": "exit"
+              },              
+              {
+                "name": "help",
+                "text": "Help",
+                "style": "default",
+                "type": "button",
+                "value": "help"
+              },
+              {
+                "name": "home",
+                "text": "🐧",
+                "style": "default",
+                "type": "button",
+                "value": "home"
+              }
+          ],
+          callback_id: 'none'
         }],
         text:'',
         fallback:'Settings'
       }, handleSettingsChange);
+
+
+
     }
     if(flag == 'noAsk'){
 
@@ -1179,6 +1207,7 @@ function handleSettingsChange(response, convo) {
 
             //FUNCTION IO.JS UPDATE MODE
 
+            convo.next();
             convo.next();
 
         }else {

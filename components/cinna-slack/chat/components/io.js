@@ -416,6 +416,10 @@ function loadSlackUsers(users){
                kipUser[data.source.id] = {}; //omg lol
             }
 
+            if(kipUser[data.source.id]){
+                console.log('🔥kay🔥',kipUser[data.source.id].conversations)
+            }
+
             if (!kipUser[data.source.id].conversations){
                 kipUser[data.source.id].conversations = 'shopping';
             }
@@ -642,6 +646,9 @@ var preProcess = function(data){
 
     //console.log('👻 👻 👻 👻  ',kipUser[data.source.id].conversations)
 
+        console.log('🍀MODEZ🍀 ',data.source.id)
+        console.log('🍀MODEZ🍀 ', kipUser[data.source.id])
+
     if (kipUser[data.source.id] && kipUser[data.source.id].conversations && kipUser[data.source.id].conversations !== 'shopping') {  //shopping = main / default kip function (search)
 
 
@@ -659,17 +666,17 @@ var preProcess = function(data){
 
         //--->
 
+
       console.log('in a conversation: ' + kipUser[data.source.id].conversations)
 
       return;
     }
 
     //check for canned responses/actions before routing to NLP
-    banter.checkForCanned(data.msg,function(res,flag,query){
+    banter.checkForCanned(data.msg,function(res,flag,query,attachment){
 
 
-            console.log('# # # # # #  # # # # ## 3333 ')
-
+        console.log('# # # # # #  # # # # ## 3333 ')
 
         //found canned response
         if(flag){
@@ -679,9 +686,19 @@ var preProcess = function(data){
                     //send message
                     data.client_res = [];
                     data.client_res.push(res);
-                        console.log('# # # # # # BASIC # # # # ## 3333 ')
-
                     cannedBanter(data);
+
+                    if(attachment){
+                        //send  
+                        delete data.client_res;
+                        data.action = 'sendAttachment';
+                        data.client_res = attachment;
+                        setTimeout(function() {
+                            sendResponse(data);
+                        }, 50);
+                        
+                    }
+
                     break;
                 case 'search.initial':
                     //send message
@@ -923,7 +940,7 @@ var incomingMsgAction = function(data,origin){
         origin: origin,
         channel: parsedIn.channel.id,
         org: parsedIn.team.id,
-        id: parsedIn.team.id +'_'+ parsedIn.channel.id,
+        id: parsedIn.team.id +'_'+ parsedIn.user.id,
         user: parsedIn.user.id,
         flag: 'buttonAction'
     }
@@ -931,6 +948,12 @@ var incomingMsgAction = function(data,origin){
     //let's try to build a universal action button i/o for all platforms
     //deal with first action in action arr...more will happen later?
     if (parsedIn.actions && parsedIn.actions[0] && parsedIn.actions[0].name && parsedIn.actions[0].value){
+
+        // if (!kipUser[kipObj.source.id]){
+        //     kipUser[kipObj.source.id] = {
+        //         conversations: 'shopping'
+        //     };
+        // }
 
         //get bucket/action
         switch (parsedIn.actions[0].name){
@@ -1029,8 +1052,83 @@ var incomingMsgAction = function(data,origin){
 
             case 'help':
                 kipObj.msg = 'help';
+
                 closeCurrentMode('shopping');
                 preProcess(kipObj);
+                break;
+
+            case 'exit':
+                //kipObj.msg = 'exit';
+                //kipObj.action = 'showMode';
+
+                closeCurrentMode('shopping');
+
+                console.log(parsedIn);
+                console.log(parsedIn.actions[0]);
+
+                //remove settings mode here
+
+
+
+                var attachment = [
+                    {
+                        "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+                        "text":"",
+                        "mrkdwn_in": [
+                            "text",
+                            "pretext"
+                        ],
+                        "color":"#45a5f4"
+                    },
+                    {   
+                        "text": "Tell me what you're looking for, or type `help` for more options",
+                        "mrkdwn_in": [
+                            "text",
+                            "pretext"
+                        ],
+                        "color":"#49d63a",
+                        "fallback":"Shopping",
+                        "actions": [
+                            {
+                              "name": "search",
+                              "text": "Headphones",
+                              "style": "default",
+                              "type": "button",
+                              "value": "headphones"
+                            },
+                            {
+                              "name": "search",
+                              "text": "Coding Books",
+                              "style": "default",
+                              "type": "button",
+                              "value": "coding books"
+                            },
+                            {
+                              "name": "search",
+                              "text": "Healthy Snacks",
+                              "style": "default",
+                              "type": "button",
+                              "value": "healthy snacks"
+                            },
+                            {
+                              "name": "home",
+                              "text": "🐧",
+                              "style": "default",
+                              "type": "button",
+                              "value": "home"
+                            }
+                        ],
+                        callback_id: 'none'
+                    }
+                ];
+
+                kipObj.action = 'sendAttachment';
+                kipObj.client_res = attachment;
+                setTimeout(function() {
+                    sendResponse(kipObj);
+                }, 50);
+
+                //preProcess(kipObj);
                 break;
 
             case 'search':
@@ -2881,7 +2979,6 @@ var sendResponse = function(data,flag){
 
                     attachments = JSON.stringify(attachments);
 
-                    console.log('FOCUS ATTACHEMNTS !!!!!! ! ! ! ! ! ! ',attachments)
 
                     var msgData = {
                       // attachments: [...],
@@ -2889,10 +2986,15 @@ var sendResponse = function(data,flag){
                         username:'Kip',
                         attachments: attachments
                     };
+
+                    console.log('🍀🍀🍀FOCUS ',msgData)
+
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
 
                 });
             }else if (data.action == 'sendAttachment'){
+
+
 
                 //remove first message from res arr
                 var attachThis = data.client_res;
@@ -2910,13 +3012,14 @@ var sendResponse = function(data,flag){
             else {
                 //loop through responses in order
 
-                console.log('data.client_resdata.client_resdata.client_res ',data.client_res)
                 async.eachSeries(data.client_res, function(message, callback) {
 
                         console.log('# # # # # # OUTGING ARRAY # # # # ## 3333 ')
 
                     //item is a string, send message
                     if (typeof message === 'string'){
+
+                        console.log('string🍀🍀🍀 ',message);
                             console.log('# # # # # # STRING OUT  # # # # ## 3333 ')
 
                         var msgData = {
@@ -2948,13 +3051,12 @@ var sendResponse = function(data,flag){
                     //item is an attachment object, send attachment
                     else if (message !== null && typeof message === 'object' || message instanceof Array){
 
-                            console.log('# # # # # # OBJECT OUT # # # # ## 3333 ')
-
-
 
                         var attachThis = message;
 
                         attachThis = JSON.stringify(attachThis);
+
+                        console.log('obj🍀🍀🍀 ',attachThis);
 
                         var msgData = {
                             icon_url:'http://kipthis.com/img/kip-icon.png',
@@ -2966,7 +3068,7 @@ var sendResponse = function(data,flag){
 
                         if (data.button_ts){
 
-                                console.log('# # # # # # BUTTON TS # # # # ## 3333 ')
+                            console.log('# # # # # # BUTTON TS # # # # ## 3333 ')
 
                             msgData.as_user = true;
                             msgData.parse = 'full';
@@ -3468,6 +3570,10 @@ var updateMode = function(data){
 
     console.log('UPDATE MODE DATA💅💅💅 ',data);
 
+    if(kipUser[data.source.id]){
+        console.log('💅💅kay💅💅',kipUser[data.source.id].conversations)
+    }
+
     if(!kipUser[data.source.id]){
         kipUser[data.source.id] = {};
     }
@@ -3488,6 +3594,12 @@ var updateMode = function(data){
 
         case 'settings':
             kipUser[data.source.id].conversations = 'settings';
+
+
+            if(kipUser[data.source.id]){
+                console.log('💅💅kay222💅💅',kipUser[data.source.id].conversations)
+            }
+
             //fire show settings
             settingsMode(data);
             console.log('SETTINGS MODE ON')
@@ -3550,6 +3662,12 @@ function settingsMode(data){
 
     kipUser[data.source.id].conversations = 'settings';
 
+    if(kipUser[data.source.id]){
+        console.log('💅💅kay💅💅',kipUser[data.source.id].conversations)
+    }
+
+    console.log('🍀🍀 ',kipUser[data.source.id].conversations)
+
     co(function*() {
         // um let's refresh the slackbot just in case...
         var slackbot = yield db.Slackbots.findOne({team_id: data.source.org}).exec();
@@ -3561,22 +3679,28 @@ function settingsMode(data){
 
         return conversation_botkit.settings(slackbot, data.source.user, function(msg) {
 
-            if (!msg){
-                return;
-            }
+            console.log('💎💎💎 ',msg)
 
             data.bucket;
             data.action;
 
-            if(typeof msg === 'object'){
-                var obj = _.extend(data, msg); //merge data obj from kip with botkit
-            }else {
-                var obj = data;
-                obj.mode = msg;
+            if (!msg){
+                data.mode = 'shopping';
+                updateMode(data);
+            }
+            else {
+                if(typeof msg === 'object'){
+                    var obj = _.extend(data, msg); //merge data obj from kip with botkit
+                }else {
+                    var obj = data;
+                    obj.mode = msg;
+                }
+
+                //kipUser[data.source.id].conversations = 'shopping';
+                console.log('💎incoming💎 💎 ',obj);
+                updateMode(obj);                
             }
 
-            console.log('💎incoming💎 💎 ',obj);
-            updateMode(obj);
         },newObj)
 
     }).catch((e) => {
@@ -3599,14 +3723,20 @@ function addmemberMode(data){
         //var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
         return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function(msg) {
 
-            if (!msg){
-                return;
-            }
+            // if (!msg){
+            //     return;
+            // }
 
             console.log('done adding members');
 
             data.bucket;
             data.action;
+
+
+            if (!msg){
+                data.mode = 'shopping';
+                updateMode(data);
+            }
 
             if(typeof msg === 'object'){
                 var obj = _.extend(data, msg); //merge data obj from kip with botkit
@@ -3715,6 +3845,10 @@ function shoppingMode(data){
     data.bucket = 'mode';
     data.action = 'shopping';
     history.saveHistory(data,true,function(res){});
+
+    if(!kipUser[data.source.id]){
+        kipUser[data.source.id] = {};
+    }
 
     kipUser[data.source.id].conversations = 'shopping';
 

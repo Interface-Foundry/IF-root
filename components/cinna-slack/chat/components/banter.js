@@ -173,6 +173,7 @@ var checkForCanned = function(input,callback,origin,source) {
     var res;
     var flag;
     var query;
+    var attachment;
 
     //prevents people from copy pasting onboard message into pub channel to @kip
     if(input.indexOf('I just enabled') > -1){ 
@@ -193,6 +194,47 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'salutations') > 60:
             flag = 'basic';
             res = input + ', what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
+            var attachment = [
+                {
+                    "mrkdwn_in": [
+                        "text",
+                        "pretext"
+                    ],
+                    "color":"#49d63a",
+                    "fallback":"Help",
+                    "actions": [
+                        {
+                          "name": "search",
+                          "text": "Headphones",
+                          "style": "default",
+                          "type": "button",
+                          "value": "headphones"
+                        },
+                        {
+                          "name": "search",
+                          "text": "Coding Books",
+                          "style": "default",
+                          "type": "button",
+                          "value": "coding books"
+                        },
+                        {
+                          "name": "search",
+                          "text": "Healthy Snacks",
+                          "style": "default",
+                          "type": "button",
+                          "value": "healthy snacks"
+                        },
+                        {
+                          "name": "home",
+                          "text": "🐧",
+                          "style": "default",
+                          "type": "button",
+                          "value": "home"
+                        }
+                    ],
+                    callback_id: 'none'
+                }
+            ];
             break;
         case textSimilar(input,'hi kip') > 60:
         case textSimilar(input,'hello kip') > 60:
@@ -200,6 +242,47 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'/start') > 90:
             flag = 'basic';
             res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
+            var attachment = [
+                {
+                    "mrkdwn_in": [
+                        "text",
+                        "pretext"
+                    ],
+                    "color":"#49d63a",
+                    "fallback":"Help",
+                    "actions": [
+                        {
+                          "name": "search",
+                          "text": "Headphones",
+                          "style": "default",
+                          "type": "button",
+                          "value": "headphones"
+                        },
+                        {
+                          "name": "search",
+                          "text": "Coding Books",
+                          "style": "default",
+                          "type": "button",
+                          "value": "coding books"
+                        },
+                        {
+                          "name": "search",
+                          "text": "Healthy Snacks",
+                          "style": "default",
+                          "type": "button",
+                          "value": "healthy snacks"
+                        },
+                        {
+                          "name": "home",
+                          "text": "🐧",
+                          "style": "default",
+                          "type": "button",
+                          "value": "home"
+                        }
+                    ],
+                    callback_id: 'none'
+                }
+            ];
             break;     
         case textSimilar(input,'what you up to') > 60:
         case textSimilar(input,'what\'s up') > 60:
@@ -802,8 +885,9 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'wut') > 70:
         case textSimilar(input,'wtf') > 70:
             flag = 'basic';
-            if (origin == 'slack' || origin == 'telegram'){
-                res = 'I\'m Kip, your personal shopper.\n'+
+
+            if (origin == 'telegram'){
+                res = 'I\'m Kip, your personal shopper!\n'+
 
                 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
                 'Use commands to refine your search, for example:\n\n'+
@@ -826,6 +910,77 @@ var checkForCanned = function(input,callback,origin,source) {
                 '`help` : view guidelines\n'+
                 'Try it now! Maybe you need new headphones? Type `headphones` to start.';
             }
+            else if (origin == 'slack'){
+
+                res = 'I\'m Kip, I help you shop for items to add to your Team Cart\n'+
+
+                'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n'+
+                'Use commands to refine your search, for example:\n\n'+
+
+                '`more` : view more search results\n'+
+                '`more like 3` : find similar items to search result :three:\n\n'+
+
+                '`2` : check for product details for item :two:\n'+
+                '`1 but cheaper` : finds :one: or similar in a lower price\n'+
+                '`2 but in XL` : finds :two: or similar in size XL\n'+
+                '`3 but in blue` : finds :three: or similar in color blue\n'+
+                '`2 but in wool` : finds :two: or similar with wool fabric\n\n'+
+
+                '`buy 1` : to buy item :one:\n'+
+                '`save 2` : save item :two: to cart\n'+
+                '`view cart` : see all items in the cart\n'+
+                '`remove 3` : to remove item :three: from cart\n\n'+
+
+
+                '`help` : view guidelines\n'+
+                'Try it now! Maybe you need new headphones? Type `headphones` to start.';
+
+                //send this attachment to user too
+                //
+
+                var attachment = [
+                    {
+                        "mrkdwn_in": [
+                            "text",
+                            "pretext"
+                        ],
+                        "color":"#49d63a",
+                        "fallback":"Help",
+                        "actions": [
+                            {
+                              "name": "search",
+                              "text": "Headphones",
+                              "style": "default",
+                              "type": "button",
+                              "value": "headphones"
+                            },
+                            {
+                              "name": "search",
+                              "text": "Coding Books",
+                              "style": "default",
+                              "type": "button",
+                              "value": "coding books"
+                            },
+                            {
+                              "name": "search",
+                              "text": "Healthy Snacks",
+                              "style": "default",
+                              "type": "button",
+                              "value": "healthy snacks"
+                            },
+                            {
+                              "name": "home",
+                              "text": "🐧",
+                              "style": "default",
+                              "type": "button",
+                              "value": "home"
+                            }
+                        ],
+                        callback_id: 'none'
+                    }
+                ];
+
+            }
             else if (origin == 'kik'){
                 res = 'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: 1⃣ 2⃣ or 3⃣ \n'+
                 'Tap the matching keyboard button for more info and options for each search result.\n\n'+
@@ -834,7 +989,7 @@ var checkForCanned = function(input,callback,origin,source) {
             }
             else if (origin == 'socket.io'){
                 
-                res = 'I\'m Kip, your personal shopper.<br>'+
+                res = 'I\'m Kip, your personal shopper!<br>'+
 
                 'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
                 'Use commands to refine your search, for example:<br><br>'+
@@ -921,7 +1076,48 @@ var checkForCanned = function(input,callback,origin,source) {
 
         case textSimilar(input,'kip') > 90:
             flag = 'basic'; //do this action      
-            res = 'That\'s me 🐧! find out more at http://kipthis.com'; 
+            res = 'That\'s me 🐧!';
+            var attachment = [
+                {
+                    "mrkdwn_in": [
+                        "text",
+                        "pretext"
+                    ],
+                    "color":"#49d63a",
+                    "fallback":"Help",
+                    "actions": [
+                        {
+                          "name": "search",
+                          "text": "Headphones",
+                          "style": "default",
+                          "type": "button",
+                          "value": "headphones"
+                        },
+                        {
+                          "name": "search",
+                          "text": "Coding Books",
+                          "style": "default",
+                          "type": "button",
+                          "value": "coding books"
+                        },
+                        {
+                          "name": "search",
+                          "text": "Healthy Snacks",
+                          "style": "default",
+                          "type": "button",
+                          "value": "healthy snacks"
+                        },
+                        {
+                          "name": "home",
+                          "text": "🐧",
+                          "style": "default",
+                          "type": "button",
+                          "value": "home"
+                        }
+                    ],
+                    callback_id: 'none'
+                }
+            ]; 
             break;             
     
         case textSimilar(input,'lame') > 90:
@@ -1326,7 +1522,7 @@ var checkForCanned = function(input,callback,origin,source) {
             break;
     }
 
-    callback(res,flag,query);
+    callback(res,flag,query,attachment);
 };
 
 //when people first connect or sign up for Kip
@@ -1424,7 +1620,7 @@ var getCinnaResponse = function(data,callback){
     }
 
     var selectNum = parseInt(data.searchSelect);
-    
+
     switch (data.bucket) {
         case 'search':
             switch (data.action) {
