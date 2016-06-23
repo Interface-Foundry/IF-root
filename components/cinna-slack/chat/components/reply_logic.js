@@ -407,13 +407,19 @@ handlers['shopping.similar'] = function*(message, exec) {
   })
 }
 
-// "cheaper" and "like 2 but blue"
-handlers['shopping.modify'] = function*(message, exec) {
+// "cheaper" and "denim"
+handlers['shopping.modify.all'] = function*(message, exec) {
   var old_params = yield getLatestAmazonQuery(message);
+  // modify the params and then do another search.
 
 
   throw new Error('Not implemented');
 };
+
+// "like 1 but cheaper", "like 2 but blue"
+handlers['shopping.modify.one'] = function*(message, exec) {
+  throw new Error('Not implemented');
+}
 
 handlers['cart.save'] = function*(message, exec) {
   if (!exec.params.focus) {
@@ -425,7 +431,7 @@ console.log('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
 
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
-  
+
 
   try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1])
