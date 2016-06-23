@@ -3597,7 +3597,7 @@ function addmemberMode(data){
     co(function*() {
 
         //var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
-        return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel, function(msg) {
+        return weekly_updates.addMembers(data.source.org, data.source.user, data.source.channel,function(msg) {
 
             if (!msg){
                 return;

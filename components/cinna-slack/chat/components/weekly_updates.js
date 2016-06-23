@@ -303,6 +303,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, done, opt) 
    //var bot;
 
    // MAKE THIS BOT A GLOBAL KEY VAL :::::: team_id, person_id, channel_id
+   
 
    var incomingId = team_id + '_' + person_id + '_' + channel_id;
 
@@ -325,6 +326,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, done, opt) 
 
     console.log('slackbot: ',slackbot);
     console.log('PERSON ID!!!!!!: ',person_id);
+    console.log('channel ID!!!!!!: ',channel_id);
     console.log('slackbot assistants!!!!: ',slackbot.meta.office_assistants);
 
     if (slackbot.meta.office_assistants.indexOf(person_id) < 0) {
@@ -337,20 +339,21 @@ module.exports.addMembers = function(team_id, person_id, channel_id, done, opt) 
     var bot = controller.spawn({ token: slackbot.bot.bot_access_token });
     bot.startRTM(function(e, bot, payload) {
       bot.startPrivateConversation({user: person_id}, function(response, convo) {
-        bots[incomingId] = bot; //adding this bot obj to global state so we can end bot outside of scope
+        bots[incomingId] = bot; //
+
+        // adding this bot obj to global state so we can end bot outside of scope
         convo.slackbot = slackbot;
         convo.bot = bot;
         convo.user_id = person_id;
         convo.on('end', function() {
-          console.log('IS THIS FIRING?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!')
-          console.log('ending addmember convo');
+          // console.log('IS THIS FIRING?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!')
+          // console.log('ending addmember convo');
           delete bots[incomingId];
           bot.closeRTM();
           done(convo.parsedKip);
         });
         listenForCart(response,convo);
       //}//end of startConvo function
-
       }); // start private conversation
     }); //start RTM
    }).catch((e) => {
@@ -610,6 +613,23 @@ function handleChange(response, convo){
           console.log('ADDING INCOMING EMAIL ',email);
 
           co(function*() {
+
+          var post_body = {
+              "recipient_emails": [
+                email
+              ]
+            }
+
+            request({
+            url: 'https://api.sendgrid.com/v3/asm/suppressions/global/' + email,
+            headers: {
+              'Authorization': 'Bearer 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'
+            },
+                method: 'DELETE'
+            }, function(err, res, body) {
+                if (err) console.error('post err ', err);
+                console.log(2, body);
+            });
 
             //update existing users in db
             var emailUser = yield Chatuser.findOne({

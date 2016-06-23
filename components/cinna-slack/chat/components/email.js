@@ -183,6 +183,7 @@ var collect = module.exports.collect = function(address, team_name, team_id, tea
 
     var html = template_collect
       .replace(/\$ID/g, threadId)
+      .replace(/\$EMAIL/g, address.replace('@','-at-'))
       .replace(/\$SLACKBOT_NAME/g, team_name)
       .replace(/\$SLACKBOT_LINK/g, team_link);
 
@@ -229,6 +230,8 @@ ${threadId}
 //
 var reply = module.exports.reply = function(payload, data) {
   console.log('replying to thread', data.source.id);
+      console.log('email: ', data.emailInfo.to.replace('@','-at-'));
+
   if (!payload || !payload.to) {
     throw new Error('Cannot send email to nobody');
   }
@@ -237,7 +240,7 @@ var reply = module.exports.reply = function(payload, data) {
   payload.subject = data.emailInfo.subject,
   payload.html = template_generic
     .replace(/\$ID/g, data.source.id)
-    // .replace(.)
+    .replace(/\$EMAIL/g, data.emailInfo.to.replace('@','-at-'))
     .replace(/\$MESSAGE/, payload.text)
   payload.text = payload.text + plaintext_signature + data.source.id;
 
@@ -264,13 +267,13 @@ var reply = module.exports.reply = function(payload, data) {
 //
 var results = module.exports.results = function(data) {
   return co(function*() {
-    console.log('sending results to thread', data);
+    console.log('email: ', data.emailInfo.to.replace('@','-at-'));
 
     var payload = {
       to: data.emailInfo.to,
       from: `Kip <${addr}>`,
       subject: data.emailInfo.subject
-    };
+    };  
 
     payload.html = template_results
       .replace(/\$ID/g, data.source.id)
@@ -302,6 +305,8 @@ var results = module.exports.results = function(data) {
 //
 var confirmation = module.exports.confirmation = function(data) {
   return co(function*() {
+        console.log('email: ', data.emailInfo.to.replace('@','-at-'));
+
     var payload = {
       to: data.emailInfo.to,
       from: `Kip <${addr}>`,
@@ -328,6 +333,7 @@ var confirmation = module.exports.confirmation = function(data) {
 
 if (!module.parent) {
   var template = fs.readFileSync('./email-results.html', 'utf8');
+      console.log('email: ', data.emailInfo.to.replace('@','-at-'));
 
   var template2 = template
     .replace(/\$ID/g, 'email-chain-13f8jasf04fjakdf9320jk')

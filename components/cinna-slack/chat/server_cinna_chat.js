@@ -222,10 +222,27 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
 })
 
 //user hit unsubsctibe link in email 
-app.get('/unsubscribe', function(req, res) {
-  console.log('hitting /unsubscribe ', req.params, req.body);
-  
+app.get('/unsubscribe/:email', function(req, res) {
+  var email = req.params.email.slice(0, req.params.email.length-1).replace('-at-','@');
+  console.log('hitting /unsubscribe ', email);
 
+    var post_body = {
+        "recipient_emails": [
+          email
+        ]
+      }
+
+    request({
+          url: 'https://api.sendgrid.com/v3/asm/suppressions/global',
+          headers: {
+            'Authorization': 'Bearer EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+          },
+          method: 'DELETE',
+          json: post_body
+      }, function(err, res, body) {
+          if (err) console.error('post err ', err);
+          console.log(body);
+      });
 
 });
 
