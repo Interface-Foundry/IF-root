@@ -1,3 +1,4 @@
+var kip = require('kip');
 
 var checkExitMode = function(input){
 
@@ -17,7 +18,7 @@ var checkExitMode = function(input){
         case textSimilar(input,'stop') > 90:
             return true;
         break;
-    }   
+    }
 }
 
 var checkModes = function(inputObj,context,callback) {
@@ -75,7 +76,7 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'kip collect') > 90:
         case textSimilar(input,'coollect') > 90:
         case textSimilar(input,'collekt') > 90:
-            mode = 'collect';            
+            mode = 'collect';
             break;
 
         //* * * * SETTINGS MODE * * * * //
@@ -88,8 +89,8 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'admin') > 90:
         case textSimilar(input,'admins') > 90:
         case textSimilar(input,'admins') > 90:
-        case textSimilar(input,'configure') > 90:        
-        case textSimilar(input,'configuration') > 90:      
+        case textSimilar(input,'configure') > 90:
+        case textSimilar(input,'configuration') > 90:
         case textSimilar(input,'change settings') > 90:
         case textSimilar(input,'show settings') > 90:
         case textSimilar(input,'show me settings') > 90:
@@ -100,7 +101,7 @@ var checkModes = function(inputObj,context,callback) {
         case textSimilar(input,'change admins') > 90:
         case textSimilar(input,'update admins') > 80:
         case textSimilar(input,'remove admin') > 80:
-            mode = 'settings';            
+            mode = 'settings';
             break;
 
         //* * onboarding mode
@@ -169,14 +170,14 @@ var checkModes = function(inputObj,context,callback) {
 
 
 var checkForCanned = function(input,callback,origin,source) {
-   
+
     var res;
     var flag;
     var query;
     var attachment;
 
     //prevents people from copy pasting onboard message into pub channel to @kip
-    if(input.indexOf('I just enabled') > -1){ 
+    if(input.indexOf('I just enabled') > -1){
         flag = 'cancel';
     }
 
@@ -242,6 +243,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'/start') > 90:
             flag = 'basic';
             res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
+
             var attachment = [
                 {
                     "mrkdwn_in": [
@@ -284,6 +286,7 @@ var checkForCanned = function(input,callback,origin,source) {
                 }
             ];
             break;     
+
         case textSimilar(input,'what you up to') > 60:
         case textSimilar(input,'what\'s up') > 60:
         case textSimilar(input,'whats up') > 60:
@@ -462,7 +465,7 @@ var checkForCanned = function(input,callback,origin,source) {
                 flag = 'kik.help';
             }
             else if (origin == 'socket.io'){
-                
+
                 res = 'Looks like I didn\'t answer your question properly. I\'m not very smart yet, maybe this will help?<br>'+
 
                 'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
@@ -578,7 +581,7 @@ var checkForCanned = function(input,callback,origin,source) {
             query = 'coffee';
             res = 'Awww how about some coffee to wake you up? ☕';
             break;
- 
+
         case textSimilar(input,'i\'m stressed') > 60:
         case textSimilar(input,'stressed') > 90:
         case textSimilar(input,'anxious') > 90:
@@ -728,15 +731,15 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'this is so weird') > 70:
         case textSimilar(input,'this is so strange') > 70:
         case textSimilar(input,'this is so odd') > 70:
-        case textSimilar(input,'this is so creepy') > 70:    
+        case textSimilar(input,'this is so creepy') > 70:
             flag = 'search.initial';
             query = 'novelty';
             res = 'You think this is strange? Check out what we sell in our shop! 😜';
             break;
 
-        case textSimilar(input,'find me weed') > 90: 
+        case textSimilar(input,'find me weed') > 90:
         case textSimilar(input,'weed') > 90:
-        case textSimilar(input,'do you have weed') > 90:      
+        case textSimilar(input,'do you have weed') > 90:
             flag = 'search.initial';
             query = 'modafinil';
             res = 'Not yet! Why don\'t you try these instead? 😉';
@@ -745,7 +748,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'find me sex') > 95:
         case textSimilar(input,'find me hoes') > 95:
         case textSimilar(input,'prostitutes') > 90:
-        case textSimilar(input,'do you have escorts') > 90:     
+        case textSimilar(input,'do you have escorts') > 90:
             flag = 'search.initial';
             query = 'sex toys';
             res = 'Naughty naughty! Why don\'t you try these instead? 😉';
@@ -800,7 +803,7 @@ var checkForCanned = function(input,callback,origin,source) {
             res = arr[Math.floor(Math.random()*arr.length)];
             break;
         case textSimilar(input,'skynet') > 60:
-            query = 'nvidia jetson'; //do this search 
+            query = 'nvidia jetson'; //do this search
             flag = 'search.initial'; //do this action
             res = 'April 19, 2011'; //send this text
             break;
@@ -830,7 +833,7 @@ var checkForCanned = function(input,callback,origin,source) {
             res = '¯\\_(ツ)_/¯ idk';
             break;
 
-        
+
         case textSimilar(input,'nice going') > 80:
         case textSimilar(input,'nice going kip') > 80:
         case textSimilar(input,'good job') > 80:
@@ -991,6 +994,7 @@ var checkForCanned = function(input,callback,origin,source) {
                 
                 res = 'I\'m Kip, your personal shopper!<br>'+
 
+
                 'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br>'+
                 'Use commands to refine your search, for example:<br><br>'+
 
@@ -1019,60 +1023,60 @@ var checkForCanned = function(input,callback,origin,source) {
         case textSimilar(input,'what\'s new') > 60:
         case textSimilar(input,'deals') > 90:
         case textSimilar(input,'what\'s good') > 60:
-            res = 'Here\'s what\'s trending now';   
-            query = 'best seller'; //do this search 
-            flag = 'search.initial'; //do this action         
+            res = 'Here\'s what\'s trending now';
+            query = 'best seller'; //do this search
+            flag = 'search.initial'; //do this action
             break;
 
         case textSimilar(input,'You working the weekend') > 60:
         case textSimilar(input,'Do you always work') > 60:
         case textSimilar(input,'You never stop working?') > 60:
-            res = 'Yup, gotta pay those bills! But I do share the work load with my other animal friends 👌';   
-            flag = 'basic'; //do this action         
+            res = 'Yup, gotta pay those bills! But I do share the work load with my other animal friends 👌';
+            flag = 'basic'; //do this action
             break;
 
         case textSimilar(input,'How\'s the weather') > 60:
         case textSimilar(input,'What\'s the weather like') > 60:
-            res = 'Crisp and cold, just the way we like it ❄️ Penguins thrive in air conditioned server farms';   
-            flag = 'basic'; //do this action         
+            res = 'Crisp and cold, just the way we like it ❄️ Penguins thrive in air conditioned server farms';
+            flag = 'basic'; //do this action
             break;
 
         case textSimilar(input,'Can you cover me?') > 60:
         case textSimilar(input,'Can you spot me?') > 60:
-            res = 'Sorry, I don\'t have any money, only fish. Tell me what you\'re looking for and choose in the results "1, 2 or 3 but cheaper"';   
-            flag = 'basic'; //do this action         
-            break;            
+            res = 'Sorry, I don\'t have any money, only fish. Tell me what you\'re looking for and choose in the results "1, 2 or 3 but cheaper"';
+            flag = 'basic'; //do this action
+            break;
 
         case textSimilar(input,'It’s so boring') > 60:
         case textSimilar(input,'I\'m so bored') > 60:
         case textSimilar(input,'You\'re so boring so boring') > 60:
-            res = 'Does this help? 🎉🎊🎉';   
-            flag = 'search.initial'; //do this action      
-            query = 'space art';   
-            break;    
+            res = 'Does this help? 🎉🎊🎉';
+            flag = 'search.initial'; //do this action
+            query = 'space art';
+            break;
 
         // NOTE: ADD search term sensitive Kip responses
 
         case textSimilar(input,'haters gonna hate') > 90:
         case textSimilar(input,'kip start walking') > 90:
         case textSimilar(input,'kip walk it off') > 90:
-            flag = 'basic'; //do this action      
-            res = 'http://kipthis.com/img/cinna_walk_whitebg.gif'; 
-            break;    
+            flag = 'basic'; //do this action
+            res = 'http://kipthis.com/img/cinna_walk_whitebg.gif';
+            break;
 
         case textSimilar(input,'What does the scanner say?') > 80:
         case textSimilar(input,'over 9000') > 90:
         case textSimilar(input,'it\'s over 9000') > 90:
-            res = 'Over 9000?? http://image.lang-8.com/w0_h0/d17e3655c3a548908eddea8ccaa12ce6cb5b1b39.jpg';   
-            flag = 'search.initial'; //do this action      
-            query = 'dragonball z';   
-            break; 
-            
+            res = 'Over 9000?? http://image.lang-8.com/w0_h0/d17e3655c3a548908eddea8ccaa12ce6cb5b1b39.jpg';
+            flag = 'search.initial'; //do this action
+            query = 'dragonball z';
+            break;
+
         case textSimilar(input,'We’re not paid enough') > 60:
         case textSimilar(input,'i can\'t afford that') > 60:
-            flag = 'basic'; //do this action      
-            res = 'Looking for something cheaper? Tell me what you\'re looking for and choose in the results "1, 2 or 3 but cheaper"'; 
-            break;    
+            flag = 'basic'; //do this action
+            res = 'Looking for something cheaper? Tell me what you\'re looking for and choose in the results "1, 2 or 3 but cheaper"';
+            break;
 
         case textSimilar(input,'kip') > 90:
             flag = 'basic'; //do this action      
@@ -1128,7 +1132,7 @@ var checkForCanned = function(input,callback,origin,source) {
             break;
 
 
-        //INTENDED FOR KIK CALLBACK FOCUS DETECTION 
+        //INTENDED FOR KIK CALLBACK FOCUS DETECTION
         case input.indexOf('⏪') > -1:
             if(origin=='kik'){
 
@@ -1138,7 +1142,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case input.indexOf('🔮') > -1:
             flag = 'search.random';
             break;
-        
+
         case input.indexOf('1⃣') > -1:
             switch(true){
                 case input.indexOf('Add') > -1:
@@ -1151,10 +1155,10 @@ var checkForCanned = function(input,callback,origin,source) {
                     flag = 'search.similar';
                     break;
                 default:
-                    flag = 'search.focus';  
+                    flag = 'search.focus';
             }
-            query = 1; 
-            break;   
+            query = 1;
+            break;
         case input.indexOf('2⃣') > -1:
             switch(true){
                 case input.indexOf('Add') > -1:
@@ -1167,10 +1171,10 @@ var checkForCanned = function(input,callback,origin,source) {
                     flag = 'search.similar';
                     break;
                 default:
-                    flag = 'search.focus';  
+                    flag = 'search.focus';
             }
             query = 2;
-            break;   
+            break;
         case input.indexOf('3⃣') > -1:
             switch(true){
                 case input.indexOf('Add') > -1:
@@ -1183,15 +1187,15 @@ var checkForCanned = function(input,callback,origin,source) {
                     flag = 'search.similar';
                     break;
                 default:
-                    flag = 'search.focus';  
+                    flag = 'search.focus';
             }
             query = 3;
-            break; 
+            break;
 
         case input.indexOf('⏩') > -1:
             flag = 'search.more';
             break;
-        
+
 
         /// ADD VARIABLE QUERY, LIKE 'WHAT IS _______'
 
@@ -1329,14 +1333,14 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'One':
         case ':one:':
         case 'Q': //for mobile keys
-        case 'q': 
+        case 'q':
             flag = 'search.focus';
             query = 1;
             break;
 
-        case 'more': 
-        case 'mroe': 
-        case 'mor': 
+        case 'more':
+        case 'mroe':
+        case 'mor':
             flag = 'search.more';
             break;
 
@@ -1346,7 +1350,7 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'Two':
         case ':two:':
         case 'W': //for mobile keys
-        case 'w': 
+        case 'w':
             flag = 'search.focus';
             query = 2;
             break;
@@ -1357,13 +1361,13 @@ var checkForCanned = function(input,callback,origin,source) {
         case 'Three':
         case ':three:':
         case 'E': //for mobile keys
-        case 'e': 
+        case 'e':
             flag = 'search.focus';
             query = 3;
             break;
 
 
-        //CART REMOVE ITEM # 
+        //CART REMOVE ITEM #
         case 'remove':
             flag = 'basic'; //do this action
             res = 'Which item would you like to remove from the cart? For example, type: `remove 1` to remove item :one: from cart';
@@ -1550,22 +1554,23 @@ var welcomeMessage = function(data,callback){
     else if (data.source.origin == 'socket.io'){
         res = 'Hi I\'m Kip, your personal shopper!<br>'+
         'Tell me what you\'re looking for, like <span class="typer">headphones</span>, and I\'ll show you three options: <span class="selector">➊ ➋</span> or <span class="selector">➌</span><br><br><br>'+
-        
+
         'Check product details for item <span class="selector">➌</span> by chatting <span class="typer">3</span><br>'+
         'See more results with <span class="typer">more</span>. Search more items like <span class="selector">➋</span> with <span class="typer">more like 2</span><br><br><br>'+
         // 'You can buy item <span class="selector">➊</span> by chatting <span class="typer">buy 1</span><br><br>'+
 
         'See more ways to chat with Kip by typing <span class="typer">help</span><br>'+
         'Try it now! Maybe you need new headphones? Type <span class="typer">headphones</span> to start.'
-    }  
+    }
     else {
         res = 'I\'m Kip, your personal shopper';
-    }        
+    }
     callback(res);
 }
 
 
 var getCinnaResponse = function(data,callback){
+    kip.debug('getCinnaResponse', data.bucket, data.action);
     var numEmoji;
     var res;
     //Emoji Selector, based on data.source.origin (socket vs slack, etc)
@@ -1585,7 +1590,7 @@ var getCinnaResponse = function(data,callback){
                 else if (data.source.origin == 'kik'){
                     numEmoji = '1⃣️';
                 }
-              
+
                 break;
             case 2: //emoji #2
                 if (data.source.origin == 'socket.io'){
@@ -1600,7 +1605,7 @@ var getCinnaResponse = function(data,callback){
                 else if (data.source.origin == 'kik'){
                     numEmoji = '2⃣️';
                 }
-            
+
                 break;
             case 3: //emoji #3
                 if (data.source.origin == 'socket.io'){
@@ -1673,7 +1678,7 @@ var getCinnaResponse = function(data,callback){
                             res = 'Here are some choices in *'+data.dataModify.val[0]+'*, which do you like best?';
                             break;
                         case 'color':
-                            res = 'Here are some choices in *'+data.dataModify.val[0].name+'*, which do you like best?';                            
+                            res = 'Here are some choices in *'+data.dataModify.val[0].name+'*, which do you like best?';
                             break;
                         case 'genericDetail':
                             res = 'Here are some choices with *'+data.dataModify.val[0] +'*, which do you like best?';
@@ -1681,7 +1686,7 @@ var getCinnaResponse = function(data,callback){
                         default:
                             res = 'Here are some more choices, which do you like best?'; //most likely a "more" command
                             //console.log('warning: no modifier response selected!');
-                    }     
+                    }
                     break;
                 case 'focus':
                     //SET 1 MINUTE TIMEOUT HERE
@@ -1700,9 +1705,9 @@ var getCinnaResponse = function(data,callback){
         case 'purchase':
                 switch (data.action) {
                     case 'save':
-                        
+
                         if (data.source.origin == 'slack'){
-                            res = 'Awesome! I\'ve saved your item to the Team Cart 😊 Type `remove 1` to remove item :one:. Type `help` for more options';
+                            res = 'Awesome! I\'ve saved your item to the Team Cart 😊';
                         }else {
                             res = 'Awesome! I\'ve saved your item for you 😊 Use `view cart` to see your cart, `checkout` to checkout or `help` for more options.';
                         }
@@ -1714,7 +1719,7 @@ var getCinnaResponse = function(data,callback){
                     case 'list':
                         res = [
                         {
-                            text:'Here\'s everything you have in your cart 😊 Use `remove 1` to remove item :one: or `help` for more options',
+                            text:'Here\'s everything you have in your cart 😊',
                             color: '#45a5f4',
                             "mrkdwn_in": [
                                 "text",
@@ -1742,7 +1747,11 @@ var getCinnaResponse = function(data,callback){
     if (!res){
         res = 'null';
     }
-    callback(res);
+    kip.debug('calling callback');
+    setTimeout(function() {
+      callback(res);
+    }, 200)
+
 }
 
 
@@ -1758,15 +1767,15 @@ var textSimilar = function(a,b) {
         var lengthA = a.length;
         var lengthB = b.length;
         var equivalency = 0;
-        var minLength = (a.length > b.length) ? b.length : a.length;    
-        var maxLength = (a.length < b.length) ? b.length : a.length;    
+        var minLength = (a.length > b.length) ? b.length : a.length;
+        var maxLength = (a.length < b.length) ? b.length : a.length;
         for(var i = 0; i < minLength; i++) {
             if(a[i] == b[i]) {
                 equivalency++;
             }
         }
         var weight = equivalency / maxLength;
-        return weight * 100;        
+        return weight * 100;
     }
 }
 

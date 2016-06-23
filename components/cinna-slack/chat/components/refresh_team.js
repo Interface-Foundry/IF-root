@@ -13,6 +13,10 @@ module.exports = function(team_id) {
       team_id: team_id
     }).exec();
 
+    var existing_users = yield db.Chatusers.find({
+      team_id: team_id
+    });
+
     debug(bot);
 
     var r = yield request('https://slack.com/api/users.list?token=' + bot.bot.bot_access_token);
@@ -40,6 +44,7 @@ module.exports = function(team_id) {
         })
     });
     console.log('done refreshing team ' + team_id);
+    return users;
   });
 }
 

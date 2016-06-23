@@ -14,17 +14,41 @@ var kip = require('kip')
 var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
 
 
-// var client = amazon.createClient({
-//   awsId: "AKIAILD2WZTCJPBMK66A",
-//   awsSecret: "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",
-//   awsTag: "bubboorev-20"
-// });
+var aws_clients = {
+  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
+    awsId: "AKIAIKMXJTAV2ORZMWMQ",
+    awsSecret: "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",
+    awsTag: "quic0b-20"
+  }),
+  AKIAILD2WZTCJPBMK66A: amazon.createClient({
+    awsId: "AKIAILD2WZTCJPBMK66A",
+    awsSecret: "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",
+    awsTag: "bubboorev-20"
+  }),
+  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
+    awsId: "AKIAIM4IKQAE2WF4MJUQ",
+    awsSecret: "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",
+    awsTag: "krista03-20"
+  }),
+  AKIAIYTURL6C5PID2GZA: amazon.createClient({
+    awsId: "AKIAIYTURL6C5PID2GZA",
+    awsSecret: "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",
+    awsTag: "krista08-20"
+  })
+};
 
-var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
-});
+var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+
+var aws_client_id_list = Object.keys(aws_clients);
+
+var i = 0;
+function get_client() {
+  i++;
+  if (i === aws_client_id_list.length) {
+    i = 0;
+  }
+  return aws_clients[aws_client_id_list[i]];
+}
 
 var searchInitial = function(data,flag){
     searchAmazon(data,data.action,'none',flag);
@@ -236,7 +260,7 @@ var searchAmazon = function(data, type, query, flag) {
                                                         console.error('ERROR: line 237 in search.js, browsenode not found')
                                                         doSearch();
                                                     }
-  
+
                                                 });
                                             }
                                             else {
@@ -345,7 +369,7 @@ var searchAmazon = function(data, type, query, flag) {
                     data.amazonParams = amazonParams;
                 }
 
-                client.itemSearch(amazonParams).then(function(results,err){
+                get_client().itemSearch(amazonParams).then(function(results,err){
 
                     debug('got search')
                     debug(results.length);
@@ -473,7 +497,7 @@ var searchAmazon = function(data, type, query, flag) {
 
                     //AMAZON SIMILARITY QUERY
                     // [NOTE: functionality not in default AWS node lib. had to extend it!]
-                    client.similarityLookup({
+                    get_client().similarityLookup({
                       ItemId: ItemIdString, //get search focus items (can be multiple) to blend similarities
                       // Keywords: data.recallHistory.tokens,
                       SimilarityType: flag, //other option is "Random" <<< test which is better results
@@ -1093,7 +1117,7 @@ var searchFocus = function(data) {
                         }
                         return stars;
                     }
-                    
+
                     //function { return emoji rating}
 
 
@@ -1105,7 +1129,7 @@ var searchFocus = function(data) {
                     }
 
                     // if (data.recallHistory.amazon[searchSelect].reviews && data.recallHistory.amazon[searchSelect].reviews.rating && data.source.origin == 'kik'){
-               
+
                     //     if(data.recallHistory.amazon[searchSelect].reviews.reviewCount){
                     //         var reviewCounts = ' – ' + data.recallHistory.amazon[searchSelect].reviews.reviewCount + ' reviews';
                     //     }
@@ -1118,7 +1142,7 @@ var searchFocus = function(data) {
 
                     if (buildKikEnd){
                         console.log('⭐️ ⭐️ ⭐️ ⭐️⭐️ BUILDING ',buildKikEnd)
-                        data.client_res.push(buildKikEnd)         
+                        data.client_res.push(buildKikEnd)
                     }
                     //-  --  - - - - - - END KIK SPECIFIC - - - - - - //
 
@@ -2080,7 +2104,7 @@ function truncate(string,l) {
        if (string.length > 48)
           return string.substring(0,48)+'...';
        else
-          return string;        
+          return string;
     }
 
 };
