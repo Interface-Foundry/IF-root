@@ -7,11 +7,7 @@ function truncate(string) {
       return string;
 };
 
-var emojis = {
-  1: '①',
-  2: '②',
-  3: '③'
-};
+var emojis = require('../emojis')('html');
 
 
 module.exports = function(message) {
@@ -21,7 +17,7 @@ module.exports = function(message) {
   html.push(`<div><img src="http://kipthis.com/kip_modes/mode_teamcart_view.png"></div>`);
   html.push('<ul>');
   cart.aggregate_items.map((item, i) => {
-    html.push(`<li><div><a class="item_title" target="_blank" href="${item.link}">${i+1}: ${item.title}</a></div>`)
+    html.push(`<li><div><a class="item_title" target="_blank" href="${item.link}">${emojis(i+1)} ${item.title}</a></div>`)
     html.push(`<div><img src="${item.image}"></div>`);
     html.push(`<div>Quantity: ${item.quantity}</div></li>`)
   })

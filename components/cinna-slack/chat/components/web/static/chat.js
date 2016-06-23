@@ -6,6 +6,7 @@ var chats_el = $chats[0];
 
 var user = document.cookie.match(/kip_user=[A-Z0-9]+/ig)[0].split('=')[1];
 
+var initial_messages_loaded = false;
 socket.on('please_init', function() {
   socket.emit('init', {
     group: document.location.pathname.split('/').pop(),
@@ -15,9 +16,11 @@ socket.on('please_init', function() {
 
 socket.on('init', function(data) {
   console.log('client initialized', data);
+  if (initial_messages_loaded) return
   data.messages.reverse().map(m => {
     printMessage(m.html, m.user);
   })
+  initial_messages_loaded = true;
 })
 
 // setTimeout(function() {
