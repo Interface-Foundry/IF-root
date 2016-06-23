@@ -44,6 +44,14 @@ var ACTION = {
 var parse = module.exports.parse = function(message) {
   return co(function*() {
     var text = message.text;
+    var history_array = [];
+
+    for (var i = 0; i < message.history.length; i++){
+      history_array.push(message.history[i].source.text)
+    }
+
+    debug('hist_array**'.cyan, history_array)
+
     debug('parsing:' + text)
 
     // First do some global hacks
@@ -63,7 +71,8 @@ var parse = module.exports.parse = function(message) {
       url: config.nlp + '/parse',
       json: true,
       body: {
-        text: text
+        text: text,
+        history: history_array
       }
     });
 
