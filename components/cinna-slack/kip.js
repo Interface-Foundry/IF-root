@@ -1,3 +1,4 @@
+var path = require('path');
 require('colors');
 
 /**
@@ -56,7 +57,18 @@ module.exports.prettyPrint = module.exports.log
  */
 module.exports.debug = function() {
     if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
-      arguments = ['debug:'.cyan].concat(Array.prototype.slice.call(arguments));
+      var e = new Error();
+      var stack = e.stack.split('\n')[2];
+      try {
+        var filename = stack.split(':')[0].split(/[\( ]+/).pop();
+        var line = stack.split(':')[1];
+      } catch(e) {
+        console.log(e.stack);
+        filename = '?';
+        line = '?';
+      }
+      var loc = path.relative(path.resolve(require.main.filename, '..'), filename) + ':' + line;
+      arguments = ['debug'.cyan, loc.gray].concat(Array.prototype.slice.call(arguments));
       module.exports.log.apply(null, arguments)
     }
 }
