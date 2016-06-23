@@ -676,7 +676,7 @@ var preProcess = function(data){
 
     banter.checkForCanned(data.msg,function(res,flag,query,attachment){
 
-        
+
 
         kip.debug(res, flag, query, attachment);
 
@@ -693,10 +693,10 @@ var preProcess = function(data){
                     data.client_res.push(res);
                     cannedBanter(data);
 
-                    
+
 
                     // if(attachment){
-                    //     //send  
+                    //     //send
                     //     var attacher = data;
                     //     delete attacher.client_res;
                     //     attacher.action = 'sendAttachment';
@@ -704,7 +704,7 @@ var preProcess = function(data){
                     //     setTimeout(function() {
                     //         sendResponse(attacher);
                     //     }, 50);
-                        
+
                     // }
 
                     break;
@@ -1091,7 +1091,7 @@ var incomingMsgAction = function(data,origin){
                         ],
                         "color":"#45a5f4"
                     },
-                    {   
+                    {
                         "text": "Tell me what you're looking for, or type `help` for more options",
                         "mrkdwn_in": [
                             "text",
@@ -3336,7 +3336,7 @@ function buildCart(cart, isAdmin, isP2P) {
         ].join('\n');
       }
 
-      if(isAdmin || isP2P || item.added_by.indexOf(data.source.user) > -1){
+      if(isAdmin || isP2P) {
           var actionObj = [
               {
                 "name": "additem",
@@ -3671,7 +3671,7 @@ function settingsMode(data){
 
                 //kipUser[data.source.id].conversations = 'shopping';
                 console.log('💎incoming💎 💎 ',obj);
-                updateMode(obj);                
+                updateMode(obj);
             }
 
         },newObj)
