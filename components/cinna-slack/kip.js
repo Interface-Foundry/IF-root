@@ -103,3 +103,17 @@ module.exports.assertProperties = function() {
   })
   return true;
 }
+
+/**
+ * Timer
+ */
+module.exports.timer = function(name) {
+  name = name || '';
+  var now = +new Date()
+  module.exports.debug(('starting timer: ' + name).green);
+  return function(text) {
+    text = text || '';
+    module.exports.debug(('timer:' + name + ':' + text).green, +new Date() - now);
+  }
+}
+module.exports.time = module.exports.timer;

@@ -6,6 +6,7 @@ var db = require('../../../db');
 var image_search = require('../image_search');
 var emojiText = require("emoji-text");
 var search_results = require('./search_results');
+var cart = require('./cart');
 
 
 
@@ -111,8 +112,12 @@ function get_html(message) {
     case 'shopping/results':
       html = search_results(message);
       break;
+    case 'cart/view':
+      html = cart(message);
+      break;
     default:
       html = message.text
   }
+  console.log('html', html);
   return html;
 }

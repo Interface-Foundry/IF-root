@@ -44,7 +44,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var kip = require('../../../kip');
-var db = require('db');
+var db = require('../../../db');
 var _ = require('lodash');
 var websockets = require('./websockets');
 
