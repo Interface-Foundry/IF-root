@@ -410,15 +410,78 @@ handlers['shopping.similar'] = function*(message, exec) {
 // "cheaper" and "denim"
 handlers['shopping.modify.all'] = function*(message, exec) {
   var old_params = yield getLatestAmazonQuery(message);
+  var old_results = yield getLatestAmazonResults(message);
+
   // modify the params and then do another search.
+  if (exec.params.type === 'price') {
+    var max_price = Math.max.apply(null, old_results.map(r => parseFloat(r.realPrice.slice(1))));
+    if (exec.params.param === 'less') {
+      exec.params.max_price = max_price * 0.8;
+    } else if (exec.params.param === 'more') {
+      kip.log('wow someone wanted something more expensive');
+      exec.params.min_price = max_price * 1.1;
+    }
+  } else {
+    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+  }
 
+  var results = yield amazon_search.search(exec.params);
 
-  throw new Error('Not implemented');
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    execute: [exec],
+    text: 'Hi, here are some different options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    amazon: JSON.stringify(results),
+    mode: 'shopping',
+    action: 'results'
+  })
 };
 
 // "like 1 but cheaper", "like 2 but blue"
 handlers['shopping.modify.one'] = function*(message, exec) {
-  throw new Error('Not implemented');
+  if (!exec.params.focus) {
+    kip.err('no focus supplied')
+    return default_reply(message);
+  }
+
+  var old_params = yield getLatestAmazonQuery(message);
+  var old_results = yield getLatestAmazonResults(message);
+
+  exec.params.query = old_params.query; 
+
+  // modify the params and then do another search.
+  if (exec.params.type === 'price') {
+    var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
+    if (exec.params.param === 'less') {
+      exec.params.max_price = max_price * 0.8;
+    } else if (exec.params.param === 'more') {
+      kip.log('wow someone wanted something more expensive');
+      exec.params.min_price = max_price * 1.1;
+    }
+  } else {
+    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+  }
+
+  var results = yield amazon_search.search(exec.params);
+
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    source: message.source,
+    execute: [exec],
+    text: 'Hi, here are some different options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    amazon: JSON.stringify(results),
+    mode: 'shopping',
+    action: 'results'
+  })
 }
 
 handlers['cart.save'] = function*(message, exec) {
