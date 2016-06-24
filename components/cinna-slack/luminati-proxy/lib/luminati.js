@@ -109,6 +109,9 @@ function Luminati(opt){
         });
         req.on('error', this.ethrow_fn());
         req.on('timeout', ()=>this.ethrow(new Error('request timeout')));
+
+        console.log('REQ URL ',req.url)
+
         this.info.url = req.url;
         if (opt.pool_size && !req.headers['proxy-authorization'])
         {
@@ -230,6 +233,9 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
     let fetch = tryout=>etask(function*pool_fetch(){
         for (;; tryout++)
         {
+            console.log('👻👻 ',_this);
+            console.log('👻👻 ',_this.opt);
+
             let session = `${_this.port}_${_this.session_id++}`;
             let username = calculate_username(assign({session: session},
                 _.pick(_this.opt, 'customer', 'zone', 'country', 'state', 'city', 'asn',
@@ -237,7 +243,7 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
             let proxy = _this.opt.proxy.shift();
             _this.opt.proxy.push(proxy);
             let opt = {
-                url: 'http://lumtest.com/myip.json',
+                url: 'http://kipthis.com/index.html',
                 proxy: `http://${username}:${_this.opt.password}@${proxy}:22225`,
                 timeout: _this.opt.session_timeout,
             };
@@ -253,10 +259,13 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
 
                 
                 if (res && res.statusCode==200 &&
-                    res.headers['content-type'].match(/\/json/))
-                {
+                    res.headers['content-type'].match(/\/html/)){
 
                     var end= Date.now();
+
+                    console.log(begin)
+                    console.log(end)
+
                     var timeSpent=(end-begin);
 
                     console.log("PING: ",timeSpent)
@@ -271,6 +280,8 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
                     if (timeSpent < 500){
                         console.log('fast')
                     }
+
+                    //if too slow, kill session
 
                     let info = JSON.parse(res.body);
                     _this._log('DEBUG',
