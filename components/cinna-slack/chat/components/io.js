@@ -409,8 +409,10 @@ function loadSlackUsers(users){
                 'channel':data.channel, //channel id on slack
                 'org':data.team, //team id on slack
                 'id':data.team + "_" + data.user, //for retrieving chat history in node memory, //this is a kip id for user across message platforms
-                user: data.user //user id on slack
+                'user': data.user, //user id on slack
+                'ts': data.ts
             }
+            console.log('1🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 ',data.source);
 
             if(!kipUser[data.source.id]){
                kipUser[data.source.id] = {}; //omg lol
@@ -431,8 +433,6 @@ function loadSlackUsers(users){
            // var slackbot = yield db.Slackbots.findOne({team_id: team_id}).exec()
 
             kipUser[data.source.id].slack = user; //transfer conversation to global
-
-            console.log('🔥🔥🔥🔥 ',kipUser[data.source.id])
 
             if (data.type == 'message' && data.username !== 'Kip' && data.hidden !== true && data.subtype !== 'channel_join' && data.subtype !== 'channel_leave'){ //settings.name = kip's slack username
 
@@ -472,7 +472,9 @@ function loadSlackUsers(users){
                                         'channel':data.channel,
                                         'org':data.team,
                                         'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
-                                        user: data.user
+                                        'user': data.user,
+                                        'ts':data.ts
+
                                     }
                                 }
                                 newTxt.client_res = [];
@@ -525,7 +527,8 @@ function loadSlackUsers(users){
                                     'channel':data.channel,
                                     'org':data.team,
                                     'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
-                                    user: data.user
+                                    'user': data.user,
+                                    'ts':data.ts
                                 }
                             }
                             newTxt.client_res = [];
@@ -553,7 +556,8 @@ function loadSlackUsers(users){
                             'channel':data.channel,
                             'org':data.team,
                             'id':data.team + "_" + data.user, //for retrieving chat history in node memory,
-                            user: data.user
+                            'user': data.user,
+                            'ts':data.ts
                         },
                         'msg':data.text
                     }
@@ -1037,7 +1041,12 @@ var incomingMsgAction = function(data,origin){
 
             case 'settings':
                 //cancel current mode
-                closeCurrentMode('settings');
+                if (kipUser[kipObj.source.id] && kipUser[kipObj.source.id].conversations && kipUser[kipObj.source.id].conversations == 'settings'){  
+                    console.log('STOPPING A THING')
+                }else {
+                    closeCurrentMode('settings');
+                }
+
                 // kipObj.mode = 'settings';
                 // updateMode(kipObj);
                 break;
@@ -1056,7 +1065,14 @@ var incomingMsgAction = function(data,origin){
                 break;
 
             case 'members':
-                closeCurrentMode('addmember');
+
+                if (kipUser[kipObj.source.id] && kipUser[kipObj.source.id].conversations && kipUser[kipObj.source.id].conversations == 'addmember'){  
+                    console.log('STOPPING A THING')
+                }else {
+                    closeCurrentMode('addmember');
+                }
+
+                //closeCurrentMode('addmember');
                 // kipObj.mode = 'addmember';
                 // updateMode(kipObj);
                 break;
@@ -3245,11 +3261,14 @@ var saveToCart = function(data){
                 console.log(err.stack)
                 sendTxtResponse(data, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊');
                 //send email about this issue
+
+                var dataString = JSON.stringify(data);
+
                 var mailOptions = {
                     to: 'Kip Server <hello@kipthis.com>',
-                    from: 'Kip save tp cart broke <server@kipthis.com>',
-                    subject: 'Kip save to cart broke',
-                    text: 'Fix this ok thx'
+                    from: 'Pikachu <server@kipthis.com>',
+                    subject: '😊 Kip save to cart broke',
+                    text: dataString
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
                     if (err) console.log(err);
@@ -3431,7 +3450,8 @@ function viewCart(data, show_added_item) {
         return;
     }
 
-    kip.debug('VIEW CART data.ts ',data.button_ts)
+    kip.debug('VIEW CART data.ts ',data.source.ts)
+    kip.debug('VIEW CART button action data.ts ',data.button_ts)
 
     kip.debug('view cart')
     var timer = kip.timer('view cart');

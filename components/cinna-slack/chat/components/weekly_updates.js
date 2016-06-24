@@ -310,7 +310,7 @@ module.exports.addMembers = function(team_id, person_id, channel_id, done, opt) 
    if (opt == 'CLOSE'){
       console.log('😅 CLOSE TIME MEMBERS')
       if(bots[incomingId]){ //is there a bot in global?
-        console.log('CLOSNING TIME * * * * * ** * ',bots[incomingId])
+        console.log('CLOSNING TIME * * * * * ** * ')
         bots[incomingId].closeRTM();
         delete bots[incomingId];
         done();

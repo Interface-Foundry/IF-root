@@ -1128,7 +1128,7 @@ function handleSettingsChange(response, convo) {
 
 
             convo.next();
-            convo.next();
+            //convo.next();
 
 
         } else {
