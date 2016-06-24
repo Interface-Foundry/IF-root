@@ -1156,9 +1156,14 @@ var incomingMsgAction = function(data,origin){
             }
             if (!kipUser[kipObj.source.id].conversations){
                 kipUser[kipObj.source.id].conversations = 'shopping';
-            }
+            }   
+
+
+            console.log('SWITCHING TO THIS ',switchMode)
 
             console.log('CLOSING THIS ',kipUser[kipObj.source.id].conversations)
+
+
 
             switch(kipUser[kipObj.source.id].conversations){
                 case 'settings':
@@ -1174,7 +1179,7 @@ var incomingMsgAction = function(data,origin){
                 case 'addmember':
 
                     weekly_updates.addMembers(parsedIn.team.id,parsedIn.user.id,parsedIn.channel.id,function(){
-                        console.log('DONE!!!')
+                        console.log('TURNED OFF ADD MEMBER!!!')
                         kipObj.mode = switchMode;
                         updateMode(kipObj);
                     },'CLOSE');
