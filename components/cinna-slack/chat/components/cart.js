@@ -628,6 +628,50 @@ var report = module.exports.report = function(slack_id, days) {
   })
 }
 
+//
+// Job to check all the carts and see if they were purchased
+//
+var cron = require('cron');
+new cron.CronJob('00 00 * * * *', function() {
+  kip.debug('Chcking for carts that might have just been purchased');
+  co(function*() {
+    var carts = yield db.Carts.find({
+      deleted: false,
+      purchased: false,
+      'items.0': { $exists: true },
+      amazon: { $exists: true }
+    });
+
+    for (var i = 0; i < carts.length; i++) {
+      var cart = carts[i];
+      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+      var amazon_cart = yield client.getCart({
+        CartId: _.get(cart, 'amazon.CartId.0'),
+        HMAC: _.get(cart, "amazon.HMAC[0]")
+      });
+
+      if (!amazon_cart.Request[0].IsValid[0] || amazon_cart.Request[0].Errors) {
+        kip.log(`cart ${cart._id.toString()} has been purchased`);
+        cart.purchased = true;
+        cart.purchased_date = new Date();
+        yield cart.save();
+        yield cart.items.map(i => {
+          i.purchased = true;
+          i.purchased_date = cart.purchased_date;
+          return i.save();
+        });
+      }
+
+      sleep(100);
+
+    }
+  }).catch(e => {
+    kip.err('error checking if carts are purchased');
+    kip.err(e);
+  });
+}).start();
+
+
 
 //
 // Testing
