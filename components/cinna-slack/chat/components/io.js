@@ -1945,15 +1945,16 @@ var checkOutgoingBanter = function(data){
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
 
-        console.log('# # # # # # SEND RESPONSE # # # # ## 3333 ')
-
-
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
-        console.log('SAVING OUTGOING RESPONSE');
-        history.saveHistory(data,false,function(res){
-            //whatever
-        }); //saving outgoing message
+        console.log('SAVING OUTGOING RESPONSE ',data.action);
+
+        if (data.action !== 'list' || data.source.origin !=='slack'){
+            history.saveHistory(data,false,function(res){
+                //whatever
+            }); //saving outgoing message         
+        }
+
         //});
     }
     else {
@@ -2901,7 +2902,7 @@ var sendResponse = function(data,flag){
     //* * * * * * * *
     else if (!(data.flags && data.flags.email) && data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
-        console.log('🍀SENDING RESPONSE🍀 ',data)
+        //console.log('🍀SENDING RESPONSE🍀 ',data)
 
         //eventually cinna can change emotions in this pic based on response type
         var params = {
@@ -2938,7 +2939,9 @@ var sendResponse = function(data,flag){
                     // delete_original: false,
                     response_type: "in_channel"
                 };
-                slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+                slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
+                    
+                });
             }
             else if (data.action == 'focus'){
 
@@ -3027,7 +3030,9 @@ var sendResponse = function(data,flag){
 
                     console.log('🍀🍀🍀FOCUS ',msgData)
 
-                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
+                        c
+                    });
 
                 });
             }else if (data.action == 'sendAttachment'){
@@ -3044,7 +3049,9 @@ var sendResponse = function(data,flag){
                     username:'Kip',
                     attachments: attachThis
                 };
-                slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function() {});
+                slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
+                    
+                });
 
             }
             else {
@@ -3067,6 +3074,12 @@ var sendResponse = function(data,flag){
                         };
                         slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
 
+
+                            data.source.ts = res.ts;
+                            history.saveHistory(data,false,function(res){
+                                //whatever
+                            });        
+                        
                             //store typing message for later to remove it
                             if (res.ok && flag == 'typing'){
 
@@ -3094,7 +3107,6 @@ var sendResponse = function(data,flag){
 
                         attachThis = JSON.stringify(attachThis);
 
-                        console.log('obj🍀🍀🍀 ',attachThis);
 
                         var msgData = {
                             icon_url:'http://kipthis.com/img/kip-icon.png',
@@ -3106,8 +3118,6 @@ var sendResponse = function(data,flag){
 
                         if (data.button_ts){
 
-                            console.log('# # # # # # BUTTON TS # # # # ## 3333 ')
-
                             msgData.as_user = true;
                             msgData.parse = 'full';
                             msgData.link_names = '1';
@@ -3115,6 +3125,7 @@ var sendResponse = function(data,flag){
                             //console.log('SEND DATA NOW _ BUTTON ',msgData);
 
                             slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, '', msgData, function(err,res) {
+                        
                                 console.log('EDIT CART ERROR ',err)
                                 console.log('EDIT CART RES ',res)
                             });
@@ -3123,12 +3134,23 @@ var sendResponse = function(data,flag){
                         else {
                             //normal attach send
 
-                                console.log('# # # # # # NORMAL SEND # # # # ## 3333 ')
-
                             msgData.attachments = attachThis;
 
                             //console.log('SEND DATA NOW _ NORMAL ',msgData);
-                            slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {
+                            slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function(err,res) {
+                                
+
+                                if(data.action == 'list'){
+
+                                    data.source.ts = res.ts;
+
+                                    console.log('🍀👹6',data.source.ts);
+                                    history.saveHistory(data,false,function(res){
+                                        //whatever
+                                    });   
+                                }
+
+
                                 callback();
                             });
                         }
@@ -3143,7 +3165,8 @@ var sendResponse = function(data,flag){
                         username:'Kip',
                         attachments: attachThis
                     };
-                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function() {});
+                    slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function(err,res) {
+                    });
                 });
             }
         }else {
