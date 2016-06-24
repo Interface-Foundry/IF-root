@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>Luminati Proxy</title>
+    <meta name=viewport
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel=stylesheet href=//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css>
+    <link rel=stylesheet
+      href=//fonts.googleapis.com/icon?family=Material+Icons>
+    <link rel=stylesheet
+      href=//cdnjs.cloudflare.com/ajax/libs/angular-material-data-table/0.10.8/md-data-table.min.css>
+    <link rel=stylesheet href=//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css integrity=sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7 crossorigin=anonymous>
+  </head>
+  <body ng-cloak>
+    <header layout=row>
+      <div flex layout=row>
+        <nav class=logo flex=none>
+          <a href=//luminati.io target=_blank flex>
+            <img src=/img/menu-logo.svg>
+          </a>
+        </nav>
+        <nav ng-controller="version as ver" class=version flex=none>
+          v{{ver.current}}
+          <a ng-if=ver.need_upgrade class=upgrade
+            href=https//www.github.com/luminati-io/luminati-proxy>
+            a new version v{{ver.latest}} is avaliable
+          </a>
+        </nav>
+      </div>
+      <nav class=states flex>
+        <a ui-sref-active=active ui-sref=cred>Credentials</a>
+        <a ui-sref-active=active ui-sref=create>Create</a>
+        <a ui-sref-active=active ui-sref=proxies>Proxies</a>
+        <a ui-sref-active=active ui-sref=zones>Zones</a>
+      </nav>
+    </header>
+    <div ui-view></div>
+    <script data-main=./config.js
+        src=//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js>
+    </script>
+  </body>
+</html>
+

@@ -32,24 +32,24 @@ async.whilst(
 
         var options = {
           url: 'http://kipthis.com/DONTTOUCH.txt', //a single byte file lol
-          proxy: 'http://127.0.0.1:23000'
+          proxy: 'http://127.0.0.1:24000'
         };
         requestPromise(options).then(function(data){ 
-          //console.log('LUMINATI SUCCESS')
+          console.log('LUMINATI SUCCESS')
           luminatiReady = true;
           //proxyPool.push(super_proxy);
           //callback();
           setTimeout(function () {
             callback()
-          }, 10000);
+          }, 5000);
         }, function(err){ 
 
-          //console.log('LUMINATI ERROR ')
+          console.log('LUMINATI ERROR ')
           luminatiReady = false;
 
           setTimeout(function () {
             callback()
-          }, 10000);
+          }, 5000);
 
         });
 
@@ -282,10 +282,23 @@ module.exports.basic = function basic(url, callback, num) {
         console.log('REQUEST🍹WITH🍹THIS🍹 ',proxyPool.length-num)
 
         var proxiedRequest = request.defaults({
-          proxy: 'http://127.0.0.1:23000',
+          proxy: 'http://127.0.0.1:24000',
           headers: {
-              'User-Agent': user_agent
+              'Accept': 'text/html,application/xhtml+xml',
+              //'Accept-Encoding':'gzip, deflate, sdch',
+              'Accept-Language':'en-US,en;q=0.8',
+              // 'Avail-Dictionary':'qHs1hh9Q',
+              'Cache-Control':'max-age=0',
+              'Connection':'keep-alive',
+              'Cookie': 'csm-hit='+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN+s-'+Math.floor(Math.random() * 99) + 11+'RP'+Math.floor(Math.random() * 99) + 11+'K'+Math.floor(Math.random() * 99) + 11+'JQAZRCBH9VN|'+Math.floor(Math.random() * 9999999999999) + 1111111111111+'; ubid-main=181-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'; session-id-time=20827'+Math.floor(Math.random() * 99999) + 11111+'l; session-id=187-'+Math.floor(Math.random() * 9999999) + 1111111+'-'+Math.floor(Math.random() * 9999999) + 1111111+'',
+              'Host':'www.amazon.com',
+              'Origin':'http://www.amazon.com',
+              //'Pragma':'no-cache',
+              // 'Upgrade-Insecure-Requests':'1',
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
+              // 'Referer':url
           }
+          
         }); 
 
       }

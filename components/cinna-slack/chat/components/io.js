@@ -2880,6 +2880,8 @@ var sendResponse = function(data,flag){
     //* * * * * * * *
     else if (!(data.flags && data.flags.email) && data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
+        console.log('🍀SENDING RESPONSE🍀 ',data)
+
         //eventually cinna can change emotions in this pic based on response type
         var params = {
             icon_url: 'http://kipthis.com/img/kip-icon.png'
