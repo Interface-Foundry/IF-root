@@ -233,8 +233,8 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
     let fetch = tryout=>etask(function*pool_fetch(){
         for (;; tryout++)
         {
-            console.log('👻👻 ',_this);
-            console.log('👻👻 ',_this.opt);
+            //console.log('👻👻z ',_this);
+            console.log('👻👻z ',_this.opt);
 
             let session = `${_this.port}_${_this.session_id++}`;
             let username = calculate_username(assign({session: session},
@@ -243,7 +243,7 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
             let proxy = _this.opt.proxy.shift();
             _this.opt.proxy.push(proxy);
             let opt = {
-                url: 'http://kipthis.com/index.html',
+                url: 'http://lumtest.com/myip.json',
                 proxy: `http://${username}:${_this.opt.password}@${proxy}:22225`,
                 timeout: _this.opt.session_timeout,
             };
@@ -259,31 +259,58 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
 
                 
                 if (res && res.statusCode==200 &&
-                    res.headers['content-type'].match(/\/html/)){
+                    res.headers['content-type'].match(/\/json/)){
 
-                    var end= Date.now();
-
-                    console.log(begin)
-                    console.log(end)
-
-                    var timeSpent=(end-begin);
-
-                    console.log("PING: ",timeSpent)
-
-                    // var ping = console.timeEnd();
-
-                    // timeSpent = ping.replace('ms','');
-                    // ping = parseFloat(ping);
-                    if (timeSpent > 500){
-                        console.log('slow')
-                    }
-                    if (timeSpent < 500){
-                        console.log('fast')
-                    }
 
                     //if too slow, kill session
 
                     let info = JSON.parse(res.body);
+
+                    console.log('👻 ',info);
+
+
+                    // this.info.url = 'http://kipthis.com/index.html';
+                    // // if (opt.pool_size && !req.headers['proxy-authorization'])
+                    // // {
+                    // //     if (!_this.sessions)
+                    // //     {
+                    // //         _this.sessions = [];
+                    // //         _this.session_id = 1;
+                    // //         yield _this._pool(opt.pool_size);
+                    // //         _this._log('DEBUG',
+                    // //             `initialized pool - ${_this.opt.pool_size}`);
+                    // //         _this._pool_ready = true;
+                    // //     }
+                    // //     else
+                    // //     {
+                    // //         if (_this._pool_ready)
+                    // //         {
+                    // //             if (!_this.sessions.length)
+                    // //             {
+                    // //                 _this._log('WARNING', 'pool size is too small');
+                    // //                 yield _this._pool(1);
+                    // //             }
+                    // //         }
+                    // //         for (;; yield etask.sleep(1000))
+                    // //         {
+                    // //             if (!_this._pool_ready)
+                    // //                 continue;
+                    // //             if (_this.sessions.length)
+                    // //                 break;
+                    // //             _this._log('WARNING', 'pool size is too small');
+                    // //             yield _this._pool(1);
+                    // //             break;
+                    // //         }
+                    // //     }
+                    // // }
+                    // yield _this._request(req, res, head);
+
+
+
+                    //test IP ping here!
+
+                    
+
                     _this._log('DEBUG',
                         `new session added ${proxy}:${session}`,
                         {ip: info.ip});
@@ -326,7 +353,7 @@ Luminati.prototype._log = function(level, msg, extra){
 
 Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
 
-    //console.log('👻👻 ',_this.sessions);
+    console.log('👻👻 ',_this.sessions);
 
     let url = req.url;
     if (req.method=='CONNECT')
@@ -340,7 +367,9 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
     const timestamp = Date.now();
     let authorization =
         parse_authorization(req.headers['proxy-authorization']);
-    let session = !authorization && _this.sessions && _this.sessions[Math.floor(Math.random()*_this.sessions.length)];
+
+    var whichSession = Math.floor(Math.random()*_this.sessions.length);
+    let session = !authorization && _this.sessions && _this.sessions[whichSession];
 
     //console.log('👻 ',session);
 
@@ -383,13 +412,57 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
         timeline: timeline,
     };
     const handler = (proxy, headers)=>etask(function*(){
+
+        var begin=Date.now();
+        var begin2=Date.now();
+
         proxy.on('response', _res=>{
+
+            var end= Date.now();
+
+            console.log(begin)
+            console.log(end)
+
+            var timeSpent=(end-begin);
+
+
+            console.log("💖PING: ",timeSpent)
+
+            //if(_res.statusCode == '')
+
+            if (timeSpent > 300){
+                console.log('slow')
+                _res.statusCode = 500;
+
+                console.log("💖KILLING: ",_this.sessions) 
+
+                console.log("💖KILL ME: ",_this.sessions[whichSession]) 
+                _this.sessions.splice(whichSession, 1);
+
+                console.log("💖KILLED: ",_this.sessions) 
+
+                _this._pool(1,);
+
+            }
+
+            else if (timeSpent < 300){
+                console.log('fast')
+                //_res.statusCode = 200;
+            }
+
             timeline.response = Date.now()-timeline.start;
             stats.active_requests--;
             let code = `${_res.statusCode}`.replace(/(?!^)./g, 'x');
             stats.status_code[code] = (stats.status_code[code]||0)+1;
             _this._log('DEBUG',
                 `${req.method} ${url} - ${_res.statusCode}`);
+
+
+            // console.log("💖CODE: ",code)
+            // console.log("💖CODEarr: ",stats.status_code[code])
+
+
+
             write_http_reply(res, _res, headers);
             _res.pipe(res);
             _res.on('end', ()=>{
@@ -401,6 +474,13 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
                 this.ereturn();
             });
         }).on('connect', (_res, socket, _head)=>{
+
+            var end2= Date.now();
+
+            var timeSpent=(end2-begin2);
+
+            console.log("💖PING2: ",timeSpent)
+
             timeline.connect = Date.now()-timeline.start;
             stats.active_requests--;
             write_http_reply(res, _res);
@@ -479,9 +559,13 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
         agent: _this.agent,
         headers: assign(headers, req.headers),
     });
+
     if (req.method=='CONNECT')
         proxy.end();
     else
+       // console.log('NOT CONNECT METHOD')
         req.pipe(proxy);
+
+   // console.log(proxy)
     yield handler(proxy);
 });
