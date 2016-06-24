@@ -1041,7 +1041,7 @@ var incomingMsgAction = function(data,origin){
 
             case 'settings':
                 //cancel current mode
-                if (kipUser[kipObj.source.id] && kipUser[kipObj.source.id].conversations && kipUser[kipObj.source.id].conversations == 'settings'){  
+                if (kipUser[kipObj.source.id] && kipUser[kipObj.source.id].conversations && kipUser[kipObj.source.id].conversations == 'settings'){
                     console.log('STOPPING A THING')
                 }else {
                     closeCurrentMode('settings');
@@ -1066,7 +1066,7 @@ var incomingMsgAction = function(data,origin){
 
             case 'members':
 
-                if (kipUser[kipObj.source.id] && kipUser[kipObj.source.id].conversations && kipUser[kipObj.source.id].conversations == 'addmember'){  
+                if (kipUser[kipObj.source.id] && kipUser[kipObj.source.id].conversations && kipUser[kipObj.source.id].conversations == 'addmember'){
                     console.log('STOPPING A THING')
                 }else {
                     closeCurrentMode('addmember');
@@ -1172,7 +1172,7 @@ var incomingMsgAction = function(data,origin){
             }
             if (!kipUser[kipObj.source.id].conversations){
                 kipUser[kipObj.source.id].conversations = 'shopping';
-            }   
+            }
 
 
             console.log('SWITCHING TO THIS ',switchMode)
@@ -1952,7 +1952,7 @@ var sendResponse = function(data,flag){
         if (data.action !== 'list' || data.source.origin !=='slack'){
             history.saveHistory(data,false,function(res){
                 //whatever
-            }); //saving outgoing message         
+            }); //saving outgoing message
         }
 
         //});
@@ -2940,7 +2940,7 @@ var sendResponse = function(data,flag){
                     response_type: "in_channel"
                 };
                 slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
-                    
+
                 });
             }
             else if (data.action == 'focus'){
@@ -3050,7 +3050,7 @@ var sendResponse = function(data,flag){
                     attachments: attachThis
                 };
                 slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
-                    
+
                 });
 
             }
@@ -3078,8 +3078,8 @@ var sendResponse = function(data,flag){
                             data.source.ts = res.ts;
                             history.saveHistory(data,false,function(res){
                                 //whatever
-                            });        
-                        
+                            });
+
                             //store typing message for later to remove it
                             if (res.ok && flag == 'typing'){
 
@@ -3125,7 +3125,7 @@ var sendResponse = function(data,flag){
                             //console.log('SEND DATA NOW _ BUTTON ',msgData);
 
                             slackUsers_web[data.source.org].chat.update(data.button_ts,data.source.channel, '', msgData, function(err,res) {
-                        
+
                                 console.log('EDIT CART ERROR ',err)
                                 console.log('EDIT CART RES ',res)
                             });
@@ -3138,7 +3138,7 @@ var sendResponse = function(data,flag){
 
                             //console.log('SEND DATA NOW _ NORMAL ',msgData);
                             slackUsers_web[data.source.org].chat.postMessage(data.source.channel, '', msgData, function(err,res) {
-                                
+
 
                                 if(data.action == 'list'){
 
@@ -3147,7 +3147,7 @@ var sendResponse = function(data,flag){
                                     console.log('🍀👹6',data.source.ts);
                                     history.saveHistory(data,false,function(res){
                                         //whatever
-                                    });   
+                                    });
                                 }
 
 
@@ -3487,14 +3487,14 @@ function viewCart(data, show_added_item) {
       var slackbot = yield db.Slackbots.findOne({team_id: data.source.org});
       var isAdmin = slackbot.meta.office_assistants.indexOf(data.source.user) >= 0;
       var isP2P = slackbot.meta.office_assistants.length === 0;
-      // var team_carts = yield db.Carts.find({slack_id: data.source.org, purchased: false, deleted: false}).populate('items', '-source_json').exec();
-      // if (team_carts.length === 1 && team_carts[0].aggregate_items.length > 0) {
-      //   // send a quick response
-      //   kip.debug('sending a quick response');
-      //   var attachments = yield buildCart(team_carts[0], isAdmin, isP2P);
-      //   data.client_res = [attachments];
-      //   sendResponse(data);
-      // }
+      var team_carts = yield db.Carts.find({slack_id: data.source.org, purchased: false, deleted: false}).populate('items', '-source_json').exec();
+      if (team_carts.length === 1 && team_carts[0].aggregate_items.length > 0) {
+        // send a quick response
+        kip.debug('sending a quick response');
+        var attachments = yield buildCart(team_carts[0], isAdmin, isP2P);
+        data.client_res = [attachments];
+        sendResponse(data);
+      }
 
       kip.debug('rebuilding cart')
       // now rebuild the cart and update the message
@@ -3508,7 +3508,14 @@ function viewCart(data, show_added_item) {
           // what the fuck is this bullshit.
           data.client_res[0].unshift(res[0]);
         }
-        sendResponse(data);
+        var msgData = {
+            icon_url:'http://kipthis.com/img/kip-icon.png',
+            username:'Kip',
+            attachments: data.client_res[0]
+        };
+        slackUsers_web[data.source.org].chat.update(data.source.ts, data.source.channel, '', msgData, function(err,res) {
+          console.log(err, res);
+        });
       });
 
     }).catch(function(e) {
