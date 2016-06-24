@@ -148,5 +148,10 @@
   "author": "IF",
   "license": "BSD",
   "readmeFilename": "README.md",
-  "gitHead": "e624fcec4318dc2d4a5042f0bf2c806b4758a37b"
+  "gitHead": "e624fcec4318dc2d4a5042f0bf2c806b4758a37b",
+  "eslintConfig": {
+    "env": {
+      "es6": true
+    }
+  }
 }
