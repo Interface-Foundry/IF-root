@@ -1,0 +1,91 @@
+{
+  "_args": [
+    [
+      "luminati-io/luminati-proxy",
+      ""
+    ]
+  ],
+  "_from": "luminati-io/luminati-proxy",
+  "_id": "luminati-proxy@0.2.1",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/luminati-proxy",
+  "_phantomChildren": {},
+  "_requested": {
+    "hosted": {
+      "directUrl": "https://raw.githubusercontent.com/luminati-io/luminati-proxy/master/package.json",
+      "gitUrl": "git://github.com/luminati-io/luminati-proxy.git",
+      "httpsUrl": "git+https://github.com/luminati-io/luminati-proxy.git",
+      "shortcut": "github:luminati-io/luminati-proxy",
+      "ssh": "git@github.com:luminati-io/luminati-proxy.git",
+      "sshUrl": "git+ssh://git@github.com/luminati-io/luminati-proxy.git",
+      "type": "github"
+    },
+    "name": null,
+    "raw": "luminati-io/luminati-proxy",
+    "rawSpec": "luminati-io/luminati-proxy",
+    "scope": null,
+    "spec": "github:luminati-io/luminati-proxy",
+    "type": "hosted"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "git://github.com/luminati-io/luminati-proxy.git#1305215e52d37ea9c5d453ca62c81abcc395a032",
+  "_shasum": "a48d2d7c94cde1824055d7605b3f24d956758e2a",
+  "_shrinkwrap": null,
+  "_spec": "luminati-io/luminati-proxy",
+  "_where": "",
+  "author": {
+    "email": "gilad@hola.org",
+    "name": "Gilad Novik"
+  },
+  "bin": {
+    "luminati": "bin/luminati.js",
+    "luminati-proxy": "bin/luminati.js"
+  },
+  "bugs": {
+    "email": "gilad@hola.org"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "glob": "^7.0.3",
+    "humanize": "0.0.9",
+    "hutil": "^0.1.3",
+    "moment": "^2.12.0",
+    "netmask": "^1.0.5",
+    "prompt": "^1.0.0",
+    "request": "^2.69.0",
+    "socket.io": "^1.4.5",
+    "socksv5": "0.0.6",
+    "sqlite3": "^3.1.4",
+    "underscore": "^1.8.3",
+    "yargs": "^4.3.2"
+  },
+  "description": "A configurable local proxy for luminati.io",
+  "devDependencies": {},
+  "gitHead": "1305215e52d37ea9c5d453ca62c81abcc395a032",
+  "homepage": "https://luminati.io/",
+  "keywords": [
+    "hola",
+    "luminati",
+    "proxy"
+  ],
+  "license": "MIT",
+  "main": "lib/luminati.js",
+  "name": "luminati-proxy",
+  "optionalDependencies": {},
+  "preferGlobal": "true",
+  "readme": "# Luminati HTTP/HTTPS Proxy manager\n\nA forward HTTP/HTTPS proxy on your side, to accelerate/compress/rotate/distribute/manage/monitor/report/log/debug traffic to your proxies around the world.\n\nThis tool requires a [Luminati](https://luminati.io/?cam=github-proxy) account.\n\n## Features\n- Highly scalable\n- Connection pool for faster response time\n- Easy setup for multiple configurations using a simple web interface\n- Statistics\n- Automatically rotate IP every X requests\n- Load balancing using multiple Super Proxies\n- SSL sniffing (using a self-signed certificate)\n- SOCKSv5 proxy\n\n## Installation\n\n### Windows\n- Install [Git](https://git-scm.com/download/win)\n- Install [Node.js](https://nodejs.org/en/download/)\n- Install Luminati Proxy from Window's command prompt:\n```sh\nnpm install -g luminati-io/luminati-proxy\n```\n\n### Linux/MacOS\n- Install Node.js (preferably using [nave](https://github.com/isaacs/nave))\n- Install Luminati Proxy from the terminal prompt:\n```sh\n$ sudo npm install -g luminati-io/luminati-proxy\n```\n\n### Upgrade\n- Use npm to upgrade\n```sh\n$ sudo npm install -g luminati-io/luminati-proxy\n```\nNOTE: In versions 0.1.x port 23000 was used by default. In version 0.2.0 this was changed to port 24000.\n\n## Usage\n```sh\n$ luminati --help\nUsage: bin/luminati [options] config1 config2 ...\n\nOptions:\n  -p                 Listening port  [default: 24000]\n  --log              Log level (ERROR|WARNING|INFO|DEBUG)  [default: \"WARNING\"]\n  --customer         Customer\n  --password         Password\n  --proxy            Super proxy ip or country\n  --proxy_count      Number of super proxies to use  [default: 1]\n  --secure_proxy     Use SSL when accessing super proxy\n  --zone             Zone  [default: \"gen\"]\n  --country          Country\n  --state            State\n  --city             City\n  --asn              ASN\n  --dns              DNS resolving (local|remote)\n  --pool_size        Pool size  [default: 3]\n  --ssl              Enable SSL sniffing\n  --max_requests     Requests per session  [default: 50]\n  --session_timeout  Session establish timeout  [default: 5000]\n  --direct_include   Include pattern for direct requests\n  --direct_exclude   Exclude pattern for direct requests\n  --www              Local web port  [default: 22999]\n  --socks            SOCKS5 port (local:remote)\n  --history          Log history\n  --resolve          Reverse DNS lookup file\n  --version          Display current luminati-proxy version\n  --config           Config file containing proxy definitions [default: \".luminati.json\"]\n  -h, --help         Show help  [boolean]\n```\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hola/luminati-proxy.git"
+  },
+  "scripts": {
+    "start": "bin/luminati.js"
+  },
+  "version": "0.2.1"
+}
