@@ -285,12 +285,12 @@ var checkForCanned = function(input,callback,origin,source) {
                     callback_id: 'none'
                 }
             ];
-            break;     
+            break;
 
         case textSimilar(input,'what you up to') > 60:
         case textSimilar(input,'what\'s up') > 60:
         case textSimilar(input,'whats up') > 60:
-        case textSimilar(input,'sup') > 60:
+        case textSimilar(input,'sup') > 99:
         case textSimilar(input,'how are you') > 60:
         case textSimilar(input,'how r you') > 60:
         case textSimilar(input,'how r u') > 90:
@@ -991,7 +991,7 @@ var checkForCanned = function(input,callback,origin,source) {
                 flag = 'kik.help';
             }
             else if (origin == 'socket.io'){
-                
+
                 res = 'I\'m Kip, your personal shopper!<br>'+
 
 
@@ -1079,7 +1079,7 @@ var checkForCanned = function(input,callback,origin,source) {
             break;
 
         case textSimilar(input,'kip') > 90:
-            flag = 'basic'; //do this action      
+            flag = 'basic'; //do this action
             res = 'That\'s me 🐧!';
             var attachment = [
                 {
@@ -1121,9 +1121,9 @@ var checkForCanned = function(input,callback,origin,source) {
                     ],
                     callback_id: 'none'
                 }
-            ]; 
-            break;             
-    
+            ];
+            break;
+
         case textSimilar(input,'lame') > 90:
         case textSimilar(input,'ugh') > 90:
         case textSimilar(input,'those suck') > 60:
