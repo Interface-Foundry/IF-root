@@ -3270,15 +3270,14 @@ function removeCartItem(data){
           yield kipcart.removeFromCart(data.source.org, data.source.user, searchSelect);
       }
 
-      data.client_res = ['Item '+searchSelect.toString()+'⃣ removed from your cart']
-      outgoingResponse(data, 'txt');
+      sendTxtResponse(data, 'Item '+searchSelect.toString()+'⃣ removed from your cart');
       viewCart(data);
 
-    }).then(function(){}).catch(function(err) {
+    }).catch(function(err) {
+        kip.err('error removing item from cart')
         console.log(err);
         console.log(err.stack)
         return;
-        sendTxtResponse(data, err);
     })
 }
 
