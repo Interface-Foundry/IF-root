@@ -1,5 +1,10 @@
 // LICENSE_CODE ZON
 'use strict'; /*jslint node:true, esnext:true*/
+
+//
+//run with: pm2 start luminati-proxy -x -- --customer lum-customer-kipthis-zone-gen --country us --password e49d4ega1696 --pool_size 9 --session_timeout 5000 --max_requests 50
+//or: luminati --customer lum-customer-kipthis-zone-gen --country us --password e49d4ega1696 --pool_size 9 --session_timeout 5000 --max_requests 50
+
 const _ = require('underscore');
 const events = require('events');
 const http = require('http');
@@ -230,11 +235,14 @@ Luminati.prototype.stop = etask._fn(function*stop(_this){
 });
 
 Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
+
+    //console.log('?? ',count);
+
     let fetch = tryout=>etask(function*pool_fetch(){
         for (;; tryout++)
         {
             //console.log('👻👻z ',_this);
-            console.log('👻👻z ',_this.opt);
+           // console.log('@👻@ ',_this.deleteMe);
 
             let session = `${_this.port}_${_this.session_id++}`;
             let username = calculate_username(assign({session: session},
@@ -266,7 +274,7 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
 
                     let info = JSON.parse(res.body);
 
-                    console.log('👻 ',info);
+                   // console.log('👻 ',info);
 
 
                     // this.info.url = 'http://kipthis.com/index.html';
@@ -330,9 +338,54 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
                 return this.ethrow(new Error('could not establish a session'));
         }
     });
+    
+   // console.log('count?? ',count)
+    //kip: removing bad session 
+    if(count.length > 3){
+
+       // console.log('YES?')
+        var deleteByIP = count;
+        
+
+        // var remover = _.filter(_this.sessions, function(session){
+        //   return session.info.ip === deleteByIP;
+        // });
+    
+        
+
+        //console.log(_.filter(_this.sessions, {info: {ip: deleteByIP}}) );
+
+        _this.sessions = _this.sessions.filter(function(obj){
+           if (obj.info.ip !== deleteByIP){
+               return obj;            
+           }
+        });
+
+
+        console.log('ARRRRRAY ',_this.sessions)
+
+        // var removedArr = _.remove(_this.sessions, function(session) {
+
+        //     console.log('ZZ?? ',session)
+        //   return session.info.ip === deleteByIP;
+        // });
+
+        //console.log('___DELETED ME____ ',removedArr);
+
+        // _this.sessions = removedArr;
+
+        // console.log('___UPDATED ARR____ ',_this.sessions);
+
+        count = 1;
+
+    }
+
     for (let i=0; i<count; i++)
         this.spawn(fetch(1));
-    yield this.wait_child('all');
+    yield this.wait_child('all');        
+
+
+
 });
 
 Luminati.log_level = {
@@ -353,7 +406,7 @@ Luminati.prototype._log = function(level, msg, extra){
 
 Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
 
-    console.log('👻👻 ',_this.sessions);
+    //console.log('👻👻 ',_this.sessions);
 
     let url = req.url;
     if (req.method=='CONNECT')
@@ -371,7 +424,7 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
     var whichSession = Math.floor(Math.random()*_this.sessions.length);
     let session = !authorization && _this.sessions && _this.sessions[whichSession];
 
-    //console.log('👻 ',session);
+    //console.log('👻whichSession ',whichSession);
 
     let host = session&&session.proxy||_this.opt.proxy[0];
     let username = calculate_username(assign({}, _this.opt, {
@@ -426,27 +479,30 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
             var timeSpent=(end-begin);
 
 
-            console.log("💖PING: ",timeSpent)
+            //console.log("💖PING: ",timeSpent)
 
             //if(_res.statusCode == '')
 
-            if (timeSpent > 300){
-                console.log('slow')
-                _res.statusCode = 500;
+            if (timeSpent > 250){
+                //console.log('slow')
+                //_res.statusCode = 500;
 
-                console.log("💖KILLING: ",_this.sessions) 
+                //console.log("💖SELECT: ",whichSession)
 
-                console.log("💖KILL ME: ",_this.sessions[whichSession]) 
-                _this.sessions.splice(whichSession, 1);
+                //console.log("💖KILs: ",_this.sessions) 
 
-                console.log("💖KILLED: ",_this.sessions) 
+                //console.log("💖KILL ME: ",_this.sessions[whichSession].info.ip) 
 
-                _this._pool(1,);
+                //console.log("💖KILLED: ",_this.sessions) 
+
+                if (_this.sessions.length > 1 && _this.sessions[whichSession] && _this.sessions[whichSession].info && _this.sessions[whichSession].info.ip){
+                    _this._pool(_this.sessions[whichSession].info.ip);
+                }
 
             }
 
             else if (timeSpent < 300){
-                console.log('fast')
+               // console.log('fast')
                 //_res.statusCode = 200;
             }
 
@@ -479,7 +535,7 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
 
             var timeSpent=(end2-begin2);
 
-            console.log("💖PING2: ",timeSpent)
+            //console.log("💖PING2: ",timeSpent)
 
             timeline.connect = Date.now()-timeline.start;
             stats.active_requests--;

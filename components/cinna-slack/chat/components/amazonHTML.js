@@ -41,10 +41,10 @@ async.whilst(
           //callback();
           setTimeout(function () {
             callback()
-          }, 5000);
+          }, 3000);
         }, function(err){ 
 
-          //console.log('LUMINATI ERROR ')
+         // console.log('LUMINATI ERROR ')
           luminatiReady = false;
 
           setTimeout(function () {
