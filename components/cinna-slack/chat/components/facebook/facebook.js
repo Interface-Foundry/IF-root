@@ -479,7 +479,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             if (err) console.log(err);
 
             var giphy_gif = JSON.parse(body).data[0].images.downsized_medium.url
-            console.log('GIFY RETURN DATA: ', giphy_gif)
+            // console.log('GIFY RETURN DATA: ', giphy_gif)
 
                var messageData = {
                     "attachment": {
