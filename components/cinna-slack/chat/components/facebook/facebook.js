@@ -61,7 +61,7 @@
 var co = require('co');
 var kip = require('kip');
 var queue = require('../queue-mongo');
-var db = require('../../../db')
+var db = require('../../../db');
 var _ = require('lodash');
 var http = require('http');
 var request = require('request');
@@ -472,7 +472,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         // http://api.giphy.com/v1/gifs/search?q=funny+cat&api_key=dc6zaTOxFJmzC   
        // co(function*() {
 
-        // console.log('getting to send_results, outgoing: ', outgoing)
+        console.log('getting to send_results, outgoing: ', outgoing.data.original_query)
               var giphy_gif = ''
 
         request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {

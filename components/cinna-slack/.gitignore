@@ -1,4 +1,6 @@
 *.log
 *.err
 venv-nlp/
-node_modules/
+node_modules/*
+!node_modules/kip.js
+

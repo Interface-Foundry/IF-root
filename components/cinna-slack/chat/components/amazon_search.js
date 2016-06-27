@@ -113,6 +113,8 @@ var similar = function*(params) {
 
   var results = yield client.similarityLookup(amazonParams);
   results = results.slice(params.skip, params.skip + 3);
+    results.original_query = params.query
+
 
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {

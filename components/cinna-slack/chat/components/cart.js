@@ -54,7 +54,7 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, user_id, item) {
+module.exports.addToCart = function(slack_id, user_id, item, type) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
@@ -74,34 +74,20 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
-    if (team_carts.length === 1) {
-      var cart = team_carts[0];
+    console.log('type: ', type)
+    if (type == 'personal') {
+      cart = yield getCart(slack_id, type);
     } else {
-      cart = yield getCart(slack_id);
+      var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
+      if (team_carts.length === 1) {
+      var cart = team_carts[0];
+      } else {
+        cart = yield getCart(slack_id);
+      }
     }
     console.log(cart);
 
-<<<<<<< HEAD
 
-       var imageURL;
-      if (item.MediumImage && item.MediumImage[0].URL[0]){
-          imageURL = item.MediumImage[0].URL[0];
-      }
-      else if (item.ImageSets && item.ImageSets[0].ImageSet && item.ImageSets[0].ImageSet[0].MediumImage && item.ImageSets[0].ImageSet[0].MediumImage[0]){
-          imageURL = item.ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
-      }
-      else if (item.altImage){
-          imageURL = item.altImage;
-          console.log('OMG OMG using scraped image URL ', imageURL);
-      }
-      else {
-          console.log('NO IMAGE FOUND ', item);
-          imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
-      }
-
-      // item.altImage || _.get(item, 'SmallImage[0].URL[0]')
-=======
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
     var ok = false;
@@ -123,25 +109,19 @@ module.exports.addToCart = function(slack_id, user_id, item) {
       });
       if (_.get(res, 'Request[0].Errors')) {
         console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
-        throw new Error('Cannot add this item to cart');
+        throw new Error('Cannot add this item to cart', JSON.stringify(_.get(res, 'Request[0].Errors')));
       }
     }
 
     var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
->>>>>>> 4dfb2ab7438a21b5b564b783efd5caf54e1295de
 
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
       title: _.get(item, 'ItemAttributes[0].Title'),
-<<<<<<< HEAD
-      link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
-      image: imageURL,
-=======
       link: link,
       image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
->>>>>>> 4dfb2ab7438a21b5b564b783efd5caf54e1295de
       price: item.realPrice,
       rating: _.get(item, 'reviews.rating'),
       review_count: _.get(item, 'reviews.reviewCount'),
@@ -234,13 +214,15 @@ module.exports.addExtraToCart = function(cart, slack_id, user_id, item) {
 // user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, user_id, number) {
+module.exports.removeFromCart = function(slack_id, user_id, number, type) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
-    var team = yield db.slackbots.findOne({team_id: slack_id});
-    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    if (type == 'team') {
+      var team = yield db.slackbots.findOne({team_id: slack_id});
+      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    }
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
