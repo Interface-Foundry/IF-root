@@ -60,6 +60,7 @@ var search = function*(params) {
 
   var results = yield client.itemSearch(amazonParams);
   results = results.slice(skip, skip + 3);
+  results.original_query = params.query
 
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {

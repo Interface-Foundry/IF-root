@@ -64,6 +64,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
+  console.log('\n\n\nsendmsg: ', msg);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -325,7 +326,8 @@ handlers['shopping.initial'] = function*(message, exec) {
     text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
-    action: 'results'
+    action: 'results',
+    original_query: results.original_query
   })
 }
 
