@@ -34,14 +34,20 @@ var search = function*(params) {
     throw new Error('no query specified');
   }
 
-  if (!params.skip) {
-    params.skip = 0;
+  amazonParams = {
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
+    Keywords: params.query,
+    Availability: 'Available'
+  };
+
+  // Amazon price queries are formatted as string of cents...
+  if (params.min_price) {
+    amazonParams.MinimumPrice = (params.min_price * 100).toFixed(0);
   }
 
-  amazonParams = {
-    responseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
-    Keywords: params.query
-  };
+  if (params.max_price) {
+    amazonParams.MaximumPrice = (params.max_price * 100).toFixed(0);
+  }
 
   var skip = 0;
   if (params.skip > 0) {

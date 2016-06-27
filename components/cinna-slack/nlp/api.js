@@ -22,6 +22,8 @@ var ACTION = {
   initial: 'initial',
   similar: 'similar',
   modify: 'modify',
+  modifyone: 'modify.one',
+  modifyall: 'modify.all',
   focus: 'focus',
   more: 'more',
   back: 'back',
@@ -270,17 +272,16 @@ function nlpToResult(nlp, message) {
     }
   }
 
-
   var priceModifier = price(nlp.text);
   if (priceModifier) {
     debug('priceModifier triggered')
     var exec = {
       mode: MODE.shopping,
-      action: ACTION.modify,
+      action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
       params: priceModifier,
     };
     if (nlp.focus.length >= 1) {
-      exec.focus = nlp.focus[0];
+      exec.params.focus = nlp.focus[0];
     }
     message.execute.push(exec);
   }
@@ -293,7 +294,7 @@ function nlpToResult(nlp, message) {
     debug('single focus, single modifier triggered')
     var exec = {
       mode: MODE.shopping,
-      action: ACTION.modify,
+      action: ACTION.modifyone,
       params: getModifier(modifierWords[0])
     }
     exec.params.focus = nlp.focus;
@@ -308,6 +309,13 @@ function nlpToResult(nlp, message) {
       nlp.locations.push(e[0])
     }
   })
+
+  // take care of any extraneous modify parameters
+  message.execute.map(e => {
+    if (e.action === ACTION.modify) {
+      e.action = typeof _.get(e, 'params.focus[0]') === 'undefined' ? ACTION.modifyall : ACTION.modifyone;
+    }
+  });
 
   if (nlp.isQuestion) {
     debug('its a question')

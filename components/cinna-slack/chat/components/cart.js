@@ -5,21 +5,46 @@ var moment = require('moment')
 var co = require('co')
 var sleep = require('co-sleep')
 var natural = require('natural')
-var async = require('async')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
 //   awsTag: "bubboorev-20"
 // });
-var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
-});
 
-var getCartLink = require('./process').getCartLink;
+
+// could use multiple amazon ids to relieve the load on the carts
+var aws_clients = {
+  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
+    awsId: "AKIAIKMXJTAV2ORZMWMQ",
+    awsSecret: "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",
+    awsTag: "quic0b-20"
+  }),
+  AKIAILD2WZTCJPBMK66A: amazon.createClient({
+    awsId: "AKIAILD2WZTCJPBMK66A",
+    awsSecret: "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",
+    awsTag: "bubboorev-20"
+  }),
+  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
+    awsId: "AKIAIM4IKQAE2WF4MJUQ",
+    awsSecret: "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",
+    awsTag: "krista03-20"
+  }),
+  AKIAIYTURL6C5PID2GZA: amazon.createClient({
+    awsId: "AKIAIYTURL6C5PID2GZA",
+    awsSecret: "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",
+    awsTag: "krista08-20"
+  })
+};
+
+var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+
+var aws_client_id_list = Object.keys(aws_clients);
+
+console.log("AWS LCIENTS ",aws_client_id_list)
+var processData = require('./process');
 var fs = require('fs')
+var kip = require('../../kip');
 
 module.exports = {};
 
@@ -29,9 +54,9 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, user_id, item, type) {
+module.exports.addToCart = function(slack_id, user_id, item) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
-  console.log('ITEM ZZZZ ',item)
+  console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
   //fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount){
@@ -49,9 +74,15 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
   }
 
   return co(function*() {
-    var cart = yield getCart(slack_id, type);
+    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
+    if (team_carts.length === 1) {
+      var cart = team_carts[0];
+    } else {
+      cart = yield getCart(slack_id);
+    }
     console.log(cart);
 
+<<<<<<< HEAD
 
        var imageURL;
       if (item.MediumImage && item.MediumImage[0].URL[0]){
@@ -70,20 +101,121 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
       }
 
       // item.altImage || _.get(item, 'SmallImage[0].URL[0]')
+=======
+    // make sure we can add this item to the cart
+    // know it's ok if the item already exists in the cart
+    var ok = false;
+    cart.aggregate_items.map(i => {
+      if (i.ASIN === item.ASIN[0] && i.quantity > 1) {
+        ok = true;
+      }
+    });
+
+    // TODO can't check if an item is okay to add if it's their first item in the cart...
+    if (!ok && _.get(cart, 'amazon.CartId[0]')) {
+      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+      // attempt to add the item to the cart for the first time, check for errors
+      var res = yield client.addCart({
+        CartId: cart.amazon.CartId[0],
+        HMAC: cart.amazon.HMAC[0],
+        'Item.0.ASIN': item.ASIN[0],
+        'Item.0.Quantity': 1
+      });
+      if (_.get(res, 'Request[0].Errors')) {
+        console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
+        throw new Error('Cannot add this item to cart');
+      }
+    }
+
+    var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
+>>>>>>> 4dfb2ab7438a21b5b564b783efd5caf54e1295de
 
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
       title: _.get(item, 'ItemAttributes[0].Title'),
+<<<<<<< HEAD
       link: _.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), // so obviously converted to json from xml
       image: imageURL,
+=======
+      link: link,
+      image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
+>>>>>>> 4dfb2ab7438a21b5b564b783efd5caf54e1295de
       price: item.realPrice,
       rating: _.get(item, 'reviews.rating'),
       review_count: _.get(item, 'reviews.reviewCount'),
       added_by: user_id,
       slack_id: slack_id,
       source_json: JSON.stringify(item)
+    })).save();
+
+    console.log('adding item ' + i._id + ' to cart ' + cart._id);
+    cart.items.push(i._id);
+    yield cart.save();
+
+    console.log('calling getCart again to rebuild amazon cart')
+    try {
+      yield getCart(slack_id);
+    } catch (e) {
+      // didn't work, so remove the item and say sorry
+      cart.items = cart.items.filter(item => {
+        console.log(item);
+        console.log(i._id);
+        return item !== i._id;
+      })
+      cart.save();
+      i.remove();
+      throw new Error('could not add item to cart')
+    }
+  })
+}
+
+
+// Add an item already in cart to the db by increasing quantity
+// slack_id: either the team id or the user id if a personal cart
+// user_id: the user who added the item
+// item: the item from getCart aggregate item
+//
+module.exports.addExtraToCart = function(cart, slack_id, user_id, item) {
+  console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
+  console.log('ITEM ZZZZ ',item)
+  console.log('CART ZZZZ ',cart)
+
+
+  //fixing bug to convert string to to int
+  // if (item.reviews && item.reviews.reviewCount){
+  //   item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
+  // }
+
+  // // Handle the case where the search api returns items that we can't add to cart
+  // var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
+  // if (total_offers === 0) {
+  //   // This item is not available.  According to the amazon documentation, the search
+  //   // api can and will return items that you cannot buy.  So we have to just
+  //   // ignore these things.
+  //   // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
+  //   return Promise.reject('Item not available');
+  // }
+
+  return co(function*() {
+    // var cart = yield getCart(slack_id);
+    // console.log(cart);
+
+    console.log('creating item in database')
+
+    var i = yield (new db.Item({
+      cart_id: cart._id,
+      ASIN: item.ASIN,
+      title: item.title,
+      link: item.link, // so obviously converted to json from xml
+      image: item.image,
+      price: item.price,
+      rating: item.rating,
+      review_count: item.review_count,
+      added_by: user_id,
+      slack_id: slack_id,
+      // source_json: JSON.stringify(item)
     })).save();
 
     console.log('adding item ' + i._id + ' to cart ' + cart._id);
@@ -102,15 +234,13 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
 // user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, user_id, number, type) {
+module.exports.removeFromCart = function(slack_id, user_id, number) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
-    var cart = yield getCart(slack_id, type);
-    if (type == 'team') {
-      var team = yield db.slackbots.findOne({team_id: slack_id});
-      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
-    }
+    var cart = yield getCart(slack_id);
+    var team = yield db.slackbots.findOne({team_id: slack_id});
+    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
@@ -139,39 +269,43 @@ module.exports.removeFromCart = function(slack_id, user_id, number, type) {
   })
 }
 
+// Removes all of an item from the db
+// slack_id: either the team id or the user id if a personal cart
+// number: the item to remove in cart array, as listed in View Carts
 //
-// Removes all items in the cart
-//
-module.exports.emptyCart = function(cart_id) {
-  return co(function*() {
-    var cart = yield db.Carts.findOne({"slack_id": cart_id}).exec();
-    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart);
+module.exports.removeAllOfItem = function(slack_id, number) {
+  console.log(`removing item #${number} from cart`)
 
-    async.eachSeries(cart.items, function iterator(id, callback) {
-        db.Item.findById(id).then(function(err, item){
-          if (item) {
-             item.deleted = true;
-              item.save(function(err, saved) {
-                callback();
-              })
-            } else {
-              callback();
-            }
-        });
-       
-      },function done (err) {
-        if (err) console.log(err);
+  return co(function*() {
+    var cart = yield getCart(slack_id);
+    console.log('got cart');
+
+    // need to watch out for items that have multiple quantities
+    // check to make sure this item exists
+    var ASIN_to_remove = _.get(cart, `aggregate_items[${number - 1}].ASIN`);
+    console.log('asin to remove is', ASIN_to_remove);
+
+    if (!ASIN_to_remove) {
+      kip.err('no asin found');
+      return cart;
+    }
+
+    yield cart.items.filter(i => {
+      return i.ASIN === ASIN_to_remove
+    }).map(i => {
+      i.deleted = true;
+      return i.save();
     });
 
-     console.log('ids: ',cart.slack_id, cart_id)
-        cart.items = [];
-        yield cart.save()
-        // rebuild the cart
-        return getCart(cart.slack_id);
+    cart.items = cart.items.filter(i => {
+      return i.ASIN !== ASIN_to_remove;
+    });
 
-  
+    yield cart.save();
+    return getCart(slack_id);
   })
 }
+
 
 //
 // Removes one item from the cart at a time
@@ -194,35 +328,37 @@ module.exports.removeFromCartByItem = function(item) {
   })
 }
 
-
 //
 // Syncs cart with amazon and returns a nicely formatted object
 // Right now there is no saved amazon cart, so if they delete something from
 // amazon,
 // Returns a promise for yieldy things
 //
-var getCart = module.exports.getCart = function(slack_id, type) {
+var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
+  var timer = kip.timer('get cart');
   return co(function*() {
     //
     // Get the Kip mongodb cart first (amazon cart next)
     //
     var cart;
-    console.log('getting team cart for ' + slack_id)
+    kip.log('getting team cart for ' + slack_id)
     var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items', '-source_json').exec();
+    timer('fetched team_cart from db if exists');
 
     if (!team_carts || team_carts.length === 0) {
       // create a new cart
-      console.log('no carts found, creating new cart for ' + slack_id)
+      kip.log('no carts found, creating new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
         items: [],
-        type: type
+        aws_client: aws_client_id_list[(Math.random()*aws_client_id_list.length)|0]
       })
     } else {
       // yay already have a cart
       cart = team_carts[0];
     }
 
+    var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
 
     //
     // get the amazon cart for this Kip cart
@@ -246,12 +382,12 @@ var getCart = module.exports.getCart = function(slack_id, type) {
 
     // create a new cart if they don't have one
     if (!cart.amazon) {
+      kip.debug('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
-      console.log(JSON.stringify(amazonCart, null, 2))
+      kip.debug(JSON.stringify(amazonCart, null, 2))
       cart.amazon = amazonCart;
-      cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+      cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
       yield cart.save();
-            console.log('creating new cart in amazon, cart: ', cart)
 
       return cart;
     }
@@ -259,14 +395,15 @@ var getCart = module.exports.getCart = function(slack_id, type) {
 
     // otherwize rebuild their current cart
     // make sure the cart has not been checked out (purchased) yet
+    timer('getting cart from amazon');
     var amazonCart = yield client.getCart({
       'CartId': _.get(cart, 'amazon.CartId.0'),
       'HMAC': _.get(cart, "amazon.HMAC[0]")
     })
+    timer('got cart from amazon');
 
     // console.log(JSON.stringify(amazonCart, null, 2))
-    console.log('got amazon cart')
-    console.log(amazonCart)
+    // kip.debug(amazonCart))
 
     // If the amazon cart is empty but
 
@@ -274,7 +411,7 @@ var getCart = module.exports.getCart = function(slack_id, type) {
     // Although maybe the cart has expired? TODO
     // mark cart as purchased and create a new one
     if (!amazonCart.Request[0].IsValid[0] || amazonCart.Request[0].Errors) {
-      console.log('cart has already been purchased')
+      kip.log('cart has already been purchased')
       cart.purchased = true;
       cart.purchased_date = new Date();
       yield cart.save();
@@ -284,13 +421,12 @@ var getCart = module.exports.getCart = function(slack_id, type) {
         return i.save();
       })
 
-      console.log('creating a new cart for ' + slack_id)
+      kip.debug('creating a new cart for ' + slack_id)
       cart = new db.Cart({
         slack_id: slack_id,
-        items: [],
-        type: type
+        items: []
       })
-      console.log('creating new cart in amazon')
+      kip.debug('creating new cart in amazon')
       var amazonCart = yield client.createCart(cart_items)
 
       // console.log(amazonCart.Request[0].Errors[0].Message[0]);
@@ -300,10 +436,10 @@ var getCart = module.exports.getCart = function(slack_id, type) {
       //ERROR TEMP FIX: can't save item to cart, example item: "VELCANS® Fashion Transparent and Flat Ladies Rain Boots" to cart
       if(amazonCart.Request[0].Errors && amazonCart.Request[0].Errors[0] && amazonCart.Request[0].Errors[0].Error && amazonCart.Request[0].Errors[0].Error[0].Message && amazonCart.Request[0].Errors[0].Error[0].Message[0].indexOf('not eligible to be added to the cart') > -1){
 
-        console.log('ERR: Amazon item is not eligible to be added to the cart');
+        kip.err('ERR: Amazon item is not eligible to be added to the cart');
         //cart.amazon = amazonCart;
 
-        console.log('# cart ',cart);
+        kip.debug('# cart ',cart);
         //console.log('# amz ',cart.amazon);
 
         //cart.link =
@@ -314,31 +450,85 @@ var getCart = module.exports.getCart = function(slack_id, type) {
       }
       //no error adding item to cart
       else {
-        console.log(JSON.stringify(amazonCart, null, 2))
+        kip.debug(JSON.stringify(amazonCart, null, 2))
         cart.amazon = amazonCart;
-        cart.link = yield getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+        cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
         yield cart.save()
         return cart;
       }
 
     }
 
-    // rebuild amazon cart off of the contents we have in the db
-    console.log('clearing cart for rebuild ' + cart.amazon.CartId)
-    yield client.clearCart({
-      'CartId': cart.amazon.CartId[0],
-      'HMAC': cart.amazon.HMAC[0]
+    //
+    // "SubTotal": [
+    //   {
+    //     "Amount": [
+    //       "15435"
+    //     ],
+    //     "CurrencyCode": [
+    //       "USD"
+    //     ],
+    //     "FormattedPrice": [
+    //       "$154.35"
+    //     ]
+    //   }
+    // ],
+
+    // check items and quantities to see if they match
+    var cart_items_hash = cart.aggregate_items.reduce((hash, i) => {
+      hash[i.ASIN] = i.quantity;
+      return hash;
+    }, {});
+    var amazon_items = _.get(amazonCart, 'CartItems[0].CartItem') || [];
+
+    /*
+    { Request: [ { IsValid: [Object], CartGetRequest: [Object] } ],
+  HMAC: [ '6Axr5aN7FLqoEVtNWknoyzf1JdI=' ],
+  CartId: [ '182-6172169-7031558' ],
+  URLEncodedHMAC: [ '6Axr5aN7FLqoEVtNWknoyzf1JdI%3D' ] }
+  */
+
+    var needs_rebuild = amazon_items.length !== cart.aggregate_items.length;
+    amazon_items = amazon_items.map(i => {
+      console.log(cart_items_hash[i.ASIN[0]], parseInt(i.Quantity[0]));
+      if (cart_items_hash[i.ASIN[0]] !== parseInt(i.Quantity[0])) {
+        needs_rebuild = true;
+      }
     })
+    if (!needs_rebuild) {
+      kip.debug('cart not changed');
+    } else {
+      kip.debug(_.get(amazonCart, 'SubTotal[0].FormattedPrice[0]'), cart.total);
+      // rebuild amazon cart off of the contents we have in the db
+      kip.debug('clearing cart for rebuild ' + cart.amazon.CartId);
+      timer('clearing cart for rebuild');
+      yield client.clearCart({
+        'CartId': cart.amazon.CartId[0],
+        'HMAC': cart.amazon.HMAC[0]
+      })
+      timer('cleared');
 
-    yield sleep(8); //prevent amazon throttle
+      yield sleep(8); //prevent amazon throttle
 
-    console.log('rebuilding cart ' + cart.amazon.CartId)
-    yield client.addCart(_.merge({}, cart_items, {
-      CartId: cart.amazon.CartId[0],
-      HMAC: cart.amazon.HMAC[0],
-    }))
+      timer('rebuilding cart ' + cart.amazon.CartId)
+      console.log('rebuilding cart');
+      var items_to_add = _.merge({}, cart_items, {
+        CartId: cart.amazon.CartId[0],
+        HMAC: cart.amazon.HMAC[0],
+      });
+      // kip.debug(items_to_add);
+      var res = yield client.addCart(items_to_add);
+      kip.debug('errors', _.get(res, 'Request[0].Errors'));
+      timer('rebuilt')
+    }
 
-    yield cart.save()
+    //pretty print a nice cart
+    kip.debug('final cart summary:', {
+      link: cart.link,
+      team: cart.slack_id,
+      total: cart.total,
+      items: cart.aggregate_items.map(i => {return { ASIN: i.ASIN, title: i.title, quantity: i.quantity}})
+    });
     return cart;
   })
 }
@@ -480,9 +670,11 @@ var report = module.exports.report = function(slack_id, days) {
 //
 if (!module.parent) {
   co(function*() {
-    var item = yield db.Items.findById('56f2c006d045b96c1eb14acb').select('-source_json');
-    var cart = yield module.exports.removeFromCart(item)
-    console.log(item);
+    var cart = yield getCart('T0R6J00JW');
     console.log(cart);
+    var cart = yield module.exports.removeAllOfItem('T0R6J00JW', 5);
+    console.log(cart);
+  }).catch(e => {
+    kip.err(e);
   })
 }
