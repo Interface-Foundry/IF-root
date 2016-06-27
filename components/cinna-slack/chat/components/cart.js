@@ -6,6 +6,7 @@ var co = require('co')
 var sleep = require('co-sleep')
 var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var async = require('async');
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
@@ -107,10 +108,10 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
         'Item.0.ASIN': item.ASIN[0],
         'Item.0.Quantity': 1
       });
-      if (_.get(res, 'Request[0].Errors')) {
-        console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
-        throw new Error('Cannot add this item to cart', JSON.stringify(_.get(res, 'Request[0].Errors')));
-      }
+      // if (_.get(res, 'Request[0].Errors')) {
+      //   console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
+      //   throw new Error('Cannot add this item to cart', JSON.stringify(_.get(res, 'Request[0].Errors')));
+      // }
     }
 
     var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
@@ -150,6 +151,41 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     }
   })
 }
+
+//
+// Removes all items in the cart
+//
+module.exports.emptyCart = function(cart_id) {
+  return co(function*() {
+    var cart = yield db.Carts.findOne({"slack_id": cart_id}).exec();
+    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart);
+
+    async.eachSeries(cart.items, function iterator(id, callback) {
+        db.Item.findById(id).then(function(err, item){
+          if (item) {
+             item.deleted = true;
+              item.save(function(err, saved) {
+                callback();
+              })
+            } else {
+              callback();
+            }
+        });
+       
+      },function done (err) {
+        if (err) console.log(err);
+    });
+
+     console.log('ids: ',cart.slack_id, cart_id)
+        cart.items = [];
+        yield cart.save()
+        // rebuild the cart
+        return getCart(cart.slack_id);
+
+  
+  })
+}
+
 
 
 // Add an item already in cart to the db by increasing quantity
