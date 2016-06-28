@@ -38,11 +38,11 @@ def model():
     with tf.name_scope('complete_model'):
         model = Model(input=sequence, output=output)
 
-    with tf.name_scope('optimizer'):
-        rmsprop = RMSprop(lr=0.0001, rho=0.9, epsilon=1e-08)
+    # with tf.name_scope('optimizer'):
+    #     rmsprop = RMSprop(lr=0.00005, rho=0.9, epsilon=1e-08)
 
     with tf.name_scope('model_compiled'):
-        model.compile(optimizer='adamax',
+        model.compile(optimizer='adam',
                       loss='categorical_crossentropy',
                       metrics=['accuracy'])
 
@@ -65,6 +65,6 @@ if __name__ == '__main__':
     model.fit(data, action_codes,
               validation_split=.2,
               nb_epoch=100,
-              batch_size=32,
+              batch_size=16,
               verbose=1,
               callbacks=[tb_callback])
