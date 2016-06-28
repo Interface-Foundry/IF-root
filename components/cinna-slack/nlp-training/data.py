@@ -1,15 +1,14 @@
 import pandas as pd
 from pymongo import MongoClient
-import collections
-from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from keras.utils import np_utils
 
 import pickle
 import string
+from os import path
 
 
-def df_to_pickle():
+def load_df(foldername='pkls', filename='messages.pkl', save=True):
     '''
     for training on google cloud
     '''
@@ -17,24 +16,32 @@ def df_to_pickle():
     db = client.prod
     cursor = db.messages.find({})
     df = pd.DataFrame(list(cursor))
-    df.to_pickle('messages.pkl')
-
-
-def retrieve_from_prod_db(only_incoming=True, not_null=True):
-    '''
-    helper function to munge and explore with pandas
-    '''
-    client = MongoClient()
-    db = client.prod
-    cursor = db.messages.find({})
-    df = pd.DataFrame(list(cursor))
-    if only_incoming and not_null:
-        df = df[(df.incoming == 1) & (df.msg.notnull() == 1)]
+    if save:
+        df.to_pickle(path.join(foldername, filename))
     return df
 
 
 def combine_smalltalk(df):
+    '''there is both smallTalk and smalltalk in actions, possibly others'''
     df['action'] = df.action.str.lower()
+    return df
+
+
+def retrieve_from_prod_db(only_incoming=True, not_null=True, save=True):
+    '''
+    helper function to munge and explore with pandas
+    '''
+    pickled_location = path.join('pkls', 'messages.pkl')
+
+    if path.isfile(pickled_location):
+        df = pd.read_pickle(pickled_location)
+    else:
+        df = load_df()
+    if only_incoming and not_null:
+        df = df[(df.incoming == 1) & (df.msg.notnull() == 1)]
+    df = combine_smalltalk(df)
+    return df
+
 
 def base_filter():
     '''from keras but writing here for simplicity
@@ -61,32 +68,36 @@ def to_tk(df, default_col='msg'):
 
 
 def actions_to_codes(df):
-    action_codes_dictionary = {}
-    rev_action_codes_dictionary = {}
+    '''return action codes from
+    '''
+    dictionary = {}
+    rev_dictionary = {}
     df['action_codes'] = df['action'].astype('category')
     action_codes = np_utils.to_categorical(df['action_codes'].cat.codes.values)
     i = 0
     for k in df.action_codes.cat.categories:
-        action_codes_dictionary[k] = i
+        dictionary[k] = i
         i += 1
 
     # reverse lookup for action codes
-    rev_action_codes_dictionary = {v: k for k,
-                                   v in action_codes_dictionary.items()}
+    rev_dictionary = {v: k for k, v in dictionary.items()}
 
-    return action_codes, action_codes_dictionary, rev_action_codes_dictionary
-
-
-def save_tokenizer(tk, pkl_name='tokenizer.pkl'):
-    with open(pkl_name, 'wb') as f:
-        pickle.dump(tk, f)
+    return action_codes, dictionary, rev_dictionary
 
 
-def load_tokenizer(pkl_name='tokenizer.pkl'):
-    with open(pkl_name, 'rb') as f:
+def save_tokenizer(tokenizer, pkl_name='tokenizer.pkl', foldername='pkls'):
+    with open(path.join(foldername, pkl_name), 'wb') as f:
+        pickle.dump(tokenizer, f)
+
+
+def load_tokenizer(pkl_name='tokenizer.pkl', foldername='pkls'):
+    with open(path.join(foldername, pkl_name), 'rb') as f:
         tokenizer = pickle.load(f)
     return tokenizer
 
+
+# --------------------------------
+# OLD BELOW ----------------------
 
 # def messages_to_words(df):
 #     '''

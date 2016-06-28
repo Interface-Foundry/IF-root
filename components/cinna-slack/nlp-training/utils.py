@@ -2,24 +2,39 @@ from __future__ import print_function
 
 import pandas as pd
 import re
-from pymongo import MongoClient
+from os import path
 
 
+def save_model(model, filename='latest_model', folder='models'):
+    json_string = model.to_json()
+    open(path.join(folder, filename + '.json'), 'w').write(json_string)
+    model.save_weights(path.join(folder, filename, '.h5'))
 
-skip_words = ['nan', 'hi', 'Hi', 'hehe', 'hey', 'help']
+
+def load_model(filename='latest_model', folder='models'):
+    from keras.models import model_from_json
+    model = model_from_json(open(path.join(folder, filename + '.json')).read())
+    model.load_weights(path.join(folder, filename + '.h5'))
 
 
-def retrieve_from_prod_db():
+def predict_to_class(text, tokenizer, model, reverse_action_dict):
     '''
-    helper function to munge and explore with pandas
     '''
-    client = MongoClient()
-    db = client.prod
-    cursor = db.messages.find({})
-    return pd.DataFrame(list(cursor))
+    if type(text) is str:
+        text = [text]
+
+    preds = model.predict(pad_sequences(
+        tokenizer.texts_to_sequences(text), maxlen=pad_length))
+
+    reverse_action_dict[preds.argmax()]
+
+
+# --------------------------------
+# OLD BELOW ----------------------
 
 
 def retrieve_from_test_db():
+    '''use to get stuff from test_db, not useful for training keras'''
     from pymongo import MongoClient
     client = MongoClient()
     db = client.foundry
@@ -29,33 +44,29 @@ def retrieve_from_test_db():
 
 
 def dict_to_cols(df, cols=['source', 'thread']):
-    '''
-    some columns have dict/json within the rows
-    '''
+    '''some columns have dict/json within the rows'''
     for c in cols:
         df.join(pd.DataFrame(df.source.to_dict()).T)
     return df
 
 
-def text_look(df, skip_words=skip_words):
-    '''
-    removing some results
-    '''
+def text_look(df, skip_words=['hi', 'hey', 'Hi']):
+    '''removing some results'''
     pat = '|'.join(map(re.escape, skip_words))
     df[df.msg.str.contains(pat) == 'False']
     return df
 
 
-# def word_to_v(df, debug_=False):
-#     # remove
-#     if debug_:  # debug uses df.text not df.msg
-#         pass
-#     else:
-#         words = df.msg.str.split(' ').values
-#     # df = df[df.text.str.contains('_debug') == 'False']  # _debug w kip_tester
-#     words = df.text.str.split(' ').values
-#     model = Word2Vec(words)
-#     return model
+def word_to_v(df, debug_=False):
+    # remove
+    # if debug_:  # debug uses df.text not df.msg
+    #     pass
+    # else:
+    #     words = df.msg.str.split(' ').values
+    # words = df.text.str.split(' ').values
+    # model = Word2Vec(words)
+    # return model
+    pass
 
 
 def array_of_threads(df):
