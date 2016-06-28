@@ -1,0 +1,16 @@
+nlp:
+  build: ./nlp2
+  ports:
+    - "8083:8083"
+image_processing:
+  build: ./image_processing
+  ports:
+    - "5000:5000"
+# node_stuff:
+#   build: .
+#   command: pm2 start app.json
+#   ports:
+#     - "27017:27017"
+#     - "8000:8000"
+# mongo:
+#   image: mongo:3.2.6

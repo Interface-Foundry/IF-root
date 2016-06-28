@@ -2,8 +2,8 @@ from __future__ import print_function
 from easydict import EasyDict
 from flask import Flask, request, jsonify
 import logging
-import parser
 
+import legacy as parser
 from mcparser import McParser
 
 orig_ = False
@@ -58,7 +58,7 @@ def parse_message(orig_parser=orig_):
 @app.route('/reload')
 def reload_parse():
     logging.debug('------trying to reload------')
-    reload(parser)
+    reload()
 
 
 if __name__ == '__main__':

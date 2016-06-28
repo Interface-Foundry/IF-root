@@ -1,4 +1,12 @@
 
+Database columns of interest:
+
+### bucket
+- 'banter'
+- 'search'
+- 'purchase'
+- 'mod'
+
 
 # Notes:
 
@@ -7,3 +15,8 @@
 ## Pretrained Stuff:
 
 https://code.google.com/archive/p/word2vec/
+
+
+# Glove vectors
+
+http://nlp.stanford.edu/projects/glove/
