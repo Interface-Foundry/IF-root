@@ -64,6 +64,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
+  console.log('\n\n\nsendmsg: ', msg);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -325,7 +326,8 @@ handlers['shopping.initial'] = function*(message, exec) {
     text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
-    action: 'results'
+    action: 'results',
+    original_query: results.original_query
   })
 }
 
@@ -369,7 +371,8 @@ handlers['shopping.more'] = function*(message, exec) {
     text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
-    action: 'results'
+    action: 'results',
+    original_query: results.original_query
   })
 }
 
@@ -403,7 +406,8 @@ handlers['shopping.similar'] = function*(message, exec) {
     text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
-    action: 'results'
+    action: 'results',
+    original_query: results.original_query
   })
 }
 
@@ -494,10 +498,11 @@ console.log('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
 
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
-
+  //Diverting team vs. personal cart based on source origin for now
+  var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
 
   try {
-    yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1])
+    yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);
     return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')

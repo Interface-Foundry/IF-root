@@ -83,7 +83,8 @@ var messageSchema = mongoose.Schema({
     },
     slackData: {
         callback_id: String
-    }
+    },
+    original_query: String
 });
 
 module.exports = mongoose.model('Message', messageSchema);

@@ -6,6 +6,7 @@ var co = require('co')
 var sleep = require('co-sleep')
 var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var async = require('async');
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
@@ -54,7 +55,7 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, user_id, item) {
+module.exports.addToCart = function(slack_id, user_id, item, type) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
@@ -74,13 +75,21 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   }
 
   return co(function*() {
-    var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
-    if (team_carts.length === 1) {
-      var cart = team_carts[0];
+    console.log('type: ', type)
+
+    //please do not remove changes below. it is required for fb to work.
+    if (type == 'personal') {
+      cart = yield getCart(slack_id, type);
     } else {
-      cart = yield getCart(slack_id);
+      var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
+      if (team_carts.length === 1) {
+      var cart = team_carts[0];
+      } else {
+        cart = yield getCart(slack_id);
+      }
     }
     console.log(cart);
+
 
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
@@ -101,10 +110,10 @@ module.exports.addToCart = function(slack_id, user_id, item) {
         'Item.0.ASIN': item.ASIN[0],
         'Item.0.Quantity': 1
       });
-      if (_.get(res, 'Request[0].Errors')) {
-        console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
-        throw new Error('Cannot add this item to cart');
-      }
+      // if (_.get(res, 'Request[0].Errors')) {
+      //   console.error(JSON.stringify(_.get(res, 'Request[0].Errors'), null, 2));
+      //   throw new Error('Cannot add this item to cart', JSON.stringify(_.get(res, 'Request[0].Errors')));
+      // }
     }
 
     var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
@@ -145,6 +154,36 @@ module.exports.addToCart = function(slack_id, user_id, item) {
   })
 }
 
+//
+// Removes all items in the cart
+//
+module.exports.emptyCart = function(cart_id) {
+  return co(function*() {
+    var cart = yield db.Carts.findOne({"slack_id": cart_id}).exec();
+    console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart);
+    async.eachSeries(cart.items, function iterator(id, callback) {
+        db.Item.findById(id).then(function(err, item){
+          if (item) {
+             item.deleted = true;
+              item.save(function(err, saved) {
+                callback();
+              })
+            } else {
+              callback();
+            }
+        });
+      },function done (err) {
+        if (err) console.log(err);
+    });
+     console.log('ids: ',cart.slack_id, cart_id)
+        cart.items = [];
+        yield cart.save()
+        // rebuild the cart
+        return getCart(cart.slack_id);
+  })
+}
+
+
 
 // Add an item already in cart to the db by increasing quantity
 // slack_id: either the team id or the user id if a personal cart
@@ -152,6 +191,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 // item: the item from getCart aggregate item
 //
 module.exports.addExtraToCart = function(cart, slack_id, user_id, item) {
+  console.log('firing addextratocart')
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',item)
   console.log('CART ZZZZ ',cart)
@@ -208,13 +248,16 @@ module.exports.addExtraToCart = function(cart, slack_id, user_id, item) {
 // user_id: the user who is trying to remove the item from the cart
 // number: the item to remove in cart array, as listed in View Carts
 //
-module.exports.removeFromCart = function(slack_id, user_id, number) {
+module.exports.removeFromCart = function(slack_id, user_id, number, type) {
   console.log(`removing item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
-    var team = yield db.slackbots.findOne({team_id: slack_id});
-    var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+      //please do not remove changes below. it is required for fb to work.
+    if (type == 'team') {
+      var team = yield db.slackbots.findOne({team_id: slack_id});
+      var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
+    }
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
@@ -248,7 +291,7 @@ module.exports.removeFromCart = function(slack_id, user_id, number) {
 // number: the item to remove in cart array, as listed in View Carts
 //
 module.exports.removeAllOfItem = function(slack_id, number) {
-  console.log(`removing item #${number} from cart`)
+  console.log(`removing all of item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);
