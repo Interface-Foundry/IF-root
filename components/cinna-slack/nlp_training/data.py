@@ -8,7 +8,7 @@ import string
 from os import path
 
 
-def load_df(foldername='pkls', filename='messages.pkl', save=True):
+def load_df(foldername='pkls/too_big', filename='messages.pkl', save=True):
     '''
     for training on google cloud
     '''
@@ -31,7 +31,7 @@ def retrieve_from_prod_db(only_incoming=True, not_null=True, save=True):
     '''
     helper function to munge and explore with pandas
     '''
-    pickled_location = path.join('pkls', 'messages.pkl')
+    pickled_location = path.join('pkls/too_big', 'messages.pkl')
 
     if path.isfile(pickled_location):
         df = pd.read_pickle(pickled_location)

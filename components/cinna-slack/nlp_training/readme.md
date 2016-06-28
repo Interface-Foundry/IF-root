@@ -21,3 +21,9 @@ Database columns of interest:
     - https://code.google.com/archive/p/word2vec/
 - glove
     - http://nlp.stanford.edu/projects/glove/
+
+
+## To use a model you need:
+- model.hdf5 (weights)
+- model.json (structure)
+- tokenizer (to change words into integers to feed into model)
