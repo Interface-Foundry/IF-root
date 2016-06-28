@@ -76,6 +76,8 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
 
   return co(function*() {
     console.log('type: ', type)
+
+    //please do not remove changes below. it is required for fb to work.
     if (type == 'personal') {
       cart = yield getCart(slack_id, type);
     } else {
@@ -159,7 +161,6 @@ module.exports.emptyCart = function(cart_id) {
   return co(function*() {
     var cart = yield db.Carts.findOne({"slack_id": cart_id}).exec();
     console.log('firing emptyCart: cart_id: ', cart_id, ' cart: ', cart);
-
     async.eachSeries(cart.items, function iterator(id, callback) {
         db.Item.findById(id).then(function(err, item){
           if (item) {
@@ -171,18 +172,14 @@ module.exports.emptyCart = function(cart_id) {
               callback();
             }
         });
-       
       },function done (err) {
         if (err) console.log(err);
     });
-
      console.log('ids: ',cart.slack_id, cart_id)
         cart.items = [];
         yield cart.save()
         // rebuild the cart
         return getCart(cart.slack_id);
-
-  
   })
 }
 
@@ -194,6 +191,7 @@ module.exports.emptyCart = function(cart_id) {
 // item: the item from getCart aggregate item
 //
 module.exports.addExtraToCart = function(cart, slack_id, user_id, item) {
+  console.log('firing addextratocart')
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',item)
   console.log('CART ZZZZ ',cart)
@@ -255,6 +253,7 @@ module.exports.removeFromCart = function(slack_id, user_id, number, type) {
 
   return co(function*() {
     var cart = yield getCart(slack_id);
+      //please do not remove changes below. it is required for fb to work.
     if (type == 'team') {
       var team = yield db.slackbots.findOne({team_id: slack_id});
       var userIsAdmin = team.meta.office_assistants.indexOf(user_id) >= 0;
@@ -292,7 +291,7 @@ module.exports.removeFromCart = function(slack_id, user_id, number, type) {
 // number: the item to remove in cart array, as listed in View Carts
 //
 module.exports.removeAllOfItem = function(slack_id, number) {
-  console.log(`removing item #${number} from cart`)
+  console.log(`removing all of item #${number} from cart`)
 
   return co(function*() {
     var cart = yield getCart(slack_id);

@@ -81,6 +81,8 @@ var search_results = require('./search_results');
 var focus = require('./focus');
 var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
 var emojiText = require('emoji-text'); //convert emoji to text
+var kipcart = require('../cart');
+
 
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
@@ -206,7 +208,7 @@ app.post('/facebook', function(req, res) {
                         var amazon = yield getLatestAmazonResults(msg);
                         msg.amazon = amazon;
                         if (msg && msg.amazon) {
-                                if (postback.action == 'add') {
+                                if (postback.action == 'add' && postback.initial) {
                                     console.log('add --> postback: ', postback);
                                        var new_message = new db.Message({
                                             incoming: true,
@@ -225,7 +227,33 @@ app.post('/facebook', function(req, res) {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
                     
-                                } else if (postback.action === 'remove') {
+                                } 
+                                else if (postback.action == 'add' && !postback.initial) {
+                                    co(function*() {
+                                      console.log('addExtra --> postback: ', postback);
+                                      var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team; 
+                                      var cart = yield kipcart.getCart(cart_id);
+                                      var item = cart.items[postback.selected-1];
+                                      kipcart.addExtraToCart(cart, cart_id, cart_id, item);
+                                      var new_message = new db.Message({
+                                        incoming: true,
+                                        thread_id: msg.thread_id,
+                                        resolved: false,
+                                        user_id: msg.user_id,
+                                        origin: msg.origin,
+                                        text: 'view cart',
+                                        source: msg.source,
+                                        amazon: msg.amazon
+                                      });
+                                      // queue it up for processing
+                                      var message = new db.Message(new_message);
+                                      message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                      });
+                                    })
+
+                                } 
+                                else if (postback.action === 'remove') {
                                     var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -295,13 +323,17 @@ app.post('/facebook', function(req, res) {
                                     });
                                 }
                                 else if (postback.action === 'empty') {
-                                      var new_message = new db.Message({
+                                      var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
+                                      //Diverting team vs. personal cart based on source origin for now
+                                      var cart_type= msg.source.origin == 'slack' ? 'team' : 'personal';
+                                      kipcart.removeAllOfItem(cart_id, postback.selected);
+                                    var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
                                         resolved: false,
                                         user_id: msg.user_id,
                                         origin: msg.origin,
-                                        text: 'empty cart',
+                                        text: 'view cart',
                                         source: msg.source,
                                         amazon: msg.amazon
                                       });
@@ -478,7 +510,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
             if (err) console.log(err);
 
-            var giphy_gif = JSON.parse(body).data[0].images.downsized_medium.url
+            var giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.downsized_medium.url :  'http://kipthis.com/images/header_partners.png';
             // console.log('GIFY RETURN DATA: ', giphy_gif)
 
                var messageData = {
@@ -759,8 +791,8 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "remove" ,"selected": (i + 1), initial: false})
                     },
                     { "type": "postback", 
-                      "title": "Empty Cart", 
-                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "empty", initial: false})
+                      "title": "Remove All", 
+                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "empty", "selected": (i + 1), initial: false})
                     }
                 ]
               }
