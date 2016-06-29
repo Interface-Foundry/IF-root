@@ -299,8 +299,12 @@ module.exports.removeAllOfItem = function(slack_id, number) {
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
-    var ASIN_to_remove = _.get(cart, `aggregate_items[${number - 1}].ASIN`);
-    console.log('asin to remove is', ASIN_to_remove);
+    
+    var unique_items = _.uniqBy(cart.aggregate_items, 'title');
+    var ASIN_to_remove = _.get(unique_items, `${number - 1}.ASIN`);
+    var item_to_remove = _.get(unique_items, `${number - 1}.title`);
+
+    console.log('item to remove is', item_to_remove);
 
     if (!ASIN_to_remove) {
       kip.err('no asin found');

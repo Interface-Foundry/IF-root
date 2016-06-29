@@ -31,6 +31,7 @@ params:
 */
 var search = function*(params) {
   if (!params.query) {
+    console.log('error params: ', params)
     throw new Error('no query specified');
   }
 

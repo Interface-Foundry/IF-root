@@ -274,8 +274,10 @@ app.post('/facebook', function(req, res) {
                                       console.log('addExtra --> postback: ', postback);
                                       var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team; 
                                       var cart = yield kipcart.getCart(cart_id);
-                                      var item = cart.items[postback.selected-1];
-                                      kipcart.addExtraToCart(cart, cart_id, cart_id, item);
+                                      var unique_items = _.uniqBy( cart.aggregate_items, 'title');
+                                      var item = unique_items[parseInt(postback.selected-1)];
+                                      console.log('\n\n\n\n\n\\\n\n\nADDING AN EXTRA: ', item);
+                                      yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
                                       var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -364,25 +366,27 @@ app.post('/facebook', function(req, res) {
                                     });
                                 }
                                 else if (postback.action === 'empty') {
-                                      var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
-                                      //Diverting team vs. personal cart based on source origin for now
-                                      var cart_type= msg.source.origin == 'slack' ? 'team' : 'personal';
-                                      kipcart.removeAllOfItem(cart_id, postback.selected);
-                                    var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: 'view cart',
-                                        source: msg.source,
-                                        amazon: msg.amazon
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
+                                    co(function*(){
+                                        var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
+                                          //Diverting team vs. personal cart based on source origin for now
+                                          var cart_type= msg.source.origin == 'slack' ? 'team' : 'personal';
+                                          yield kipcart.removeAllOfItem(cart_id, postback.selected);
+                                        var new_message = new db.Message({
+                                            incoming: true,
+                                            thread_id: msg.thread_id,
+                                            resolved: false,
+                                            user_id: msg.user_id,
+                                            origin: msg.origin,
+                                            text: 'view cart',
+                                            source: msg.source,
+                                            amazon: msg.amazon
+                                          });
+                                        // queue it up for processing
+                                        var message = new db.Message(new_message);
+                                        message.save().then(() => {
+                                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                        });
+                                    })
                                 }
                                else if (postback.action === 'more') {
                                   var new_message = new db.Message({
@@ -626,7 +630,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
             if (err) console.log(err);
 
-            console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
+            // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
             giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
                
                var messageData = {
@@ -816,7 +820,8 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                 dataId: outgoing.data.thread_id,
                                 action: "add",
                                 selected: focus_info.selected,
-                                ts: outgoing.data.ts
+                                ts: outgoing.data.ts,
+                                initial: true
                             })
                         },
                         {
@@ -886,12 +891,13 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 }
               }
           };
-          console.log('facebook.js-send_cart()-cart: ', cart)
-        for (var i = 0; i < cart.aggregate_items.length; i++) {
-            var item = cart.aggregate_items[i];
-            var userString = item.added_by.map(function(u) {
-              return 'u';
-            }).join(', ');
+          var unique_items = _.uniqBy( cart.aggregate_items, 'title');
+        for (var i = 0; i < unique_items.length; i++) {
+            var item = unique_items[i];
+            // console.log('\n\n\n\nUNIQUE ITEMMMMS: ', unique_items)
+            // var userString = item.added_by.map(function(u) {
+            //   return 'u';
+            // }).join(', ');
             debugger;
             var cart_item = {
                 "title":  `${item.title}`,
