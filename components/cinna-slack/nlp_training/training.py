@@ -5,11 +5,11 @@ from keras.models import Model
 from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
 from keras.optimizers import RMSprop
 from keras.preprocessing.sequence import pad_sequences
-from keras.callbacks import TensorBoard as TBC
-from keras.callbacks import ModelCheckpoint as MC
+from keras.callbacks import TensorBoard, ModelCheckpoint
+
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes
-from utils import save_model
+from utils import save_model, save_tokenizer
 
 import tensorflow as tf
 
@@ -29,17 +29,18 @@ def model():
 
     with tf.name_scope('forwards'):
         # apply forwards LSTM1
-        forwards = LSTM(128, return_sequences=True)(embed)
+        forwards = LSTM(128, consume_less='gpu', return_sequences=True)(embed)
         # forwards = LSTM(128, return_sequences=True)(forwards)
         # forwards = LSTM(64, return_sequences=True)(forwards)
-        forwards = LSTM(128)(forwards)
+        forwards = LSTM(128, consume_less='gpu')(forwards)
 
     with tf.name_scope('backwards'):
         # apply forwards LSTM1
-        backwards = LSTM(128, return_sequences=True, go_backwards=True)(embed)
+        backwards = LSTM(128, return_sequences=True,
+                         consume_less='gpu', go_backwards=True)(embed)
         # backwards = LSTM(128, return_sequences=False)(backwards)
-        # backwards = LSTM(64, return_sequences=True, go_backwards=True)(after_dp)
-        backwards = LSTM(128)(backwards)
+        # backwards = LSTM(64, return_sequences=True)(after_dp)
+        backwards = LSTM(128, consume_less='gpu')(backwards)
 
     with tf.name_scope('merge1'):
         # concat the outputs of the 2 LSTMs
@@ -54,7 +55,7 @@ def model():
         model = Model(input=sequence, output=output)
 
     with tf.name_scope('optimizer'):
-        rmsprop = RMSprop(lr=0.0001, rho=0.9, epsilon=1e-08)
+        rmsprop = RMSprop(lr=0.00005, rho=0.9, epsilon=1e-08)
 
     with tf.name_scope('model_compiled'):
         model.compile(optimizer=rmsprop,
@@ -63,6 +64,17 @@ def model():
 
     return model
 
+
+def get_callbacks():
+    '''returns callbacks to use for training'''
+    tb = TensorBoard(
+        log_dir='logs/', histogram_freq=2, write_graph=True)
+
+    mc = ModelCheckpoint(
+        filepath='models/latest_model.hdf5',
+        verbose=1, save_best_only=True)
+
+    return tb, mc
 
 if __name__ == '__main__':
     pad_length = 20
@@ -76,13 +88,13 @@ if __name__ == '__main__':
     model = model()
     save_model(model)
     print(model.summary())
-    tb_callback = TBC(log_dir='logs/', histogram_freq=2, write_graph=True)
-    mc = MC(filepath='models/latest_model.hdf5',
-            verbose=1, save_best_only=True)
 
+    tb, mc = get_callbacks()
+
+    save_tokenizer(tk)
     model.fit(data, action_codes,
               validation_split=.2,
               nb_epoch=250,
               batch_size=16,
               verbose=1,
-              callbacks=[tb_callback, mc])
+              callbacks=[tb, mc])

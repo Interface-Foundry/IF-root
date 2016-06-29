@@ -3,6 +3,8 @@ from __future__ import print_function
 from keras.models import model_from_json
 import pandas as pd
 import re
+import json
+import pickle
 from os import path
 
 
@@ -27,6 +29,28 @@ def predict_to_class(text, tokenizer, model, reverse_action_dict):
         tokenizer.texts_to_sequences(text), maxlen=pad_length))
 
     reverse_action_dict[preds.argmax()]
+
+
+def save_tokenizer(tokenizer, pkl_name='tokenizer.pkl', foldername='pkls'):
+    with open(path.join(foldername, pkl_name), 'wb') as f:
+        pickle.dump(tokenizer, f)
+
+
+def load_tokenizer(pkl_name='tokenizer.pkl', foldername='pkls'):
+    with open(path.join(foldername, pkl_name), 'rb') as f:
+        tokenizer = pickle.load(f)
+    return tokenizer
+
+
+
+
+with open('my_dict.json', 'w') as f:
+    json.dump(my_dict, f)
+
+# elsewhere...
+
+with open('my_dict.json') as f:
+    my_dict = json.load(f)
 
 
 # --------------------------------

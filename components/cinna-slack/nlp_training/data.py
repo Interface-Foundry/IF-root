@@ -85,16 +85,6 @@ def actions_to_codes(df):
     return action_codes, dictionary, rev_dictionary
 
 
-def save_tokenizer(tokenizer, pkl_name='tokenizer.pkl', foldername='pkls'):
-    with open(path.join(foldername, pkl_name), 'wb') as f:
-        pickle.dump(tokenizer, f)
-
-
-def load_tokenizer(pkl_name='tokenizer.pkl', foldername='pkls'):
-    with open(path.join(foldername, pkl_name), 'rb') as f:
-        tokenizer = pickle.load(f)
-    return tokenizer
-
 
 # --------------------------------
 # OLD BELOW ----------------------
