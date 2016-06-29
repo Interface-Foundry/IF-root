@@ -11,8 +11,20 @@ logging.basicConfig(level=logging.DEBUG,
 
 predictor = Predictor()
 
+
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     '''
     '''
-    data.text = request.json['text']
+    text = request.json['text']
+
+    predictor.return_predictions(text)
+
+if __name__ == '__main__':
+    logging.info('running app on port ' + str(port_num))
+    app.run(host="0.0.0.0",
+            port=port_num,
+            use_debugger=True,
+            debug=True,
+            use_reloader=False)
+

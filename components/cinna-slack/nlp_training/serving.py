@@ -18,13 +18,11 @@ class Predictor:
         '''
         self.tokenizer()
 
-    '''
-    '''
-    if type(text) is str:
-        text = [text]
+        if type(text) is str:
+            text = [text]
 
-    preds = model.predict(pad_sequences(
-        tokenizer.texts_to_sequences(text), maxlen=pad_length))
+        preds = model.predict(pad_sequences(
+            tokenizer.texts_to_sequences(text), maxlen=pad_length))
 
     reverse_action_dict[preds.argmax()]
 

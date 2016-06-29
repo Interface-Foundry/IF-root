@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import json
 from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
@@ -23,24 +23,23 @@ def model():
     with tf.name_scope('inputs'):
         sequence = Input(shape=(data.shape[1],), dtype='int32')
         embed = Embedding(input_dim=tk.nb_words,
-                          output_dim=256,
+                          output_dim=128,
                           input_length=data.shape[1],
                           mask_zero=True)(sequence)
 
     with tf.name_scope('forwards'):
         # apply forwards LSTM1
-        forwards = LSTM(128, consume_less='gpu', return_sequences=True)(embed)
-        # forwards = LSTM(128, return_sequences=True)(forwards)
+        forwards = LSTM(64, consume_less='gpu', return_sequences=True)(embed)
+        # forwards = LSTM(128, consume_less='gpu', return_sequences=True)(forwards)
         # forwards = LSTM(64, return_sequences=True)(forwards)
-        forwards = LSTM(128, consume_less='gpu')(forwards)
+        forwards = LSTM(64, consume_less='gpu')(forwards)
 
     with tf.name_scope('backwards'):
         # apply forwards LSTM1
-        backwards = LSTM(128, return_sequences=True,
-                         consume_less='gpu', go_backwards=True)(embed)
+        backwards = LSTM(64, return_sequences=True, consume_less='gpu', go_backwards=True)(embed)
         # backwards = LSTM(128, return_sequences=False)(backwards)
         # backwards = LSTM(64, return_sequences=True)(after_dp)
-        backwards = LSTM(128, consume_less='gpu')(backwards)
+        backwards = LSTM(64, consume_less='gpu')(backwards)
 
     with tf.name_scope('merge1'):
         # concat the outputs of the 2 LSTMs
@@ -55,7 +54,7 @@ def model():
         model = Model(input=sequence, output=output)
 
     with tf.name_scope('optimizer'):
-        rmsprop = RMSprop(lr=0.00005, rho=0.9, epsilon=1e-08)
+        rmsprop = RMSprop(lr=0.0001, rho=0.9, epsilon=1e-08)
 
     with tf.name_scope('model_compiled'):
         model.compile(optimizer=rmsprop,
@@ -88,6 +87,11 @@ if __name__ == '__main__':
     model = model()
     save_model(model)
     print(model.summary())
+    # with open('my_dict.json') as f:
+    #     my_dict = json.load(f)
+
+# elsewhere...
+
 
     tb, mc = get_callbacks()
 

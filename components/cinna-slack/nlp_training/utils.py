@@ -11,7 +11,7 @@ from os import path
 def save_model(model, filename='latest_model', folder='models'):
     json_string = model.to_json()
     open(path.join(folder, filename + '.json'), 'w').write(json_string)
-    model.save_weights(path.join(folder, filename + '.hdf5'))
+    model.save_weights(path.join(folder, filename + '.hdf5'), overwrite=True)
 
 
 def load_model(filename='latest_model', folder='models'):
@@ -42,15 +42,9 @@ def load_tokenizer(pkl_name='tokenizer.pkl', foldername='pkls'):
     return tokenizer
 
 
-
-
-with open('my_dict.json', 'w') as f:
-    json.dump(my_dict, f)
-
-# elsewhere...
-
-with open('my_dict.json') as f:
-    my_dict = json.load(f)
+def save_dict(dictionary, filename, folder='dict_lookups'):
+    with open(path.join(folder, filename + '.json'), 'w') as f:
+        json.dump(dictionary, f)
 
 
 # --------------------------------
