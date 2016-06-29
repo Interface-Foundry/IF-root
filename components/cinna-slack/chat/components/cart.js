@@ -300,7 +300,7 @@ module.exports.removeAllOfItem = function(slack_id, number) {
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
     
-    var unique_items = _.uniqBy(cart.aggregate_items, 'title');
+    var unique_items = _.uniqBy(cart.aggregate_items, 'ASIN');
     var ASIN_to_remove = _.get(unique_items, `${number - 1}.ASIN`);
     var item_to_remove = _.get(unique_items, `${number - 1}.title`);
 

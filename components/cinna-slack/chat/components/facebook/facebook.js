@@ -274,7 +274,7 @@ app.post('/facebook', function(req, res) {
                                       console.log('addExtra --> postback: ', postback);
                                       var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team; 
                                       var cart = yield kipcart.getCart(cart_id);
-                                      var unique_items = _.uniqBy( cart.aggregate_items, 'title');
+                                      var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
                                       var item = unique_items[parseInt(postback.selected-1)];
                                       console.log('\n\n\n\n\n\\\n\n\nADDING AN EXTRA: ', item);
                                       yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
@@ -891,7 +891,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 }
               }
           };
-          var unique_items = _.uniqBy( cart.aggregate_items, 'title');
+          var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
         for (var i = 0; i < unique_items.length; i++) {
             var item = unique_items[i];
             // console.log('\n\n\n\nUNIQUE ITEMMMMS: ', unique_items)
