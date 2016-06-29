@@ -1,0 +1,17 @@
+main:
+  pad_length: 20
+ac_dict:
+  checkout: 1
+  collect: 2
+  focus: 3
+  initial: 4
+  list: 5
+  modify: 6
+  more: 7
+  onboarding: 8
+  remove: 9
+  save: 10
+  settings: 11
+  shopping: 12
+  similar: 13
+  smalltalk: 14

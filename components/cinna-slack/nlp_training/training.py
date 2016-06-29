@@ -1,5 +1,8 @@
 from __future__ import print_function
+
 import json
+
+import tensorflow as tf
 from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
@@ -11,7 +14,8 @@ from keras.callbacks import TensorBoard, ModelCheckpoint
 from data import retrieve_from_prod_db, to_tk, actions_to_codes
 from utils import save_model, save_tokenizer
 
-import tensorflow as tf
+with open('config/config.json', 'r') as f:
+    config = json.load(f)
 
 
 def model():
@@ -29,21 +33,24 @@ def model():
 
     with tf.name_scope('forwards'):
         # apply forwards LSTM1
-        forwards = LSTM(64, consume_less='gpu', return_sequences=True)(embed)
-        # forwards = LSTM(128, consume_less='gpu', return_sequences=True)(forwards)
-        # forwards = LSTM(64, return_sequences=True)(forwards)
-        forwards = LSTM(64, consume_less='gpu')(forwards)
+        fw = LSTM(64, consume_less='gpu', return_sequences=True)(embed)
+        fw = Dropout(0.25)(fw)
+        fw = LSTM(64, consume_less='gpu', return_sequences=True)(fw)
+        fw = LSTM(32, consume_less='gpu', return_sequences=True)(fw)
+        fw = LSTM(32, consume_less='gpu')(fw)
 
     with tf.name_scope('backwards'):
         # apply forwards LSTM1
-        backwards = LSTM(64, return_sequences=True, consume_less='gpu', go_backwards=True)(embed)
-        # backwards = LSTM(128, return_sequences=False)(backwards)
-        # backwards = LSTM(64, return_sequences=True)(after_dp)
-        backwards = LSTM(64, consume_less='gpu')(backwards)
+        bw = LSTM(64, consume_less='gpu', return_sequences=True,
+                  go_backwards=True)(embed)
+        bw = Dropout(0.25)(bw)
+        bw = LSTM(64, consume_less='gpu', return_sequences=True)(bw)
+        bw = LSTM(32, consume_less='gpu', return_sequences=True)(bw)
+        bw = LSTM(32, consume_less='gpu')(bw)
 
     with tf.name_scope('merge1'):
         # concat the outputs of the 2 LSTMs
-        merged = merge([forwards, backwards], mode='concat', concat_axis=-1)
+        merged = merge([fw, bw], mode='concat', concat_axis=-1)
         after_dp = Dropout(0.5)(merged)
 
         # apply forwards + backwards LSTM1
@@ -76,7 +83,11 @@ def get_callbacks():
     return tb, mc
 
 if __name__ == '__main__':
-    pad_length = 20
+
+    pad_length = config['pad_length']
+    ac_dict = config['ac_dict']
+    rev_ac_dict = config['rev_ac_dict']
+
     df = retrieve_from_prod_db()
     action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
 
@@ -85,13 +96,13 @@ if __name__ == '__main__':
     data = pad_sequences(data, maxlen=pad_length)
 
     model = model()
+    config['model'] = model.to_json()
     save_model(model)
     print(model.summary())
     # with open('my_dict.json') as f:
     #     my_dict = json.load(f)
 
 # elsewhere...
-
 
     tb, mc = get_callbacks()
 

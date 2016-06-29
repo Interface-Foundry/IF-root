@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     python3-pip \
     python3-numpy \
-    libhdf5-dev
+    libhdf5-dev \
+    python3-h5py
 
-RUN pip3 install keras h5py pandas $TF_DOWNLOAD
+RUN pip3 install keras pandas $TF_DOWNLOAD
