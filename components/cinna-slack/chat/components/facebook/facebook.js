@@ -113,8 +113,11 @@ app.get('/facebook', function(req, res) {
 })
 
 app.post('/facebook', function(req, res) {
-            // console.log('\n\n\n\n\nFB Messenger raw message POST event: ', JSON.stringify(req.body),'\n\n\n\n\n')
+            console.log('\n\n\n\n\nFB Messenger raw message POST event: ', JSON.stringify(req.body),'\n\n\n\n\n')
     messaging_events = req.body.entry[0].messaging;
+    if (!messaging_events) {
+        return console.log('facebook.js messaging events missing:  ', req.body.entry[0])
+    }
     for (i = 0; i < messaging_events.length; i++) {
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
@@ -123,7 +126,19 @@ app.post('/facebook', function(req, res) {
             text = emojiText.convert(text,{delimiter: ' '});
             console.log(JSON.stringify(req.body));
 
+            //IMAGE
+            // {"object":"page",
+            //  "entry":[{"id":"976386645706699",
+            //            "time":1467150524385,
+            //            "messaging":[{"sender":{"id":"835675223228683"},
+                          // "recipient":{"id":"976386645706699"},
+                          // "timestamp":1467150524291,
+                          // "message":{"mid":"mid.1467150524208:c4b573468f51f14971",
+                          // "seq":7040,
+                          // "attachments":[{"type":"image","payload":{"url":"https://scontent.xx.fbcdn.net/v/t35.0-12/13555998_10106500839158099_1145220634_o.jpg?_nc_ad=z-m&oh=748ab0918c5e1b008f6a89e5aeda7898&oe=5775635E"}}]}}]}]}
 
+
+            //STICKER
             // {"object":"page",
             //     "entry":[{"id":"976386645706699",
             //               "time":1466720536096,
@@ -132,9 +147,9 @@ app.post('/facebook', function(req, res) {
             //                       "recipient":{"id":"976386645706699"},
             //                       "timestamp":1466720536018,
             //                        "message":{"mid":"mid.1466720536009:b696bef8626e341406",
-            //                        "seq":6406,
-            //                        "sticker_id":554423931312128,
-            //                        "attachments":[{"type":"image","payload":{"url":"https://scontent.xx.fbcdn.net/t39.1997-6/p100x100/851574_555286174559237_1177223253_n.png?_nc_ad=z-m"}}]}}]}]}
+                        //                        "seq":6406,
+                        //                        "sticker_id":554423931312128,
+                        //                        "attachments":[{"type":"image","payload":{"url":"https://scontent.xx.fbcdn.net/t39.1997-6/p100x100/851574_555286174559237_1177223253_n.png?_nc_ad=z-m"}}]}}]}]}
 
 
             var message = new db.Message({
@@ -162,10 +177,36 @@ app.post('/facebook', function(req, res) {
             });
 
         } 
-        // else if (event.message.sticker_id) {
 
+        else if (_.get(req.body.entry[0].messaging[i], 'message.sticker_id') || _.get(req.body.entry[0].messaging[i], 'message.attachments')) {
+             var img_card = {
+                    "attachment":{
+                      "type":"image",
+                      "payload":{
+                        "url": 'http://i.imgur.com/UuloBFs.png'
+
+                      }
+                    }
+                  } 
+
+             request({
+                    url: 'https://graph.facebook.com/v2.6/me/messages',
+                    qs: {
+                        access_token: fbtoken
+                    },
+                    method: 'POST',
+                    json: {
+                        recipient: {
+                            id: sender.toString()
+                        },
+                        message: img_card,
+                    }
+                }, function(err, res, body) {
+                    if (err) console.error('post err ', err);
+                    console.log(body);
+                });
             
-        // }   
+        }   
         else if (event.postback) {
             var postback = JSON.parse(event.postback.payload);
             console.log('\n\n\npostback: ', postback,'\n\n\n');
@@ -462,6 +503,9 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
             else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
                 return send_text(message.source.channel, message.text, outgoing)
+            } 
+            else {
+                console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhmm, shouldnt be getting here.. facebook.js line 466: ', message);
             }
 
             outgoing.ack();
@@ -480,24 +524,96 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
     function send_text(channel, text, outgoing) {
         console.log('send_text: ', fbtoken, channel, text);
-       request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: {
-                recipient: {
-                    id: channel
+
+        function chunkString(str, length) {
+          return str.match(new RegExp('.{1,' + length + '}', 'g'));
+        }
+
+        if (text.length >= 200) {
+            var text_array = chunkString(text, 250) 
+            console.log('text_array: ', text_array);
+            var el_count = 0;
+            var char_count = 0;
+            var current_chunk = ''
+            async.eachSeries(text_array, function iterator(chunk, cb){
+                char_count = char_count + chunk.length;
+                if (el_count == text_array.length-1) {
+                     request({
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {
+                            access_token: fbtoken
+                        },
+                        method: 'POST',
+                        json: {
+                            recipient: {
+                                id: channel
+                            },
+                            message: {text: current_chunk},
+                            notification_type: "NO_PUSH"
+                        }
+                    }, function(err, res, body) {
+                        if (err) console.error('post err ', err);
+                        console.log(body);
+                        char_count = 0;
+                        current_chunk = '';
+                        el_count++;
+                        cb();
+                    });
+                }
+                else if (char_count > 125) {
+                     request({
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {
+                            access_token: fbtoken
+                        },
+                        method: 'POST',
+                        json: {
+                            recipient: {
+                                id: channel
+                            },
+                            message: {text: current_chunk},
+                            notification_type: "NO_PUSH"
+                        }
+                    }, function(err, res, body) {
+                        if (err) console.error('post err ', err);
+                        console.log(body);
+                        char_count = 0;
+                        current_chunk = '';
+                        el_count++;
+                        cb();
+                    });
+                }
+                else {
+                    current_chunk = current_chunk + ' ' + chunk;
+                    el_count++;
+                    cb()
+                } 
+            }, function done() {
+              outgoing.ack();
+
+            })
+          }
+        else {
+           request({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {
+                    access_token: fbtoken
                 },
-                message: {text: text},
-                notification_type: "NO_PUSH"
-            }
-        }, function(err, res, body) {
-            if (err) console.error('post err ', err);
-            console.log(body);
-            outgoing.ack();
-        });
+                method: 'POST',
+                json: {
+                    recipient: {
+                        id: channel
+                    },
+                    message: {text: text},
+                    notification_type: "NO_PUSH"
+                }
+            }, function(err, res, body) {
+                if (err) console.error('post err ', err);
+                console.log(body);
+                outgoing.ack();
+            });
+        }
+
     }
 
     function send_results(channel, text, results, outgoing) {
@@ -510,9 +626,9 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
             if (err) console.log(err);
 
-            var giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.downsized_medium.url :  'http://kipthis.com/images/header_partners.png';
-            // console.log('GIFY RETURN DATA: ', giphy_gif)
-
+            console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
+            giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
+               
                var messageData = {
                     "attachment": {
                         "type": "template",

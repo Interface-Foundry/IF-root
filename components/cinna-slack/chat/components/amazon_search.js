@@ -60,7 +60,7 @@ var search = function*(params) {
   // skip = 9; p2, s0
   }
 
-  debug('🔍 do the amazon search! 🔎 ')
+  debug('🔍 do the amazon search! 🔎 ');
   debug('input params', params);
   debug('amazon params', amazonParams);
 
