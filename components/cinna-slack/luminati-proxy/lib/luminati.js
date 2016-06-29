@@ -1,10 +1,6 @@
 // LICENSE_CODE ZON
 'use strict'; /*jslint node:true, esnext:true*/
-
-//
-//run with: pm2 start luminati-proxy -x -- --customer lum-customer-kipthis-zone-gen --country us --password e49d4ega1696 --pool_size 9 --session_timeout 5000 --max_requests 50
-//or: luminati --customer lum-customer-kipthis-zone-gen --country us --password e49d4ega1696 --pool_size 9 --session_timeout 5000 --max_requests 50
-
+const async = require('async');
 const _ = require('underscore');
 const events = require('events');
 const http = require('http');
@@ -114,9 +110,6 @@ function Luminati(opt){
         });
         req.on('error', this.ethrow_fn());
         req.on('timeout', ()=>this.ethrow(new Error('request timeout')));
-
-        console.log('REQ URL ',req.url)
-
         this.info.url = req.url;
         if (opt.pool_size && !req.headers['proxy-authorization'])
         {
@@ -133,7 +126,7 @@ function Luminati(opt){
             {
                 if (_this._pool_ready)
                 {
-                    if (!_this.sessions.length)
+                    if (_this.sessions.length < 3)
                     {
                         _this._log('WARNING', 'pool size is too small');
                         yield _this._pool(1);
@@ -151,7 +144,105 @@ function Luminati(opt){
                 }
             }
         }
-        yield _this._request(req, res, head);
+
+
+        // async.whilst(function () {
+        //     return true;
+        // },
+        // function (next) {
+        //     console.log('checking in...')
+        //     if (_this.sessions){
+        //         var approved_sessions = _this.sessions.filter(function(obj){
+        //            if (obj.good){
+        //                return obj;            
+        //            }
+        //         });
+        //         console.log('routine check: ',approved_sessions)
+
+        //         if (approved_sessions.length < 3){
+        //             console.log('NOT ENOUGH APPROVED SESSIONS!, adding new')
+        //             _this._pool(1);
+        //         }
+        //     }
+
+        //     setTimeout(function() {
+        //        next(); 
+        //     }, 15000);
+        // },
+        // function (err) {
+        //   // All things are done!
+        // });
+
+
+
+        //study #1
+
+        yield _this._request(req, res, head, function(rez){
+
+            //console.log('study #1: ',_this.sessions)
+
+            //handle sessions here
+
+            if(!rez.ping){
+                return;
+            }
+
+            //fast
+            if(rez.ping < 180){
+
+                console.log('fast')
+
+                _this.sessions = _this.sessions.filter(function(obj){
+                   if (obj.info.ip == rez.session.info.ip){
+                       obj.good = true;
+                       return obj;            
+                   }else {
+                       return obj; 
+                   }
+                });   
+
+                //console.log('after good ',_this.sessions)
+
+            }
+            //slow
+            else if (rez.ping >= 180){
+                //remove session from _this.sessions
+                console.log('slow')
+
+                _this.sessions = _this.sessions.filter(function(obj){
+                   if (obj.info.ip == rez.session.info.ip){
+
+                        if(!obj.tryout){
+                            obj.tryout = 1;
+                        } 
+                        if(obj.good){
+                            obj.good = false;
+                        }
+
+                        //count tries
+                        if(obj.tryout < 10){
+                            obj.tryout++;
+                            console.log('counting ',obj.tryout)
+                            return obj;
+                        }
+                        //we tried enough, kill
+                        else {
+                            console.log('kill me')
+                            //dont return slow session
+                        }                  
+
+                   }else {
+                       return obj; 
+                   }
+                }); 
+
+                //console.log('after kill ',_this.sessions)
+            }
+            else {
+                console.log('wtf')
+            }
+        });
+
     });
     _this.http_server = http.createServer((req, res, head)=>{
         if (req.headers.host=='trigger.domain' ||
@@ -162,7 +253,7 @@ function Luminati(opt){
         if (!req.url.startsWith('http:'))
             req.url = 'http://'+req.headers.host+req.url;
         handler(req, res, head);
-    });
+    }).on('connection', socket=>socket.setNoDelay());
     if (_this.opt.ssl)
     {
         _this.authorization = {};
@@ -171,11 +262,12 @@ function Luminati(opt){
             if (authorization)
                 req.headers['proxy-authorization'] = authorization;
             handler(req, res, head);
-        });
+        }).on('connection', socket=>socket.setNoDelay());
         _this.http_server.on('connect', (req, socket, head)=>{
             socket.write(`HTTP/1.1 200 OK\r\n\r\n`);
             const _socket = net.connect({host: '127.0.0.1',
                 port: _this.https_server.address().port});
+            _socket.setNoDelay();
             const authorization = req.headers['proxy-authorization'];
             if (authorization)
             {
@@ -194,7 +286,7 @@ function Luminati(opt){
 
 util.inherits(Luminati, events.EventEmitter);
 
-Luminati.prototype.listen = etask._fn(function*listen(_this, port){
+Luminati.prototype.listen = etask._fn(function*listen(_this, port, hostname){
     let _http = _this.http_server, _https = _this.https_server;
     if (port===undefined)
         port = _this.opt.port||24000;
@@ -202,7 +294,7 @@ Luminati.prototype.listen = etask._fn(function*listen(_this, port){
         _http.removeAllListeners('error');
         _this.emit('error', err);
         this.ethrow(err);
-    }).listen(port, ()=>{
+    }).listen(port, hostname||'0.0.0.0', ()=>{
         _http.removeAllListeners('error');
         _this.port = _http.address().port;
         if (!_https)
@@ -214,7 +306,7 @@ Luminati.prototype.listen = etask._fn(function*listen(_this, port){
             _https.removeAllListener('error');
             _this.emit('error', err);
             this.ethrow(err);
-        }).listen(()=>{
+        }).listen(0, '127.0.0.1', ()=>{
             _https.removeAllListeners('error');
             _this.emit('ready');
             this.ereturn(_this);
@@ -224,26 +316,18 @@ Luminati.prototype.listen = etask._fn(function*listen(_this, port){
 });
 
 Luminati.prototype.stop = etask._fn(function*stop(_this){
-    _this.http_server.stop(()=>{
+    _this.http_server.close(()=>{
         if (!_this.https_server)
             return this.ereturn(_this);
-        _this.https_server.stop(()=>{
-            return this.ereturn(_this);
-        });
+        _this.https_server.close(()=>this.ereturn(_this));
     });
     yield this.wait();
 });
 
 Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
-
-    //console.log('?? ',count);
-
     let fetch = tryout=>etask(function*pool_fetch(){
         for (;; tryout++)
         {
-            //console.log('👻👻z ',_this);
-           // console.log('@👻@ ',_this.deleteMe);
-
             let session = `${_this.port}_${_this.session_id++}`;
             let username = calculate_username(assign({session: session},
                 _.pick(_this.opt, 'customer', 'zone', 'country', 'state', 'city', 'asn',
@@ -258,67 +342,10 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
             let res, err;
             try {
                 res = yield etask.nfn_apply(request, [opt]);
-
-                //console.log('TRY RES ',res);
-
-                //console.time("PING");
-
-                var begin=Date.now();
-
-                
                 if (res && res.statusCode==200 &&
-                    res.headers['content-type'].match(/\/json/)){
-
-
-                    //if too slow, kill session
-
+                    res.headers['content-type'].match(/\/json/))
+                {
                     let info = JSON.parse(res.body);
-
-                   // console.log('👻 ',info);
-
-
-                    // this.info.url = 'http://kipthis.com/index.html';
-                    // // if (opt.pool_size && !req.headers['proxy-authorization'])
-                    // // {
-                    // //     if (!_this.sessions)
-                    // //     {
-                    // //         _this.sessions = [];
-                    // //         _this.session_id = 1;
-                    // //         yield _this._pool(opt.pool_size);
-                    // //         _this._log('DEBUG',
-                    // //             `initialized pool - ${_this.opt.pool_size}`);
-                    // //         _this._pool_ready = true;
-                    // //     }
-                    // //     else
-                    // //     {
-                    // //         if (_this._pool_ready)
-                    // //         {
-                    // //             if (!_this.sessions.length)
-                    // //             {
-                    // //                 _this._log('WARNING', 'pool size is too small');
-                    // //                 yield _this._pool(1);
-                    // //             }
-                    // //         }
-                    // //         for (;; yield etask.sleep(1000))
-                    // //         {
-                    // //             if (!_this._pool_ready)
-                    // //                 continue;
-                    // //             if (_this.sessions.length)
-                    // //                 break;
-                    // //             _this._log('WARNING', 'pool size is too small');
-                    // //             yield _this._pool(1);
-                    // //             break;
-                    // //         }
-                    // //     }
-                    // // }
-                    // yield _this._request(req, res, head);
-
-
-
-                    //test IP ping here!
-
-                    
-
                     _this._log('DEBUG',
                         `new session added ${proxy}:${session}`,
                         {ip: info.ip});
@@ -338,54 +365,9 @@ Luminati.prototype._pool = etask._fn(function*pool(_this, count, retries){
                 return this.ethrow(new Error('could not establish a session'));
         }
     });
-    
-   // console.log('count?? ',count)
-    //kip: removing bad session 
-    if(count.length > 3){
-
-       // console.log('YES?')
-        var deleteByIP = count;
-        
-
-        // var remover = _.filter(_this.sessions, function(session){
-        //   return session.info.ip === deleteByIP;
-        // });
-    
-        
-
-        //console.log(_.filter(_this.sessions, {info: {ip: deleteByIP}}) );
-
-        _this.sessions = _this.sessions.filter(function(obj){
-           if (obj.info.ip !== deleteByIP){
-               return obj;            
-           }
-        });
-
-
-        console.log('ARRRRRAY ',_this.sessions)
-
-        // var removedArr = _.remove(_this.sessions, function(session) {
-
-        //     console.log('ZZ?? ',session)
-        //   return session.info.ip === deleteByIP;
-        // });
-
-        //console.log('___DELETED ME____ ',removedArr);
-
-        // _this.sessions = removedArr;
-
-        // console.log('___UPDATED ARR____ ',_this.sessions);
-
-        count = 1;
-
-    }
-
     for (let i=0; i<count; i++)
         this.spawn(fetch(1));
-    yield this.wait_child('all');        
-
-
-
+    yield this.wait_child('all');
 });
 
 Luminati.log_level = {
@@ -404,10 +386,9 @@ Luminati.prototype._log = function(level, msg, extra){
     console.log.apply(console, args);
 };
 
-Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
+var countz = 0;
 
-    //console.log('👻👻 ',_this.sessions);
-
+Luminati.prototype._request = etask._fn(function*(_this, req, res, head, done){
     let url = req.url;
     if (req.method=='CONNECT')
     {
@@ -421,25 +402,62 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
     let authorization =
         parse_authorization(req.headers['proxy-authorization']);
 
-    var whichSession = Math.floor(Math.random()*_this.sessions.length);
-    let session = !authorization && _this.sessions && _this.sessions[whichSession];
+    //experiment #2:
+    let session;
 
-    //console.log('👻whichSession ',whichSession);
+    if(req.url !== 'http://kipthis.com/DONTTOUCH.txt'){
+        var goodSessions = _this.sessions.filter(function(obj){
+           if (obj.good){
+               return obj;            
+           }
+        });   
+        if (goodSessions.length < 2){
+            console.log('warning: need more goodSessions')
+            
+            session = !authorization && _this.sessions && _this.sessions[Math.floor(Math.random()*_this.sessions.length)];
+        }
+        else {
+            console.log('countz ',countz)
 
-    let host = session&&session.proxy||_this.opt.proxy[0];
-    let username = calculate_username(assign({}, _this.opt, {
-        session: session && session.session,
-        direct: _this.opt.direct && _this.opt.direct.include &&
-            _this.opt.direct.include.test(url) ||
-            _this.opt.direct && _this.opt.direct.exclude &&
-            !_this.opt.direct.exclude.test(url) || false,
-    }, authorization||{}));
-    let password = authorization && authorization.password ||
-        _this.opt.password;
-    let stats = _this.stats[host];
-    stats.active_requests++;
-    stats.max_requests = Math.max(stats.max_requests, stats.active_requests);
-    _this._log('DEBUG', `requesting using ${username}`);
+            if(countz == 0 && goodSessions[countz]){
+                session = goodSessions[countz];
+                console.log('0 ',session)
+                countz++;
+            }else if (countz == 1 && goodSessions[countz]){
+                session = goodSessions[countz];
+                console.log('1 ',session)
+                countz++;
+            }else if (countz == 2 && goodSessions[countz]){
+                session = goodSessions[countz];
+                console.log('2 ',session)
+                countz = 0;
+            }else{
+                countz = 0;
+                session = goodSessions[countz];
+                console.log('00 ',session)
+            }
+            
+            //session = goodSessions && goodSessions[Math.floor(Math.random()*goodSessions.length)];
+            //console.log('using this session: ',session)
+        }
+        
+    }else {
+        
+        var goodSessions = _this.sessions.filter(function(obj){
+           if (obj.good){
+               return obj;            
+           }
+        });   
+
+        console.log('. ',goodSessions.length)
+        if (goodSessions.length < 2){
+            console.log('warning: need more goodSessions, making new')
+            _this._pool(3);
+        }
+        session = !authorization && _this.sessions && _this.sessions[Math.floor(Math.random()*_this.sessions.length)];
+    }
+    
+
     if (session)
     {
         session.count++;
@@ -451,6 +469,36 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
             yield _this._pool(1);
         }
     }
+    else if (_this.opt.sticky_ip)
+    {
+        const ip = req.connection.remoteAddress;
+        if (!_this.opt.sticky_ip[ip])
+        {
+            _this.opt.sticky_ip[ip] = {
+                proxy: _this.opt.proxy[0],
+                session: util.format('%d_%s', _this.port,
+                    new Buffer(ip, 'hex').toString('utf8')),
+            };
+        }
+        session = _this.opt.sticky_ip[ip];
+        session.authorization = session.authorization||authorization;
+    }
+    else if (_this.opt.session)
+        session = {session: _this.opt.session};
+    let host = session&&session.proxy||_this.opt.proxy[0];
+    let username = calculate_username(assign({}, _this.opt, {
+        session: session&&session.session,
+        direct: _this.opt.direct && _this.opt.direct.include &&
+            _this.opt.direct.include.test(url) ||
+            _this.opt.direct && _this.opt.direct.exclude &&
+            !_this.opt.direct.exclude.test(url) || false,
+    }, authorization||{}));
+    let password = authorization && authorization.password ||
+        _this.opt.password;
+    let stats = _this.stats[host];
+    stats.active_requests++;
+    stats.max_requests = Math.max(stats.max_requests, stats.active_requests);
+    _this._log('DEBUG', `requesting using ${username}`);
     const timeline = {start: Date.now()};
     const response = {
         request: {
@@ -466,59 +514,24 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
     };
     const handler = (proxy, headers)=>etask(function*(){
 
-        var begin=Date.now();
-        var begin2=Date.now();
 
         proxy.on('response', _res=>{
-
-            var end= Date.now();
-
-            console.log(begin)
-            console.log(end)
-
-            var timeSpent=(end-begin);
-
-
-            //console.log("💖PING: ",timeSpent)
-
-            //if(_res.statusCode == '')
-
-            if (timeSpent > 250){
-                //console.log('slow')
-                //_res.statusCode = 500;
-
-                //console.log("💖SELECT: ",whichSession)
-
-                //console.log("💖KILs: ",_this.sessions) 
-
-                //console.log("💖KILL ME: ",_this.sessions[whichSession].info.ip) 
-
-                //console.log("💖KILLED: ",_this.sessions) 
-
-                if (_this.sessions.length > 1 && _this.sessions[whichSession] && _this.sessions[whichSession].info && _this.sessions[whichSession].info.ip){
-                    _this._pool(_this.sessions[whichSession].info.ip);
-                }
-
-            }
-
-            else if (timeSpent < 300){
-               // console.log('fast')
-                //_res.statusCode = 200;
-            }
-
             timeline.response = Date.now()-timeline.start;
+
+            var k = {
+                ping: timeline.response,
+                session: session
+            }
+            //study #1
+            if(req.url == 'http://kipthis.com/DONTTOUCH.txt'){
+                done(k);
+            }
+
             stats.active_requests--;
             let code = `${_res.statusCode}`.replace(/(?!^)./g, 'x');
             stats.status_code[code] = (stats.status_code[code]||0)+1;
             _this._log('DEBUG',
                 `${req.method} ${url} - ${_res.statusCode}`);
-
-
-            // console.log("💖CODE: ",code)
-            // console.log("💖CODEarr: ",stats.status_code[code])
-
-
-
             write_http_reply(res, _res, headers);
             _res.pipe(res);
             _res.on('end', ()=>{
@@ -530,13 +543,6 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
                 this.ereturn();
             });
         }).on('connect', (_res, socket, _head)=>{
-
-            var end2= Date.now();
-
-            var timeSpent=(end2-begin2);
-
-            //console.log("💖PING2: ",timeSpent)
-
             timeline.connect = Date.now()-timeline.start;
             stats.active_requests--;
             write_http_reply(res, _res);
@@ -573,6 +579,12 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
             path: url,
             headers: req.headers,
         });
+
+        proxy.setTimeout(1000,function(){
+            console.log('1AOBRTING?!?!?!??!!?!?!?')
+            proxy.abort()
+        });
+
         req.pipe(proxy);
         return yield handler(proxy);
     }
@@ -616,12 +628,17 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head){
         headers: assign(headers, req.headers),
     });
 
+    if (url !== 'http://kipthis.com/DONTTOUCH.txt'){
+        proxy.setTimeout(1000,function(rez){
+            console.log('2AOBRTING?!?!?!??!!?!?!? ')
+            proxy.abort();
+
+        });      
+    }
+
     if (req.method=='CONNECT')
         proxy.end();
     else
-       // console.log('NOT CONNECT METHOD')
         req.pipe(proxy);
-
-   // console.log(proxy)
     yield handler(proxy);
 });
