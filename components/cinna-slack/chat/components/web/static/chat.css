@@ -49,19 +49,35 @@
 }
 
 .typer{
-  background-color:#f7f7f9; 
-  border:1px solid #e1e1e8; 
-  font-family: Monaco,Menlo,Consolas,monospace; 
-  color:#c25; 
-  font-size:1.2rem; 
-  line-height:.72rem; 
-  white-space:normal; 
-  padding: 1px 3px; 
+  background-color:#f7f7f9;
+  border:1px solid #e1e1e8;
+  font-family: Monaco,Menlo,Consolas,monospace;
+  color:#c25;
+  font-size:1.2rem;
+  line-height:.72rem;
+  white-space:normal;
+  padding: 1px 3px;
   border-radius:3px;
 }
 
 .selector{
   font-size: 20px;
+}
+
+a.item_title {
+  text-decoration: none;
+  font-size: large;
+}
+
+.avatar {
+  display: inline-block;
+  width:45px;
+  height: 45px;
+  margin-right: 5px;
+  color: white;
+  font-size: 20px;
+  line-height: 45px;
+  padding-left: 5px;
 }
 
 html, body {
