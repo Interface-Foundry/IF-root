@@ -515,17 +515,23 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head, done){
     const handler = (proxy, headers)=>etask(function*(){
 
 
-        proxy.on('response', _res=>{
-            timeline.response = Date.now()-timeline.start;
+        var goody = false;
 
-            var k = {
-                ping: timeline.response,
-                session: session
-            }
-            //study #1
-            if(req.url == 'http://kipthis.com/DONTTOUCH.txt'){
-                done(k);
-            }
+        // if(req.url !== 'http://kipthis.com/DONTTOUCH.txt'){
+        //     setTimeout(function() {
+        //         if(!goody){
+        //             proxy.end()
+        //             //this.ethrow_fn()
+        //             console.log('KILLING EARLY')
+        //         }
+        //     }, 2000);
+        // }
+        
+        proxy.on('response', _res=>{
+
+            timeline.response = Date.now()-timeline.start;
+            //console.log('WAITING START')
+
 
             stats.active_requests--;
             let code = `${_res.statusCode}`.replace(/(?!^)./g, 'x');
@@ -535,7 +541,20 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head, done){
             write_http_reply(res, _res, headers);
             _res.pipe(res);
             _res.on('end', ()=>{
+                goody = true;
+                console.log('WAITING END ',goody)
                 timeline.end = Date.now()-timeline.start;
+
+                var k = {
+                    ping: timeline.end,
+                    session: session
+                }
+                //study #1
+                if(req.url == 'http://kipthis.com/DONTTOUCH.txt'){
+                    console.log('kk ping ',k.ping)
+                    done(k);
+                }
+
                 _this.emit('response', Object.assign(response, {
                     status_code: _res.statusCode,
                     headers: Object.assign({}, _res.headers, headers||{}),
@@ -568,6 +587,7 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head, done){
                 this.ereturn();
             });
         }).on('error', this.ethrow_fn());
+
         yield this.wait();
     });
     if (0)
@@ -580,10 +600,10 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head, done){
             headers: req.headers,
         });
 
-        proxy.setTimeout(1000,function(){
-            console.log('1AOBRTING?!?!?!??!!?!?!?')
-            proxy.abort()
-        });
+        // proxy.setTimeout(1000,function(){
+        //     console.log('1AOBRTING?!?!?!??!!?!?!?')
+        //     proxy.abort()
+        // });
 
         req.pipe(proxy);
         return yield handler(proxy);
@@ -629,9 +649,10 @@ Luminati.prototype._request = etask._fn(function*(_this, req, res, head, done){
     });
 
     if (url !== 'http://kipthis.com/DONTTOUCH.txt'){
-        proxy.setTimeout(1000,function(rez){
+        proxy.setTimeout(500,function(rez){
             console.log('2AOBRTING?!?!?!??!!?!?!? ')
-            proxy.abort();
+            //proxy.abort();
+            proxy.end()
 
         });      
     }
