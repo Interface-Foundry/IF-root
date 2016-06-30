@@ -34,19 +34,16 @@ def model():
     with tf.name_scope('forwards'):
         # apply forwards LSTM1
         fw = LSTM(64, consume_less='gpu', return_sequences=True)(embed)
-        fw = Dropout(0.3)(fw)
-        fw = LSTM(64, consume_less='gpu', return_sequences=True)(fw)
-        fw = LSTM(32, consume_less='gpu', return_sequences=True)(fw)
-        fw = LSTM(32, consume_less='gpu')(fw)
+        # fw = LSTM(64, consume_less='gpu', return_sequences=True)(fw)
+        # fw = LSTM(32, consume_less='gpu', return_sequences=True)(fw)
+        fw = LSTM(32)(fw)
 
     with tf.name_scope('backwards'):
         # apply forwards LSTM1
-        bw = LSTM(64, consume_less='gpu', return_sequences=True,
-                  go_backwards=True)(embed)
-        bw = Dropout(0.3)(bw)
-        bw = LSTM(64, consume_less='gpu', return_sequences=True)(bw)
-        bw = LSTM(32, consume_less='gpu', return_sequences=True)(bw)
-        bw = LSTM(32, consume_less='gpu')(bw)
+        bw = LSTM(64, consume_less='gpu', return_sequences=True, go_backwards=True)(embed)
+        # bw = LSTM(64, return_sequences=True)(bw)
+        # bw = LSTM(32, consume_less='gpu', return_sequences=True)(bw)
+        bw = LSTM(32)(bw)
 
     with tf.name_scope('merge1'):
         # concat the outputs of the 2 LSTMs
@@ -55,8 +52,7 @@ def model():
 
     with tf.name_scope('complete_model'):
         # to dense output
-        output = Dense(action_codes.shape[
-                       1], activation='relu', W_regularizer=l2(1e-4))(after_dp)
+        output = Dense(action_codes.shape[1], activation='relu')(after_dp)
         model = Model(input=sequence, output=output)
 
     with tf.name_scope('optimizer'):
