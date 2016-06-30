@@ -25,14 +25,20 @@ class Predict:
     '''
 
     def __init__(self):
+        '''
+        base predictor class
+        '''
         with open('config/config.json') as cfg:
             self.config = json.load(cfg)
+
         self.model = load_model(filename='latest_model', folder='models')
+        self.model.compile(optimizer='rmsprop',
+                           loss='categorical_crossentropy')
+        self.model_layout = self.model.to_json()
+
         self.tokenizer = load_tokenizer()
         self.action_dict = self.config['ac_dict']
         self.reverse_action_dict = self.config['rev_ac_dict']
-        self.model_layout = self.config['model']
-        # model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
     def return_predictions(self, text):
         ''' take input text and return

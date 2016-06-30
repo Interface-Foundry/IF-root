@@ -7,9 +7,9 @@ from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
 from keras.optimizers import RMSprop
+from keras.regularizers import l2
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint
-
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes
 from utils import save_model, save_tokenizer
@@ -19,7 +19,7 @@ with open('config/config.json', 'r') as f:
 
 
 def model():
-    '''full bidirectional'''
+    '''full bidirectional LSTM'''
     with tf.name_scope('session'):
         sess = tf.Session()
         K.set_session(sess)
@@ -34,7 +34,7 @@ def model():
     with tf.name_scope('forwards'):
         # apply forwards LSTM1
         fw = LSTM(64, consume_less='gpu', return_sequences=True)(embed)
-        fw = Dropout(0.25)(fw)
+        fw = Dropout(0.3)(fw)
         fw = LSTM(64, consume_less='gpu', return_sequences=True)(fw)
         fw = LSTM(32, consume_less='gpu', return_sequences=True)(fw)
         fw = LSTM(32, consume_less='gpu')(fw)
@@ -43,7 +43,7 @@ def model():
         # apply forwards LSTM1
         bw = LSTM(64, consume_less='gpu', return_sequences=True,
                   go_backwards=True)(embed)
-        bw = Dropout(0.25)(bw)
+        bw = Dropout(0.3)(bw)
         bw = LSTM(64, consume_less='gpu', return_sequences=True)(bw)
         bw = LSTM(32, consume_less='gpu', return_sequences=True)(bw)
         bw = LSTM(32, consume_less='gpu')(bw)
@@ -53,11 +53,10 @@ def model():
         merged = merge([fw, bw], mode='concat', concat_axis=-1)
         after_dp = Dropout(0.5)(merged)
 
-        # apply forwards + backwards LSTM1
-
     with tf.name_scope('complete_model'):
         # to dense output
-        output = Dense(action_codes.shape[1], activation='softmax')(after_dp)
+        output = Dense(action_codes.shape[
+                       1], activation='relu', W_regularizer=l2(1e-4))(after_dp)
         model = Model(input=sequence, output=output)
 
     with tf.name_scope('optimizer'):
@@ -96,13 +95,8 @@ if __name__ == '__main__':
     data = pad_sequences(data, maxlen=pad_length)
 
     model = model()
-    config['model'] = model.to_json()
     save_model(model)
     print(model.summary())
-    # with open('my_dict.json') as f:
-    #     my_dict = json.load(f)
-
-# elsewhere...
 
     tb, mc = get_callbacks()
 
