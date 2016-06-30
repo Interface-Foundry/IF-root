@@ -1,11 +1,11 @@
 env: production
 isProduction: true
 mongodb:
-  url: mongodb://jolteon.internal.kipapp.co,vaporeon.internal.kipapp.co/foundry?connectTimeoutMS=600000&socketTimeoutMS=600000
+  url: mongodb://10.142.0.8,10.142.0.7/foundry
   backuphost: jolteon.internal.kipapp.co
   options:
     replset:
-      rs_name: foundry
+      rs_name: rs0
       socketOptions:
         keepAlive: 1
 elasticsearch:
@@ -20,6 +20,6 @@ neighborhoodServer:
   url: http://localhost:9998
 app:
   publicAPI: https://kipapp.co/styles/api
-picstitch: http://localhost:5000
-nlp: http://localhost:8083
+picstitch: http://picstitch:5000
+nlp: http://nlp:8083
 doc2vec: http://localhost:8084
