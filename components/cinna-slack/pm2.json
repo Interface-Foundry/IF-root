@@ -1,0 +1,9 @@
+{
+    "apps" : [{
+        "name" : "slack_js",
+        "script": "chat/components/slack/slack.js"
+    },{
+        "name": "reply_logic",
+        "script": "chat/components/reply_logic.js"
+    }]
+}

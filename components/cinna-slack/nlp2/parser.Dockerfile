@@ -20,7 +20,7 @@ MAINTAINER grahama <graham.annett@gmail.com>
 
 RUN pip install ipython # just for testing rn
 
-ADD src /root/
+ADD . /root/
 
 RUN chmod +x /root/parser.sh
 

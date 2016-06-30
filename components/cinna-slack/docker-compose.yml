@@ -1,5 +1,6 @@
 nlp:
-  build: ./nlp2
+  build: ./nlp2/
+  dockerfile: parser.Dockerfile
   ports:
     - "8083:8083"
 image_processing:
