@@ -6,7 +6,7 @@ var config = require('../config');
 var kip = require('../kip');
 
 if (mongoose.connection.readyState == 0) {
-    mongoose.connect(config.mongodb.url, config.mongodb.options);
+    mongoose.connect(config.mongodb.url);
     var db_conn = mongoose.connection;
     db_conn.on('error', function(err) {
         kip.error(err);
