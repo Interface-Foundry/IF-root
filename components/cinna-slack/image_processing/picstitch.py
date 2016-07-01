@@ -23,6 +23,7 @@ THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
 
 # Constants bestowed upon us by a higher power (slack)
+
 CHAT_WIDTH = 365
 CHAT_HEIGHT = 140
 # MOBILE_WIDTH = 0 # TODO
@@ -70,6 +71,13 @@ def index():
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
     TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
+    #messenger ratio
+    if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+        CHAT_WIDTH = 267
+        PIC_COORDS = [{'x': 5, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
+        TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
+
+
     #add images
     for i, data in enumerate(images):
         im = download_image(data[u'url'])
@@ -88,6 +96,7 @@ def index():
         # y = CHOICE_COORDS[i][u'y']
         # img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
+
     #add names, text wrapped
     font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price 
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
@@ -96,6 +105,23 @@ def index():
         x = TEXTBOX_COORDS[i][u'x'] - 30
         y = TEXTBOX_COORDS[i][u'y']
         draw = ImageDraw.Draw(img)
+
+        #draw white fill to cover image
+        if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+            #draw white boxes
+            print 'boxbox'
+            draw.rectangle(((115,0),(400,160)), fill="white")
+
+            # add white box transparency in, eventually fam ~
+            # # # 
+            # back = Image.new('RGBA', (512,512), (255,0,0,0))
+            # poly = Image.new('RGBA', (512,512))
+            # pdraw = ImageDraw.Draw(poly)
+            # pdraw.polygon([(128,128),(384,384),(128,384),(384,128)],
+            #               fill=(255,255,255,127),outline=(255,255,255,255))
+            # back.paste(poly,mask=poly)
+            # back.show()
+
 
         last_y = 5
 
@@ -140,11 +166,17 @@ def index():
 
         last_y = last_y + 5
 
+        if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+            BOX_WIDTH = 26
+        else:
+            BOX_WIDTH = 30
+
+
         for z in im[u'name']:  
 
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
             countLines = 0
-            for line in textwrap.wrap(z, width=30):
+            for line in textwrap.wrap(z, width=BOX_WIDTH):
                 countLines += 1
                 if countLines < 3:
                     filler = ''

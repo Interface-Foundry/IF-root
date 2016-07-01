@@ -1,9 +1,11 @@
 stitch = require('../../image_processing/api.js');
 var async = require('async');
 
-var stitchResultsPromise = function(items) {
+var stitchResultsPromise = function(items,origin) {
+  console.log('originSTITCH ',origin)
   return new Promise((resolve, reject) => {
     stitchResults({
+      origin: origin,
       amazon: items
     }, 'amazon', function(urls) {
       resolve(urls);
@@ -31,21 +33,21 @@ var stitchResults = function(data,source,callback) {
 
                   //* * item 1 * * *//
                   function(callback){
-                    buildImage(data.amazon[0],function(res){
+                    buildImage(data,function(res){
                       callback(null,res);
                     },0);
                   },
 
                   //* * item 2 * * *//
                   function(callback){
-                    buildImage(data.amazon[1],function(res){
+                    buildImage(data,function(res){
                       callback(null,res);
                     },1);
                   },
 
                   //* * item 3 * * *//
                   function(callback){
-                    buildImage(data.amazon[2],function(res){
+                    buildImage(data,function(res){
                       callback(null,res);
                     },2);
                   }
@@ -87,7 +89,17 @@ var stitchResults = function(data,source,callback) {
           }
 
 
-          function buildImage(amazonObj,callbackG,tracker){ //the tracker is to keep track of which URL is which in parallel process
+          function buildImage(data,callbackG,tracker){ //the tracker is to keep track of which URL is which in parallel process
+
+              console.log('OK OK OK ',data);
+
+              var origin = data.origin;
+
+              if(!origin){
+                origin = 'web';
+              }
+
+              var amazonObj = data.amazon[tracker];
 
               var price;
 
@@ -284,7 +296,8 @@ var stitchResults = function(data,source,callback) {
                     price: price,
                     prime: primeAvail, //is prime available?
                     name: cString, //TRIM NAME HERE
-                    reviews: amazonObj.reviews
+                    reviews: amazonObj.reviews,
+                    origin: origin
                 });
               }
               else {
@@ -293,7 +306,8 @@ var stitchResults = function(data,source,callback) {
                     price: price,
                     prime: primeAvail, //is prime available?
                     name: '',
-                    reviews: amazonObj.reviews
+                    reviews: amazonObj.reviews,
+                    origin: origin
                 });
               }
               fireStitch(tracker,function(){

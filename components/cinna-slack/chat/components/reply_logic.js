@@ -320,7 +320,7 @@ var handlers = {};
 
 handlers['shopping.initial'] = function*(message, exec) {
   typing(message);
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -365,7 +365,7 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -400,7 +400,7 @@ handlers['shopping.similar'] = function*(message, exec) {
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
 
-  var results = yield amazon_search.similar(exec.params);
+  var results = yield amazon_search.similar(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -440,7 +440,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -485,7 +485,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
