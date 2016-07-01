@@ -14,11 +14,9 @@
 # USAGE:
 #
 
-FROM grahama/kip:parsey
+FROM gcr.io/kip-ai/nlp:base
 
 MAINTAINER grahama <graham.annett@gmail.com>
-
-RUN pip install ipython # just for testing rn
 
 ADD src_parser /root/
 

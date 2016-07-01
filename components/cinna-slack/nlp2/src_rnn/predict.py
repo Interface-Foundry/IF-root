@@ -1,9 +1,13 @@
+# K.set_learning_phase(0)
 from keras.models import model_from_json
 from keras.preprocessing.sequence import pad_sequences
 import pickle
 import json
 from os import path
-# K.set_learning_phase(0)
+import logging
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def load_model(filename='latest_model', folder='models'):
@@ -20,7 +24,7 @@ def load_tokenizer(pkl_name='tokenizer.pkl', foldername='pkls'):
     return tokenizer
 
 
-class Predict:
+class ModelPredictor:
     '''
     '''
 
@@ -28,7 +32,7 @@ class Predict:
         '''
         base predictor class
         '''
-        with open('config/config.json') as cfg:
+        with open('config.json') as cfg:
             self.config = json.load(cfg)
 
         self.model = load_model(filename='latest_model', folder='models')
@@ -39,14 +43,22 @@ class Predict:
         self.tokenizer = load_tokenizer()
         self.action_dict = self.config['ac_dict']
         self.reverse_action_dict = self.config['rev_ac_dict']
+        self.pad_length = self.config['pad_length']
 
     def return_predictions(self, text):
         ''' take input text and return
         '''
-        self.tokenizer()
-        pad_length = self.config['pad_length']
         if type(text) is str:
             text = [text]
+        logging.info('text received: ' + str(text))
         sequenced = self.tokenizer.texts_to_sequences(text)
-        preds = self.model.predict(pad_sequences(sequenced, maxlen=pad_length))
-        return self.reverse_action_dict[str(preds.argmax())]
+        logging.info('converted to sequence sequence: ' + str(sequenced))
+        preds = self.model.predict(pad_sequences(
+            sequenced, maxlen=self.pad_length))
+        logging.info('preds: ' + str(preds))
+        resp = preds.argsort()[::-1]
+        logging.info('top 3 preds: ' +
+                     self.reverse_action_dict[str(resp[0][0])] + ' ' +
+                     self.reverse_action_dict[str(resp[0][1])] + ' ' +
+                     self.reverse_action_dict[str(resp[0][2])])
+        return self.reverse_action_dict[str(resp[0][0])]

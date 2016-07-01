@@ -3,7 +3,6 @@ from pymongo import MongoClient
 from keras.preprocessing.text import Tokenizer
 from keras.utils import np_utils
 
-import pickle
 import string
 from os import path
 
@@ -27,13 +26,13 @@ def combine_smalltalk(df):
     return df
 
 
-def retrieve_from_prod_db(only_incoming=True, not_null=True, save=True):
+def retrieve_from_prod_db(only_incoming=True, not_null=True, p=False):
     '''
     helper function to munge and explore with pandas
     '''
     pickled_location = path.join('pkls/too_big', 'messages.pkl')
 
-    if path.isfile(pickled_location):
+    if p and path.isfile(pickled_location):
         df = pd.read_pickle(pickled_location)
     else:
         df = load_df()
@@ -83,7 +82,6 @@ def actions_to_codes(df):
     rev_dictionary = {v: k for k, v in dictionary.items()}
 
     return action_codes, dictionary, rev_dictionary
-
 
 
 # --------------------------------

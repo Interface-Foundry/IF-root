@@ -1,12 +1,17 @@
-nlp:
-  build: ./nlp2/
-  dockerfile: parser.Dockerfile
-  ports:
-    - "8083:8083"
 image_processing:
   build: ./image_processing
   ports:
     - "5000:5000"
+parser:
+  build: ./nlp2/
+  dockerfile: parser.Dockerfile
+  ports:
+    - "8083:8083"
+rnn:
+  build: ./nlp2/
+  dockerfile: rnn.Dockerfile
+  ports:
+    - "8085:8085"
 # node_stuff:
 #   build: .
 #   command: pm2 start app.json
