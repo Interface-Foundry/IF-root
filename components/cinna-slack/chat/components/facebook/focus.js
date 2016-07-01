@@ -43,7 +43,7 @@ module.exports = function*(message) {
     }
 
     return {
-      title: emojis[message.focus] + ' ' + _.get(r, 'ItemAttributes[0].Title[0]').substring(0, 50),
+      title: emojis[message.focus] + _.get(r, 'ItemAttributes[0].Title[0]').substring(0, 50),
       price: r.realPrice,
       image_url: _.get(r, 'LargeImage[0].URL[0]') || _.get(r, 'ImageSets[0].ImageSet[0].LargeImage[0].URL[0]'),
       title_link: r.shortened_url,
