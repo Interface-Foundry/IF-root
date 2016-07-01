@@ -26,7 +26,7 @@ h5 {
 
 
 a {
-  color: #47a2fc 
+  color: #47a2fc;
 }
 
 hr
@@ -66,4 +66,35 @@ hr
 
 .product {
   border: 1.7px solid #d3d3d3;
+}
+
+.live-demo-container {
+  position: fixed;
+  top:15px;
+  right: 10px;
+  width: 100%;
+  z-index: 100;
+}
+
+.btn-live-demo {
+  float: right;
+  padding: 5px 30px;
+  background-color: #47a2fc;
+  color: #fff;
+
+  -webkit-box-shadow: -1px 1px 5px 0px rgba(0,0,0,0.41);
+  -moz-box-shadow: -1px 1px 5px 0px rgba(0,0,0,0.41);
+  box-shadow: -1px 1px 5px 0px rgba(0,0,0,0.41);
+  border: 0px;
+
+  /*Transition*/
+  -webkit-transition: All 0.5s ease;
+  -moz-transition: All 0.5s ease;
+  -o-transition: All 0.5s ease;
+  -ms-transition: All 0.5s ease;
+  transition: All 0.5s ease;
+}
+
+.btn-live-demo:hover {
+  background-color: #7057cf;
 }
