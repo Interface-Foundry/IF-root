@@ -1,11 +1,13 @@
+from __future__ import print_function
+
 from easydict import EasyDict as edict
 
 # data.text is the original text
 # data.blob is the output of TextBlob
 # data.doc is the output of spaCy
 def parse(data):
-    print 'entering parser method'
-    print data.text
+    print('entering parser method')
+    print(data.text)
 
     # Create the object we will return from the api
     res = edict({})
@@ -78,10 +80,12 @@ def parse(data):
         res.nouns.add(n.lower())
     for chunk in data.doc.noun_chunks:
         res.nouns.add(chunk.orth_.lower())
-    if (len(res.nouns) == 0):
+    if len(res.nouns) == 0:
         for token in res.parts_of_speech:
-            if token[1] == 'NOUN':
+            if token[1] in ['NOUN', 'PROPN']:
                 res.nouns.add(token[0])
+    if len(res.nouns) == 0:
+        res.nouns.add(data.doc.text.lower())
     res.nouns = list(res.nouns)
 
     # Adjectives & verrrrrbs
