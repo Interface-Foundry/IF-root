@@ -106,7 +106,10 @@ queue.topic('incoming').subscribe(incoming => {
     // kip.debug('simple replies'.cyan, replies);
 
     if (!replies || replies.length === 0) {
+      // console.log('\n\n\n\n\n\nBEFORE NLP message', message);
       replies = yield nlp_response(message);
+            // console.log('\n\n\n\n\n\nAFTER NLP RESOINSE', replies);
+
       // kip.debug('nlp replies'.cyan, replies);
     }
 
@@ -135,6 +138,7 @@ function* simple_response(message) {
 
   //check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
+  // console.log('\n\n\n\n\n\nBEFORE BANTER: ', message);
   var reply = banter.checkForCanned(message);
 
   kip.debug('prefab reply from banter.js', reply);
@@ -248,11 +252,15 @@ function* simple_response(message) {
 function* nlp_response(message) {
   kip.debug('nlp_response begin'.cyan)
   // the nlp api adds the processing data to the message
-  yield nlp.parse(message);
-
+  
+  try {
+     yield nlp.parse(message);
   var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
-
   var messages = yield execute(message);
+  } catch(err) {
+    console.log('\n\n\n\NLP ERR', err)
+  }
+ 
 
   return [debug_message].concat(messages);
 }
@@ -277,7 +285,6 @@ function execute(message) {
       }
       return messages;
     }, [])
-
     // only return messages
     return messages.reduce((all, m) => {
       console.log(typeof m);
@@ -425,7 +432,11 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } else {
+  } 
+  else if (exec.params.type === 'genericDetail') {
+    
+  } 
+  else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
@@ -467,7 +478,10 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } else {
+  } 
+
+
+  else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 

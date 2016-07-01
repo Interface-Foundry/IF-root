@@ -59,6 +59,7 @@ var parse = module.exports.parse = function(message) {
       return simpleResult;
     }
 
+    
     // Get help from TextBlob and spaCy python modules
     var res = yield request({
       method: 'POST',
@@ -68,6 +69,7 @@ var parse = module.exports.parse = function(message) {
         text: text
       }
     });
+
 
     // welp we'll mutate the shit out of the message here.
     nlpToResult(res, message);
