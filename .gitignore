@@ -70,8 +70,5 @@ app/phonegap/platforms/ios/Bubbl.li.xcodeproj/project.xcworkspace/xcuserdata/jrb
 
 *.xcuserstate
 
-<<<<<<< HEAD
 TrainingCorpus
-=======
 components/cinna-slack/node_modules/*
->>>>>>> 7c2ef330e538cee2f3c38a0c1aa7f6b47ba033c5
