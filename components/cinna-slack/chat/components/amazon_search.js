@@ -10,12 +10,38 @@ var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = promisify(require('./amazonHTML'));
-var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
-});
+// var client = amazon.createClient({
+//   awsId: "AKIAIKMXJTAV2ORZMWMQ",
+//   awsSecret: "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",
+//   awsTag: "quic0b-20"
+// });
 
+
+var aws_clients = {
+  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
+    awsId: "AKIAIKMXJTAV2ORZMWMQ",
+    awsSecret: "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",
+    awsTag: "quic0b-20"
+  }),
+  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
+    awsId: "AKIAIM4IKQAE2WF4MJUQ",
+    awsSecret: "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",
+    awsTag: "quic0b-20"
+  })
+};
+
+var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+
+var aws_client_id_list = Object.keys(aws_clients);
+
+var i = 0;
+function get_client() {
+  i++;
+  if (i === aws_client_id_list.length) {
+    i = 0;
+  }
+  return aws_clients[aws_client_id_list[i]];
+}
 
 /*
 params:
@@ -29,7 +55,10 @@ params:
 
   http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 */
-var search = function*(params) {
+var search = function*(params,origin) {
+
+  console.log('origin ',origin)
+
   if (!params.query) {
     console.log('error params: ', params)
     throw new Error('no query specified');
@@ -65,7 +94,7 @@ var search = function*(params) {
   debug('input params', params);
   debug('amazon params', amazonParams);
 
-  var results = yield client.itemSearch(amazonParams);
+  var results = yield get_client().itemSearch(amazonParams);
   results = results.slice(skip, skip + 3);
   results.original_query = params.query
 
@@ -78,7 +107,7 @@ var search = function*(params) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results);
+  return yield enhance_results(results,origin);
 }
 
 
@@ -87,7 +116,7 @@ params:
 asin
 skip
 */
-var similar = function*(params) {
+var similar = function*(params,origin) {
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
     throw new Error('no ASIN specified');
@@ -112,7 +141,7 @@ var similar = function*(params) {
   debug('input params', params);
   debug('amazon params', amazonParams);
 
-  var results = yield client.similarityLookup(amazonParams);
+  var results = yield get_client().similarityLookup(amazonParams);
   results = results.slice(params.skip, params.skip + 3);
     results.original_query = params.query
 
@@ -126,12 +155,14 @@ var similar = function*(params) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results);
+  return yield enhance_results(results,origin);
 }
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results) {
+function* enhance_results(results,origin) {
+
+  
 
   // enhance the results, naturally.
   yield results.map(r => {
@@ -148,7 +179,9 @@ function* enhance_results(results) {
     })
   });
 
-  var urls = yield picstitch.stitchResultsPromise(results); // no way i'm refactoring this right now
+  console.log('incomign results!!!! ',results)
+
+  var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
 
   for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];
