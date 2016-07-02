@@ -69,3 +69,5 @@ IF_server.js
 app/phonegap/platforms/ios/Bubbl.li.xcodeproj/project.xcworkspace/xcuserdata/jrbaldwin.xcuserdatad/UserInterfaceState.xcuserstate
 
 *.xcuserstate
+
+TrainingCorpus
