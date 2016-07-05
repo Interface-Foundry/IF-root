@@ -57,14 +57,17 @@ class McParser:
         self.nouns = []
         self.verbs = []
         self.adjectives = []
+        self.noun_phrases = []
         self.parts_of_speech = []
         self.item_descriptors = []
         self.entities = []
         self.had_find = False
         self.isQuestion = False
-        self.process_text()
+        self._process_text()
+        self._array_form()
+        self._parse_terms()
 
-    def process_text(self):
+    def _process_text(self):
         '''
         takes base text, pass into syntaxnet_array, put into array form, and
         parse the terms into accessible object
@@ -77,10 +80,8 @@ class McParser:
             self.terms['had_find'] = True
             # self.text = self.text.lower().replace('find', '')
         self.d_array = syntaxnet_array(self.text)
-        self.array_form()
-        self.parse_terms()
 
-    def array_form(self):
+    def _array_form(self):
         '''
         '''
         self.dependency_array = []
@@ -88,7 +89,7 @@ class McParser:
             self.dependency_array.append(line.split('\t'))
         self.dependency_array.sort(key=lambda x: x[6])
 
-    def parse_terms(self):
+    def _parse_terms(self):
         '''
         not sure if i should use unicode(i[1]) or u"{}",format(i[1])" so using
         cur_word
@@ -110,6 +111,7 @@ class McParser:
             if i[7] in ['dobj']:
                 self.dobj = cur_word
                 self.search_object = cur_word
+                self.noun_phrases = [self.root + ' ' + cur_word]
             if i[7] in ['dep']:
                 self.item_descriptors.append(cur_word)
 
@@ -131,7 +133,7 @@ class McParser:
         Put into correct json format for api.js
         '''
         response = EasyDict()
-        response.nouns = [' '.join(self.adjectives + self.nouns)]
+        response.nouns = self.noun_phrases + [' '.join(self.adjectives + self.nouns)]
         response.adjectives = self.adjectives
         response.entities = self.entities
         response.focus = self.focus
@@ -142,7 +144,7 @@ class McParser:
         ss = {}
         ss['focus'] = self.focus
         ss['isQuestion'] = self.isQuestion
-        ss['noun_phrases'] = [' '.join(self.nouns + self.adjectives)]
+        ss['noun_phrases'] = self.noun_phrases
         ss['parts_of_speech'] = self.parts_of_speech
         ss['sentiment_polarity'] = 0.0
         ss['sentiment_subjectivity'] = 0.0

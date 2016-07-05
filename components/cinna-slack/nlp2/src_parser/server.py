@@ -20,8 +20,7 @@ if orig_:
     logging.debug('------using spacy------')
     from spacy.en import English
     from textblob import TextBlob
-    nlp_data_dir = '/usr/local/lib/python2.7/dist-packages/spacy/data/en-1.1.0'
-    nlp = English(data_dir=nlp_data_dir)
+    nlp = English()
 
 
 @app.route('/parse', methods=['GET', 'POST'])
