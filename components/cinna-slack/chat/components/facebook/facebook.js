@@ -68,6 +68,7 @@ var request = require('request');
 var async = require('async');
 var bodyParser = require('body-parser');
 var busboy = require('connect-busboy');
+var fs = require('fs');
 //set env vars
 var config = require('../../../config');
 process.on('uncaughtException', function(err) {
@@ -77,6 +78,9 @@ process.on('uncaughtException', function(err) {
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
+var httpsServer = require('https').createServer({
+  pfx: fs.readFileSync('facebook-dev.pfx')
+}, app);
 var search_results = require('./search_results');
 var focus = require('./focus');
 var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
@@ -99,6 +103,10 @@ server.listen(8000, function(e) {
     }
     console.log('chat app listening on port 8000 🌏 💬')
 })
+httpsServer.listen(4343, function(e) {
+  if (kip.err(e)) return;
+  console.log('chat app listening on https port 4343')
+})
 
 app.get('/facebook', function(req, res) {
 
@@ -113,7 +121,7 @@ app.get('/facebook', function(req, res) {
 app.post('/facebook', function(req, res) {
 
 
-      var welcome = { "setting_type":"greeting", 
+      var welcome = { "setting_type":"greeting",
                         "greeting":{ "text":"Welcome to Kip, your personal AI shopping bot!" } }
 
     request({
@@ -188,11 +196,11 @@ app.post('/facebook', function(req, res) {
                 json: typing_indicator
             }, function() { })
         }
-            
 
 
 
-        if (event.message && event.message.text) {   
+
+        if (event.message && event.message.text) {
             // var typing_indicator = {
             //   "recipient":{
             //     "id": sender.toString()
@@ -233,7 +241,7 @@ app.post('/facebook', function(req, res) {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
                 // })
-        } 
+        }
          else if (!_.get(req.body.entry[0].messaging[i], 'message.sticker_id') && _.get(req.body.entry[0].messaging[i], 'message.attachments[0].type') == 'image') {
             var data = { file: {url_private: req.body.entry[0].messaging[i].message.attachments[0].payload.url}};
              process_image.imageSearch(data,'',function(res){
@@ -263,7 +271,7 @@ app.post('/facebook', function(req, res) {
                     });
                 }
             });
-        }   
+        }
         else if (_.get(req.body.entry[0].messaging[i], 'message.sticker_id') || _.get(req.body.entry[0].messaging[i], 'message.attachments')) {
             var img_array = [
             'http://kipthis.com/kip_stickers/kip1.png',
@@ -284,7 +292,7 @@ app.post('/facebook', function(req, res) {
                         "url": img_array[Math.floor(Math.random()*img_array.length)]
                       }
                     }
-                  } 
+                  }
 
              request({
                     url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -302,16 +310,16 @@ app.post('/facebook', function(req, res) {
                     if (err) console.error('post err ', err);
                     console.log(body);
                 });
-            
-        }   
-       
-        
+
+        }
+
+
         else if (event.postback) {
             try {
                 var postback = JSON.parse(event.postback.payload);
             } catch(err) {
                 console.log('POSTBACK PARSE ERR: ',err)
-                var postback = event.postback.payload;   
+                var postback = event.postback.payload;
             }
             console.log('\n\n\npostback: ', postback,'\n\n\n');
             db.Messages.find({
@@ -386,7 +394,7 @@ app.post('/facebook', function(req, res) {
                             }, function(err, res, body) {
                                 if (err) console.error('post err ', err);
                             })
-                        } 
+                        }
                         else if (postback.action == 'button_search') {
                             var text = postback.text;
                             text = emojiText.convert(text,{delimiter: ' '});
@@ -404,7 +412,7 @@ app.post('/facebook', function(req, res) {
                                     message.save().then(() => {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
-                    
+
                         }
                         function* getLatestAmazonResults(message) {
                             message.history = [];
@@ -454,12 +462,12 @@ app.post('/facebook', function(req, res) {
                                     message.save().then(() => {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
-                    
-                                } 
+
+                                }
                                 else if (postback.action == 'add' && !postback.initial) {
                                     co(function*() {
                                       console.log('addExtra --> postback: ', postback);
-                                      var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team; 
+                                      var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
                                       var cart = yield kipcart.getCart(cart_id);
                                       var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
                                       var item = unique_items[parseInt(postback.selected-1)];
@@ -482,7 +490,7 @@ app.post('/facebook', function(req, res) {
                                       });
                                     })
 
-                                } 
+                                }
                                 else if (postback.action === 'remove') {
                                     var new_message = new db.Message({
                                         incoming: true,
@@ -500,7 +508,7 @@ app.post('/facebook', function(req, res) {
                                     message.save().then(() => {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
-                                
+
                                 } else if (postback.action === 'list') {
                                       var new_message = new db.Message({
                                         incoming: true,
@@ -517,7 +525,7 @@ app.post('/facebook', function(req, res) {
                                     message.save().then(() => {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
-                                } 
+                                }
                                 else if (postback.action === 'focus') {
                                       var new_message = new db.Message({
                                         incoming: true,
@@ -669,7 +677,7 @@ app.post('/facebook', function(req, res) {
     res.sendStatus(200);
 
 
-     
+
 
 });
 
@@ -706,12 +714,12 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             }
 
             else if (message.mode === 'cart' && message.action === 'view') {
-                return send_cart(message.source.channel, message.text, outgoing); 
+                return send_cart(message.source.channel, message.text, outgoing);
             }
 
             else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
                 return send_text(message.source.channel, message.text, outgoing)
-            } 
+            }
             else {
                 // console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhmm, shouldnt be getting here.. facebook.js line 466: ', message);
             }
@@ -738,7 +746,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         }
 
         if (text.length >= 200) {
-            var text_array = chunkString(text, 250) 
+            var text_array = chunkString(text, 250)
             console.log('text_array: ', text_array);
             var el_count = 0;
             var char_count = 0;
@@ -795,7 +803,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     current_chunk = current_chunk + ' ' + chunk;
                     el_count++;
                     cb()
-                } 
+                }
             }, function done() {
               outgoing.ack();
 
@@ -852,7 +860,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
             // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
             giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
-               
+
                var messageData = {
                     "attachment": {
                         "type": "template",
@@ -876,7 +884,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                     "type": "web_url",
                                     "url": results[0].title_link,
                                     "title": "View on Amazon"
-                                }, 
+                                },
                                 {
                                     "type": "postback",
                                     "title": "Details",
@@ -905,7 +913,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                     "type": "web_url",
                                     "url": results[1].title_link,
                                     "title": "View on Amazon"
-                                }, 
+                                },
                                 {
                                     "type": "postback",
                                     "title": "Details",
@@ -934,7 +942,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                     "type": "web_url",
                                     "url": results[2].title_link,
                                     "title": "View on Amazon"
-                                }, 
+                                },
                                 {
                                     "type": "postback",
                                     "title": "Details",
@@ -1001,7 +1009,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
          })
         // })
 
-      
+
 
         // });
 
@@ -1014,7 +1022,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         var img_card = {
              "recipient": {
                 "id": channel
-            }, 
+            },
              "message":{
                 "attachment":{
                   "type":"template",
@@ -1024,7 +1032,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                       {
                         "title": focus_info.title,
                         "item_url": focus_info.title_link,
-                        "image_url": focus_info.image_url, 
+                        "image_url": focus_info.image_url,
                       }
                     ]
                   }
@@ -1073,7 +1081,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                             })
                         }
                         ],
-                         
+
                         "text": (focus_info.price + '\n' + focus_info.description + '\n' + focus_info.reviews).substring(0,300)
                     }
                 }
@@ -1138,16 +1146,16 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 "subtitle": 'Price: ' + item.price + "\nQuantity:" + item.quantity,
                 "image_url": item.image,
                 "buttons":[
-                    { "type": "postback", 
-                      "title": "➕", 
+                    { "type": "postback",
+                      "title": "➕",
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "add" ,"selected": (i + 1), initial: false })
                     },
-                    { "type": "postback", 
-                      "title": "➖", 
+                    { "type": "postback",
+                      "title": "➖",
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "remove" ,"selected": (i + 1), initial: false})
                     },
-                    { "type": "postback", 
-                      "title": "Remove All", 
+                    { "type": "postback",
+                      "title": "Remove All",
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "empty", "selected": (i + 1), initial: false})
                     }
                 ]
@@ -1155,7 +1163,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             cartDisplay.attachment.payload.elements.push(cart_item);
           }
 
-        request.post({ 
+        request.post({
               url: 'https://graph.facebook.com/v2.6/me/messages',
               qs: {access_token: fbtoken},
               method: "POST",
