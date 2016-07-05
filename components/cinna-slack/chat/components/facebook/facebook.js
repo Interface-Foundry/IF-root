@@ -79,7 +79,7 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var httpsServer = require('https').createServer({
-  pfx: fs.readFileSync('facebook-dev.pfx')
+  pfx: fs.readFileSync(__dirname + '/facebook-dev.pfx')
 }, app);
 var search_results = require('./search_results');
 var focus = require('./focus');
