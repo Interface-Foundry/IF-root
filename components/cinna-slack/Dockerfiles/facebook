@@ -2,5 +2,6 @@ FROM node:6
 COPY . /kip
 WORKDIR /kip
 ENV NODE_ENV=production
-RUN npm install
+RUN npm install && cp kip.js node_modules
+EXPOSE 4343
 CMD node chat/components/facebook/facebook.js
