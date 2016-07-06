@@ -47,11 +47,9 @@ var parse = module.exports.parse = function(message) {
   return co(function*() {
     var text = message.text;
     var history_array = [];
-
     for (var i = 0; i < message.history.length; i++){
       history_array.push(message.history[i].source.text)
     }
-
     debug('hist_array**'.cyan, history_array)
 
     debug('parsing:' + text)
@@ -67,6 +65,7 @@ var parse = module.exports.parse = function(message) {
       return simpleResult;
     }
 
+
     // Get help from TextBlob and spaCy python modules
     var res = yield request({
       method: 'POST',
@@ -77,6 +76,7 @@ var parse = module.exports.parse = function(message) {
         history: history_array
       }
     });
+
 
     // welp we'll mutate the shit out of the message here.
     nlpToResult(res, message);
