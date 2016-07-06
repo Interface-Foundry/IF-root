@@ -181,7 +181,7 @@ app.post('/facebook', function(req, res) {
             // console.log(body)
         })
         if (event.message) {
-             var typing_indicator = {
+            var typing_indicator = {
               "recipient":{
                 "id": sender.toString()
               },
@@ -195,28 +195,31 @@ app.post('/facebook', function(req, res) {
                 },
                 method: 'POST',
                 json: typing_indicator
-            }, function() { })
+            }, function() {
+                setTimeout(function(){ 
+                     var typing_indicators = {
+                          "recipient":{
+                            "id": sender.toString()
+                          },
+                          "sender_action": "typing_off"
+                        };
+                    request({
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {
+                            access_token: fbtoken
+                        },
+                        method: 'POST',
+                        json: typing_indicators
+                    }, function() {})
+                }, 2000);
+             })
         }
 
 
 
 
         if (event.message && event.message.text) {
-            // var typing_indicator = {
-            //   "recipient":{
-            //     "id": sender.toString()
-            //   },
-            //   "sender_action": "typing_on"
-            // };
 
-            // request({
-            //     url: 'https://graph.facebook.com/v2.6/me/messages',
-            //     qs: {
-            //         access_token: fbtoken
-            //     },
-            //     method: 'POST',
-            //     json: typing_indicator
-            // }, function() {
                  text = event.message.text;
                  text = emojiText.convert(text,{delimiter: ' '});
                     console.log(JSON.stringify(req.body));
