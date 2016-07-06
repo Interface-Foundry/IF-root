@@ -67,6 +67,7 @@ def index():
     biggest_height = 0
     thumbnails = []
     PIC_SIZE = 130, 130
+    CHAT_WIDTH = 336
     PIC_COORDS = [{'x': 14, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
     TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
@@ -98,7 +99,7 @@ def index():
 
 
     #add names, text wrapped
-    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price 
+    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
 
     for i, im in enumerate(images):
@@ -113,7 +114,7 @@ def index():
             draw.rectangle(((115,0),(400,160)), fill="white")
 
             # add white box transparency in, eventually fam ~
-            # # # 
+            # # #
             # back = Image.new('RGBA', (512,512), (255,0,0,0))
             # poly = Image.new('RGBA', (512,512))
             # pdraw = ImageDraw.Draw(poly)
@@ -134,7 +135,7 @@ def index():
 
         last_y = last_y + 27
 
-        if 'reviews' in im and 'rating' in im[u'reviews']:   
+        if 'reviews' in im and 'rating' in im[u'reviews']:
             # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
             #add rating
             if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
@@ -159,7 +160,7 @@ def index():
                 selectRating = 9
             img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
             #add review count
-            if 'reviewCount' in im[u'reviews']:  
+            if 'reviewCount' in im[u'reviews']:
                 draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
 
             last_y = last_y + 20
@@ -172,7 +173,7 @@ def index():
             BOX_WIDTH = 30
 
 
-        for z in im[u'name']:  
+        for z in im[u'name']:
 
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
             countLines = 0
@@ -185,11 +186,11 @@ def index():
                     draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
                     last_y += font2.getsize(line)[1]
                     last_y = last_y + 2
-                
+
                 # last_y = y
             # y += font.getsize(line)[1]
-            # last_y = y      
-            
+            # last_y = y
+
 
         # #add product names
         # for line in textwrap.wrap(im[u'name'], width=30):

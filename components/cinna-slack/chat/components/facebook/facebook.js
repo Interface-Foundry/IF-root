@@ -78,8 +78,9 @@ process.on('uncaughtException', function(err) {
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
+var keyfile = process.env.NODE_ENV === 'production' ? __dirname + '/facebook-prod.pfx' : __dirname + '/facebook-dev.pfx';
 var httpsServer = require('https').createServer({
-  pfx: fs.readFileSync(__dirname + '/facebook-dev.pfx')
+  pfx: fs.readFileSync(keyfile)
 }, app);
 var search_results = require('./search_results');
 var focus = require('./focus');
