@@ -2,6 +2,8 @@ import logging
 import subprocess
 from easydict import EasyDict
 
+from stopwords import stopword_list as stopwl
+
 DEBUG_ = False
 logger = logging.getLogger()
 
@@ -52,7 +54,8 @@ class McParser:
         '''
         # self.terms = EasyDict({'item_descriptors': [], 'had_find': False})
         '''
-        self.text = text
+        self.text = text.lower()
+        self.text_lowered = self.text.lower()
         self.focus = []
         self.nouns = []
         self.verbs = []
@@ -61,24 +64,22 @@ class McParser:
         self.parts_of_speech = []
         self.item_descriptors = []
         self.entities = []
-        self.had_find = False
-        self.isQuestion = False
+
         self._process_text()
         self._array_form()
         self._parse_terms()
+        self._remove_stopwords()
+        self._checks()
+
+        # self._check_for_about()
+        # self._check_for_find()
+        # self._check_for_more()
 
     def _process_text(self):
         '''
         takes base text, pass into syntaxnet_array, put into array form, and
         parse the terms into accessible object
-
-        Notes:
-            find ruins 'root' parser, possibly remove
         '''
-        #
-        if 'find' in self.text.lower():
-            self.terms['had_find'] = True
-            # self.text = self.text.lower().replace('find', '')
         self.d_array = syntaxnet_array(self.text)
 
     def _array_form(self):
@@ -116,9 +117,9 @@ class McParser:
                 self.item_descriptors.append(cur_word)
 
             # store punctuation
-            if i[7] in ['punct']:
-                if cur_word in ['?']:
-                    self.isQuestion = True
+            # if i[7] in ['punct']:
+            #     if cur_word in ['?']:
+            #         self.isQuestion = True
 
             # focus thing
             if cur_word.lower() in ['one', '1', 'first']:
@@ -128,12 +129,51 @@ class McParser:
             if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append(3)
 
+    def _remove_stopwords(self):
+        self.nouns_without_stopwords = list(set(self.nouns).difference(stopwl))
+
+    def _checks(self):
+        '''check for all the words previously searched for in api.js
+
+        old but previously removed 'find'
+        text.lower().replace('find', '')
+        '''
+        self.had_about = False
+        self.had_find = False
+        self.had_more = False
+        self.had_question = False
+        if 'about' in self.text_lowered:
+            self.had_about = True
+        if 'find' in self.text_lowered:
+            self.had_find = True
+        if 'more' in self.text_lowered:
+            self.had_more = True
+
+    # def _check_for_about(self):
+    #     '''if more about item is triggered, focus executes'''
+    #     if 'about' in self.text_lowered:
+    #         self.had_about = True
+    #     else:
+    #         self.had_about = False
+
+    # def _check_for_find(self):
+    #     if 'find' in self.text_lowered:
+    #         self.had_find = True
+    #     else:
+    #         self.had_find = False
+    #         # self.text = self.text.lower().replace('find', '')
+
+    # def _check_for_more(self):
+    #     if 'more' in self.text_lowered:
+    #         self.had_more = True
+
     def output_form(self):
         '''
         Put into correct json format for api.js
         '''
         response = EasyDict()
-        response.nouns = self.noun_phrases + [' '.join(self.adjectives + self.nouns)]
+        response.nouns = self.noun_phrases + \
+            [' '.join(self.adjectives + self.nouns)]
         response.adjectives = self.adjectives
         response.entities = self.entities
         response.focus = self.focus
@@ -143,7 +183,7 @@ class McParser:
         # add ss
         ss = {}
         ss['focus'] = self.focus
-        ss['isQuestion'] = self.isQuestion
+        ss['has_question'] = self.has_question
         ss['noun_phrases'] = self.noun_phrases
         ss['parts_of_speech'] = self.parts_of_speech
         ss['sentiment_polarity'] = 0.0
