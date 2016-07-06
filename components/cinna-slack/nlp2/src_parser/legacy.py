@@ -79,7 +79,7 @@ def parse(data):
         res.nouns.add(chunk.orth_.lower())
     if (len(res.nouns) == 0):
         for token in res.parts_of_speech:
-            if token[1] == 'NOUN':
+            if token[1] in ['NOUN', 'PROPN']:
                 res.nouns.add(token[0])
     res.nouns = list(res.nouns)
 
@@ -95,4 +95,5 @@ def parse(data):
             res.verbs.append('checkout')
         if (token[0] == 'info'):
             res.verbs.append('info')
+
     return res
