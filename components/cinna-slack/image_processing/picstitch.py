@@ -67,7 +67,7 @@ def index():
     biggest_height = 0
     thumbnails = []
     PIC_SIZE = 130, 130
-    CHAT_WIDTH = 336
+    CHAT_WIDTH = 365
     PIC_COORDS = [{'x': 14, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
     TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
