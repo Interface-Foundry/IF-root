@@ -197,7 +197,7 @@ input be like:
   focus: [],
   nouns: [ 'monitor' ],
   parts_of_speech: [ [ 'cheapest', 'ADJ' ], [ '32', 'NUM' ], [ '"', 'PUNCT' ], [ 'monitor', 'NOUN' ] ],
-  ss: [ { focus: [], isQuestion: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
+  ss: [ { focus: [], has_question: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
   text: 'cheapest 32" monitor',
   verbs: [] }}
 */
@@ -213,28 +213,28 @@ function nlpToResult(nlp, message) {
     return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
   })
 
-  // take care of invalid nouns
-  nlp.nouns = (nlp.nouns || []).filter(function(n) {
-    return stopwords.indexOf(n.toLowerCase()) < 0;
-  })
+  // take care of invalid nouns - removed for now
+  // nlp.nouns = (nlp.nouns || []).filter(function(n) {
+  //   return stopwords.indexOf(n.toLowerCase()) < 0;
+  // })
 
   // handle all initial search requests first
-  if (nlp.focus.length === 0) {
+  // if (nlp.focus.length === 0) {
 
-  }
+  // }
 
   // check for "about"
-  if (nlp.focus.length === 1) {
-    if (nlp.text.indexOf('about') >= 0) {
-      debug('about triggered')
-      message.execute.push({
-        mode: MODE.shopping,
-        action: ACTION.focus,
-        params: {focus: nlp.focus[0]}
-      })
-      return
-    }
-  }
+  // if (nlp.focus.length === 1) {
+  //   if (nlp.text.indexOf('about') >= 0) {
+  //     debug('about triggered')
+  //     message.execute.push({
+  //       mode: MODE.shopping,
+  //       action: ACTION.focus,
+  //       params: {focus: nlp.focus[0]}
+  //     })
+  //     return
+  //   }
+  // }
 
   // check for "more"
   if (nlp.focus.length >= 1) {
@@ -267,7 +267,7 @@ function nlpToResult(nlp, message) {
 
   if (nlp.ss.length === 1 && nlp.focus.length === 0) {
     var s = nlp.ss[0];
-    if (!s.isQuestion) {
+    if (!s.has_question) {
       debug('simple case initial triggered');
       message.execute.push({
         mode: MODE.shopping,
@@ -326,7 +326,7 @@ function nlpToResult(nlp, message) {
     }
   });
 
-  if (nlp.isQuestion) {
+  if (nlp.has_question) {
     debug('its a question')
   }
 
