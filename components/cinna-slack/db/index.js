@@ -27,21 +27,9 @@ if (mongoose.connection.readyState == 0) {
  * @type {{filename: string, single: string, plural: string}[]}
  */
 var schemas = [{
-    filename: 'activity_schema',
-    single: 'Activity',
-    plural: 'Activities'
-}, {
     filename: 'analytics_schema',
     single: 'Analytic',
     plural: 'Analytics'
-}, {
-    filename: 'announcements_schema',
-    single: 'Announcement',
-    plural: 'Announcements'
-}, {
-    filename: 'anon_user_schema',
-    single: 'AnonUser',
-    plural: 'AnonUsers'
 }, {
     filename: 'cart_schema',
     single: 'Cart',
@@ -51,21 +39,9 @@ var schemas = [{
     single: 'Chatuser',
     plural: 'Chatusers'
 }, {
-    filename: 'contest_schema',
-    single: 'Contest',
-    plural: 'Contests'
-}, {
-    filename: 'contestEntry_schema',
-    single: 'ContestEntry',
-    plural: 'ContestEntries'
-}, {
     filename: 'email_schema',
     single: 'Email',
     plural: 'Emails'
-}, {
-    filename: 'instagram_schema',
-    single: 'Instagram',
-    plural: 'Instagrams'
 }, {
     filename: 'item_schema',
     single: 'Item',
@@ -75,93 +51,17 @@ var schemas = [{
     single: 'Job',
     plural: 'Jobs'
 }, {
-    filename: 'justvisual_schema',
-    single: 'JustVisual',
-    plural: 'JustVisuals'
-}, {
-    filename: 'landmark_schema',
-    single: 'Landmark',
-    plural: 'Landmarks'
-}, {
-    filename: 'look_schema',
-    single: 'Look',
-    plural: 'Looks'
-}, {
     filename: 'message_schema',
     single: 'Message',
     plural: 'Messages'
-}, {
-    filename: 'metric_schema',
-    single: 'Metric',
-    plural: 'Metrics'
-}, {
-    filename: 'product_schema',
-    single: 'Product',
-    plural: 'Products'
-}, {
-    filename: 'project_schema',
-    single: 'Project',
-    plural: 'Projects'
 }, {
     filename: 'pubsub_schema',
     single: 'PubSub',
     plural: 'PubSubs'
 }, {
-    filename: 'serverwidgets_schema',
-    single: 'ServerWidget',
-    plural: 'ServerWidgets'
-}, {
     filename: 'slackbot_schema',
     single: 'Slackbot',
     plural: 'Slackbots'
-}, {
-    filename: 'sticker_schema',
-    single: 'Sticker',
-    plural: 'Stickers'
-}, {
-    filename: 'style_schema',
-    single: 'Style',
-    plural: 'Styles'
-}, {
-    filename: 'training_schema',
-    single: 'TrainingData',
-    plural: 'TrainingDatas'
-}, {
-    filename: 'twitter_schema',
-    single: 'Twitter',
-    plural: 'Twitters'
-}, {
-    filename: 'user_schema',
-    single: 'User',
-    plural: 'Users'
-}, {
-    filename: 'visit_schema',
-    single: 'Visit',
-    plural: 'Visits'
-}, {
-    filename: 'worldchat_schema',
-    single: 'Worldchat',
-    plural: 'Worldchats'
-}, {
-    filename: 'zipcode_schema',
-    single: 'Zipcode',
-    plural: 'Zipcodes'
-}, {
-    filename: 'ebayCategories_schema',
-    single: 'EbayCategory',
-    plural: 'EbayCategories'
-}, {
-    filename: 'ebayItem_schema',
-    single: 'EbayItem',
-    plural: 'EbayItems'
-}, {
-    filename: 'feed_data_schema',
-    single: 'FeedData',
-    plural: 'FeedData'
-}, {
-    filename: 'credentials_schema',
-    single: 'Credential',
-    plural: 'Credentials'
 }];
 
 module.exports = {
@@ -175,7 +75,11 @@ module.exports = {
 schemas.map(function(schema) {
     try {
     	var model = require('./' + schema.filename);
-    } catch(e) {return}
+    } catch(e) {
+      console.error('Error setting up schema ' + schema.filename);
+      console.error(e);
+      return;
+    }
     module.exports[schema.single] = model;
     module.exports[schema.plural] = model;
     module.exports[schema.plural.toLowerCase()] = model;
