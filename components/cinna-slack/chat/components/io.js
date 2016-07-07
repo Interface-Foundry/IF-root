@@ -3031,7 +3031,6 @@ var sendResponse = function(data,flag){
                     console.log('🍀🍀🍀FOCUS ',msgData)
 
                     slackUsers_web[data.source.org].chat.postMessage(data.source.channel, message, msgData, function(err,res) {
-                        c
                     });
 
                 });
