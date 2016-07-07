@@ -122,6 +122,7 @@ queue.topic('incoming').subscribe(incoming => {
 
     yield message.save(); // the incoming message has had some stuff added to it :)
     yield replies.map(r => {
+      // console.log('who is mr robot: ', r);
       r.save()
     });
     yield replies.map((r, i) => {

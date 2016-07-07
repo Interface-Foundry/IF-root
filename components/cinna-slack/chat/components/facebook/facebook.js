@@ -196,22 +196,22 @@ app.post('/facebook', function(req, res) {
                 method: 'POST',
                 json: typing_indicator
             }, function() {
-                setTimeout(function(){ 
-                     var typing_indicators = {
-                          "recipient":{
-                            "id": sender.toString()
-                          },
-                          "sender_action": "typing_off"
-                        };
-                    request({
-                        url: 'https://graph.facebook.com/v2.6/me/messages',
-                        qs: {
-                            access_token: fbtoken
-                        },
-                        method: 'POST',
-                        json: typing_indicators
-                    }, function() {})
-                }, 2000);
+                // setTimeout(function(){ 
+                //      var typing_indicators = {
+                //           "recipient":{
+                //             "id": sender.toString()
+                //           },
+                //           "sender_action": "typing_off"
+                //         };
+                //     request({
+                //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                //         qs: {
+                //             access_token: fbtoken
+                //         },
+                //         method: 'POST',
+                //         json: typing_indicators
+                //     }, function() {})
+                // }, 2000);
              })
         }
 
@@ -449,6 +449,40 @@ app.post('/facebook', function(req, res) {
                         msg.amazon = amazon;
                         if (msg && msg.amazon) {
                                 if (postback.action == 'add' && postback.initial) {
+                                                  var typing_indicator = {
+                                          "recipient":{
+                                            "id": sender.toString()
+                                          },
+                                          "sender_action": "typing_on"
+                                        };
+
+                                        request({
+                                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            qs: {
+                                                access_token: fbtoken
+                                            },
+                                            method: 'POST',
+                                            json: typing_indicator
+                                        }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 1000);
+                                         })
+
+
                                     console.log('add --> postback: ', postback);
                                        var new_message = new db.Message({
                                             incoming: true,
@@ -469,6 +503,38 @@ app.post('/facebook', function(req, res) {
 
                                 }
                                 else if (postback.action == 'add' && !postback.initial) {
+                                                  var typing_indicator = {
+                                          "recipient":{
+                                            "id": sender.toString()
+                                          },
+                                          "sender_action": "typing_on"
+                                        };
+
+                                        request({
+                                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            qs: {
+                                                access_token: fbtoken
+                                            },
+                                            method: 'POST',
+                                            json: typing_indicator
+                                        }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 1000);
+                                         })
                                     co(function*() {
                                       console.log('addExtra --> postback: ', postback);
                                       var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
@@ -496,6 +562,38 @@ app.post('/facebook', function(req, res) {
 
                                 }
                                 else if (postback.action === 'remove') {
+                                                  var typing_indicator = {
+                                          "recipient":{
+                                            "id": sender.toString()
+                                          },
+                                          "sender_action": "typing_on"
+                                        };
+
+                                        request({
+                                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            qs: {
+                                                access_token: fbtoken
+                                            },
+                                            method: 'POST',
+                                            json: typing_indicator
+                                        }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 1000);
+                                         })
                                     var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -514,6 +612,40 @@ app.post('/facebook', function(req, res) {
                                     });
 
                                 } else if (postback.action === 'list') {
+                                     var typing_indicator = {
+                                          "recipient":{
+                                            "id": sender.toString()
+                                          },
+                                          "sender_action": "typing_on"
+                                        };
+
+                                        request({
+                                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            qs: {
+                                                access_token: fbtoken
+                                            },
+                                            method: 'POST',
+                                            json: typing_indicator
+                                        }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 1000);
+                                         })
+
+
                                       var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -531,6 +663,40 @@ app.post('/facebook', function(req, res) {
                                     });
                                 }
                                 else if (postback.action === 'focus') {
+                                        //           var typing_indicator = {
+                                        //   "recipient":{
+                                        //     "id": sender.toString()
+                                        //   },
+                                        //   "sender_action": "typing_on"
+                                        // };
+
+                                        // request({
+                                        //     url: 'https://graph.facebook.com/v2.6/me/messages',
+                                        //     qs: {
+                                        //         access_token: fbtoken
+                                        //     },
+                                        //     method: 'POST',
+                                        //     json: typing_indicator
+                                        // }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 2000);
+                                         // })
+
+
                                       var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -548,6 +714,40 @@ app.post('/facebook', function(req, res) {
                                     });
                                 }
                                 else if (postback.action === 'similar') {
+                                       var typing_indicator = {
+                                          "recipient":{
+                                            "id": sender.toString()
+                                          },
+                                          "sender_action": "typing_on"
+                                        };
+
+                                        request({
+                                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            qs: {
+                                                access_token: fbtoken
+                                            },
+                                            method: 'POST',
+                                            json: typing_indicator
+                                        }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 2000);
+                                         })
+
+
                                       var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
@@ -565,6 +765,40 @@ app.post('/facebook', function(req, res) {
                                     });
                                 }
                                  else if (postback.action === 'cheaper') {
+                                       var typing_indicator = {
+                                          "recipient":{
+                                            "id": sender.toString()
+                                          },
+                                          "sender_action": "typing_on"
+                                        };
+
+                                        request({
+                                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            qs: {
+                                                access_token: fbtoken
+                                            },
+                                            method: 'POST',
+                                            json: typing_indicator
+                                        }, function() {
+                                            // setTimeout(function(){ 
+                                            //      var typing_indicators = {
+                                            //           "recipient":{
+                                            //             "id": sender.toString()
+                                            //           },
+                                            //           "sender_action": "typing_off"
+                                            //         };
+                                            //     request({
+                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
+                                            //         qs: {
+                                            //             access_token: fbtoken
+                                            //         },
+                                            //         method: 'POST',
+                                            //         json: typing_indicators
+                                            //     }, function() {})
+                                            // }, 2000);
+                                         })
+
+
                                       var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
