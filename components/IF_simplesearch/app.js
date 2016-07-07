@@ -12,6 +12,7 @@ var request = require('request');
 var db = require('db');
 var kip = require('kip')
 var fs = require('fs')
+var _ = require('lodash');
 
 app.use(compression());
 app.use(bodyParser.json());
