@@ -4,20 +4,37 @@ from keras.preprocessing.text import Tokenizer
 from keras.utils import np_utils
 
 import string
-from os import path
+from os import makedirs, path
 
 
-def load_df(foldername='pkls/too_big', filename='messages.pkl', save=True):
+def load_df(foldername='pkls/too_big',
+            db_name='prod1',
+            filename='messages.pkl',
+            save=True):
     '''
-    for training on google cloud
+    for training
     '''
     client = MongoClient()
-    db = client.prod
+    db = client[db_name]
     cursor = db.messages.find({})
     df = pd.DataFrame(list(cursor))
+    if not path.isdir(foldername):
+        makedirs(foldername)
     if save:
+        if path.isfile(path.join(foldername, filename)):
+            print('-----overwriting current saved df-----')
         df.to_pickle(path.join(foldername, filename))
     return df
+
+
+def classes_to_weights(df, ac_dict):
+    ''' return weights to a dict for use with class imbalance'''
+    weight_dict = {}
+    weights = df.action.value_counts()
+    for c in ac_dict.keys():
+        weight_dict[ac_dict[c]] = weights[c]
+
+    return weight_dict
 
 
 def combine_smalltalk(df):

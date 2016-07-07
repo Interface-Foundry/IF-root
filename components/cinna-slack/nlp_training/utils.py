@@ -46,6 +46,9 @@ def save_dict(dictionary, filename, folder='dict_lookups'):
     with open(path.join(folder, filename + '.json'), 'w') as f:
         json.dump(dictionary, f)
 
+def write_config(config, filename, folder='dict_lookups'):
+    with(path.join(folder, filename + '.json'), 'w') as f:
+        json.dump(dictionary, f)
 
 # --------------------------------
 # OLD BELOW ----------------------

@@ -56,6 +56,7 @@ class McParser:
         '''
         self.text = text.lower()
         self.text_lowered = self.text.lower()
+        self.tokens = self.text_lowered.split(' ')
         self.focus = []
         self.nouns = []
         self.verbs = []
@@ -69,11 +70,8 @@ class McParser:
         self._array_form()
         self._parse_terms()
         self._remove_stopwords()
+        self._get_action()
         self._checks()
-
-        # self._check_for_about()
-        # self._check_for_find()
-        # self._check_for_more()
 
     def _process_text(self):
         '''
@@ -142,30 +140,36 @@ class McParser:
         self.had_find = False
         self.had_more = False
         self.had_question = False
+
         if 'about' in self.text_lowered:
             self.had_about = True
         if 'find' in self.text_lowered:
             self.had_find = True
         if 'more' in self.text_lowered:
             self.had_more = True
+        if '?' in self.text_lowered:
+            self.had_question = True
 
-    # def _check_for_about(self):
-    #     '''if more about item is triggered, focus executes'''
-    #     if 'about' in self.text_lowered:
-    #         self.had_about = True
-    #     else:
-    #         self.had_about = False
+    def _get_action(self):
+        checkout = ['get', 'checkout']
+        remove = ['remove', 'delete', 'cancel']
+        list_cart = ['view', 'show', 'list']
+        save = ['save', 'buy', 'add']
+        focus = ['focus', 'info']
+        search = ['need', 'want']
 
-    # def _check_for_find(self):
-    #     if 'find' in self.text_lowered:
-    #         self.had_find = True
-    #     else:
-    #         self.had_find = False
-    #         # self.text = self.text.lower().replace('find', '')
-
-    # def _check_for_more(self):
-    #     if 'more' in self.text_lowered:
-    #         self.had_more = True
+        if any(map(lambda each: each in checkout, self.tokens)):
+            self.action = 'checkout'
+        if any(map(lambda each: each in remove, self.tokens)):
+            self.action = 'remove'
+        if any(map(lambda each: each in list_cart, self.tokens)):
+            self.action = 'list'
+        if any(map(lambda each: each in save, self.tokens)):
+            self.action = 'save'
+        if any(map(lambda each: each in focus, self.tokens)):
+            self.action = 'focus'
+        if any(map(lambda each: each in search, self.tokens)):
+            self.action = 'checkout'
 
     def output_form(self):
         '''

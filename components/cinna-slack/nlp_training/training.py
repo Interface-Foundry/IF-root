@@ -10,7 +10,8 @@ from keras.optimizers import RMSprop
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
-from data import retrieve_from_prod_db, to_tk, actions_to_codes
+from data import retrieve_from_prod_db, to_tk, actions_to_codes, \
+    classes_to_weights
 from utils import save_model, save_tokenizer
 
 with open('config/config.json', 'r') as f:
@@ -31,7 +32,8 @@ def model():
         fw = LSTM(64, consume_less='gpu')(fw)
 
     with tf.name_scope('backwards'):
-        bw = LSTM(64, consume_less='gpu', return_sequences=True, go_backwards=True)(embed)
+        bw = LSTM(64, consume_less='gpu', return_sequences=True,
+                  go_backwards=True)(embed)
         bw = LSTM(64, consume_less='gpu')(bw)
 
     with tf.name_scope('merge1'):
@@ -76,8 +78,9 @@ if __name__ == '__main__':
     # rev_ac_dict = config['rev_ac_dict']
 
     df = retrieve_from_prod_db()
-    action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
 
+    action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
+    weight_dict = classes_to_weights(df, ac_dict)
     config['ac_dict'] = ac_dict
     config['rev_ac_dict'] = rev_ac_dict
 
@@ -97,4 +100,5 @@ if __name__ == '__main__':
               nb_epoch=250,
               batch_size=32,
               verbose=1,
-              callbacks=[tb, mc])
+              callbacks=[tb, mc],
+              class_weight=weight_dict)

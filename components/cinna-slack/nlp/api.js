@@ -237,33 +237,33 @@ function nlpToResult(nlp, message) {
   // }
 
   // check for "more"
-  if (nlp.focus.length >= 1) {
-    for (var i = 0; i < nlp.parts_of_speech.length; i++) {
-      if (nlp.parts_of_speech[i][0] === 'more') {
-        debug('more triggered')
-        message.execute.push({
-          mode: MODE.shopping,
-          action: ACTION.similar,
-          params: { focus: nlp.focus[0]}
-        })
-        return;
-      }
-    }
-  }
+  // if (nlp.focus.length >= 1) {
+  //   for (var i = 0; i < nlp.parts_of_speech.length; i++) {
+  //     if (nlp.parts_of_speech[i][0] === 'more') {
+  //       debug('more triggered')
+  //       message.execute.push({
+  //         mode: MODE.shopping,
+  //         action: ACTION.similar,
+  //         params: { focus: nlp.focus[0]}
+  //       })
+  //       return;
+  //     }
+  //   }
+  // }
 
-  if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
-    debug('verbs.getAction triggered')
-    var exec = {
-      mode: verbs.getMode(nlp.verbs[0]),
-      action: verbs.getAction(nlp.verbs[0])
-    }
+  // if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
+  //   debug('verbs.getAction triggered')
+  //   var exec = {
+  //     mode: verbs.getMode(nlp.verbs[0]),
+  //     action: verbs.getAction(nlp.verbs[0])
+  //   }
 
-    if (nlp.focus.length >= 1) {
-      exec.params = {focus:  nlp.focus[0]};
-    }
-    message.execute.push(exec)
-    return;
-  }
+  //   if (nlp.focus.length >= 1) {
+  //     exec.params = {focus:  nlp.focus[0]};
+  //   }
+  //   message.execute.push(exec)
+  //   return;
+  // }
 
   if (nlp.ss.length === 1 && nlp.focus.length === 0) {
     var s = nlp.ss[0];
