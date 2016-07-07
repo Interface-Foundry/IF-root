@@ -1,4 +1,5 @@
 var path = require('path');
+var db = require('./db');
 require('colors');
 
 /**
@@ -7,21 +8,43 @@ require('colors');
  *  if (kip.err(e)) return;
  *  }
  */
-module.exports.err = function(e, message) {
+module.exports.err = function(e, message, data) {
   // only do stuff when there is an error`
   if (!e) {
     return false;
   }
 
-  if (message) {
-    console.error(('ERROR: ' + message).red);
+  if (typeof e === 'string') {
+    if (message) {
+      message = e + ', ' + message;
+    } else {
+      message = e;
+    }
+  } else if (e.message) {
+    if (message) {
+      message = e.message + ', ' + message;
+    } else {
+      message = e.message;
+    }
   }
 
+  console.error(('ERROR: ' + message).red);
+
   if (e.stack) {
-    console.error(e.stack.toString().red);
+    var stack = e.stack.split('\n').slice(1).join('\n');
   } else {
-    console.error(JSON.stringify(e).red);
+    var e = new Error();
+    stack = e.stack.split('\n').slice(2).join('\n');
   }
+
+  stack = stack.toString();
+  console.error(stack.red);
+
+  (new db.Error({
+    message: message,
+    stack: stack,
+    data: data
+  })).save();
 
   return true;
 };
@@ -32,21 +55,21 @@ module.exports.error = module.exports.err;
  * Kills the process if there's an ERROR
  */
 module.exports.fatal = function(e) {
-    if (e) {
-        console.error('FATAL ERROR 🔥💀'.red)
-        console.error(e.toString().red);
-        process.exit(1);
-    }
+  if (e) {
+    console.error('FATAL ERROR 🔥💀'.red)
+    console.error(e.toString().red);
+    process.exit(1);
+  }
 }
 
 /**
  * Prints a nice log message
  */
 module.exports.log = function() {
-    var args = Array.prototype.slice.call(arguments).map((o) => {
-      return ['string', 'number', 'boolean'].indexOf(typeof o) >= 0 ? o : JSON.stringify(o, null, 2);
-    });
-    console.log.apply(console, args);
+  var args = Array.prototype.slice.call(arguments).map((o) => {
+    return ['string', 'number', 'boolean'].indexOf(typeof o) >= 0 ? o : JSON.stringify(o, null, 2);
+  });
+  console.log.apply(console, args);
 }
 
 // fun alias
@@ -56,21 +79,21 @@ module.exports.prettyPrint = module.exports.log
  * Does not print in production unless DEBUG=verbose
  */
 module.exports.debug = function() {
-    if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
-      var e = new Error();
-      var stack = e.stack.split('\n')[2];
-      try {
-        var filename = stack.split(':')[0].split(/[\( ]+/).pop();
-        var line = stack.split(':')[1];
-      } catch(e) {
-        console.log(e.stack);
-        filename = '?';
-        line = '?';
-      }
-      var loc = path.relative(path.resolve(require.main.filename, '..'), filename) + ':' + line;
-      arguments = ['debug'.cyan, loc.gray].concat(Array.prototype.slice.call(arguments));
-      module.exports.log.apply(null, arguments)
+  if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
+    var e = new Error();
+    var stack = e.stack.split('\n')[2];
+    try {
+      var filename = stack.split(':')[0].split(/[\( ]+/).pop();
+      var line = stack.split(':')[1];
+    } catch (e) {
+      console.log(e.stack);
+      filename = '?';
+      line = '?';
     }
+    var loc = path.relative(path.resolve(require.main.filename, '..'), filename) + ':' + line;
+    var args = ['debug'.cyan, loc.gray].concat(Array.prototype.slice.call(arguments));
+    module.exports.log.apply(null, args)
+  }
 }
 
 /**

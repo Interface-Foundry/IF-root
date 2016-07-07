@@ -27,10 +27,6 @@ if (mongoose.connection.readyState == 0) {
  * @type {{filename: string, single: string, plural: string}[]}
  */
 var schemas = [{
-    filename: 'analytics_schema',
-    single: 'Analytic',
-    plural: 'Analytics'
-}, {
     filename: 'cart_schema',
     single: 'Cart',
     plural: 'Carts'
@@ -43,17 +39,21 @@ var schemas = [{
     single: 'Email',
     plural: 'Emails'
 }, {
+    filename: 'error_schema',
+    single: 'Error',
+    plural: 'Errors'
+}, {
     filename: 'item_schema',
     single: 'Item',
     plural: 'Items'
 }, {
-    filename: 'job_schema',
-    single: 'Job',
-    plural: 'Jobs'
-}, {
     filename: 'message_schema',
     single: 'Message',
     plural: 'Messages'
+}, {
+    filename: 'metric_schema',
+    single: 'Metric',
+    plural: 'Metrics'
 }, {
     filename: 'pubsub_schema',
     single: 'PubSub',
