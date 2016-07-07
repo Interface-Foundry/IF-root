@@ -1,4 +1,4 @@
-VERSION=0.7.4.7 
+VERSION=0.7.4.11
 
 kubectl run replylogic --image=gcr.io/kip-styles/reply_logic:$VERSION
 kubectl run web --image=gcr.io/kip-styles/web:$VERSION --port=8000

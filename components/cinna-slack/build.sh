@@ -1,4 +1,4 @@
-VERSION=0.7.4.7
+VERSION=0.7.4.11
 
 docker build -t gcr.io/kip-styles/reply_logic:$VERSION -f Dockerfiles/reply_logic .
 gcloud docker push gcr.io/kip-styles/reply_logic:$VERSION

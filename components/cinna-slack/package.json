@@ -16,6 +16,7 @@
   "dependencies": {
     "@slack/client": "^2.2.1",
     "WNdb": "^3.1.1",
+    "accounting": "^0.4.1",
     "async": "^2.0.0-rc.6",
     "aws-sdk": "^2.3.12",
     "botkit": "0.0.11",
