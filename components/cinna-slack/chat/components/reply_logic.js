@@ -252,15 +252,17 @@ function* simple_response(message) {
 function* nlp_response(message) {
   kip.debug('nlp_response begin'.cyan)
   // the nlp api adds the processing data to the message
-  
+
   try {
-     yield nlp.parse(message);
-  var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
-  var messages = yield execute(message);
+    yield nlp.parse(message);
+    if (!process.env.NODE_ENV === 'production') {
+      var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
+    }
+    var messages = yield execute(message);
   } catch(err) {
     console.log('\n\n\n\NLP ERR', err)
   }
- 
+
 
   return [debug_message].concat(messages);
 }
@@ -432,10 +434,10 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } 
+  }
   else if (exec.params.type === 'genericDetail') {
-    
-  } 
+
+  }
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
@@ -467,7 +469,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
 
-  exec.params.query = old_params.query; 
+  exec.params.query = old_params.query;
 
   // modify the params and then do another search.
   if (exec.params.type === 'price') {
@@ -478,7 +480,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } 
+  }
 
 
   else {
