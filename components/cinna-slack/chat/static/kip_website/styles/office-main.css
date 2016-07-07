@@ -19,8 +19,10 @@ hr {
   margin-top: 14px;
   padding-left: 2%;
   padding-right: 2%;
+}
 
-
+.chit-chat-container p {
+  margin-top: 10px;
 }
 
 .get-kip-container {
