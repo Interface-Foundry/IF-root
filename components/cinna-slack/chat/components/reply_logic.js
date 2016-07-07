@@ -121,7 +121,9 @@ queue.topic('incoming').subscribe(incoming => {
     kip.debug('num replies', replies.length);
 
     yield message.save(); // the incoming message has had some stuff added to it :)
-    yield replies.map(r => r.save());
+    yield replies.map(r => {
+      r.save()
+    });
     yield replies.map((r, i) => {
       kip.debug('reply', r.mode, r.action);
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
@@ -247,7 +249,6 @@ function* simple_response(message) {
 }
 
 
-
 // use nlp to deterine the intent of the user
 function* nlp_response(message) {
   kip.debug('nlp_response begin'.cyan)
@@ -255,16 +256,18 @@ function* nlp_response(message) {
 
   try {
     yield nlp.parse(message);
-    if (!process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
     }
     var messages = yield execute(message);
   } catch(err) {
     console.log('\n\n\n\NLP ERR', err)
   }
-
-
-  return [debug_message].concat(messages);
+  if (process.env.NODE_ENV !== 'production') {
+    return [debug_message].concat(messages);
+  } else {
+    return messages;
+  }
 }
 
 // do the things
@@ -288,9 +291,8 @@ function execute(message) {
       return messages;
     }, [])
     // only return messages
-    return messages.reduce((all, m) => {
+    var replies = messages.reduce((all, m) => {
       console.log(typeof m);
-      debugger;
       if (m instanceof Array) {
         all = all.concat(m);
       } else {
@@ -298,6 +300,7 @@ function execute(message) {
       }
       return all;
     }, []);
+    return replies;
   })
 }
 
@@ -541,7 +544,6 @@ handlers['cart.remove'] = function*(message, exec) {
   yield kipcart.removeFromCart(cart_id, message.user_id, exec.params.focus, cart_type);
   var confirmation = text_reply(message, `Item ${exec.params.focus} removed from your cart`);
   var viewcart = yield handlers['cart.view'](message);
-  debugger;
   return [confirmation, viewcart];
 };
 
