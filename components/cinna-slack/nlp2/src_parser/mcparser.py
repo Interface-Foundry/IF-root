@@ -2,7 +2,7 @@ import logging
 import subprocess
 from easydict import EasyDict
 
-from stopwords import stopword_list as stopwl
+from word_list import action_terms, price_terms, stopwords
 
 DEBUG_ = False
 logger = logging.getLogger()
@@ -55,8 +55,7 @@ class McParser:
         # self.terms = EasyDict({'item_descriptors': [], 'had_find': False})
         '''
         self.text = text.lower()
-        self.text_lowered = self.text.lower()
-        self.tokens = self.text_lowered.split(' ')
+        self.tokens = self.text.split(' ')
         self.focus = []
         self.nouns = []
         self.verbs = []
@@ -113,11 +112,8 @@ class McParser:
                 self.noun_phrases = [self.root + ' ' + cur_word]
             if i[7] in ['dep']:
                 self.item_descriptors.append(cur_word)
-
-            # store punctuation
-            # if i[7] in ['punct']:
-            #     if cur_word in ['?']:
-            #         self.isQuestion = True
+            if i[7] in ['amod']:
+                self.had_qualitative = cur_word
 
             # focus thing
             if cur_word.lower() in ['one', '1', 'first']:
@@ -141,35 +137,38 @@ class McParser:
         self.had_more = False
         self.had_question = False
 
-        if 'about' in self.text_lowered:
+        if 'about' in self.text:
             self.had_about = True
-        if 'find' in self.text_lowered:
+        if 'find' in self.text:
             self.had_find = True
-        if 'more' in self.text_lowered:
+        if 'more' in self.text:
             self.had_more = True
-        if '?' in self.text_lowered:
+        if '?' in self.text:
             self.had_question = True
 
     def _get_action(self):
-        checkout = ['get', 'checkout']
-        remove = ['remove', 'delete', 'cancel']
-        list_cart = ['view', 'show', 'list']
-        save = ['save', 'buy', 'add']
-        focus = ['focus', 'info']
-        search = ['need', 'want']
-
-        if any(map(lambda each: each in checkout, self.tokens)):
+        if any(map(lambda each: each in action_terms['checkout'], self.tokens)):
             self.action = 'checkout'
-        if any(map(lambda each: each in remove, self.tokens)):
+        if any(map(lambda each: each in action_terms['remove'], self.tokens)):
             self.action = 'remove'
-        if any(map(lambda each: each in list_cart, self.tokens)):
+        if any(map(lambda each: each in action_terms['list_cart'], self.tokens)):
             self.action = 'list'
-        if any(map(lambda each: each in save, self.tokens)):
+        if any(map(lambda each: each in action_terms['save'], self.tokens)):
             self.action = 'save'
-        if any(map(lambda each: each in focus, self.tokens)):
+        if any(map(lambda each: each in action_terms['focus'], self.tokens)):
             self.action = 'focus'
-        if any(map(lambda each: each in search, self.tokens)):
+        if any(map(lambda each: each in action_terms['search'], self.tokens)):
             self.action = 'checkout'
+
+    def _simple_case(self):
+        pass
+
+    def _price_modifier(self):
+        '''check if price is to be modified'''
+        if any(w in self.text for w in price_terms['more']):
+            self.data_modify = 'more'
+        if any(w in self.text for w in price_terms['less']):
+            self.data_modify = 'less'
 
     def output_form(self):
         '''

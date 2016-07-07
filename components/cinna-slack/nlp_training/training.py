@@ -6,13 +6,13 @@ import tensorflow as tf
 from keras.models import Model
 from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
 from keras.optimizers import RMSprop
-# from keras.regularizers import l2
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes, \
     classes_to_weights
-from utils import save_model, save_tokenizer
+from utils import save_model, save_tokenizer, load_glove_vocab, \
+    load_glove_vectors
 
 with open('config/config.json', 'r') as f:
     config = json.load(f)
@@ -78,6 +78,12 @@ if __name__ == '__main__':
     # rev_ac_dict = config['rev_ac_dict']
 
     df = retrieve_from_prod_db()
+
+    # glove vectors if using embedding pretraining
+    glove_vocab_array, glove_vocab_dict = load_glove_vocab(
+        config['glove_filename'])
+    glove_vectors, glove_dict = load_glove_vectors(
+        config['glove_filename'], set(glove_vocab_array))
 
     action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
     weight_dict = classes_to_weights(df, ac_dict)
