@@ -10,6 +10,9 @@ var cart = require('./cart');
 var showdown = new (require('showdown').Converter)();
 
 function emojify(text) {
+  if (!text) {
+    return '';
+  }
   return text.replace(/:one:/g, '①')
     .replace(/:two:/g, '②')
     .replace(/:three:/g, '③');
