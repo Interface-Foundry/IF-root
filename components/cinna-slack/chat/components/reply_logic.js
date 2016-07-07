@@ -190,15 +190,16 @@ function* simple_response(message) {
         action: 'more'
       })
       break;
-
+    case 'purchase.remove':
     case 'cart.remove':
       message.mode = 'cart';
       message.action = 'remove';
-      message.execute.pusH({
+      message.execute.push({
         mode: 'cart',
         action: 'remove',
-        prams: {
+        params: {
           focus: reply.query
+           // ? reply.query : (message.searchSelect[0] ? message.searchSelect[0] : undefined)
         }
       })
       break;
@@ -261,7 +262,7 @@ function* nlp_response(message) {
     }
     var messages = yield execute(message);
   } catch(err) {
-    console.log('\n\n\n\NLP ERR', err)
+    console.log('\n\n\n\NLP ERR', err, message)
   }
   if (process.env.NODE_ENV !== 'production') {
     return [debug_message].concat(messages);
@@ -533,7 +534,7 @@ console.log('raw_results: ', typeof raw_results, raw_results);
 
 handlers['cart.remove'] = function*(message, exec) {
   if (!exec.params.focus) {
-    throw new Error('no focus for removing from cart')
+    throw new Error('no focus for removing from cart', message)
   }
 
   var cart_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team;
