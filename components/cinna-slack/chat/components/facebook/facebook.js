@@ -338,7 +338,7 @@ app.post('/facebook', function(req, res) {
                          if (postback.action == 'help') {
                             var help_card = {
                                 "recipient": {
-                                    "id": msg.source.channel
+                                    "id": sender.toString()
                                 },
                                 "message": {
                                     "attachment": {
