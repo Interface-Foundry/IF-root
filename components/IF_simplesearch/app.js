@@ -84,6 +84,7 @@ app.get('/newslack', function(req, res) {
         console.log('got positive response from slack')
         console.log('body was', body)
         console.log('response was', b)
+	db.Metrics.log('slackbutton', b);
         var bot = new db.Slackbot(b)
         db.Slackbots.findOne({team_id: b.team_id, deleted: {$ne: true}}, function(e, old_bot) {
           if (e) { console.error(e) }

@@ -75,6 +75,10 @@ var schemas = [{
     single: 'Item',
     plural: 'Items'
 }, {
+    filename: 'error_schema',
+    single: 'Error',
+    plural: 'Errors'
+}, {
     filename: 'job_schema',
     single: 'Job',
     plural: 'Jobs'

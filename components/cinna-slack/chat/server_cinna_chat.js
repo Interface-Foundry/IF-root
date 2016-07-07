@@ -55,6 +55,8 @@ process.on('uncaughtException', function(err) {
   kip.error(err.stack);
 });
 
+db.Metrics.log('server_cinna_chat.restarted');
+
 //load kip modules
 var ioKip = require("./components/io.js");
 var processData = require("./components/process.js");
@@ -140,6 +142,7 @@ app.get('/newslack', function(req, res) {
     kip.debug('got positive response from slack')
     kip.debug('body was', body)
     kip.debug('response was', b)
+    db.Metrics.log('slackbutton', b);
     var bot = new db.Slackbot(b)
     db.Slackbots.findOne({
       team_id: b.team_id,
@@ -263,17 +266,19 @@ app.post('/emailincoming', busboy({
   })
 
   req.busboy.on('finish', () => {
+    db.Metrics.log('email.incoming', req.body);
     email.process(req.body).catch((e) => {
-      kip.debug(e.stack);
+      kip.error(e.stack);
     })
     res.sendStatus(200);
   })
 })
 
-//user hit unsubsctibe link in email 
+//user hit unsubsctibe link in email
 app.get('/unsubscribe/:email', function(req, res) {
   var email = req.params.email.slice(0, req.params.email.length-1).replace('-at-','@');
   console.log('hitting /unsubscribe ', email);
+  db.Metrics.log('email.unsubscribe', {email: email});
 
     var post_body = {
         "recipient_emails": [
