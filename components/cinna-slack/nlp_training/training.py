@@ -5,7 +5,7 @@ import json
 import tensorflow as tf
 from keras.models import Model
 from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, Adam
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
@@ -47,10 +47,10 @@ def model():
         model = Model(input=sequence, output=output)
 
     with tf.name_scope('optimizer'):
-        rmsprop = RMSprop(lr=0.0001, rho=0.9, epsilon=1e-08)
+        optimizer_ = RMSprop(lr=0.00001, rho=0.9, epsilon=1e-08)
 
     with tf.name_scope('model_compiled'):
-        model.compile(optimizer=rmsprop,
+        model.compile(optimizer=optimizer_,
                       loss='categorical_crossentropy',
                       metrics=['accuracy'])
 
