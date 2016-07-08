@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node chat/server_cinna_chat.js",
-    "install": "ln -sf ../kip.js node_modules/kip.js"
+    "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db"
   },
   "keywords": [
     "chat"
