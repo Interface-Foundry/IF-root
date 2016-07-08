@@ -1,7 +1,9 @@
 FROM node:6
-COPY . /kip
+RUN mkdir /kip
 WORKDIR /kip
 ENV NODE_ENV=production
-RUN npm install
+ADD package.json /kip/package.json
+RUN npm install --production && ln -s ../kip.js node_modules/kip.js
+COPY . /kip
 EXPOSE 8000
 CMD node chat/components/web/app.js
