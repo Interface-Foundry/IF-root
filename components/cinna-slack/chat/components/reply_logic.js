@@ -103,14 +103,11 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     var replies = yield simple_response(message);
-    // kip.debug('simple replies'.cyan, replies);
+    kip.debug('simple replies'.cyan, replies);
 
     if (!replies || replies.length === 0) {
-      // console.log('\n\n\n\n\n\nBEFORE NLP message', message);
       replies = yield nlp_response(message);
-            // console.log('\n\n\n\n\n\nAFTER NLP RESOINSE', replies);
-
-      // kip.debug('nlp replies'.cyan, replies);
+      kip.debug('nlp replies'.cyan, replies);
     }
 
     if (!replies || replies.length === 0) {
@@ -122,8 +119,11 @@ queue.topic('incoming').subscribe(incoming => {
 
     yield message.save(); // the incoming message has had some stuff added to it :)
     yield replies.map(r => {
-      // console.log('who is mr robot: ', r);
-      r.save()
+      if (r.save) {
+        r.save()
+      } else {
+        console.log('could not save ' + r);
+      }
     });
     yield replies.map((r, i) => {
       kip.debug('reply', r.mode, r.action);
@@ -263,7 +263,7 @@ function* nlp_response(message) {
     }
     var messages = yield execute(message);
   } catch(err) {
-    console.log('\n\n\n\NLP ERR', err, message)
+    kip.err(err);
   }
   if (process.env.NODE_ENV !== 'production') {
     return [debug_message].concat(messages);
@@ -278,12 +278,12 @@ function execute(message) {
   return co(function*() {
     var messages = yield message.execute.reduce((messages, exec) => {
       var route = exec.mode + '.' + exec.action;
+      kip.debug('route', route, 'exec', exec);
       if (!handlers[route]) {
         throw new Error(route + ' handler not implemented');
       }
 
       var message_promises = handlers[route](message, exec);
-      kip.debug('got', message_promises, 'from route', route);
 
       if (message_promises instanceof Array) {
         messages = messages.concat(message_promises)
@@ -430,8 +430,11 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
 
-  // modify the params and then do another search.
+  kip.debug('old params', old_params);
+
+  // for "cheaper" modify the params and then do another search.
   if (exec.params.type === 'price') {
+    _.merge(exec.params, old_params);
     var max_price = Math.max.apply(null, old_results.map(r => parseFloat(r.realPrice.slice(1))));
     if (exec.params.param === 'less') {
       exec.params.max_price = max_price * 0.8;
@@ -441,7 +444,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     }
   }
   else if (exec.params.type === 'genericDetail') {
-
+    // todo
   }
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);

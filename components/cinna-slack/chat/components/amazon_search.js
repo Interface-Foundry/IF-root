@@ -10,6 +10,7 @@ var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = promisify(require('./amazonHTML'));
+var db = require('db');
 // var client = amazon.createClient({
 //   awsId: "AKIAIKMXJTAV2ORZMWMQ",
 //   awsSecret: "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",
@@ -57,7 +58,7 @@ params:
 */
 var search = function*(params,origin) {
 
-  console.log('origin ',origin)
+  db.Metrics.log('search.amazon', params);
 
   if (!params.query) {
     console.log('error params: ', params)
@@ -162,7 +163,7 @@ var similar = function*(params,origin) {
 // Decorates the results for a party 🎉
 function* enhance_results(results,origin) {
 
-  
+
 
   // enhance the results, naturally.
   yield results.map(r => {

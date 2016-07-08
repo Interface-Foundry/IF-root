@@ -59,7 +59,7 @@ var parse = module.exports.parse = function(message) {
       return simpleResult;
     }
 
-    
+
     // Get help from TextBlob and spaCy python modules
     var res = yield request({
       method: 'POST',
@@ -211,11 +211,6 @@ function nlpToResult(nlp, message) {
     return stopwords.indexOf(n.toLowerCase()) < 0;
   })
 
-  // handle all initial search requests first
-  if (nlp.focus.length === 0) {
-
-  }
-
   // check for "about"
   if (nlp.focus.length === 1) {
     if (nlp.text.indexOf('about') >= 0) {
@@ -258,22 +253,6 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-  if (nlp.ss.length === 1 && nlp.focus.length === 0) {
-    var s = nlp.ss[0];
-    if (!s.isQuestion) {
-      debug('simple case initial triggered');
-      message.execute.push({
-        mode: MODE.shopping,
-        action: ACTION.initial,
-        params: {
-          query: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
-            return stopwords.indexOf(n) < 0;
-          })).join(' ')
-        }
-      })
-    }
-  }
-
   var priceModifier = price(nlp.text);
   if (priceModifier) {
     debug('priceModifier triggered')
@@ -286,6 +265,7 @@ function nlpToResult(nlp, message) {
       exec.params.focus = nlp.focus[0];
     }
     message.execute.push(exec);
+    return;
   }
 
   // get all the nouns and adjectives
@@ -311,6 +291,22 @@ function nlpToResult(nlp, message) {
       nlp.locations.push(e[0])
     }
   })
+
+  if (nlp.ss.length === 1 && nlp.focus.length === 0) {
+    var s = nlp.ss[0];
+    if (!s.isQuestion) {
+      debug('simple case initial triggered');
+      message.execute.push({
+        mode: MODE.shopping,
+        action: ACTION.initial,
+        params: {
+          query: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
+            return stopwords.indexOf(n) < 0;
+          })).join(' ')
+        }
+      })
+    }
+  }
 
   // take care of any extraneous modify parameters
   message.execute.map(e => {
