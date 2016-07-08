@@ -71,10 +71,7 @@ var busboy = require('connect-busboy');
 var fs = require('fs');
 //set env vars
 var config = require('../../../config');
-process.on('uncaughtException', function(err) {
-    console.error('uncaught exception', new Date())
-    console.error(err.stack);
-});
+
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -196,7 +193,7 @@ app.post('/facebook', function(req, res) {
                 method: 'POST',
                 json: typing_indicator
             }, function() {
-                // setTimeout(function(){ 
+                // setTimeout(function(){
                 //      var typing_indicators = {
                 //           "recipient":{
                 //             "id": sender.toString()
@@ -464,7 +461,7 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()
@@ -518,7 +515,7 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()
@@ -577,7 +574,7 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()
@@ -627,7 +624,7 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()
@@ -678,7 +675,7 @@ app.post('/facebook', function(req, res) {
                                         //     method: 'POST',
                                         //     json: typing_indicator
                                         // }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()
@@ -729,7 +726,7 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()
@@ -780,7 +777,7 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {
-                                            // setTimeout(function(){ 
+                                            // setTimeout(function(){
                                             //      var typing_indicators = {
                                             //           "recipient":{
                                             //             "id": sender.toString()

@@ -50,6 +50,11 @@ module.exports.err = function(e, message, data) {
 };
 module.exports.error = module.exports.err;
 
+// log all uncaught exceptions to the db
+process.on('uncaughtException', e => {
+  module.exports.error(e, 'uncaught');
+});
+
 
 /**
  * Kills the process if there's an ERROR

@@ -51,11 +51,6 @@ var websockets = require('./websockets');
 //set env vars
 var config = require('../../../config');
 
-process.on('uncaughtException', function(err) {
-  kip.error('uncaught exception', new Date())
-  kip.error(err.stack);
-});
-
 // website 🌏
 var express = require('express');
 var app = express();
