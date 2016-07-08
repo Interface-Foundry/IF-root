@@ -8,7 +8,7 @@ from os import makedirs, path
 
 
 def load_df(foldername='pkls/too_big',
-            db_name='prod1',
+            db_name='prod2',
             filename='messages.pkl',
             save=True):
     '''

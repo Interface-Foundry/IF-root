@@ -28,11 +28,11 @@ def model():
                           mask_zero=True)(sequence)
 
     with tf.name_scope('forwards'):
-        fw = LSTM(64, consume_less='gpu', return_sequences=True)(embed)
+        fw = LSTM(128, consume_less='gpu', return_sequences=True)(embed)
         fw = LSTM(64, consume_less='gpu')(fw)
 
     with tf.name_scope('backwards'):
-        bw = LSTM(64, consume_less='gpu', return_sequences=True,
+        bw = LSTM(128, consume_less='gpu', return_sequences=True,
                   go_backwards=True)(embed)
         bw = LSTM(64, consume_less='gpu')(bw)
 
@@ -80,13 +80,14 @@ if __name__ == '__main__':
     df = retrieve_from_prod_db()
 
     # glove vectors if using embedding pretraining
-    glove_vocab_array, glove_vocab_dict = load_glove_vocab(
-        config['glove_filename'])
-    glove_vectors, glove_dict = load_glove_vectors(
-        config['glove_filename'], set(glove_vocab_array))
+    # glove_vocab_array, glove_vocab_dict = load_glove_vocab(
+    #     config['glove_filename'])
+    # glove_vectors, glove_dict = load_glove_vectors(
+    #     config['glove_filename'], set(glove_vocab_array))
 
     action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
     weight_dict = classes_to_weights(df, ac_dict)
+    print('dataframe shape : ', df.shape)
     config['ac_dict'] = ac_dict
     config['rev_ac_dict'] = rev_ac_dict
 
@@ -103,7 +104,7 @@ if __name__ == '__main__':
     save_tokenizer(tk)
     model.fit(data, action_codes,
               validation_split=.2,
-              nb_epoch=250,
+              nb_epoch=500,
               batch_size=32,
               verbose=1,
               callbacks=[tb, mc],

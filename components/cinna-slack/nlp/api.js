@@ -207,11 +207,11 @@ function nlpToResult(nlp, message) {
   nlp.focus = nlp.focus || [];
 
   // take care of invalid adjectives that are actually focuses (first)
-  nlp.adjectives = nlp.adjectives || [];
-  var invalidAdjectives = ['first', 'second', 'third'];
-  nlp.adjectives = nlp.adjectives.filter(function(a) {
-    return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
-  })
+  // nlp.adjectives = nlp.adjectives || [];
+  // var invalidAdjectives = ['first', 'second', 'third'];
+  // nlp.adjectives = nlp.adjectives.filter(function(a) {
+  //   return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
+  // })
 
   // take care of invalid nouns - removed for now
   // nlp.nouns = (nlp.nouns || []).filter(function(n) {
@@ -281,19 +281,19 @@ function nlpToResult(nlp, message) {
     }
   }
 
-  var priceModifier = price(nlp.text);
-  if (priceModifier) {
-    debug('priceModifier triggered')
-    var exec = {
-      mode: MODE.shopping,
-      action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
-      params: priceModifier,
-    };
-    if (nlp.focus.length >= 1) {
-      exec.params.focus = nlp.focus[0];
-    }
-    message.execute.push(exec);
-  }
+  // var priceModifier = price(nlp.text);
+  // if (priceModifier) {
+  //   debug('priceModifier triggered')
+  //   var exec = {
+  //     mode: MODE.shopping,
+  //     action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
+  //     params: priceModifier,
+  //   };
+  //   if (nlp.focus.length >= 1) {
+  //     exec.params.focus = nlp.focus[0];
+  //   }
+  //   message.execute.push(exec);
+  // }
 
   // get all the nouns and adjectives
   var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
@@ -312,12 +312,12 @@ function nlpToResult(nlp, message) {
   }
 
   // break out the entities into stores, locations, etc
-  nlp.locations = [];
-  nlp.entities.map(function(e) {
-    if (e[1] === 'GPE') {
-      nlp.locations.push(e[0])
-    }
-  })
+  // nlp.locations = [];
+  // nlp.entities.map(function(e) {
+  //   if (e[1] === 'GPE') {
+  //     nlp.locations.push(e[0])
+  //   }
+  // })
 
   // take care of any extraneous modify parameters
   message.execute.map(e => {

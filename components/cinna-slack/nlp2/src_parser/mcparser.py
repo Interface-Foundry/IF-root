@@ -2,7 +2,7 @@ import logging
 import subprocess
 from easydict import EasyDict
 
-from word_list import action_terms, price_terms, stopwords
+from word_list import action_terms, price_terms, stopwords, invalid_adjectives
 
 DEBUG_ = False
 logger = logging.getLogger()
@@ -68,7 +68,7 @@ class McParser:
         self._process_text()
         self._array_form()
         self._parse_terms()
-        self._remove_stopwords()
+        self._remove_words()
         self._get_action()
         self._checks()
 
@@ -123,8 +123,17 @@ class McParser:
             if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append(3)
 
-    def _remove_stopwords(self):
-        self.nouns_without_stopwords = list(set(self.nouns).difference(stopwl))
+    def _remove_words(self):
+        '''
+        removes:
+            nouns without stopwords
+            adjectives without invalid adjectives
+        '''
+        self.adjectives = list(
+            set(self.adjectives).difference([invalid_adjectives]))
+
+        self.nouns_without_stopwords = list(
+            set(self.nouns).difference(stopwords))
 
     def _checks(self):
         '''check for all the words previously searched for in api.js
@@ -147,17 +156,23 @@ class McParser:
             self.had_question = True
 
     def _get_action(self):
-        if any(map(lambda each: each in action_terms['checkout'], self.tokens)):
+        if any(map(
+                lambda each: each in action_terms['checkout'], self.tokens)):
             self.action = 'checkout'
-        if any(map(lambda each: each in action_terms['remove'], self.tokens)):
+        if any(map(
+                lambda each: each in action_terms['remove'], self.tokens)):
             self.action = 'remove'
-        if any(map(lambda each: each in action_terms['list_cart'], self.tokens)):
+        if any(map(
+                lambda each: each in action_terms['list_cart'], self.tokens)):
             self.action = 'list'
-        if any(map(lambda each: each in action_terms['save'], self.tokens)):
+        if any(map(
+                lambda each: each in action_terms['save'], self.tokens)):
             self.action = 'save'
-        if any(map(lambda each: each in action_terms['focus'], self.tokens)):
+        if any(map(
+                lambda each: each in action_terms['focus'], self.tokens)):
             self.action = 'focus'
-        if any(map(lambda each: each in action_terms['search'], self.tokens)):
+        if any(map(
+                lambda each: each in action_terms['search'], self.tokens)):
             self.action = 'checkout'
 
     def _simple_case(self):
@@ -169,6 +184,18 @@ class McParser:
             self.data_modify = 'more'
         if any(w in self.text for w in price_terms['less']):
             self.data_modify = 'less'
+
+    def create_execute(self):
+        e = {}
+        if self.had_about:
+            e['mode'] = 'shopping'
+            e['action'] = 'focus'
+            e['params'] = 'params'
+        if self.had_find:
+            e['mode'] = 'shopping'
+            e['action'] = 'focus'
+            e['params'] = 'params'
+
 
     def output_form(self):
         '''

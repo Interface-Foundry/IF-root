@@ -677,3 +677,9 @@ action_terms = {
     'focus': ['focus', 'info'],
     'search': ['need', 'want']
 }
+
+invalid_adjectives = [
+    'first',
+    'second',
+    'third'
+]
