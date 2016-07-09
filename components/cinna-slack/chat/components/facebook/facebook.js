@@ -216,8 +216,6 @@ app.post('/facebook', function(req, res) {
         }
 
 
-
-
         if (event.message && event.message.text) {
 
                  text = event.message.text;

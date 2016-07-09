@@ -30,7 +30,7 @@ server.listen(3978, function (req, res, huh) {
 var connector = new builder.ChatConnector({
     appId: '3940dbc8-d579-4f3a-89fa-e8112b2cdae7',
     // 3940dbc8-d579-4f3a-89fa-e8112b2cdae7
-    appPassword:'xegc1g5ZXaHiLmmhGuVHovj'
+    appPassword: 'Hp9jMrHmP18O6wKF2qGn0kn'
      // 'xegc1g5ZXaHiLmmhGuVHovj'
 });
 
@@ -101,7 +101,7 @@ server.post('/api/messages',connector.listen());
 bot.dialog('/', function (session) {
     var text = session.message.text;
     var user = session.message.user;
-    console.log(JSON.stringify(user))
+    console.log('\n\n\nRaw incoming Skype object: ', session);
    // message:
    // { type: 'message',
    //   timestamp: '2016-07-08T21:18:46.707Z',
@@ -116,16 +116,44 @@ bot.dialog('/', function (session) {
    //      serviceUrl: 'https://skype.botframework.com' },
    //   attachments: [],
    //   user: { id: '29:1LJMJ1EMFNK3vkP5B1OjgL5M082J45ynqIct-OLEj0Jo' } },
+    if (session.message.attachments) {
+        console.log('RECEIVED AN IMAGE LEL')
+         var img_array = [
+                        'http://kipthis.com/kip_stickers/kip1.png',
+                        'http://kipthis.com/kip_stickers/kip2.png',
+                        'http://kipthis.com/kip_stickers/kip3.png',
+                        'http://kipthis.com/kip_stickers/kip4.png',
+                        'http://kipthis.com/kip_stickers/kip5.png',
+                        'http://kipthis.com/kip_stickers/kip6.png',
+                        'http://kipthis.com/kip_stickers/kip7.png',
+                        'http://kipthis.com/kip_stickers/kip8.png',
+                        'http://kipthis.com/kip_stickers/kip9.png'
+                        ];
+        // session.send(img_array[Math.floor(Math.random()*img_array.length)]);
+
+         var msg = new builder.Message(session)
+            .attachments([{
+                contentType: "image/jpeg",
+                contentUrl: img_array[Math.floor(Math.random()*img_array.length)]
+            }]);
+        session.send(msg);
+
+
+        return 
+    }
+
+
+
     text = emojiText.convert(text,{delimiter: ' '});
     console.log(text);
     console.log(user);
-    var card = new builder.HeroCard(session)
-        .title("Microsoft Bot Framework")
-        .text("Your bots - wherever your users are talking.")
-        .images([
-        builder.CardImage.create(session, "http://kipthis.com/images/header_partners.png")
-        ]);
-    var msg = new builder.Message(session).attachments([card]);
+    // var card = new builder.HeroCard(session)
+    //     .title("Microsoft Bot Framework")
+    //     .text("Your bots - wherever your users are talking.")
+    //     .images([
+    //     builder.CardImage.create(session, "http://kipthis.com/images/header_partners.png")
+    //     ]);
+    // var msg = new builder.Message(session).attachments([card]);
 
     var message = new db.Message({
             incoming: true,
@@ -150,22 +178,22 @@ bot.dialog('/', function (session) {
             queue.publish('incoming', message, ['skype', user.id, message.ts].join('.'))
         });
 
-        session.send(msg);
+        // session.send(msg);
 
 //
 // Mechanism for responding to messages
 //
 kip.debug('subscribing to outgoing.skype');
 queue.topic('outgoing.skype').subscribe(outgoing => {
-    console.log('skype outgoing message');
     // var session = outgoing.message.session;
-    console.log(outgoing);
+    // console.log(outgoing);
     // var data = outgoing.data;
     var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
     try {
         console.log('outgoing message');
         // console.log(outgoing);
         var message = outgoing.data;
+        console.log('skype outgoing message', message.mode, message.action);
         var return_data = {};
         co(function*() {
             if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
@@ -183,6 +211,9 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
             //     return send_text(message.source.channel, message.text, outgoing)
             // }
+            else if (message.text){
+                session.send(message.text);
+            }
             else {
                 console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhmm, shouldnt be getting here..', message);
             }
