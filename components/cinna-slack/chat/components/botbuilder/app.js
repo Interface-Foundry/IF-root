@@ -101,7 +101,7 @@ server.post('/api/messages',connector.listen());
 bot.dialog('/', function (session) {
     var text = session.message.text;
     var user = session.message.user;
-    console.log('\n\n\nRaw incoming Skype object: ', session);
+    console.log('\n\n\nRaw incoming Skype object: ', JSON.stringify(session.message));
    // message:
    // { type: 'message',
    //   timestamp: '2016-07-08T21:18:46.707Z',
@@ -116,37 +116,34 @@ bot.dialog('/', function (session) {
    //      serviceUrl: 'https://skype.botframework.com' },
    //   attachments: [],
    //   user: { id: '29:1LJMJ1EMFNK3vkP5B1OjgL5M082J45ynqIct-OLEj0Jo' } },
-    if (session.message.attachments) {
-        console.log('RECEIVED AN IMAGE LEL')
+    if (session.message.attachments && session.message.attachments[0]) {
          var img_array = [
-                        'http://kipthis.com/kip_stickers/kip1.png',
-                        'http://kipthis.com/kip_stickers/kip2.png',
-                        'http://kipthis.com/kip_stickers/kip3.png',
-                        'http://kipthis.com/kip_stickers/kip4.png',
-                        'http://kipthis.com/kip_stickers/kip5.png',
-                        'http://kipthis.com/kip_stickers/kip6.png',
-                        'http://kipthis.com/kip_stickers/kip7.png',
-                        'http://kipthis.com/kip_stickers/kip8.png',
-                        'http://kipthis.com/kip_stickers/kip9.png'
-                        ];
-        // session.send(img_array[Math.floor(Math.random()*img_array.length)]);
-
+            'http://kipthis.com/kip_stickers/kip1.png',
+            'http://kipthis.com/kip_stickers/kip2.png',
+            'http://kipthis.com/kip_stickers/kip3.png',
+            'http://kipthis.com/kip_stickers/kip4.png',
+            'http://kipthis.com/kip_stickers/kip5.png',
+            'http://kipthis.com/kip_stickers/kip6.png',
+            'http://kipthis.com/kip_stickers/kip7.png',
+            'http://kipthis.com/kip_stickers/kip8.png',
+            'http://kipthis.com/kip_stickers/kip9.png'
+            ];
          var msg = new builder.Message(session)
             .attachments([{
                 contentType: "image/jpeg",
                 contentUrl: img_array[Math.floor(Math.random()*img_array.length)]
             }]);
         session.send(msg);
-
-
         return 
     }
 
+    // builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|(quit)");
 
 
     text = emojiText.convert(text,{delimiter: ' '});
     console.log(text);
     console.log(user);
+
     // var card = new builder.HeroCard(session)
     //     .title("Microsoft Bot Framework")
     //     .text("Your bots - wherever your users are talking.")
@@ -154,6 +151,30 @@ bot.dialog('/', function (session) {
     //     builder.CardImage.create(session, "http://kipthis.com/images/header_partners.png")
     //     ]);
     // var msg = new builder.Message(session).attachments([card]);
+    // session.send(msg);
+    // return;
+
+     // var msg = new builder.Message(session)
+     //        .textFormat(builder.TextFormat.xml)
+     //        .attachments([
+     //            new builder.HeroCard(session)
+     //                .title("Hero Card")
+     //                .subtitle("Space Needle")
+     //                .text("The <b>Space Needle</b> is an observation tower in Seattle, Washington, a landmark of the Pacific Northwest, and an icon of Seattle.")
+     //                .images([
+     //                    builder.CardImage.create(session, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Seattlenighttimequeenanne.jpg/320px-Seattlenighttimequeenanne.jpg")
+     //                ]),
+     //            new builder.ThumbnailCard(session)
+     //                .title("Thumbnail Card")
+     //                .subtitle("Pikes Place Market")
+     //                .text("<b>Pike Place Market</b> is a public market overlooking the Elliott Bay waterfront in Seattle, Washington, United States.")
+     //                .images([
+     //                    builder.CardImage.create(session, "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/PikePlaceMarket.jpg/320px-PikePlaceMarket.jpg")
+     //                ])
+     //        ]);
+     //    session.endDialog(msg);
+     //    return;
+
 
     var message = new db.Message({
             incoming: true,
