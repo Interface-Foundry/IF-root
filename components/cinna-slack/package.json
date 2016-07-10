@@ -57,6 +57,7 @@
     "promisify-global": "^1.0.0",
     "promisify-node": "^0.4.0",
     "request": "^2.72.0",
+    "restify": "^4.1.1",
     "rx": "^4.1.0",
     "sendgrid": "^2.0.0",
     "shortid": "^2.2.4",
