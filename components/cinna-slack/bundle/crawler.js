@@ -12,7 +12,7 @@ var proxyPool = []; //current good sessions
 var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36';
 var luminatiReady = false;
 
-var rootURL = 'https://www.amazon.com/s/ref=sr_nr_n_0?fst=as%3Aoff&rh=n%3A283155%2Cp_n_availability%3A2245266011%2Cp_n_fresh_match%3A1-2%2Cn%3A%211000%2Cn%3A1%2Cn%3A173508%2Cn%3A266162&bbn=173508&ie=UTF8&qid=1467933961&rnid=173508';
+var rootURL = 'https://www.amazon.com/toys/b/ref=sd_allcat_tg?ie=UTF8&node=165793011&nocache=1467989734067';
 
 // let's try with books/Arts & Photos/Architecture first:
 
@@ -63,7 +63,7 @@ function readNextPage(url)
 	})
 }
 
-function proxyRequest(url)
+function readPage(url)
 {
 	proxiedRequest.get(url, function(err, response, body) {
 		// if (err) {
@@ -76,7 +76,7 @@ function proxyRequest(url)
 			if (response.statusCode != 200) {
 				setTimeout(function () {
 					console.log('halp')
-					proxyRequest(url)
+					readPage(url)
 				}, 3000);
 			}
 			var $ = cheerio.load(body);
@@ -89,17 +89,13 @@ function proxyRequest(url)
 					var child = 'https://www.amazon.com' + $(this).parent().attr('href');
 					hasChildren = true;
 
-					setTimeout(function() { proxyRequest(child); }, 1000);
+					setTimeout(function() { readPage(child); }, 1000);
 				}
 			});
 			if (!hasChildren)
 			{
-
 				$('div.s-item-container h2').each(function() {
 					console.log($(this).parent().attr('href'))
-					
-					// now find the links on the next page
-
 				})
 				for (var i = 2; i < 101; i++)
 				{
@@ -110,8 +106,8 @@ function proxyRequest(url)
 
 		} catch(err) {
 			setTimeout(function () {
-				console.log('uhuh')
-				proxyRequest(url)
+				// console.log('uhuh')
+				readPage(url)
 			}, 5000);
 		}
 		
@@ -120,13 +116,13 @@ function proxyRequest(url)
 
 function loadChildren(url) 
 {
-	var children = proxyRequest(url);
+	var children = readPage(url);
 	for (var child in children) {
 		setTimeout(function() { loadChildren(child); }, 1000);
 	}
 }
 
-proxyRequest(rootURL);
+readPage(rootURL);
 
 
 
