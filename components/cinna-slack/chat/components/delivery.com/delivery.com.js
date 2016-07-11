@@ -11,7 +11,9 @@ function default_reply(message) {
     user_id: 'kip',
     origin: message.origin,
     text: "I'm sorry I couldn't quite understand that",
-    source: message.source
+    source: message.source,
+    mode: message.mode,
+    action: message.action
   })
 }
 
@@ -23,6 +25,7 @@ function text_reply(message, text) {
 
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
+  msg.save();
   console.log('<<<'.yellow, text.yellow);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
@@ -50,6 +53,8 @@ queue.topic('incoming').subscribe(incoming => {
 
     var route = yield getRoute(message);
     kip.debug('route', route);
+    message.mode = 'food';
+    message.action = route.replace(/$food./, '');
     yield handlers[route](message);
     incoming.ack();
 

@@ -1,6 +1,7 @@
 var path = require('path');
 var db = require('./db');
 require('colors');
+global.kip = module.exports;
 
 /**
  * Prints an error to the screen and returns true.
