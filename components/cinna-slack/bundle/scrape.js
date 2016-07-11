@@ -83,7 +83,7 @@ function scrapeData($, featureId)
 }
 
 function loadFirstPage(req_url, asins)
-{	
+{
 	// products will load a dif number of next products each time
 	// var count = parseInt(req_url.match(/count=\d+/).slice(6))
 	//      /[0-9]+/
@@ -269,8 +269,8 @@ function findData(url) {
 			var alsoBoughtScrape = scrapeData($, alsoBoughtIDFeature);
 			alsoBought = alsoBoughtScrape[0];
 			var alsoBoughtASINS = alsoBoughtScrape[1];
-			alsoBoughtReqUrl = loadFirstPage(alsoBoughtReqUrl, alsoBoughtASINS);
-			proxyRequest(alsoBoughtReqUrl, alsoBought);
+			// alsoBoughtReqUrl = loadFirstPage(alsoBoughtReqUrl, alsoBoughtASINS);
+			// proxyRequest(alsoBoughtReqUrl, alsoBought);
 		}
 	  
 		if (alsoViewedIDFeature) 
@@ -278,8 +278,8 @@ function findData(url) {
 			var alsoViewedScrape = scrapeData($, alsoViewedIDFeature);
 			alsoViewed = alsoViewedScrape[0];
 			var alsoViewedASINS = alsoViewedScrape[1];
-			alsoViewedReqUrl = loadFirstPage(alsoViewedReqUrl, alsoViewedASINS);
-			proxyRequest(alsoViewedReqUrl, alsoViewed);
+			// alsoViewedReqUrl = loadFirstPage(alsoViewedReqUrl, alsoViewedASINS);
+			// proxyRequest(alsoViewedReqUrl, alsoViewed);
 		}
 
 	  // for subsequent pages, load 5:

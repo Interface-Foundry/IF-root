@@ -6,6 +6,7 @@ var async = require('async');
 var requestPromise = require('request-promise');
 var mongoose = require('mongoose');
 var co = require('co');
+var job = require('../JobQueue/job');
 
 //CONNECTION POOLING HERE
 var proxyPool = []; //current good sessions
@@ -20,8 +21,10 @@ mongoose.connect('mongodb://localhost/amazonData');
 	var productSchema = mongoose.Schema( {
 		asin: String,
 		name: String,
-		alsoBought: [String],
-		alsoViewed: [String]
+		topLevelURL: String,
+		category: [String],
+		alsoBought: [String]
+		// alsoViewed: [String]
 
 		// ****************************************
 		// Ignore these 2 other features for now
@@ -55,27 +58,32 @@ mongoose.connect('mongodb://localhost/amazonData');
 	scrapePage(url);
 // });
 
-
+var crawler = job('crawler-job', function(data, done) {
+	scrapePage('https://www.amazon.com/dp/' + data + '/ref=nav_timeline_asin?_encoding=UTF8&psc=1') 
+	setTimeout(function () {
+		done(null, 'woooow')
+	}, 1000)
+})
 
 function checkASINs(asins)
 {
 	co(function * () {
-		// console.log(asins)
 		// for (var i in asins)
 		// {
-		// 	var tmp = asins[i]
+		// 	var tmp = asins[i];
 		// 	Product.count( {asin: tmp}, function (err, count) {
+		// 		console.log(tmp)
 		// 		if (count === 0) 
-		// 			setTimeout(function () { scrapePage('https://www.amazon.com/dp/' + tmp + '/ref=nav_timeline_asin?_encoding=UTF8&psc=1'); }, 1000);
+		// 			crawler(tmp);
+		// 			// ^ enqueue asins
 		// 	});
-		// }
+		// }	
 
-		async.eachSeries(asins, function (elem, callback) {
-			// also check if asin is not already in the queue
+		async.forEach(asins, function (elem, callback) {
 			Product.count( {asin: elem}, function (err, count) {
 				if (count === 0) 
-					// enqueue elem;
-					setTimeout(function () { scrapePage('https://www.amazon.com/dp/' + elem + '/ref=nav_timeline_asin?_encoding=UTF8&psc=1'); }, 1000);
+					crawler(elem);
+					// ^ enqueue asins
 			});
 		});
 	});
@@ -85,15 +93,15 @@ function scrapePage(url)
 {
 	proxiedRequest.get(url, function(err, response, body) 
 	{
-		// try {
-			if (err) {
-				console.log('&^&^&^&^&^&^&^&^&^');
-				console.error('^^$%$% ERROR ' + err);	
-			}
+		try {
+			// if (err) {
+			// 	console.log('&^&^&^&^&^&^&^&^&^');
+			// 	console.error('^^$%$% ERROR ' + err);	
+			// }
 
 			// Try again?
 			if (response.statusCode != 200) {
-				console.log('-_-');
+				console.log(':(');
 				setTimeout(function () { scrapePage(url); }, 1000);
 			}
 
@@ -109,11 +117,11 @@ function scrapePage(url)
 			else if ($('#purchase-sims-feature div').attr('data-a-carousel-options'))
 				alsoBoughtIDFeature = '#purchase-sims-feature div';
 
-			var alsoViewedIDFeature;
-			if ($('#session-sims-feature div').attr('data-a-carousel-options'))
-				alsoViewedIDFeature = '#session-sims-feature div';
-			else if ($('#fallbacksession-sims-feature div').attr('data-a-carousel-options'))
-				alsoViewedIDFeature = '#fallbacksession-sims-feature div';
+			// var alsoViewedIDFeature;
+			// if ($('#session-sims-feature div').attr('data-a-carousel-options'))
+			// 	alsoViewedIDFeature = '#session-sims-feature div';
+			// else if ($('#fallbacksession-sims-feature div').attr('data-a-carousel-options'))
+			// 	alsoViewedIDFeature = '#fallbacksession-sims-feature div';
 
 			// Define fields for schema
 			var num = $('input#ASIN').val();
@@ -137,8 +145,8 @@ function scrapePage(url)
 
 			if (alsoBoughtIDFeature) 
 				alsoBoughtASINs = scrapeData(alsoBoughtIDFeature);
-			if (alsoViewedIDFeature) 
-				alsoViewedASINs = scrapeData(alsoViewedIDFeature);
+			// if (alsoViewedIDFeature) 
+			// 	alsoViewedASINs = scrapeData(alsoViewedIDFeature);
 
 			var node = new Product( {
 				asin: num,
@@ -157,7 +165,7 @@ function scrapePage(url)
 							else {
 								// throw into queue
 								checkASINs(alsoBoughtASINs);
-								checkASINs(alsoViewedASINs);
+								// checkASINs(alsoViewedASINs);
 								console.log(title);
 							}
 						});
@@ -165,12 +173,11 @@ function scrapePage(url)
 				});
 			});
 
-		// } catch(err) {
-		// 	setTimeout(function () { 
-		// 		console.log('rip')
-		// 		scrapePage(url); 
-		// 	}, 5000);
-		// }
+		} catch(err) {
+			setTimeout(function () { 
+				scrapePage(url); 
+			}, 5000);
+		}
 
 	});
 }
