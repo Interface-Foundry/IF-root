@@ -4,10 +4,10 @@ import json
 
 import tensorflow as tf
 from keras.models import Model
-from keras.layers import Input, Dense, Embedding, Dropout, LSTM, merge
+from keras.layers import Input, Dense, Embedding, Dropout, LSTM, GRU, merge
 from keras.optimizers import RMSprop, Adam
 from keras.preprocessing.sequence import pad_sequences
-from keras.callbacks import TensorBoard, ModelCheckpoint
+from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes, \
     classes_to_weights
@@ -28,13 +28,13 @@ def model():
                           mask_zero=True)(sequence)
 
     with tf.name_scope('forwards'):
-        fw = LSTM(128, consume_less='gpu', return_sequences=True)(embed)
-        fw = LSTM(64, consume_less='gpu')(fw)
+        fw = GRU(128, consume_less='gpu', return_sequences=True)(embed)
+        fw = GRU(128, consume_less='gpu')(fw)
 
     with tf.name_scope('backwards'):
-        bw = LSTM(128, consume_less='gpu', return_sequences=True,
-                  go_backwards=True)(embed)
-        bw = LSTM(64, consume_less='gpu')(bw)
+        bw = GRU(128, consume_less='gpu', return_sequences=True,
+                 go_backwards=True)(embed)
+        bw = GRU(128, consume_less='gpu')(bw)
 
     with tf.name_scope('merge1'):
         # concat the outputs of the 2 LSTMs
@@ -69,7 +69,11 @@ def get_callbacks():
         verbose=1,
         save_best_only=True)
 
-    return tb, mc
+    es = EarlyStopping(
+        monitor='val_loss',
+        patience=10)
+
+    return tb, mc, es
 
 if __name__ == '__main__':
 
@@ -99,7 +103,7 @@ if __name__ == '__main__':
     save_model(model)
     print(model.summary())
 
-    tb, mc = get_callbacks()
+    tb, mc, es = get_callbacks()
 
     save_tokenizer(tk)
     model.fit(data, action_codes,
@@ -107,5 +111,5 @@ if __name__ == '__main__':
               nb_epoch=500,
               batch_size=32,
               verbose=1,
-              callbacks=[tb, mc],
+              callbacks=[tb, mc, es],
               class_weight=weight_dict)

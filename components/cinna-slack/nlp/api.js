@@ -67,7 +67,7 @@ var parse = module.exports.parse = function(message) {
 
 
     // Get help from TextBlob and spaCy python modules
-    var res = yield request({
+    var res_parse = yield request({
       method: 'POST',
       url: config.nlp + '/parse',
       json: true,
@@ -77,9 +77,19 @@ var parse = module.exports.parse = function(message) {
       }
     });
 
+    var res_rnn = yield request({
+      method: 'POST',
+      url: config.nlp_rnn + '/predict',
+      json: true,
+      body: {
+        text: text,
+        history: history_array
+      }
+    })
+
 
     // welp we'll mutate the shit out of the message here.
-    nlpToResult(res, message);
+    nlpToResult(res_parse, message);
     return message;
   })
 }
@@ -190,6 +200,17 @@ function getModifier(text) {
 }
 
 
+function nlpUsingRNN(nlp, message) {
+  debug('using new deep learning'.cyan, nlp)
+
+  message.execute.push({
+  mode: nlp.MODE,
+  action: nlp.ACTION,
+  params: {
+    query: ;
+  }
+})
+}
 /*
 input be like:
 { adjectives: [ 'cheapest' ],
@@ -197,7 +218,7 @@ input be like:
   focus: [],
   nouns: [ 'monitor' ],
   parts_of_speech: [ [ 'cheapest', 'ADJ' ], [ '32', 'NUM' ], [ '"', 'PUNCT' ], [ 'monitor', 'NOUN' ] ],
-  ss: [ { focus: [], has_question: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
+  ss: [ { focus: [], had_question: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
   text: 'cheapest 32" monitor',
   verbs: [] }}
 */
@@ -207,67 +228,67 @@ function nlpToResult(nlp, message) {
   nlp.focus = nlp.focus || [];
 
   // take care of invalid adjectives that are actually focuses (first)
-  // nlp.adjectives = nlp.adjectives || [];
-  // var invalidAdjectives = ['first', 'second', 'third'];
-  // nlp.adjectives = nlp.adjectives.filter(function(a) {
-  //   return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
-  // })
+  nlp.adjectives = nlp.adjectives || [];
+  var invalidAdjectives = ['first', 'second', 'third'];
+  nlp.adjectives = nlp.adjectives.filter(function(a) {
+    return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
+  })
 
   // take care of invalid nouns - removed for now
-  // nlp.nouns = (nlp.nouns || []).filter(function(n) {
-  //   return stopwords.indexOf(n.toLowerCase()) < 0;
-  // })
+  nlp.nouns = (nlp.nouns || []).filter(function(n) {
+    return stopwords.indexOf(n.toLowerCase()) < 0;
+  })
 
   // handle all initial search requests first
-  // if (nlp.focus.length === 0) {
+  if (nlp.focus.length === 0) {
 
-  // }
+  }
 
   // check for "about"
-  // if (nlp.focus.length === 1) {
-  //   if (nlp.text.indexOf('about') >= 0) {
-  //     debug('about triggered')
-  //     message.execute.push({
-  //       mode: MODE.shopping,
-  //       action: ACTION.focus,
-  //       params: {focus: nlp.focus[0]}
-  //     })
-  //     return
-  //   }
-  // }
+  if (nlp.focus.length === 1) {
+    if (nlp.text.indexOf('about') >= 0) {
+      debug('about triggered')
+      message.execute.push({
+        mode: MODE.shopping,
+        action: ACTION.focus,
+        params: {focus: nlp.focus[0]}
+      })
+      return
+    }
+  }
 
   // check for "more"
-  // if (nlp.focus.length >= 1) {
-  //   for (var i = 0; i < nlp.parts_of_speech.length; i++) {
-  //     if (nlp.parts_of_speech[i][0] === 'more') {
-  //       debug('more triggered')
-  //       message.execute.push({
-  //         mode: MODE.shopping,
-  //         action: ACTION.similar,
-  //         params: { focus: nlp.focus[0]}
-  //       })
-  //       return;
-  //     }
-  //   }
-  // }
+  if (nlp.focus.length >= 1) {
+    for (var i = 0; i < nlp.parts_of_speech.length; i++) {
+      if (nlp.parts_of_speech[i][0] === 'more') {
+        debug('more triggered')
+        message.execute.push({
+          mode: MODE.shopping,
+          action: ACTION.similar,
+          params: { focus: nlp.focus[0]}
+        })
+        return;
+      }
+    }
+  }
 
-  // if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
-  //   debug('verbs.getAction triggered')
-  //   var exec = {
-  //     mode: verbs.getMode(nlp.verbs[0]),
-  //     action: verbs.getAction(nlp.verbs[0])
-  //   }
+  if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
+    debug('verbs.getAction triggered')
+    var exec = {
+      mode: verbs.getMode(nlp.verbs[0]),
+      action: verbs.getAction(nlp.verbs[0])
+    }
 
-  //   if (nlp.focus.length >= 1) {
-  //     exec.params = {focus:  nlp.focus[0]};
-  //   }
-  //   message.execute.push(exec)
-  //   return;
-  // }
+    if (nlp.focus.length >= 1) {
+      exec.params = {focus:  nlp.focus[0]};
+    }
+    message.execute.push(exec)
+    return;
+  }
 
   if (nlp.ss.length === 1 && nlp.focus.length === 0) {
     var s = nlp.ss[0];
-    if (!s.has_question) {
+    if (!s.had_question) {
       debug('simple case initial triggered');
       message.execute.push({
         mode: MODE.shopping,
@@ -282,21 +303,21 @@ function nlpToResult(nlp, message) {
   }
 
   // var priceModifier = price(nlp.text);
-  // if (priceModifier) {
-  //   debug('priceModifier triggered')
-  //   var exec = {
-  //     mode: MODE.shopping,
-  //     action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
-  //     params: priceModifier,
-  //   };
-  //   if (nlp.focus.length >= 1) {
-  //     exec.params.focus = nlp.focus[0];
-  //   }
-  //   message.execute.push(exec);
-  // }
+  if (nlp.price_modifier) {
+    debug('priceModifier triggered')
+    var exec = {
+      mode: MODE.shopping,
+      action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
+      params: nlp.price_modifier,
+    };
+    if (nlp.focus.length >= 1) {
+      exec.params.focus = nlp.focus[0];
+    }
+    message.execute.push(exec);
+  }
 
   // get all the nouns and adjectives
-  var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
+  // var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
   if (nlp.focus.length === 1 && modifierWords.length === 1 && message.execute.length == 0) {
@@ -304,7 +325,7 @@ function nlpToResult(nlp, message) {
     var exec = {
       mode: MODE.shopping,
       action: ACTION.modifyone,
-      params: getModifier(modifierWords[0])
+      params: getModifier(nlp.modifier_words)
     }
     exec.params.focus = nlp.focus;
     message.execute.push(exec);
@@ -312,12 +333,12 @@ function nlpToResult(nlp, message) {
   }
 
   // break out the entities into stores, locations, etc
-  // nlp.locations = [];
-  // nlp.entities.map(function(e) {
-  //   if (e[1] === 'GPE') {
-  //     nlp.locations.push(e[0])
-  //   }
-  // })
+  nlp.locations = [];
+  nlp.entities.map(function(e) {
+    if (e[1] === 'GPE') {
+      nlp.locations.push(e[0])
+    }
+  })
 
   // take care of any extraneous modify parameters
   message.execute.map(e => {
@@ -326,7 +347,7 @@ function nlpToResult(nlp, message) {
     }
   });
 
-  if (nlp.has_question) {
+  if (nlp.had_question) {
     debug('its a question')
   }
 

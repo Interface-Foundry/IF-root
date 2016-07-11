@@ -45,6 +45,14 @@ class ModelPredictor:
         self.reverse_action_dict = self.config['rev_ac_dict']
         self.pad_length = self.config['pad_length']
 
+    def preds_to_classes_logger(self, resp):
+        logging.info('ordered preds: \n')
+        p_number = 0
+        for resp_index in resp[0]:
+            logging.info('pred {}: {}'.format(
+                p_number, self.reverse_action_dict[str(resp_index)]))
+            p_number += 1
+
     def return_predictions(self, text):
         ''' take input text and return
         '''
@@ -55,10 +63,11 @@ class ModelPredictor:
         logging.info('converted to sequence sequence: ' + str(sequenced))
         preds = self.model.predict(pad_sequences(
             sequenced, maxlen=self.pad_length))
-        logging.info('preds: ' + str(preds))
+        logging.info('preds: \n' + str(preds))
         resp = preds.argsort()[::-1]
-        logging.info('top 3 preds: ' +
-                     self.reverse_action_dict[str(resp[0][0])] + ' ' +
-                     self.reverse_action_dict[str(resp[0][1])] + ' ' +
-                     self.reverse_action_dict[str(resp[0][2])])
+        self.preds_to_classes_logger(resp)
+        # logging.info('ordered preds: ' +
+        #              self.reverse_action_dict[str(resp[0][0])] + ' ' +
+        #              self.reverse_action_dict[str(resp[0][1])] + ' ' +
+        #              self.reverse_action_dict[str(resp[0][2])])
         return self.reverse_action_dict[str(resp[0][0])]

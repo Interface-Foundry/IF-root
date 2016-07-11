@@ -64,6 +64,7 @@ class McParser:
         self.parts_of_speech = []
         self.item_descriptors = []
         self.entities = []
+        self.d = {}
 
         self._process_text()
         self._array_form()
@@ -71,6 +72,7 @@ class McParser:
         self._remove_words()
         self._get_action()
         self._checks()
+        self._price_modifier()
 
     def _process_text(self):
         '''
@@ -130,7 +132,7 @@ class McParser:
             adjectives without invalid adjectives
         '''
         self.adjectives = list(
-            set(self.adjectives).difference([invalid_adjectives]))
+            set(self.adjectives).difference(invalid_adjectives))
 
         self.nouns_without_stopwords = list(
             set(self.nouns).difference(stopwords))
@@ -141,39 +143,39 @@ class McParser:
         old but previously removed 'find'
         text.lower().replace('find', '')
         '''
-        self.had_about = False
-        self.had_find = False
-        self.had_more = False
-        self.had_question = False
+        self.d['had_about'] = False
+        self.d['had_find'] = False
+        self.d['had_more'] = False
+        self.d['had_question'] = False
 
         if 'about' in self.text:
-            self.had_about = True
+            self.d['had_about'] = True
         if 'find' in self.text:
-            self.had_find = True
+            self.d['had_find'] = True
         if 'more' in self.text:
-            self.had_more = True
+            self.d['had_more'] = True
         if '?' in self.text:
-            self.had_question = True
+            self.d['had_question'] = True
 
     def _get_action(self):
         if any(map(
                 lambda each: each in action_terms['checkout'], self.tokens)):
-            self.action = 'checkout'
+            self.d['action'] = 'checkout'
         if any(map(
                 lambda each: each in action_terms['remove'], self.tokens)):
-            self.action = 'remove'
+            self.d['action'] = 'remove'
         if any(map(
                 lambda each: each in action_terms['list_cart'], self.tokens)):
-            self.action = 'list'
+            self.d['action'] = 'list'
         if any(map(
                 lambda each: each in action_terms['save'], self.tokens)):
-            self.action = 'save'
+            self.d['action'] = 'save'
         if any(map(
                 lambda each: each in action_terms['focus'], self.tokens)):
-            self.action = 'focus'
+            self.d['action'] = 'focus'
         if any(map(
                 lambda each: each in action_terms['search'], self.tokens)):
-            self.action = 'checkout'
+            self.d['action'] = 'checkout'
 
     def _simple_case(self):
         pass
@@ -181,9 +183,9 @@ class McParser:
     def _price_modifier(self):
         '''check if price is to be modified'''
         if any(w in self.text for w in price_terms['more']):
-            self.data_modify = 'more'
-        if any(w in self.text for w in price_terms['less']):
-            self.data_modify = 'less'
+            self.d['price_modifier'] = 'more'
+        elif any(w in self.text for w in price_terms['less']):
+            self.d['price_modifier'] = 'less'
 
     def create_execute(self):
         e = {}
@@ -196,24 +198,28 @@ class McParser:
             e['action'] = 'focus'
             e['params'] = 'params'
 
-
     def output_form(self):
         '''
         Put into correct json format for api.js
         '''
         response = EasyDict()
-        response.nouns = self.noun_phrases + \
-            [' '.join(self.adjectives + self.nouns)]
+        response.nouns = list(self.noun_phrases +
+                              [' '.join(self.adjectives + self.nouns)])
         response.adjectives = self.adjectives
         response.entities = self.entities
         response.focus = self.focus
         response.parts_of_speech = self.parts_of_speech
         response.text = self.text.lower()
         response.verbs = self.verbs
+        response.modifier_words = list(set(self.nouns).union(self.adjectives))
+
+        if 'price_modifier' in self.d.keys():
+            response.price_modifier = self.d['price_modifier']
+
         # add ss
         ss = {}
         ss['focus'] = self.focus
-        ss['has_question'] = self.has_question
+        ss['had_question'] = self.d['had_question']
         ss['noun_phrases'] = self.noun_phrases
         ss['parts_of_speech'] = self.parts_of_speech
         ss['sentiment_polarity'] = 0.0

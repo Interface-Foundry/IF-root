@@ -103,13 +103,6 @@ def retrieve_from_test_db():
     return df
 
 
-def dict_to_cols(df, cols=['source', 'thread']):
-    '''some columns have dict/json within the rows'''
-    for c in cols:
-        df.join(pd.DataFrame(df.source.to_dict()).T)
-    return df
-
-
 def text_look(df, skip_words=['hi', 'hey', 'Hi']):
     '''removing some results'''
     pat = '|'.join(map(re.escape, skip_words))

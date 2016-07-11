@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import logging
 from predict import ModelPredictor
 
@@ -13,13 +13,13 @@ m = ModelPredictor()
 logging.info('model loaded')
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
     '''
     '''
     text = request.json['text']
     resp = m.return_predictions(text)
-    return resp
+    return jsonify(resp)
 
 if __name__ == '__main__':
     logging.info('running app on port ' + str(port_num))

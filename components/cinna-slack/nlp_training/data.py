@@ -1,29 +1,40 @@
+import string
+import logging
+from os import makedirs, path
+
 import pandas as pd
 from pymongo import MongoClient
 from keras.preprocessing.text import Tokenizer
 from keras.utils import np_utils
 
-import string
-from os import makedirs, path
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def load_df(foldername='pkls/too_big',
-            db_name='prod2',
-            filename='messages.pkl',
-            save=True):
-    '''
-    for training
-    '''
+def load_db(db_name):
     client = MongoClient()
     db = client[db_name]
     cursor = db.messages.find({})
     df = pd.DataFrame(list(cursor))
+    return df
+
+
+def save_df(df, foldername, filename):
     if not path.isdir(foldername):
         makedirs(foldername)
-    if save:
-        if path.isfile(path.join(foldername, filename)):
-            print('-----overwriting current saved df-----')
+    if path.isfile(path.join(foldername, filename)):
+        logging.info('overwriting current saved dataframe')
         df.to_pickle(path.join(foldername, filename))
+
+
+def load_df(db_name='prod2', save=True):
+    '''
+    for training
+    '''
+    df = load_db(db_name=db_name)
+    if save:
+        save_df(df, foldername='pkls/too_big', filename=db_name + '.pkl')
     return df
 
 
@@ -43,16 +54,29 @@ def combine_smalltalk(df):
     return df
 
 
-def retrieve_from_prod_db(only_incoming=True, not_null=True, p=False):
+def training_data(load_pickled=False,
+                  only_incoming=True,
+                  not_null=True):
+    pass
+
+
+def retrieve_from_prod_db(only_incoming=True,
+                          not_null=True,
+                          load_pickeled=False):
     '''
     helper function to munge and explore with pandas
     '''
     pickled_location = path.join('pkls/too_big', 'messages.pkl')
 
-    if p and path.isfile(pickled_location):
+    if load_pickeled and path.isfile(pickled_location):
         df = pd.read_pickle(pickled_location)
     else:
-        df = load_df()
+
+        df = load_df(foldername='pkls/too_big',
+                     db_name='prod2',
+                     filename='messages.pkl',
+                     save=True)
+
     if only_incoming and not_null:
         df = df[(df.incoming == 1) & (df.msg.notnull() == 1)]
     df = combine_smalltalk(df)
@@ -101,59 +125,21 @@ def actions_to_codes(df):
     return action_codes, dictionary, rev_dictionary
 
 
+def dict_to_cols(df, cols=['source', 'thread']):
+    '''some columns have dict/json within the rows'''
+    for c in cols:
+        df.join(pd.DataFrame(df.source.to_dict()).T)
+    return df
+
+
+if __name__ == '__main__':
+    df = load_df(save=False)
+    df = df[(df.incoming == 1) & (df.msg.notnull() == 1)]
+    df = combine_smalltalk(df)
+
 # --------------------------------
 # OLD BELOW ----------------------
 
-# def messages_to_words(df):
-#     '''
-#     '''
-
-#     df.loc[:, 'msg'] = df.loc[:, 'msg'].str.lower()
-#     words = df.msg.str.split(' ')
-#     word_list = [w for sublist in words.values for w in sublist]
-#     return word_list, words,
-
-
-# def build_dataset(words, vocabulary_size=50000):
-#     count = [['UNK', -1]]
-#     count.extend(collections.Counter(words).most_common(vocabulary_size - 1))
-#     dictionary = dict()
-#     for word, _ in count:
-#         dictionary[word] = len(dictionary)
-#     data = list()
-#     unk_count = 0
-#     for word in words:
-#         if word in dictionary:
-#             index = dictionary[word]
-#         else:
-#             index = 0  # dictionary['UNK']
-#             unk_count += 1
-#         data.append(index)
-#     count[0][1] = unk_count
-#     reverse_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
-#     return data, count, dictionary, reverse_dictionary
-
-
-# def words2numbers(words, dictionary):
-#     '''
-#     '''
-#     data = []
-#     for row in words:
-#         data.append([dictionary[w] for w in row])
-#     return data
-
-
-# def data_for_model():
-#     df = retrieve_from_prod_db()
-#     # df = dict_to_cols(df)
-#     word_list, words, action_codes, action_codes_dictionary, rev_action_codes_dictionary = messages_to_words(df)
-#     data, count, dictionary, reverse_dictionary = build_dataset(words)
-#     data = words2numbers(word_list.values, dictionary)
-#     data = pad_sequences(data, maxlen=50)
-#     return data,
-
-
-# # df = dict_to_cols(df)
 # word_list, words, action_codes, action_codes_dictionary, rev_action_codes_dictionary = messages_to_words(
 #     df)
 # data, count, dictionary, reverse_dictionary = build_dataset(word_list)
