@@ -154,8 +154,11 @@ function* simple_response(message) {
     case 'search.initial':
       //send a reply right away
       send_text_reply(message, reply.res);
-      typing(message);
 
+      if(message.origin !== 'skype'){
+        typing(message);
+      }
+      
       //now also search for item
       message.mode = 'shopping';
       message.action = 'initial';

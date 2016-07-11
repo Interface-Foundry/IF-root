@@ -1,4 +1,5 @@
-var restify = require('restify');
+var express = require('express');
+var app = express();
 var builder = require('botbuilder');
 var co = require('co');
 var kip = require('kip');
@@ -18,25 +19,28 @@ var parse_results = require('./parse_res');
 // Bot Setup
 //=========================================================
   
-
-
-// Setup Restify Server
-var server = restify.createServer();
-server.listen(3978, function (req, res, huh) {
-   console.log('%s listening to %s', server.name, server.url); 
+app.listen(3978,function(){
+    console.log('listening on 3978')
 });
 
-// Create bot and setup server
-var connector = new builder.ChatConnector({
-    appId: '3940dbc8-d579-4f3a-89fa-e8112b2cdae7',
-    // 3940dbc8-d579-4f3a-89fa-e8112b2cdae7
-    appPassword: 'Hp9jMrHmP18O6wKF2qGn0kn'
-     // 'xegc1g5ZXaHiLmmhGuVHovj'
-});
+//MS app credentials
+if(process.env.NODE_ENV == 'development_mitsu'){
+    // Create bot and setup server
+    var connector = new builder.ChatConnector({
+        appId: '3940dbc8-d579-4f3a-89fa-e8112b2cdae7',
+        appPassword:'Hp9jMrHmP18O6wKF2qGn0kn'
+    });
+}else {
+    // Create bot and setup server
+    var connector = new builder.ChatConnector({
+        appId: '9ad92473-83db-4c54-8a17-b7c5d91c3a32',
+        appPassword:'nRe7CFYP4JdWTO9c1Cv9seP'
+    });    
+}
 
 var bot = new builder.UniversalBot(connector);
 
-server.post('/api/messages',connector.listen());
+app.post('/api/messages',connector.listen());
 
 
 //   THUMBNAIL CARD!!!!
@@ -101,7 +105,10 @@ server.post('/api/messages',connector.listen());
 bot.dialog('/', function (session) {
     var text = session.message.text;
     var user = session.message.user;
+
     console.log('\n\n\nRaw incoming Skype object: ', JSON.stringify(session.message));
+
+
    // message:
    // { type: 'message',
    //   timestamp: '2016-07-08T21:18:46.707Z',
@@ -116,6 +123,8 @@ bot.dialog('/', function (session) {
    //      serviceUrl: 'https://skype.botframework.com' },
    //   attachments: [],
    //   user: { id: '29:1LJMJ1EMFNK3vkP5B1OjgL5M082J45ynqIct-OLEj0Jo' } },
+
+    //Sticker handler
     if (session.message.attachments && session.message.attachments[0]) {
          var img_array = [
             'http://kipthis.com/kip_stickers/kip1.png',
@@ -136,6 +145,13 @@ bot.dialog('/', function (session) {
         session.send(msg);
         return 
     }
+
+    // //Skype emoji handler
+    // if (text && paranExp.exec(text) < -1){
+    //     console.log('EMOJI SKYPE ',text)
+
+    //     text = paranExp.exec(text);
+    // }
 
     // builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|(quit)");
 
@@ -209,7 +225,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     // var session = outgoing.message.session;
     // console.log(outgoing);
     // var data = outgoing.data;
-    var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+    //var fbtoken = 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
     try {
         console.log('outgoing message');
         // console.log(outgoing);
@@ -354,69 +370,166 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
             giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
              
-        var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
-        var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
-        var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
+
+
+            //WHAT HAPPENS IF LESS THAN 3 results???
+
+            //** * * * * *  **  ALL THIS NEEDS TO BE IN A LOOP V V V V V 
+
+            // console.log('\n\n\n RESULTS ',JSON.stringify(results))
+            // console.log('\n\n\n OUTGOING ',JSON.stringify(outgoing))
+            // console.log('\n\n\n TEXT ',JSON.stringify(text))
+            // console.log('\n\n\n CHANNEL ',JSON.stringify(channel))
+
+
+
+            //picstitch images
+            // var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
+            // var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
+            // var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
         
-                    console.log('SEND_RESULTS FIRED, RESULTS: ', image1, image2, image3)
+            if(outgoing.data.amazon){
+                //amazon images
+                var parsedAmazon = JSON.parse(outgoing.data.amazon);
 
-        // Ask the user to select an item from a carousel.
-        // var msg = new builder.Message(session)
-        //     .textFormat(builder.TextFormat.xml)
-        //     .attachmentLayout('carousel')
-        //     .attachments([
-        //         new builder.HeroCard(session)
-        //             .title(results[0].title)
-        //             .text(results[0].description)
-        //             .images([
-        //                 builder.CardImage.create(session, image1)
-        //                     .tap(builder.CardAction.showImage(session, image1)),
-        //             ])
-        //             .buttons([
-        //                 builder.CardAction.openUrl(session, results[0].title_link, "Amazon"),
-        //                 builder.CardAction.imBack(session, "select:100", "Select")
-        //             ]),
-        //         new builder.HeroCard(session)
-        //             .title(results[1].title)
-        //             .text(results[1].description)
-        //             .images([
-        //                 builder.CardImage.create(session, image2)
-        //                     .tap(builder.CardAction.showImage(session, image2)),
-        //             ])
-        //             .buttons([
-        //                 builder.CardAction.openUrl(session, results[1].title_link, "Amazon"),
-        //                 builder.CardAction.imBack(session, "select:101", "Select")
-        //             ]),
-        //         new builder.HeroCard(session)
-        //             .title(results[2].title)
-        //             .text(results[2].description)
-        //             .images([
-        //                 builder.CardImage.create(session, image3)
-        //                     .tap(builder.CardAction.showImage(session, image3))
-        //             ])
-        //             .buttons([
-        //                 builder.CardAction.openUrl(session, results[2].title_link,"Amazon"),
-        //                 builder.CardAction.imBack(session, "select:102", "Select")
-        //             ])
-        //     ]);
-            // builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
+                console.log('\n\n\n DOOOO ',parsedAmazon[0])
+
+                var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
+                var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
+                var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
+            }
+
+            console.log('SEND_RESULTS FIRED, RESULTS: ', image1, image2, image3)
 
 
+
+            //Ask the user to select an item from a carousel.
             var msg = new builder.Message(session)
-            .textFormat(builder.TextFormat.xml)
-            .attachments([
-                new builder.ThumbnailCard(session)
-                    .title("Thumbnail Card")
-                    .subtitle("Pikes Place Market")
-                    .text("<b>Pike Place Market</b> is a public market overlooking the Elliott Bay waterfront in Seattle, Washington, United States.")
-                    .images([
-                        builder.CardImage.create(session, "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/PikePlaceMarket.jpg/320px-PikePlaceMarket.jpg")
-                    ])
-                    .tap(builder.CardAction.openUrl(session, "https://en.wikipedia.org/wiki/Pike_Place_Market"))
-            ]);
+                .textFormat(builder.TextFormat.xml)
+                .attachmentLayout('carousel')
+                .attachments([
+       
+                    new builder.HeroCard(session)
+                        .title(results[0].title)
+                        // .subtitle("Space Needle")
+                        .text("<a href="+results[0].title_link+">Read reviews on Amazon</a>")
+                        .images([
+                            builder.CardImage.create(session, image1)
+                                .tap(builder.CardAction.showImage(session, image1)),
+                        ])
+                        .tap(builder.CardAction.openUrl(session, results[0].title_link))
+                        .buttons([
+                            builder.CardAction.openUrl(session, results[0].title_link, "Add to Cart"),
+                            builder.CardAction.imBack(session, "select:100", "Find Cheaper"),
+                            builder.CardAction.imBack(session, "select:101", "More Info")
+                        ]),
+                    new builder.HeroCard(session)
+                        .title(results[1].title)
+                        // .subtitle("Space Needle")
+                        .text("<a href="+results[1].title_link+">Read reviews on Amazon</a>")
+                        .images([
+                            builder.CardImage.create(session, image2)
+                                .tap(builder.CardAction.showImage(session, image2)),
+                        ])
+                        .tap(builder.CardAction.openUrl(session, results[1].title_link))
+                        .buttons([
+                            builder.CardAction.openUrl(session, results[1].title_link, "Add to Cart"),
+                            builder.CardAction.imBack(session, "select:100", "Find Cheaper"),
+                            builder.CardAction.imBack(session, "select:101", "More Info")
+                        ]),
+                    new builder.HeroCard(session)
+                        .title(results[2].title)
+                        // .subtitle("Space Needle")
+                        .text("<a href="+results[2].title_link+">Read reviews on Amazon</a>")
+                        .images([
+                            builder.CardImage.create(session, image3)
+                                .tap(builder.CardAction.showImage(session, image3)),
+                        ])
+                        .tap(builder.CardAction.openUrl(session, results[2].title_link))
+                        .buttons([
+                            builder.CardAction.openUrl(session, results[2].title_link, "Add to Cart"),
+                            builder.CardAction.imBack(session, "select:100", "Find Cheaper"),
+                            builder.CardAction.imBack(session, "select:101", "More Info")
+                        ])
+            
+            
+                    // new builder.ThumbnailCard(session)
+                    //     .title(results[0].title)
+                    //     // .subtitle("$15.00")
+                    //     .text("<b>$15.00</b> \n Author: J.K. Rowling \n Pages: 320 \n Special Rehearsal Edition V22 \n <a href='http://bing.com'>View on Amazon</a>")
+                    //     .images([
+                    //         builder.CardImage.create(session, image1)
+                    //             .tap(builder.CardAction.showImage(session, image1)),
+                    //     ])
+                    //     .tap(builder.CardAction.openUrl(session, "https://en.wikipedia.org/wiki/Pike_Place_Market"))
+                    //     .buttons([
+                    //         builder.CardAction.openUrl(session, results[0].title_link, "Amazon"),
+                    //         builder.CardAction.imBack(session, "select:100", "Select"),
+                    //         builder.CardAction.imBack(session, "select:101", "Select")
+                    //     ]),
+
+                    // new builder.ThumbnailCard(session)
+                    //     .title(results[0].title)
+                    //     .text("<b>Details</b> Lorem ipsum dolor sumut --- \n > text \n #H1 what \n #H5 huh <a href='http://bing.com'>View on Amazon</a>")
+                    //     .images([
+                    //         builder.CardImage.create(session, image1)
+                    //             .tap(builder.CardAction.showImage(session, image1)),
+                    //     ])
+                    //     .tap(builder.CardAction.openUrl(session, "https://en.wikipedia.org/wiki/Pike_Place_Market"))
+                    //     .buttons([
+                    //         builder.CardAction.openUrl(session, results[0].title_link, "Amazon"),
+                    //         builder.CardAction.imBack(session, "select:100", "Select"),
+                    //         builder.CardAction.imBack(session, "select:101", "Select")
+                    //     ])
+                    // new builder.ThumbnailCard(session)
+                    //     .title("Thumbnail Card")
+                    //     .subtitle("$15.00")
+                    //     .text("<b>Details</b> Lorem ipsum \n dolor sumut")
+                    //     .images([
+                    //         builder.CardImage.create(session, image2)
+                    //             .tap(builder.CardAction.showImage(session, image2)),
+                    //     ])
+                    //     .tap(builder.CardAction.openUrl(session, "https://en.wikipedia.org/wiki/Pike_Place_Market"))
+                    //     .buttons([
+                    //         builder.CardAction.openUrl(session, results[0].title_link, "Amazon"),
+                    //         builder.CardAction.imBack(session, "select:100", "Select"),
+                    //         builder.CardAction.imBack(session, "select:101", "Select")
+                    //     ]),
+                    // new builder.ThumbnailCard(session)
+                    //     .title("Thumbnail Card")
+                    //     .subtitle("$15.00")
+                    //     .text("<b>Details</b> Lorem ipsum \n dolor sumut")
+                    //     .images([
+                    //         builder.CardImage.create(session, image3)
+                    //             .tap(builder.CardAction.showImage(session, image3)),
+                    //     ])
+                    //     .tap(builder.CardAction.openUrl(session, "https://en.wikipedia.org/wiki/Pike_Place_Market"))
+                    //     .buttons([
+                    //         builder.CardAction.openUrl(session, results[0].title_link, "Amazon"),
+                    //         builder.CardAction.imBack(session, "select:100", "Select"),
+                    //         builder.CardAction.imBack(session, "select:101", "Select")
+                    //     ])
+                ]);
                 builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
 
-
+                // msg = new builder.Message(session)
+                //     .textFormat(builder.TextFormat.xml)
+                //     .attachments([
+                //         new builder.HeroCard(session)
+                //             .title("Hero Card")
+                //             .subtitle("Space Needle")
+                //             .text("The <h1>Space Needle</h1> is an observation tower in Seattle, Washington, a landmark of the Pacific Northwest, and an icon of Seattle.")
+                //             .images([
+                //                 builder.CardImage.create(session, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Seattlenighttimequeenanne.jpg/320px-Seattlenighttimequeenanne.jpg")
+                //             ])
+                //             .tap(builder.CardAction.openUrl(session, "https://en.wikipedia.org/wiki/Space_Needle"))
+                //             .buttons([
+                //                 builder.CardAction.openUrl(session, results[0].title_link, "Amazon"),
+                //                 builder.CardAction.imBack(session, "select:100", "Select"),
+                //                 builder.CardAction.imBack(session, "select:101", "Select")
+                //             ])
+                //     ]);
+                // session.send(msg);
 
             // builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
             // outgoing.ack();
