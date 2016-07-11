@@ -1,0 +1,12 @@
+{
+  "name": "Jobs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "job.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Peter Brandt <peter.m.brandt@gmail.com>",
+  "license": "ISC"
+}
