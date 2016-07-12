@@ -31,11 +31,8 @@ app.listen(3978,function(){
 if(process.env.NODE_ENV == 'development_mitsu'){
     // Create bot and setup server
     var connector = new builder.ChatConnector({
-        appId: '3940dbc8-d579-4f3a-89fa-e8112b2cdae7',
-        appPassword:
-        // 'Hp9jMrHmP18O6wKF2qGn0kn'
-        'idd5Lky8FEEbg6Jghb1UjdO'
-    });
+        appId: 'f9fb0129-81e7-4885-a5c3-39be043f3926',
+        appPassword: 'eWVg3F8oD6mjZPdE1BpTtqf'    });
 } else if (process.env.NODE_ENV == 'development') {
     // peter's config.
     var connector = new builder.ChatConnector({
@@ -236,7 +233,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     function send_results(channel, text, results, outgoing) {
         // console.log(channel, text, results, outgoing)
         co(function*(){
-            var giphy_gif = '';
             var cards = results.map((result, i) => {
                 var n = i + 1 + '';
 
@@ -250,7 +246,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
                 return card = new builder.HeroCard(session)
                     .title(result.title)
-                    // .subtitle("Space Needle")
                     .text("<a href="+result.title_link+">Read reviews on Nordstrom</a>")
                     .images([
                         builder.CardImage.create(session, image)
@@ -264,12 +259,31 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     ]);
             });
 
-            var msg = new builder.Message(session)
-                .textFormat(builder.TextFormat.xml)
-                .attachmentLayout('carousel')
-                .attachments(cards);
+            var giphy_gif = '';
 
-            session.send(msg);
+            request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
+                if (err) console.log(err);
+                console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
+                giphy_gif = 'http://kipthis.com/images/header_partners.png'
+                // JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_height :  'http://kipthis.com/images/header_partners.png';
+                cards.push(new builder.HeroCard(session)
+                .title('Click "See More Results" below for more ')
+                // .text('')
+                .images([
+                    builder.CardImage.create(session, giphy_gif)
+                        .tap(builder.CardAction.showImage(session, giphy_gif)),
+                ])
+                // .tap(builder.CardAction.openUrl(session, ))
+                .buttons([
+                    builder.CardAction.imBack(session, 'more', "See More Results"),
+                    builder.CardAction.imBack(session, 'view cart', "View Cart")
+                 ]))
+                var msg = new builder.Message(session)
+                    .textFormat(builder.TextFormat.xml)
+                    .attachmentLayout('carousel')
+                    .attachments(cards);
+                session.send(msg);
+            })
         })
     }
 
@@ -285,6 +299,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             ])
             .tap(builder.CardAction.openUrl(session, focus_info.title_link))
             .buttons([
+                builder.CardAction.imBack(session, "save " + focus_info.selected, "Add to Cart"),
                 builder.CardAction.imBack(session, 'more like ' + focus_info.selected, "Similar"),
                 builder.CardAction.imBack(session, focus_info.selected  + " but cheaper", "Find Cheaper"),
                 // builder.CardAction.imBack(session, "select:101", "More Info")
@@ -295,7 +310,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
     function send_cart(channel, text, outgoing) {
         var cart = outgoing.data.data;
-
+        console.log('CART OBJECT : ', cart)
         debugger;
 
         var cart_items = cart.aggregate_items.map((el, i) => {
@@ -327,7 +342,17 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         })
 
         debugger;
-
+        cart_items.push(
+                new builder.HeroCard(session)
+                .title('Total: ' + outgoing.data.data.total )
+                // .text((focus_info.price + '\n' + focus_info.description + '\n' + focus_info.reviews).substring(0,300))
+                // .images([
+                //      builder.CardImage.create(session, focus_info.image_url)
+                // ])
+                // .tap(builder.CardAction.openUrl(session, focus_info.title_link))
+                .buttons([
+                    builder.CardAction.openUrl(session, outgoing.data.data.link, "Checkout with Nordstrom"),
+                 ]))
         var msg = new builder.Message(session)
             .textFormat(builder.TextFormat.xml)
             .attachments(cart_items)

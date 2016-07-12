@@ -22,11 +22,8 @@ function* results(message) {
   //console.log(amazon);
 
   var results = amazon.map((r, i) => {
-
       console.log('emojis[i+1]/ / / /  ',emojis[i+1])
       console.log('emojis[i+2]/ / / /  ',emojis[i+1] + truncate(_.get(r, 'ItemAttributes[0].Title[0]')))
-      
-
        // make the description text
       var attrs = _.get(r, 'ItemAttributes[0]');
       var description = [
