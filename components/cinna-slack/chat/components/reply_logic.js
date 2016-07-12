@@ -124,12 +124,6 @@ queue.topic('incoming').subscribe(incoming => {
     yield replies.map(r => r.save());
     yield replies.map((r, i) => {
       kip.debug('reply', r.mode, r.action);
-      
-      console.log('🙏🙏🙏')
-      console.log('🙏org ',r.origin)
-      console.log('🙏r ',r)
-      console.log('🙏id ',message._id)
-      console.log('🙏i ',i)
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
     });
     incoming.ack();
