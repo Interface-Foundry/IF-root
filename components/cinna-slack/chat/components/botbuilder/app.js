@@ -57,7 +57,6 @@ app.post('/api/messages',connector.listen());
 var sessions = {};
 
 bot.dialog('/', function (session) {
-    debugger;
     var text = session.message.text;
     var user = session.message.user;
     sessions[user.id] = session;
@@ -80,60 +79,55 @@ bot.dialog('/', function (session) {
    //   console.log('\n\n\n\n\n\n\n\n\n\n\nGOTTA CATCH EM ALLLLLLLLL\n\n\n\n\n\n\n\n\n\n\n\n')
    // }
     //Attachment Handling
-    //  if ( session.message.attachments && session.message.attachments[0] && session.message.attachments[0].contentType == 'image') {
-    //     var data = { file: {url_private: session.message.attachments[0].contentUrl}};
-    //      process_image.imageSearch(data,'',function(res){
-    //         console.log('\nTranslated image',res)
-    //         if (res && res.length > 0) {
-    //             var message = new db.Message({
-    //                 incoming: true,
-    //                 thread_id: user.id,
-    //                 original_text: res,
-    //                 user_id: user.id,
-    //                 origin: 'skype',
-    //                 source: {
-    //                     'origin': 'skype',
-    //                     'channel': 'skype_' + user.id,
-    //                     'org': "skype_" + user.id,
-    //                     'id': "skype_" + user.id,
-    //                     'user': "skype_" + user.id
-    //                 },
-    //                 ts: Date.now(),
-    //                 session: session
-    //             });
-    //             // queue it up for processing
-    //             message.save().then(() => {
-    //                 queue.publish('incoming', message, ['skype', user.id, message.ts].join('.'))
-    //             });
-    //         }
-    //     });
-    // }
-    // else if (session.message.attachments && session.message.attachments[0]) {
-    //      var img_array = [
-    //         'http://kipthis.com/kip_stickers/kip1.png',
-    //         'http://kipthis.com/kip_stickers/kip2.png',
-    //         'http://kipthis.com/kip_stickers/kip3.png',
-    //         'http://kipthis.com/kip_stickers/kip4.png',
-    //         'http://kipthis.com/kip_stickers/kip5.png',
-    //         'http://kipthis.com/kip_stickers/kip6.png',
-    //         'http://kipthis.com/kip_stickers/kip7.png',
-    //         'http://kipthis.com/kip_stickers/kip8.png',
-    //         'http://kipthis.com/kip_stickers/kip9.png'
-    //         ];
-    //      var msg = new builder.Message(session)
-    //         .attachments([{
-    //             contentType: "image/jpeg",
-    //             contentUrl: img_array[Math.floor(Math.random()*img_array.length)]
-    //         }]);
-    //     session.send(msg);
-    //     return
-    // }
-    // //Skype emoji handler
-    // if (text && paranExp.exec(text) < -1){
-    //     console.log('EMOJI SKYPE ',text)
-    //     text = paranExp.exec(text);
-    // }
-    // builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|(quit)");
+     if (session.message.attachments && session.message.attachments[0] && session.message.attachments[0].contentType == 'image') {
+         var data = { file: {url_private: session.message.attachments[0].contentUrl}};
+         return process_image.imageSearch(data,'',function(res){
+            console.log('\nTranslated image',res)
+            if (res && res.length > 0) {
+                var message = new db.Message({
+                    incoming: true,
+                    thread_id: user.id,
+                    original_text: res,
+                    user_id: user.id,
+                    origin: 'skype',
+                    source: {
+                        'origin': 'skype',
+                        'channel': 'skype_' + user.id,
+                        'org': "skype_" + user.id,
+                        'id': "skype_" + user.id,
+                        'user': "skype_" + user.id
+                    },
+                    ts: Date.now(),
+                    session: session
+                });
+                // queue it up for processing
+                message.save().then(() => {
+                    queue.publish('incoming', message, ['skype', user.id, +message.ts].join('.'))
+                });
+            }
+        });
+    }
+    else if (session.message.attachments && session.message.attachments[0]) {
+         var img_array = [
+            'http://kipthis.com/kip_stickers/kip1.png',
+            'http://kipthis.com/kip_stickers/kip2.png',
+            'http://kipthis.com/kip_stickers/kip3.png',
+            'http://kipthis.com/kip_stickers/kip4.png',
+            'http://kipthis.com/kip_stickers/kip5.png',
+            'http://kipthis.com/kip_stickers/kip6.png',
+            'http://kipthis.com/kip_stickers/kip7.png',
+            'http://kipthis.com/kip_stickers/kip8.png',
+            'http://kipthis.com/kip_stickers/kip9.png'
+            ];
+         var msg = new builder.Message(session)
+            .attachments([{
+                contentType: "image/jpeg",
+                contentUrl: img_array[Math.floor(Math.random()*img_array.length)]
+            }]);
+        session.send(msg);
+        return
+    }
+
     text = emojiText.convert(text,{delimiter: ' '});
     text = skypeEmojiHack(text);
 
