@@ -237,57 +237,39 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         // console.log(channel, text, results, outgoing)
         co(function*(){
             var giphy_gif = '';
-            var cards = [];
-            var counter = 1;
-            yield request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
+            var cards = results.map((result, i) => {
+                var n = i + 1 + '';
 
-                if (err) console.log(err);
+                //get picstitch image
+                if (result && result.image_url){
+                    var image = ((result.image_url.indexOf('http') > -1) ? result.image_url : 'http://kipthis.com/images/header_partners.png')
+                } else {
+                    kip.debug('error: no result.image_url (picstitch) found');
+                    var image = 'http://kipthis.com/images/header_partners.png';
+                }
 
-                giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
+                return card = new builder.HeroCard(session)
+                    .title(result.title)
+                    // .subtitle("Space Needle")
+                    .text("<a href="+result.title_link+">Read reviews on Nordstrom</a>")
+                    .images([
+                        builder.CardImage.create(session, image)
+                            .tap(builder.CardAction.showImage(session, image)),
+                    ])
+                    .tap(builder.CardAction.openUrl(session, result.title_link))
+                    .buttons([
+                        builder.CardAction.imBack(session, 'save ' + n, "Add to Cart"),
+                        builder.CardAction.imBack(session, n + " but cheaper" , "Find Cheaper"),
+                        builder.CardAction.imBack(session, n, "More Info")
+                    ]);
+            });
 
-                async.eachSeries(results, function (result, callback) {
+            var msg = new builder.Message(session)
+                .textFormat(builder.TextFormat.xml)
+                .attachmentLayout('carousel')
+                .attachments(cards);
 
-                    //get picstitch image
-                    if (result && result.image_url){
-                        var image = ((result.image_url.indexOf('http') > -1) ? result.image_url : 'http://kipthis.com/images/header_partners.png')
-                    }else {
-                        kip.debug('error: no result.image_url (picstitch) found');
-                        var image = 'http://kipthis.com/images/header_partners.png';
-                    }
-
-                    //Build Carousel
-                    var card = new builder.HeroCard(session)
-                        .title(result.title)
-                        // .subtitle("Space Needle")
-                        .text("<a href="+result.title_link+">Read reviews on Nordstrom</a>")
-                        .images([
-                            builder.CardImage.create(session, image)
-                                .tap(builder.CardAction.showImage(session, image)),
-                        ])
-                        .tap(builder.CardAction.openUrl(session, result.title_link))
-                        .buttons([
-                            builder.CardAction.imBack(session, 'save '+counter
-                            , "Add to Cart"),
-                            builder.CardAction.imBack(session, counter + " but cheaper" , "Find Cheaper"),
-                            builder.CardAction.imBack(session, counter.toString(), "More Info")
-                        ]);
-
-                    cards.push(card)
-                    counter++;
-                    callback();
-
-                }, function (err) {
-                    if (err) { throw err; }
-
-                    var msg = new builder.Message(session)
-                        .textFormat(builder.TextFormat.xml)
-                        .attachmentLayout('carousel')
-                        .attachments(cards);
-
-                    session.send(msg);//, "select:100|select:101|select:102");
-                });
-
-            })
+            session.send(msg);
         })
     }
 
