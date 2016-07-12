@@ -83,7 +83,7 @@ def index():
         CHAT_HEIGHT = 191
         CHAT_WIDTH = 360
         PIC_COORDS = [{'x': 10, 'y': 10}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 200, 'y': 10}] #where to draw text boxes
+        TEXTBOX_COORDS = [{'x': 205, 'y': 15}] #where to draw text boxes
         PIC_SIZE = 181, 181
         #288 x 153
 
@@ -101,10 +101,9 @@ def index():
     #draw a border for skype images
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
         #draw white boxes
-        print 'boxbox'
         drawBorder = ImageDraw.Draw(img)
         drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
-        drawBorder.rectangle(((4,4),(356,187)), fill="white")
+        drawBorder.rectangle(((3,3),(356,187)), fill="white")
 
 
     for i, im in enumerate(thumbnails):
@@ -123,7 +122,7 @@ def index():
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
 
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 19) #price
+        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 20) #price
         font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16)
 
     for i, im in enumerate(images):
@@ -137,10 +136,10 @@ def index():
             print 'boxbox'
             draw.rectangle(((115,0),(400,160)), fill="white")
 
-        # if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        #     #draw white boxes
-        #     print 'boxbox'
-        #     draw.rectangle(((115,5),(329,160)), fill="white")
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            #draw white boxes
+            print 'boxbox'
+            draw.rectangle(((190,5),(329,160)), fill="white")
 
 
         last_y = 5
@@ -149,7 +148,7 @@ def index():
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
 
         #add prime logo
-        if im[u'prime'] == '1':
+        if im[u'prime'] == '1' and images[0][u'origin'] != 'skype':
             img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
 
         last_y = last_y + 27
@@ -187,22 +186,21 @@ def index():
             last_y = last_y + 20
 
         # # #fake reviews for skype!! lmao
-        # elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        #     print 'special skype review'
-
-        #     selectRating = random.randint(6,7)
-        #     print selectRating
-
-        #     reviewCount = random.randint(15,1899)
-        #     print reviewCount
-
-        #     draw.text((x + 80, last_y),' - ' + reviewCount,font=font2,fill="#2d70c1")
-        #     last_y = last_y + 20
-
+        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            selectRating = random.randint(6,8)
+            img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
+            # selectRating = random.randint(6,7)
+            reviewCount = random.randint(15,1899)
+            # img.paste(REVIEW_STARS[7], (x, last_y), mask=REVIEW_STARS[7])
+            draw.text((x + 80, last_y),' - ' + str(reviewCount),font=font2,fill="#2d70c1")
+            last_y = last_y + 20
 
         last_y = last_y + 5
 
         if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+            BOX_WIDTH = 26
+
+        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
             BOX_WIDTH = 26
         else:
             BOX_WIDTH = 30

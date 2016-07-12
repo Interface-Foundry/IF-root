@@ -2,8 +2,8 @@ var _ = require('lodash');
 
 
 function truncate(string) {
-   if (string.length > 80)
-      return string.substring(0,80)+'...';
+   if (string.length > 100)
+      return string.substring(0,100)+'...';
    else
       return string;
 };
@@ -47,7 +47,7 @@ function* results(message) {
       }
 
       return {
-        title: emojis[i+1] + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
+        title: truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
         image_url: r.picstitch_url,
         title_link: r.shortened_url,
         fallback: 'Search Results',

@@ -14,7 +14,7 @@ var busboy = require('connect-busboy');
 var fs = require('fs');
 var emojiText = require('emoji-text'); //convert emoji to text
 var parse_results = require('./parse_res');
-var focus = require('../facebook/focus');
+var focus = require('./focus');
 var kipcart = require('../cart');
 var process_image = require('../process');
 
@@ -238,6 +238,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         co(function*(){
             var giphy_gif = '';
             var cards = [];
+            var counter = 1;
             yield request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
 
                 if (err) console.log(err);
@@ -258,20 +259,21 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     var card = new builder.HeroCard(session)
                         .title(result.title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
+                        .text("<a href="+result.title_link+">Read reviews on Nordstrom</a>")
                         .images([
                             builder.CardImage.create(session, image)
                                 .tap(builder.CardAction.showImage(session, image)),
                         ])
                         .tap(builder.CardAction.openUrl(session, result.title_link))
                         .buttons([
-                            builder.CardAction.imBack(session, 'save 1'
+                            builder.CardAction.imBack(session, 'save '+counter
                             , "Add to Cart"),
-                            builder.CardAction.imBack(session, "1 but cheaper" , "Find Cheaper"),
-                            builder.CardAction.imBack(session, "1", "More Info")
+                            builder.CardAction.imBack(session, counter + " but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, counter.toString(), "More Info")
                         ]);
 
                     cards.push(card)
+                    counter++;
                     callback();
 
                 }, function (err) {
@@ -290,6 +292,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     }
 
     function send_focus(channel, text, focus_info, outgoing) {
+        console.log('FOCUS1 ',focus_info)
+        console.log('FOCUS2 ',focus_info.description)
          // Send a greeting and start the menu.
         var card = new builder.HeroCard(session)
             .title(focus_info.title)
