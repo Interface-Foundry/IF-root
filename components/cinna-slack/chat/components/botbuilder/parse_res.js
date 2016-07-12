@@ -9,9 +9,9 @@ function truncate(string) {
 };
 
 var emojis = {
-  1: '1. ',
-  2: '2. ',
-  3: '3. '
+  1: '1.',
+  2: '2.',
+  3: '3.'
 };
 
 //
@@ -19,9 +19,13 @@ var emojis = {
 //
 function* results(message) {
   var amazon = JSON.parse(message.amazon);
-  console.log(amazon);
+  //console.log(amazon);
 
   var results = amazon.map((r, i) => {
+
+      console.log('emojis[i+1]/ / / /  ',emojis[i+1])
+      console.log('emojis[i+2]/ / / /  ',emojis[i+1] + truncate(_.get(r, 'ItemAttributes[0].Title[0]')))
+      
 
        // make the description text
       var attrs = _.get(r, 'ItemAttributes[0]');
@@ -43,7 +47,7 @@ function* results(message) {
       }
 
       return {
-        title: emojis[i+1] + ' ' + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
+        title: emojis[i+1] + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
         image_url: r.picstitch_url,
         title_link: r.shortened_url,
         fallback: 'Search Results',

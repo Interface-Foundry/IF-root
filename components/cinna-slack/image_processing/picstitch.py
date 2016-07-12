@@ -82,14 +82,16 @@ def index():
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
         CHAT_HEIGHT = 191
         CHAT_WIDTH = 360
-        PIC_COORDS = [{'x': 5, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
-
+        PIC_COORDS = [{'x': 10, 'y': 10}] #where to draw main pics
+        TEXTBOX_COORDS = [{'x': 200, 'y': 10}] #where to draw text boxes
+        PIC_SIZE = 181, 181
         #288 x 153
 
     #add images
     for i, data in enumerate(images):
         im = download_image(data[u'url'])
+
+        print PIC_SIZE
         im.thumbnail(PIC_SIZE, Image.ANTIALIAS)
         thumbnails.append(im)
 
@@ -119,6 +121,10 @@ def index():
     #add names, text wrapped
     font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
+
+    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 19) #price
+        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16)
 
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x'] - 30
@@ -180,11 +186,17 @@ def index():
 
             last_y = last_y + 20
 
-        #fake reviews for skype!! lmao
+        # #fake reviews for skype!! lmao
         elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
             print 'special skype review'
-            selectRating = random.randint(7,8)
-            draw.text((x + 80, last_y),' - ' + random.randint(15,2999),font=font2,fill="#2d70c1")
+
+            selectRating = random.randint(6,7)
+            print selectRating
+
+            reviewCount = random.randint(15,1899)
+            print reviewCount
+
+            draw.text((x + 80, last_y),' - ' + reviewCount,font=font2,fill="#2d70c1")
             last_y = last_y + 20
 
 

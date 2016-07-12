@@ -171,62 +171,60 @@ bot.dialog('/', function (session) {
             // console.log('skype outgoing message', message.mode, message.action);
             var return_data = {};
 
-            if(message.text){
-                session.send(message.text);
-                outgoing.ack();
-            }
+            // if(message.text){
+            //     session.send(message.text);
+            //     outgoing.ack();
+            // }
             
+            co(function*() {
+                if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+                    return_data = yield parse_results(message);
+                    // session.channel = message.source.channel;
+                    // session.text = message.text;
+                    // session.results = return_data;
+                    // session.outgoing = outgoing;
+                    // return session.beginDialog('/results');
+                    console.log('1💀')
+                    return send_results(message.source.channel, message.text, return_data, outgoing);
+                }
+                else if (message.mode === 'cart' && message.action === 'save') {
+                    console.log('at least it gettingheah')
+                    console.log('2💀')
+                    return send_cart(message.source.channel, message.text, outgoing);
+                }
+                else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+                    console.log('focus message :', message);
+                    return_data = yield focus(message);
+                    console.log('3💀')
+                    return send_focus(message.source.channel, message.text, return_data, outgoing);
+                }
+                else if (message.mode === 'cart' && message.action === 'view') {
+                    console.log('4💀')
+                    return send_cart(message.source.channel, message.text, outgoing);
+                }
+                // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
+                //     return send_text(message.source.channel, message.text, outgoing)
+                // }
+                else if (message.text){
+                    console.log('5💀')
+                    session.send(message.text);
+                }
+                else {
+                    console.log('\nhmm, shouldnt be getting here..', message);
+                }
+                // outgoing.ack();
+            }).then(() => {
 
-
-            // co(function*() {
-            //     if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-            //         return_data = yield parse_results(message);
-            //         // session.channel = message.source.channel;
-            //         // session.text = message.text;
-            //         // session.results = return_data;
-            //         // session.outgoing = outgoing;
-            //         // return session.beginDialog('/results');
-            //         console.log('1💀')
-            //         return send_results(message.source.channel, message.text, return_data, outgoing);
-            //     }
-            //     else if (message.mode === 'cart' && message.action === 'save') {
-            //         console.log('at least it gettingheah')
-            //         console.log('2💀')
-            //         return send_cart(message.source.channel, message.text, outgoing);
-            //     }
-            //     else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-            //         console.log('focus message :', message);
-            //         return_data = yield focus(message);
-            //         console.log('3💀')
-            //         return send_focus(message.source.channel, message.text, return_data, outgoing);
-            //     }
-            //     else if (message.mode === 'cart' && message.action === 'view') {
-            //         console.log('4💀')
-            //         return send_cart(message.source.channel, message.text, outgoing);
-            //     }
-            //     // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
-            //     //     return send_text(message.source.channel, message.text, outgoing)
-            //     // }
-            //     else if (message.text){
-            //         console.log('5💀')
-            //         session.send(message.text);
-            //     }
-            //     else {
-            //         console.log('\nhmm, shouldnt be getting here..', message);
-            //     }
-            //     // outgoing.ack();
-            // }).then(() => {
-
-            //     console.log('.x.x.x.')
-            //     //if(message.text){
-            //     outgoing.ack();
-            //     //}
+                console.log('.x.x.x.')
+                //if(message.text){
+                outgoing.ack();
+                //}
                 
-            // }).catch(e => {
-            //     console.log(e);
-            //     outgoing.ack();
-            // // })
+            }).catch(e => {
+                console.log(e);
+                outgoing.ack();
             // })
+            })
         } catch ( e ) {
             kip.err(e);
         }
