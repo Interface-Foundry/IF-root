@@ -23,8 +23,8 @@ mongoose.connect('mongodb://localhost/amazonData');
 		name: String,
 		topLevelURL: String,
 		category: [String],
-		alsoBought: [String]
-		// alsoViewed: [String]
+		alsoBought: [String],
+		alsoViewed: [String]
 
 		// ****************************************
 		// Ignore these 2 other features for now
@@ -35,9 +35,12 @@ mongoose.connect('mongodb://localhost/amazonData');
 
 
 	var Product = mongoose.model('Product', productSchema);
-	Product.remove({}, function (err) {
-		console.log('collection cleared')
-	});
+
+	// %%%%%%%%%%%%%%%%%%%%%% REMOVE ME %%%%%%%%%%%%%%%%%%%%%%
+	// Product.remove({}, function (err) {
+	// 	console.log('collection cleared')
+	// });
+	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	// Make proxy and URL:
 	var proxiedRequest = request.defaults( {
@@ -54,37 +57,112 @@ mongoose.connect('mongodb://localhost/amazonData');
 		}
 	});
 
-	var url = 'https://www.amazon.com/dp/B0033RVDVC/ref=nav_timeline_asin?_encoding=UTF8&psc=1';
-	scrapePage(url);
+	var rootCategoryPage = 'https://www.amazon.com/electronics-store/b/ref=topnav_storetab_e?ie=UTF8&node=172282';
+	// var url = 'https://www.amazon.com/dp/B0033RVDVC/ref=nav_timeline_asin?_encoding=UTF8&psc=1';
+	
+	//*********************************
+	// RUN PROGRAM
+	//*********************************
+	findSubcategories(rootCategoryPage);
+	// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
 // });
 
 var crawler = job('crawler-job', function(data, done) {
-	scrapePage('https://www.amazon.com/dp/' + data + '/ref=nav_timeline_asin?_encoding=UTF8&psc=1') 
-	setTimeout(function () {
-		done(null, 'woooow')
-	}, 1000)
+	scrapePage('https://www.amazon.com/dp/' + data) //+ '/ref=nav_timeline_asin?_encoding=UTF8&psc=1') 
+	setTimeout(function () { done(null, 'woooow') }, 500)
 })
+
+var categoryCrawler = job('categoryCrawler-job', function(data, done) {
+	findSubcategories(data) 
+	setTimeout(function () { done(null, 'woooow') }, 1000)
+})
+
+var readPageCrawler = job('readPageCrawler-job', function(data, done) {
+	readPage(data);
+	setTimeout(function () { done(null, 'woooow') }, 1000)
+})
+
+function readPage(url)
+{	
+	proxiedRequest.get(url, function(err, response, body) {
+		try {
+			if (response.statusCode != 200) 
+				setTimeout(function () { readPageCrawler(url); }, 1000);
+
+			var $ = cheerio.load(body);
+			$('html').find('script').remove();
+			$('html').find('style').remove();
+
+
+			$('li.s-result-item').each(function (i, elem) {
+				var asin = $(this).attr('data-asin');
+				var url = 'https://www.amazon.com/dp/' + asin;
+				// console.log(url);
+				Product.count( {asin: asin}, function (err, count) {
+					if (count === 0)
+						scrapePage(url);		
+				});
+			});
+
+			if ($('a#pagnNextLink').attr('href'))
+				readPageCrawler('https://www.amazon.com' + $('a#pagnNextLink').attr('href'));
+		} catch(err) {
+			setTimeout(function () { readPageCrawler(url); }, 1000);
+		}
+	});
+	
+}
+
+function findSubcategories(url)
+{
+	proxiedRequest.get(url, function(err, response, body) {
+		try {
+			if (response.statusCode != 200) 
+				setTimeout(function () { findSubcategories(url); }, 1000);
+
+			var $ = cheerio.load(body);
+			$('html').find('script').remove();
+			$('html').find('style').remove();
+
+			var hasChildren = false;
+			$('.categoryRefinementsSection span').each(function(i, elem) {
+				if ($(this).attr('class') == 'refinementLink') 
+				{
+					if ($(this).parent().attr('href'))
+					{
+						var child = 'https://www.amazon.com' + $(this).parent().attr('href');
+						hasChildren = true;
+
+						setTimeout(function() { categoryCrawler(child); }, 1000);	
+					}
+				}
+			});
+
+			$('div[class="left_nav browseBox"] ul li a').each(function(i, elem) {
+				var child = 'https://www.amazon.com' + $(this).attr('href');
+				hasChildren = true;
+
+				setTimeout(function () { categoryCrawler(child); }, 1000);
+			});
+
+			if (!hasChildren) 
+				readPageCrawler(url);
+
+		} catch(err) {
+			setTimeout(function () { categoryCrawler(url) }, 5000);
+		}
+	});
+}
 
 function checkASINs(asins)
 {
-	co(function * () {
-		// for (var i in asins)
-		// {
-		// 	var tmp = asins[i];
-		// 	Product.count( {asin: tmp}, function (err, count) {
-		// 		console.log(tmp)
-		// 		if (count === 0) 
-		// 			crawler(tmp);
-		// 			// ^ enqueue asins
-		// 	});
-		// }	
-
-		async.forEach(asins, function (elem, callback) {
-			Product.count( {asin: elem}, function (err, count) {
-				if (count === 0) 
-					crawler(elem);
-					// ^ enqueue asins
-			});
+	async.forEach(asins, function (elem, callback) {
+		Product.count( {asin: elem}, function (err, count) {
+			if (count === 0) 
+				setTimeout(function () { crawler(elem); }, 1250);
+				// ^ enqueue asins
 		});
 	});
 }
@@ -110,6 +188,13 @@ function scrapePage(url)
 			$('html').find('script').remove();
 			$('html').find('style').remove();
 
+
+			// Find categories
+			var categories = [];
+			$('.a-link-normal.a-color-tertiary').each(function (i, elem) {
+				categories.push($(this).text().trim());
+			})
+
 			// Check for the existence of features
 			var alsoBoughtIDFeature;
 			if ($('#purchase-similarities_feature_div div').attr('data-a-carousel-options'))
@@ -117,11 +202,11 @@ function scrapePage(url)
 			else if ($('#purchase-sims-feature div').attr('data-a-carousel-options'))
 				alsoBoughtIDFeature = '#purchase-sims-feature div';
 
-			// var alsoViewedIDFeature;
-			// if ($('#session-sims-feature div').attr('data-a-carousel-options'))
-			// 	alsoViewedIDFeature = '#session-sims-feature div';
-			// else if ($('#fallbacksession-sims-feature div').attr('data-a-carousel-options'))
-			// 	alsoViewedIDFeature = '#fallbacksession-sims-feature div';
+			var alsoViewedIDFeature;
+			if ($('#session-sims-feature div').attr('data-a-carousel-options'))
+				alsoViewedIDFeature = '#session-sims-feature div';
+			else if ($('#fallbacksession-sims-feature div').attr('data-a-carousel-options'))
+				alsoViewedIDFeature = '#fallbacksession-sims-feature div';
 
 			// Define fields for schema
 			var num = $('input#ASIN').val();
@@ -145,14 +230,31 @@ function scrapePage(url)
 
 			if (alsoBoughtIDFeature) 
 				alsoBoughtASINs = scrapeData(alsoBoughtIDFeature);
-			// if (alsoViewedIDFeature) 
-			// 	alsoViewedASINs = scrapeData(alsoViewedIDFeature);
+			if (alsoViewedIDFeature) 
+				alsoViewedASINs = scrapeData(alsoViewedIDFeature);
+
+			// Frequently Bought Feature
+			$('#sims-fbt-container div img').each(function(i, elem) {
+				frequentlyBought.push($(this).attr('alt'));
+			});
+			// the first item is the product itself
+			frequentlyBought.shift();
+
+			// What Other Customers Bought after Viewing this Item
+			$('#view_to_purchase-sims-feature img').each(function(i, elem) {
+				boughtAfterView.push($(this).attr('alt'));
+			});
 
 			var node = new Product( {
 				asin: num,
 				name: title,
+				category: categories,
+
 				alsoBought: alsoBoughtASINs,
-				alsoViewed: alsoViewedASINs
+				alsoViewed: alsoViewedASINs,
+
+				frequentlyBought: frequentlyBought,
+				boughtAfterView: boughtAfterView
 			});
 
 			co(function * () {
@@ -164,9 +266,11 @@ function scrapePage(url)
 								console.log(err);
 							else {
 								// throw into queue
+								console.log(title);
 								checkASINs(alsoBoughtASINs);
 								// checkASINs(alsoViewedASINs);
-								console.log(title);
+								// checkASINs(frequentlyBought);
+								// checkASINs(boughtAfterView);
 							}
 						});
 					}
@@ -181,6 +285,22 @@ function scrapePage(url)
 
 	});
 }
+
+var isEmpty = false;
+setInterval(function () {
+	co(function () {
+		if (isEmpty === true) {
+			console.log("############### EXITING ###############");
+			process.exit(0);
+		}
+		crawler.count(function (err, count) {
+			if (!err && count === 0) {
+				console.log("############### QUEUE IS EMPTY ###############");
+				isEmpty = true;
+			}
+		});
+	});
+}, 60000);
 
 
 
