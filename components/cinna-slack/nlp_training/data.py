@@ -28,13 +28,25 @@ def save_df(df, foldername, filename):
         df.to_pickle(path.join(foldername, filename))
 
 
-def load_df(db_name='prod2', save=True):
+def retrieve_from_prod_db(only_incoming=True,
+                          not_null=True,
+                          load_pickeled=False,
+                          save=False,
+                          db_name='prod2'):
     '''
-    for training
+    helper function to munge and explore with pandas
     '''
-    df = load_db(db_name=db_name)
+    pickled_location = path.join('pkls/too_big', 'messages.pkl')
+
+    if load_pickeled and path.isfile(pickled_location):
+        df = pd.read_pickle(pickled_location)
+    else:
+        df = load_db(db_name=db_name)
     if save:
         save_df(df, foldername='pkls/too_big', filename=db_name + '.pkl')
+    if only_incoming and not_null:
+        df = df[(df.incoming == 1) & (df.msg.notnull() == 1)]
+    df = combine_smalltalk(df)
     return df
 
 
@@ -58,29 +70,6 @@ def training_data(load_pickled=False,
                   only_incoming=True,
                   not_null=True):
     pass
-
-
-def retrieve_from_prod_db(only_incoming=True,
-                          not_null=True,
-                          load_pickeled=False):
-    '''
-    helper function to munge and explore with pandas
-    '''
-    pickled_location = path.join('pkls/too_big', 'messages.pkl')
-
-    if load_pickeled and path.isfile(pickled_location):
-        df = pd.read_pickle(pickled_location)
-    else:
-
-        df = load_df(foldername='pkls/too_big',
-                     db_name='prod2',
-                     filename='messages.pkl',
-                     save=True)
-
-    if only_incoming and not_null:
-        df = df[(df.incoming == 1) & (df.msg.notnull() == 1)]
-    df = combine_smalltalk(df)
-    return df
 
 
 def base_filter():
