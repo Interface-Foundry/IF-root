@@ -415,7 +415,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                         .text("<a href="+results[0].title_link+">Read reviews on Amazon</a>")
                         .images([
                             builder.CardImage.create(session, image1)
-                                .tap(builder.CardAction.showImage(session, image1)),
+                                .tap(builder.CardAction.showImage(session, results[0].title_link)),
                         ])
                         .tap(builder.CardAction.openUrl(session, results[0].title_link))
                         .buttons([
@@ -429,7 +429,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                         .text("<a href="+results[1].title_link+">Read reviews on Amazon</a>")
                         .images([
                             builder.CardImage.create(session, image2)
-                                .tap(builder.CardAction.showImage(session, image2)),
+                                .tap(builder.CardAction.showImage(session, results[1].title_link)),
                         ])
                         .tap(builder.CardAction.openUrl(session, results[1].title_link))
                         .buttons([
@@ -443,7 +443,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                         .text("<a href="+results[2].title_link+">Read reviews on Amazon</a>")
                         .images([
                             builder.CardImage.create(session, image3)
-                                .tap(builder.CardAction.showImage(session, image3)),
+                                .tap(builder.CardAction.showImage(session, results[2].title_link)),
                         ])
                         .tap(builder.CardAction.openUrl(session, results[2].title_link))
                         .buttons([
@@ -511,6 +511,10 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     //     ])
                 ]);
                 builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
+
+                outgoing.ack();
+                //session.endDialog(msg);
+
 
                 // msg = new builder.Message(session)
                 //     .textFormat(builder.TextFormat.xml)

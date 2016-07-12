@@ -80,11 +80,12 @@ def index():
         TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        CHAT_HEIGHT = 280
-        CHAT_WIDTH = 534
+        CHAT_HEIGHT = 191
+        CHAT_WIDTH = 360
         PIC_COORDS = [{'x': 5, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
         TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
+        #288 x 153
 
     #add images
     for i, data in enumerate(images):
@@ -92,8 +93,18 @@ def index():
         im.thumbnail(PIC_SIZE, Image.ANTIALIAS)
         thumbnails.append(im)
 
-    #add select numbers
+    #image object
     img = Image.new('RGB', (CHAT_WIDTH, CHAT_HEIGHT), BGCOLOR)
+
+    #draw a border for skype images
+    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        #draw white boxes
+        print 'boxbox'
+        drawBorder = ImageDraw.Draw(img)
+        drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
+        drawBorder.rectangle(((4,4),(356,187)), fill="white")
+
+
     for i, im in enumerate(thumbnails):
         #add pics
         x = PIC_COORDS[i][u'x']
@@ -123,16 +134,7 @@ def index():
         if images[0][u'origin'] and images[0][u'origin'] == 'skype':
             #draw white boxes
             print 'boxbox'
-            draw.rectangle(((115,0),(400,160)), fill="white")
-            # add white box transparency in, eventually fam ~
-            # # #
-            # back = Image.new('RGBA', (512,512), (255,0,0,0))
-            # poly = Image.new('RGBA', (512,512))
-            # pdraw = ImageDraw.Draw(poly)
-            # pdraw.polygon([(128,128),(384,384),(128,384),(384,128)],
-            #               fill=(255,255,255,127),outline=(255,255,255,255))
-            # back.paste(poly,mask=poly)
-            # back.show()
+            draw.rectangle(((115,5),(329,160)), fill="white")
 
 
         last_y = 5
@@ -145,6 +147,8 @@ def index():
             img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
 
         last_y = last_y + 27
+
+
 
         if 'reviews' in im and 'rating' in im[u'reviews']:
             # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
@@ -175,6 +179,14 @@ def index():
                 draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
 
             last_y = last_y + 20
+
+        #fake reviews for skype!! lmao
+        else if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            print 'special skype review'
+            selectRating = random.randint(7,8)
+            draw.text((x + 80, last_y),' - ' + random.randint(15,2999),font=font2,fill="#2d70c1")
+            last_y = last_y + 20
+
 
         last_y = last_y + 5
 
