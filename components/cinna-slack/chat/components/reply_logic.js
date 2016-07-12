@@ -333,7 +333,7 @@ handlers['shopping.initial'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'Hi, here are some options you might like. Tap `Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -378,7 +378,7 @@ handlers['shopping.more'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'Hi, here are some more options. Type `more` to see more options or tap `Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -413,7 +413,7 @@ handlers['shopping.similar'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'I found some similar options, would you like to see more product info? Tap `More Info`',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -438,6 +438,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   } 
   else if (exec.params.type === 'genericDetail') {
       //add handler for all other modifiers here
+
   } 
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);

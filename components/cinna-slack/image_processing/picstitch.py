@@ -90,8 +90,8 @@ def index():
     #add images
     for i, data in enumerate(images):
         im = download_image(data[u'url'])
-
-        print PIC_SIZE
+        print PIC_SIZE[0]
+        print PIC_SIZE[1]
         im.thumbnail(PIC_SIZE, Image.ANTIALIAS)
         thumbnails.append(im)
 
@@ -137,10 +137,10 @@ def index():
             print 'boxbox'
             draw.rectangle(((115,0),(400,160)), fill="white")
 
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            #draw white boxes
-            print 'boxbox'
-            draw.rectangle(((115,5),(329,160)), fill="white")
+        # if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        #     #draw white boxes
+        #     print 'boxbox'
+        #     draw.rectangle(((115,5),(329,160)), fill="white")
 
 
         last_y = 5
@@ -186,18 +186,18 @@ def index():
 
             last_y = last_y + 20
 
-        # #fake reviews for skype!! lmao
-        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            print 'special skype review'
+        # # #fake reviews for skype!! lmao
+        # elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        #     print 'special skype review'
 
-            selectRating = random.randint(6,7)
-            print selectRating
+        #     selectRating = random.randint(6,7)
+        #     print selectRating
 
-            reviewCount = random.randint(15,1899)
-            print reviewCount
+        #     reviewCount = random.randint(15,1899)
+        #     print reviewCount
 
-            draw.text((x + 80, last_y),' - ' + reviewCount,font=font2,fill="#2d70c1")
-            last_y = last_y + 20
+        #     draw.text((x + 80, last_y),' - ' + reviewCount,font=font2,fill="#2d70c1")
+        #     last_y = last_y + 20
 
 
         last_y = last_y + 5
