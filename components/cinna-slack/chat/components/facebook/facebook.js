@@ -288,13 +288,13 @@ app.post('/facebook', function(req, res) {
             ];
 
              var img_card = {
-                    "attachment":{
-                      "type":"image",
-                      "payload":{
-                        "url": img_array[Math.floor(Math.random()*img_array.length)]
-                      }
-                    }
+                "attachment":{
+                  "type":"image",
+                  "payload":{
+                    "url": img_array[Math.floor(Math.random()*img_array.length)]
                   }
+                }
+              }
 
              request({
                     url: 'https://graph.facebook.com/v2.6/me/messages',

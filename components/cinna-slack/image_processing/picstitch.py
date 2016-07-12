@@ -181,7 +181,7 @@ def index():
             last_y = last_y + 20
 
         #fake reviews for skype!! lmao
-        else if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
             print 'special skype review'
             selectRating = random.randint(7,8)
             draw.text((x + 80, last_y),' - ' + random.randint(15,2999),font=font2,fill="#2d70c1")
