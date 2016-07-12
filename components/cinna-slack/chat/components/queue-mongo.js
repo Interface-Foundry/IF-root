@@ -1,6 +1,6 @@
 var kip = require('../../kip');
 var co = require('co');
-var PubSub = require('../../db').PubSub;
+var PubSub = require('../../db').Pubsub;
 var rx = require('rx');
 
 

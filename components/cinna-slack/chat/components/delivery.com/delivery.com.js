@@ -3,6 +3,8 @@ var kip = require('kip');
 var co = require('co');
 var db = require('db');
 
+var search = require('./search');
+
 function default_reply(message) {
   return new db.Message({
     incoming: false,
@@ -50,11 +52,16 @@ queue.topic('incoming').subscribe(incoming => {
     if (message._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct message not retrieved from db');
     }
+    if (history[1]) {
+      message.prevMode = history[1].mode;
+      message.prevAction = history[1].action;
+      message.prevRoute = message.prevMode + '.' + message.prevAction;
+    }
 
     var route = yield getRoute(message);
     kip.debug('route', route);
     message.mode = 'food';
-    message.action = route.replace(/$food./, '');
+    message.action = route.replace(/^food./, '');
     yield handlers[route](message);
     incoming.ack();
 
@@ -62,32 +69,43 @@ queue.topic('incoming').subscribe(incoming => {
 });
 
 //
-// starts a food order for a group
+// this is the worst part of building bots: intent recognition
 //
-function startFoodOrder(message) {
-  console.log('🍕 food order 🌮');
-  send_text_reply(message, "yay let's eat! what address should i use?");
-}
-
 function getRoute(message) {
   return co(function*() {
-    switch (message.text) {
-      case 'hi':
-        return 'food.begin';
-      case '902 broadway':
-        return 'food.address';
+    if (message.text === 'food') return 'food.begin';
+    if (message.prevRoute === 'food.begin') return 'food.address';
+    if (message.prevRoute === 'food.results') return 'food.results';
 
-    }
+    throw new Error("couldn't figure out the right mode/action to route to")
   })
 }
 
 var handlers = {};
+
 handlers['food.begin'] = function* (message) {
-  startFoodOrder(message);
+  console.log('🍕 food order 🌮');
+  send_text_reply(message, "yeah let's eat! what address should i use?");
+  // todo save addresses and show saved addresses
 }
+
 handlers['food.address'] = function* (message) {
   var addr = message.text;
   // check if it's a good address
+  // TODO
 
   // search for food near that address
+  send_text_reply(message, 'thanks, searching your area for good stuff!');
+
+  var results = yield search.search({
+    addr: addr
+  });
+  var results_message = default_reply(message);
+  results_message.action = 'results';
+  results_message.text = 'Here are some restaurants you might like nearby';
+  results_message.data = {
+    results: results.results,
+    params: {addr: results.address}
+  };
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
 }
