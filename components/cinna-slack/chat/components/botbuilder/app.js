@@ -57,6 +57,7 @@ app.post('/api/messages',connector.listen());
 var sessions = {};
 
 bot.dialog('/', function (session) {
+    console.log('kill me now');
     var text = session.message.text;
     var user = session.message.user;
     sessions[user.id] = session;
@@ -224,7 +225,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             //}
 
         }).catch(e => {
-            console.log(e);
+            kip.err(e);
             outgoing.ack();
         // })
         })
@@ -281,7 +282,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                         .attachmentLayout('carousel')
                         .attachments(cards);
 
-                    builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
+                    session.send(msg);//, "select:100|select:101|select:102");
                 });
 
             })
