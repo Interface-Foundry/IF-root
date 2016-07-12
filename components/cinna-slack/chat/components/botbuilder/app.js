@@ -85,7 +85,7 @@ bot.dialog('/', function (session) {
                     origin: 'skype',
                     source: {
                         'origin': 'skype',
-                        'channel': user.id,
+                        'channel': 'skype_' + user.id,
                         'org': "skype_" + user.id,
                         'id': "skype_" + user.id,
                         'user': "skype_" + user.id
@@ -138,7 +138,7 @@ bot.dialog('/', function (session) {
             origin: 'skype',
             source: {
                 'origin': 'skype',
-                'channel': user.id,
+                'channel': 'skype_' + user.id,
                 'org': "skype_" + user.id,
                 'id': "skype_" + user.id,
                 'user': "skype_" + user.id
@@ -150,9 +150,10 @@ bot.dialog('/', function (session) {
         message.text = message.original_text.trim(); //remove extra spaces on edges of string
         // queue it up for processing
         message.save().then(() => {
-                console.log('\n\n\n\n\nPUBLISHING MESSAGE', text);
+            console.log('>>>> incoming from skype'.yellow, text.yellow);
+
             queue.publish('incoming', message, ['skype', user.id, message.ts].join('.'))
-        });
+        }).catch(kip.err);
 
 
     //
@@ -164,50 +165,68 @@ bot.dialog('/', function (session) {
         // console.log(outgoing);
         // var data = outgoing.data;
         try {
-            console.log('outgoing message');
+            console.log('<<<< outgoing message'.yellow, outgoing);
             // console.log(outgoing);
             var message = outgoing.data;
-            console.log('skype outgoing message', message.mode, message.action);
+            // console.log('skype outgoing message', message.mode, message.action);
             var return_data = {};
-            co(function*() {
-                if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-                    return_data = yield parse_results(message);
-                    // session.channel = message.source.channel;
-                    // session.text = message.text;
-                    // session.results = return_data;
-                    // session.outgoing = outgoing;
-                    // return session.beginDialog('/results');
-                    return send_results(message.source.channel, message.text, return_data, outgoing);
-                }
-                else if (message.mode === 'cart' && message.action === 'save') {
-                    console.log('at least it gettingheah')
-                    return send_cart(message.source.channel, message.text, outgoing);
-                }
-                else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-                    console.log('focus message :', message);
-                    return_data = yield focus(message);
-                    return send_focus(message.source.channel, message.text, return_data, outgoing);
-                }
-                else if (message.mode === 'cart' && message.action === 'view') {
-                    return send_cart(message.source.channel, message.text, outgoing);
-                }
-                // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
-                //     return send_text(message.source.channel, message.text, outgoing)
-                // }
-                else if (message.text){
-                    session.send(message.text);
-                }
-                else {
-                    console.log('\nhmm, shouldnt be getting here..', message);
-                }
-                // outgoing.ack();
-            }).then(() => {
+
+            if(message.text){
+                session.send(message.text);
                 outgoing.ack();
-            }).catch(e => {
-                console.log(e);
-                outgoing.ack();
+            }
+            
+
+
+            // co(function*() {
+            //     if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+            //         return_data = yield parse_results(message);
+            //         // session.channel = message.source.channel;
+            //         // session.text = message.text;
+            //         // session.results = return_data;
+            //         // session.outgoing = outgoing;
+            //         // return session.beginDialog('/results');
+            //         console.log('1💀')
+            //         return send_results(message.source.channel, message.text, return_data, outgoing);
+            //     }
+            //     else if (message.mode === 'cart' && message.action === 'save') {
+            //         console.log('at least it gettingheah')
+            //         console.log('2💀')
+            //         return send_cart(message.source.channel, message.text, outgoing);
+            //     }
+            //     else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+            //         console.log('focus message :', message);
+            //         return_data = yield focus(message);
+            //         console.log('3💀')
+            //         return send_focus(message.source.channel, message.text, return_data, outgoing);
+            //     }
+            //     else if (message.mode === 'cart' && message.action === 'view') {
+            //         console.log('4💀')
+            //         return send_cart(message.source.channel, message.text, outgoing);
+            //     }
+            //     // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
+            //     //     return send_text(message.source.channel, message.text, outgoing)
+            //     // }
+            //     else if (message.text){
+            //         console.log('5💀')
+            //         session.send(message.text);
+            //     }
+            //     else {
+            //         console.log('\nhmm, shouldnt be getting here..', message);
+            //     }
+            //     // outgoing.ack();
+            // }).then(() => {
+
+            //     console.log('.x.x.x.')
+            //     //if(message.text){
+            //     outgoing.ack();
+            //     //}
+                
+            // }).catch(e => {
+            //     console.log(e);
+            //     outgoing.ack();
+            // // })
             // })
-            })
         } catch ( e ) {
             kip.err(e);
         }
@@ -215,80 +234,57 @@ bot.dialog('/', function (session) {
         function send_results(channel, text, results, outgoing) {
             // console.log(channel, text, results, outgoing)
             co(function*(){
-                 var giphy_gif = '';
-            yield request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
-                if (err) console.log(err);
-                // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
-                giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
-                //picstitch images
-                // var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
-                // var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
-                // var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
-            
-                if(outgoing.data.amazon){
-                    //amazon images
-                    var parsedAmazon = JSON.parse(outgoing.data.amazon);
-                    // console.log('\n\n\n DOOOO ',parsedAmazon[0])
-                    var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
-                    var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
-                    var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
-                }
-                console.log('SEND_RESULTS FIRED, RESULTS: ', results)
-                //Ask the user to select an item from a carousel.
-                var msg = new builder.Message(session)
-                    .textFormat(builder.TextFormat.xml)
-                    .attachmentLayout('carousel')
-                    .attachments([
-                        new builder.HeroCard(session)
-                            .title(results[0].title)
+                var giphy_gif = '';
+                var cards = [];
+                yield request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
+                    
+                    if (err) console.log(err);
+
+                    giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
+
+                    async.eachSeries(results, function (result, callback) {
+
+                        //get picstitch image
+                        if (result && result.image_url){
+                            var image = ((result.image_url.indexOf('http') > -1) ? result.image_url : 'http://kipthis.com/images/header_partners.png')
+                        }else {
+                            kip.debug('error: no result.image_url (picstitch) found');
+                            var image = 'http://kipthis.com/images/header_partners.png';
+                        }
+                        
+                        //Build Carousel 
+                        var card = new builder.HeroCard(session)
+                            .title(result.title)
                             // .subtitle("Space Needle")
-                            .text("<a href="+results[0].title_link+">Read reviews on Amazon</a>")
+                            .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
                             .images([
-                                builder.CardImage.create(session, image1)
-                                    .tap(builder.CardAction.showImage(session, image1)),
+                                builder.CardImage.create(session, image)
+                                    .tap(builder.CardAction.showImage(session, image)),
                             ])
-                            .tap(builder.CardAction.openUrl(session, results[0].title_link))
+                            .tap(builder.CardAction.openUrl(session, result.title_link))
                             .buttons([
                                 builder.CardAction.imBack(session, 'save 1'
                                 , "Add to Cart"),
                                 builder.CardAction.imBack(session, "1 but cheaper" , "Find Cheaper"),
                                 builder.CardAction.imBack(session, "1", "More Info")
-                            ]),
-                        new builder.HeroCard(session)
-                            .title(results[1].title)
-                            // .subtitle("Space Needle")
-                            .text("<a href="+results[1].title_link+">Read reviews on Amazon</a>")
-                            .images([
-                                builder.CardImage.create(session, image2)
-                                    .tap(builder.CardAction.showImage(session, image2)),
-                            ])
-                            .tap(builder.CardAction.openUrl(session, results[1].title_link))
-                            .buttons([
-                                builder.CardAction.imBack(session, '<dataId:' + outgoing.data.thread_id + ', action=\"add\", selected=\"2\", ts: '+ outgoing.data.ts + ', initial:\"true\" />'
-                                , "Add to Cart"),
-                                builder.CardAction.imBack(session, "2 but cheaper" , "Find Cheaper"),
-                                builder.CardAction.imBack(session, "2", "More Info")
-                            ]),
-                        new builder.HeroCard(session)
-                            .title(results[2].title)
-                            // .subtitle("Space Needle")
-                            .text("<a href="+results[2].title_link+">Read reviews on Amazon</a>")
-                            .images([
-                                builder.CardImage.create(session, image3)
-                                    .tap(builder.CardAction.showImage(session, image3)),
-                            ])
-                            .tap(builder.CardAction.openUrl(session, results[2].title_link))
-                            .buttons([
-                                builder.CardAction.imBack(session, '<dataId:' + outgoing.data.thread_id + ', action=\"add\", selected=\"3\", ts: '+ outgoing.data.ts + ', initial:\"true\" />'
-                                , "Add to Cart"),
-                                builder.CardAction.imBack(session, "3 but cheaper" , "Find Cheaper"),
-                                builder.CardAction.imBack(session, "3", "More Info")
-                            ])
-                     ]);
+                            ]);
+
+                        cards.push(card)
+                        callback(); 
+
+                    }, function (err) {
+                        if (err) { throw err; }
+
+                        var msg = new builder.Message(session)
+                            .textFormat(builder.TextFormat.xml)
+                            .attachmentLayout('carousel')
+                            .attachments(cards);
+
                         builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
-                        // session.endDialog(msg);
-                 })
-             })
+                    });
+
+                })
+            })
         }
 
         function send_focus(channel, text, focus_info, outgoing) {
