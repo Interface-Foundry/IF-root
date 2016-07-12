@@ -4,7 +4,7 @@ import json
 
 import tensorflow as tf
 from keras.models import Model
-from keras.layers import Input, Dense, Embedding, Dropout, LSTM, GRU, merge
+from keras.layers import Input, Dense, Embedding, Dropout, LSTM, GRU, merge, Convolution1D, MaxPooling1D
 from keras.optimizers import RMSprop, Adam
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
@@ -27,13 +27,22 @@ def model():
                           input_length=data.shape[1],
                           mask_zero=True)(sequence)
 
+    with tf.name_scope('simple_conv'):
+        conv = Dropout(0.25)(embed)
+        conv = Convolution1D(nb_filter=64,
+                             filter_length=3,
+                             border_mode='valid',
+                             activation='relu',
+                             subsample_length=1)
+        conv = MaxPooling1D(pool_length=2)(conv)
+
     with tf.name_scope('forwards'):
-        fw = GRU(128, consume_less='gpu', return_sequences=True)(embed)
+        fw = GRU(128, consume_less='gpu', return_sequences=True)(conv)
         fw = GRU(128, consume_less='gpu')(fw)
 
     with tf.name_scope('backwards'):
         bw = GRU(128, consume_less='gpu', return_sequences=True,
-                 go_backwards=True)(embed)
+                 go_backwards=True)(conv)
         bw = GRU(128, consume_less='gpu')(bw)
 
     with tf.name_scope('merge1'):
