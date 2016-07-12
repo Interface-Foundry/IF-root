@@ -135,6 +135,7 @@ bot.dialog('/', function (session) {
     // }
     // builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|(quit)");
     text = emojiText.convert(text,{delimiter: ' '});
+    text = skypeEmojiHack(text);
 
     var message = new db.Message({
         incoming: true,
@@ -451,3 +452,11 @@ bot.dialog('/results', [
         session.replaceDialog('/');
     }
 ]);
+
+//
+// grabs emoji names from the xml sent by skype api
+// <ss type="movember">:{</ss> -> "movember"
+//
+function skypeEmojiHack(text) {
+  return text.replace(/<ss type="([^"]+)">[^>]+>/g, '$1')
+}
