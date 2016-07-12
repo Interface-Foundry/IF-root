@@ -25,7 +25,7 @@ def model():
         embed = Embedding(input_dim=tk.nb_words,
                           output_dim=256,
                           input_length=data.shape[1],
-                          mask_zero=True)(sequence)
+                          mask_zero=False)(sequence)
 
     with tf.name_scope('simple_conv'):
         conv = Dropout(0.25)(embed)
