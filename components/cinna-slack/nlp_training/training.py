@@ -117,8 +117,8 @@ if __name__ == '__main__':
     save_tokenizer(tk)
     model.fit(data, action_codes,
               validation_split=.2,
-              nb_epoch=500,
-              batch_size=32,
+              nb_epoch=1000,
+              batch_size=16,
               verbose=1,
               callbacks=[tb, mc, es],
               class_weight=weight_dict)
