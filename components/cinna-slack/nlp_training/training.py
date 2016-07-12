@@ -33,7 +33,7 @@ def model():
                              filter_length=3,
                              border_mode='valid',
                              activation='relu',
-                             subsample_length=1)
+                             subsample_length=1)(conv)
         conv = MaxPooling1D(pool_length=2)(conv)
 
     with tf.name_scope('forwards'):
