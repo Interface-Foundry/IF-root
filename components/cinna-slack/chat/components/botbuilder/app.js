@@ -309,34 +309,41 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
     function send_cart(channel, text, outgoing) {
         var cart = outgoing.data.data;
-        var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
 
-     var cart_items = [];
-     unique_items.forEach(function(el, i) {
-                cart_items.push(new builder.HeroCard(session)
-                    .title(el.title)
-                    .subtitle(el.price + '\n' + el.quantity)
-                    // .text("<a href="el.title+">Read reviews on Amazon</a>")
-                    .images([
-                        builder.CardImage.create(session, el.image)
-                            .tap(builder.CardAction.showImage(session, el.image))
-                    ])
-                    .tap(builder.CardAction.openUrl(session, el.title))
-                    .buttons([
-                         builder.CardAction(session).type('postBack').value('+').title("Click to send response to bot"),
-                         builder.CardAction(session).type('postBack').value('-').title("Click to send response to bot"),
-                         builder.CardAction(session).type('postBack').value('removeAll').title("Click to send response to bot")
-                        // builder.CardAction.imBack(session, "save " + (i+1), "+"),
-                        // builder.CardAction.imBack(session, "remove " + (i+1), "-"),
-                        // builder.CardAction.imBack(session, "remove all of " + (i+1), "Remove All")
-                    ]))
-                 })
-        if (cart_items.length > 3) {
-            cart_items = cart_items.slice(0,4);
-        }
-         var msg = new builder.Message(session)
+        debugger;
+
+        var cart_items = cart.aggregate_items.map((el, i) => {
+          var description = `<b>Price: ${el.price}\nQuantity: ${el.quantity}</b>`;
+           var card = new builder.ThumbnailCard(session)
+                .title(`${i+1}. ${truncate(el.title)}`)
+                .text(description)
+                // .text("<a href="el.title+">Read reviews on Amazon</a>")
+                // .tap(builder.CardAction.openUrl(session, el.title))
+                .buttons([
+                    builder.CardAction.postBack(session, 'add ' + el._id, '+ Increase Quantity'),
+                    builder.CardAction.postBack(session, 'remove ' + el._id, '- Decrease Quantity')
+                ])
+                //     // builder.CardAction.postBack(session, '+', "+"),
+                //     //  builder.CardAction(session).type('postBack').value('+').title("Click to send response to bot"),
+                //     //  builder.CardAction(session).type('postBack').value('-').title("Click to send response to bot"),
+                //     //  builder.CardAction(session).type('postBack').value('removeAll').title("Click to send response to bot")
+                //     // builder.CardAction.imBack(session, "save " + (i+1), "+"),
+                //     // builder.CardAction.imBack(session, "remove " + (i+1), "-"),
+                //     // builder.CardAction.imBack(session, "remove all of " + (i+1), "Remove All")
+                // ])
+            if (el.image) {
+              card.images([
+                  builder.CardImage.create(session, el.image)
+                      .tap(builder.CardAction.showImage(session, el.image))
+              ]);
+            }
+            return card;
+        })
+
+        debugger;
+
+        var msg = new builder.Message(session)
             .textFormat(builder.TextFormat.xml)
-            .attachmentLayout('carousel')
             .attachments(cart_items)
         session.send(msg);
     }
@@ -455,3 +462,10 @@ bot.dialog('/results', [
 function skypeEmojiHack(text) {
   return text.replace(/<ss type="([^"]+)">[^>]+>/g, '$1')
 }
+
+function truncate(string) {
+   if (string.length > 80)
+      return string.substring(0,80)+'...';
+   else
+      return string;
+};
