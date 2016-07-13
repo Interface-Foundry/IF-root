@@ -82,7 +82,7 @@ var httpsServer = require('https').createServer({
 var search_results = require('./search_results');
 var focus = require('./focus');
 // EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD
-var fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'; 
+fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'; 
 
 // 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
 var emojiText = require('emoji-text'); //convert emoji to text
@@ -387,7 +387,7 @@ app.post('/facebook', function(req, res) {
                             request.post({
                                 url: 'https://graph.facebook.com/v2.6/me/messages',
                                 qs: {
-                                    access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                                    access_token: fbtoken
                                 },
                                 method: "POST",
                                 json: true,
@@ -929,8 +929,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
     console.log('facebook outgoing message');
     console.log(outgoing);
     // var data = outgoing.data;
-    var fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'; 
-
     try {
         console.log('outgoing message');
         console.log(outgoing);
@@ -1330,7 +1328,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
          request.post({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                access_token: fbtoken
             },
             method: "POST",
             json: true,
@@ -1344,7 +1342,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             request.post({
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {
-                    access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                    access_token: fbtoken
                 },
                 method: "POST",
                 json: true,
@@ -1443,7 +1441,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     request.post({
                         url: 'https://graph.facebook.com/v2.6/me/messages',
                         qs: {
-                            access_token: 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+                            access_token: fbtoken
                         },
                         method: "POST",
                         json: true,
