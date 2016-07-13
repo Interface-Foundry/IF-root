@@ -38,9 +38,10 @@ module.exports = function*(message) {
       }
 
       review_line += ` ${r.reviews.rating} stars - ${r.reviews.reviewCount} reviews`
-      var final_description = (description.length > 200) ? (description.substring(0, 150) + '...') : description;
       // console.log('final_decription: ', final_description);
     }
+    var final_description = (description.length > 200) ? (description.substring(0, 150) + '...') : description;
+
 
     return {
       title: emojis[message.focus] + _.get(r, 'ItemAttributes[0].Title[0]').substring(0, 50),

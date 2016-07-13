@@ -7,10 +7,6 @@ var async = require('async');
 var _ = require('underscore');
 var shortid = require('shortid');
 
-process.on('uncaughtException', function (err) {
-  console.log(err.stack);
-});
-
 
 var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
     //Dont save preview searches from supervisor

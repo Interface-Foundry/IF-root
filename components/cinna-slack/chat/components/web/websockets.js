@@ -7,9 +7,13 @@ var image_search = require('../image_search');
 var emojiText = require("emoji-text");
 var search_results = require('./search_results');
 var cart = require('./cart');
+var focus = require('./focus');
 var showdown = new (require('showdown').Converter)();
 
 function emojify(text) {
+  if (!text) {
+    return '';
+  }
   return text.replace(/:one:/g, '①')
     .replace(/:two:/g, '②')
     .replace(/:three:/g, '③');
@@ -120,6 +124,9 @@ function get_html(message) {
       break;
     case 'cart/view':
       html = cart(message);
+      break;
+    case 'shopping/focus':
+      html = showdown.makeHtml(focus(message));
       break;
     default:
       html = emojify(showdown.makeHtml(message.text));
