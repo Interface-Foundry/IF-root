@@ -60,8 +60,8 @@ if(process.env.NODE_ENV == 'development_mitsu'){
 } else {
     // Create bot and setup server
     var connector = new builder.ChatConnector({
-        appId: '9ad92473-83db-4c54-8a17-b7c5d91c3a32',
-        appPassword:'nRe7CFYP4JdWTO9c1Cv9seP'
+        appId: '5d87a3e6-23de-4a8f-bd0c-e52a1c98231d',
+        appPassword:'BZw7sj8gHMLjn34bVUa6QEK'
     });
 }
 
