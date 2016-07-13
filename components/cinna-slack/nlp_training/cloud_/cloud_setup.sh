@@ -17,7 +17,7 @@ ln -s /usr/bin/nodejs /usr/bin/node
 
 export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
 
-sudo pip3 install --upgrade $TF_BINARY_URL pandas flask keras pymongo h5py nltk spacy && \
+sudo pip3 install --upgrade $TF_BINARY_URL pandas flask keras pymongo h5py nltk spacy gcloud && \
     python3 -m textblob.download_corpora &&  \
     python3 -m spacy.en.download all
 

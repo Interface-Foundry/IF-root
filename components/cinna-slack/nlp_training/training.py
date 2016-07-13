@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import json
+import logging
 
 import tensorflow as tf
 from keras.models import Model
@@ -18,6 +19,9 @@ from utils import save_model, save_tokenizer, gcloud_upload
 
 with open('config/config.json', 'r') as f:
     config = json.load(f)
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def model():
@@ -105,7 +109,7 @@ if __name__ == '__main__':
 
     action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
     weight_dict = classes_to_weights(df, ac_dict)
-    print('dataframe shape : ', df.shape)
+    logging.info('dataframe shape : ', df.shape)
     config['ac_dict'] = ac_dict
     config['rev_ac_dict'] = rev_ac_dict
 
@@ -128,4 +132,5 @@ if __name__ == '__main__':
               callbacks=[tb, mc, es],
               class_weight=weight_dict)
 
-    gcloud_upload
+    gcloud_upload()
+    logging.info('successfully uploaded model to gcloud')
