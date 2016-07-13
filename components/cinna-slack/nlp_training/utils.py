@@ -55,6 +55,16 @@ def write_config(config, filename, folder='dict_lookups'):
     with(path.join(folder, filename + '.json'), 'w') as f:
         json.dump(config, f)
 
+
+def retrieve_from_test_db():
+    '''use to get stuff from test_db, not useful for training keras'''
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.foundry
+    cursor = db.messages.find({})
+    df = pd.DataFrame(list(cursor))
+    return df
+
 # ---------------------------------
 # Glove Functions
 
@@ -101,16 +111,6 @@ def evaluate_recall(y, y_test, k=1):
 
 # --------------------------------
 # OLD BELOW ----------------------
-
-
-def retrieve_from_test_db():
-    '''use to get stuff from test_db, not useful for training keras'''
-    from pymongo import MongoClient
-    client = MongoClient()
-    db = client.foundry
-    cursor = db.messages.find({})
-    df = pd.DataFrame(list(cursor))
-    return df
 
 
 def text_look(df, skip_words=['hi', 'hey', 'Hi']):

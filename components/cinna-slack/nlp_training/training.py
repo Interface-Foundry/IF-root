@@ -31,7 +31,7 @@ def model():
         embed = Embedding(input_dim=tk.nb_words,
                           output_dim=256,
                           input_length=data.shape[1],
-                          mask_zero=False)(sequence)
+                          mask_zero=True)(sequence)
 
     # with tf.name_scope('simple_conv'):
     #     conv = Dropout(0.25)(embed)
@@ -40,7 +40,7 @@ def model():
     #                          border_mode='valid',
     #                          activation='relu',
     #                          subsample_length=1)(conv)
-    #     conv = MaxPooling1D(pool_length=2)(conv)
+    #     embed = MaxPooling1D(pool_length=2)(conv)
 
     with tf.name_scope('forwards'):
         fw = GRU(128, consume_less='gpu', return_sequences=True)(embed)
