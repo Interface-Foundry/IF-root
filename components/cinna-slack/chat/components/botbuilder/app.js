@@ -57,6 +57,11 @@ if(process.env.NODE_ENV == 'development_mitsu'){
         appId: '7431dd85-ac18-41e7-9941-e3fe37ae6d75',
         appPassword:'8pgJToqGYgZuPT8mm0Mmk26'
     });
+} else if (process.env.NODE_ENV === 'production') {
+    var connector = new builder.ChatConnector({
+        appId: '7431dd85-ac18-41e7-9941-e3fe37ae6d75',
+        appPassword:'8pgJToqGYgZuPT8mm0Mmk26'
+    });
 } else {
     // Create bot and setup server
     var connector = new builder.ChatConnector({
