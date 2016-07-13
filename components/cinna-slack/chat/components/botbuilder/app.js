@@ -17,15 +17,33 @@ var parse_results = require('./parse_res');
 var focus = require('./focus');
 var kipcart = require('../cart');
 var process_image = require('../process');
+var fs = require('fs');
+
+//=========================================================
+// Server Setup
+//=========================================================
+var server = require('http').createServer(app);
+var keyfile = process.env.NODE_ENV === 'production' ? __dirname + '/skype-prod.pfx' : __dirname + '/skype-dev.pfx';
+var httpsServer = require('https').createServer({
+  pfx: fs.readFileSync(keyfile)
+}, app);
+
+server.listen(3978, function(e) {
+    if (e) {
+        console.error(e)
+    }
+    console.log('botbuilder app listening on port 3978 🌏 💬')
+})
+httpsServer.listen(4343, function(e) {
+  if (kip.err(e)) return;
+  console.log('botbuilder app listening on https port 4343')
+})
+
 
 
 //=========================================================
 // Bot Setup
 //=========================================================
-
-app.listen(3978,function(){
-    console.log('listening on 3978')
-});
 
 //MS app credentials
 if(process.env.NODE_ENV == 'development_mitsu'){
@@ -465,6 +483,11 @@ bot.dialog('/results', [
         session.replaceDialog('/');
     }
 ]);
+
+app.get('/healthcheck', function(req, res) {
+  res.send('feelin good');
+})
+
 
 //
 // grabs emoji names from the xml sent by skype api
