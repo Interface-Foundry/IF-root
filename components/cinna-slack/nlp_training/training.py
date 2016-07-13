@@ -8,6 +8,7 @@ from keras.layers import Input, Dense, Embedding, Dropout, LSTM, GRU, merge, Con
 from keras.optimizers import RMSprop, Adam
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
+from heraspy.model import HeraModel
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes, \
     classes_to_weights
@@ -82,7 +83,10 @@ def get_callbacks():
         monitor='val_loss',
         patience=10)
 
-    return tb, mc, es
+    hm = HeraModel({'id': 'action-rnn'},
+                   {'domain': 'localhost', 'port': 4000})
+
+    return tb, mc, es, hm
 
 if __name__ == '__main__':
 
@@ -112,7 +116,7 @@ if __name__ == '__main__':
     save_model(model)
     print(model.summary())
 
-    tb, mc, es = get_callbacks()
+    tb, mc, es, hm = get_callbacks()
 
     save_tokenizer(tk)
     model.fit(data, action_codes,
@@ -120,5 +124,5 @@ if __name__ == '__main__':
               nb_epoch=1000,
               batch_size=16,
               verbose=1,
-              callbacks=[tb, mc, es],
+              callbacks=[tb, mc, es, hm],
               class_weight=weight_dict)
