@@ -7,6 +7,6 @@
 # - tokenizer
 # - model weights/json
 
-cp -r ../nlp_training/models src_rnn/
-cp ../nlp_training/pkls/tokenizer.pkl src_rnn/pkls/tokenizer.pkl
-cp ../nlp_training/config/config.json src_rnn/config.json
+# cp -r ../nlp_training/models src_rnn/
+# cp ../nlp_training/pkls/tokenizer.pkl src_rnn/pkls/tokenizer.pkl
+# cp ../nlp_training/config/config.json src_rnn/config.json
