@@ -15,13 +15,21 @@ from gcloud import storage
 from keras.models import model_from_json
 
 
-def gcloud_upload(filename='latest_model', folder='models'):
+def gcloud_upload(tk='tokenizer.pkl', fn='latest_model', folder='models'):
+    '''upload various stuff to gcloud for downloading when model is built.
+    uploads:
+        - structure:    model.json
+        - architecture: model.hdf5
+        - tokenizer:    tokenizer.pkl
+    '''
     client = storage.Client()
     bucket = client.get_bucket('saved-models-bucket')
-    json_blob = bucket.blob(filename + '.json')
-    json_blob.upload_from_filename(path.join(folder, filename + '.json'))
-    model_blob = bucket.blob(filename + '.hdf5')
-    model_blob.upload_from_filename(path.join(folder, filename + '.hdf5'))
+    json_blob = bucket.blob(fn + '.json')
+    model_blob = bucket.blob(fn + '.hdf5')
+    token_blob = bucket.blob(tk)
+    json_blob.upload_from_filename(path.join(folder, fn + '.json'))
+    model_blob.upload_from_filename(path.join(folder, fn + '.hdf5'))
+    token_blob.upload_from_filename(path.join('pkls', tk))
 
 
 def save_model(model, gcloud=False, filename='latest_model', folder='models'):
