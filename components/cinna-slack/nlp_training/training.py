@@ -124,5 +124,5 @@ if __name__ == '__main__':
               nb_epoch=1000,
               batch_size=16,
               verbose=1,
-              callbacks=[tb, mc, es, hm],
+              callbacks=[tb, mc, es, hm.callback],
               class_weight=weight_dict)
