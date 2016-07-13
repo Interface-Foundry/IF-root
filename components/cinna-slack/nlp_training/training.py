@@ -84,7 +84,7 @@ def get_callbacks():
         patience=10)
 
     hm = HeraModel({'id': 'action-rnn'},
-                   {'domain': 'localhost', 'port': 4000})
+                   {'domain': 'localhost', 'port': 80})
 
     return tb, mc, es, hm
 
