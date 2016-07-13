@@ -108,6 +108,7 @@ bot.dialog('/', function (session) {
                 var message = new db.Message({
                     incoming: true,
                     thread_id: user.id,
+                    cart_reference_id: user.id,
                     original_text: res,
                     user_id: user.id,
                     origin: 'skype',
@@ -155,6 +156,7 @@ bot.dialog('/', function (session) {
     var message = new db.Message({
         incoming: true,
         thread_id: user.id,
+        cart_reference_id: user.id,
         original_text: text,
         user_id: user.id,
         origin: 'skype',
