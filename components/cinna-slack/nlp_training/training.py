@@ -62,7 +62,7 @@ def model():
         model = Model(input=sequence, output=output)
 
     with tf.name_scope('optimizer'):
-        optimizer_ = RMSprop(lr=0.00001, rho=0.9, epsilon=1e-08)
+        optimizer_ = RMSprop(lr=0.00007, rho=0.9, epsilon=1e-08)
 
     with tf.name_scope('model_compiled'):
         model.compile(optimizer=optimizer_,
