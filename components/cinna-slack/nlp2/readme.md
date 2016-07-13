@@ -1,4 +1,17 @@
+# Running New NLP System
+
+requires docker-compose and docker
+
+```
+> cd /components/cinna-slack/nlp2
+> docker-compose build
+> docker-compose up
+```
+
+
 # Notes
+
+
 
 ## notes on using prod mongo_db
 
