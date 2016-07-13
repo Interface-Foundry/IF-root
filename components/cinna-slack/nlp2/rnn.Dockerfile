@@ -20,14 +20,19 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-numpy \
     libhdf5-dev \
-    python3-h5py
+    python3-h5py \
+    wget
 
 RUN pip3 install keras pandas flask $TF_DOWNLOAD
 
 ADD src_rnn /app
 
-RUN mkdir /root/.keras/ && echo '{"floatx": "float32", "epsilon": 1e-07, "backend": "tensorflow"}' > /root/.keras/keras.json
+RUN mkdir /root/.keras/ && \
+    echo '{"floatx": "float32", "epsilon": 1e-07, "backend": "tensorflow"}' > /root/.keras/keras.json
+
+RUN wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.hdf5 && \
+    wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.json
 
 WORKDIR /app/
 
-ENTRYPOINT python3 server.py
+# ENTRYPOINT python3 server.py

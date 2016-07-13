@@ -4,16 +4,17 @@ import json
 
 import tensorflow as tf
 from keras.models import Model
-from keras.layers import Input, Dense, Embedding, Dropout, LSTM, GRU, merge, Convolution1D, MaxPooling1D
-from keras.optimizers import RMSprop, Adam
+from keras.layers import Input, Dense, Embedding, Dropout, GRU, merge
+from keras.optimizers import RMSprop
 from keras.preprocessing.sequence import pad_sequences
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
-from heraspy.model import HeraModel
+
+# from heraspy.model import HeraModel
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes, \
     classes_to_weights
-from utils import save_model, save_tokenizer, load_glove_vocab, \
-    load_glove_vectors
+from utils import save_model, save_tokenizer, gcloud_upload
+# from utils import load_glove_vocab, load_glove_vectors
 
 with open('config/config.json', 'r') as f:
     config = json.load(f)
@@ -83,10 +84,10 @@ def get_callbacks():
         monitor='val_loss',
         patience=10)
 
-    hm = HeraModel({'id': 'action-rnn'},
-                   {'domain': 'localhost', 'port': 80})
+    # hm = HeraModel({'id': 'action-rnn'},
+    #                {'domain': 'localhost', 'port': 80})
 
-    return tb, mc, es, hm
+    return tb, mc, es
 
 if __name__ == '__main__':
 
@@ -116,13 +117,15 @@ if __name__ == '__main__':
     save_model(model)
     print(model.summary())
 
-    tb, mc, es, hm = get_callbacks()
+    tb, mc, es = get_callbacks()
 
     save_tokenizer(tk)
     model.fit(data, action_codes,
               validation_split=.2,
-              nb_epoch=1000,
+              nb_epoch=1,
               batch_size=16,
               verbose=1,
-              callbacks=[tb, mc, es, hm.callback],
+              callbacks=[tb, mc, es],
               class_weight=weight_dict)
+
+    gcloud_upload

@@ -10,11 +10,21 @@ from os import path
 
 import numpy as np
 import pandas as pd
+from gcloud import storage
 
 from keras.models import model_from_json
 
 
-def save_model(model, filename='latest_model', folder='models'):
+def gcloud_upload(filename='latest_model', folder='models'):
+    client = storage.Client()
+    bucket = client.get_bucket('saved-models-bucket')
+    json_blob = bucket.blob(filename + '.json')
+    json_blob.upload_from_filename(path.join(folder, filename + '.json'))
+    model_blob = bucket.blob(filename + '.hdf5')
+    model_blob.upload_from_filename(path.join(folder, filename + '.hdf5'))
+
+
+def save_model(model, gcloud=False, filename='latest_model', folder='models'):
     json_string = model.to_json()
     open(path.join(folder, filename + '.json'), 'w').write(json_string)
     model.save_weights(path.join(folder, filename + '.hdf5'), overwrite=True)
