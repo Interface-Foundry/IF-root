@@ -220,6 +220,8 @@ class McParser:
         ss = {}
         ss['focus'] = self.focus
         ss['had_question'] = self.d['had_question']
+        ss['had_about'] = self.d['had_about']
+        ss['had_more'] = self.d['had_more']
         ss['noun_phrases'] = self.noun_phrases
         ss['parts_of_speech'] = self.parts_of_speech
         ss['sentiment_polarity'] = 0.0

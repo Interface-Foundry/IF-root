@@ -32,9 +32,9 @@ RUN mkdir /root/.keras/ && \
 
 RUN wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.hdf5 && \
     wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/latest_model.json && \
-    wget -P /app/pkls/ https://storage.googleapis.com/saved-models-bucket/tokenizer.pkl
+    wget -P /app/pkls/ https://storage.googleapis.com/saved-models-bucket/tokenizer.pkl && \
     wget -P /app/ https://storage.googleapis.com/saved-models-bucket/config.json
 
 WORKDIR /app/
 
-# ENTRYPOINT python3 server.py
+ENTRYPOINT python3 server.py
