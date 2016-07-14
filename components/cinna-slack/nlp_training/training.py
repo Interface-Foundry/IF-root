@@ -18,7 +18,7 @@ from utils import save_model, save_tokenizer, save_config, gcloud_upload
 # from utils import load_glove_vocab, load_glove_vectors
 
 with open('models/config.json', 'r') as f:
-    config = json.load(f)
+    config_ = json.load(f)
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -93,10 +93,10 @@ if __name__ == '__main__':
 
     logging.info('dataframe shape : ' + str(df.shape))
 
-    config['ac_dict'] = ac_dict
-    config['rev_ac_dict'] = rev_ac_dict
-    config['weight_dict'] = str(weight_dict)
-    pad_length = config['pad_length']
+    config_['ac_dict'] = ac_dict
+    config_['rev_ac_dict'] = rev_ac_dict
+    config_['weight_dict'] = str(weight_dict)
+    pad_length = config_['pad_length']
 
     tk = to_tk(df)
     data = tk.texts_to_sequences(df.msg.values)
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     save_model(model)
     save_tokenizer(tk)
-    save_config(config)
+    save_config(config_)
 
     print(model.summary())
 
