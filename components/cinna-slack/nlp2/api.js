@@ -136,6 +136,7 @@ function getModifier(text) {
 function nlpUsingRNN(nlp, message) {
   debug('using new deep learning'.cyan, nlp)
 
+  nlp.
   message.execute.push({
   mode: nlp.MODE,
   action: nlp.ACTION,
@@ -144,6 +145,7 @@ function nlpUsingRNN(nlp, message) {
   }
 })
 }
+
 /*
 input be like:
 { adjectives: [ 'cheapest' ],
@@ -156,25 +158,23 @@ input be like:
   verbs: [] }}
 */
 function nlpToResult(nlp, rnn, message) {
-  debug(nlp)
+  debug('using syntaxnet parser'.cyan, nlp)
 
   nlp.focus = nlp.focus || [];
+  nlp.adjectives = nlp.adjectives || [];
+  // nlp.mode =
 
   // take care of invalid adjectives that are actually focuses (first)
-  nlp.adjectives = nlp.adjectives || [];
-  var invalidAdjectives = ['first', 'second', 'third'];
-  nlp.adjectives = nlp.adjectives.filter(function(a) {
-    return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
-  })
 
+  /*
   // take care of invalid nouns - removed for now
   nlp.nouns = (nlp.nouns || []).filter(function(n) {
     return stopwords.indexOf(n.toLowerCase()) < 0;
-  })
+  })*/
 
   // handle all initial search requests first
   if (nlp.focus.length === 0) {
-
+    // not sure what this is from. look at google-cloud/kip branch
   }
 
   // check for "about"
@@ -192,8 +192,6 @@ function nlpToResult(nlp, rnn, message) {
 
   // check for "more"
   if (nlp.had_more == true) {
-
-    if (nlp.ss.had_more == 'True') {
       debug('more triggered')
       message.execute.push({
         mode: MODE.shopping,
@@ -201,14 +199,14 @@ function nlpToResult(nlp, rnn, message) {
         params: { focus: nlp.focus[0]}
       })
       return;
-      }
-  }
+    }
 
-  if (nlp.verbs.length === 1 && verbs.getAction(nlp.verbs[0])) {
+  //
+  if (nlp.verbs.length === 1 && nlp.mode) {
     debug('verbs.getAction triggered')
     var exec = {
-      mode: verbs.getMode(nlp.verbs[0]),
-      action: verbs.getAction(nlp.verbs[0])
+      mode: nlp.mode,
+      action: nlp.action
     }
 
     if (nlp.focus.length >= 1) {
@@ -218,18 +216,13 @@ function nlpToResult(nlp, rnn, message) {
     return;
   }
 
-  if (nlp.ss.length === 1 && nlp.focus.length === 0) {
-    var s = nlp.ss[0];
-    if (!s.had_question) {
+  if (nlp.focus.length === 0) {
+    if (nlp.simple_case == true) {
       debug('simple case initial triggered');
       message.execute.push({
         mode: MODE.shopping,
         action: ACTION.initial,
-        params: {
-          query: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
-            return stopwords.indexOf(n) < 0;
-          })).join(' ')
-        }
+        params: { query: nlp.simple_query}
       })
     }
   }

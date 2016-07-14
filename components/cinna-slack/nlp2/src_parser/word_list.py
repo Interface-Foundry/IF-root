@@ -650,36 +650,39 @@ stopwords = [
 ]
 
 price_terms = {
-        'less': [
-                'cheapest',
-                'cheaper',
-                'cheap',
-                'least expensive',
-                'less expensive',
-                'less',
-                'too expensive',
-                'too pricey',
-                'less money',
-                'too much money'
-        ],
-        'more': [
-                'more expensive',
-                'fancier',
-                'too cheap'
-        ]
+    'less': [
+        'cheapest',
+        'cheaper',
+        'cheap',
+        'least expensive',
+        'less expensive',
+        'less',
+        'too expensive',
+        'too pricey',
+        'less money',
+        'too much money'
+    ],
+    'more': [
+        'more expensive',
+        'fancier',
+        'too cheap'
+    ]
 }
 
 action_terms = {
-        'checkout': ['get', 'checkout'],
-        'remove': ['remove', 'delete', 'cancel'],
-        'list_cart': ['view', 'show', 'list'],
-        'save': ['save', 'buy', 'add'],
-        'focus': ['focus', 'info'],
-        'search': ['need', 'want']
+    'checkout': ['get', 'checkout'],
+    'remove': ['remove', 'delete', 'cancel'],
+    'list_cart': ['view', 'show', 'list'],
+    'save': ['save', 'buy', 'add'],
+    'focus': ['focus', 'info'],
+    'search': ['need', 'want']
 }
 
 invalid_adjectives = [
-        'first',
-        'second',
-        'third'
+    'first',
+    'second',
+    'third'
 ]
+
+purchase_terms = action_terms['checkout'] + \
+    action_terms['remove'] + action_terms['list_cart']

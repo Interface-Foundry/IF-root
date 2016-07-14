@@ -2,7 +2,7 @@ import logging
 import subprocess
 from easydict import EasyDict
 
-from word_list import action_terms, price_terms, stopwords, invalid_adjectives
+from word_list import action_terms, price_terms, stopwords, invalid_adjectives, purchase_terms
 
 DEBUG_ = False
 logger = logging.getLogger()
@@ -70,7 +70,8 @@ class McParser:
         self._array_form()
         self._parse_terms()
         self._remove_words()
-        self._get_action()
+        self._get_action_mode()
+        self._get_mode()
         self._checks()
         self._price_modifier()
 
@@ -131,11 +132,12 @@ class McParser:
             nouns without stopwords
             adjectives without invalid adjectives
         '''
-        self.adjectives = list(
-            set(self.adjectives).difference(invalid_adjectives))
+        adj_set = set(self.adjectives)
+        nouns_set = set(self.nouns)
 
-        self.nouns_without_stopwords = list(
-            set(self.nouns).difference(stopwords))
+        self.adjectives = list(adj_set.difference(invalid_adjectives))
+        self.invalid_adj = list(adj_set.intersection(invalid_adjectives))
+        self.nouns_without_stopwords = list(nouns_set.difference(stopwords))
 
     def _checks(self):
         '''check for all the words previously searched for in api.js
@@ -157,28 +159,37 @@ class McParser:
         if '?' in self.text:
             self.d['had_question'] = True
 
-    def _get_action(self):
-        if any(map(
-                lambda each: each in action_terms['checkout'], self.tokens)):
+    def _get_action_mode(self):
+        if any(map(lambda each: each in action_terms['checkout'], self.tokens)):
             self.d['action'] = 'checkout'
-        if any(map(
-                lambda each: each in action_terms['remove'], self.tokens)):
+        if any(map(lambda each: each in action_terms['remove'], self.tokens)):
             self.d['action'] = 'remove'
-        if any(map(
-                lambda each: each in action_terms['list_cart'], self.tokens)):
+        if any(map(lambda each: each in action_terms['list_cart'], self.tokens)):
             self.d['action'] = 'list'
-        if any(map(
-                lambda each: each in action_terms['save'], self.tokens)):
+        if any(map(lambda each: each in action_terms['save'], self.tokens)):
             self.d['action'] = 'save'
-        if any(map(
-                lambda each: each in action_terms['focus'], self.tokens)):
+        if any(map(lambda each: each in action_terms['focus'], self.tokens)):
             self.d['action'] = 'focus'
-        if any(map(
-                lambda each: each in action_terms['search'], self.tokens)):
+        if any(map(lambda each: each in action_terms['search'], self.tokens)):
             self.d['action'] = 'checkout'
 
+        if self.d['action']:
+            self.get_action = self.d['action']
+
+        # not sure if to use self.tokens or self.verbs, using tokens for now
+        if set(self.tokens).intersection(purchase_terms):
+            self.mode = 'cart'
+        if set(self.tokens).intersection(action_terms['focus']):
+            self.mode = 'focus'
+
     def _simple_case(self):
-        pass
+        if not self.had_question and not self.focus:
+            # or possibly self.nouns_without_stopwords.join(' ') but that
+            # doesnt include adjectives
+            self.simple_query = self.text
+            self.simple_case = True
+        else:
+            self.simple_case = False
 
     def _price_modifier(self):
         '''check if price is to be modified'''
@@ -205,6 +216,7 @@ class McParser:
         response = EasyDict()
         response.nouns = list(self.noun_phrases +
                               [' '.join(self.adjectives + self.nouns)])
+        response.nouns_without_stopwords = self.nouns_without_stopwords
         response.adjectives = self.adjectives
         response.entities = self.entities
         response.focus = self.focus
@@ -213,15 +225,22 @@ class McParser:
         response.verbs = self.verbs
         response.modifier_words = list(set(self.nouns).union(self.adjectives))
 
+        response.mode = self.mode
+
+        response.had_about = self.d['had_about']
+        response.had_more = self.d['had_more']
+        response.had_question = self.d['had_question']
+
         if 'price_modifier' in self.d.keys():
             response.price_modifier = self.d['price_modifier']
+
+        if self.simple_case:
+            response.simple_case = self.simple_case
+            response.simple_query = self.simple_query
 
         # add ss
         ss = {}
         ss['focus'] = self.focus
-        ss['had_question'] = self.d['had_question']
-        ss['had_about'] = self.d['had_about']
-        ss['had_more'] = self.d['had_more']
         ss['noun_phrases'] = self.noun_phrases
         ss['parts_of_speech'] = self.parts_of_speech
         ss['sentiment_polarity'] = 0.0
