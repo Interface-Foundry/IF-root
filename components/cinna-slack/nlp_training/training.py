@@ -14,10 +14,10 @@ from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 
 from data import retrieve_from_prod_db, to_tk, actions_to_codes, \
     classes_to_weights
-from utils import save_model, save_tokenizer, gcloud_upload
+from utils import save_model, save_tokenizer, save_config, gcloud_upload
 # from utils import load_glove_vocab, load_glove_vectors
 
-with open('config/config.json', 'r') as f:
+with open('models/config.json', 'r') as f:
     config = json.load(f)
 
 logging.basicConfig(level=logging.DEBUG,
@@ -32,15 +32,6 @@ def model():
                           output_dim=256,
                           input_length=data.shape[1],
                           mask_zero=True)(sequence)
-
-    # with tf.name_scope('simple_conv'):
-    #     conv = Dropout(0.25)(embed)
-    #     conv = Convolution1D(nb_filter=64,
-    #                          filter_length=3,
-    #                          border_mode='valid',
-    #                          activation='relu',
-    #                          subsample_length=1)(conv)
-    #     embed = MaxPooling1D(pool_length=2)(conv)
 
     with tf.name_scope('forwards'):
         fw = GRU(128, consume_less='gpu', return_sequences=True)(embed)
@@ -95,35 +86,32 @@ def get_callbacks():
 
 if __name__ == '__main__':
 
-    pad_length = config['pad_length']
-    # ac_dict = config['ac_dict']
-    # rev_ac_dict = config['rev_ac_dict']
-
     df = retrieve_from_prod_db()
-
-    # glove vectors if using embedding pretraining
-    # glove_vocab_array, glove_vocab_dict = load_glove_vocab(
-    #     config['glove_filename'])
-    # glove_vectors, glove_dict = load_glove_vectors(
-    #     config['glove_filename'], set(glove_vocab_array))
 
     action_codes, ac_dict, rev_ac_dict = actions_to_codes(df)
     weight_dict = classes_to_weights(df, ac_dict)
+
     logging.info('dataframe shape : ' + str(df.shape))
+
     config['ac_dict'] = ac_dict
     config['rev_ac_dict'] = rev_ac_dict
+    config['weight_dict'] = weight_dict
+    pad_length = config['pad_length']
 
     tk = to_tk(df)
     data = tk.texts_to_sequences(df.msg.values)
     data = pad_sequences(data, maxlen=pad_length)
 
     model = model()
+
     save_model(model)
+    save_tokenizer(tk)
+    save_config(config)
+
     print(model.summary())
 
     tb, mc, es = get_callbacks()
 
-    save_tokenizer(tk)
     model.fit(data, action_codes,
               validation_split=.2,
               nb_epoch=1000,

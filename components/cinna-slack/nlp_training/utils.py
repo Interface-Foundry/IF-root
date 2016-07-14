@@ -15,7 +15,10 @@ from gcloud import storage
 from keras.models import model_from_json
 
 
-def gcloud_upload(tk='tokenizer.pkl', fn='latest_model', folder='models'):
+def gcloud_upload(tk='tokenizer',
+                  conf='config',
+                  model='latest_model',
+                  folder='models'):
     '''upload various stuff to gcloud for downloading when model is built.
     uploads:
         - structure:    model.json
@@ -24,12 +27,15 @@ def gcloud_upload(tk='tokenizer.pkl', fn='latest_model', folder='models'):
     '''
     client = storage.Client()
     bucket = client.get_bucket('saved-models-bucket')
-    json_blob = bucket.blob(fn + '.json')
-    model_blob = bucket.blob(fn + '.hdf5')
-    token_blob = bucket.blob(tk)
-    json_blob.upload_from_filename(path.join(folder, fn + '.json'))
-    model_blob.upload_from_filename(path.join(folder, fn + '.hdf5'))
-    token_blob.upload_from_filename(path.join('pkls', tk))
+    json_blob = bucket.blob(model + '.json')
+    conf_blob = bucket.blob(conf + '.json')
+    model_blob = bucket.blob(model + '.hdf5')
+    token_blob = bucket.blob(tk + '.pkl')
+
+    json_blob.upload_from_filename(path.join(folder, model + '.json'))
+    conf_blob.upload_from_filename(path.join(folder, conf + '.json'))
+    model_blob.upload_from_filename(path.join(folder, model + '.hdf5'))
+    token_blob.upload_from_filename(path.join(folder, tk + '.pkl'))
 
 
 def save_model(model, gcloud=False, filename='latest_model', folder='models'):
@@ -43,35 +49,21 @@ def load_model(filename='latest_model', folder='models'):
     model.load_weights(path.join(folder, filename + '.hdf5'))
 
 
-def save_tokenizer(tokenizer, pkl_name='tokenizer.pkl', foldername='pkls'):
+def save_tokenizer(tokenizer, pkl_name='tokenizer.pkl', foldername='models'):
     with open(path.join(foldername, pkl_name), 'wb') as f:
         pickle.dump(tokenizer, f)
 
 
-def load_tokenizer(pkl_name='tokenizer.pkl', foldername='pkls'):
+def load_tokenizer(pkl_name='tokenizer.pkl', foldername='models'):
     with open(path.join(foldername, pkl_name), 'rb') as f:
         tokenizer = pickle.load(f)
     return tokenizer
 
 
-def save_dict(dictionary, filename, folder='dict_lookups'):
+def save_config(config_dict, filename='config', folder='models'):
     with open(path.join(folder, filename + '.json'), 'w') as f:
-        json.dump(dictionary, f)
+        json.dump(config_dict, f)
 
-
-def write_config(config, filename, folder='dict_lookups'):
-    with(path.join(folder, filename + '.json'), 'w') as f:
-        json.dump(config, f)
-
-
-def retrieve_from_test_db():
-    '''use to get stuff from test_db, not useful for training keras'''
-    from pymongo import MongoClient
-    client = MongoClient()
-    db = client.foundry
-    cursor = db.messages.find({})
-    df = pd.DataFrame(list(cursor))
-    return df
 
 # ---------------------------------
 # Glove Functions
@@ -119,6 +111,16 @@ def evaluate_recall(y, y_test, k=1):
 
 # --------------------------------
 # OLD BELOW ----------------------
+
+
+def retrieve_from_test_db():
+    '''use to get stuff from test_db, not useful for training keras'''
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.foundry
+    cursor = db.messages.find({})
+    df = pd.DataFrame(list(cursor))
+    return df
 
 
 def text_look(df, skip_words=['hi', 'hey', 'Hi']):
