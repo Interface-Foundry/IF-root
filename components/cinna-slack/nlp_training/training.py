@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     config['ac_dict'] = ac_dict
     config['rev_ac_dict'] = rev_ac_dict
-    config['weight_dict'] = weight_dict
+    config['weight_dict'] = str(weight_dict)
     pad_length = config['pad_length']
 
     tk = to_tk(df)
