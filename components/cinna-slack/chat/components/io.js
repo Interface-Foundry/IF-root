@@ -3015,6 +3015,8 @@ var sendResponse = function(data,flag){
                         attachments[0].actions = actionObj;
                         if(data.slackData){
                             attachments[0].callback_id = data.slackData.callback_id;
+                        } else {
+                            attachments[0].callback_id = data.recallHistory._id.toString();
                         }
                     }
 
