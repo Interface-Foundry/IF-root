@@ -10,7 +10,9 @@ var item = mongoose.Schema({
 
   link: String,
 
-  image: String,
+  image: String, // primary image
+
+  images: Array,
 
   description: String,
 
@@ -27,6 +29,12 @@ var item = mongoose.Schema({
   slack_id: String,
 
   source_json: String,  // make sure to do JSON.stringify()
+
+  search_provider: String,  // make sure to do JSON.stringify()
+
+  category: String,  // make sure to do JSON.stringify()
+
+  upc: String,
 
   purchased: {
     type: Boolean,
