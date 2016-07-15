@@ -115,7 +115,8 @@ input be like:
 // NLP TO RESULT
 // // --------------------------------------------------------
 function nlpToResult(nlp, message) {
-  debug('using syntaxnet parser'.cyan, nlp)
+  debug('using syntaxnet parser')
+  debug('using syntaxnet parser', nlp)
 
   nlp.focus = nlp.focus || [];
   nlp.adjectives = nlp.adjectives || [];
@@ -132,24 +133,24 @@ function nlpToResult(nlp, message) {
 
 
   if (nlp.had_about) {
-      debug('about triggered')
-      message.execute.push({
-        mode: nlp.mode,
-        action: nlp.action,
-        params: {focus: nlp.focus[0]}
-      })
-      return;
+    debug('about triggered')
+    message.execute.push({
+      mode: nlp.mode,
+      action: nlp.action,
+      params: {focus: nlp.focus[0]}
+    })
+    return;
   }
 
   if (nlp.had_more) {
-      debug('more triggered')
-      message.execute.push({
-        mode: nlp.mode,
-        action: nlp.action,
-        params: { focus: nlp.focus[0]}
-      })
-      return;
-    }
+    debug('more triggered')
+    message.execute.push({
+      mode: nlp.mode,
+      action: nlp.action,
+      params: { focus: nlp.focus[0]}
+    })
+    return;
+  }
 
   //
   if (nlp.verbs.length === 1 && nlp.mode) {
@@ -165,14 +166,11 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-
-
-  // var priceModifier = price(nlp.text);
   if (nlp.price_modifier) {
     debug('priceModifier triggered')
     var exec = {
       mode: nlp.mode, // MODE.shopping,
-      action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
+      action: nlp.action,
       params: nlp.price_modifier,
     };
     if (nlp.focus.length >= 1) {
@@ -180,9 +178,6 @@ function nlpToResult(nlp, message) {
     }
     message.execute.push(exec);
   }
-
-  // get all the nouns and adjectives
-  // var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
   if (nlp.sf_sm && message.execute.length == 0) {
@@ -278,13 +273,6 @@ function quickparse(text) {
           mode: handler.mode,
           action: handler.action
         };
-
-        // if (handler.action === 'initial') {
-        //   result.params = {
-        //     query: text.replace(re, '').trim()
-        //   }
-        // }
-
         return;
       }
     }

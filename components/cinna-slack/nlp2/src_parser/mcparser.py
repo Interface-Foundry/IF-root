@@ -249,6 +249,7 @@ class McParser:
         response.mode = self.mode
         response.action = self.action
         response.focus = self.focus
+        response.sf_sm = self.sf_sm
 
         response.had_about = self.had_about
         response.had_more = self.had_more
