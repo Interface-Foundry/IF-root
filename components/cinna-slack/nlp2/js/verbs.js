@@ -12,7 +12,8 @@ var search = focus;
 
 module.exports.getAction = function(v) {
   debug('getting action for ' + v)
-  v = v.toLowerCase();
+  // v = v.toLowerCase();
+  v = v.toString().toLowerCase();
   if (search.indexOf(v) >= 0) {
     return 'initial'
   }
@@ -34,7 +35,8 @@ module.exports.getAction = function(v) {
 }
 
 module.exports.getMode = function(v) {
-  v = v.toLowerCase();
+  v = v.toString().toLowerCase();
+  // v = v.toLowerCase();
   if (purchase.indexOf(v) >= 0) {
     return 'cart'
   } else if (search.indexOf(v) >= 0) {

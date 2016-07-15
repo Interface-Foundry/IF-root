@@ -123,11 +123,11 @@ class McParser:
 
             # focus thing
             if cur_word.lower() in ['one', '1', 'first']:
-                self.focus.append(1)
+                self.focus.append('1')
             if cur_word.lower() in ['two', '2', 'second']:
-                self.focus.append(2)
+                self.focus.append('2')
             if cur_word.lower() in ['three', '3', 'third']:
-                self.focus.append(3)
+                self.focus.append('3')
 
         self.modifier_words = list(set(self.nouns).union(self.adjectives))
 
@@ -184,9 +184,16 @@ class McParser:
         else:
             self.action = 'initial'
 
+        # for triggering verbs thing
+        if self.action in action_terms.keys():
+            self.action_verb = True
+        else:
+            self.action_verb = False
+
+        # trigger single focus single modify
         if (len(self.focus) == 1) and (len(self.modifier_words) == 1):
             self.action = 'modify.one'
-            self.sf_sm = True
+            self.single_focus_single_modify = True
 
             if any(w in self.tokens for w in price_terms['more']):
                 self.price_modifier = 'more'

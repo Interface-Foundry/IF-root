@@ -121,17 +121,19 @@ function nlpToResult(nlp, message) {
   nlp.focus = nlp.focus || [];
   nlp.adjectives = nlp.adjectives || [];
 
+
   if (nlp.focus.length === 0 && nlp.simple_case == true) {
     debug('simple case initial triggered');
     message.execute.push({
       mode: nlp.mode,
       action: nlp.action,
-      params: { query: nlp.simple_query}
+      params: { query: nlp.simple_query }
     })
     return;
   }
 
 
+  // combine the following 3 later
   if (nlp.had_about) {
     debug('about triggered')
     message.execute.push({
@@ -152,17 +154,13 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-  //
-  if (nlp.verbs.length === 1 && nlp.mode) {
-    debug('verbs.getAction triggered')
-    var exec = {
+  if (nlp.action_verb) {
+    debug('verbs triggered')
+    message.execute.push({
       mode: nlp.mode,
-      action: nlp.action
-    }
-    if (nlp.focus.length >= 1) {
-      exec.params = {focus:  nlp.focus[0]};
-    }
-    message.execute.push(exec)
+      action: nlp.action,
+      params: {focus:  nlp.focus[0]}
+    })
     return;
   }
 
@@ -171,26 +169,33 @@ function nlpToResult(nlp, message) {
     var exec = {
       mode: nlp.mode, // MODE.shopping,
       action: nlp.action,
-      params: nlp.price_modifier,
-    };
-    if (nlp.focus.length >= 1) {
-      exec.params.focus = nlp.focus[0];
+      params: {
+        price: nlp.price_modifier,
+        focus: nlp.focus[0]
+      }
     }
     message.execute.push(exec);
+    return;
   }
 
   // if there is a focus and a modifier, it's a modified search
-  if (nlp.sf_sm && message.execute.length == 0) {
+  if (nlp.focus.length === 1 && nlp.modifier_words.length === 1 && message.execute.length == 0) {
     debug('single focus, single modifier triggered')
     var exec = {
       mode: nlp.mode,
       action: nlp.action,
-      params: getModifier(nlp.modifier_words)
+      params: getModifier(nlp.modifier_words[0])
     }
-    exec.params.focus = nlp.focus;
-    message.execute.push(exec);
+    exec.params.focus = nlp.focus
+    message.execute.push(exec)
     return;
   }
+
+  message.execute.map(e => {
+    if (e.action === nlp.action) {
+      e.action = typeof _.get(e, 'params.focus') === 'undefined' ? ACTION.modifyall : ACTION.modifyone;
+    }
+  });
 
   if (nlp.had_question) {
     debug('its a question')

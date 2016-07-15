@@ -6,7 +6,8 @@ module.exports = function(material) {
 }
 
 module.exports.isMaterial = function(text) {
-  return material_names.indexOf(text.toLowerCase()) >= 0;
+  // return material_names.indexOf(text.toLowerCase()) >= 0;
+  return material_names.indexOf(text.toString().toLowerCase()) >= 0;
 }
 
 var materials = material_names.reduce(function(m, name) {

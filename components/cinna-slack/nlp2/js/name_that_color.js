@@ -1,33 +1,23 @@
 /*
-
 +-----------------------------------------------------------------+
 |     Created by Chirag Mehta - http://chir.ag/projects/ntc       |
 |-----------------------------------------------------------------|
 |               ntc js (Name that Color JavaScript)               |
 +-----------------------------------------------------------------+
-
 All the functions, code, lists etc. have been written specifically
 for the Name that Color JavaScript by Chirag Mehta unless otherwise
 specified.
-
 This script is released under the: Creative Commons License:
 Attribution 2.5 http://creativecommons.org/licenses/by/2.5/
-
 Sample Usage:
-
   <script type="text/javascript" src="ntc.js"></script>
-
   <script type="text/javascript">
-
     var n_match  = ntc.name("#6195ED");
     n_rgb        = n_match[0]; // This is the RGB value of the closest matching color
     n_name       = n_match[1]; // This is the text string for the name of the match
     n_exactmatch = n_match[2]; // True if exact color match, False if close-match
-
     alert(n_match);
-
   </script>
-
 */
 
 var ntc = module.exports = {
@@ -43,6 +33,7 @@ var ntc = module.exports = {
       hsl = ntc.hsl(color);
       ntc.names[i].push(rgb[0], rgb[1], rgb[2], hsl[0], hsl[1], hsl[2]);
       ntc.names2[ntc.names[i][1].toLowerCase()] = ntc.names[i];
+      ntc.names2[ntc.names[i][1].toString().toLowerCase()] = ntc.names[i];
       ntc.docs.push({
         hex: color,
         name: ntc.names[i][1],
@@ -122,7 +113,8 @@ var ntc = module.exports = {
   },
 
   parseName: function(name) {
-    return ntc.names2[name.toLowerCase()];
+    // return ntc.names2[name.toLowerCase()];
+    return ntc.names2[name.toString().toLowerCase()];
   },
 
   names: [["F0F8FF","Alice Blue"],

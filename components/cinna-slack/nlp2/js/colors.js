@@ -11,7 +11,8 @@ var tree = kdtree(ntc.docs.map(function(c) {
 // input: a name of a color, like "blue"
 module.exports = function(color) {
   // get the hsl for this color name
-  color = color.toLowerCase();
+  // color = color.toLowerCase();
+  color = color.toString().toLowerCase();
   if (!ntc.names2[color]) {
     return []
   }

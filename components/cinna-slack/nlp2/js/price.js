@@ -1,7 +1,8 @@
 var _ = require('lodash')
 
 module.exports = function(text) {
-  text = text.toLowerCase()
+  // text = text.toLowerCase()
+  text = text.toString().toLowerCase()
   var dataModify = {
     type: 'price'
   }
@@ -31,7 +32,8 @@ module.exports = function(text) {
 
 module.exports.isPriceModifier = function(text) {
   if (!text) { return false }
-  text = text.toLowerCase();
+  // text = text.toLowerCase();
+  text = text.toString().toLowerCase();
   return all_terms.reduce(function(found, term) {
     return found || term.indexOf(text) >= 0;
   })

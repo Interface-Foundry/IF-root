@@ -3,7 +3,8 @@ module.exports = function(size) {
 }
 
 module.exports.isSize = function(text) {
-  return !!sizes[text.toLowerCase()]
+  // return !!sizes[text.toLowerCase()]
+  return !!sizes[text.toString().toLowerCase()]
 }
 
 var size_names = [
