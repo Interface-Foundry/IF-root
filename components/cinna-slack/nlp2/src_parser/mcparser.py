@@ -46,8 +46,7 @@ class McParser:
         - terms
 
     # Methods
-        - process_text
-        - find_search_terms
+
     '''
 
     def __init__(self, text):
@@ -76,11 +75,10 @@ class McParser:
 
         self._process_text()
         self._parse_terms()
-        self._get_modifier_terms()
-        self._remove_words()
-        self._get_action_mode()
         self._checks()
-        self._price_modifier()
+        self._remove_words()
+        self._get_action_and_mode()
+        self._get_last_check()
         self._simple_case()
 
     def _process_text(self):
@@ -131,10 +129,6 @@ class McParser:
             if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append(3)
 
-            self.action = self._get_action(cur_word)
-            self.mode = self._get_mode(cur_word)
-
-    def _get_modifier_terms(self):
         self.modifier_words = list(set(self.nouns).union(self.adjectives))
 
     def _remove_words(self):
@@ -156,71 +150,61 @@ class McParser:
         old but previously removed 'find'
         text.lower().replace('find', '')
         '''
-
-        if 'about' in self.text:
+        if 'about' in self.tokens:
             self.had_about = True
-
-        if 'find' in self.text:
+        if 'find' in self.tokens:
             self.had_find = True
-
-        if 'more' in self.text:
+        if 'more' in self.tokens:
             self.had_more = True
-
-        if '?' in self.text:
+        if '?' in self.tokens:
             self.had_question = True
 
-    def _get_action(w):
-        if w in action_terms['checkout']:
-            return 'checkout'
-        elif w in action_terms['remove']:
-            return 'remove'
-        elif w in action_terms['list_cart']:
-            return 'list'
-        elif w in action_terms['save']:
-            return 'save'
-        elif w in action_terms['focus']:
-            return 'focus'
-        elif w in action_terms['search']:
-            return 'search'
+    def _get_action_and_mode(self):
+        if any(map(
+                lambda each: each in action_terms['checkout'], self.tokens)):
+            self.action = 'checkout'
+
+        elif any(map(
+                lambda each: each in action_terms['remove'], self.tokens)):
+            self.action = 'remove'
+
+        elif any(map(
+                lambda each: each in action_terms['list_cart'], self.tokens)):
+            self.action = 'list'
+
+        elif any(map(lambda each: each in action_terms['save'], self.tokens)):
+            self.action = 'save'
+
+        elif any(map(lambda each: each in action_terms['focus'], self.tokens)):
+            self.action = 'focus'
+
+        elif any(map(
+                lambda each: each in action_terms['search'], self.tokens)):
+            self.action = 'search'
         else:
-            return 'initial'
+            self.action = 'initial'
 
-    def _get_mode(w):
-        if w in purchase_terms:
-            return 'cart'
-        elif w in action_terms['focus']:
-            return 'focus'
+        if (len(self.focus) == 1) and (len(self.modifier_words) == 1):
+            self.action = 'modify.one'
+            self.sf_sm = True
 
-    def _get_action_mode(self):
-        # if any(map(
-        #         lambda each: each in action_terms['checkout'], self.tokens)):
-        #     self.action = 'checkout'
-        # if any(map(lambda each: each in action_terms['remove'],self.tokens)):
-        #     self.action = 'remove'
-        # if any(map(
-        #         lambda each: each in action_terms['list_cart'],self.tokens)):
-        #     self.action = 'list'
-        # if any(map(lambda each: each in action_terms['save'], self.tokens)):
-        #     self.action = 'save'
-        # if any(map(lambda each: each in action_terms['focus'], self.tokens)):
-        #     self.action = 'focus'
-        # if any(map(lambda each: each in action_terms['search'],self.tokens)):
-        #     self.action = 'checkout'
-        # not sure if to use self.tokens or self.verbs, using tokens for now
-        # if set(self.tokens).intersection(purchase_terms):
-        #     self.mode = 'cart'
-        # if set(self.tokens).intersection(action_terms['focus']):
-        #     self.mode = 'focus'
+            if any(w in self.tokens for w in price_terms['more']):
+                self.price_modifier = 'more'
+                logger.info('modifying price of one with more')
 
-        if hasattr(self, 'modifier_words'):
+            elif any(w in self.tokens for w in price_terms['less']):
+                self.price_modifier = 'less'
+                logger.info('modifying price of one with less')
+
+        elif len(self.modifier_words) > 1:
+            self.action = 'modify.all'
+
+        if any(map(lambda each: each in purchase_terms, self.tokens)):
+            self.mode = 'cart'
+        else:
             self.mode = 'shopping'
-            if (len(self.focus) == 1) and (len(self.modifier_words) == 1):
-                # single focus single modifier
-                self.sf_sm = True
-                self.action = 'modify.one'
-            else:
-                self.action = 'modify.all'
 
+    def _get_last_check(self):
         if self.had_about:
             self.mode = 'shopping'
             self.action = 'focus'
@@ -228,20 +212,6 @@ class McParser:
         if self.had_more:
             self.mode = 'shopping'
             self.action = 'similar'
-
-    def _price_modifier(self):
-        '''check if price is to be modified'''
-        if any(w in self.tokens for w in price_terms['more']):
-            self.price_modifier = 'more'
-            self.action = 'modify.one'
-            self.mode = 'focus'
-            logger.info('modifying price of one with more')
-
-        elif any(w in self.tokens for w in price_terms['less']):
-            self.price_modifier = 'less'
-            self.action = 'modify.one'
-            self.mode = 'focus'
-            logger.info('modifying price of one with less')
 
     def _simple_case(self):
         '''possibly self.nouns_without_stopwords.join(' ') but that
@@ -257,8 +227,6 @@ class McParser:
             self.simple_case = False
             logger.info('not using a simple query')
 
-
-
     def output_form(self):
         '''
         Put into correct json format for api.js
@@ -269,7 +237,8 @@ class McParser:
 
         # probably need to fix response.nouns
         # most likely want (set(noun_phrases) - nouns) - adjectives)
-        response.nouns = list(self.noun_phrases +[' '.join(self.adjectives + self.nouns)])
+        response.nouns = list(self.noun_phrases +
+                              [' '.join(self.adjectives + self.nouns)])
         response.nouns_without_stopwords = self.nouns_without_stopwords
         response.verbs = self.verbs
         response.adjectives = self.adjectives
@@ -303,6 +272,8 @@ class McParser:
 
         return response
 
+    # ---------------------------------------------------
+    # TODO LATER ----------------------------------------
     # def _create_execute(self):
     #     e = {}
     #     if self.had_about:
