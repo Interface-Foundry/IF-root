@@ -46,12 +46,6 @@ var ACTION = {
 var parse = module.exports.parse = function(message) {
   return co(function*() {
     var text = message.text;
-    var history_array = [];
-    for (var i = 0; i < message.history.length; i++){
-      history_array.push(message.history[i].source.text)
-    }
-    debug('hist_array**'.cyan, history_array)
-
     debug('parsing:' + text)
 
     // First do some global hacks
@@ -67,29 +61,18 @@ var parse = module.exports.parse = function(message) {
 
 
     // Get help from TextBlob and spaCy python modules
-    var res_parse = yield request({
+    var res = yield request({
       method: 'POST',
       url: config.nlp + '/parse',
       json: true,
       body: {
-        text: text,
-        history: history_array
+        text: text
       }
     });
 
-    var res_rnn = yield request({
-      method: 'POST',
-      url: config.nlp_rnn + '/predict',
-      json: true,
-      body: {
-        text: text,
-        history: history_array
-      }
-    })
-
 
     // welp we'll mutate the shit out of the message here.
-    nlpToResult(res_parse, message);
+    nlpToResult(res, message);
     return message;
   })
 }
@@ -200,17 +183,6 @@ function getModifier(text) {
 }
 
 
-function nlpUsingRNN(nlp, message) {
-  debug('using new deep learning'.cyan, nlp)
-
-  message.execute.push({
-  mode: nlp.MODE,
-  action: nlp.ACTION,
-  params: {
-    query: ;
-  }
-})
-}
 /*
 input be like:
 { adjectives: [ 'cheapest' ],
@@ -218,7 +190,7 @@ input be like:
   focus: [],
   nouns: [ 'monitor' ],
   parts_of_speech: [ [ 'cheapest', 'ADJ' ], [ '32', 'NUM' ], [ '"', 'PUNCT' ], [ 'monitor', 'NOUN' ] ],
-  ss: [ { focus: [], had_question: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
+  ss: [ { focus: [], isQuestion: false, noun_phrases: [], parts_of_speech: [Object], sentiment_polarity: 0, sentiment_subjectivity: 0 } ],
   text: 'cheapest 32" monitor',
   verbs: [] }}
 */
@@ -234,15 +206,10 @@ function nlpToResult(nlp, message) {
     return invalidAdjectives.indexOf(a.toLowerCase()) < 0;
   })
 
-  // take care of invalid nouns - removed for now
+  // take care of invalid nouns
   nlp.nouns = (nlp.nouns || []).filter(function(n) {
     return stopwords.indexOf(n.toLowerCase()) < 0;
   })
-
-  // handle all initial search requests first
-  if (nlp.focus.length === 0) {
-
-  }
 
   // check for "about"
   if (nlp.focus.length === 1) {
@@ -286,38 +253,23 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-  if (nlp.ss.length === 1 && nlp.focus.length === 0) {
-    var s = nlp.ss[0];
-    if (!s.had_question) {
-      debug('simple case initial triggered');
-      message.execute.push({
-        mode: MODE.shopping,
-        action: ACTION.initial,
-        params: {
-          query: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
-            return stopwords.indexOf(n) < 0;
-          })).join(' ')
-        }
-      })
-    }
-  }
-
-  // var priceModifier = price(nlp.text);
-  if (nlp.price_modifier) {
+  var priceModifier = price(nlp.text);
+  if (priceModifier) {
     debug('priceModifier triggered')
     var exec = {
       mode: MODE.shopping,
       action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
-      params: nlp.price_modifier,
+      params: priceModifier,
     };
     if (nlp.focus.length >= 1) {
       exec.params.focus = nlp.focus[0];
     }
     message.execute.push(exec);
+    return;
   }
 
   // get all the nouns and adjectives
-  // var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
+  var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
   if (nlp.focus.length === 1 && modifierWords.length === 1 && message.execute.length == 0) {
@@ -325,7 +277,7 @@ function nlpToResult(nlp, message) {
     var exec = {
       mode: MODE.shopping,
       action: ACTION.modifyone,
-      params: getModifier(nlp.modifier_words)
+      params: getModifier(modifierWords[0])
     }
     exec.params.focus = nlp.focus;
     message.execute.push(exec);
@@ -340,6 +292,22 @@ function nlpToResult(nlp, message) {
     }
   })
 
+  if (nlp.ss.length === 1 && nlp.focus.length === 0) {
+    var s = nlp.ss[0];
+    if (!s.isQuestion) {
+      debug('simple case initial triggered');
+      message.execute.push({
+        mode: MODE.shopping,
+        action: ACTION.initial,
+        params: {
+          query: _.uniq(nlp.nouns.join(' ').split(' ').filter(function(n) {
+            return stopwords.indexOf(n) < 0;
+          })).join(' ')
+        }
+      })
+    }
+  }
+
   // take care of any extraneous modify parameters
   message.execute.map(e => {
     if (e.action === ACTION.modify) {
@@ -347,7 +315,7 @@ function nlpToResult(nlp, message) {
     }
   });
 
-  if (nlp.had_question) {
+  if (nlp.isQuestion) {
     debug('its a question')
   }
 

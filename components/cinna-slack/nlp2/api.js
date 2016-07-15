@@ -1,16 +1,22 @@
+/*
+Notes:
+
+Removed currently:
+- take care of any extraneous modify parameters
+- break out the entities into stores, locations, etc
+*/
 var request = require('request-promise')
 var co = require('co');
 var _ = require('lodash')
 var debug = require('debug')('nlp')
 
 var config = require('../config')
-var colors = require("./colors")
+var colors = require("js/colors")
 var materials = require('./materials')
-var sizes = require('./sizes')
-var brands = require('./brands')
-var verbs = require('./verbs')
-var price = require('./price')
-var stopwords = require('./stopwords');
+var sizes = require('js/sizes')
+var brands = require('js/brands')
+var verbs = require('js/verbs')
+var price = require('js/price')
 
 var MODE = {
   shopping: 'shopping',
@@ -33,8 +39,10 @@ var ACTION = {
   list: 'list'
 }
 
-/**
- * Call this with the message like message schema.
+
+
+/*
+Call this with the message like message schema.
  sampleRes = {
         mode: 'search',
         action: actionS, //initial, similar, modified, focus, more, back
@@ -42,8 +50,7 @@ var ACTION = {
         tokens: msg,
         channel: '3EL18A0M' //example of slack channel (the user who is chatting) --> please send back from python
     };
-  */
-
+*/
 var parse = module.exports.parse = function(message) {
   return co(function*() {
     var text = message.text;
@@ -52,7 +59,6 @@ var parse = module.exports.parse = function(message) {
       history_array.push(message.history[i].source.text)
     }
     debug('hist_array**'.cyan, history_array)
-
     debug('parsing:' + text)
 
     // First do some global hacks
@@ -65,7 +71,6 @@ var parse = module.exports.parse = function(message) {
       message.execute = [simpleResult];
       return simpleResult;
     }
-
 
     // using parser and res_rnn
     var res_parse = yield request({
@@ -88,63 +93,12 @@ var parse = module.exports.parse = function(message) {
       }
     })
 
-
     // welp we'll mutate the shit out of the message here.
     nlpToResult(res_parse, message);
     return message;
   })
 }
 
-
-function getModifier(text) {
-  debug('getting dataModify object for ' + text)
-  if (colors.isColor(text)) {
-    return {
-      type: 'color',
-      val: colors(text)
-    }
-  }
-
-  if (materials.isMaterial(text)) {
-    return {
-      type: 'material',
-      val: [text]
-    }
-  }
-
-  if (sizes.isSize(text)) {
-    return {
-      type: 'size',
-      val: [text]
-    }
-  }
-
-  if (brands.isBrand(text)) {
-    return {
-      type: 'brand',
-      val: [text]
-    }
-  }
-
-  return {
-    type: 'genericDetail',
-    val: [text]
-  }
-}
-
-
-function nlpUsingRNN(nlp, message) {
-  debug('using new deep learning'.cyan, nlp)
-
-  nlp.
-  message.execute.push({
-  mode: nlp.MODE,
-  action: nlp.ACTION,
-  params: {
-    query: ;
-  }
-})
-}
 
 /*
 input be like:
@@ -159,42 +113,35 @@ input be like:
 */
 function nlpToResult(nlp, rnn, message) {
   debug('using syntaxnet parser'.cyan, nlp)
+  debug('using rnn'.cyan, rnn)
 
   nlp.focus = nlp.focus || [];
   nlp.adjectives = nlp.adjectives || [];
-  // nlp.mode =
 
-  // take care of invalid adjectives that are actually focuses (first)
-
-  /*
-  // take care of invalid nouns - removed for now
-  nlp.nouns = (nlp.nouns || []).filter(function(n) {
-    return stopwords.indexOf(n.toLowerCase()) < 0;
-  })*/
-
-  // handle all initial search requests first
-  if (nlp.focus.length === 0) {
-    // not sure what this is from. look at google-cloud/kip branch
+  if (nlp.focus.length === 0 && nlp.simple_case == true) {
+      debug('simple case initial triggered');
+      message.execute.push({
+        mode: MODE.shopping,
+        action: ACTION.initial,
+        params: { query: nlp.simple_query}
+      })
+    }
   }
 
-  // check for "about"
-
-  if (nlp.had_about == true) {
+  if (nlp.had_about) {
       debug('about triggered')
       message.execute.push({
         mode: MODE.shopping,
         action: ACTION.focus,
         params: {focus: nlp.focus[0]}
       })
-      return
-    }
+      return;
   }
 
-  // check for "more"
-  if (nlp.had_more == true) {
+  if (nlp.had_more) {
       debug('more triggered')
       message.execute.push({
-        mode: MODE.shopping,
+        mode: nlp.mode,
         action: ACTION.similar,
         params: { focus: nlp.focus[0]}
       })
@@ -216,22 +163,13 @@ function nlpToResult(nlp, rnn, message) {
     return;
   }
 
-  if (nlp.focus.length === 0) {
-    if (nlp.simple_case == true) {
-      debug('simple case initial triggered');
-      message.execute.push({
-        mode: MODE.shopping,
-        action: ACTION.initial,
-        params: { query: nlp.simple_query}
-      })
-    }
-  }
+
 
   // var priceModifier = price(nlp.text);
   if (nlp.price_modifier) {
     debug('priceModifier triggered')
     var exec = {
-      mode: MODE.shopping,
+      mode: nlp.mode, // MODE.shopping,
       action: nlp.focus.length === 0 ? ACTION.modifyall : ACTION.modifyone,
       params: nlp.price_modifier,
     };
@@ -245,7 +183,7 @@ function nlpToResult(nlp, rnn, message) {
   // var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
-  if (nlp.focus.length === 1 && modifierWords.length === 1 && message.execute.length == 0) {
+  if (nlp.focus.length === 1 && nlp.modifier_words.length === 1 && message.execute.length == 0) {
     debug('single focus, single modifier triggered')
     var exec = {
       mode: MODE.shopping,
@@ -257,27 +195,26 @@ function nlpToResult(nlp, rnn, message) {
     return;
   }
 
-  // break out the entities into stores, locations, etc
-  nlp.locations = [];
-  nlp.entities.map(function(e) {
-    if (e[1] === 'GPE') {
-      nlp.locations.push(e[0])
-    }
-  })
-
-  // take care of any extraneous modify parameters
-  message.execute.map(e => {
-    if (e.action === ACTION.modify) {
-      e.action = typeof _.get(e, 'params.focus[0]') === 'undefined' ? ACTION.modifyall : ACTION.modifyone;
-    }
-  });
-
   if (nlp.had_question) {
     debug('its a question')
   }
 
   debug('returning at the end');
   return;
+}
+
+
+function nlpRNN(nlp, message) {
+  debug('using new deep learning'.cyan, nlp)
+  //   pass for now
+  //   nlp.
+  //   message.execute.push({
+  //   mode: nlp.MODE,
+  //   action: nlp.ACTION,
+  //   params: {
+  //     query: ;
+  //   }
+  // })
 }
 
 // --------------------------------------------------------
@@ -352,4 +289,41 @@ function quickparse(text) {
   })
 
   return result;
+}
+
+
+function getModifier(text) {
+  debug('getting dataModify object for ' + text)
+  if (colors.isColor(text)) {
+    return {
+      type: 'color',
+      val: colors(text)
+    }
+  }
+
+  if (materials.isMaterial(text)) {
+    return {
+      type: 'material',
+      val: [text]
+    }
+  }
+
+  if (sizes.isSize(text)) {
+    return {
+      type: 'size',
+      val: [text]
+    }
+  }
+
+  if (brands.isBrand(text)) {
+    return {
+      type: 'brand',
+      val: [text]
+    }
+  }
+
+  return {
+    type: 'genericDetail',
+    val: [text]
+  }
 }

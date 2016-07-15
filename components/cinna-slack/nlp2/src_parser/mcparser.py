@@ -2,7 +2,8 @@ import logging
 import subprocess
 from easydict import EasyDict
 
-from word_list import action_terms, price_terms, stopwords, invalid_adjectives, purchase_terms
+from word_list import action_terms, price_terms, stopwords, \
+    invalid_adjectives, purchase_terms
 
 DEBUG_ = False
 logger = logging.getLogger()
@@ -74,6 +75,7 @@ class McParser:
         self._get_mode()
         self._checks()
         self._price_modifier()
+        self._simple_case()
 
     def _process_text(self):
         '''
@@ -145,69 +147,77 @@ class McParser:
         old but previously removed 'find'
         text.lower().replace('find', '')
         '''
-        self.d['had_about'] = False
-        self.d['had_find'] = False
-        self.d['had_more'] = False
-        self.d['had_question'] = False
+        self.had_about = False
+        self.had_find = False
+        self.had_more = False
+        self.had_question = False
 
         if 'about' in self.text:
-            self.d['had_about'] = True
+            self.had_about = True
+
         if 'find' in self.text:
-            self.d['had_find'] = True
+            self.had_find = True
+
         if 'more' in self.text:
-            self.d['had_more'] = True
+            self.had_more = True
+            self.mode = 'shopping'
+            self.action = 'similar'
+
         if '?' in self.text:
-            self.d['had_question'] = True
+            self.had_question = True
 
     def _get_action_mode(self):
-        if any(map(lambda each: each in action_terms['checkout'], self.tokens)):
-            self.d['action'] = 'checkout'
-        if any(map(lambda each: each in action_terms['remove'], self.tokens)):
-            self.d['action'] = 'remove'
-        if any(map(lambda each: each in action_terms['list_cart'], self.tokens)):
-            self.d['action'] = 'list'
-        if any(map(lambda each: each in action_terms['save'], self.tokens)):
-            self.d['action'] = 'save'
-        if any(map(lambda each: each in action_terms['focus'], self.tokens)):
-            self.d['action'] = 'focus'
-        if any(map(lambda each: each in action_terms['search'], self.tokens)):
-            self.d['action'] = 'checkout'
 
-        if self.d['action']:
-            self.get_action = self.d['action']
+        if any(map(
+                lambda each: each in action_terms['checkout'], self.tokens)):
+            self.action = 'checkout'
+
+        if any(map(lambda each: each in action_terms['remove'], self.tokens)):
+            self.action = 'remove'
+
+        if any(map(
+                lambda each: each in action_terms['list_cart'], self.tokens)):
+            self.action = 'list'
+
+        if any(map(lambda each: each in action_terms['save'], self.tokens)):
+            self.action = 'save'
+
+        if any(map(lambda each: each in action_terms['focus'], self.tokens)):
+            self.action = 'focus'
+
+        if any(map(lambda each: each in action_terms['search'], self.tokens)):
+            self.action = 'checkout'
+
+        # if self.action:
+            # self.get_action = self.action
 
         # not sure if to use self.tokens or self.verbs, using tokens for now
         if set(self.tokens).intersection(purchase_terms):
             self.mode = 'cart'
+
         if set(self.tokens).intersection(action_terms['focus']):
             self.mode = 'focus'
 
+        # if (len(self.focus) == 1) and (len(self.modifier_words) == 1)
+
     def _simple_case(self):
+        '''possibly self.nouns_without_stopwords.join(' ') but that
+        doesnt include adjectives
+        '''
         if not self.had_question and not self.focus:
-            # or possibly self.nouns_without_stopwords.join(' ') but that
-            # doesnt include adjectives
             self.simple_query = self.text
             self.simple_case = True
+            self.mode
         else:
             self.simple_case = False
 
     def _price_modifier(self):
         '''check if price is to be modified'''
         if any(w in self.text for w in price_terms['more']):
-            self.d['price_modifier'] = 'more'
-        elif any(w in self.text for w in price_terms['less']):
-            self.d['price_modifier'] = 'less'
+            self.price_modifier = 'more'
 
-    def create_execute(self):
-        e = {}
-        if self.had_about:
-            e['mode'] = 'shopping'
-            e['action'] = 'focus'
-            e['params'] = 'params'
-        if self.had_find:
-            e['mode'] = 'shopping'
-            e['action'] = 'focus'
-            e['params'] = 'params'
+        elif any(w in self.text for w in price_terms['less']):
+            self.price_modifier = 'less'
 
     def output_form(self):
         '''
@@ -227,12 +237,12 @@ class McParser:
 
         response.mode = self.mode
 
-        response.had_about = self.d['had_about']
-        response.had_more = self.d['had_more']
-        response.had_question = self.d['had_question']
+        response.had_about = self.had_about
+        response.had_more = self.had_more
+        response.had_question = self.had_question
 
         if 'price_modifier' in self.d.keys():
-            response.price_modifier = self.d['price_modifier']
+            response.price_modifier = self.price_modifier
 
         if self.simple_case:
             response.simple_case = self.simple_case
@@ -248,3 +258,14 @@ class McParser:
         response.ss = [ss]
 
         return response
+
+    # def _create_execute(self):
+    #     e = {}
+    #     if self.had_about:
+    #         e['mode'] = 'shopping'
+    #         e['action'] = 'focus'
+    #         e['params'] = 'params'
+    #     if self.had_find:
+    #         e['mode'] = 'shopping'
+    #         e['action'] = 'focus'
+    #         e['params'] = 'params'
