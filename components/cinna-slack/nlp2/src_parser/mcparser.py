@@ -228,6 +228,9 @@ class McParser:
             logger.info('not using a simple query')
 
     def output_form(self):
+        return self.__dict__
+
+    def old_output_form(self):
         '''
         Put into correct json format for api.js
         note: probably a better way to do this with obj.__dict__

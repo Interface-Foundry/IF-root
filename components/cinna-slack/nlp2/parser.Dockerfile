@@ -18,6 +18,8 @@ FROM gcr.io/kip-ai/nlp:base
 
 MAINTAINER grahama <graham.annett@gmail.com>
 
+RUN pip install ipython
+
 ADD src_parser /root/
 
 RUN chmod +x /root/parser.sh
@@ -25,4 +27,4 @@ RUN chmod +x /root/parser.sh
 WORKDIR /root
 
 # start python services, follow dockerfile from old nlp folder
-ENTRYPOINT python server.py
+CMD python server.py

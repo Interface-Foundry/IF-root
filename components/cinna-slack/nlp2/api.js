@@ -115,20 +115,20 @@ input be like:
 // NLP TO RESULT
 // // --------------------------------------------------------
 function nlpToResult(nlp, message) {
-  debug('using syntaxnet parser')
+
   debug('using syntaxnet parser', nlp)
 
   nlp.focus = nlp.focus || [];
   nlp.adjectives = nlp.adjectives || [];
 
   if (nlp.focus.length === 0 && nlp.simple_case == true) {
-      debug('simple case initial triggered');
-      message.execute.push({
-        mode: nlp.mode,
-        action: nlp.action,
-        params: { query: nlp.text}
-      })
-      return;
+    debug('simple case initial triggered');
+    message.execute.push({
+      mode: nlp.mode,
+      action: nlp.action,
+      params: { query: nlp.simple_query}
+    })
+    return;
   }
 
 

@@ -16,7 +16,7 @@ var purchase = require("./purchase.js");
 // var conversation_botkit = require('./conversation_botkit');
 // var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
@@ -251,7 +251,7 @@ function* simple_response(message) {
 }
 
 
-// use nlp to deterine the intent of the user
+// use nlp to determine the intent of the user
 function* nlp_response(message) {
   kip.debug('nlp_response begin'.cyan)
   // the nlp api adds the processing data to the message

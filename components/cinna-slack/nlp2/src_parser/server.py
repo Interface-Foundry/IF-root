@@ -1,5 +1,4 @@
 from __future__ import print_function
-from easydict import EasyDict
 from flask import Flask, request, jsonify
 import logging
 
@@ -18,6 +17,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 if orig_:
     logging.debug('------using spacy------')
+    from easydict import EasyDict
     from spacy.en import English
     from textblob import TextBlob
     nlp = English()
@@ -27,13 +27,15 @@ if orig_:
 def parse_message(orig_parser=orig_):
     '''
     '''
-    data = EasyDict({})
-    data.text = request.json['text']
+
+    text = request.json['text']
     # data.history = request.json['history']
-    logging.info('query: ' + data.text)
+    logging.info('query: ' + text)
     # ------------------------------------------------------------------------
     # original parser
     if orig_parser:
+        data = EasyDict({})
+        data.text = text
         logging.debug('using old parser')
         data.blob = TextBlob(data.text)
         data.doc = nlp(u"{}".format(data.text),
@@ -44,7 +46,7 @@ def parse_message(orig_parser=orig_):
     # syntaxnet parser
     else:
         logging.debug('using mcparser')
-        resp = McParser(data.text)
+        resp = McParser(text)
 
         logging.debug(resp.dependency_array)
         resp = resp.output_form()
