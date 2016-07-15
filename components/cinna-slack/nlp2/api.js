@@ -62,7 +62,7 @@ var parse = module.exports.parse = function(message) {
     debug('parsing:' + text)
 
     // First do some global hacks
-    text = text.replace(' but blue', ' but in blue').replace(/[^\w\s,.$!]/gi, '')
+    // text = text.replace(' but blue', ' but in blue').replace(/[^\w\s,.$!]/gi, '')
 
     // check for easy regex matches
     var simpleResult = quickparse(text);
@@ -125,7 +125,7 @@ function nlpToResult(nlp, message) {
       message.execute.push({
         mode: nlp.mode,
         action: nlp.action,
-        params: { query: nlp.simple_query}
+        params: { query: nlp.text}
       })
       return;
   }
@@ -189,7 +189,7 @@ function nlpToResult(nlp, message) {
     debug('single focus, single modifier triggered')
     var exec = {
       mode: nlp.mode,
-      action: ACTION.modifyone,
+      action: nlp.action,
       params: getModifier(nlp.modifier_words)
     }
     exec.params.focus = nlp.focus;
@@ -279,11 +279,11 @@ function quickparse(text) {
           action: handler.action
         };
 
-        if (handler.action === 'initial') {
-          result.params = {
-            query: text.replace(re, '').trim()
-          }
-        }
+        // if (handler.action === 'initial') {
+        //   result.params = {
+        //     query: text.replace(re, '').trim()
+        //   }
+        // }
 
         return;
       }
