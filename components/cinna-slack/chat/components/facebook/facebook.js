@@ -81,10 +81,7 @@ var httpsServer = require('https').createServer({
 }, app);
 var search_results = require('./search_results');
 var focus = require('./focus');
-// EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD
-fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'; 
-
-// 'EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD';
+fbtoken = process.env.NODE_ENV === 'production' ? 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'  : 'EAAPkuxFNp9UBAL6JrXOwHVdji0mjpqsKqrWBlhJyVpNdh0mE2C4ZClfmvZCyTXPgEjGESnjeS3PXs5oFcl1qWlJipqAFluTUuFZBpQzbBb9Oa9TMP6WD7d8wro6IgGueCpQk18isez7wRYlUto4KXKZCSbFagFAZD'
 var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
@@ -111,6 +108,21 @@ httpsServer.listen(4343, function(e) {
 
 app.get('/facebook', function(req, res) {
 
+     var welcome = { "setting_type":"greeting",
+                        "greeting":{ "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. " } }
+
+    request({
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            qs: {
+                access_token: fbtoken
+            },
+            method: 'POST',
+            json: welcome
+        }, function(err, res, body) {
+           if (err) console.log('\n\n\n\nWARNING: WELCOME SET ERROR SHIEETTT: ', err)
+            console.log(res, body)
+        });
+
     if (req.query['hub.verify_token'] === fbtoken) {
         res.send(req.query['hub.challenge']);
     } else {
@@ -122,20 +134,7 @@ app.get('/facebook', function(req, res) {
 app.post('/facebook', function(req, res) {
 
 
-      var welcome = { "setting_type":"greeting",
-                        "greeting":{ "text":"Welcome to Kip, your personal AI shopping bot!" } }
-
-    request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: welcome
-        }, function(err, body) {
-           if (err) console.log('\n\n\n\nWARNING: WELCOME SET ERROR SHIEETTT: ', err)
-            // console.log(body)
-        });
+     
 
 
             // console.log('\n\n\n\n\nFB Messenger raw message POST event: ', JSON.stringify(req.body),'\n\n\n\n\n');
@@ -219,6 +218,46 @@ app.post('/facebook', function(req, res) {
 
 
         if (event.message && event.message.text) {
+
+
+                //TEST 2 ELECTRIC BUGALOOO
+                // var quick_replies = {
+                //     "text":"",
+                //     "quick_replies":[
+                //       {
+                //         "content_type":"text",
+                //         "title":"🐔",
+                //         "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
+                //       },
+                //       {
+                //         "content_type":"text",
+                //         "title":"Green",
+                //         "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
+                //       }
+                //     ]
+                //   }
+
+
+                // return request({
+                //     url: 'https://graph.facebook.com/v2.6/me/messages',
+                //     qs: {
+                //         access_token: fbtoken
+                //     },
+                //     method: 'POST',
+                //     json: {
+                //         recipient: {
+                //             id: sender.toString()
+                //         },
+                //         message: quick_replies,
+                //     }
+                // }, function(err, res, body) {
+                //     if (err) console.error('post err ', err);
+                //    return  console.log(body);
+                // });
+
+
+
+
 
                  text = event.message.text;
                  text = emojiText.convert(text,{delimiter: ' '});
@@ -1097,130 +1136,78 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
             giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
 
+            var cards = results.map((result, i) => {
+                var n = i + 1 + '';
+
+                //get picstitch image
+                if (result && result.image_url){
+                    var image = ((result.image_url.indexOf('http') > -1) ? result.image_url : 'http://kipthis.com/images/header_partners.png')
+                } else {
+                    kip.debug('error: no result.image_url (picstitch) found');
+                    var image = 'http://kipthis.com/images/header_partners.png';
+                }
+
+                return {
+                        "title": result.title,
+                        "image_url": (result.image_url.indexOf('http') > -1 ? result.image_url : 'http://kipthis.com/images/header_partners.png'),
+                        "buttons": [{
+                            "type": "postback",
+                            "title": "Add to Cart",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "add",
+                                selected: 1,
+                                ts: outgoing.data.ts,
+                                initial: true
+                            })
+                        },
+                        {
+                            "type": "web_url",
+                            "url": result.title_link,
+                            "title": "View on Amazon"
+                        },
+                        {
+                            "type": "postback",
+                            "title": "Details",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "focus",
+                                selected: 1,
+                                ts: outgoing.data.ts
+                            })
+                        }],
+                    } 
+            });
+
+            cards.push( {
+                "title": 'Click "See More Results" below for more products!',
+                "image_url": giphy_gif,
+                "buttons": [{
+                    "type": "postback",
+                    "title": "See More Results",
+                    "payload": JSON.stringify({
+                        dataId: outgoing.data.thread_id,
+                        action: "more",
+                        ts: outgoing.data.ts
+                    })
+                },{
+                    "type": "postback",
+                    "title": "View Cart",
+                    "payload": JSON.stringify({
+                        dataId: outgoing.data.thread_id,
+                        action: "list",
+                        ts: outgoing.data.ts
+                    })
+                 }]})
+
+
+
                var messageData = {
                     "attachment": {
                         "type": "template",
                         "payload": {
                             "template_type": "generic",
-                            "elements": [{
-                                "title": results[0].title,
-                                "image_url": (results[0].image_url.indexOf('http') > -1 ? results[0].image_url : 'http://kipthis.com/images/header_partners.png'),
-                                "buttons": [{
-                                    "type": "postback",
-                                    "title": "Add to Cart",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "add",
-                                        selected: 1,
-                                        ts: outgoing.data.ts,
-                                        initial: true
-                                    })
-                                },
-                                {
-                                    "type": "web_url",
-                                    "url": results[0].title_link,
-                                    "title": "View on Amazon"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "Details",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "focus",
-                                        selected: 1,
-                                        ts: outgoing.data.ts
-                                    })
-                                }],
-                            }, {
-                                "title": results[1].title,
-                                "image_url": (results[1].image_url.indexOf('http') > -1 ? results[1].image_url : 'http://kipthis.com/images/header_partners.png'),
-                                "buttons": [{
-                                    "type": "postback",
-                                    "title": "Add to Cart",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "add",
-                                        selected: 2,
-                                        ts: outgoing.data.ts,
-                                        initial: true
-                                    })
-                                },
-                                {
-                                    "type": "web_url",
-                                    "url": results[1].title_link,
-                                    "title": "View on Amazon"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "Details",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "focus",
-                                        selected: 2,
-                                        ts: outgoing.data.ts
-                                    })
-                                }],
-                            }, {
-                                "title": results[2].title,
-                                "image_url": ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png'),
-                                "buttons": [{
-                                    "type": "postback",
-                                    "title": "Add to Cart",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "add",
-                                        selected: 3,
-                                        ts: outgoing.data.ts,
-                                        initial: true
-                                    })
-                                },
-                                {
-                                    "type": "web_url",
-                                    "url": results[2].title_link,
-                                    "title": "View on Amazon"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "Details",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "focus",
-                                        selected: 3,
-                                        ts: outgoing.data.ts
-                                    })
-                                }],
-                            },
-                            {
-                                "title": 'Click "See More Results" below for more products!',
-                                "image_url": giphy_gif,
-                                "buttons": [{
-                                    "type": "postback",
-                                    "title": "See More Results",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "more",
-                                        ts: outgoing.data.ts
-                                    })
-                                },{
-                                    "type": "postback",
-                                    "title": "View Cart",
-                                    "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "list",
-                                        ts: outgoing.data.ts
-                                    })
-                                 },
-                                // {
-                                //     "type": "postback",
-                                //     "title": "Home 🐧",
-                                //     "payload": JSON.stringify({
-                                //         dataId: outgoing.data.thread_id,
-                                //         action: "home",
-                                //         ts: outgoing.data.ts
-                                //     })
-                                // }
-                                ],
-                            }]
+                            "elements": cards
                         }
                     }
                 };
@@ -1239,7 +1226,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     }
                 }, function(err, res, body) {
                     if (err) console.error('post err ', err);
-                    // console.log(body,'\n\n\n\n\n\n\n\n\nACTUAL RESSSS: ',res);
+                    console.log(body);
                     outgoing.ack();
                 });
          })

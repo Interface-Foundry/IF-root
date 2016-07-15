@@ -10,7 +10,7 @@ var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = promisify(require('./amazonHTML'));
-var db = require('db');
+var db = require('../../db');
 // var client = amazon.createClient({
 //   awsId: "AKIAIKMXJTAV2ORZMWMQ",
 //   awsSecret: "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",
