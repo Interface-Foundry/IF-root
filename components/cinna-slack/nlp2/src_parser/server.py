@@ -29,7 +29,7 @@ def parse_message(orig_parser=orig_):
     '''
     data = EasyDict({})
     data.text = request.json['text']
-    data.history = request.json['history']
+    # data.history = request.json['history']
     logging.info('query: ' + data.text)
     # ------------------------------------------------------------------------
     # original parser

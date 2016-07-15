@@ -48,9 +48,8 @@ class ModelPredictor:
     def preds_to_classes_logger(self, resp):
         logging.info('ordered preds: \n')
         p_number = 0
-        for resp_index in resp[0]:
-            logging.info('pred {}: {}'.format(
-                p_number, self.r_action_dict[str(resp_index)]))
+        for resp_index in resp:
+            logging.info('pred {}: {}'.format(p_number, self.r_action_dict[str(resp_index)]))
             p_number += 1
 
     def return_predictions(self, text):
@@ -63,7 +62,7 @@ class ModelPredictor:
         logging.info('converted to sequence sequence: ' + str(sequenced))
         preds = self.model.predict(pad_sequences(
             sequenced, maxlen=self.pad_length))
-        logging.info('preds: \n' + str(preds))
-        resp = preds.argsort()[::-1]
+        logging.info('preds: \n' + str(preds[0]))
+        resp = preds[0].argsort()[::-1]
         self.preds_to_classes_logger(resp)
-        return self.r_action_dict[str(resp[0][0])]
+        return self.r_action_dict[str(resp[0])]

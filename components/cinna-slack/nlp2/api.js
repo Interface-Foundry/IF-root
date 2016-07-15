@@ -11,12 +11,12 @@ var _ = require('lodash')
 var debug = require('debug')('nlp')
 
 var config = require('../config')
-var colors = require("js/colors")
-var materials = require('./materials')
-var sizes = require('js/sizes')
-var brands = require('js/brands')
-var verbs = require('js/verbs')
-var price = require('js/price')
+var colors = require('./js/colors')
+var materials = require('./js/materials')
+var sizes = require('./js/sizes')
+var brands = require('./js/brands')
+var verbs = require('./js/verbs')
+var price = require('./js/price')
 
 var MODE = {
   shopping: 'shopping',
@@ -89,7 +89,7 @@ var parse = module.exports.parse = function(message) {
       json: true,
       body: {
         text: text,
-        history: history_array
+        // history: history_array
       }
     })
 
@@ -111,9 +111,11 @@ input be like:
   text: 'cheapest 32" monitor',
   verbs: [] }}
 */
-function nlpToResult(nlp, rnn, message) {
+// // --------------------------------------------------------
+// NLP TO RESULT
+// // --------------------------------------------------------
+function nlpToResult(nlp, message) {
   debug('using syntaxnet parser'.cyan, nlp)
-  debug('using rnn'.cyan, rnn)
 
   nlp.focus = nlp.focus || [];
   nlp.adjectives = nlp.adjectives || [];
@@ -121,18 +123,19 @@ function nlpToResult(nlp, rnn, message) {
   if (nlp.focus.length === 0 && nlp.simple_case == true) {
       debug('simple case initial triggered');
       message.execute.push({
-        mode: MODE.shopping,
-        action: ACTION.initial,
+        mode: nlp.mode,
+        action: nlp.action,
         params: { query: nlp.simple_query}
       })
-    }
+      return;
   }
+
 
   if (nlp.had_about) {
       debug('about triggered')
       message.execute.push({
-        mode: MODE.shopping,
-        action: ACTION.focus,
+        mode: nlp.mode,
+        action: nlp.action,
         params: {focus: nlp.focus[0]}
       })
       return;
@@ -142,7 +145,7 @@ function nlpToResult(nlp, rnn, message) {
       debug('more triggered')
       message.execute.push({
         mode: nlp.mode,
-        action: ACTION.similar,
+        action: nlp.action,
         params: { focus: nlp.focus[0]}
       })
       return;
@@ -155,7 +158,6 @@ function nlpToResult(nlp, rnn, message) {
       mode: nlp.mode,
       action: nlp.action
     }
-
     if (nlp.focus.length >= 1) {
       exec.params = {focus:  nlp.focus[0]};
     }
@@ -183,10 +185,10 @@ function nlpToResult(nlp, rnn, message) {
   // var modifierWords = _.uniq(nlp.nouns.concat(nlp.adjectives));
 
   // if there is a focus and a modifier, it's a modified search
-  if (nlp.focus.length === 1 && nlp.modifier_words.length === 1 && message.execute.length == 0) {
+  if (nlp.sf_sm && message.execute.length == 0) {
     debug('single focus, single modifier triggered')
     var exec = {
-      mode: MODE.shopping,
+      mode: nlp.mode,
       action: ACTION.modifyone,
       params: getModifier(nlp.modifier_words)
     }
@@ -204,21 +206,21 @@ function nlpToResult(nlp, rnn, message) {
 }
 
 
-function nlpRNN(nlp, message) {
-  debug('using new deep learning'.cyan, nlp)
-  //   pass for now
-  //   nlp.
-  //   message.execute.push({
-  //   mode: nlp.MODE,
-  //   action: nlp.ACTION,
-  //   params: {
-  //     query: ;
-  //   }
-  // })
-}
+// function nlpRNN(nlp, message) {
+//   debug('using new deep learning'.cyan, nlp)
+//   //   pass for now
+//   //   nlp.
+//   //   message.execute.push({
+//   //   mode: nlp.MODE,
+//   //   action: nlp.ACTION,
+//   //   params: {
+//   //     query: ;
+//   //   }
+//   // })
+// }
 
 // --------------------------------------------------------
-// saved function from peter
+// saved functions from peter
 // --------------------------------------------------------
 
 

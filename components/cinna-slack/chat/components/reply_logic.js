@@ -16,7 +16,7 @@ var purchase = require("./purchase.js");
 // var conversation_botkit = require('./conversation_botkit');
 // var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp2/api');
+var nlp = require('../../nlp/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
@@ -103,11 +103,11 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     var replies = yield simple_response(message);
-    // kip.debug('simple replies'.cyan, replies);
+    kip.debug('simple replies'.cyan, replies);
 
     if (!replies || replies.length === 0) {
       replies = yield nlp_response(message);
-      // kip.debug('nlp replies'.cyan, replies);
+      kip.debug('nlp replies'.cyan, replies);
     }
 
     if (!replies || replies.length === 0) {
@@ -118,7 +118,13 @@ queue.topic('incoming').subscribe(incoming => {
     kip.debug('num replies', replies.length);
 
     yield message.save(); // the incoming message has had some stuff added to it :)
-    yield replies.map(r => r.save());
+    yield replies.map(r => {
+      if (r.save) {
+        r.save()
+      } else {
+        console.log('could not save ' + r);
+      }
+    });
     yield replies.map((r, i) => {
       kip.debug('reply', r.mode, r.action);
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
@@ -135,6 +141,7 @@ function* simple_response(message) {
 
   //check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
+  // console.log('\n\n\n\n\n\nBEFORE BANTER: ', message);
   var reply = banter.checkForCanned(message);
 
   kip.debug('prefab reply from banter.js', reply);
@@ -184,15 +191,16 @@ function* simple_response(message) {
         action: 'more'
       })
       break;
-
+    case 'purchase.remove':
     case 'cart.remove':
       message.mode = 'cart';
       message.action = 'remove';
-      message.execute.pusH({
+      message.execute.push({
         mode: 'cart',
         action: 'remove',
-        prams: {
+        params: {
           focus: reply.query
+           // ? reply.query : (message.searchSelect[0] ? message.searchSelect[0] : undefined)
         }
       })
       break;
@@ -243,18 +251,25 @@ function* simple_response(message) {
 }
 
 
-
 // use nlp to deterine the intent of the user
 function* nlp_response(message) {
   kip.debug('nlp_response begin'.cyan)
   // the nlp api adds the processing data to the message
-  yield nlp.parse(message);
 
-  var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
-
-  var messages = yield execute(message);
-
-  return [debug_message].concat(messages);
+  try {
+    yield nlp.parse(message);
+    if (process.env.NODE_ENV !== 'production') {
+      var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
+    }
+    var messages = yield execute(message);
+  } catch(err) {
+    kip.err(err);
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    return [debug_message].concat(messages);
+  } else {
+    return messages;
+  }
 }
 
 // do the things
@@ -263,12 +278,12 @@ function execute(message) {
   return co(function*() {
     var messages = yield message.execute.reduce((messages, exec) => {
       var route = exec.mode + '.' + exec.action;
+      kip.debug('route', route, 'exec', exec);
       if (!handlers[route]) {
         throw new Error(route + ' handler not implemented');
       }
 
       var message_promises = handlers[route](message, exec);
-      kip.debug('got', message_promises, 'from route', route);
 
       if (message_promises instanceof Array) {
         messages = messages.concat(message_promises)
@@ -277,11 +292,9 @@ function execute(message) {
       }
       return messages;
     }, [])
-
     // only return messages
-    return messages.reduce((all, m) => {
+    var replies = messages.reduce((all, m) => {
       console.log(typeof m);
-      debugger;
       if (m instanceof Array) {
         all = all.concat(m);
       } else {
@@ -289,6 +302,7 @@ function execute(message) {
       }
       return all;
     }, []);
+    return replies;
   })
 }
 
@@ -313,7 +327,7 @@ var handlers = {};
 
 handlers['shopping.initial'] = function*(message, exec) {
   typing(message);
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -358,7 +372,7 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -393,7 +407,7 @@ handlers['shopping.similar'] = function*(message, exec) {
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
 
-  var results = yield amazon_search.similar(exec.params);
+  var results = yield amazon_search.similar(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -416,8 +430,11 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
 
-  // modify the params and then do another search.
+  kip.debug('old params', old_params);
+
+  // for "cheaper" modify the params and then do another search.
   if (exec.params.type === 'price') {
+    _.merge(exec.params, old_params);
     var max_price = Math.max.apply(null, old_results.map(r => parseFloat(r.realPrice.slice(1))));
     if (exec.params.param === 'less') {
       exec.params.max_price = max_price * 0.8;
@@ -425,11 +442,15 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } else {
+  }
+  else if (exec.params.type === 'genericDetail') {
+    // todo
+  }
+  else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -467,11 +488,14 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } else {
+  }
+
+
+  else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
-  var results = yield amazon_search.search(exec.params);
+  var results = yield amazon_search.search(exec.params,message.origin);
 
   return new db.Message({
     incoming: false,
@@ -505,7 +529,7 @@ console.log('raw_results: ', typeof raw_results, raw_results);
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
 
   // view the cart
@@ -514,7 +538,7 @@ console.log('raw_results: ', typeof raw_results, raw_results);
 
 handlers['cart.remove'] = function*(message, exec) {
   if (!exec.params.focus) {
-    throw new Error('no focus for removing from cart')
+    throw new Error('no focus for removing from cart', message)
   }
 
   var cart_id = (message.source.origin === 'facebook') ? message.source.org : message.cart_reference_id || message.source.team;
@@ -525,7 +549,6 @@ handlers['cart.remove'] = function*(message, exec) {
   yield kipcart.removeFromCart(cart_id, message.user_id, exec.params.focus, cart_type);
   var confirmation = text_reply(message, `Item ${exec.params.focus} removed from your cart`);
   var viewcart = yield handlers['cart.view'](message);
-  debugger;
   return [confirmation, viewcart];
 };
 

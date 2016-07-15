@@ -72,7 +72,6 @@ class McParser:
         self._parse_terms()
         self._remove_words()
         self._get_action_mode()
-        self._get_mode()
         self._checks()
         self._price_modifier()
         self._simple_case()
@@ -151,9 +150,12 @@ class McParser:
         self.had_find = False
         self.had_more = False
         self.had_question = False
+        self.sf_sm = False
 
         if 'about' in self.text:
             self.had_about = True
+            self.mode = 'shopping'
+            self.action = 'focus'
 
         if 'find' in self.text:
             self.had_find = True
@@ -188,9 +190,6 @@ class McParser:
         if any(map(lambda each: each in action_terms['search'], self.tokens)):
             self.action = 'checkout'
 
-        # if self.action:
-            # self.get_action = self.action
-
         # not sure if to use self.tokens or self.verbs, using tokens for now
         if set(self.tokens).intersection(purchase_terms):
             self.mode = 'cart'
@@ -198,7 +197,14 @@ class McParser:
         if set(self.tokens).intersection(action_terms['focus']):
             self.mode = 'focus'
 
-        # if (len(self.focus) == 1) and (len(self.modifier_words) == 1)
+        if hasattr(self, 'focus') and hasattr(self, 'modifier_words'):
+            self.mode = 'shopping'
+            if (len(self.focus) == 1) and (len(self.modifier_words) == 1):
+                # single focus single modifier
+                self.sf_sm = True
+                self.action = 'modify.one'
+            else:
+                self.action = 'modify.all'
 
     def _simple_case(self):
         '''possibly self.nouns_without_stopwords.join(' ') but that
@@ -207,46 +213,57 @@ class McParser:
         if not self.had_question and not self.focus:
             self.simple_query = self.text
             self.simple_case = True
-            self.mode
+            self.mode = 'shopping'
+            self.action = 'initial'
         else:
             self.simple_case = False
 
     def _price_modifier(self):
         '''check if price is to be modified'''
-        if any(w in self.text for w in price_terms['more']):
+        if any(w in self.tokens for w in price_terms['more']):
             self.price_modifier = 'more'
+            self.action = 'modify.one'
+            self.mode = 'focus'
 
-        elif any(w in self.text for w in price_terms['less']):
+        elif any(w in self.tokens for w in price_terms['less']):
             self.price_modifier = 'less'
+            self.action = 'modify.one'
+            self.mode = 'focus'
 
     def output_form(self):
         '''
         Put into correct json format for api.js
+        note: probably a better way to do this with obj.__dict__
         '''
         response = EasyDict()
-        response.nouns = list(self.noun_phrases +
-                              [' '.join(self.adjectives + self.nouns)])
+        response.text = self.text
+
+        # probably need to fix response.nouns
+        # most likely want (set(noun_phrases) - nouns) - adjectives)
+        response.nouns = list(self.noun_phrases +[' '.join(self.adjectives + self.nouns)])
         response.nouns_without_stopwords = self.nouns_without_stopwords
+        response.verbs = self.verbs
         response.adjectives = self.adjectives
         response.entities = self.entities
-        response.focus = self.focus
         response.parts_of_speech = self.parts_of_speech
-        response.text = self.text.lower()
-        response.verbs = self.verbs
         response.modifier_words = list(set(self.nouns).union(self.adjectives))
 
+        response.simple_case = self.simple_case
+
         response.mode = self.mode
+        response.action = self.action
+        response.focus = self.focus
 
         response.had_about = self.had_about
         response.had_more = self.had_more
         response.had_question = self.had_question
 
-        if 'price_modifier' in self.d.keys():
+        if hasattr(self, 'price_modifier'):
             response.price_modifier = self.price_modifier
 
-        if self.simple_case:
-            response.simple_case = self.simple_case
+        if hasattr(self, 'simple_query'):
             response.simple_query = self.simple_query
+            response.simple_case = self.simple_case
 
         # add ss
         ss = {}
