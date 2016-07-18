@@ -132,7 +132,6 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-
   // combine the following 3 later
   if (nlp.had_about) {
     debug('about triggered')
@@ -170,6 +169,7 @@ function nlpToResult(nlp, message) {
       mode: nlp.mode, // MODE.shopping,
       action: nlp.action,
       params: {
+        type: 'price',
         price: nlp.price_modifier,
         focus: nlp.focus[0]
       }

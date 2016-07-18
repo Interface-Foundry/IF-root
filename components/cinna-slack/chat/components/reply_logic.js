@@ -480,6 +480,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   exec.params.query = old_params.query;
 
   // modify the params and then do another search.
+  // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
     var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
     if (exec.params.param === 'less') {
@@ -489,11 +490,13 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
-
-
-  else {
-    throw new Error('this type of modification not handled yet: ' + exec.params.type);
-  }
+  // modify the color
+  // if (exec.params.type === 'color') {
+  //   var new_query = (old_results[exec.params.focus - 1].ItemAttributes[0].Title + old_)
+  // }
+  // else {
+  //   throw new Error('this type of modification not handled yet: ' + exec.params.type);
+  // }
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
