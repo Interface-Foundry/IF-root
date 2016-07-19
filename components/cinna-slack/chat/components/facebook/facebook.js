@@ -108,20 +108,20 @@ httpsServer.listen(4343, function(e) {
 
 app.get('/facebook', function(req, res) {
 
-     var welcome = { "setting_type":"greeting",
-                        "greeting":{ "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. " } }
+    //  var welcome = { "setting_type":"greeting",
+    //                     "greeting":{ "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. " } }
 
-    request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: welcome
-        }, function(err, res, body) {
-           if (err) console.log('\n\n\n\nWARNING: WELCOME SET ERROR SHIEETTT: ', err)
-            console.log(res, body)
-        });
+    // request({
+    //         url: "https://graph.facebook.com/v2.6/me/thread_settings",
+    //         qs: {
+    //             access_token: fbtoken
+    //         },
+    //         method: 'POST',
+    //         json: welcome
+    //     }, function(err, res, body) {
+    //        if (err) console.log('\n\n\n\nWARNING: WELCOME SET ERROR SHIEETTT: ', err)
+    //         console.log(res, body)
+    //     });
 
     if (req.query['hub.verify_token'] === fbtoken) {
         res.send(req.query['hub.challenge']);
@@ -133,10 +133,27 @@ app.get('/facebook', function(req, res) {
 
 app.post('/facebook', function(req, res) {
 
+         var set_greeting = {
+          "setting_type" : "greeting",
+          "greeting": { 
+                "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and   I'll show you 3 options." 
+            }
+         }
 
-     
-
-
+        request({
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            qs: {
+                access_token: fbtoken
+            },
+            method: 'POST',
+            json: set_greeting
+        }, function(err, body) {
+           if (err) console.log('\n\n\n\nWARNING: FB SET WELCOME ERROR: ', err)
+            else {
+                // console.log(body)
+            }
+        })
+        
             // console.log('\n\n\n\n\nFB Messenger raw message POST event: ', JSON.stringify(req.body),'\n\n\n\n\n');
     messaging_events = req.body.entry[0].messaging;
     if (!messaging_events) {
@@ -179,6 +196,38 @@ app.post('/facebook', function(req, res) {
            if (err) console.log('\n\n\n\nWARNING: FB SET MENU ERROR SHIEETTT: ', err)
             // console.log(body)
         })
+
+        var set_get_started = {
+          "setting_type":"call_to_actions",
+          "thread_state":"new_thread",
+          "call_to_actions":[
+            {   
+              "payload": JSON.stringify({
+                   "type": "GET_STARTED",
+                   "dataId":"facebook_" + sender.toString()
+                 })
+            }
+          ]
+       }
+
+        request({
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            qs: {
+                access_token: fbtoken
+            },
+            method: 'POST',
+            json: set_get_started
+        }, function(err, body) {
+           if (err) console.log('\n\n\n\nWARNING: FB SET GET STARTED ERROR: ', err)
+            else {
+                // console.log(body)
+            }
+        }) 
+
+
+
+
+
         if (event.message) {
             var typing_indicator = {
               "recipient":{
@@ -218,46 +267,6 @@ app.post('/facebook', function(req, res) {
 
 
         if (event.message && event.message.text) {
-
-
-                //TEST 2 ELECTRIC BUGALOOO
-                // var quick_replies = {
-                //     "text":"",
-                //     "quick_replies":[
-                //       {
-                //         "content_type":"text",
-                //         "title":"🐔",
-                //         "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
-                //       },
-                //       {
-                //         "content_type":"text",
-                //         "title":"Green",
-                //         "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
-                //       }
-                //     ]
-                //   }
-
-
-                // return request({
-                //     url: 'https://graph.facebook.com/v2.6/me/messages',
-                //     qs: {
-                //         access_token: fbtoken
-                //     },
-                //     method: 'POST',
-                //     json: {
-                //         recipient: {
-                //             id: sender.toString()
-                //         },
-                //         message: quick_replies,
-                //     }
-                // }, function(err, res, body) {
-                //     if (err) console.error('post err ', err);
-                //    return  console.log(body);
-                // });
-
-
-
-
 
                  text = event.message.text;
                  text = emojiText.convert(text,{delimiter: ' '});
@@ -364,7 +373,67 @@ app.post('/facebook', function(req, res) {
                 console.log('POSTBACK PARSE ERR: ',err)
                 var postback = event.postback.payload;
             }
+ 
             console.log('\n\n\npostback: ', postback,'\n\n\n');
+
+            if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
+
+                 var get_started = {
+                                "recipient": {
+                                    "id": sender.toString()
+                                },
+                                "message": {
+                                          "quick_replies":[
+                                              {
+                                                "content_type":"text",
+                                                "title":"Headphones",
+                                                "payload": JSON.stringify({
+                                                        dataId: postback.dataId,
+                                                        action: "button_search",
+                                                        text: 'headphones'
+                                                    })
+                                              },
+                                              {
+                                                "content_type":"text",
+                                                "title":"🐔 🍜",
+                                                "payload": JSON.stringify({
+                                                        dataId: postback.dataId,
+                                                        action: "button_search",
+                                                        text: '🐔 🍜'
+                                                    })
+                                              },
+                                              {
+                                                "content_type":"text",
+                                                "title":"Books",
+                                                "payload": JSON.stringify({
+                                                        dataId: postback.dataId,
+                                                        action: "button_search",
+                                                        text: 'books'})
+                                              }
+                                            ],
+                                            "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"   
+                                },
+                                "notification_type": "NO_PUSH"
+                            };
+
+                            request.post({
+                                url: 'https://graph.facebook.com/v2.6/me/messages',
+                                qs: {
+                                    access_token: fbtoken
+                                },
+                                method: "POST",
+                                json: true,
+                                headers: {
+                                    "content-type": "application/json",
+                                },
+                                body: get_started
+                            }, function(err, res, body) {
+                                if (err) console.error('post err ', err);
+                            })
+
+
+            }
+
             db.Messages.find({
                 thread_id: postback.dataId
             }).sort('-ts').exec(function(err, messages) {
@@ -457,6 +526,88 @@ app.post('/facebook', function(req, res) {
                                     });
 
                         }
+                         else if (postback.action == 'quick_modify') {
+                            console.log('SELECTED QUICK_MODIFY');
+                            var modify_choice = postback.text;
+                            console.log('SELECTED QUICK_MODIFY: ', modify_choice);
+                            switch(modify_choice) {
+                                case 'color': 
+                                     console.log('OK KIDDO, MODIFYING COLOR');
+                                     var modify_sub_menu = {
+                                        "recipient": {
+                                            "id": sender.toString()
+                                        },
+                                        "message": {
+                                                  "quick_replies":[
+                                                      {
+                                                        "content_type":"text",
+                                                        "title":"Blue",
+                                                        "payload": JSON.stringify({
+                                                                dataId: postback.dataId,
+                                                                action: "quick_modify_next",
+                                                                text: '1 but blue'
+                                                            })
+                                                      },
+                                                      {
+                                                        "content_type":"text",
+                                                        "title":"🐔 🍜",
+                                                        "payload": JSON.stringify({
+                                                                dataId: postback.dataId,
+                                                                action: "button_search",
+                                                                text: '🐔 🍜'
+                                                            })
+                                                      },
+                                                      {
+                                                        "content_type":"text",
+                                                        "title":"Books",
+                                                        "payload": JSON.stringify({
+                                                                dataId: postback.dataId,
+                                                                action: "button_search",
+                                                                text: 'books'})
+                                                      }
+                                                    ],
+                                                    "text": "What color do you want this in?"
+                                        },
+                                        "notification_type": "NO_PUSH"
+                                    };
+
+                                    request.post({
+                                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                                        qs: {
+                                            access_token: fbtoken
+                                        },
+                                        method: "POST",
+                                        json: true,
+                                        headers: {
+                                            "content-type": "application/json",
+                                        },
+                                        body: modify_sub_menu
+                                    }, function(err, res, body) {
+                                        if (err) console.error('post err ', err);
+                                    })
+                                    break;
+                            }
+                        }
+                        else if (postback.action == 'quick_modify_next') {
+                            var text = postback.text;
+                            text = emojiText.convert(text,{delimiter: ' '});
+                            var new_message = new db.Message({
+                                            incoming: true,
+                                            thread_id: msg.thread_id,
+                                            resolved: false,
+                                            user_id: msg.user_id,
+                                            origin: msg.origin,
+                                            text: text,
+                                            source: msg.source,
+                                            amazon: msg.amazon                                      });
+                                    // queue it up for processing
+                                    var message = new db.Message(new_message);
+                                    message.save().then(() => {
+                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                    });
+
+                        }
+
                         function* getLatestAmazonResults(message) {
                             message.history = [];
                             var results,
@@ -1109,26 +1260,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
     function send_results(channel, text, results, outgoing) {
 
-        // var typing_obj = {
-        //   "recipient":{
-        //     "id": channel
-        //   },
-        //   "sender_action":"typing_on"
-        // };
-
-
-        // request({
-        //     url: 'https://graph.facebook.com/v2.6/me/messages',
-        //     qs: {
-        //         access_token: fbtoken
-        //     },
-        //     method: 'POST',
-        //     json: typing_obj
-        // }, function(err, res, body) {
-        //     if (err) console.error('typing event err ', err);
-            // console.log('typing event body: ',body);
-
-              var giphy_gif = ''
+          var giphy_gif = ''
 
         request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
             if (err) console.log(err);
@@ -1199,9 +1331,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         ts: outgoing.data.ts
                     })
                  }]})
-
-
-
                var messageData = {
                     "attachment": {
                         "type": "template",
@@ -1209,7 +1338,63 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                             "template_type": "generic",
                             "elements": cards
                         }
-                    }
+                    },     
+                    // "quick_replies":[
+                    //           {
+                    //             "content_type":"text",
+                    //             "title":"Color",
+                    //             "payload": JSON.stringify({
+                    //                     dataId: outgoing.data.thread_id,
+                    //                     action: "quick_modify",
+                    //                     text: 'color',
+                    //                     ts: outgoing.data.ts
+
+                    //                 })
+                    //           },
+                    //           {
+                    //             "content_type":"text",
+                    //             "title":"Texture",
+                    //             "payload": JSON.stringify({
+                    //                     dataId: outgoing.data.thread_id,
+                    //                     action: "button_search",
+                    //                     text: '🐔 🍜',
+                    //                     ts: outgoing.data.ts
+
+                    //                 })
+                    //           },
+                    //           {
+                    //             "content_type":"text",
+                    //             "title":"Emoji",
+                    //             "payload": JSON.stringify({
+                    //                     dataId: outgoing.data.thread_id,
+                    //                     action: "button_search",
+                    //                     text: 'books',
+                    //                     ts: outgoing.data.ts
+                    //                 })
+                    //           }
+                    //           ,
+                    //           {
+                    //             "content_type":"text",
+                    //             "title":"Cheaper",
+                    //             "payload": JSON.stringify({
+                    //                     dataId: outgoing.data.thread_id,
+                    //                     action: "button_search",
+                    //                     text: 'books',
+                    //                     ts: outgoing.data.ts
+                    //                 })
+                    //           }
+                    //           ,
+                    //           {
+                    //             "content_type":"text",
+                    //             "title":"Similar",
+                    //             "payload": JSON.stringify({
+                    //                     dataId: outgoing.data.thread_id,
+                    //                     action: "button_search",
+                    //                     text: 'books',
+                    //                     ts: outgoing.data.ts
+                    //                 })
+                    //           }
+                    //         ]
                 };
 
                 request({
@@ -1227,6 +1412,10 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 }, function(err, res, body) {
                     if (err) console.error('post err ', err);
                     console.log(body);
+
+
+
+
                     outgoing.ack();
                 });
          })
