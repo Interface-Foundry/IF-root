@@ -83,12 +83,18 @@ function getRoute(message) {
 
 var handlers = {};
 
+//
+// the user's intent is to initiate a food order
+//
 handlers['food.begin'] = function* (message) {
   console.log('🍕 food order 🌮');
   send_text_reply(message, "yeah let's eat! what address should i use?");
   // todo save addresses and show saved addresses
 }
 
+//
+// the user's intent is to specify an address for delivery/pickup
+//
 handlers['food.address'] = function* (message) {
   var addr = message.text;
   // check if it's a good address
@@ -108,4 +114,36 @@ handlers['food.address'] = function* (message) {
     params: {addr: results.address}
   };
   queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+}
+
+//
+// the user's intent is to choose a restaurant to order from
+//
+handlers['food.restaurant.select'] = function*(message) {
+
+}
+
+//
+// the user's intent is to obtian more information about a restaurant
+//
+handlers['food.restaurant.info'] = function*(message) {
+
+}
+
+//
+// the user's intent is to obtain more information about a menu item
+//
+handlers['food.item.info'] = function*(message) {
+
+}
+
+// the user's intent is to add a menu item to cart
+handlers['food.item.add'] = function*(message) {
+
+}
+
+// the user's intent is to select an option for a menu item, like size or type of sauce
+// the item could already be in their cart or not. message.item should be what you modify
+handlers['food.item.option'] = function*(message) {
+
 }

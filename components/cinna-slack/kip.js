@@ -98,10 +98,42 @@ function timer(name) {
   }
 }
 
+var ihazinternet;
+function icanhazinternet() {
+  return new Promise((resolve, reject) => {
+    if (typeof ihazinternet !== 'undefined') {
+      return resolve(ihazinternet);
+    }
+
+    var request = require('request-promise');
+    setTimeout(x => {
+      console.log('timeout reached');
+      if (typeof ihazinternet === 'undefined') {
+        ihazinternet = false;
+        resolve(false);
+      }
+    }, 2000);
+
+    console.log('requesting icanhazip.com');
+    request('http://icanhazip.com').then(() => {
+      if (typeof ihazinternet === 'undefined') {
+        ihazinternet = true;
+        resolve(true);
+      }
+    }, () => {
+      if (typeof ihazinternet === 'undefined') {
+        ihazinternet = false;
+        resolve(false);
+      }
+    })
+  });
+}
+
 module.exports = global.kip = {
   debug: debug,
   error: error,
   err: error,
   log: log,
-  timer: timer
+  timer: timer,
+  icanhazinternet: icanhazinternet
 }
