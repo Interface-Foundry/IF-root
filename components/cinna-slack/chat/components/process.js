@@ -6,13 +6,43 @@ var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
 var nlp = require('../../nlp/api');
 var banter = require("./banter.js");
-
+var db = require('../../db');
 
 var googl = require('goo.gl');
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
 } else {
     googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk');
+}
+
+var COUNTRY = {
+  DEFAULT: ['.com'],
+  US: ['.com'],
+  CANADA: ['.ca'],
+  UK: ['.co.uk'],
+  AUSTRALIA: ['.com.au'],
+  INDIA: ['.in'],
+  JAPAN: ['co.jp'],
+  FRANCE: ['.fr'],
+  GERMANY: ['.de'],
+  ITALY: ['.it'],
+  NETHERLANDS: ['.nl'],
+  SPAIN: ['.es'],
+  IRELAND: ['.ie'],
+  MEXICO: ['.com.mx'],
+  BRAZIL: ['.com.br']
+}
+
+var swapAmazonTLD = function (url, user_id) {
+  var user = db.Chatuser.findOne({
+    id: user_id
+  })
+  if (COUNTRY.hasOwnProperty(user.country)) {
+    return url.split('.com').join(COUNTRY[user_country])
+  }
+  else {
+    return url
+  }
 }
 
 var urlShorten = function(data,callback2) {
@@ -24,6 +54,7 @@ var urlShorten = function(data,callback2) {
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var url = data.client_res;
            url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+
            var escapeAmazon = querystring.escape(url);
 
             // request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
@@ -186,7 +217,9 @@ function getItemLink(url, user_id, item_id) {
   url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
+
+  var url_swapped = swapAmazonTLD(url, user_id)
+  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
 }
 
 //
@@ -205,7 +238,7 @@ var imageSearch = function(data,token,callback){
          }
       };
 
-      var savePath = __dirname + '/temp_imgs/'+Math.random().toString(36).substring(7)+data.file.filetype;
+      var savePath = __dirname + '/temp_imgs/' + Math.random().toString(36).substring(7)+data.file.filetype;
 
       request(options).pipe(fs.createWriteStream(savePath)).on('close', function(){
 

@@ -5,13 +5,13 @@
     },{
         "name": "reply_logic",
         "script": "chat/components/reply_logic.js"
-    },{
-        "name": "picstitch",
-        "script": "image_processing/picstitch.py",
-        "interpreter": "venv-nlp/.virtualenvs/cinna-slack/bin/python"
-    },{
-        "name": "nlp",
-        "script": "nlp/server.py",
-        "interpreter": "venv-nlp/cinna-slack/bin/python"
+//    },{
+//        "name": "picstitch",
+//        "script": "image_processing/picstitch.py",
+//        "interpreter": "venv-nlp/.virtualenvs/cinna-slack/bin/python"
+//    },{
+//        "name": "nlp",
+//        "script": "nlp/server.py",
+//        "interpreter": "venv-nlp/cinna-slack/bin/python"
     }]
 }

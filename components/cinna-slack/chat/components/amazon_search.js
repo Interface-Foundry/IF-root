@@ -186,6 +186,7 @@ function* enhance_results(results,origin) {
 
   for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];
+    // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
   // cool i've got the results now...

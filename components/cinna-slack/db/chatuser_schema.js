@@ -19,6 +19,7 @@ var chatuserSchema = mongoose.Schema({
     tz: String,
     tz_label: String,
     tz_offset: Number,
+    country: String,
     profile: {
         avatar_hash: String,
         real_name: String,
