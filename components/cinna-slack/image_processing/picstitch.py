@@ -80,9 +80,12 @@ def index():
         TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        CHAT_HEIGHT = 191
-        CHAT_WIDTH = 360
-        PIC_COORDS = [{'x': 10, 'y': 10}] #where to draw main pics
+
+        # 254 x 153
+        # 318 x 192
+        CHAT_HEIGHT = 192
+        CHAT_WIDTH = 318
+        PIC_COORDS = [{'x': 5, 'y': 5}] #where to draw main pics
         TEXTBOX_COORDS = [{'x': 205, 'y': 15}] #where to draw text boxes
         PIC_SIZE = 181, 181
         #288 x 153
@@ -99,11 +102,11 @@ def index():
     img = Image.new('RGB', (CHAT_WIDTH, CHAT_HEIGHT), BGCOLOR)
 
     #draw a border for skype images
-    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        #draw white boxes
-        drawBorder = ImageDraw.Draw(img)
-        drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
-        drawBorder.rectangle(((3,3),(356,187)), fill="white")
+    # if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+    #     #draw white boxes
+    #     drawBorder = ImageDraw.Draw(img)
+    #     drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
+    #     drawBorder.rectangle(((3,3),(356,187)), fill="white")
 
 
     for i, im in enumerate(thumbnails):

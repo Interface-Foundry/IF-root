@@ -65,16 +65,43 @@ if(process.env.NODE_ENV == 'development_mitsu'){
 } else {
     // Create bot and setup server
     var connector = new builder.ChatConnector({
-        appId: '5d87a3e6-23de-4a8f-bd0c-e52a1c98231d',
-        appPassword:'BZw7sj8gHMLjn34bVUa6QEK'
+        appId: '318a63f8-c9bc-406a-adf1-0bea5b333f3d',
+        appPassword:'4LZ837bTJiB1a64mTpUA2NO'
     });
 }
+
+console.log('CONNECTOR ',connector)
 
 var bot = new builder.UniversalBot(connector);
 
 app.post('/api/messages',connector.listen());
 
 var sessions = {};
+
+//welcome message
+bot.dialog('/', [
+    function (session) {
+        // Send a greeting and show help.
+        var card = new builder.HeroCard(session)
+            .title("Microsoft Bot Framework")
+            .text("Your bots - wherever your users are talking.")
+            .images([
+                 builder.CardImage.create(session, "http://docs.botframework.com/images/demo_bot_image.png")
+            ]);
+        var msg = new builder.Message(session).attachments([card]);
+        session.send(msg);
+        session.send("Hi... I'm the Microsoft Bot Framework demo bot for Skype. I can show you everything you can use our Bot Builder SDK to do on Skype.");
+        session.beginDialog('/help');
+    },
+    function (session, results) {
+        // Display menu
+        session.beginDialog('/menu');
+    },
+    function (session, results) {
+        // Always say goodbye
+        session.send("Ok... See you later!");
+    }
+]);
 
 bot.dialog('/', function (session) {
     console.log('kill me now');
@@ -99,6 +126,11 @@ bot.dialog('/', function (session) {
    // if (session.message.value.dataId) {
    //   console.log('\n\n\n\n\n\n\n\n\n\n\nGOTTA CATCH EM ALLLLLLLLL\n\n\n\n\n\n\n\n\n\n\n\n')
    // }
+
+    bot.on('typing', function (message) {
+        // User is typing
+    });
+
     //Attachment Handling
      if (session.message.attachments && session.message.attachments[0] && session.message.attachments[0].contentType == 'image') {
          var data = { file: {url_private: session.message.attachments[0].contentUrl}};
@@ -271,7 +303,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
                 return card = new builder.HeroCard(session)
                     .title(result.title)
-                    .text("<a href="+result.title_link+">Read reviews on Nordstrom</a>")
+                    .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
                     .images([
                         builder.CardImage.create(session, image)
                             .tap(builder.CardAction.showImage(session, image)),
