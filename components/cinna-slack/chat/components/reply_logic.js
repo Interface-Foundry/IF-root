@@ -474,6 +474,8 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     return default_reply(message);
   }
 
+  // console.log('\n\n\n\n\n\n\n\n\n\n WHO IS MR ROBOT? ', message,'\n\n\n\n\n\n\n\n\n\n\n\n')
+
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
 
@@ -489,8 +491,15 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
+  else if (exec.params.type === 'color') {
+    var jsonAmazon = JSON.parse(message.amazon);
+    exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val.name;
+        // console.log('\n\n\n\n\n\n\n\n\n DO THEY SEE ME? ',  exec.params, '\n\n\n\n\n\n\n\n\n')
 
-
+    // console.log('exec for color search: ', JSON.stringify(exec))
+  }
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
