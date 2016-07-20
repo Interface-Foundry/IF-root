@@ -12,11 +12,3 @@ rnn:
   dockerfile: rnn.Dockerfile
   ports:
     - "8085:8085"
-# node_stuff:
-#   build: .
-#   command: pm2 start app.json
-#   ports:
-#     - "27017:27017"
-#     - "8000:8000"
-# mongo:
-#   image: mongo:3.2.6
