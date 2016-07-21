@@ -255,8 +255,10 @@ app.post('/facebook', function(req, res) {
             } catch(err) {
                 console.log(err)
             }
-            // console.log('sub_menu data: ', sub_menu.action, event.message.quick_reply);
-            //Hook for the second level sub_menu response e.g. user chooses :Blue
+
+
+
+            //sub-menu actions
             if (sub_menu.action && sub_menu.action == 'button_search') {
                 console.log(event.message)
                 db.Messages.find({
@@ -309,7 +311,109 @@ app.post('/facebook', function(req, res) {
                     });
                 }
               })               
-            }
+            } else if (sub_menu.action && sub_menu.action == 'similar') {
+                console.log(event.message)
+                db.Messages.find({
+                    thread_id: 'facebook_' + sender.toString()
+                }).sort('-ts').exec(function(err, messages) {
+                    if (err) return console.error(err);
+                    if (messages.length == 0) {
+                        return console.log('No message found');
+                    } else if (messages[0]) {
+
+                        var msg = messages[0];
+                        var message = new db.Message({
+                            incoming: true,
+                            thread_id: 'facebook_' + sender.toString(),
+                            resolved: false,
+                            user_id: msg.user_id,
+                            origin: 'facebook',
+                            text: 'more like ' + sub_menu.selected,
+                            source: msg.source,
+                            amazon: msg.amazon
+                          });
+                    // queue it up for processing
+                    message.save().then(() => {
+                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                    });
+                }
+              })    
+            }  else if (sub_menu.action && sub_menu.action == 'back') {
+                db.Messages.find({
+                    thread_id: 'facebook_' + sender.toString()
+                }).sort('-ts').exec(function(err, messages) {
+                    if (err) return console.error(err);
+                    if (messages.length == 0) {
+                        return console.log('No message found');
+                    } else if (messages[0]) {
+                        console.log('\n\n\n\n\n\n\n\n\n\n\n\n\nmessages[1]\n\n\n\n\n\n\n\n\n\n\n\n\n', messages[1])
+                              var main_menu = {
+                                "quick_replies":[
+                                          {
+                                            "content_type":"text",
+                                            "title":"Cheaper",
+                                            "payload": JSON.stringify({
+                                                    action: "cheaper",
+                                                    selected: '1'
+                                                })
+                                          } ,
+                                          {
+                                            "content_type":"text",
+                                            "title":"Similar",
+                                            "payload": JSON.stringify({
+                                                    action: "similar",
+                                                    selected: "1"
+                                                })
+                                          },
+                                          {
+                                            "content_type":"text",
+                                            "title":"Color",
+                                            "payload": "sub_menu_color"
+                                          },
+                                          {
+                                            "content_type":"text",
+                                            "title":"Texture",
+                                            "payload": JSON.stringify({
+                                                    dataId: 'facebook_' + sender.toString(),
+                                                    action: "button_search",
+                                                    text: '🐔 🍜'
+
+                                                })
+                                          },
+                                          {
+                                            "content_type":"text",
+                                            "title":"Emoji",
+                                            "payload": JSON.stringify({
+                                                    dataId: 'facebook_' + sender.toString(),
+                                                    action: "button_search",
+                                                    text: 'books'
+                                                })
+                                          }
+                                        ],
+                                        "text": "Going back..."
+                                };
+
+                                request({
+                                    url: 'https://graph.facebook.com/v2.6/me/messages',
+                                    qs: {
+                                        access_token: fbtoken
+                                    },
+                                    method: 'POST',
+                                    json: {
+                                        recipient: {
+                                            id: sender.toString()
+                                        },
+                                        message: main_menu,
+                                    }
+                                }, function(err, res, body) {
+                                    if (err) console.error('post err ', err);
+                                    console.log(body);
+                                });
+                              
+                        }
+                      })  
+                    }
+
 
 
                 switch(sub_menu) {
@@ -350,10 +454,18 @@ app.post('/facebook', function(req, res) {
                                       },
                                        {
                                         "content_type":"text",
-                                        "title":"<Back",
+                                        "title":"Black",
                                         "payload": JSON.stringify({
-                                                action: "sub_menu_back",
-                                                text: 'back'
+                                                dataId: "facebook_" + sender.toString(),
+                                                action: "button_search",
+                                                text: '1 but black'
+                                            })
+                                      },
+                                       {
+                                        "content_type":"text",
+                                        "title":" < Back ",
+                                        "payload": JSON.stringify({
+                                                action: "back"
                                             })
                                       }
                                     ],
@@ -973,27 +1085,10 @@ app.post('/facebook', function(req, res) {
                                             },
                                             method: 'POST',
                                             json: typing_indicator
-                                        }, function() {
-                                            // setTimeout(function(){
-                                            //      var typing_indicators = {
-                                            //           "recipient":{
-                                            //             "id": sender.toString()
-                                            //           },
-                                            //           "sender_action": "typing_off"
-                                            //         };
-                                            //     request({
-                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            //         qs: {
-                                            //             access_token: fbtoken
-                                            //         },
-                                            //         method: 'POST',
-                                            //         json: typing_indicators
-                                            //     }, function() {})
-                                            // }, 2000);
-                                         })
+                                        }, function() { })
 
 
-                                      var new_message = new db.Message({
+                                    var new_message = new db.Message({
                                         incoming: true,
                                         thread_id: msg.thread_id,
                                         resolved: false,
@@ -1024,24 +1119,7 @@ app.post('/facebook', function(req, res) {
                                             },
                                             method: 'POST',
                                             json: typing_indicator
-                                        }, function() {
-                                            // setTimeout(function(){
-                                            //      var typing_indicators = {
-                                            //           "recipient":{
-                                            //             "id": sender.toString()
-                                            //           },
-                                            //           "sender_action": "typing_off"
-                                            //         };
-                                            //     request({
-                                            //         url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            //         qs: {
-                                            //             access_token: fbtoken
-                                            //         },
-                                            //         method: 'POST',
-                                            //         json: typing_indicators
-                                            //     }, function() {})
-                                            // }, 2000);
-                                         })
+                                        }, function() {})
 
 
                                       var new_message = new db.Message({
@@ -1386,7 +1464,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         ts: outgoing.data.ts
                     })
                  }]})
-               var messageData = {
+               var modify_menu = {
                     "attachment": {
                         "type": "template",
                         "payload": {
@@ -1394,8 +1472,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                             "elements": cards
                         }
                     },     
-
-
                     "quick_replies":[
                               {
                                 "content_type":"text",
@@ -1409,10 +1485,8 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                 "content_type":"text",
                                 "title":"Similar",
                                 "payload": JSON.stringify({
-                                        dataId: outgoing.data.thread_id,
-                                        action: "button_search",
-                                        text: 'books',
-                                        ts: outgoing.data.ts
+                                        action: "similar",
+                                        selected: "1"
                                     })
                               },
                               {
@@ -1454,15 +1528,11 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                         recipient: {
                             id: channel
                         },
-                        message: messageData,
+                        message: modify_menu,
                     }
                 }, function(err, res, body) {
                     if (err) console.error('post err ', err);
                     console.log(body);
-
-
-
-
                     outgoing.ack();
                 });
          })
@@ -1489,61 +1559,91 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     "template_type":"generic",
                     "elements":[
                       {
-                        "title": focus_info.title,
+                        "title": focus_info.price + ' | ' + focus_info.reviews,
+                        // "subtitle": focus_info.price,
                         "item_url": focus_info.title_link,
                         "image_url": focus_info.image_url,
                       }
                     ]
                   }
-                }
-              },
-              "notification_type": "NO_PUSH"
-        }
+                }, "quick_replies":[
+                              {
+                                "content_type":"text",
+                                "title":"Cheaper",
+                                "payload": JSON.stringify({
+                                        action: "cheaper",
+                                        selected: focus_info.selected
+                                    })
+                              } ,
+                              {
+                                "content_type":"text",
+                                "title":"Similar",
+                                "payload": JSON.stringify({
+                                        action: "similar",
+                                        selected: focus_info.selected
+                                    })
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"Color",
+                                "payload": "sub_menu_color"
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"Texture",
+                                "payload": JSON.stringify({
+                                        dataId: outgoing.data.thread_id,
+                                        action: "button_search",
+                                        text: '🐔 🍜',
+                                        ts: outgoing.data.ts
 
+                                    })
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"Emoji",
+                                "payload": JSON.stringify({
+                                        dataId: outgoing.data.thread_id,
+                                        action: "button_search",
+                                        text: 'books',
+                                        ts: outgoing.data.ts
+                                    })
+                              }
+                            ]
+              } ,"notification_type": "NO_PUSH"
+        }
         var focus_card = {
             "recipient": {
                 "id": channel
             },
             "message": {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "button",
-                        "buttons": [{
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "button",
+                    // "title": focus_info.title,
+                    // "subtitle": focus_info.price,
+                    "buttons": [{
                             "type": "postback",
                             "title": "Add to Cart",
                             "payload": JSON.stringify({
                                 dataId: outgoing.data.thread_id,
                                 action: "add",
                                 selected: focus_info.selected,
-                                ts: outgoing.data.ts,
-                                initial: true
-                            })
-                        },{
-                                "type": "postback",
-                                "title": 'Cheaper',
-                                "payload": JSON.stringify({
-                                    dataId: outgoing.data.thread_id,
-                                    action: "cheaper",
-                                    selected: focus_info.selected,
-                                    ts: outgoing.data.ts
-                                })
-                        },
-                        {
-                            "type": "postback",
-                            "title": "Similar",
-                            "payload": JSON.stringify({
-                                dataId: outgoing.data.thread_id,
-                                action: "similar",
-                                selected: focus_info.selected,
                                 ts: outgoing.data.ts
                             })
-                        }
-                        ],
-
-                        "text": (focus_info.price + '\n' + focus_info.description + '\n' + focus_info.reviews).substring(0,300)
-                    }
+                        },{
+                            "type": "postback",
+                            "title": "View Cart",
+                            "payload": JSON.stringify({
+                                dataId: outgoing.data.thread_id,
+                                action: "list",
+                                ts: outgoing.data.ts
+                            })
+                         }],
+                    "text": (focus_info.title + '\n' + focus_info.description + '\n').substring(0,300)
                 }
+              }
             },
             "notification_type": "NO_PUSH"
         };
@@ -1558,7 +1658,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             headers: {
                 "content-type": "application/json",
             },
-            body: img_card
+            body: focus_card
         }, function(err, res, body) {
             if (err) console.error('post err ', err);
             console.log(body)
@@ -1572,12 +1672,14 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 headers: {
                     "content-type": "application/json",
                 },
-                body: focus_card
+                body: img_card
             }, function(err, res, body) {
                 if (err) console.error('post err ', err);
                 console.log(body)
             })
         })
+
+          
     }
 
     function send_cart(channel, text, outgoing) {
