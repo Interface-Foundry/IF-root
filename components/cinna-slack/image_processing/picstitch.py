@@ -80,15 +80,12 @@ def index():
         TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-
-        # 254 x 153
-        # 318 x 192
-        CHAT_HEIGHT = 192
-        CHAT_WIDTH = 318
-        PIC_COORDS = [{'x': 5, 'y': 5}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 205, 'y': 15}] #where to draw text boxes
-        PIC_SIZE = 181, 181
-        #288 x 153
+        print 'ahhhhhhhh'
+        CHAT_HEIGHT = 230
+        CHAT_WIDTH = 381
+        PIC_COORDS = [{'x': 10, 'y': 20}] #where to draw main pics
+        TEXTBOX_COORDS = [{'x': 205, 'y': 20}] #where to draw text boxes
+        PIC_SIZE = 200, 200
 
     #add images
     for i, data in enumerate(images):
@@ -147,6 +144,9 @@ def index():
 
         last_y = 5
 
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            last_y = last_y + 10
+
         #add price
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
 
@@ -204,7 +204,7 @@ def index():
             BOX_WIDTH = 26
 
         elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            BOX_WIDTH = 26
+            BOX_WIDTH = 24
         else:
             BOX_WIDTH = 30
 

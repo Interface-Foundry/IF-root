@@ -78,32 +78,45 @@ app.post('/api/messages',connector.listen());
 
 var sessions = {};
 
-//welcome message
-bot.dialog('/', [
-    function (session) {
-        // Send a greeting and show help.
-        var card = new builder.HeroCard(session)
-            .title("Microsoft Bot Framework")
-            .text("Your bots - wherever your users are talking.")
-            .images([
-                 builder.CardImage.create(session, "http://docs.botframework.com/images/demo_bot_image.png")
-            ]);
-        var msg = new builder.Message(session).attachments([card]);
-        session.send(msg);
-        session.send("Hi... I'm the Microsoft Bot Framework demo bot for Skype. I can show you everything you can use our Bot Builder SDK to do on Skype.");
-        session.beginDialog('/help');
-    },
-    function (session, results) {
-        // Display menu
-        session.beginDialog('/menu');
-    },
-    function (session, results) {
-        // Always say goodbye
-        session.send("Ok... See you later!");
-    }
-]);
+
+// //welcome message :)
+// bot.on('contactRelationUpdate', function (message) {
+
+//     //TBD
+//     if (message.action === 'add') {
+//         var name = message.user ? message.user.name : null;
+//         var reply = new builder.Message()
+//                 .address(message.address)
+//                 .text("Hello %s... Thanks for adding me!", name || 'there');
+//         bot.send(reply);
+
+//        var card = new builder.ThumbnailCard()
+//             .title('Choose your country')
+//             .text('To show items available in your country, please choose your country')
+//             // .text("<a href="el.title+">Read reviews on Amazon</a>")
+//             // .tap(builder.CardAction.openUrl(session, el.title))
+//             // .buttons([
+//             //     builder.CardAction.postBack(session, 'add'),
+//             //     builder.CardAction.postBack(session, 'remove')
+//             // ])
+//         var msg = new builder.Message(session).attachments([card]);
+//         session.send(msg);
+//         //bbbutons: (my country not here)
+//         //---> tell us which country to send to: "Which country to add next?"
+
+//     } else {
+//         //remove user from DB!
+//     }
+// });
+
+// bot.on('postBack', function (message) {
+
+//     console.log('Z Z Z Z Z  Z Z ',message)
+// });
+
 
 bot.dialog('/', function (session) {
+
     console.log('kill me now');
     var text = session.message.text;
     var user = session.message.user;
@@ -127,9 +140,9 @@ bot.dialog('/', function (session) {
    //   console.log('\n\n\n\n\n\n\n\n\n\n\nGOTTA CATCH EM ALLLLLLLLL\n\n\n\n\n\n\n\n\n\n\n\n')
    // }
 
-    bot.on('typing', function (message) {
-        // User is typing
-    });
+    // bot.on('typing', function (message) {
+    //     // User is typing
+    // });
 
     //Attachment Handling
      if (session.message.attachments && session.message.attachments[0] && session.message.attachments[0].contentType == 'image') {
@@ -180,6 +193,8 @@ bot.dialog('/', function (session) {
             }]);
         session.send(msg);
         return
+    } else {
+
     }
 
     text = emojiText.convert(text,{delimiter: ' '});
@@ -303,7 +318,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
                 return card = new builder.HeroCard(session)
                     .title(result.title)
-                    .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
+                    .text("<a href="+result.title_link+">Read reviews on Target</a>")
                     .images([
                         builder.CardImage.create(session, image)
                             .tap(builder.CardAction.showImage(session, image)),
@@ -448,7 +463,7 @@ bot.dialog('/results', [
                     new builder.HeroCard(session)
                         .title(session.results[0].title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+session.results[0].title_link+">Read reviews on Amazon</a>")
+                        .text("<a href="+session.results[0].title_link+">Read reviews on Target</a>")
                         .images([
                             builder.CardImage.create(session, image1)
                                 .tap(builder.CardAction.showImage(session, results[0].title_link)),
@@ -463,7 +478,7 @@ bot.dialog('/results', [
                     new builder.HeroCard(session)
                         .title(session.results[1].title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+ session.results[1].title_link+">Read reviews on Amazon</a>")
+                        .text("<a href="+ session.results[1].title_link+">Read reviews on Target</a>")
                         .images([
                             builder.CardImage.create(session, image2)
                                 .tap(builder.CardAction.showImage(session, results[1].title_link)),
@@ -478,7 +493,7 @@ bot.dialog('/results', [
                     new builder.HeroCard(session)
                         .title(session.results[2].title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+session.results[2].title_link+">Read reviews on Amazon</a>")
+                        .text("<a href="+session.results[2].title_link+">Read reviews on Target</a>")
                         .images([
                             builder.CardImage.create(session, image3)
                                 .tap(builder.CardAction.showImage(session, results[2].title_link)),
