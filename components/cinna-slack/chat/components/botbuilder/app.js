@@ -58,14 +58,16 @@ var credentials = {
     appPassword:'oKSt75PfRSdnjg4HgoKYSRP'
   },
   "test-b": {
-
+    appId: 'c65fabd5-6a4a-47a4-9853-74e2c63d067e',
+    appPassword: 'caPpo0JpX9SmkKTf2iro1tQ'
   },
   kip: {
     appId: '7431dd85-ac18-41e7-9941-e3fe37ae6d75',
     appPassword:'8pgJToqGYgZuPT8mm0Mmk26'
   },
   target: {
-
+    appId: 'b8460a2d-96d0-4c68-97e6-56fae6c22f00',
+    appPassword: 'SSgTUmntbe77OULjVknZmwg'
   }
 };
 
