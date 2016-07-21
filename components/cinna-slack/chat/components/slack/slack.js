@@ -159,63 +159,69 @@ co(function*() {
 //
 kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
-  try {
-    console.log('outgoing message');
-    console.log(outgoing);
-    var message = outgoing.data;
+  console.log('outgoing message');
+  console.log(outgoing);
+  var message = outgoing.data;
 
-    var bot = slackConnections[message.source.team];
+  var bot = slackConnections[message.source.team];
 
-    if (typeof bot === 'undefined') {
-      throw new Error('rtm client not registered for slack team ' + message.source.team);
+  if (typeof bot === 'undefined') {
+    throw new Error('rtm client not registered for slack team ' + message.source.team);
+  }
+
+  var msgData = {
+      icon_url:'http://kipthis.com/img/kip-icon.png',
+      username:'Kip'
+  };
+
+  co(function*() {
+
+    if (message.action === 'typing') {
+      return bot.rtm.sendMessage('typing...', message.source.channel, () => {
+        outgoing.ack();
+      })
     }
 
-    var msgData = {
-        icon_url:'http://kipthis.com/img/kip-icon.png',
-        username:'Kip'
-    };
-    co(function*() {
+    if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+      msgData.attachments = yield search_results(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
 
-      if (message.action === 'typing') {
-        return bot.rtm.sendMessage('typing...', message.source.channel, () => {
-          outgoing.ack();
-        })
-      }
+    if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+      msgData.attachments = yield focus(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
 
-      if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-        msgData.attachments = yield search_results(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
+    if (message.mode === 'cart' && message.action === 'view') {
+      msgData.attachments = yield cart(message, bot.slackbot, false);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
 
-      if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-        msgData.attachments = yield focus(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
+    if (message.mode === 'food' && message.action === 'restaurant.list') {
+      msgData.attachments = yield delivery.com.results(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
 
-      if (message.mode === 'cart' && message.action === 'view') {
-        msgData.attachments = yield cart(message, bot.slackbot, false);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
-
-      if (message.mode === 'food' && message.action === 'results') {
-        msgData.attachments = yield delivery.com.results(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
+    if (message.mode === 'food' && message.action === 'restaurant.info') {
+      msgData.attachments = yield delivery.com.menu(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
+    if (message.mode === 'food' && message.action === 'menu.list') {
+      msgData.attachments = yield delivery.com.fullMenu(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
 
 
-      bot.rtm.sendMessage(message.text, message.source.channel, () => {
-        outgoing.ack();
-      })
-
-    }).then(() => {
+    bot.rtm.sendMessage(message.text, message.source.channel, () => {
       outgoing.ack();
-    }).catch(e => {
-      console.log(e.stack);
-      bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
-        outgoing.ack();
-      })
     })
-  } catch (e) {
-    kip.err(e);
-  }
+
+  }).then(() => {
+    outgoing.ack();
+  }).catch(e => {
+    console.log(e.stack);
+    bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
+      outgoing.ack();
+    })
+  })
 })

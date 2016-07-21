@@ -19,6 +19,13 @@ module.exports.searchNearby = function* (params) {
 
   // make sure we have all the merchants in the db
   saveMerchants(allNearby.merchants);
+
+  if (params.q) {
+    allNearby.merchants = allNearby.merchants.filter(r => {
+      return JSON.stringify(r).match(new RegExp(params.q, 'i'));
+    })
+  }
+
   return allNearby;
 }
 
@@ -51,9 +58,9 @@ function saveMerchants(merchants) {
 //
 module.exports.getMenu = function* (merchant_id) {
   kip.debug('getting menu for merchant id', merchant_id);
-  var data = yield db.Menus.findOne({merchant_id: merchant_id});
-  // var data = request({url: `https://api.delivery.com/merchant/${merchant_id}/menu?client_id=${client_id}`, json: true})
-  var menu = data.raw_menu.menu; // should i return this or a better data model?
+  // var data = yield db.Menus.findOne({merchant_id: merchant_id});
+  var data = yield request({url: `https://api.delivery.com/merchant/${merchant_id}/menu?client_id=${client_id}`, json: true})
+  var menu = data.menu; // should i return this or a better data model?
   return unfuck_menu(menu);
 }
 
@@ -67,6 +74,7 @@ module.exports.getMenu = function* (merchant_id) {
   i'm just trying to eat some food.
 */
 function unfuck_menu(menu) {
+  return menu;
   // first flatten out all the menus so lunch just becomes part of the lunch category not a separate menu
   console.log(menu)
   var categories = menu.reduce((categories, m) => {
@@ -90,6 +98,7 @@ function unfuck_menu(menu) {
   }, [])
 
   kip.debug('categories', categories);
+  kip.debug('returning unfucked menu');
 
   return {
     categories: categories,
