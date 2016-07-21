@@ -43,7 +43,7 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 
 var slack = require('@slack/client');
 var co = require('co');
-var kip = require('../../../kip');
+var kip = require('kip');
 var _ = require('lodash');
 
 var queue = require('../queue-mongo');
