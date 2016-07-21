@@ -28,11 +28,11 @@ var httpsServer = require('https').createServer({
   pfx: fs.readFileSync(keyfile)
 }, app);
 
-server.listen(3978, function(e) {
+server.listen(8000, function(e) {
     if (e) {
         console.error(e)
     }
-    console.log('botbuilder app listening on port 3978 🌏 💬')
+    console.log('botbuilder app listening on port 8000 🌏 💬')
 })
 httpsServer.listen(4343, function(e) {
   if (kip.err(e)) return;
@@ -44,67 +44,84 @@ httpsServer.listen(4343, function(e) {
 //=========================================================
 // Bot Setup
 //=========================================================
+var credentials = {
+  mitsu: {
+    appId: 'f9fb0129-81e7-4885-a5c3-39be043f3926',
+    appPassword: 'eWVg3F8oD6mjZPdE1BpTtqf'
+  },
+  alyx: {
+    appId: '318a63f8-c9bc-406a-adf1-0bea5b333f3d',
+    appPassword:'4LZ837bTJiB1a64mTpUA2NO'
+  },
+  "test-a": {
+    appId: '7e0eb83a-53b9-4b91-94ff-c2feed28f3c5',
+    appPassword:'oKSt75PfRSdnjg4HgoKYSRP'
+  },
+  "test-b": {
 
-//MS app credentials
+  },
+  kip: {
+    appId: '7431dd85-ac18-41e7-9941-e3fe37ae6d75',
+    appPassword:'8pgJToqGYgZuPT8mm0Mmk26'
+  },
+  target: {
+
+  }
+};
+
+
+
+
+//pick the credentials we need
 if(process.env.NODE_ENV == 'development_mitsu'){
-    // Create bot and setup server
-    var connector = new builder.ChatConnector({
-        appId: 'f9fb0129-81e7-4885-a5c3-39be043f3926',
-        appPassword: 'eWVg3F8oD6mjZPdE1BpTtqf'    });
+  var names = ['mitsu'];
 } else if (process.env.NODE_ENV == 'development') {
-    // peter's config.
-    var connector = new builder.ChatConnector({
-        appId: '7431dd85-ac18-41e7-9941-e3fe37ae6d75',
-        appPassword:'8pgJToqGYgZuPT8mm0Mmk26'
-    });
+  names = ['test-a', 'test-b'];
 } else if (process.env.NODE_ENV === 'production') {
-    var connector = new builder.ChatConnector({
-        appId: '7431dd85-ac18-41e7-9941-e3fe37ae6d75',
-        appPassword:'8pgJToqGYgZuPT8mm0Mmk26'
-    });
+  names = ['kip', 'target'];
 } else {
-    // Create bot and setup server
-    var connector = new builder.ChatConnector({
-        appId: '318a63f8-c9bc-406a-adf1-0bea5b333f3d',
-        appPassword:'4LZ837bTJiB1a64mTpUA2NO'
-    });
+  names = ['alyx']
 }
 
-console.log('CONNECTOR ',connector)
+var bots = names.map(name => {
+  kip.log('Loading bot', name.cyan);
 
-var bot = new builder.UniversalBot(connector);
+  var connector = new builder.ChatConnector(credentials[name]);
+  app.post('/api/messages/' + name, connector.listen());
+  var bot = new builder.UniversalBot(connector);
+  setup_bot(bot);
+})
 
-app.post('/api/messages',connector.listen());
 
 var sessions = {};
 
+function setup_bot(bot) {
 //welcome message
-bot.dialog('/', [
-    function (session) {
-        // Send a greeting and show help.
-        var card = new builder.HeroCard(session)
-            .title("Microsoft Bot Framework")
-            .text("Your bots - wherever your users are talking.")
-            .images([
-                 builder.CardImage.create(session, "http://docs.botframework.com/images/demo_bot_image.png")
-            ]);
-        var msg = new builder.Message(session).attachments([card]);
-        session.send(msg);
-        session.send("Hi... I'm the Microsoft Bot Framework demo bot for Skype. I can show you everything you can use our Bot Builder SDK to do on Skype.");
-        session.beginDialog('/help');
-    },
-    function (session, results) {
-        // Display menu
-        session.beginDialog('/menu');
-    },
-    function (session, results) {
-        // Always say goodbye
-        session.send("Ok... See you later!");
-    }
-]);
+// bot.dialog('/', [
+//     function (session) {
+//         // Send a greeting and show help.
+//         var card = new builder.HeroCard(session)
+//             .title("Microsoft Bot Framework")
+//             .text("Your bots - wherever your users are talking.")
+//             .images([
+//                  builder.CardImage.create(session, "http://docs.botframework.com/images/demo_bot_image.png")
+//             ]);
+//         var msg = new builder.Message(session).attachments([card]);
+//         session.send(msg);
+//         session.send("Hi... I'm the Microsoft Bot Framework demo bot for Skype. I can show you everything you can use our Bot Builder SDK to do on Skype.");
+//         session.beginDialog('/help');
+//     },
+//     function (session, results) {
+//         // Display menu
+//         session.beginDialog('/menu');
+//     },
+//     function (session, results) {
+//         // Always say goodbye
+//         session.send("Ok... See you later!");
+//     }
+// ]);
 
 bot.dialog('/', function (session) {
-    console.log('kill me now');
     var text = session.message.text;
     var user = session.message.user;
     sessions[user.id] = session;
@@ -212,6 +229,114 @@ bot.dialog('/', function (session) {
     }).catch(kip.err);
 })
 
+
+bot.dialog('/results', [
+    function (session) {
+     // console.log(channel, text, results, outgoing)
+        co(function*(){
+             var giphy_gif = '';
+         yield request('http://api.giphy.com/v1/gifs/search?q=' + session.outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
+            if (err) console.log(err);
+            // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
+            giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
+            //picstitch images
+            // var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
+            // var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
+            // var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
+
+            if(session.outgoing.data.amazon){
+                //amazon images
+                var parsedAmazon = JSON.parse(session.outgoing.data.amazon);
+                // console.log('\n\n\n DOOOO ',parsedAmazon[0])
+                var image1 = ((session.results[0].image_url.indexOf('http') > -1) ? session.results[0].image_url : 'http://kipthis.com/images/header_partners.png')
+                var image2 = ((session.results[1].image_url.indexOf('http') > -1) ? session.results[1].image_url : 'http://kipthis.com/images/header_partners.png')
+                var image3 = ((session.results[2].image_url.indexOf('http') > -1) ? session.results[2].image_url : 'http://kipthis.com/images/header_partners.png')
+            }
+            // console.log('SEND_RESULTS FIRED, RESULTS: ', results)
+            //Ask the user to select an item from a carousel.
+            var msg = new builder.Message(session)
+                .textFormat(builder.TextFormat.xml)
+                .attachmentLayout('carousel')
+                .attachments([
+                    new builder.HeroCard(session)
+                        .title(session.results[0].title)
+                        // .subtitle("Space Needle")
+                        .text("<a href="+session.results[0].title_link+">Read reviews on Amazon</a>")
+                        .images([
+                            builder.CardImage.create(session, image1)
+                                .tap(builder.CardAction.showImage(session, results[0].title_link)),
+                        ])
+                        .tap(builder.CardAction.openUrl(session, session.results[0].title_link))
+                        .buttons([
+                            builder.CardAction.imBack(session, 'save 1'
+                            , "Add to Cart"),
+                            builder.CardAction.imBack(session, "1 but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, "1", "More Info")
+                        ]),
+                    new builder.HeroCard(session)
+                        .title(session.results[1].title)
+                        // .subtitle("Space Needle")
+                        .text("<a href="+ session.results[1].title_link+">Read reviews on Amazon</a>")
+                        .images([
+                            builder.CardImage.create(session, image2)
+                                .tap(builder.CardAction.showImage(session, results[1].title_link)),
+                        ])
+                        .tap(builder.CardAction.openUrl(session, session.results[1].title_link))
+                        .buttons([
+                            builder.CardAction.imBack(session, '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"2\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
+                            , "Add to Cart"),
+                            builder.CardAction.imBack(session, "2 but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, "2", "More Info")
+                        ]),
+                    new builder.HeroCard(session)
+                        .title(session.results[2].title)
+                        // .subtitle("Space Needle")
+                        .text("<a href="+session.results[2].title_link+">Read reviews on Amazon</a>")
+                        .images([
+                            builder.CardImage.create(session, image3)
+                                .tap(builder.CardAction.showImage(session, results[2].title_link)),
+                        ])
+                        .tap(builder.CardAction.openUrl(session, session.results[2].title_link))
+                        .buttons([
+                            builder.CardAction.imBack(session, '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"3\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
+                            , "Add to Cart"),
+                            builder.CardAction.imBack(session, "3 but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, "3", "More Info")
+                        ])
+                 ]);
+                    // builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
+                    session.endDialog(msg);
+             })
+         })
+
+
+
+
+        // builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|(quit)");
+
+
+
+
+
+
+
+    },
+    function (session, results) {
+        // if (results.response && results.response.entity != '(quit)') {
+        //     // Launch demo dialog
+        //     session.beginDialog('/' + results.response.entity);
+        // } else {
+            // Exit the menu
+            session.endDialog();
+        // }
+    },
+    function (session, results) {
+        // The menu runs a loop until the user chooses to (quit).
+        session.replaceDialog('/');
+    }
+]);
+
+}
 
 //
 // Mechanism for responding to messages
@@ -416,112 +541,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         session.send(msg);
     }
 })
-
-bot.dialog('/results', [
-    function (session) {
-     // console.log(channel, text, results, outgoing)
-        co(function*(){
-             var giphy_gif = '';
-         yield request('http://api.giphy.com/v1/gifs/search?q=' + session.outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
-            if (err) console.log(err);
-            // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
-            giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
-            //picstitch images
-            // var image1 = ((results[0].image_url.indexOf('http') > -1) ? results[0].image_url : 'http://kipthis.com/images/header_partners.png')
-            // var image2 = ((results[1].image_url.indexOf('http') > -1) ? results[1].image_url : 'http://kipthis.com/images/header_partners.png')
-            // var image3 = ((results[2].image_url.indexOf('http') > -1) ? results[2].image_url : 'http://kipthis.com/images/header_partners.png')
-
-            if(session.outgoing.data.amazon){
-                //amazon images
-                var parsedAmazon = JSON.parse(session.outgoing.data.amazon);
-                // console.log('\n\n\n DOOOO ',parsedAmazon[0])
-                var image1 = ((session.results[0].image_url.indexOf('http') > -1) ? session.results[0].image_url : 'http://kipthis.com/images/header_partners.png')
-                var image2 = ((session.results[1].image_url.indexOf('http') > -1) ? session.results[1].image_url : 'http://kipthis.com/images/header_partners.png')
-                var image3 = ((session.results[2].image_url.indexOf('http') > -1) ? session.results[2].image_url : 'http://kipthis.com/images/header_partners.png')
-            }
-            // console.log('SEND_RESULTS FIRED, RESULTS: ', results)
-            //Ask the user to select an item from a carousel.
-            var msg = new builder.Message(session)
-                .textFormat(builder.TextFormat.xml)
-                .attachmentLayout('carousel')
-                .attachments([
-                    new builder.HeroCard(session)
-                        .title(session.results[0].title)
-                        // .subtitle("Space Needle")
-                        .text("<a href="+session.results[0].title_link+">Read reviews on Amazon</a>")
-                        .images([
-                            builder.CardImage.create(session, image1)
-                                .tap(builder.CardAction.showImage(session, results[0].title_link)),
-                        ])
-                        .tap(builder.CardAction.openUrl(session, session.results[0].title_link))
-                        .buttons([
-                            builder.CardAction.imBack(session, 'save 1'
-                            , "Add to Cart"),
-                            builder.CardAction.imBack(session, "1 but cheaper" , "Find Cheaper"),
-                            builder.CardAction.imBack(session, "1", "More Info")
-                        ]),
-                    new builder.HeroCard(session)
-                        .title(session.results[1].title)
-                        // .subtitle("Space Needle")
-                        .text("<a href="+ session.results[1].title_link+">Read reviews on Amazon</a>")
-                        .images([
-                            builder.CardImage.create(session, image2)
-                                .tap(builder.CardAction.showImage(session, results[1].title_link)),
-                        ])
-                        .tap(builder.CardAction.openUrl(session, session.results[1].title_link))
-                        .buttons([
-                            builder.CardAction.imBack(session, '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"2\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
-                            , "Add to Cart"),
-                            builder.CardAction.imBack(session, "2 but cheaper" , "Find Cheaper"),
-                            builder.CardAction.imBack(session, "2", "More Info")
-                        ]),
-                    new builder.HeroCard(session)
-                        .title(session.results[2].title)
-                        // .subtitle("Space Needle")
-                        .text("<a href="+session.results[2].title_link+">Read reviews on Amazon</a>")
-                        .images([
-                            builder.CardImage.create(session, image3)
-                                .tap(builder.CardAction.showImage(session, results[2].title_link)),
-                        ])
-                        .tap(builder.CardAction.openUrl(session, session.results[2].title_link))
-                        .buttons([
-                            builder.CardAction.imBack(session, '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"3\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
-                            , "Add to Cart"),
-                            builder.CardAction.imBack(session, "3 but cheaper" , "Find Cheaper"),
-                            builder.CardAction.imBack(session, "3", "More Info")
-                        ])
-                 ]);
-                    // builder.Prompts.choice(session, msg, "select:100|select:101|select:102");
-                    session.endDialog(msg);
-             })
-         })
-
-
-
-
-        // builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|(quit)");
-
-
-
-
-
-
-
-    },
-    function (session, results) {
-        // if (results.response && results.response.entity != '(quit)') {
-        //     // Launch demo dialog
-        //     session.beginDialog('/' + results.response.entity);
-        // } else {
-            // Exit the menu
-            session.endDialog();
-        // }
-    },
-    function (session, results) {
-        // The menu runs a loop until the user chooses to (quit).
-        session.replaceDialog('/');
-    }
-]);
 
 app.get('/healthcheck', function(req, res) {
   res.send('feelin good');
