@@ -123,10 +123,43 @@ function setup_bot(bot) {
 //     }
 // ]);
 
+
+//welcome message :)
+bot.on('contactRelationUpdate', function (message) {
+
+    //TBD
+    if (message.action === 'add') {
+        var name = message.user ? message.user.name : null;
+        var reply = new builder.Message()
+                .address(message.address)
+                .text("Hello %s... Thanks for adding me!", name || 'there');
+        bot.send(reply);
+
+       var card = new builder.ThumbnailCard()
+            .title('Choose your country')
+            .text('To show items available in your country, please choose your country')
+            .buttons([
+                builder.CardAction.postBack(session, 'add'),
+                builder.CardAction.postBack(session, 'remove')
+            ])
+        var msg = new builder.Message(session).attachments([card]);
+        session.send(msg);
+        //bbbutons: (my country not here)
+        //---> tell us which country to send to: "Which country to add next?"
+
+    } else {
+        //remove user from DB!
+    }
+});
+
+
 bot.dialog('/', function (session) {
+
     var text = session.message.text;
     var user = session.message.user;
     sessions[user.id] = session;
+
+    console.log('SESSIONS ',sessions)
    // message:
    // { type: 'message',
    //   timestamp: '2016-07-08T21:18:46.707Z',
@@ -202,6 +235,7 @@ bot.dialog('/', function (session) {
     }
 
     text = emojiText.convert(text,{delimiter: ' '});
+
     text = skypeEmojiHack(text);
 
     var message = new db.Message({
@@ -263,7 +297,7 @@ bot.dialog('/results', [
                     new builder.HeroCard(session)
                         .title(session.results[0].title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+session.results[0].title_link+">Read reviews on Target</a>")
+                        .text("<a href="+session.results[0].title_link+">Read reviews on Amazon</a>")
                         .images([
                             builder.CardImage.create(session, image1)
                                 .tap(builder.CardAction.showImage(session, results[0].title_link)),
@@ -278,7 +312,7 @@ bot.dialog('/results', [
                     new builder.HeroCard(session)
                         .title(session.results[1].title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+ session.results[1].title_link+">Read reviews on Target</a>")
+                        .text("<a href="+ session.results[1].title_link+">Read reviews on Amazon</a>")
                         .images([
                             builder.CardImage.create(session, image2)
                                 .tap(builder.CardAction.showImage(session, results[1].title_link)),
@@ -293,7 +327,7 @@ bot.dialog('/results', [
                     new builder.HeroCard(session)
                         .title(session.results[2].title)
                         // .subtitle("Space Needle")
-                        .text("<a href="+session.results[2].title_link+">Read reviews on Target</a>")
+                        .text("<a href="+session.results[2].title_link+">Read reviews on Amazon</a>")
                         .images([
                             builder.CardImage.create(session, image3)
                                 .tap(builder.CardAction.showImage(session, results[2].title_link)),
@@ -393,6 +427,17 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             else if (message.text){
                 console.log('5💀')
                 session.send(message.text);
+
+                var card = new builder.ThumbnailCard()
+                    .title('Choose your country')
+                    .text('To show items available in your country, please choose your country')
+                    .buttons([
+                        builder.CardAction.postBack(session, 'United States','United States'),
+                        builder.CardAction.postBack(session, 'Singapore','Singapore')
+                    ])
+                var msg = new builder.Message(session).attachments([card]);
+                session.send(msg);
+
             }
             else {
                 console.log('\nhmm, shouldnt be getting here..', message);
@@ -430,7 +475,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
                 return card = new builder.HeroCard(session)
                     .title(result.title)
-                    .text("<a href="+result.title_link+">Read reviews on Target</a>")
+                    .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
                     .images([
                         builder.CardImage.create(session, image)
                             .tap(builder.CardAction.showImage(session, image)),
@@ -505,8 +550,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 // .text("<a href="el.title+">Read reviews on Amazon</a>")
                 // .tap(builder.CardAction.openUrl(session, el.title))
                 .buttons([
-                    builder.CardAction.postBack(session, 'add ' + el._id, '+ Increase Quantity'),
-                    builder.CardAction.postBack(session, 'remove ' + el._id, '- Decrease Quantity')
+                    builder.CardAction.postBack(session, `add ${i+1}`, '+ Increase Quantity'),
+                    builder.CardAction.postBack(session, `remove ${i+1}`, '- Decrease Quantity')
                 ])
                 //     // builder.CardAction.postBack(session, '+', "+"),
                 //     //  builder.CardAction(session).type('postBack').value('+').title("Click to send response to bot"),
@@ -535,7 +580,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 // ])
                 // .tap(builder.CardAction.openUrl(session, focus_info.title_link))
                 .buttons([
-                    builder.CardAction.openUrl(session, outgoing.data.data.link, "Checkout with Target"),
+                    builder.CardAction.openUrl(session, outgoing.data.data.link, "Checkout with Amazon"),
                  ]))
         var msg = new builder.Message(session)
             .textFormat(builder.TextFormat.xml)
