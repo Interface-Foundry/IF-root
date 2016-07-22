@@ -210,6 +210,10 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       msgData.attachments = yield delivery.com.fullMenu(message);
       return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
     }
+    if (message.mode === 'food' && message.action === 'menu.search.results') {
+      msgData.attachments = yield delivery.com.menuResults(message);
+      return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+    }
 
 
     bot.rtm.sendMessage(message.text, message.source.channel, () => {

@@ -26,6 +26,12 @@ delivery.com.results = function *(message) {
     }
   }))
 
+  att.push({
+    text: 'type `1`, `2`, oe `3` to select an item or tell me the type of food you are interested in, like `sushi`',
+    mrkdwn_in: ['text'],
+    color: '#45a5f4'
+  })
+
   console.log(att);
   return att;
 }
@@ -67,6 +73,21 @@ delivery.com.fullMenu = function*(message) {
   }))
 }
 
+//
+// render options 1,2,3 for menu item search
+//
+delivery.com.menuResults = function*(message) {
+  return _.flatten(message.data.results.map(i => {
+    if (generators[i.type]) {
+      kip.debug('handling', i.type, i.id);
+      return generators[i.type](i);
+    } else {
+      console.error(i);
+      kip.err('no menu item generator for item ' + i.id + ' of type ' + i.type)
+    }
+  })).filter(Boolean);
+}
+
 
 //
 // generate content for individual pieces of the menu
@@ -94,6 +115,15 @@ generators.menu = function(i) {
 
   return {
     text: text, 
+    mrkdwn_in: ['text'],
+    color: '#45a5f4'
+  }
+}
+
+generators.item = function(i) {
+  console.log(i);
+  return {
+    text: i.name,
     mrkdwn_in: ['text'],
     color: '#45a5f4'
   }

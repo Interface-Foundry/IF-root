@@ -213,7 +213,20 @@ handlers['food.menu.list'] = function*(message) {
 // the user is looking at a menu and is searching for an item to add
 //
 handlers['food.menu.search'] = function*(message) {
-
+  var results_message = default_reply(message);
+  results_message.action = 'menu.search.results';
+  var results = yield search.menuSearch({
+    q: message.text,
+    menu: message.history.filter(m => {
+      return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu');
+    })[0].data.menu
+  });
+  results_message.data = {
+    results: results
+  };
+  results_message.text = `Okay, here are the items matching "${message.text}"`;
+  results_message.save();
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
 }
 
 //
