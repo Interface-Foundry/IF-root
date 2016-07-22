@@ -1,0 +1,38 @@
+{
+  "rev_ac_dict": {
+    "8": "onboarding",
+    "1": "checkout",
+    "3": "focus",
+    "12": "shopping",
+    "13": "similar",
+    "14": "smalltalk",
+    "7": "more",
+    "9": "remove",
+    "4": "initial",
+    "6": "modify",
+    "2": "collect",
+    "0": "addmember",
+    "11": "settings",
+    "10": "save",
+    "5": "list"
+  },
+  "ac_dict": {
+    "list": 5,
+    "smalltalk": 14,
+    "initial": 4,
+    "similar": 13,
+    "collect": 2,
+    "more": 7,
+    "save": 10,
+    "onboarding": 8,
+    "settings": 11,
+    "remove": 9,
+    "modify": 6,
+    "checkout": 1,
+    "addmember": 0,
+    "shopping": 12,
+    "focus": 3
+  },
+  "pad_length": 20,
+  "port_number": 8085
+}

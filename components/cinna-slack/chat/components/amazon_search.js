@@ -10,7 +10,7 @@ var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = promisify(require('./amazonHTML'));
-var db = require('db');
+var db = require('../../db');
 // var client = amazon.createClient({
 //   awsId: "AKIAIKMXJTAV2ORZMWMQ",
 //   awsSecret: "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",
@@ -189,6 +189,7 @@ function* enhance_results(results,origin) {
 
   for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];
+    // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
   // cool i've got the results now...
