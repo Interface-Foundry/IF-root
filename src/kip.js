@@ -1,6 +1,7 @@
 var path = require('path');
 require('colors');
 global.db = require('./db');
+var config = require('./config');
 
 /**
  * Prints an error to the screen and returns true.
@@ -135,5 +136,6 @@ module.exports = global.kip = {
   err: error,
   log: log,
   timer: timer,
-  icanhazinternet: icanhazinternet
+  icanhazinternet: icanhazinternet,
+  config: config
 }
