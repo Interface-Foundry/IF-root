@@ -119,10 +119,10 @@ app.get('/facebook', function(req, res) {
 
 //
 //   -Back button state cache- 
-//   What is this you ask? Basically a flag cache which keeps track of whether user just hit back or not
+//   What is this you ask? Basically an index to keep track of how many 'backs' you clicked
 //   May refactor in future..
 //
-backCache = false;
+backCache = 0;
 
 
 app.post('/facebook', function(req, res) {
@@ -134,12 +134,14 @@ app.post('/facebook', function(req, res) {
     //--  *THIS MAY BE MOVED ELSEWHERE, currently it will make redundant calls but just playing it on the safe side for now
     //
     //
+
     var set_greeting = {
       "setting_type" : "greeting",
       "greeting": { 
             "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and   I'll show you 3 options." 
         }
-     }
+     };
+
     request({
         url: "https://graph.facebook.com/v2.6/me/thread_settings",
         qs: {
@@ -265,7 +267,7 @@ app.post('/facebook', function(req, res) {
                             origin: 'facebook',
                             text: sub_menu.text,
                             source: msg.source,
-                            amazon: msg.amazon                                      });
+                            amazon: msg.amazon });
                     // queue it up for processing
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
@@ -329,6 +331,7 @@ app.post('/facebook', function(req, res) {
             //  --If user hits back button..--
             //
             else if (sub_menu.action && sub_menu.action == 'back') {
+                console.log('\n\n\n\n\n\BackCache: ', backCache,'\n\n\n\n\n')
                 db.Messages.find({
                     thread_id: 'facebook_' + sender.toString()
                 }).sort('-ts').exec(function(err, messages) {
@@ -339,26 +342,29 @@ app.post('/facebook', function(req, res) {
                         return console.log('No message found');
                     } 
                     //If user just hit the back button already -- back --> back :  e.g. backs on backs on backs
-                    if (backCache) {
-                        console.log('USER JUST HIT BACK RIGHT BEFORE!!')
-                        message_to_retrieve = message_to_retrieve - 2;
-                            // console.log(2)
-                            var msg = messages[message_to_retrieve];
-                            var message = new db.Message({
-                                incoming: true,
-                                thread_id: 'facebook_' + sender.toString(),
-                                resolved: false,
-                                user_id: msg.user_id,
-                                origin: 'facebook',
-                                text:  _.get(messages[message_to_retrieve], 'execute[0].params.query'),
-                                source: msg.source,
-                                amazon: msg.amazon
-                              });
-                            message.save().then(() => {
-                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                            });
-                        } 
-                        else if (messages[message_to_retrieve] && _.get(messages[message_to_retrieve], 'execute[0].params.query')) {
+                    // if (backCache > 0) {
+                    //      backCache = backCache + 1;
+                    //      message_to_retrieve = message_to_retrieve + backCache;
+                    //         // console.log(2)
+                    //         var msg = messages[message_to_retrieve];
+                    //         var message = new db.Message({
+                    //             incoming: true,
+                    //             thread_id: 'facebook_' + sender.toString(),
+                    //             resolved: false,
+                    //             user_id: msg.user_id,
+                    //             origin: 'facebook',
+                    //             text:  _.get(messages[message_to_retrieve], 'execute[0].params.query'),
+                    //             source: msg.source,
+                    //             amazon: msg.amazon
+                    //           });
+                    //         message.save().then(() => {
+                    //             queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                    //         });
+                    //     } 
+                    //     else
+                         if (messages[message_to_retrieve] && _.get(messages[message_to_retrieve], 'execute[0].params.query')) {
+                             backCache = backCache + 1;
+                         message_to_retrieve = message_to_retrieve + backCache;
                             //This will loop through older messages until it finds a query.  
                             //..There may be a situation in which user may be backing into a focus query
                             //..in which case the message history will not be properly aligned to return the correct focus result..
@@ -425,7 +431,7 @@ app.post('/facebook', function(req, res) {
                                           },
                                           {
                                             "content_type":"text",
-                                            "title":" < Back ",
+                                            "title":" < Previous Search ",
                                             "payload": JSON.stringify({
                                                     action: "back",
                                                     type:"last_search"
@@ -453,6 +459,9 @@ app.post('/facebook', function(req, res) {
                             }
                         } 
                       })  
+                } else {
+                    //Resetting back button count
+                    backCache = 0;
                 }
 
                 //
@@ -644,7 +653,7 @@ app.post('/facebook', function(req, res) {
             console.log('\n\n\npostback: ', postback,'\n\n\n');
             if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
 
-                 var get_started = {
+                 var get_started = { 
                         "recipient": {
                             "id": sender.toString()
                         },
@@ -842,24 +851,47 @@ app.post('/facebook', function(req, res) {
                         msg.amazon = amazon;
                         if (msg && msg.amazon) {
                                 if (postback.action == 'add' && postback.initial) {
-                                        var typing_indicator = {
-                                          "recipient":{
-                                            "id": sender.toString()
-                                          },
-                                          "sender_action": "typing_on"
-                                        };
+                                    console.log('add postback: ', postback);
 
-                                        request({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: fbtoken
-                                            },
-                                            method: 'POST',
-                                            json: typing_indicator
-                                        }, function() {})
+                                    //Send a typing indicator to user
+                                    var typing_indicator = {
+                                      "recipient":{
+                                        "id": sender.toString()
+                                      },
+                                      "sender_action": "typing_on"
+                                    };
 
-                                    console.log('add --> postback: ', postback);
-                                       var new_message = new db.Message({
+                                    request({
+                                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                                        qs: {
+                                            access_token: fbtoken
+                                        },
+                                        method: 'POST',
+                                        json: typing_indicator
+                                    }, function() {})
+
+                                    //Check if user scrolled up and this item is not from the previous search...
+                                    var old_search = yield db.Messages.find({
+                                            thread_id: 'facebook_' + sender.toString()
+                                    }).sort('-ts').exec(function(err, messages) {
+                                        if (err) return console.error(err);
+                                        if (messages.length == 0) {
+                                            console.log('No message found');
+                                        } 
+                                        else if (messages[0]._id == postback.object_id) { 
+                                            console.log('THIS IS AN ITEM FROM THE LATEST SEARCH');
+                                            return 'false'
+                                        }
+                                        else if (messages[0]._id !== postback.object_id) {
+                                            console.log('THIS IS AN NOOOOT ITEM FROM THE LATEST SEARCH', postback)
+                                            return postback.object_id;
+                                        }
+                                    })
+
+
+                                    if (old_search == 'false') {
+                                        //This is the latest search so just pass it through Kip like normal
+                                           var new_message = new db.Message({
                                             incoming: true,
                                             thread_id: msg.thread_id,
                                             resolved: false,
@@ -869,12 +901,35 @@ app.post('/facebook', function(req, res) {
                                             source: msg.source,
                                             amazon: msg.amazon,
                                             searchSelect: [postback.selected]
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
+                                              });
+                                            // queue it up for processing
+                                            var message = new db.Message(new_message);
+                                            message.save().then(() => {
+                                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                            });
+                                    }
+                                    else if (old_search && postback.object_id){
+                                           //Check if user scrolled up and this item is not from the previous search...
+                                            var old_message = yield db.Messages.findById(postback.object_id).exec();
+                                            if (old_message && old_message.amazon && old_message.amazon.length > 0) {
+                                                var new_message = new db.Message({
+                                                    incoming: true,
+                                                    thread_id: old_message.thread_id,
+                                                    resolved: false,
+                                                    user_id: old_message.user_id,
+                                                    origin: old_message.origin,
+                                                    text: 'save ' + postback.selected,
+                                                    source: old_message.source,
+                                                    amazon: old_message.amazon,
+                                                    searchSelect: [postback.selected]
+                                                      });
+                                                // queue it up for processing
+                                                var message = new db.Message(new_message);
+                                                message.save().then(() => {
+                                                    queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                                });
+                                            }
+                                    } 
 
                                 }
                                 else if (postback.action == 'add' && !postback.initial) {
@@ -1334,15 +1389,16 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     kip.debug('error: no result.image_url (picstitch) found');
                     var image = 'http://kipthis.com/images/header_partners.png';
                 }
-
+                console.log('OBJECT ID TEEHEE', outgoing.data)
                 return {
                         "title": result.title,
-                        "image_url": (result.image_url.indexOf('http') > -1 ? result.image_url : 'http://kipthis.com/images/header_partners.png'),
+                        "image_url": (result.image_url && result.image_url.indexOf('http') > -1 ? result.image_url : 'http://kipthis.com/images/header_partners.png'),
                         "buttons": [{
                             "type": "postback",
                             "title": "Add to Cart",
                             "payload": JSON.stringify({
                                 dataId: outgoing.data.thread_id,
+                                object_id: outgoing.data._id,
                                 action: "add",
                                 selected: 1,
                                 ts: outgoing.data.ts,
@@ -1432,7 +1488,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                               },
                               {
                                 "content_type":"text",
-                                "title":" < Back ",
+                                "title":" < Previous Search ",
                                 "payload": JSON.stringify({
                                         action: "back",
                                         type:"last_search"
@@ -1540,6 +1596,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                             "title": "Add to Cart",
                             "payload": JSON.stringify({
                                 dataId: outgoing.data.thread_id,
+                                object_id: outgoing.data._id,
                                 action: "add",
                                 selected: focus_info.selected,
                                 ts: outgoing.data.ts
@@ -1616,10 +1673,12 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 "buttons":[
                     { "type": "postback",
                       "title": "➕",
+                      "object_id": outgoing.data._id,
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "add" ,"selected": (i + 1), initial: false })
                     },
                     { "type": "postback",
                       "title": "➖",
+                      "object_id": outgoing.data._id,
                       "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "remove" ,"selected": (i + 1), initial: false})
                     },
                     { "type": "postback",
