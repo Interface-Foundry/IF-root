@@ -36,7 +36,6 @@ var COUNTRY = {
   BRAZIL: ['.com.br']
 }
 
-<<<<<<< HEAD
 var swapAmazonTLD = function (url, user_id) {
   var user = db.Chatuser.findOne({
     id: user_id
@@ -48,20 +47,6 @@ var swapAmazonTLD = function (url, user_id) {
     return url
   }
 }
-=======
-// var swapAmazonTLD = function (url, user_id) {
-//   var user = db.Chatuser.findOne({
-//     id: user_id
-//   })
-//   if (COUNTRY.hasOwnProperty(user.country)) {
-//     return url.split('.com').join(COUNTRY[user_country])
-//   }
-//   else {
-//     return url
-//   }
-// }
-
->>>>>>> graham/nlp
 
 var urlShorten = function(data,callback2) {
 
