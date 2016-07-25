@@ -1,8 +1,0 @@
-env: development
-elasticsearch:
-  url: http://localhost:9200
-app:
-  publicAPI: http://localhost:2997/api
-picstitch: http://localhost:5000
-nlp: http://localhost:8083
-doc2vec: http://localhost:8084
