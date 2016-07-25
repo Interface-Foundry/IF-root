@@ -70,3 +70,26 @@ example:
 Explanation of some of the terms (POSTAG, DEPREL, etc): [Dependencies Manual](http://nlp.stanford.edu/software/dependencies_manual.pdf)
 
 Another explanation: [temrs](https://cs.nyu.edu/grishman/jet/guide/PennPOS.html)
+
+
+## USING FROM PYTHON
+
+the request from node stuff:
+```
+var resp =request({
+...       method: 'POST',
+...       url: config.nlp_rnn + '/predict',
+...       json: true,
+...       body: {
+.....         text: text,
+.....         // history: history_array
+.....       }
+...     })
+```
+the equivalent in python will be:
+
+```
+import requests
+r = requests.post('http://localhost:8085/predict', json={'text': 'red shoes'})
+```
+

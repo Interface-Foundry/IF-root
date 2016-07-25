@@ -7,7 +7,6 @@ var datejs = require('./date');
 var momenttz = require('moment-timezone');
 var weeklyUpdate = require('./weekly_updates');
 var history = require("./history.js");
-var nlp = require('../../nlp/api');
 var processData = require("./process.js");
 var banter = require("./banter.js");
 var refreshTeam = require('./refresh_team');
@@ -106,9 +105,9 @@ module.exports.settings = function(slackbot, user_id, done, data) {
         // if (convo.status=='completed'){
         //   var res = convo.extractResponses();
         //   console.log('CONVO ENDED HERE ',res);
-          
+
         // }
-        
+
       })
       console.log('showing settings');
       showSettings(response, convo);
@@ -263,7 +262,7 @@ function listenOnboard(response, convo){
 
     convo.say(resStatus);
     //convo.next()
-    specialAdminMessage();     
+    specialAdminMessage();
   }
 
   // check for something like "nobody"
@@ -294,7 +293,7 @@ function listenOnboard(response, convo){
 
     convo.say(resStatus)
     //convo.next()
-    
+
     specialAdminMessage();
   }
 
@@ -313,7 +312,7 @@ function listenOnboard(response, convo){
           "mrkdwn_in": [
               "text",
               "pretext"
-          ],  
+          ],
         }
     ];
 
@@ -335,7 +334,7 @@ function listenOnboard(response, convo){
 
     var attachments = [
         {
-            "color":"#45a5f4",  
+            "color":"#45a5f4",
             "image_url":"http://kipthis.com/kip_modes/mode_howtousekip.png",
             "text":'',
             "fallback":"Welcome"
@@ -401,7 +400,7 @@ function listenOnboard(response, convo){
     convo.next()
   }
 
-  
+
 
   function fireGremlins(){
 
@@ -522,7 +521,7 @@ function listenOnboard(response, convo){
 
           convo.next();
         //}
-        console.log('2🔸','GREMLINS FIRED'); 
+        console.log('2🔸','GREMLINS FIRED');
       }
 
       // check if we didn't get it
@@ -584,7 +583,7 @@ function listenOnboard(response, convo){
                           "text",
                           "pretext"
                       ],
-                      "color":"#45a5f4",  
+                      "color":"#45a5f4",
                       "image_url":"http://kipthis.com/kip_modes/mode_howtousekip.png",
                       "fallback":"Welcome"
                   },
@@ -653,11 +652,11 @@ function listenOnboard(response, convo){
           });
 
         })
-  
+
         // show this user the welcome video
         //welcomeVid(response, convo);
       });
-    }) 
+    })
   }
 
 }
@@ -769,7 +768,7 @@ function showSettings(response, convo, flag, done) {
     }else {
       var adminText = 'I\'m managed by ' + office_gremlins.join(', ') + '.';
     }
-    
+
     if (isAdmin) {
       adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
     }else if (convo.slackbot.meta.office_assistants.length < 1){
@@ -806,7 +805,7 @@ function showSettings(response, convo, flag, done) {
     attachments.map(function(a) {
       a.mrkdwn_in =  ['text'];
       a.color = '#45a5f4';
-    })  
+    })
 
     convo.say({
       username: 'Kip',
@@ -1045,7 +1044,7 @@ function handleSettingsChange(response, convo) {
 
       //* * * * * * * * * * * * * * * * * *
       //MAKE ALL THESE STRING MATCHES FUZZY
-      //* * * * * * * * * * * * * * * * * * 
+      //* * * * * * * * * * * * * * * * * *
       // - -- - - - - > run through banter.js (new function)
 
       case 'yes weekly status':
@@ -1095,12 +1094,12 @@ function handleSettingsChange(response, convo) {
           convo.ask('Yes? I\'m listening', handleSettingsChange)
           return convo.next();
 
-        //EXITING SETTINGS MODE 
+        //EXITING SETTINGS MODE
         } else if (response.text.match(convo.task.botkit.utterances.no) || banter.checkExitMode(cleanTxt)) {
 
             //FUNCTION CHECK FOR STOP WORDS, SEND BACK RESPONSE IN ATTACHMENT FORMAT
 
-            //FUNCTION 
+            //FUNCTION
             var attachments = [
                 {
                   "pretext": "Ok thanks! Done with settings 😊",
@@ -1139,7 +1138,7 @@ function handleSettingsChange(response, convo) {
           var currentMode = 'settings';
           //pass message to check for mode handling with mode 'settings'
           processData.modeHandle(response.text,currentMode,function(obj){
-            //mode detected 
+            //mode detected
             if(obj && obj.mode && obj.mode !== currentMode){
               convo.parsedKip = obj.res;
               convo.next();
@@ -1147,11 +1146,11 @@ function handleSettingsChange(response, convo) {
             }
             //continue same mode
             else if (obj && obj.mode && obj.mode == currentMode && obj.res){
-              convo.say(obj.res);              
+              convo.say(obj.res);
             }
             //no mode detected
             else {
-              //send default 
+              //send default
               var attachments = [
                 {
                   text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit Settings",
@@ -1169,9 +1168,9 @@ function handleSettingsChange(response, convo) {
                 attachments: attachments,
                 fallback: 'Settings'
               };
-              
+
               showSettings(response, convo, 'noAsk', function(){
-                convo.ask(resStatus, handleSettingsChange); 
+                convo.ask(resStatus, handleSettingsChange);
                 convo.next();
               });
 
@@ -1185,12 +1184,12 @@ function handleSettingsChange(response, convo) {
   }).catch(function(e) {
     console.log('error handling settings change')
     console.log(response)
-    console.log(e)  
+    console.log(e)
 
     var currentMode = 'settings';
     //pass message to check for mode handling with mode 'settings'
     processData.modeHandle(response.text,currentMode,function(obj){
-      //mode detected 
+      //mode detected
       if(obj && obj.mode && obj.mode !== currentMode){
         convo.parsedKip = obj.res;
         convo.next();
@@ -1216,13 +1215,13 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
-        convo.ask(resStatus, handleSettingsChange); 
+
+        convo.ask(resStatus, handleSettingsChange);
         convo.next()
       }
       //no mode detected
       else {
-        //send default 
+        //send default
         var attachments = [
           {
             text: "I'm sorry, I couldn't understand that.  Do you have any settings changes? Type `exit` to quit Settings",
@@ -1240,9 +1239,9 @@ function handleSettingsChange(response, convo) {
           attachments: attachments,
           fallback: 'Settings'
         };
-        
+
         showSettings(response, convo, 'noAsk', function(){
-          convo.ask(resStatus, handleSettingsChange); 
+          convo.ask(resStatus, handleSettingsChange);
           convo.next()
         });
 

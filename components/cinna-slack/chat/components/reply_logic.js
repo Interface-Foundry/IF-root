@@ -16,7 +16,7 @@ var purchase = require("./purchase.js");
 // var conversation_botkit = require('./conversation_botkit');
 // var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
@@ -480,6 +480,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   exec.params.query = old_params.query;
 
   // modify the params and then do another search.
+  // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
     var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
     if (exec.params.param === 'less') {
@@ -489,11 +490,13 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
-
-
-  else {
-    throw new Error('this type of modification not handled yet: ' + exec.params.type);
-  }
+  // modify the color
+  // if (exec.params.type === 'color') {
+  //   var new_query = (old_results[exec.params.focus - 1].ItemAttributes[0].Title + old_)
+  // }
+  // else {
+  //   throw new Error('this type of modification not handled yet: ' + exec.params.type);
+  // }
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
@@ -529,7 +532,7 @@ console.log('raw_results: ', typeof raw_results, raw_results);
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
 
   // view the cart

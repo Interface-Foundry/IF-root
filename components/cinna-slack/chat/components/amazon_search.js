@@ -11,11 +11,6 @@ var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = promisify(require('./amazonHTML'));
 var db = require('../../db');
-// var client = amazon.createClient({
-//   awsId: "AKIAIKMXJTAV2ORZMWMQ",
-//   awsSecret: "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",
-//   awsTag: "quic0b-20"
-// });
 
 
 var aws_clients = {
@@ -161,10 +156,7 @@ var similar = function*(params,origin) {
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results,origin) {
-
-
-
+function* enhance_results(results, user_id) {
   // enhance the results, naturally.
   yield results.map(r => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {

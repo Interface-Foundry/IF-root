@@ -43,9 +43,9 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 
 var slack = require('@slack/client');
 var co = require('co');
-var kip = require('kip');
 var _ = require('lodash');
 
+var kip = require('../../../kip');
 var queue = require('../queue-mongo');
 var db = require('../../../db')
 var image_search = require('../image_search');
