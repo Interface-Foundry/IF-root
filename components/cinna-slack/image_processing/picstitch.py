@@ -83,9 +83,9 @@ def index():
         print 'ahhhhhhhh'
         CHAT_HEIGHT = 230
         CHAT_WIDTH = 381
-        PIC_COORDS = [{'x': 10, 'y': 20}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 205, 'y': 20}] #where to draw text boxes
-        PIC_SIZE = 200, 200
+        PIC_COORDS = [{'x': 20, 'y': 50}] #where to draw main pics
+        TEXTBOX_COORDS = [{'x': 250, 'y': 100}] #where to draw text boxes
+        PIC_SIZE = 250, 250
 
     #add images
     for i, data in enumerate(images):
@@ -122,8 +122,8 @@ def index():
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
 
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 20) #price
-        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16)
+        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 23) #price
+        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 18)
 
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x'] - 30
@@ -145,7 +145,7 @@ def index():
         last_y = 5
 
         if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            last_y = last_y + 10
+            last_y = last_y + 50
 
         #add price
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
@@ -154,8 +154,12 @@ def index():
         if im[u'prime'] == '1' and images[0][u'origin'] != 'skype':
             img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
 
+
         last_y = last_y + 27
 
+        #move reviews down a bit 
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            last_y = last_y + 10
 
 
         if 'reviews' in im and 'rating' in im[u'reviews']:
@@ -198,30 +202,31 @@ def index():
             draw.text((x + 80, last_y),' - ' + str(reviewCount),font=font2,fill="#2d70c1")
             last_y = last_y + 20
 
-        last_y = last_y + 5
+        # last_y = last_y + 5
 
-        if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-            BOX_WIDTH = 26
+        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+        #     BOX_WIDTH = 26
 
-        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            BOX_WIDTH = 24
-        else:
-            BOX_WIDTH = 30
+        # elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        #     BOX_WIDTH = 24
+        # else:
+        #     BOX_WIDTH = 30
 
+        #draw details but not for skype or fbook
+        # if images[0][u'origin'] != 'skype' or images[0][u'origin'] != 'facebook':
+        #     for z in im[u'name']:
 
-        for z in im[u'name']:
-
-            # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-            countLines = 0
-            for line in textwrap.wrap(z, width=BOX_WIDTH):
-                countLines += 1
-                if countLines < 3:
-                    filler = ''
-                    if countLines == 3:
-                        filler = '...'
-                    draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
-                    last_y += font2.getsize(line)[1]
-                    last_y = last_y + 2
+        #         # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
+        #         countLines = 0
+        #         for line in textwrap.wrap(z, width=BOX_WIDTH):
+        #             countLines += 1
+        #             if countLines < 3:
+        #                 filler = ''
+        #                 if countLines == 3:
+        #                     filler = '...'
+        #                 draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
+        #                 last_y += font2.getsize(line)[1]
+        #                 last_y = last_y + 2
 
                 # last_y = y
             # y += font.getsize(line)[1]

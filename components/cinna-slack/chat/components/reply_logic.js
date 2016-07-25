@@ -36,6 +36,9 @@ var email = require('./email');
 var queue = require('./queue-mongo');
 var kip = require('../../kip');
 
+//temp in-memory mode tracker
+var modes = {};
+
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 
@@ -102,17 +105,60 @@ queue.topic('incoming').subscribe(incoming => {
       throw new Error('correct message not retrieved from db');
     }
 
-    var replies = yield simple_response(message);
-    kip.debug('simple replies'.cyan, replies);
-
-    if (!replies || replies.length === 0) {
-      replies = yield nlp_response(message);
-      kip.debug('nlp replies'.cyan, replies);
+    //// MODES STUFF ////
+    var user = {
+      id : incoming.data.user_id
     }
 
-    if (!replies || replies.length === 0) {
-      kip.error('Could not understand message ' + message._id);
-      replies = [default_reply(message)];
+    if(incoming.data.action == 'mode.update'){
+      modes[user.id] = 'onboarding'
+      console.log('UPDATED MODE!!!!')
+      incoming.ack(); 
+      return;
+    }
+
+    if (!modes[user.id]){
+        modes[user.id] = 'shopping';
+    }
+    
+    /////////////////////
+
+    //MODE SWITCHER
+    switch(modes[user.id]){
+      case 'onboarding':
+        console.log('ONBAORDING MODE')
+
+        //check for valid country
+        //turn this into a function
+        if(text == 'Singapore' || text == 'United States'){
+          console.log('SAVING TO DB')
+          replies = ['Saved country!'];
+
+          //access onboard template per source origin!!!!
+          modes[user.id] = 'shopping';
+        }else {
+          replies = ['Didnt understand, please choose a country thx'];
+          console.log('Didnt understand, please choose a country thx')
+        }
+      break;
+
+      //default Kip Mode shopping
+      default:
+        console.log('DEFAULT SHOPPING MODE')
+        //try for simple reply
+        var replies = yield simple_response(message);
+        kip.debug('simple replies'.cyan, replies);
+
+        //not a simple reply, do NLP 
+        if (!replies || replies.length === 0) {
+          replies = yield nlp_response(message);
+          kip.debug('nlp replies'.cyan, replies);
+        }
+
+        if (!replies || replies.length === 0) {
+          kip.error('Could not understand message ' + message._id);
+          replies = [default_reply(message)];
+        }
     }
 
     kip.debug('num replies', replies.length);

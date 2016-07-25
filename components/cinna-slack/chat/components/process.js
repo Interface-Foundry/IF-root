@@ -45,6 +45,31 @@ var swapAmazonTLD = function (url, user_id) {
   }
 }
 
+var updateCountry = function(country, user_id){
+
+
+  co(function*() {
+    var user = yield db.Chatuser.findOne({id: user_id}).exec()
+
+    convo.chatuser.settings.last_call_alerts = true;
+    yield convo.chatuser.save();
+
+  }).catch(function(e) {
+
+  })
+
+  
+  var user = db.Chatuser.findOne({
+    id: user_id
+  })
+  if (COUNTRY.hasOwnProperty(user.country)) {
+    return url.split('.com').join(COUNTRY[user_country])
+  }
+  else {
+    return url
+  }
+}
+
 var urlShorten = function(data,callback2) {
 
     //single url for checkouts

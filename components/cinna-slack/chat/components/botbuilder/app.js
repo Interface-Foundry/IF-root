@@ -132,18 +132,11 @@ bot.on('contactRelationUpdate', function (message) {
         var name = message.user ? message.user.name : null;
         var reply = new builder.Message()
                 .address(message.address)
-                .text("Hello %s... Thanks for adding me!", name || 'there');
+                .text("Hi %s – I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options.", name || 'there');
+
         bot.send(reply);
 
-       var card = new builder.ThumbnailCard()
-            .title('Choose your country')
-            .text('To show items available in your country, please choose your country')
-            .buttons([
-                builder.CardAction.postBack(session, 'add'),
-                builder.CardAction.postBack(session, 'remove')
-            ])
-        var msg = new builder.Message(session).attachments([card]);
-        session.send(msg);
+
         //bbbutons: (my country not here)
         //---> tell us which country to send to: "Which country to add next?"
 
@@ -153,13 +146,13 @@ bot.on('contactRelationUpdate', function (message) {
 });
 
 
+
+
 bot.dialog('/', function (session) {
 
     var text = session.message.text;
     var user = session.message.user;
     sessions[user.id] = session;
-
-    console.log('SESSIONS ',sessions)
    // message:
    // { type: 'message',
    //   timestamp: '2016-07-08T21:18:46.707Z',
@@ -179,9 +172,9 @@ bot.dialog('/', function (session) {
    //   console.log('\n\n\n\n\n\n\n\n\n\n\nGOTTA CATCH EM ALLLLLLLLL\n\n\n\n\n\n\n\n\n\n\n\n')
    // }
 
-    bot.on('typing', function (message) {
-        // User is typing
-    });
+    // bot.on('typing', function (message) {
+    //     // User is typing
+    // });
 
     //Attachment Handling
      if (session.message.attachments && session.message.attachments[0] && session.message.attachments[0].contentType == 'image') {
@@ -428,16 +421,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 console.log('5💀')
                 session.send(message.text);
 
-                var card = new builder.ThumbnailCard()
-                    .title('Choose your country')
-                    .text('To show items available in your country, please choose your country')
-                    .buttons([
-                        builder.CardAction.postBack(session, 'United States','United States'),
-                        builder.CardAction.postBack(session, 'Singapore','Singapore')
-                    ])
-                var msg = new builder.Message(session).attachments([card]);
-                session.send(msg);
-
             }
             else {
                 console.log('\nhmm, shouldnt be getting here..', message);
@@ -547,20 +530,12 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
            var card = new builder.ThumbnailCard(session)
                 .title(`${i+1}. ${truncate(el.title)}`)
                 .text(description)
-                // .text("<a href="el.title+">Read reviews on Amazon</a>")
-                // .tap(builder.CardAction.openUrl(session, el.title))
                 .buttons([
-                    builder.CardAction.postBack(session, `add ${i+1}`, '+ Increase Quantity'),
-                    builder.CardAction.postBack(session, `remove ${i+1}`, '- Decrease Quantity')
+                    builder.CardAction.postBack(session, `remove ${i+1}` , 'Remove Item')
+                    // builder.CardAction.postBack(session, 'add ' + el._id, '+ Increase Quantity'),
+                    // builder.CardAction.postBack(session, 'remove ' + el._id, '- Decrease Quantity')
                 ])
-                //     // builder.CardAction.postBack(session, '+', "+"),
-                //     //  builder.CardAction(session).type('postBack').value('+').title("Click to send response to bot"),
-                //     //  builder.CardAction(session).type('postBack').value('-').title("Click to send response to bot"),
-                //     //  builder.CardAction(session).type('postBack').value('removeAll').title("Click to send response to bot")
-                //     // builder.CardAction.imBack(session, "save " + (i+1), "+"),
-                //     // builder.CardAction.imBack(session, "remove " + (i+1), "-"),
-                //     // builder.CardAction.imBack(session, "remove all of " + (i+1), "Remove All")
-                // ])
+
             if (el.image) {
               card.images([
                   builder.CardImage.create(session, el.image)
@@ -571,20 +546,22 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         })
 
         debugger;
-        cart_items.push(
-                new builder.HeroCard(session)
-                .title('Total: ' + outgoing.data.data.total )
-                // .text((focus_info.price + '\n' + focus_info.description + '\n' + focus_info.reviews).substring(0,300))
-                // .images([
-                //      builder.CardImage.create(session, focus_info.image_url)
-                // ])
-                // .tap(builder.CardAction.openUrl(session, focus_info.title_link))
-                .buttons([
-                    builder.CardAction.openUrl(session, outgoing.data.data.link, "Checkout with Amazon"),
-                 ]))
+
+        //I HATE YOU SKYPE, no really, fuck off.
+        var urlwhat = outgoing.data.data.link;
+        urlwhat = urlwhat.replace('http://','https://');
+
+        cart_items.push(new builder.HeroCard(session)
+            .title('Total: ' + outgoing.data.data.total)
+            .buttons([
+                builder.CardAction.openUrl(session, urlwhat, "Checkout with Amazon")
+            ]))
+        
         var msg = new builder.Message(session)
             .textFormat(builder.TextFormat.xml)
             .attachments(cart_items)
+
+        console.log('IN CONSTRUCT? ',JSON.stringify(msg.attachments));
         session.send(msg);
     }
 })
