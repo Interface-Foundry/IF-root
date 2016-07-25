@@ -8,11 +8,7 @@ Removed currently:
 var request = require('request-promise')
 var co = require('co');
 var _ = require('lodash')
-<<<<<<< HEAD
-var debug = require('debug')('nlp')
-=======
 var debug = require('debug')('nlp2')
->>>>>>> google-cloud
 
 var config = require('../config')
 var colors = require('./js/colors')

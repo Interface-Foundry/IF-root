@@ -1,6 +1,5 @@
 require('kip');
 var co = require('co');
-var PubSub = db.PubSub;
 var rx = require('rx');
 
 var topics = {
@@ -35,7 +34,7 @@ function publish(topic, data, key) {
 
   // Upsert the thing
   return co(function*() {
-    return yield PubSub.update({
+    return yield db.Pubsub.update({
       _id: key
     }, {
       _id: key,
@@ -81,7 +80,7 @@ function topic(topic) {
 
     // Retry interval, retry if dispatched but not done and 10 seconds old.
     setInterval(() => {
-      PubSub.update({
+      db.Pubsub.update({
         dispatched: true,
         done: { $ne: true },
         dispatch_time: { $lt: new Date() - 10000 },
@@ -100,7 +99,8 @@ function topic(topic) {
 }
 
 function* getNextMessage(topic) {
-  var message = yield PubSub.findOne({
+  debugger;
+  var message = yield db.Pubsub.findOne({
     topic: topic,
     dispatched: { $ne: true },
     done: { $ne: true },
@@ -112,7 +112,7 @@ function* getNextMessage(topic) {
 
   if (!message) { return }
 
-  var status = yield PubSub.update({
+  var status = yield db.Pubsub.update({
     _id: message._id,
     dispatched: { $ne: true }
   }, {

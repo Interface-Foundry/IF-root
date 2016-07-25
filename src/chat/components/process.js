@@ -6,8 +6,8 @@ var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
 var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
-var db = require('../../db');
 var googl = require('goo.gl');
+require('kip');
 
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
