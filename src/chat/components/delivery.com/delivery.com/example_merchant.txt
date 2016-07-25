@@ -1,0 +1,207 @@
+{
+	"_id" : ObjectId("57840e9797f5bc682a4fd164"),
+	"id" : "62236",
+	"data" : {
+		"filters" : null,
+		"location" : {
+			"landmark" : "Abraham Place",
+			"latitude" : 40.714835,
+			"longitude" : -73.982551,
+			"zip" : "10002",
+			"state" : "NY",
+			"city" : "New York",
+			"street" : "500 Grand St",
+			"distance" : 0.39104587028574
+		},
+		"ordering" : {
+			"enabled_last_mile_providers" : [ ],
+			"anonymous_cart_price" : 0,
+			"availability" : {
+				"delivery_estimate" : 45,
+				"pickup_estimate" : 35,
+				"laundry_window_minutes" : null,
+				"next_delivery_timestamp" : null,
+				"next_pickup_timestamp" : null,
+				"next_delivery_time" : null,
+				"next_pickup_time" : null,
+				"last_delivery_time" : "2016-07-11 17:45:00",
+				"last_pickup_time" : "2016-07-11 18:15:00",
+				"delivery_supported" : true,
+				"pickup_supported" : true,
+				"delivery" : true,
+				"pickup" : true
+			},
+			"delivery_percent" : 0,
+			"delivery_charge" : 0,
+			"is_open" : true,
+			"minimum" : 10,
+			"minutes_left_for_ASAP" : 35,
+			"last_or_next_order_time" : "2016-07-11 17:45:00",
+			"specials" : [
+				{
+					"short_name" : "10% off $50",
+					"type" : "L",
+					"name" : "10% Off All Orders Over $50"
+				},
+				{
+					"short_name" : "10% off 1st time",
+					"type" : "F",
+					"name" : "10% Off for First Time Users"
+				}
+			],
+			"time_needed" : 30,
+			"rds_name" : "Salesforce",
+			"is_rds" : false,
+			"payment_types" : [
+				"credit",
+				"gift card",
+				"promotions"
+			],
+			"delivery_processes_card" : true
+		},
+		"summary" : {
+			"menu_has_images" : false,
+			"has_ordered" : false,
+			"banner_ad" : {
+				"active" : false,
+				"url" : null,
+				"priority" : null
+			},
+			"merchant_main" : null,
+			"header_images" : [
+				{
+					"path" : "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432223333555dfe65164cb.jpg",
+					"width" : 640,
+					"height" : 320
+				},
+				{
+					"path" : "https://s3.amazonaws.com/s3.delivery.com/images/merchant-header-images/1432302778555f34bac9b5f.jpg",
+					"width" : 1080,
+					"height" : 480
+				}
+			],
+			"merchant_logo_raw" : "https://static.delivery.com/merchant_logo.php?w=0&h=0&id=62236",
+			"merchant_logo" : "https://static.delivery.com/merchant_logo.php?id=62236",
+			"menu_template" : "M",
+			"promoted_priority" : null,
+			"is_promoted" : false,
+			"recommended_items" : {
+				"18" : {
+					"rating" : "0.30",
+					"description" : "Choice of ham, salami, bacon or sausage.",
+					"price" : "8.75",
+					"name" : "Two Eggs Any Style with Meat",
+					"navigation_id" : "E18",
+					"unique_id" : 18
+				},
+				"169" : {
+					"rating" : "0.21",
+					"description" : "",
+					"price" : "17.90",
+					"name" : "Chopped Sirloin Steak Platter",
+					"navigation_id" : "E169",
+					"unique_id" : 169
+				},
+				"179" : {
+					"rating" : "0.21",
+					"description" : "",
+					"price" : "17.30",
+					"name" : "Broiled Chicken Cutlet Platter",
+					"navigation_id" : "E179",
+					"unique_id" : 179
+				},
+				"226" : {
+					"rating" : "0.34",
+					"description" : "",
+					"price" : null,
+					"name" : "Garden Burger",
+					"navigation_id" : "E226",
+					"unique_id" : 226
+				},
+				"511" : {
+					"rating" : "0.21",
+					"description" : "Onion, Cheddar cheese, jalapeno.",
+					"price" : "16.10",
+					"name" : "Avocado Omelete Platter",
+					"navigation_id" : "E511",
+					"unique_id" : 511
+				},
+				"552" : {
+					"rating" : "0.17",
+					"description" : null,
+					"price" : "12.50",
+					"name" : "Chicken Fingers with French Fries",
+					"navigation_id" : "E552",
+					"unique_id" : 552
+				},
+				"626" : {
+					"rating" : "0.21",
+					"description" : null,
+					"price" : null,
+					"name" : "Spinach Omelette",
+					"navigation_id" : "E626",
+					"unique_id" : 626
+				},
+				"692" : {
+					"rating" : "0.21",
+					"description" : "",
+					"price" : null,
+					"name" : "Meat Loaf",
+					"navigation_id" : "E692",
+					"unique_id" : 692
+				}
+			},
+			"activation_date" : "2010-06-23",
+			"url" : {
+				"complete" : "https://www.delivery.com/cities/nyc/categories/restaurant/zafis-luncheonette",
+				"merchant_type" : "restaurant",
+				"short_tag" : "zafis-luncheonette",
+				"geo_tag" : "nyc"
+			},
+			"notes" : null,
+			"category_groups" : [
+				{
+					"id" : 1,
+					"name" : "Food"
+				}
+			],
+			"categories" : [
+				{
+					"id" : 1,
+					"name" : "Restaurant"
+				}
+			],
+			"type_label" : "Restaurant",
+			"type" : "R",
+			"re_order_count" : 0,
+			"price_rating" : 1,
+			"num_ratings" : 21,
+			"logistics_enabled" : false,
+			"cuisine_weight" : 1,
+			"star_ratings" : 4,
+			"overall_rating" : 76,
+			"description" : "",
+			"phone" : "212-533-2415",
+			"cuisines" : [
+				"American",
+				"Burgers",
+				"Sandwiches",
+				"Diner"
+			],
+			"name" : "Zafis Luncheonette"
+		},
+		"curated_rank" : null,
+		"matched_items" : [ ],
+		"local_favorite_rank" : null,
+		"merchant_name_scores" : [ ],
+		"cuisine_scores" : [ ],
+		"is_matching_name" : false,
+		"is_matching_items" : false,
+		"is_similar_cuisine" : false,
+		"is_matching_cuisine" : false,
+		"id" : "62236"
+	},
+	"first_searched" : ISODate("2016-07-11T21:24:39.785Z"),
+ 35 graham: runnable rnn w/ tensorflow w/ two docker containers.
+	"__v" : 0
+}

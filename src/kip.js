@@ -1,6 +1,6 @@
 var path = require('path');
-var db = require('./db');
 require('colors');
+global.db = require('./db');
 
 /**
  * Prints an error to the screen and returns true.
@@ -8,7 +8,7 @@ require('colors');
  *  if (kip.err(e)) return;
  *  }
  */
-module.exports.err = function(e, message, data) {
+function error(e, message, data) {
   // only do stuff when there is an error`
   if (!e) {
     return false;
@@ -48,42 +48,26 @@ module.exports.err = function(e, message, data) {
 
   return true;
 };
-module.exports.error = module.exports.err;
 
 // log all uncaught exceptions to the db
 process.on('uncaughtException', e => {
-  module.exports.error(e, 'uncaught');
+  error(e, 'uncaught');
 });
-
-
-/**
- * Kills the process if there's an ERROR
- */
-module.exports.fatal = function(e) {
-  if (e) {
-    console.error('FATAL ERROR 🔥💀'.red)
-    console.error(e.toString().red);
-    process.exit(1);
-  }
-}
 
 /**
  * Prints a nice log message
  */
-module.exports.log = function() {
+function log() {
   var args = Array.prototype.slice.call(arguments).map((o) => {
     return ['string', 'number', 'boolean'].indexOf(typeof o) >= 0 ? o : JSON.stringify(o, null, 2);
   });
   console.log.apply(console, args);
 }
 
-// fun alias
-module.exports.prettyPrint = module.exports.log
-
 /**
  * Does not print in production unless DEBUG=verbose
  */
-module.exports.debug = function() {
+function debug() {
   if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
     var e = new Error();
     var stack = e.stack.split('\n')[2];
@@ -97,51 +81,59 @@ module.exports.debug = function() {
     }
     var loc = path.relative(path.resolve(require.main.filename, '..'), filename) + ':' + line;
     var args = ['debug'.cyan, loc.gray].concat(Array.prototype.slice.call(arguments));
-    module.exports.log.apply(null, args)
+    log.apply(null, args)
   }
-}
-
-/**
- * GTFO
- */
-module.exports.exit = function(code) {
-  if (code && code > 0) {
-    console.error(('kip exiting with code ' + code).red);
-    process.exit(code);
-  } else {
-    console.log('kip exited successfully'.green);
-    process.exit();
-  }
-}
-
-module.exports.assert = function(val) {
-  if (!val) {
-    throw new Error('assertion failed');
-  }
-  return true;
-}
-
-module.exports.assertProperties = function() {
-  var args = Array.prototype.slice.call(arguments);
-  var obj = args[0];
-  args.slice(1).map(p => {
-    if (!obj.hasOwnProperty(p)) {
-      throw new Error('assertProperties failed, property ' + p + ' does not exist');
-    }
-  })
-  return true;
 }
 
 /**
  * Timer
  */
-module.exports.timer = function(name) {
+function timer(name) {
   name = name || '';
   var now = +new Date()
-  module.exports.debug(('starting timer: ' + name).green);
+  debug(('starting timer: ' + name).green);
   return function(text) {
     text = text || '';
-    module.exports.debug(('timer:' + name + ':' + text).green, +new Date() - now);
+    debug(('timer:' + name + ':' + text).green, +new Date() - now);
   }
 }
-module.exports.time = module.exports.timer;
+
+var ihazinternet;
+function icanhazinternet() {
+  return new Promise((resolve, reject) => {
+    if (typeof ihazinternet !== 'undefined') {
+      return resolve(ihazinternet);
+    }
+
+    var request = require('request-promise');
+    setTimeout(x => {
+      console.log('timeout reached');
+      if (typeof ihazinternet === 'undefined') {
+        ihazinternet = false;
+        resolve(false);
+      }
+    }, 2000);
+
+    console.log('requesting icanhazip.com');
+    request('http://icanhazip.com').then(() => {
+      if (typeof ihazinternet === 'undefined') {
+        ihazinternet = true;
+        resolve(true);
+      }
+    }, () => {
+      if (typeof ihazinternet === 'undefined') {
+        ihazinternet = false;
+        resolve(false);
+      }
+    })
+  });
+}
+
+module.exports = global.kip = {
+  debug: debug,
+  error: error,
+  err: error,
+  log: log,
+  timer: timer,
+  icanhazinternet: icanhazinternet
+}

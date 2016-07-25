@@ -3,7 +3,9 @@ var mongoose = promisify(require('mongoose'));
 mongoose.Promise = global.Promise;
 var ensureIndexes = require('mongoose-hook-ensure-indexes')
 var config = require('../config');
-var kip = require('../kip');
+var natural = require('natural');
+var nounInflector = new natural.NounInflector();
+var fs = require('fs');
 
 if (mongoose.connection.readyState == 0) {
     mongoose.connect(config.mongodb.url);
@@ -21,48 +23,7 @@ if (mongoose.connection.readyState == 0) {
  * db.Users.find({})
  * var user = new db.User()
  */
-
-/**
- * Schema definition
- * @type {{filename: string, single: string, plural: string}[]}
- */
-var schemas = [{
-    filename: 'cart_schema',
-    single: 'Cart',
-    plural: 'Carts'
-}, {
-    filename: 'chatuser_schema',
-    single: 'Chatuser',
-    plural: 'Chatusers'
-}, {
-    filename: 'email_schema',
-    single: 'Email',
-    plural: 'Emails'
-}, {
-    filename: 'error_schema',
-    single: 'Error',
-    plural: 'Errors'
-}, {
-    filename: 'item_schema',
-    single: 'Item',
-    plural: 'Items'
-}, {
-    filename: 'message_schema',
-    single: 'Message',
-    plural: 'Messages'
-}, {
-    filename: 'metric_schema',
-    single: 'Metric',
-    plural: 'Metrics'
-}, {
-    filename: 'pubsub_schema',
-    single: 'PubSub',
-    plural: 'PubSubs'
-}, {
-    filename: 'slackbot_schema',
-    single: 'Slackbot',
-    plural: 'Slackbots'
-}];
+var files = fs.readdirSync(__dirname);
 
 module.exports = {
     connection: mongoose.connection,
@@ -72,21 +33,33 @@ module.exports = {
 /**
  * Expose all the single and plural versions
  */
-schemas.map(function(schema) {
+files.map(function(f) {
+    if (!f.match('_schema.js')) return;
+
+    console.log('loading'.gray, f.gray);
+
     try {
-    	var model = require('./' + schema.filename);
+    	var model = require('./' + f);
     } catch(e) {
-      console.error('Error setting up schema ' + schema.filename);
+      console.error('Error setting up schema ' + f);
       console.error(e);
       return;
     }
-    module.exports[schema.single] = model;
-    module.exports[schema.plural] = model;
-    module.exports[schema.plural.toLowerCase()] = model;
+
+    var name = f.replace('_schema.js', '');
+
+    module.exports[capitalize(nounInflector.singularize(name))] = model;
+    module.exports[nounInflector.singularize(name)] = model;
+    module.exports[capitalize(nounInflector.pluralize(name))] = model;
+    module.exports[nounInflector.pluralize(name)] = model;
     model.schema.plugin(ensureIndexes, {
         mongoose: mongoose
     });
 });
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 
 /**
@@ -94,6 +67,6 @@ schemas.map(function(schema) {
  */
 module.exports.map = function(cb) {
     schemas.map(function(schema) {
-        return module.exports[schema.single];
+        return module.exports[nounInflector.singularize(name)];
     }).map(cb);
 };

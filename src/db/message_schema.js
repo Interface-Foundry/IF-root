@@ -44,6 +44,7 @@ var messageSchema = mongoose.Schema({
     action: String, // the last action we did
     focus: Number,
     data: {},
+    state: {}, // state information about the context of the conversation
 
     //
     // Miscellaneous probably will get removed eventually
