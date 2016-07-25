@@ -4,7 +4,7 @@ var request = require('request');
 var fs = require('fs');
 var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
 var db = require('../../db');
 
@@ -34,17 +34,17 @@ var COUNTRY = {
   BRAZIL: ['.com.br']
 }
 
-var swapAmazonTLD = function (url, user_id) {
-  var user = db.Chatuser.findOne({
-    id: user_id
-  })
-  if (COUNTRY.hasOwnProperty(user.country)) {
-    return url.split('.com').join(COUNTRY[user_country])
-  }
-  else {
-    return url
-  }
-}
+// var swapAmazonTLD = function (url, user_id) {
+//   var user = db.Chatuser.findOne({
+//     id: user_id
+//   })
+//   if (COUNTRY.hasOwnProperty(user.country)) {
+//     return url.split('.com').join(COUNTRY[user_country])
+//   }
+//   else {
+//     return url
+//   }
+// }
 
 
 var urlShorten = function(data,callback2) {
@@ -218,8 +218,8 @@ function getItemLink(url, user_id, item_id) {
   url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
-  var url_swapped = swapAmazonTLD(url, user_id)
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
+  // var url_swapped = swapAmazonTLD(url, user_id)
+  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
 }
 
 

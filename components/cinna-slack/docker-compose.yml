@@ -1,7 +1,7 @@
 version: "2"
 services:
-  image_processing:
-    container_name: picstitch
+  image:
+    container_name: image
     build: ./image_processing
     ports:
       - "5000:5000"
@@ -17,8 +17,8 @@ services:
     build:
       context: ./nlp_rnn/
       dockerfile: rnn.Dockerfile
-  reply_logic:
-    container_name: reply_logic
+  reply:
+    container_name: reply
     build:
       context: .
       dockerfile: dockerfiles/reply_logic.Dockerfile

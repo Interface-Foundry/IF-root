@@ -3,7 +3,6 @@ var request = require('request');
 var fs = require('fs');
 var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
-var nlp = require('../../nlp/api');
 var banter = require("./banter.js");
 
 
