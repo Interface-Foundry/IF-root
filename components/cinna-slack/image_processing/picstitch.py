@@ -202,35 +202,35 @@ def index():
             draw.text((x + 80, last_y),' - ' + str(reviewCount),font=font2,fill="#2d70c1")
             last_y = last_y + 20
 
-        # last_y = last_y + 5
+        last_y = last_y + 5
 
-        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        #     BOX_WIDTH = 26
+        if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+            BOX_WIDTH = 26
 
-        # elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        #     BOX_WIDTH = 24
-        # else:
-        #     BOX_WIDTH = 30
+        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            BOX_WIDTH = 24
+        else:
+            BOX_WIDTH = 30
 
         #draw details but not for skype or fbook
-        # if images[0][u'origin'] != 'skype' or images[0][u'origin'] != 'facebook':
-        #     for z in im[u'name']:
+        if images[0][u'origin'] != 'skype':
+            for z in im[u'name']:
 
-        #         # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-        #         countLines = 0
-        #         for line in textwrap.wrap(z, width=BOX_WIDTH):
-        #             countLines += 1
-        #             if countLines < 3:
-        #                 filler = ''
-        #                 if countLines == 3:
-        #                     filler = '...'
-        #                 draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
-        #                 last_y += font2.getsize(line)[1]
-        #                 last_y = last_y + 2
+                # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
+                countLines = 0
+                for line in textwrap.wrap(z, width=BOX_WIDTH):
+                    countLines += 1
+                    if countLines < 3:
+                        filler = ''
+                        if countLines == 3:
+                            filler = '...'
+                        draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
+                        last_y += font2.getsize(line)[1]
+                        last_y = last_y + 2
 
-                # last_y = y
-            # y += font.getsize(line)[1]
-            # last_y = y
+                last_y = y
+            y += font.getsize(line)[1]
+            last_y = y
 
 
         # #add product names
