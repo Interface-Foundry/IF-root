@@ -130,7 +130,7 @@ var similar = function*(params) {
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results) {
+function* enhance_results(results, user_id) {
 
   // enhance the results, naturally.
   yield results.map(r => {
@@ -151,7 +151,7 @@ function* enhance_results(results) {
 
   for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];
-    results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
+    results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0], user_id);
   }
   // cool i've got the results now...
 

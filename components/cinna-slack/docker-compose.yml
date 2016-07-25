@@ -1,14 +1,33 @@
-image_processing:
-  build: ./image_processing
-  ports:
-    - "5000:5000"
-parser:
-  build: ./nlp2/
-  dockerfile: parser.Dockerfile
-  ports:
-    - "8083:8083"
-rnn:
-  build: ./nlp2/
-  dockerfile: rnn.Dockerfile
-  ports:
-    - "8085:8085"
+version: "2"
+services:
+  image_processing:
+    container_name: picstitch
+    build: ./image_processing
+    ports:
+      - "5000:5000"
+  parser:
+    container_name: parser
+    build:
+      context: ./nlp_parser/
+      dockerfile: parser.Dockerfile
+    ports:
+      - "8083:8083"
+  rnn:
+    container_name: rnn
+    build:
+      context: ./nlp_rnn/
+      dockerfile: rnn.Dockerfile
+  reply_logic:
+    container_name: reply_logic
+    build:
+      context: .
+      dockerfile: dockerfiles/reply_logic.Dockerfile
+    ports:
+      - "27017:27017"
+  slack:
+    container_name: slack
+    build:
+      context: .
+      dockerfile: dockerfiles/slack.Dockerfile
+    ports:
+      - "8000:8000"

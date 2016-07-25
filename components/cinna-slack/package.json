@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node chat/server_cinna_chat.js"
+    "start": "node chat/server_cinna_chat.js",
+    "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db"
   },
   "keywords": [
     "chat"
@@ -15,12 +16,17 @@
   "dependencies": {
     "@slack/client": "^2.2.1",
     "WNdb": "^3.1.1",
+    "accounting": "^0.4.1",
+    "async": "^2.0.0-rc.6",
     "aws-sdk": "^2.3.12",
+    "body-parser": "^1.15.2",
     "botkit": "0.0.11",
     "co": "^4.6.0",
     "co-sleep": "0.0.1",
     "connect-busboy": "0.0.2",
+    "cookie-parser": "^1.4.3",
     "cron": "^1.1.0",
+    "emoji-text": "^0.2.6",
     "es6-promise": "^3.0.2",
     "everyconfig": "^1.0.2",
     "express": "^4.13.4",
@@ -33,6 +39,7 @@
     "juice": "^1.10.0",
     "koat": "^1.0.1",
     "linkifyjs": "^2.0.2",
+    "lodash": "^4.13.1",
     "memory-cache": "^0.1.5",
     "moment-timezone": "^0.5.3",
     "mongoose": "^4.4.17",
@@ -48,9 +55,11 @@
     "parse-reply": "0.0.4",
     "promisify-global": "^1.0.0",
     "promisify-node": "^0.4.0",
+    "request": "^2.72.0",
     "rx": "^4.1.0",
     "sendgrid": "^2.0.0",
     "shortid": "^2.2.4",
+    "showdown": "^1.4.2",
     "slackbots": "0.5.0",
     "socket.io": "^1.4.6",
     "static-kdtree": "^1.0.1",

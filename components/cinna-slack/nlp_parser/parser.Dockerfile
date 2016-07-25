@@ -26,5 +26,7 @@ RUN chmod +x /root/parser.sh
 
 WORKDIR /root
 
+EXPOSE 8083
+
 # start python services, follow dockerfile from old nlp folder
 CMD python server.py

@@ -28,6 +28,9 @@ RUN npm uninstall bufferutil && npm install -g bufferutil node-inspector && \
 EXPOSE 8000
 EXPOSE 27017
 
-# CMD ["pm2", "start","app.js"]
+WORKDIR /app/components/cinna-slack
+
+RUN echo "pm2 start app.json && pm2 logs all" > app.sh && chmod +x app.sh
+
 
 
