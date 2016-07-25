@@ -1,15 +1,8 @@
 FROM node:6
-
-ENV NODE_ENV=development_nlp
-
-ADD package.json /kip/
-
-RUN cd /kip/ && npm install
-
-ADD . /kip/
-
-EXPOSE 8000
-
-EXPOSE 27017
-
-CMD node /kip/chat/components/reply_logic.js
+RUN mkdir /kip
+WORKDIR /kip
+ENV NODE_ENV=production
+ADD package.json /kip/package.json
+RUN npm install --production && ln -s ../kip.js node_modules/kip.js && ln -s ../db node_modules/db
+COPY . /kip
+CMD node chat/components/reply_logic.js
