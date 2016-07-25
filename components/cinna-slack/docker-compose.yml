@@ -1,3 +1,19 @@
+<<<<<<< HEAD
+image_processing:
+  build: ./image_processing
+  ports:
+    - "5000:5000"
+parser:
+  build: ./nlp2/
+  dockerfile: parser.Dockerfile
+  ports:
+    - "8083:8083"
+rnn:
+  build: ./nlp2/
+  dockerfile: rnn.Dockerfile
+  ports:
+    - "8085:8085"
+=======
 version: "2"
 services:
   image:
@@ -31,3 +47,4 @@ services:
       dockerfile: dockerfiles/slack.Dockerfile
     ports:
       - "8000:8000"
+>>>>>>> google-cloud

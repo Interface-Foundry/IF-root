@@ -3,7 +3,6 @@ var co = require('co');
 var PubSub = require('../../db').PubSub;
 var rx = require('rx');
 
-
 var topics = {
   'incoming': 1,
   'nlp': 2,
@@ -12,7 +11,8 @@ var topics = {
   'outgoing.kik': 5,
   'outgoing.telegram': 6,
   'outgoing.facebook': 7,
-  'outgoing.web': 8
+  'outgoing.web': 8,
+  'outgoing.skype': 9
 };
 
 //

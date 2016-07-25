@@ -1,18 +1,23 @@
-VERSION=0.7.4.13
+VERSION=0.7.4.27
 
-docker build -t gcr.io/kip-styles/reply_logic:$VERSION -f Dockerfiles/reply_logic .
-gcloud docker push gcr.io/kip-styles/reply_logic:$VERSION
+#docker build -t gcr.io/kip-styles/reply_logic:$VERSION -f Dockerfiles/reply_logic .
+#gcloud docker push gcr.io/kip-styles/reply_logic:$VERSION
 
-docker build -t gcr.io/kip-styles/web:$VERSION -f Dockerfiles/web .
-gcloud docker push gcr.io/kip-styles/web:$VERSION
+#docker build -t gcr.io/kip-styles/web:$VERSION -f Dockerfiles/web .
+#gcloud docker push gcr.io/kip-styles/web:$VERSION
 
 docker build -t gcr.io/kip-styles/facebook:$VERSION -f Dockerfiles/facebook .
 gcloud docker push gcr.io/kip-styles/facebook:$VERSION
 
+#docker build -t gcr.io/kip-styles/botbuilder:$VERSION -f Dockerfiles/botbuilder .
+#gcloud docker push gcr.io/kip-styles/botbuilder:$VERSION
+
+exit 0
+
 # NLP
 cd nlp
-docker build -t gcr.io/kip-styles/nlp:$VERSION .
-gcloud docker push gcr.io/kip-styles/nlp:$VERSION
+#docker build -t gcr.io/kip-styles/nlp:$VERSION .
+#gcloud docker push gcr.io/kip-styles/nlp:$VERSION
 cd ..
 
 # NLP2

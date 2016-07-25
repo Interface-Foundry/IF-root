@@ -264,8 +264,6 @@ app.post('/facebook', function(req, res) {
         }
 
 
-
-
         if (event.message && event.message.text) {
 
                  text = event.message.text;
@@ -338,13 +336,13 @@ app.post('/facebook', function(req, res) {
             ];
 
              var img_card = {
-                    "attachment":{
-                      "type":"image",
-                      "payload":{
-                        "url": img_array[Math.floor(Math.random()*img_array.length)]
-                      }
-                    }
+                "attachment":{
+                  "type":"image",
+                  "payload":{
+                    "url": img_array[Math.floor(Math.random()*img_array.length)]
                   }
+                }
+              }
 
              request({
                     url: 'https://graph.facebook.com/v2.6/me/messages',
