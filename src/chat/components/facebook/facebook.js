@@ -61,7 +61,7 @@
 var co = require('co');
 var kip = require('kip');
 var queue = require('../queue-mongo');
-var db = require('../../../db');
+var kip = require('kip');
 var _ = require('lodash');
 var http = require('http');
 var request = require('request');
@@ -70,7 +70,7 @@ var bodyParser = require('body-parser');
 var busboy = require('connect-busboy');
 var fs = require('fs');
 //set env vars
-var config = require('../../../config');
+var config = kip.config;
 
 var express = require('express');
 var app = express();

@@ -18,12 +18,12 @@ var purchase = require("./purchase.js");
 var kipcart = require('./cart');
 var nlp = require('../../nlp2/api');
 //set env vars
-var config = require('../../config');
+require('kip');
+var config = kip.config;
 var mailerTransport = require('../../mail/IF_mail.js');
 
 //load mongoose models
 var mongoose = require('mongoose');
-var db = require('../../db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
@@ -34,7 +34,6 @@ var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 
 var queue = require('./queue-mongo');
-var kip = require('../../kip');
 
 //temp in-memory mode tracker
 var modes = {};

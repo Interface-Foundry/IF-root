@@ -1,5 +1,4 @@
 /*eslint-env es6*/
-var db = require('../../db')
 var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
@@ -35,7 +34,7 @@ var aws_client_id_list = Object.keys(aws_clients);
 console.log("AWS LCIENTS ",aws_client_id_list)
 var processData = require('./process');
 var fs = require('fs')
-var kip = require('../../kip');
+require('kip')
 
 module.exports = {};
 
