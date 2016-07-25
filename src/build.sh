@@ -27,9 +27,7 @@ gcloud docker push gcr.io/kip-styles/parser:$VERSION
 gcloud docker push gcr.io/kip-styles/rnn:$VERSION
 
 # PICSTITCH
-cd image_processing
-docker build -t gcr.io/kip-styles/picstitch:$VERSION .
+docker build -t gcr.io/kip-styles/picstitch:$VERSION -f Dockerfiles/picstitch.Dockerfile
 gcloud docker push gcr.io/kip-styles/picstitch:$VERSION
-cd ..
 
 

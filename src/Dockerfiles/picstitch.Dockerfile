@@ -4,11 +4,11 @@ RUN apt-get update
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y -q python-all python-pip
 
-ADD ./requirements.txt /tmp/requirements.txt
+ADD image_processing/requirements.txt /tmp/requirements.txt
 
 RUN pip install -qr /tmp/requirements.txt
 
-ADD . /opt/picstitch/
+ADD image_processing /opt/picstitch/
 
 WORKDIR /opt/picstitch
 
