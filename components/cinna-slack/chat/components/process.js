@@ -4,11 +4,11 @@ var request = require('request');
 var fs = require('fs');
 var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
 var db = require('../../db');
-
 var googl = require('goo.gl');
+
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
 } else {
@@ -242,10 +242,10 @@ function getItemLink(url, user_id, item_id) {
   url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
-
   var url_swapped = swapAmazonTLD(url, user_id)
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
 }
+
 
 //
 // Downloads slack file and runs through google vision for image to text search

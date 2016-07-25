@@ -3,8 +3,17 @@ var co = require('co');
 var PubSub = require('../../db').PubSub;
 var rx = require('rx');
 
-
-var topics = {'incoming': 1, 'nlp': 2, 'picstitch': 3, 'outgoing.slack': 4, 'outgoing.kik': 5, 'outgoing.telegram': 6, 'outgoing.facebook': 7, 'outgoing.web': 8, 'outgoing.skype': 9};
+var topics = {
+  'incoming': 1,
+  'nlp': 2,
+  'picstitch': 3,
+  'outgoing.slack': 4,
+  'outgoing.kik': 5,
+  'outgoing.telegram': 6,
+  'outgoing.facebook': 7,
+  'outgoing.web': 8,
+  'outgoing.skype': 9
+};
 
 //
 // publishes a message in the given topic. returns a promise

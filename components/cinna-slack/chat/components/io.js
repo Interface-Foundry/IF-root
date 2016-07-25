@@ -22,7 +22,7 @@ var init_team = require("./init_team.js");
 var conversation_botkit = require('./conversation_botkit');
 var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 
 //set env vars
 var config = require('../../config');
