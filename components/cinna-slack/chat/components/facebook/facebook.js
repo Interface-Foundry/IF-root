@@ -634,7 +634,7 @@ app.post('/facebook', function(req, res) {
                                     })
                               }
                             ],
-                            "text": "YOLO"
+                            "text": "Choose one :)"
                         },
                         "notification_type": "NO_PUSH"
                     };
