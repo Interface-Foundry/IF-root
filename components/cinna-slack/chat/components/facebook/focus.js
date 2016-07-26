@@ -40,7 +40,7 @@ module.exports = function*(message) {
       review_line += ` ${r.reviews.rating} stars - ${r.reviews.reviewCount} reviews`
       // console.log('final_decription: ', final_description);
     }
-    var final_description = (description.length > 250) ? (description.substring(0, 200) + '...') : description;
+    var final_description = (description.length > 200) ? (description.substring(0, 150) + '...') : description;
 
 
     return {
