@@ -85,7 +85,7 @@ fbtoken = process.env.NODE_ENV === 'production' ? 'EAAT6cw81jgoBAEtZABCicbZCmjle
 var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
-
+var process_emoji = require('../process_emoji').search;
 
 
 app.use(express.static(__dirname + '/static'))
@@ -648,7 +648,11 @@ app.post('/facebook', function(req, res) {
        
 
         else if (event.message && event.message.text) {
-                text = event.message.text;
+                text = event.message.text;  
+                process_emoji(text, function(res) {
+                    
+                    text = res;
+                })
                 text = emojiText.convert(text,{delimiter: ' '});
                 console.log(JSON.stringify(req.body));
                 var message = new db.Message({
