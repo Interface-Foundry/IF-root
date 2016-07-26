@@ -61,6 +61,7 @@ class McParser:
         self.sf_sm = False
 
         self.text = text.lower()
+        self.advanced_query = []
         # self.tokens = [self.text.split(' ')]
         self.tokens = []
         self.focus = []
@@ -90,19 +91,26 @@ class McParser:
         self.dependency_array = []
         for line in self.d_array:
             self.dependency_array.append(line.split('\t'))
-        self.dependency_array.sort(key=lambda x: x[6])
+
+        # dont sort into tree struct
+        # self.dependency_array.sort(key=lambda x: x[6])
 
     def _parse_terms(self):
         '''
         not sure if i should use unicode(i[1]) or u"{}",format(i[1])" so using
         cur_word
         '''
+        d_index = 0
         for i in self.dependency_array:
             cur_word = unicode(i[1])
             self.tokens.append(cur_word)
             self.parts_of_speech.append([cur_word, unicode(i[3])])
             if i[3] in ['NOUN', 'PRON']:
                 self.nouns.append(cur_word)
+                if not hasattr(self, 'first_noun'):
+                    self.first_noun = d_index
+
+                self.last_noun = d_index
             if i[3] in ['VERB']:
                 self.verbs.append(cur_word)
             if i[3] in ['ADJ']:
@@ -116,6 +124,9 @@ class McParser:
                 self.dobj = cur_word
                 self.search_object = cur_word
                 self.noun_phrases = [self.root + ' ' + cur_word]
+            if i[7] in ['pobj']:
+                self.pobj = cur_word
+                self.search_object = cur_word
             if i[7] in ['dep']:
                 self.item_descriptors.append(cur_word)
             if i[7] in ['amod']:
@@ -129,6 +140,15 @@ class McParser:
             if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append('3')
 
+            # first to last noun advanced query try
+            # if i[3] in ['NOUN', 'PRON']:
+                # self.
+            d_index += 1
+
+        if hasattr(self, 'first_noun'):
+            if self.first_noun is not self.last_noun:
+                self.noun_query = ' '.join(
+                    self.tokens[self.first_noun:self.last_noun + 1])
         self.modifier_words = list(set(self.nouns).union(self.adjectives))
         self.nouns_with_adjectives = ' '.join(self.modifier_words)
 
@@ -221,27 +241,31 @@ class McParser:
             self.mode = 'shopping'
             self.action = 'similar'
 
+    def _create_search(self):
+        '''
+        '''
+        if hasattr(self, 'noun_query'):
+            self.search_query = self.noun_query
+        elif hasattr(self, 'pobj'):
+            self.search_query = self.pobj
+        elif hasattr(self, 'nouns_with_adjectives'):
+            self.search_query = self.nouns_with_adjectives
+        elif len(self.noun_phrases) > 0:
+            self.search_query = self.noun_phrases[0]
+        else:
+            logger.info('using full query')
+            self.search_query = self.text
+
     def _simple_case(self):
         '''possibly self.nouns_without_stopwords.join(' ') but that
         doesnt include adjectives
         '''
         if not self.had_question and not self.focus:
             self.simple_case = True
-            if hasattr(self, 'nouns_with_adjectives'):
-                if len(self.noun_phrases) > 0:
-                    if len(self.noun_phrases[0]) > len(self.nouns_with_adjectives):
-                        self.simple_query = self.noun_phrases[0]
-                        self.simple_q_test = self.noun_phrases[0]
-                        logger.info('using nouns phrases')
-                else:
-                    self.simple_query = self.nouns_with_adjectives
-                    logger.info('using nouns joined with adjectives search')
-            else:
-                logger.info('using full query')
-                self.simple_query = self.text
             self.mode = 'shopping'
             self.action = 'initial'
-            logger.info('simple case using query: ' + self.simple_query)
+            self._create_search()
+            logger.info('simple case using query: ' + self.search_query)
         else:
             self.simple_case = False
             logger.info('not using a simple query')

@@ -123,13 +123,37 @@ function nlpToResult(nlp, message) {
   nlp.focus = nlp.focus || [];
   nlp.adjectives = nlp.adjectives || [];
 
+  // checkout
+  if (nlp.action === 'checkout') {
+    debug('checkout')
+    message.execute.push({
+      mode: nlp.mode,
+      action: nlp.action
+    })
+    return;
+  }
+
+  // save item
+  if (nlp.action === 'save' || nlp.action === 'remove') {
+    if (nlp.focus.length === 1) {
+    debug('item action', nlp.action)
+    message.execute.push({
+      mode: nlp.mode,
+      action: nlp.action,
+      params: {focus: nlp.focus[0]}
+    })
+    return;
+    }
+  }
+
+
 
   if (nlp.focus.length === 0 && nlp.simple_case == true) {
     debug('simple case initial triggered');
     message.execute.push({
       mode: nlp.mode,
       action: nlp.action,
-      params: { query: nlp.simple_query }
+      params: { query: nlp.search_query }
     })
     return;
   }

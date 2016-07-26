@@ -684,5 +684,5 @@ invalid_adjectives = [
     'third'
 ]
 
-purchase_terms = action_terms['checkout'] + \
-    action_terms['remove'] + action_terms['list_cart']
+purchase_terms = action_terms['checkout'] + action_terms['remove'] + \
+    action_terms['list_cart'] + action_terms['save']
