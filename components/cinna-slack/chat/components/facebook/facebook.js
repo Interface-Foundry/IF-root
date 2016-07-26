@@ -244,6 +244,15 @@ app.post('/facebook', function(req, res) {
         //
         //
         if (event.message && event.message.quick_reply && event.message.quick_reply.payload) {
+
+            //pre-parse emoji to prevent quickreply emoji  to go to nlp
+            // if (event.message.text) {
+            //     process_emoji( event.message.text, function(res) {
+            //          event.message.text = res;
+            //     })
+            //      event.message.text = emojiText.convert(text,{delimiter: ' '});
+            // }
+               
             var sub_menu = event.message.quick_reply.payload;
             try {
                 sub_menu = JSON.parse(sub_menu);
@@ -620,6 +629,106 @@ app.post('/facebook', function(req, res) {
                                     })
                               }
                             ],
+                            "text": "YOLO"
+                        },
+                        "notification_type": "NO_PUSH"
+                    };
+
+                    request.post({
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {
+                            access_token: fbtoken
+                        },
+                        method: "POST",
+                        json: true,
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        body: modify_sub_menu
+                    }, function(err, res, body) {
+                        if (err) console.error('post err ', err);
+                    })
+                    break;
+
+                case "sub_menu_":
+                      var modify_sub_menu = {
+                        "recipient": {
+                            "id": sender.toString()
+                        },
+                        "message": {
+                          "quick_replies":[
+                             {
+                                "content_type":"text",
+                                "title":"🍪",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: 'cookie'
+                                    })
+                              },
+                               {
+                                "content_type":"text",
+                                "title":"👖",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: 'jeans'
+                                    })
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"🌹",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: '🌹'
+                                    })
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"☕",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: '☕'
+                                    })
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"🔨",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: '🔨'
+                                    })
+                              },
+                              {
+                                "content_type":"text",
+                                "title":"👻",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: '👻'
+                                    })
+                               },
+                               {
+                                "content_type":"text",
+                                "title":"💯",
+                                "payload": JSON.stringify({
+                                        dataId: "facebook_" + sender.toString(),
+                                        action: "button_search",
+                                        text: '💯 '
+                                    })
+                              },
+                               {
+                                "content_type":"text",
+                                "title":" < Back ",
+                                "payload": JSON.stringify({
+                                        action: "back",
+                                        type: "last_menu"
+                                    })
+                              }
+                            ],
                             "text": "Try these emoji searches"
                         },
                         "notification_type": "NO_PUSH"
@@ -642,6 +751,8 @@ app.post('/facebook', function(req, res) {
                     break;
 
 
+
+
                } 
 
             }
@@ -650,7 +761,7 @@ app.post('/facebook', function(req, res) {
         else if (event.message && event.message.text) {
                 text = event.message.text;  
                 process_emoji(text, function(res) {
-                    
+
                     text = res;
                 })
                 text = emojiText.convert(text,{delimiter: ' '});
