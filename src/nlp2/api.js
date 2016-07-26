@@ -96,6 +96,7 @@ var parse = module.exports.parse = function(message) {
 
     // welp we'll mutate the shit out of the message here.
     nlpToResult(res_parse, message);
+    debug('_rnn response_: ', res_rnn)
     return message;
   })
 }
@@ -164,13 +165,12 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-  if (nlp.price_modifier) {
-    debug('priceModifier triggered')
+  if (nlp.focus.length === 1 && nlp.price_modifier && nlp.modifier_words.length === 1) {
+    debug('single focus and priceModifier triggered')
     var exec = {
       mode: nlp.mode, // MODE.shopping,
       action: nlp.action,
       params: {
-        // price: nlp.price_modifier,
         type: 'price',
         param: nlp.price_modifier,
         focus: nlp.focus[0]
@@ -180,9 +180,8 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-  // if there is a focus and a modifier, it's a modified search
-  if (nlp.focus.length === 1 && nlp.modifier_words.length === 1 && message.execute.length == 0) {
-    debug('single focus, single modifier triggered')
+  if (nlp.focus.length === 1 && getModifier(nlp.modifier_words[0])) {
+    debug('single focus, unused modifier')
     var exec = {
       mode: nlp.mode,
       action: nlp.action,
@@ -192,6 +191,7 @@ function nlpToResult(nlp, message) {
     message.execute.push(exec)
     return;
   }
+
 
   message.execute.map(e => {
     if (e.action === nlp.action) {

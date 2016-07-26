@@ -130,6 +130,7 @@ class McParser:
                 self.focus.append('3')
 
         self.modifier_words = list(set(self.nouns).union(self.adjectives))
+        self.nouns_with_adjectives = ' '.join(self.modifier_words)
 
     def _remove_words(self):
         '''
@@ -226,7 +227,18 @@ class McParser:
         '''
         if not self.had_question and not self.focus:
             self.simple_case = True
-            self.simple_query = self.text
+            if hasattr(self, 'nouns_with_adjectives'):
+                if len(self.noun_phrases) > 0:
+                    if len(self.noun_phrases[0]) > len(self.nouns_with_adjectives):
+                        self.simple_query = self.noun_phrases[0]
+                        self.simple_q_test = self.noun_phrases[0]
+                        logger.info('using nouns phrases')
+                else:
+                    self.simple_query = self.nouns_with_adjectives
+                    logger.info('using nouns joined with adjectives search')
+            else:
+                logger.info('using full query')
+                self.simple_query = self.text
             self.mode = 'shopping'
             self.action = 'initial'
             logger.info('simple case using query: ' + self.simple_query)
@@ -236,62 +248,3 @@ class McParser:
 
     def output_form(self):
         return self.__dict__
-
-    def old_output_form(self):
-        '''
-        Put into correct json format for api.js
-        note: probably a better way to do this with obj.__dict__
-        '''
-        response = EasyDict()
-        response.text = self.text
-
-        # probably need to fix response.nouns
-        # most likely want (set(noun_phrases) - nouns) - adjectives)
-        response.nouns = list(self.noun_phrases +
-                              [' '.join(self.adjectives + self.nouns)])
-        response.nouns_without_stopwords = self.nouns_without_stopwords
-        response.verbs = self.verbs
-        response.adjectives = self.adjectives
-        response.entities = self.entities
-        response.parts_of_speech = self.parts_of_speech
-        response.modifier_words = self.modifier_words
-
-        response.mode = self.mode
-        response.action = self.action
-        response.focus = self.focus
-        response.sf_sm = self.sf_sm
-
-        response.had_about = self.had_about
-        response.had_more = self.had_more
-        response.had_question = self.had_question
-
-        if hasattr(self, 'price_modifier'):
-            response.price_modifier = self.price_modifier
-
-        if hasattr(self, 'simple_query'):
-            response.simple_query = self.simple_query
-            response.simple_case = self.simple_case
-
-        # add ss
-        ss = {}
-        ss['focus'] = self.focus
-        ss['noun_phrases'] = self.noun_phrases
-        ss['parts_of_speech'] = self.parts_of_speech
-        ss['sentiment_polarity'] = 0.0
-        ss['sentiment_subjectivity'] = 0.0
-        response.ss = [ss]
-
-        return response
-
-    # ---------------------------------------------------
-    # TODO LATER ----------------------------------------
-    # def _create_execute(self):
-    #     e = {}
-    #     if self.had_about:
-    #         e['mode'] = 'shopping'
-    #         e['action'] = 'focus'
-    #         e['params'] = 'params'
-    #     if self.had_find:
-    #         e['mode'] = 'shopping'
-    #         e['action'] = 'focus'
-    #         e['params'] = 'params'

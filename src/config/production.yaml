@@ -21,5 +21,6 @@ neighborhoodServer:
 app:
   publicAPI: https://kipapp.co/styles/api
 picstitch: http://picstitch:5000
-nlp: http://nlp:8083
+nlp: http://parser:8083
+nlp_rnn: http://rnn:8085
 doc2vec: http://localhost:8084

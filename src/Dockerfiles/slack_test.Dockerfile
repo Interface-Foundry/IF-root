@@ -1,6 +1,6 @@
 FROM node:6
 
-ENV NODE_ENV=production
+ENV NODE_ENV=development_nlp
 
 RUN mkdir /kip
 
