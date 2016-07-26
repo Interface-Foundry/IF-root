@@ -273,6 +273,7 @@ app.post('/facebook', function(req, res) {
                     // queue it up for processing
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+
                     });
                 }
               })                
@@ -594,6 +595,7 @@ app.post('/facebook', function(req, res) {
             'http://kipthis.com/kip_stickers/kip8.png',
             'http://kipthis.com/kip_stickers/kip9.png'
             ];
+
             var img_card = {
                 "attachment":{
                   "type":"image",
@@ -602,6 +604,7 @@ app.post('/facebook', function(req, res) {
                   }
                 }
               }
+
              request({
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {

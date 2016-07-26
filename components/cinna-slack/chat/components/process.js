@@ -4,15 +4,70 @@ var request = require('request');
 var fs = require('fs');
 var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
-
-
+var db = require('../../db');
 var googl = require('goo.gl');
+
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
 } else {
     googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk');
+}
+
+var COUNTRY = {
+  DEFAULT: ['.com'],
+  US: ['.com'],
+  CANADA: ['.ca'],
+  UK: ['.co.uk'],
+  AUSTRALIA: ['.com.au'],
+  INDIA: ['.in'],
+  JAPAN: ['co.jp'],
+  FRANCE: ['.fr'],
+  GERMANY: ['.de'],
+  ITALY: ['.it'],
+  NETHERLANDS: ['.nl'],
+  SPAIN: ['.es'],
+  IRELAND: ['.ie'],
+  MEXICO: ['.com.mx'],
+  BRAZIL: ['.com.br']
+}
+
+var swapAmazonTLD = function (url, user_id) {
+  var user = db.Chatuser.findOne({
+    id: user_id
+  })
+  if (COUNTRY.hasOwnProperty(user.country)) {
+    return url.split('.com').join(COUNTRY[user_country])
+  }
+  else {
+    return url
+  }
+}
+
+var updateCountry = function(country, user_id){
+
+
+  co(function*() {
+    var user = yield db.Chatuser.findOne({id: user_id}).exec()
+
+    convo.chatuser.settings.last_call_alerts = true;
+    yield convo.chatuser.save();
+
+  }).catch(function(e) {
+
+  })
+
+  
+  var user = db.Chatuser.findOne({
+    id: user_id
+  })
+  if (COUNTRY.hasOwnProperty(user.country)) {
+    return url.split('.com').join(COUNTRY[user_country])
+  }
+  else {
+    return url
+  }
 }
 
 var urlShorten = function(data,callback2) {
@@ -24,6 +79,7 @@ var urlShorten = function(data,callback2) {
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var url = data.client_res;
            url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+
            var escapeAmazon = querystring.escape(url);
 
             // request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
@@ -100,7 +156,7 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➊</div>';
             }
-            else if (data.flags && data.flags.email == true) {
+            else if (data.flags && data.flags.email == true || data.source.origin == 'skype') {
                   numEmoji = '1.'
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
@@ -114,7 +170,7 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➋</div>';
             }
-            else if (data.flags && data.flags.email == true) {
+            else if (data.flags && data.flags.email == true || data.source.origin == 'skype') {
                   numEmoji = '2.'
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
@@ -128,7 +184,7 @@ function getNumEmoji(data,number,callback){
             if (data.source.origin == 'socket.io'){
                 numEmoji = '<div class="number">➌</div>';
             }
-            else if (data.flags && data.flags.email == true) {
+            else if (data.flags && data.flags.email == true || data.source.origin == 'skype') {
                   numEmoji = '3.'
             }
             else if (data.source.origin == 'slack' || data.source.origin == 'supervisor' ){
@@ -143,26 +199,26 @@ function getNumEmoji(data,number,callback){
 }
 
 var emoji = {
-  1: { slack: ':one:', html: '<div class="number">①</div>', email: '1. ' },
-  2: { slack: ':two:', html: '<div class="number">②</div>', email: '2. ' },
-  3: { slack: ':three:', html: '<div class="number">③</div>', email: '3. ' },
-  4: { slack: ':four:', html: '<div class="number">④</div>', email: '4. ' },
-  5: { slack: ':five:', html: '<div class="number">⑤</div>', email: '5. ' },
-  6: { slack: ':six:', html: '<div class="number">⑥</div>', email: '6. ' },
-  7: { slack: ':seven:', html: '<div class="number">⑦</div>', email: '7. ' },
-  8: { slack: ':eight:', html: '<div class="number">⑧</div>', email: '8. ' },
-  9: { slack: ':nine:', html: '<div class="number">⑨</div>', email: '9. ' },
-  10: { slack: '10.', html: '<div class="number">⑩</div>', email: '10. ' },
-  11: { slack: '11.', html: '<div class="number">⑪</div>', email: '11. ' },
-  12: { slack: '12.', html: '<div class="number">⑫</div>', email: '12. ' },
-  13: { slack: '13.', html: '<div class="number">⑬</div>', email: '13. ' },
-  14: { slack: '14.', html: '<div class="number">⑭</div>', email: '14. ' },
-  15: { slack: '15.', html: '<div class="number">⑮</div>', email: '15. ' },
-  16: { slack: '16.', html: '<div class="number">⑯</div>', email: '16. ' },
-  17: { slack: '17.', html: '<div class="number">⑰</div>', email: '17. ' },
-  18: { slack: '18.', html: '<div class="number">⑱</div>', email: '18. ' },
-  19: { slack: '19.', html: '<div class="number">⑲</div>', email: '19. ' },
-  20: { slack: '20.', html: '<div class="number">⑳</div>', email: '20. ' },
+  1: { slack: ':one:', html: '<div class="number">①</div>', email: '1. ', skype: '1.'},
+  2: { slack: ':two:', html: '<div class="number">②</div>', email: '2. ', skype: '2.' },
+  3: { slack: ':three:', html: '<div class="number">③</div>', email: '3. ', skype: '3.' },
+  4: { slack: ':four:', html: '<div class="number">④</div>', email: '4. ', skype: '4.' },
+  5: { slack: ':five:', html: '<div class="number">⑤</div>', email: '5. ', skype: '5.' },
+  6: { slack: ':six:', html: '<div class="number">⑥</div>', email: '6. ', skype: '6.' },
+  7: { slack: ':seven:', html: '<div class="number">⑦</div>', email: '7. ', skype: '7.' },
+  8: { slack: ':eight:', html: '<div class="number">⑧</div>', email: '8. ', skype: '8.' },
+  9: { slack: ':nine:', html: '<div class="number">⑨</div>', email: '9. ', skype: '9.' },
+  10: { slack: '10.', html: '<div class="number">⑩</div>', email: '10. ', skype: '10.' },
+  11: { slack: '11.', html: '<div class="number">⑪</div>', email: '11. ', skype: '11.' },
+  12: { slack: '12.', html: '<div class="number">⑫</div>', email: '12. ', skype: '12.' },
+  13: { slack: '13.', html: '<div class="number">⑬</div>', email: '13. ', skype: '13.' },
+  14: { slack: '14.', html: '<div class="number">⑭</div>', email: '14. ', skype: '14.' },
+  15: { slack: '15.', html: '<div class="number">⑮</div>', email: '15. ', skype: '15.' },
+  16: { slack: '16.', html: '<div class="number">⑯</div>', email: '16. ', skype: '16.' },
+  17: { slack: '17.', html: '<div class="number">⑰</div>', email: '17. ', skype: '17.' },
+  18: { slack: '18.', html: '<div class="number">⑱</div>', email: '18. ', skype: '18.' },
+  19: { slack: '19.', html: '<div class="number">⑲</div>', email: '19. ', skype: '19.' },
+  20: { slack: '20.', html: '<div class="number">⑳</div>', email: '20. ', skype: '20.' },
 
 }
 
@@ -186,8 +242,10 @@ function getItemLink(url, user_id, item_id) {
   url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
+  var url_swapped = swapAmazonTLD(url, user_id)
+  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
 }
+
 
 //
 // Downloads slack file and runs through google vision for image to text search
@@ -205,7 +263,7 @@ var imageSearch = function(data,token,callback){
          }
       };
 
-      var savePath = __dirname + '/temp_imgs/'+Math.random().toString(36).substring(7)+data.file.filetype;
+      var savePath = __dirname + '/temp_imgs/' + Math.random().toString(36).substring(7)+data.file.filetype;
 
       request(options).pipe(fs.createWriteStream(savePath)).on('close', function(){
 

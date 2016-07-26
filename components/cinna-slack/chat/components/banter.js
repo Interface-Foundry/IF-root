@@ -740,28 +740,39 @@ var checkForCanned = function(message) {
     case textSimilar(input, 'wut') > 70:
     case textSimilar(input, 'wtf') > 70:
       flag = 'basic';
-      res = 'I\'m Kip, your personal shopper.\n' +
+            
+      //if (origin == 'skype') {
+          res = 'I\'m Kip, your penguin shopper.\n ' +
+            'Tell me what you\'re looking for, and I\'ll show you three options.\n ' +
+            'Try it now! Maybe you need new headphones? Type <b>headphones</b> to start.';
 
-        'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n' +
-        'Use commands to refine your search, for example:\n\n' +
+      // } 
+      // else{
+      //     res = 'I\'m Kip, your penguin shopper.\n' +
 
-        '`more` : view more search results\n' +
-        '`more like 3` : find similar items to search result :three:\n\n' +
+      //       'Tell me what you\'re looking for, like `headphones`, and I\'ll show you three options: :one: :two: or :three:\n' +
+      //       'Use commands to refine your search, for example:\n\n' +
 
-        '`2` : check for product details for item :two:\n' +
-        '`1 but cheaper` : finds :one: or similar in a lower price\n' +
-        '`2 but in XL` : finds :two: or similar in size XL\n' +
-        '`3 but in blue` : finds :three: or similar in color blue\n' +
-        '`2 but in wool` : finds :two: or similar with wool fabric\n\n' +
+      //       '`more` : view more search results\n' +
+      //       '`more like 3` : find similar items to search result :three:\n\n' +
 
-        '`buy 1` : to buy item :one:\n' +
-        '`save 2` : save item :two: to cart\n' +
-        '`view cart` : see all items in the cart\n' +
-        '`remove 3` : to remove item :three: from cart\n\n' +
+      //       '`2` : check for product details for item :two:\n' +
+      //       '`1 but cheaper` : finds :one: or similar in a lower price\n' +
+      //       '`2 but in XL` : finds :two: or similar in size XL\n' +
+      //       '`3 but in blue` : finds :three: or similar in color blue\n' +
+      //       '`2 but in wool` : finds :two: or similar with wool fabric\n\n' +
+
+      //       '`buy 1` : to buy item :one:\n' +
+      //       '`save 2` : save item :two: to cart\n' +
+      //       '`view cart` : see all items in the cart\n' +
+      //       '`remove 3` : to remove item :three: from cart\n\n' +
 
 
-        '`help` : view guidelines\n' +
-        'Try it now! Maybe you need new headphones? Type `headphones` to start.';
+      //       '`help` : view guidelines\n' +
+      //       'Try it now! Maybe you need new headphones? Type `headphones` to start.';
+      // }
+
+
       break;
 
     case textSimilar(input, 'trending now') > 90:
