@@ -173,7 +173,7 @@ var similar = function*(params,origin) {
 
   var results = yield get_client().similarityLookup(amazonParams);
   results = results.slice(params.skip, params.skip + 3);
-    results.original_query = params.query
+  results.original_query = params.query;
 
 
   // if there aren't enough results... do a weaker search
