@@ -524,6 +524,8 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     return default_reply(message);
   }
 
+  // console.log('\n\n\n\n\n\n\n\n\n\n WHO IS MR ROBOT? ', message,'\n\n\n\n\n\n\n\n\n\n\n\n')
+
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
 
@@ -540,13 +542,19 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
-  // modify the color
-  // if (exec.params.type === 'color') {
-  //   var new_query = (old_results[exec.params.focus - 1].ItemAttributes[0].Title + old_)
-  // }
-  // else {
-  //   throw new Error('this type of modification not handled yet: ' + exec.params.type);
-  // }
+  else if (exec.params.type === 'color') {
+    var jsonAmazon = JSON.parse(message.amazon);
+    exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val.name;
+        // console.log('\n\n\n\n\n\n\n\n\n DO THEY SEE ME? ',  exec.params, '\n\n\n\n\n\n\n\n\n')
+
+    // console.log('exec for color search: ', JSON.stringify(exec))
+  }
+  else {
+    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+  }
+  
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
@@ -570,8 +578,10 @@ handlers['cart.save'] = function*(message, exec) {
     throw new Error('no focus for saving to cart');
   }
 
-  var raw_results = yield getLatestAmazonResults(message);
-console.log('raw_results: ', typeof raw_results, raw_results);
+
+ 
+ var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
+  console.log('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
 
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms

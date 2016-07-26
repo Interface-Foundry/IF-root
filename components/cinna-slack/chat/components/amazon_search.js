@@ -5,10 +5,10 @@ var _ = require('lodash');
 var debug = process.env.NODE_ENV == 'production' ? function() {} : console.log.bind(console);
 var verbose = process.env.VERBOSE ? console.log.bind(console) : function() {};
 var kip = require('../../kip');
-
 var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var parseAmazon = require('./search.js').parseAmazon;
 var amazonHTML = promisify(require('./amazonHTML'));
 var db = require('../../db');
 
@@ -51,6 +51,16 @@ params:
 
   http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 */
+
+
+
+ // {"mode":"shopping",
+ // "action":"modify.one",
+ // "params":{"query":"shoes","focus":[1],"val":[{"hsl":[170,255,127],"rgb":[0,0,255],"name":"Blue","hex":"#0000FF"},{"hsl":[170,255,64],"rgb":[0,0,128],"name":"Navy Blue","hex":"#000080"},{"hsl":[159,185,145],"rgb":[65,105,225],"name":"Royal Blue","hex":"#4169E1"},{"hsl":[194,255,65],"rgb":[75,0,130],"name":"Indigo","hex":"#4B0082"}],"type":"color"},"_id":"578fa1f16e7ef4c065933966"}
+
+
+
+
 var search = function*(params,origin) {
 
   db.Metrics.log('search.amazon', params);
@@ -60,12 +70,15 @@ var search = function*(params,origin) {
     throw new Error('no query specified');
   }
 
+
+
   amazonParams = {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
     Keywords: params.query,
     Availability: 'Available'
   };
 
+  
   // Amazon price queries are formatted as string of cents...
   if (params.min_price) {
     amazonParams.MinimumPrice = (params.min_price * 100).toFixed(0);
@@ -93,10 +106,26 @@ var search = function*(params,origin) {
   debug('input params', params);
   debug('amazon params', amazonParams);
 
-  var results = yield get_client().itemSearch(amazonParams);
+  // if (amazonParams.type == 'color') {
+    if (params.productGroup && params.browseNodes) {
+        // console.log('west virginia mountain mama ', params.val[0].name);
+         amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name) ? params.val[0].name  + ' ' + amazonParams["Keywords"]:  amazonParams["Keywords"];
+
+        var key;
+        yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
+          key = res;
+        });          
+        if (key) {
+          amazonParams.SearchIndex = key.SearchIndex;
+          amazonParams.BrowseNode = key.BrowseNode;
+        }
+     
+    } 
+
+  // console.log('shiet son' , amazonParams);
+  var results = yield get_client().itemSearch(amazonParams); 
   results = results.slice(skip, skip + 3);
   results.original_query = params.query
-
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {
     // TODO do the weak search thing.  looks like the weak search thing
@@ -105,8 +134,9 @@ var search = function*(params,origin) {
   // results = yield weakSearch(params); TODO
   // results = results.slice(skip, 3); // yeah whatevers
   }
-
   return yield enhance_results(results,origin);
+
+
 }
 
 
