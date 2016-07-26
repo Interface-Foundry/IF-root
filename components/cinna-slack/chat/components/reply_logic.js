@@ -587,8 +587,8 @@ handlers['cart.save'] = function*(message, exec) {
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
-
-  try {
+  console.log('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 )
+;  try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);
