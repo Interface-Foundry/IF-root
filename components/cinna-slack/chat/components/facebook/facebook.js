@@ -90,6 +90,8 @@ var process_emoji = require('../process_emoji').search;
 
 if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAAD62qJNXSQBAD0LH9w1sfIGBcoNXj4hWehsachzeA3cYUgiIcVy7nAo1wZArzMqTWaGHcdkIW2qZBl6kkPduZBo3ynZBelPBp6yk8QKAtt7KTR4BCENYmN40wZBB9oIfZACkC6mHgOYHliNqbzO7JKSJlZBZAWzjZBkZD';
+} else if (process.env.NODE_ENV === 'development') {
+    fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
 }
 
 app.use(express.static(__dirname + '/static'))
