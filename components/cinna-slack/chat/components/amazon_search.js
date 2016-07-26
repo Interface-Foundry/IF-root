@@ -146,6 +146,7 @@ asin
 skip
 */
 var similar = function*(params,origin) {
+
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
     throw new Error('no ASIN specified');
@@ -189,7 +190,7 @@ var similar = function*(params,origin) {
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results, user_id) {
+function* enhance_results(results, origin) {
   // enhance the results, naturally.
   yield results.map(r => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {

@@ -6,5 +6,7 @@ elasticsearch:
 app:
   publicAPI: http://localhost:2997/api
 picstitch: http://localhost:5000
+nlp_rnn: http://104.196.104.89:8085
+nlp: http://104.196.149.61:8083
 # nlp: http://localhost:8083
 # doc2vec: http://localhost:8084
