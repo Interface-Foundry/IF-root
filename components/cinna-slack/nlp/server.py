@@ -9,9 +9,12 @@ import parser
 
 from spacy.en import English, LOCAL_DATA_DIR
 
+import os
+from spacy.en import English
+# data_dir = os.environ.get('SPACY_DATA')
 print('loading data, usually takes 75 seconds on my mac')
-data_dir = os.environ.get('SPACY_DATA', LOCAL_DATA_DIR)
-nlp = English(data_dir=data_dir)
+nlp = English()
+
 
 app = Flask(__name__)
 
@@ -32,6 +35,7 @@ def parse_message():
 def reload_parse():
     reload(parser)
     return 'ok'
+
 
 if __name__ == '__main__':
     print('running app on port 8083')

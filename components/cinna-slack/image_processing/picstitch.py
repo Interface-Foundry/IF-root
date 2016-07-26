@@ -68,6 +68,7 @@ def index():
     thumbnails = []
     PIC_SIZE = 130, 130
     CHAT_WIDTH = 365
+    CHAT_HEIGHT = 140
     PIC_COORDS = [{'x': 14, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
     CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
     TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
@@ -78,15 +79,33 @@ def index():
         PIC_COORDS = [{'x': 5, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
         TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
 
+    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        print 'ahhhhhhhh'
+        CHAT_HEIGHT = 230
+        CHAT_WIDTH = 381
+        PIC_COORDS = [{'x': 20, 'y': 50}] #where to draw main pics
+        TEXTBOX_COORDS = [{'x': 250, 'y': 100}] #where to draw text boxes
+        PIC_SIZE = 250, 250
 
     #add images
     for i, data in enumerate(images):
         im = download_image(data[u'url'])
+        print PIC_SIZE[0]
+        print PIC_SIZE[1]
         im.thumbnail(PIC_SIZE, Image.ANTIALIAS)
         thumbnails.append(im)
 
-    #add select numbers
+    #image object
     img = Image.new('RGB', (CHAT_WIDTH, CHAT_HEIGHT), BGCOLOR)
+
+    #draw a border for skype images
+    # if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+    #     #draw white boxes
+    #     drawBorder = ImageDraw.Draw(img)
+    #     drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
+    #     drawBorder.rectangle(((3,3),(356,187)), fill="white")
+
+
     for i, im in enumerate(thumbnails):
         #add pics
         x = PIC_COORDS[i][u'x']
@@ -102,6 +121,10 @@ def index():
     font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
 
+    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 23) #price
+        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 18)
+
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x'] - 30
         y = TEXTBOX_COORDS[i][u'y']
@@ -113,27 +136,31 @@ def index():
             print 'boxbox'
             draw.rectangle(((115,0),(400,160)), fill="white")
 
-            # add white box transparency in, eventually fam ~
-            # # #
-            # back = Image.new('RGBA', (512,512), (255,0,0,0))
-            # poly = Image.new('RGBA', (512,512))
-            # pdraw = ImageDraw.Draw(poly)
-            # pdraw.polygon([(128,128),(384,384),(128,384),(384,128)],
-            #               fill=(255,255,255,127),outline=(255,255,255,255))
-            # back.paste(poly,mask=poly)
-            # back.show()
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            #draw white boxes
+            print 'boxbox'
+            draw.rectangle(((190,5),(329,160)), fill="white")
 
 
         last_y = 5
+
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            last_y = last_y + 50
 
         #add price
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
 
         #add prime logo
-        if im[u'prime'] == '1':
+        if im[u'prime'] == '1' and images[0][u'origin'] != 'skype':
             img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
 
+
         last_y = last_y + 27
+
+        #move reviews down a bit 
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            last_y = last_y + 10
+
 
         if 'reviews' in im and 'rating' in im[u'reviews']:
             # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
@@ -165,31 +192,45 @@ def index():
 
             last_y = last_y + 20
 
+        # # #fake reviews for skype!! lmao
+        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            selectRating = random.randint(6,8)
+            img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
+            # selectRating = random.randint(6,7)
+            reviewCount = random.randint(15,1899)
+            # img.paste(REVIEW_STARS[7], (x, last_y), mask=REVIEW_STARS[7])
+            draw.text((x + 80, last_y),' - ' + str(reviewCount),font=font2,fill="#2d70c1")
+            last_y = last_y + 20
+
         last_y = last_y + 5
 
         if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
             BOX_WIDTH = 26
+
+        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
+            BOX_WIDTH = 24
         else:
             BOX_WIDTH = 30
 
+        #draw details but not for skype or fbook
+        if images[0][u'origin'] != 'skype':
+            for z in im[u'name']:
 
-        for z in im[u'name']:
+                # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
+                countLines = 0
+                for line in textwrap.wrap(z, width=BOX_WIDTH):
+                    countLines += 1
+                    if countLines < 3:
+                        filler = ''
+                        if countLines == 3:
+                            filler = '...'
+                        draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
+                        last_y += font2.getsize(line)[1]
+                        last_y = last_y + 2
 
-            # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-            countLines = 0
-            for line in textwrap.wrap(z, width=BOX_WIDTH):
-                countLines += 1
-                if countLines < 3:
-                    filler = ''
-                    if countLines == 3:
-                        filler = '...'
-                    draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
-                    last_y += font2.getsize(line)[1]
-                    last_y = last_y + 2
-
-                # last_y = y
-            # y += font.getsize(line)[1]
-            # last_y = y
+                last_y = y
+            y += font.getsize(line)[1]
+            last_y = y
 
 
         # #add product names

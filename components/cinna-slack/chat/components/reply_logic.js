@@ -16,7 +16,7 @@ var purchase = require("./purchase.js");
 // var conversation_botkit = require('./conversation_botkit');
 // var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
@@ -35,6 +35,9 @@ var email = require('./email');
 
 var queue = require('./queue-mongo');
 var kip = require('../../kip');
+
+//temp in-memory mode tracker
+var modes = {};
 
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
@@ -102,17 +105,60 @@ queue.topic('incoming').subscribe(incoming => {
       throw new Error('correct message not retrieved from db');
     }
 
-    var replies = yield simple_response(message);
-    kip.debug('simple replies'.cyan, replies);
-
-    if (!replies || replies.length === 0) {
-      replies = yield nlp_response(message);
-      kip.debug('nlp replies'.cyan, replies);
+    //// MODES STUFF ////
+    var user = {
+      id : incoming.data.user_id
     }
 
-    if (!replies || replies.length === 0) {
-      kip.error('Could not understand message ' + message._id);
-      replies = [default_reply(message)];
+    if(incoming.data.action == 'mode.update'){
+      modes[user.id] = 'onboarding'
+      console.log('UPDATED MODE!!!!')
+      incoming.ack(); 
+      return;
+    }
+
+    if (!modes[user.id]){
+        modes[user.id] = 'shopping';
+    }
+    
+    /////////////////////
+
+    //MODE SWITCHER
+    switch(modes[user.id]){
+      case 'onboarding':
+        console.log('ONBAORDING MODE')
+
+        //check for valid country
+        //turn this into a function
+        if(text == 'Singapore' || text == 'United States'){
+          console.log('SAVING TO DB')
+          replies = ['Saved country!'];
+
+          //access onboard template per source origin!!!!
+          modes[user.id] = 'shopping';
+        }else {
+          replies = ['Didnt understand, please choose a country thx'];
+          console.log('Didnt understand, please choose a country thx')
+        }
+      break;
+
+      //default Kip Mode shopping
+      default:
+        console.log('DEFAULT SHOPPING MODE')
+        //try for simple reply
+        var replies = yield simple_response(message);
+        kip.debug('simple replies'.cyan, replies);
+
+        //not a simple reply, do NLP 
+        if (!replies || replies.length === 0) {
+          replies = yield nlp_response(message);
+          kip.debug('nlp replies'.cyan, replies);
+        }
+
+        if (!replies || replies.length === 0) {
+          kip.error('Could not understand message ' + message._id);
+          replies = [default_reply(message)];
+        }
     }
 
     kip.debug('num replies', replies.length);
@@ -157,7 +203,10 @@ function* simple_response(message) {
     case 'search.initial':
       //send a reply right away
       send_text_reply(message, reply.res);
-      typing(message);
+
+      //if(message.origin !== 'skype'){
+        typing(message);
+      //}
 
       //now also search for item
       message.mode = 'shopping';
@@ -337,7 +386,7 @@ handlers['shopping.initial'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some options you might like. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'Hi, here are some options you might like. Tap `Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -382,7 +431,7 @@ handlers['shopping.more'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'Hi, here are some more options. Type `more` to see more options or tap `Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -417,7 +466,7 @@ handlers['shopping.similar'] = function*(message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some more options. Use `more` to see more options or `buy 1`, `2`, or `3` to get it now 😊',
+    text: 'I found some similar options, would you like to see more product info? Tap `More Info`',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',
@@ -444,7 +493,8 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     }
   }
   else if (exec.params.type === 'genericDetail') {
-    // todo
+      //add handler for all other modifiers here
+
   }
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
@@ -482,6 +532,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   exec.params.query = old_params.query;
 
   // modify the params and then do another search.
+  // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
     var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
     if (exec.params.param === 'less') {
@@ -503,6 +554,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
+  
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
@@ -540,7 +592,7 @@ handlers['cart.save'] = function*(message, exec) {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
 
   // view the cart

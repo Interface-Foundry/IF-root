@@ -88,6 +88,10 @@ var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
 
 
+if (process.env.NODE_ENV === 'development_alyx'){
+    fbtoken = 'EAAD62qJNXSQBAD0LH9w1sfIGBcoNXj4hWehsachzeA3cYUgiIcVy7nAo1wZArzMqTWaGHcdkIW2qZBl6kkPduZBo3ynZBelPBp6yk8QKAtt7KTR4BCENYmN40wZBB9oIfZACkC6mHgOYHliNqbzO7JKSJlZBZAWzjZBkZD';
+}
+
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
     res.send('💬 🌏')
@@ -282,6 +286,7 @@ app.post('/facebook', function(req, res) {
                     // queue it up for processing
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+
                     });
                 }
               })                
@@ -831,6 +836,7 @@ app.post('/facebook', function(req, res) {
             'http://kipthis.com/kip_stickers/kip8.png',
             'http://kipthis.com/kip_stickers/kip9.png'
             ];
+
             var img_card = {
                 "attachment":{
                   "type":"image",
@@ -839,6 +845,7 @@ app.post('/facebook', function(req, res) {
                   }
                 }
               }
+
              request({
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {

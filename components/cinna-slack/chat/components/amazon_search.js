@@ -11,11 +11,6 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var parseAmazon = require('./search.js').parseAmazon;
 var amazonHTML = promisify(require('./amazonHTML'));
 var db = require('../../db');
-// var client = amazon.createClient({
-//   awsId: "AKIAIKMXJTAV2ORZMWMQ",
-//   awsSecret: "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",
-//   awsTag: "quic0b-20"
-// });
 
 
 var aws_clients = {
@@ -104,6 +99,9 @@ var search = function*(params,origin) {
   // skip = 9; p2, s0
   }
 
+  //modify?
+
+
   debug('🔍 do the amazon search! 🔎 ');
   debug('input params', params);
   debug('amazon params', amazonParams);
@@ -148,6 +146,7 @@ asin
 skip
 */
 var similar = function*(params,origin) {
+
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
     throw new Error('no ASIN specified');
@@ -191,10 +190,7 @@ var similar = function*(params,origin) {
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results,origin) {
-
-
-
+function* enhance_results(results, origin) {
   // enhance the results, naturally.
   yield results.map(r => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
@@ -216,6 +212,7 @@ function* enhance_results(results,origin) {
 
   for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];
+    // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
   // cool i've got the results now...
