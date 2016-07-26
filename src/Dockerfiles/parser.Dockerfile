@@ -20,7 +20,7 @@ MAINTAINER grahama <graham.annett@gmail.com>
 
 RUN pip install ipython
 
-ADD src_parser /root/
+ADD nlp_parser/src_parser /root/
 
 RUN chmod +x /root/parser.sh
 

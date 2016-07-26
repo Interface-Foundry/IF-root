@@ -1,5 +1,5 @@
-# VERSION:        0.1
-# REPO/TAG:       kip/nlp:rnn
+# VERSION:        0.7.5
+# REPO/TAG:       gcr.io/kip-styles/rnn:$VERSION
 # DESCRIPTION:    trained LSTM model
 # AUTHOR:         graham annett
 # COMMENTS:
@@ -23,9 +23,9 @@ RUN apt-get update && apt-get install -y \
     python3-h5py \
     wget
 
-RUN pip3 install keras pandas flask $TF_DOWNLOAD
+RUN pip3 install keras pandas flask oauth2client google-api-python-client $TF_DOWNLOAD
 
-ADD src_rnn /app
+ADD nlp_rnn/src_rnn /app
 
 RUN mkdir /root/.keras/ && \
     echo '{"floatx": "float32", "epsilon": 1e-07, "backend": "tensorflow"}' > /root/.keras/keras.json
@@ -36,5 +36,9 @@ RUN wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/late
     wget -P /app/ https://storage.googleapis.com/saved-models-bucket/config.json
 
 WORKDIR /app/
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/nlp_creds.json
+
+EXPOSE 8085
 
 ENTRYPOINT python3 server.py
