@@ -51,7 +51,7 @@ params:
 
   http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 */
-var search = function*(params,origin) {
+var search = function*(params) {
 
   db.Metrics.log('search.amazon', params);
 
@@ -106,7 +106,7 @@ var search = function*(params,origin) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results,origin);
+  return yield enhance_results(results);
 }
 
 
@@ -115,7 +115,7 @@ params:
 asin
 skip
 */
-var similar = function*(params,origin) {
+var similar = function*(params) {
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
     throw new Error('no ASIN specified');
@@ -154,12 +154,12 @@ var similar = function*(params,origin) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results,origin);
+  return yield enhance_results(results);
 }
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results, user_id) {
+function* enhance_results(results) {
   // enhance the results, naturally.
   yield results.map(r => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
@@ -177,7 +177,7 @@ function* enhance_results(results, user_id) {
 
   console.log('incomign results!!!! ',results)
 
-  var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
+  var urls = yield picstitch.stitchResultsPromise(results); // no way i'm refactoring this right now
 
   for (var i = 0; i < 3; i++) {
     results[i].picstitch_url = urls[i];

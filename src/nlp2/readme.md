@@ -69,9 +69,6 @@ example:
 
 Explanation of some of the terms (POSTAG, DEPREL, etc): [Dependencies Manual](http://nlp.stanford.edu/software/dependencies_manual.pdf)
 
-<<<<<<< HEAD
-Another explanation: [temrs](https://cs.nyu.edu/grishman/jet/guide/PennPOS.html)
-=======
 Another explanation: [temrs](https://cs.nyu.edu/grishman/jet/guide/PennPOS.html)
 
 
@@ -96,4 +93,4 @@ import requests
 r = requests.post('http://localhost:8085/predict', json={'text': 'red shoes'})
 ```
 
->>>>>>> google-cloud
+

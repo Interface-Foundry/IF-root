@@ -18,7 +18,7 @@ var purchase = require("./purchase.js");
 var kipcart = require('./cart');
 var nlp = require('../../nlp2/api');
 //set env vars
-require('kip');
+var kip = require('../../kip.js');
 var config = kip.config;
 var mailerTransport = require('../../mail/IF_mail.js');
 
@@ -112,14 +112,14 @@ queue.topic('incoming').subscribe(incoming => {
     if(incoming.data.action == 'mode.update'){
       modes[user.id] = 'onboarding'
       console.log('UPDATED MODE!!!!')
-      incoming.ack(); 
+      incoming.ack();
       return;
     }
 
     if (!modes[user.id]){
         modes[user.id] = 'shopping';
     }
-    
+
     /////////////////////
 
     //MODE SWITCHER
@@ -148,7 +148,7 @@ queue.topic('incoming').subscribe(incoming => {
         var replies = yield simple_response(message);
         kip.debug('simple replies'.cyan, replies);
 
-        //not a simple reply, do NLP 
+        //not a simple reply, do NLP
         if (!replies || replies.length === 0) {
           replies = yield nlp_response(message);
           kip.debug('nlp replies'.cyan, replies);
@@ -485,6 +485,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     _.merge(exec.params, old_params);
     var max_price = Math.max.apply(null, old_results.map(r => parseFloat(r.realPrice.slice(1))));
     if (exec.params.param === 'less') {
+      kip.log('searching for something cheaper');
       exec.params.max_price = max_price * 0.8;
     } else if (exec.params.param === 'more') {
       kip.log('wow someone wanted something more expensive');
@@ -518,6 +519,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
 
 // "like 1 but cheaper", "like 2 but blue"
 handlers['shopping.modify.one'] = function*(message, exec) {
+  kip.debug('_using_modify_one_')
   if (!exec.params.focus) {
     kip.err('no focus supplied')
     return default_reply(message);
@@ -532,13 +534,19 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
     var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
+    kip.debug('max_price:', max_price)
     if (exec.params.param === 'less') {
+      kip.log('searching for something cheaper');
       exec.params.max_price = max_price * 0.8;
     } else if (exec.params.param === 'more') {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
   }
+  else {
+    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+  }
+
   // modify the color
   // if (exec.params.type === 'color') {
   //   var new_query = (old_results[exec.params.focus - 1].ItemAttributes[0].Title + old_)

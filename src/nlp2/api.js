@@ -170,8 +170,9 @@ function nlpToResult(nlp, message) {
       mode: nlp.mode, // MODE.shopping,
       action: nlp.action,
       params: {
+        // price: nlp.price_modifier,
         type: 'price',
-        price: nlp.price_modifier,
+        param: nlp.price_modifier,
         focus: nlp.focus[0]
       }
     }

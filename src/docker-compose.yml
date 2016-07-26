@@ -19,17 +19,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/rnn.Dockerfile
-  reply:
-    container_name: reply
-    build:
-      context: .
-      dockerfile: Dockerfiles/reply_logic.Dockerfile
     ports:
-      - "27017:27017"
-  slack:
-    container_name: slack
-    build:
-      context: .
-      dockerfile: Dockerfiles/slack.Dockerfile
-    ports:
-      - "8000:8000"
+      - "8085:8085"
+  # reply:
+  #   container_name: reply
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfiles/reply_logic.Dockerfile
+  #   ports:
+  #     - "27017:27017"
+  # slack:
+  #   container_name: slack
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfiles/slack.Dockerfile
+  #   ports:
+  #     - "8000:8000"
