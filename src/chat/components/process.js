@@ -7,7 +7,7 @@ const vision = require('node-cloud-vision-api');
 var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
 var googl = require('goo.gl');
-require('kip');
+var kip = require('../../kip');
 
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
@@ -58,7 +58,7 @@ var updateCountry = function(country, user_id){
 
   })
 
-  
+
   var user = db.Chatuser.findOne({
     id: user_id
   })

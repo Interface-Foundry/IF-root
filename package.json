@@ -139,7 +139,7 @@
     "test": "./node_modules/mocha/bin/mocha test",
     "debugtest": "node debug ./node_modules/mocha/bin/mocha test",
     "start": "node IF_server.js",
-    "install": "ln -sf ../kip.js node_modules/kip.js"
+    "install": "ln -sf src/kip.js node_modules/kip.js"
   },
   "repository": {
     "type": "git",

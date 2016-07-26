@@ -45,7 +45,7 @@ var slack = require('@slack/client');
 var co = require('co');
 var _ = require('lodash');
 
-var kip = require('kip');
+var kip = require('../../../kip.js');
 var queue = require('../queue-mongo');
 var image_search = require('../image_search');
 var search_results = require('./search_results');
