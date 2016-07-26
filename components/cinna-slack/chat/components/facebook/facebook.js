@@ -586,7 +586,7 @@ app.post('/facebook', function(req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "button_search",
-                                        text: '🌹'
+                                        text: 'flower'
                                     })
                               },
                               {
@@ -595,7 +595,7 @@ app.post('/facebook', function(req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "button_search",
-                                        text: '☕'
+                                        text: 'coffee'
                                     })
                               },
                               {
@@ -604,7 +604,7 @@ app.post('/facebook', function(req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "button_search",
-                                        text: '🔨'
+                                        text: 'hammer'
                                     })
                               },
                               {
@@ -613,7 +613,7 @@ app.post('/facebook', function(req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "button_search",
-                                        text: '👻'
+                                        text: 'ghost'
                                     })
                                },
                                {
@@ -622,7 +622,7 @@ app.post('/facebook', function(req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "button_search",
-                                        text: '💯 '
+                                        text: 'one hundred'
                                     })
                               },
                                {
