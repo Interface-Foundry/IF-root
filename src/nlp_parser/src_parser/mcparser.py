@@ -123,7 +123,6 @@ class McParser:
             if i[7] in ['dobj']:
                 self.dobj = cur_word
                 self.search_object = cur_word
-                self.noun_phrases = [self.root + ' ' + cur_word]
             if i[7] in ['pobj']:
                 self.pobj = cur_word
                 self.search_object = cur_word
@@ -144,6 +143,8 @@ class McParser:
             # if i[3] in ['NOUN', 'PRON']:
                 # self.
             d_index += 1
+
+        # self.noun_phrases = [self.root + ' ' + cur_word]
 
         if hasattr(self, 'first_noun'):
             if self.first_noun is not self.last_noun:
@@ -250,8 +251,8 @@ class McParser:
             self.search_query = self.pobj
         elif hasattr(self, 'nouns_with_adjectives'):
             self.search_query = self.nouns_with_adjectives
-        elif len(self.noun_phrases) > 0:
-            self.search_query = self.noun_phrases[0]
+        # elif len(self.noun_phrases) > 0:
+        #     self.search_query = self.noun_phrases[0]
         else:
             logger.info('using full query')
             self.search_query = self.text
@@ -265,7 +266,18 @@ class McParser:
             self.mode = 'shopping'
             self.action = 'initial'
             self._create_search()
-            logger.info('simple case using query: ' + self.search_query)
+            if type(self.search_query) is not str:
+                # coerce query into str
+                logger.info('query isnt a string for some reason')
+                try:
+                    logger.info(str(self.search_query))
+                except:
+                    logger.critical('_something_wrong_trying_to_strng_')
+            try:
+                logger.info('simple case using query: ' + self.search_query)
+            except:
+                logger.critical('_something_wrong_trying_show_query_')
+
         else:
             self.simple_case = False
             logger.info('not using a simple query')
