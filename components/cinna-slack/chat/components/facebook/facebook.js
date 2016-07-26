@@ -86,7 +86,9 @@ var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
 
-
+if (process.env.NODE_ENV === 'development_alyx'){
+    fbtoken = 'EAAD62qJNXSQBAD0LH9w1sfIGBcoNXj4hWehsachzeA3cYUgiIcVy7nAo1wZArzMqTWaGHcdkIW2qZBl6kkPduZBo3ynZBelPBp6yk8QKAtt7KTR4BCENYmN40wZBB9oIfZACkC6mHgOYHliNqbzO7JKSJlZBZAWzjZBkZD';
+}
 
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
