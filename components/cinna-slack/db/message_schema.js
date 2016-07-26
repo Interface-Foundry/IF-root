@@ -66,6 +66,8 @@ var messageSchema = mongoose.Schema({
     },
     urlShorten:[String],
     flags: {
+            //stuff for chatbot
+            old_search: Boolean,
             //stuff for supervisor
             toSupervisor: Boolean, //messages coming from cinna to supervisor
             toClient: Boolean, //messages going from supervisor to cinna to client

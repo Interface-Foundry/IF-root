@@ -86,6 +86,8 @@ var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
 
+
+
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
     res.send('💬 🌏')
@@ -341,34 +343,10 @@ app.post('/facebook', function(req, res) {
                     if (messages.length == 0) {
                         return console.log('No message found');
                     } 
-                    //If user just hit the back button already -- back --> back :  e.g. backs on backs on backs
-                    // if (backCache > 0) {
-                    //      backCache = backCache + 1;
-                    //      message_to_retrieve = message_to_retrieve + backCache;
-                    //         // console.log(2)
-                    //         var msg = messages[message_to_retrieve];
-                    //         var message = new db.Message({
-                    //             incoming: true,
-                    //             thread_id: 'facebook_' + sender.toString(),
-                    //             resolved: false,
-                    //             user_id: msg.user_id,
-                    //             origin: 'facebook',
-                    //             text:  _.get(messages[message_to_retrieve], 'execute[0].params.query'),
-                    //             source: msg.source,
-                    //             amazon: msg.amazon
-                    //           });
-                    //         message.save().then(() => {
-                    //             queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                    //         });
-                    //     } 
-                    //     else
                          if (messages[message_to_retrieve] && _.get(messages[message_to_retrieve], 'execute[0].params.query')) {
                              backCache = backCache + 1;
-                         message_to_retrieve = message_to_retrieve + backCache;
+                            message_to_retrieve = message_to_retrieve + backCache;
                             //This will loop through older messages until it finds a query.  
-                            //..There may be a situation in which user may be backing into a focus query
-                            //..in which case the message history will not be properly aligned to return the correct focus result..
-                            //..in that case we'll simply return the main sub-menu..
                             var i = message_to_retrieve;
                             var found_query = false;
                             while (i >= 0 && !found_query) {
@@ -879,11 +857,11 @@ app.post('/facebook', function(req, res) {
                                             console.log('No message found');
                                         } 
                                         else if (messages[0]._id == postback.object_id) { 
-                                            console.log('THIS IS AN ITEM FROM THE LATEST SEARCH');
+                                            // console.log('THIS IS AN ITEM FROM THE LATEST SEARCH');
                                             return 'false'
                                         }
                                         else if (messages[0]._id !== postback.object_id) {
-                                            console.log('THIS IS AN NOOOOT ITEM FROM THE LATEST SEARCH', postback)
+                                            // console.log('THIS IS AN NOOOOT ITEM FROM THE LATEST SEARCH', postback)
                                             return postback.object_id;
                                         }
                                     })
@@ -908,6 +886,7 @@ app.post('/facebook', function(req, res) {
                                                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                             });
                                     }
+
                                     else if (old_search && postback.object_id){
                                            //Check if user scrolled up and this item is not from the previous search...
                                             var old_message = yield db.Messages.findById(postback.object_id).exec();
@@ -921,24 +900,28 @@ app.post('/facebook', function(req, res) {
                                                     text: 'save ' + postback.selected,
                                                     source: old_message.source,
                                                     amazon: old_message.amazon,
-                                                    searchSelect: [postback.selected]
-                                                      });
+                                                    searchSelect: [postback.selected],
+                                                    flags: { old_search: true}
+                                                    });
+                                                }
                                                 // queue it up for processing
                                                 var message = new db.Message(new_message);
                                                 message.save().then(() => {
                                                     queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                                 });
                                             }
-                                    } 
+                                    
 
                                 }
                                 else if (postback.action == 'add' && !postback.initial) {
+
                                         var typing_indicator = {
                                           "recipient":{
                                             "id": sender.toString()
                                           },
                                           "sender_action": "typing_on"
                                         };
+
                                         request({
                                             url: 'https://graph.facebook.com/v2.6/me/messages',
                                             qs: {
@@ -947,29 +930,32 @@ app.post('/facebook', function(req, res) {
                                             method: 'POST',
                                             json: typing_indicator
                                         }, function() {});
-                                    co(function*() {
-                                      console.log('addExtra --> postback: ', postback);
-                                      var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
-                                      var cart = yield kipcart.getCart(cart_id);
-                                      var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
-                                      var item = unique_items[parseInt(postback.selected-1)];
-                                      yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
-                                      var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: 'view cart',
-                                        source: msg.source,
-                                        amazon: msg.amazon
-                                      });
-                                      // queue it up for processing
-                                      var message = new db.Message(new_message);
-                                      message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                      });
-                                    })
+
+                                        co(function*() {
+                                          console.log('addExtra --> postback: ', postback);
+                                          var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
+                                          var cart = yield kipcart.getCart(cart_id);
+                                          var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
+                                          var item = unique_items[parseInt(postback.selected-1)];
+                                          yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
+                                          var new_message = new db.Message({
+                                            incoming: true,
+                                            thread_id: msg.thread_id,
+                                            resolved: false,
+                                            user_id: msg.user_id,
+                                            origin: msg.origin,
+                                            text: 'view cart',
+                                            source: msg.source,
+                                            amazon: msg.amazon
+                                          });
+
+                                          // queue it up for processing
+                                          var message = new db.Message(new_message);
+                                          message.save().then(() => {
+                                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                                          });
+                                        });
+
                                 }
                                 else if (postback.action === 'remove') {
                                         var typing_indicator = {
@@ -1389,7 +1375,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                     kip.debug('error: no result.image_url (picstitch) found');
                     var image = 'http://kipthis.com/images/header_partners.png';
                 }
-                console.log('OBJECT ID TEEHEE', outgoing.data)
                 return {
                         "title": result.title,
                         "image_url": (result.image_url && result.image_url.indexOf('http') > -1 ? result.image_url : 'http://kipthis.com/images/header_partners.png'),
@@ -1673,13 +1658,11 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 "buttons":[
                     { "type": "postback",
                       "title": "➕",
-                      "object_id": outgoing.data._id,
-                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "add" ,"selected": (i + 1), initial: false })
+                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "object_id": outgoing.data._id,"action": "add" ,"selected": (i + 1), initial: false })
                     },
                     { "type": "postback",
                       "title": "➖",
-                      "object_id": outgoing.data._id,
-                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "action": "remove" ,"selected": (i + 1), initial: false})
+                      "payload": JSON.stringify({"dataId": outgoing.data.thread_id, "object_id": outgoing.data._id, "action": "remove" ,"selected": (i + 1), initial: false})
                     },
                     { "type": "postback",
                       "title": "Remove All",
