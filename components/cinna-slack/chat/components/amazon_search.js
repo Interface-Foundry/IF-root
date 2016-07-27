@@ -13,13 +13,29 @@ var amazonHTML = promisify(require('./amazonHTML'));
 var db = require('../../db');
 
 
+/*
+Affiliate tag:
+eileenog-20
+
+Access Key ID:
+AKIAIS2R5G6NPAMLEDNQ
+Secret Access Key:
+RI9cX59m7DKYNaR/qgME3kuBL+8J7LD3k+T6AN5b
+
+
+Access Key ID:
+AKIAJWTPOWIOUPHJYG2Q
+Secret Access Key:
+Vi/GjWwSC+Yto0Dt1j7UY6pSOn6zoqviid1PQ4Xz
+*/
+
 var aws_clients = {
-  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
-    awsId: "AKIAIS2R5G6NPAMLEDNQ",
-    awsSecret: "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",
-    awsTag: "eileenog-20"
-  }),
-  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
+  // AKIAIS2R5G6NPAMLEDNQ: amazon.createClient({
+  //   awsId: "AKIAIS2R5G6NPAMLEDNQ",
+  //   awsSecret: "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",
+  //   awsTag: "eileenog-20"
+  // }),
+  AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
     awsId: "AKIAJWTPOWIOUPHJYG2Q",
     awsSecret: "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",
     awsTag: "eileenog-20"
