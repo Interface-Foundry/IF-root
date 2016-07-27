@@ -94,6 +94,9 @@ if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
 }
 
+//temp. needs to be story in DB
+var fb_memory = {}
+
 app.use(express.static(__dirname + '/static'))
 app.get('/healthcheck', function(req, res) {
     res.send('💬 🌏')
@@ -143,7 +146,7 @@ app.post('/facebook', function(req, res) {
         return res.send(200);
     }
 
-
+    console.log('HITTING?!??!?!?!!??!!?')
     //
     //
     //--  Initial API calls to FB to set up  greeting and welcome screen.  
@@ -175,7 +178,51 @@ app.post('/facebook', function(req, res) {
         return console.log('facebook.js messaging events missing:  ', JSON.stringify(req.body.entry[0]));
     }
 
+
+
+    //CHECK HERE FOR ONBOARDING!!!!! click through
+
+    //IF user input: then respond with "skip" button functionality. Will show Kip (help) message
+
+
+
+    //else, SHOPPING MODE
     for (i = 0; i < messaging_events.length; i++) {
+
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
+        //@ @ @ @ @ shitty code @ @ @ @ @ @
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
+
+        var userid_z = event.sender.id.toString();
+        console.log('@ @ @ GETTING ME @ @ @ ',userid_z)
+
+        //gross, in-memory modes and story tracker
+        if(!fb_memory[userid_z]){
+            fb_memory[userid_z] = {
+                mode: 'shopping',
+                story_pointer: 0
+            };
+        }
+
+        console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[userid_z])
+
+        //non-shopping mode?
+        switch(fb_memory[userid_z].mode){
+            case 'onboarding':
+                console.log('ONBOARDING MODE STOPPING everything else')
+
+                //@ @ @ eventually move this to the onboarding callback function
+                //FIRE STORY!! 
+                //AND same handler goes into button callbacks from story questions
+                send_story(userid_z);
+
+                return;
+            break;
+        }
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
+
+
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
          var set_menu = {
@@ -764,21 +811,28 @@ app.post('/facebook', function(req, res) {
                         if (err) console.error('post err ', err);
                     })
                     break;
-
-
-
-
                } 
 
-            }
+        }
        
 
+        //REGULAR INCOMING TEXT MESSAGES 
         else if (event.message && event.message.text) {
-                text = event.message.text;  
-                process_emoji(text, function(res) {
 
+
+                text = event.message.text;  
+
+
+                //@ @ @ @ @ @ TEMPORARRY TURN OFF LATER
+                if (text == 'hi'){
+                    fb_memory[userid_z].mode = 'onboarding';
+                }
+
+                //converting some emojis into more "product-y" results
+                process_emoji(text, function(res) {
                     text = res;
                 })
+                //converting other emojis into text
                 text = emojiText.convert(text,{delimiter: ' '});
                 console.log(JSON.stringify(req.body));
                 var message = new db.Message({
@@ -883,6 +937,10 @@ app.post('/facebook', function(req, res) {
                 var postback = event.postback.payload;
             }
             console.log('\n\n\npostback: ', postback,'\n\n\n');
+
+            //@ @ @ @ @ @ @ @ @ @ @ @ 
+            //@ @ @ @ @ ONBOARDING!!!!!!
+            //@ @ @ @ @ @ @ @ @ @ @ @ @
             if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
 
                  var get_started = { 
@@ -1871,10 +1929,125 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 if (err) console.error('post err ', err);
                 console.log(body)
             })
-        })
-
-          
+        }) 
     }
+
+    // @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ //
+    // @ @ @ @ @ @ @ @ @ @ @ lil cinna house :> @ @ @ @ @ @ @ @ //
+    // @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ //
+
+    //onboarding quiz, sequential stories
+    var onboarding_quiz = [{
+        "recipient": {
+            "id": userid
+        },    
+        "message":{
+            "attachment":{
+              "type":"template",
+              "payload":{
+                "template_type":"button",
+                "text":"What do you want to do next?",
+                "buttons":[
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"1"
+                  },
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"2"
+                  },
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"3"
+                  },
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"4"
+                  }
+                ]
+              }
+            }
+        }
+    },
+    {
+        "recipient": {
+            "id": userid
+        },    
+        "message":{
+            "attachment":{
+              "type":"template",
+              "payload":{
+                "template_type":"button",
+                "text":"What do you want to do next?",
+                "buttons":[
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"1"
+                  },
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"2"
+                  },
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"3"
+                  },
+                  {
+                    "type":"postback",
+                    "title":"eat food blah blah ",
+                    "payload":"4"
+                  }
+                ]
+              }
+            }
+        }
+    }];
+
+
+    function send_story(userid_z){
+
+        var storySender;
+
+        if(fb_memory[userid_z]){
+            var story_pointer = fb_memory[userid_z].story_pointer;
+            if(story_pointer){
+                var storySender = onboarding_quiz[story_pointer];
+            }else {
+                return;
+            }
+        }
+
+        //send res to user
+        request.post({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {
+                access_token: fbtoken
+            },
+            method: "POST",
+            json: true,
+            headers: {
+                "content-type": "application/json",
+            },
+            body: storySender
+        }, function(err, res, body) {
+
+            if (err) console.error('post err ', err);
+
+            fb_memory[userid_z].story_pointer++; //advance the story to next sequence
+
+        })
+    }
+
+
+    // @ @ @ @ @ @ @ @ @ @ @ bye cinna @ @ @ @ @ @ @ @ @ @ @ //
+
 
     function send_cart(channel, text, outgoing) {
           var cart = outgoing.data.data;
