@@ -86,7 +86,7 @@ var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
-
+var Chatuser = db.Chatuser;
 
 if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAAD62qJNXSQBAD0LH9w1sfIGBcoNXj4hWehsachzeA3cYUgiIcVy7nAo1wZArzMqTWaGHcdkIW2qZBl6kkPduZBo3ynZBelPBp6yk8QKAtt7KTR4BCENYmN40wZBB9oIfZACkC6mHgOYHliNqbzO7JKSJlZBZAWzjZBkZD';
@@ -229,11 +229,13 @@ app.post('/facebook', function(req, res) {
                     //@ @ @ eventually move this to the onboarding callback function
                     //FIRE STORY!! 
                     //AND same handler goes into button callbacks from story questions
-                    send_story(userid_z,sender);
-                    res.sendStatus(200);
+                    //send_story(userid_z,sender);
 
-                    // var x = {text: "Please answer the question above this message, thanks 😊"}
-                    // send_universal_message(x,sender);
+                   
+
+                    var x = {text: "Please answer the question above this message, thanks 😊"}
+                    send_universal_message(x,sender);
+                    res.sendStatus(200);
 
                     return;
                 break;
@@ -347,6 +349,10 @@ app.post('/facebook', function(req, res) {
             //sub-menu actions
             if (sub_menu.action && sub_menu.action == 'button_search') {
                 console.log(event.message)
+
+
+                console.log('FIRING ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ',event.message)
+
                 db.Messages.find({
                     thread_id: 'facebook_' + sender.toString()
                 }).sort('-ts').exec(function(err, messages) {
@@ -354,6 +360,9 @@ app.post('/facebook', function(req, res) {
                     if (messages.length == 0) {
                         return console.log('No message found');
                     } else if (messages[0]) {
+
+                        console.log('zzz ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ',messages[0]);
+
                         var msg = messages[0];
                         var message = new db.Message({
                             incoming: true,
@@ -371,7 +380,12 @@ app.post('/facebook', function(req, res) {
                     });
                 }
               })                
-            } else if (sub_menu.action && sub_menu.action == 'cheaper') {
+            }
+            else if (sub_menu.action && sub_menu.action == 'take_quiz'){
+                send_story(userid_z,sender);
+                fb_memory[userid_z].mode = 'onboarding';
+            }
+            else if (sub_menu.action && sub_menu.action == 'cheaper') {
                 console.log(event.message)
                 db.Messages.find({
                     thread_id: 'facebook_' + sender.toString()
@@ -848,9 +862,42 @@ app.post('/facebook', function(req, res) {
 
 
                 //@ @ @ @ @ @ TEMPORARRY TURN OFF LATER
-                if (text == 'hi'){
-                    fb_memory[userid_z].mode = 'onboarding';
-                }
+                // if (text == 'hi'){
+                //     fb_memory[userid_z].mode = 'onboarding';
+
+                //     // curl  \
+                //     //   -F recipient='{"id":"USER_ID"}' \
+                //     //   -F message='{"attachment":{"type":"image", "payload":{}}}' \
+                //     //   -F filedata=@/tmp/shirt.png \
+                //     //   "https://graph.facebook.com/v2.6/me/messages?access_token=PAGE_ACCESS_TOKEN"    
+
+                //     console.log('TRYING THIS STUFF NO@QQQWWWWWW')
+                //     //res.send(200);
+                //     send_image('cart.png',sender,function(){
+                //         send_story(userid_z,sender);
+                //     });
+
+
+                //     //   //TURN THIS INTO AN IMAGE SENDER!!!
+                //     //  request({
+                //     //     url: 'https://graph.facebook.com/v2.6/me/messages',
+                //     //     qs: {
+                //     //         access_token: fbtoken
+                //     //     },
+                //     //     method: 'POST',
+                //     //     json: {
+                //     //         recipient: {
+                //     //             id: sender.toString()
+                //     //         },
+                //     //         message: '{"attachment":{"type":"image", "payload":{}}}',
+                //     //         filedata: 
+                //     //     }
+                //     // }, function(err, res, body) {
+                //     //     if (err) console.error('post err ', err);
+                //     //     console.log(body);
+                //     // });
+
+                // }
                 //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
 
                 //converting some emojis into more "product-y" results
@@ -968,58 +1015,76 @@ app.post('/facebook', function(req, res) {
             //@ @ @ @ @ @ @ @ @ @ @ @ @
             if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
 
-                 var get_started = { 
-                        "recipient": {
-                            "id": sender.toString()
-                        },
-                        "message": {
-                                  "quick_replies":[
-                                      {
-                                        "content_type":"text",
-                                        "title":"Headphones",
-                                        "payload": JSON.stringify({
-                                                dataId: postback.dataId,
-                                                action: "button_search",
-                                                text: 'headphones'
-                                            })
-                                      },
-                                      {
-                                        "content_type":"text",
-                                        "title":"🐔 🍜",
-                                        "payload": JSON.stringify({
-                                                dataId: postback.dataId,
-                                                action: "button_search",
-                                                text: '🐔 🍜'
-                                            })
-                                      },
-                                      {
-                                        "content_type":"text",
-                                        "title":"Books",
-                                        "payload": JSON.stringify({
-                                                dataId: postback.dataId,
-                                                action: "button_search",
-                                                text: 'books'})
-                                      }
-                                    ],
-                                    "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"   
-                        },
-                        "notification_type": "NO_PUSH"
-                    };
 
-                    request.post({
-                        url: 'https://graph.facebook.com/v2.6/me/messages',
-                        qs: {
-                            access_token: fbtoken
-                        },
-                        method: "POST",
-                        json: true,
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        body: get_started
-                    }, function(err, res, body) {
-                        if (err) console.error('post err ', err);
-                    })
+                //send welcome image here
+
+                //then one more text message intro 
+                //then send story
+                fb_memory[userid_z].mode = 'onboarding';
+                //res.send(200);
+                send_image('cart.png',sender,function(){
+                    var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+                    //send image here
+                    send_universal_message(x,sender);
+                    setTimeout(function() {
+                        send_story(userid_z,sender);
+                    }, 1500);
+                    
+                });
+                
+
+                 // var get_started = { 
+                 //        "recipient": {
+                 //            "id": sender.toString()
+                 //        },
+                 //        "message": {
+                 //                  "quick_replies":[
+                 //                      {
+                 //                        "content_type":"text",
+                 //                        "title":"Headphones",
+                 //                        "payload": JSON.stringify({
+                 //                                dataId: postback.dataId,
+                 //                                action: "button_search",
+                 //                                text: 'headphones'
+                 //                            })
+                 //                      },
+                 //                      {
+                 //                        "content_type":"text",
+                 //                        "title":"🐔 🍜",
+                 //                        "payload": JSON.stringify({
+                 //                                dataId: postback.dataId,
+                 //                                action: "button_search",
+                 //                                text: '🐔 🍜'
+                 //                            })
+                 //                      },
+                 //                      {
+                 //                        "content_type":"text",
+                 //                        "title":"Books",
+                 //                        "payload": JSON.stringify({
+                 //                                dataId: postback.dataId,
+                 //                                action: "button_search",
+                 //                                text: 'books'})
+                 //                      }
+                 //                    ],
+                 //                    "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"   
+                 //        },
+                 //        "notification_type": "NO_PUSH"
+                 //    };
+
+                 //    request.post({
+                 //        url: 'https://graph.facebook.com/v2.6/me/messages',
+                 //        qs: {
+                 //            access_token: fbtoken
+                 //        },
+                 //        method: "POST",
+                 //        json: true,
+                 //        headers: {
+                 //            "content-type": "application/json",
+                 //        },
+                 //        body: get_started
+                 //    }, function(err, res, body) {
+                 //        if (err) console.error('post err ', err);
+                 //    })
             }
             //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
             else if (postback.action === 'story.answer') {
@@ -1791,7 +1856,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                         action: "cheaper",
                                         selected: '1'
                                     })
-                              } ,
+                              },
                               {
                                 "content_type":"text",
                                 "title":"Similar",
@@ -1816,17 +1881,22 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                         action: "sub_menu_emoji",
                                         selected: "1"
                                     })
-                              },
-                              {
-                                "content_type":"text",
-                                "title":" < Back",
-                                "payload": JSON.stringify({
-                                        action: "back",
-                                        type:"last_search"
-                                    })
                               }
                             ]
                 };
+
+                //prevents showing back when there's no back
+                // if (backCache > 0){
+                //     console.log('BACK CACHE')
+                //     modify_menu.quick_replies.push({
+                //         "content_type":"text",
+                //         "title":" < Back",
+                //         "payload": JSON.stringify({
+                //                 action: "back",
+                //                 type:"last_search"
+                //             })
+                //       });
+                // }
 
                 request({
                     url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -2107,34 +2177,360 @@ function start_story(recipient,sender){
 //select: which answer did user pick
 function process_story(recipient,sender,pointer,select){
 
+    //SAVE THIS quiz response TO USERS PERSONA as a session
+    var query = {id: 'facebook_'+sender},
+        update = { origin:'facebook' },
+        options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
+        var obj = {
+            recipient: recipient,
+            sender: sender,
+            ts: Date.now(),
+            select: select,
+            story: 'intro quiz',
+            pointer: pointer - 1
+        }
+        user.persona.sessions.push(JSON.stringify(obj))
+        user.save(function (err) {
+            if(err) {
+                console.error('ERROR!');
+            }
+        });  
+    });
+    //////////
 
-
-    console.log('RECORDING SELECT ',select)
-
-    console.log('RECORDING POINTER ',pointer)
-
-
-    //IF NO SCORE IN MEMORY, THEN start from x 
-
-    //* * * * WHEN STORY MODE IS OVER:
-    //fb_memory[userid_z].mode = 'shopping';
-
-    //record pointer + select in DB
-
-    //do stuff
-    //store in user DB
 
     //check if we should end story. will stop story after length of quiz question array 
     if(pointer == onboarding_quiz.length - 1){
-        var x = {text: "Quiz done, you got this present:"}
-        send_universal_message(x,sender);
+
+        //ADD TIMER DELAY FOR "TOTALING RESULTS...."
+        
+
+        //send image here
+        
+
+
+
+        //SEND PRESENT IMAGE
+        //DELAY
+        //SEND PRESENT 
+
+        console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[recipient].quiz)
+
+        //console.log('MAXY KEY ',_.max(Object.keys(fb_memory[recipient].quiz), function (o) { return obj[o]; }))
+
+        var item;
+
+        if(fb_memory[recipient].quiz >= 0 && fb_memory[recipient].quiz <= 3){
+            item = 'Flying Sailboat'
+            send_image('sailboat.png',sender,function(){
+                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+                send_universal_message(x,sender);
+            });
+        }
+        else if(fb_memory[recipient].quiz >= 4 && fb_memory[recipient].quiz <= 7){
+            item = 'Lucky Goldfish'
+            send_image('goldfish.png',sender,function(){
+                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+                send_universal_message(x,sender);
+            });
+        }
+        else if(fb_memory[recipient].quiz >= 8 && fb_memory[recipient].quiz <= 9){
+            item = 'Snowglobe Charm'
+            send_image('snowglobe.png',sender,function(){
+                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+                send_universal_message(x,sender);
+            });
+        }
+        else if(fb_memory[recipient].quiz >= 10 && fb_memory[recipient].quiz <= 12){
+            item = 'Rainbow Pearl'
+            send_image('pearl.png',sender,function(){
+                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+                send_universal_message(x,sender);
+            });
+        }else {
+            item = 'Lucky Goldfish'
+            send_image('goldfish.png',sender,function(){
+                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+                send_universal_message(x,sender);
+            });
+        }
+
+        fb_memory[recipient].quiz = 1;
+
+        console.log('COLLECTABLE/////???/ ',item)
+
+        //get highest ranking
+        // var maxy = _.max(Object.keys(fb_memory[recipient].quiz), function (o) { return obj[o]; });
+        // switch(maxy){
+        //     case 'trendy':
+        //         send_image('snowglobe.png',sender,function(){
+        //         });
+        //     break;
+        //     case 'lavish':
+        //         send_image('pearl.png',sender,function(){
+        //         });
+        //     break;
+        //     case 'smart':
+        //         send_image('goldfish.png',sender,function(){
+        //         });
+        //     break;
+        //     case 'adventure':
+        //         send_image('sailboat.png',sender,function(){
+        //         });
+        //     break;
+        //     default:
+        //         send_image('pearl.png',sender,function(){
+        //         });
+        // }
+
         fb_memory[recipient].mode = 'shopping';
+
+
+
+        var sendObj;
+        switch(item){
+            case 'Flying Sailboat':
+             sendObj = { 
+                    "recipient": {
+                        "id": sender.toString()
+                    },
+                    "message": {
+                              "quick_replies":[
+                                  {
+                                    "content_type":"text",
+                                    "title":"Athletic socks",
+                                    "payload": JSON.stringify({
+                                        
+                                            action: "button_search",
+                                            text: 'athletic socks'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"⛺",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'tent'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Fitbit",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'fitbit'})
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Retake Quiz",
+                                    "payload": JSON.stringify({
+                                            action: "take_quiz"
+                                    })
+                                  }
+                                ],
+                                "text": "Here are a some cool things you might like! :)"   
+                    },
+                    "notification_type": "NO_PUSH"
+                };
+            break;
+            case 'Lucky Goldfish':
+             sendObj = { 
+                    "recipient": {
+                        "id": sender.toString()
+                    },
+                    "message": {
+                              "quick_replies":[
+                                  {
+                                    "content_type":"text",
+                                    "title":"Phone charger",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'external phone battery'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"🍧",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'shaved ice'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Keurig cups",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'keurig cups'})
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Retake Quiz",
+                                    "payload": JSON.stringify({
+                                            action: "take_quiz"
+                                    })
+                                  }
+                                ],
+                                "text": "Here are a some cool things you might like! :)"   
+                    },
+                    "notification_type": "NO_PUSH"
+                };
+            break;
+            case 'Rainbow Pearl':
+             sendObj = { 
+                    "recipient": {
+                        "id": sender.toString()
+                    },
+                    "message": {
+                              "quick_replies":[
+                                  {
+                                    "content_type":"text",
+                                    "title":"Amazon Echo",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'amazon echo'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"📷",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'camera'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Safecard wallet",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'safecard wallet'})
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Retake Quiz",
+                                    "payload": JSON.stringify({
+                                            action: "take_quiz"
+                                    })
+                                  }
+                                ],
+                                "text": "Here are a some cool things you might like! :)"   
+                    },
+                    "notification_type": "NO_PUSH"
+                };
+            break;
+            case 'Snowglobe Charm':
+             sendObj = { 
+                    "recipient": {
+                        "id": sender.toString()
+                    },
+                    "message": {
+                              "quick_replies":[
+                                  {
+                                    "content_type":"text",
+                                    "title":"Moleskin Notebook",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'moleskin notebook'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"✏️",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: 'pencil'
+                                        })
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"4-port USB hub",
+                                    "payload": JSON.stringify({
+                                            action: "button_search",
+                                            text: '4-port USB hub'})
+                                  },
+                                  {
+                                    "content_type":"text",
+                                    "title":"Retake Quiz",
+                                    "payload": JSON.stringify({
+                                            action: "take_quiz"
+                                    })
+                                  }
+                                ],
+                                "text": "Here are a some cool things you might like! :)"   
+                    },
+                    "notification_type": "NO_PUSH"
+                };
+            break;
+        }
+
+        setTimeout(function() {
+            request.post({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: {
+                    access_token: fbtoken
+                },
+                method: "POST",
+                json: true,
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: sendObj
+            }, function(err, res, body) {
+                if (err) console.error('post err ', err);
+                console.log('@$@$@$@$@$@$@$@$@$@$@$@$@$ ',body)
+            })           
+        }, 2000);
+
+
+
+
+
+        //SAVE ITEM TO USER PROFILE
+        var query = {id: 'facebook_'+sender},
+            update = { origin:'facebook' },
+            options = { upsert: true, new: true, setDefaultsOnInsert: true };
+        Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
+            var obj = {
+                item: item,
+                ts: Date.now()
+            }
+            user.persona.items.push(JSON.stringify(obj))
+            user.save(function (err) {
+                if(err) {
+                    console.error('ERROR!');
+                }
+            });  
+        });
+
+
+        
+
+        //SWITCH
+        //CHOOSE PRESENT, display search buttons 
     }else {
         pointer++;
+
+        //this should really be in a DB asap @@@@@-----@@@@@
+        if(!fb_memory[recipient].quiz){
+            fb_memory[recipient].quiz = 1;
+        }
+
+        console.log('SELECTOR ',select)
+        // console.log('SELECTED ',fb_memory[recipient].quiz[select])
+
+        if(fb_memory[recipient].quiz || fb_memory[recipient].quiz == 0){
+            fb_memory[recipient].quiz = fb_memory[recipient].quiz + select;
+        }else {
+            console.log('error: key not found for persona val')
+        }
+
+        console.log('@!@!@!@!@!@!@!@!@!@!@!@!@!@!@ ',fb_memory[recipient].quiz);
+
         console.log('ADDING POINTER ',pointer)
         send_story(recipient,sender,pointer)        
     }
-
 
 }
 
@@ -2197,45 +2593,68 @@ function send_story(userid_z,recipient,pointer){
     })
 }
 
+//for higher quality images, upload them directly to FB
+//img: local image url
+function send_image(img,sender,callback){
+    var r = request.post('https://graph.facebook.com/v2.6/me/messages?access_token='+fbtoken, function optionalCallback (err, httpResponse, body) {
+      if (err) {
+        callback();
+        return console.error('upload failed:', err);
+      }
+      console.log('Upload successful!');
+      callback();
+    })
+    var form = r.form()
+    form.append('recipient', '{"id":"'+sender.toString()+'"}')
+    form.append('message', '{"attachment":{"type":"image", "payload":{}}}')
+    form.append('filedata', fs.createReadStream(__dirname +'/assets/'+img))                  
+}
+
 //onboarding quiz, sequential stories
+
+                // trendy:0,
+                // lavish:0,
+                // smart:0,
+                // adventure:0
+
 var onboarding_quiz = [{ 
     "message":{
         "attachment":{
           "type":"template",
           "payload":{
             "template_type":"button",
-            "text":"What do you want to do next?",
+            "text":"You arrive in a foreign city, where do you stay?",
             "buttons":[
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Luxury hotel",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: 'trending',
+                                selected: 3,
                                 story_pointer: 0
                             })
               },
               {
                 "type":"postback",
-                "title":"food meh ",
+                "title":"Forest cabin",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: 'lavish',
+                                selected: 0,
                                 story_pointer: 0
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Vintage townhouse",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: 'lavish',
+                                selected: 2,
                                 story_pointer: 0
                             })
               }
@@ -2250,38 +2669,38 @@ var onboarding_quiz = [{
           "type":"template",
           "payload":{
             "template_type":"button",
-            "text":"how weird",
+            "text":"After unpacking, you get a chance to explore. Where do you go first?",
             "buttons":[
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Local market",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '1',
+                                selected: 2,
                                 story_pointer: 1
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Explore nature",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '2',
+                                selected: 0,
                                 story_pointer: 1
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Art & Culture",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '3',
+                                selected: 3,
                                 story_pointer: 1
                             })
               }
@@ -2296,38 +2715,38 @@ var onboarding_quiz = [{
           "type":"template",
           "payload":{
             "template_type":"button",
-            "text":"22222222",
+            "text":"Phew! You’ve been out exploring the whole day, how do you treat yourself?",
             "buttons":[
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Luxurious massage",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '1',
+                                selected: 3,
                                 story_pointer: 2
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"New restaurant",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '2',
+                                selected: 2,
                                 story_pointer: 2
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Hanging with locals",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '3',
+                                selected: 0,
                                 story_pointer: 2
                             })
               }
@@ -2342,38 +2761,38 @@ var onboarding_quiz = [{
           "type":"template",
           "payload":{
             "template_type":"button",
-            "text":"8282828",
+            "text":"It’s your last day on the trip, what do you remember most?",
             "buttons":[
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Feel of the City",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: 'trending',
+                                selected: 2,
                                 story_pointer: 3
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Historical landmarks",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: 'lavish',
+                                selected: 3,
                                 story_pointer: 3
                             })
               },
               {
                 "type":"postback",
-                "title":"eat food blah blah ",
+                "title":"Memories w. friends",
                 "payload": JSON.stringify({
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: 'smart',
+                                selected: 0,
                                 story_pointer: 3
                             })
               }

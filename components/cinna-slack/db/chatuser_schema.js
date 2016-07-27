@@ -13,6 +13,8 @@ var chatuserSchema = mongoose.Schema({
         sessions: [String],
         items: [String]
     },
+    ts: String,
+    origin: String,
     type: { type: String }, // slack, telegram, skype, etc.
     dm: String, // direct message channel id
     team_id: String,
