@@ -75,9 +75,12 @@ def index():
 
     #messenger ratio
     if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        CHAT_WIDTH = 267
-        PIC_COORDS = [{'x': 5, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 155, 'y': 5},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
+        print 'ahhh -_-'
+        CHAT_HEIGHT = 223
+        CHAT_WIDTH = 425
+        PIC_COORDS = [{'x': 5, 'y': 5}] #where to draw main pics
+        TEXTBOX_COORDS = [{'x': 250, 'y': 5}] #where to draw text boxes
+        PIC_SIZE = 223, 223
 
     if images[0][u'origin'] and images[0][u'origin'] == 'skype':
         print 'ahhhhhhhh'
@@ -121,9 +124,9 @@ def index():
     font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
 
-    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 23) #price
-        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 18)
+    if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
+        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 28) #price
+        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 20)
 
     for i, im in enumerate(images):
         x = TEXTBOX_COORDS[i][u'x'] - 30
@@ -131,15 +134,15 @@ def index():
         draw = ImageDraw.Draw(img)
 
         #draw white fill to cover image
-        if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-            #draw white boxes
-            print 'boxbox'
-            draw.rectangle(((115,0),(400,160)), fill="white")
+        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+        #     #draw white boxes
+        #     print 'boxbox'
+        #     draw.rectangle(((115,0),(400,160)), fill="white")
 
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
             #draw white boxes
             print 'boxbox'
-            draw.rectangle(((190,5),(329,160)), fill="white")
+            draw.rectangle(((205,5),(329,160)), fill="white")
 
 
         last_y = 5
@@ -147,18 +150,24 @@ def index():
         if images[0][u'origin'] and images[0][u'origin'] == 'skype':
             last_y = last_y + 50
 
+        # if images[0][u'origin'] == 'facebook':
+        #     last_y = last_y 
+
         #add price
         draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
 
         #add prime logo
         if im[u'prime'] == '1' and images[0][u'origin'] != 'skype':
-            img.paste(AMAZON_PRIME, (x + 58, last_y), mask=AMAZON_PRIME)
+            img.paste(AMAZON_PRIME, (x + 110, last_y + 2), mask=AMAZON_PRIME)
 
+
+        print '0'
+        print last_y
 
         last_y = last_y + 27
 
         #move reviews down a bit 
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
             last_y = last_y + 10
 
 
@@ -185,7 +194,7 @@ def index():
                 selectRating = 8
             if im[u'reviews'][u'rating'] > 4.5 and im[u'reviews'][u'rating'] <= 5:
                 selectRating = 9
-            img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
+            img.paste(REVIEW_STARS[selectRating], (x, last_y + 3), mask=REVIEW_STARS[selectRating])
             #add review count
             if 'reviewCount' in im[u'reviews']:
                 draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
@@ -195,7 +204,7 @@ def index():
         # # #fake reviews for skype!! lmao
         elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
             selectRating = random.randint(6,8)
-            img.paste(REVIEW_STARS[selectRating], (x, last_y), mask=REVIEW_STARS[selectRating])
+            img.paste(REVIEW_STARS[selectRating], (x, last_y + 3), mask=REVIEW_STARS[selectRating])
             # selectRating = random.randint(6,7)
             reviewCount = random.randint(15,1899)
             # img.paste(REVIEW_STARS[7], (x, last_y), mask=REVIEW_STARS[7])
@@ -204,33 +213,49 @@ def index():
 
         last_y = last_y + 5
 
-        if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-            BOX_WIDTH = 26
+        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
+        #     BOX_WIDTH = 26
 
-        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            BOX_WIDTH = 24
+        if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
+            BOX_WIDTH = 22
         else:
             BOX_WIDTH = 30
 
         #draw details but not for skype or fbook
-        if images[0][u'origin'] != 'skype':
-            for z in im[u'name']:
+        #if images[0][u'origin'] != 'skype' or images[0][u'origin'] != 'facebook':
 
-                # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
-                countLines = 0
-                for line in textwrap.wrap(z, width=BOX_WIDTH):
-                    countLines += 1
-                    if countLines < 3:
-                        filler = ''
-                        if countLines == 3:
-                            filler = '...'
-                        draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
-                        last_y += font2.getsize(line)[1]
-                        last_y = last_y + 2
+        print 'z__1'
+        print last_y
 
-                last_y = y
-            y += font.getsize(line)[1]
-            last_y = y
+        for z in im[u'name']:
+
+            # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
+            countLines = 0
+            for line in textwrap.wrap(z, width=BOX_WIDTH):
+                countLines += 1
+                if countLines < 3:
+                    filler = ''
+                    if countLines == 3:
+                        filler = '...'
+                    print 'z____z'
+                    print line
+                    print filler
+                    print last_y
+                    print 'z____z'
+                    draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
+                    print 'z__2'
+                    print last_y
+                    last_y += font2.getsize(line)[1]
+                    print 'z__3'
+                    print last_y
+                    last_y = last_y + 2
+            print 'z__4'
+            print last_y
+            #last_y = y
+        y += font.getsize(line)[1]
+        print 'z__5'
+        print last_y
+        last_y = y
 
 
         # #add product names

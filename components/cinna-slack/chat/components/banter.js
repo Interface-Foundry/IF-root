@@ -872,7 +872,7 @@ var checkForCanned = function(message) {
     case 'Version':
     case 'version':
       flag = 'basic';
-      res = 'I\'m a penguin running Kip v0.7.0 Paprika';
+      res = 'I\'m a penguin running Kip v0.8.0 Licorice';
       break;
 
     case '/':
