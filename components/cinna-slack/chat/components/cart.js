@@ -16,11 +16,11 @@ var async = require('async');
 
 // could use multiple amazon ids to relieve the load on the carts
 var aws_clients = {
-  // AKIAIS2R5G6NPAMLEDNQ: amazon.createClient({
-  //   awsId: "AKIAIS2R5G6NPAMLEDNQ",
-  //   awsSecret: "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",
-  //   awsTag: "eileenog-20"
-  // }),
+  AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
+    awsId: "AKIAJ7JWQNS2HH5UYNVQ",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
+  }),
   AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
     awsId: "AKIAJWTPOWIOUPHJYG2Q",
     awsSecret: "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",
