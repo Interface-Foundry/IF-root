@@ -188,13 +188,13 @@ var checkForCanned = function(message) {
     case textSimilar(input, 'hey there') > 60:
     case textSimilar(input, 'salutations') > 60:
       flag = 'basic';
-      res = input + ', what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
+      res = input + ', what can I do for you? Tell me the thing you\'re looking for 😊';
       break;
     case textSimilar(input, 'hi kip') > 60:
     case textSimilar(input, 'hello kip') > 60:
     case textSimilar(input, 'hey kip') > 60:
       flag = 'basic';
-      res = 'Hi, what can I do for you? Tell me the thing you\'re looking for, or use `help` for more options 😊';
+      res = 'Hi, what can I do for you? Tell me the thing you\'re looking for 😊';
       break;
     case textSimilar(input, 'what you up to') > 60:
     case textSimilar(input, 'whats up') > 60:
@@ -872,7 +872,7 @@ var checkForCanned = function(message) {
     case 'Version':
     case 'version':
       flag = 'basic';
-      res = 'I\'m a penguin running Kip v0.7.0 Paprika';
+      res = 'I\'m a penguin running Kip v0.8.0 Licorice';
       break;
 
     case '/':

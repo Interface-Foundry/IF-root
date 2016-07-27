@@ -1,4 +1,5 @@
 /*eslint-env es6*/
+var db = require('../../db')
 var _ = require('lodash')
 var moment = require('moment')
 var co = require('co')
@@ -15,26 +16,26 @@ var async = require('async');
 
 // could use multiple amazon ids to relieve the load on the carts
 var aws_clients = {
-  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
-    awsId: "AKIAIKMXJTAV2ORZMWMQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+  AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
+    awsId: "AKIAJ7JWQNS2HH5UYNVQ",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   }),
-  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
-    awsId: "AKIAIM4IKQAE2WF4MJUQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+  AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
+    awsId: "AKIAJWTPOWIOUPHJYG2Q",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   })
 };
 
-var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
 console.log("AWS LCIENTS ",aws_client_id_list)
 var processData = require('./process');
 var fs = require('fs')
-require('kip')
+var kip = require('../../kip');
 
 module.exports = {};
 
@@ -91,7 +92,9 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
 
     // TODO can't check if an item is okay to add if it's their first item in the cart...
     if (!ok && _.get(cart, 'amazon.CartId[0]')) {
-      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+      var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
+      if (typeof client === 'undefined') client = aws_clients[DEFAULT_CLIENT];
+      
       // attempt to add the item to the cart for the first time, check for errors
       var res = yield client.addCart({
         CartId: cart.amazon.CartId[0],
@@ -368,7 +371,8 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       cart = team_carts[0];
     }
 
-    var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+    var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
+    if (typeof client === 'undefined') client = aws_clients[DEFAULT_CLIENT];
 
     //
     // get the amazon cart for this Kip cart

@@ -267,7 +267,7 @@ var search = function(input,callback) {
           break;
 
       default:
-          res = null;
+          res = input;
 
   }
 

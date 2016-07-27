@@ -64,7 +64,7 @@ var stitchResults = function(data,source,callback) {
             }
             else {
 
-              var loopLame = [0,1,2];//lol
+              var loopLame = [0,1,2].slice(0, data.amazon.length);//lol
               async.eachSeries(loopLame, function(i, callback) {
 
                 console.log('WHAT??????? ? ?? ? ? ? ? ? ? ?? ',i);
@@ -72,7 +72,7 @@ var stitchResults = function(data,source,callback) {
                 if (data.amazon && data.amazon[i]){
 
                   console.log('BUILD IMAGE^ ^ ^ ^ ^ ^ ^ ^ ');
-                  buildImage(data.amazon[i],function(res){
+                  buildImage(data,function(res){
                     callback();
                   },i);
                 }else {
@@ -142,16 +142,26 @@ var stitchResults = function(data,source,callback) {
               }
 
               var imageURL;
-              if (amazonObj.MediumImage && amazonObj.MediumImage[0].URL[0]){
+              //do you have this image in large?
+              if (amazonObj.LargeImage && amazonObj.LargeImage[0].URL[0]){
+                  imageURL = amazonObj.LargeImage[0].URL[0];
+              }
+              else if (amazonObj.ImageSets && amazonObj.ImageSets[0].ImageSet && amazonObj.ImageSets[0].ImageSet[0].LargeImage && amazonObj.ImageSets[0].ImageSet[0].LargeImage[0]){
+                  imageURL = amazonObj.ImageSets[0].ImageSet[0].LargeImage[0].URL[0];
+              }
+              //do you have this image in medium?
+              else if (amazonObj.MediumImage && amazonObj.MediumImage[0].URL[0]){
                   imageURL = amazonObj.MediumImage[0].URL[0];
               }
               else if (amazonObj.ImageSets && amazonObj.ImageSets[0].ImageSet && amazonObj.ImageSets[0].ImageSet[0].MediumImage && amazonObj.ImageSets[0].ImageSet[0].MediumImage[0]){
                   imageURL = amazonObj.ImageSets[0].ImageSet[0].MediumImage[0].URL[0];
               }
+              //well, do you have it at all??
               else if (amazonObj.altImage){
                   imageURL = amazonObj.altImage;
                   console.log('OMG OMG using scraped image URL ', imageURL);
               }
+              //fine...here's a penguin!!!!!
               else {
                   console.log('NO IMAGE FOUND ',amazonObj);
                   imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!

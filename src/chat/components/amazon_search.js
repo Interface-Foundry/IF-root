@@ -5,32 +5,50 @@ var _ = require('lodash');
 var debug = process.env.NODE_ENV == 'production' ? function() {} : console.log.bind(console);
 var verbose = process.env.VERBOSE ? console.log.bind(console) : function() {};
 var kip = require('../../kip');
-
 var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
+var parseAmazon = require('./search.js').parseAmazon;
 var amazonHTML = promisify(require('./amazonHTML'));
 var db = require('../../db');
 
 
+/*
+Affiliate tag:
+eileenog-20
+
+Access Key ID:
+AKIAIS2R5G6NPAMLEDNQ
+Secret Access Key:
+RI9cX59m7DKYNaR/qgME3kuBL+8J7LD3k+T6AN5b
+
+
+Access Key ID:
+AKIAJWTPOWIOUPHJYG2Q
+Secret Access Key:
+Vi/GjWwSC+Yto0Dt1j7UY6pSOn6zoqviid1PQ4Xz
+*/
+
 var aws_clients = {
-  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
-    awsId: "AKIAIKMXJTAV2ORZMWMQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+  AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
+    awsId: "AKIAJ7JWQNS2HH5UYNVQ",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   }),
-  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
-    awsId: "AKIAIM4IKQAE2WF4MJUQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+  AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
+    awsId: "AKIAJWTPOWIOUPHJYG2Q",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   })
 };
 
-var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+var DEFAULT_CLIENT = 'AKIAIS2R5G6NPAMLEDNQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
+
 var i = 0;
+// Round-robin method for spreading the load between all our clients.
 function get_client() {
   i++;
   if (i === aws_client_id_list.length) {
@@ -51,7 +69,17 @@ params:
 
   http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 */
-var search = function*(params) {
+
+
+
+ // {"mode":"shopping",
+ // "action":"modify.one",
+ // "params":{"query":"shoes","focus":[1],"val":[{"hsl":[170,255,127],"rgb":[0,0,255],"name":"Blue","hex":"#0000FF"},{"hsl":[170,255,64],"rgb":[0,0,128],"name":"Navy Blue","hex":"#000080"},{"hsl":[159,185,145],"rgb":[65,105,225],"name":"Royal Blue","hex":"#4169E1"},{"hsl":[194,255,65],"rgb":[75,0,130],"name":"Indigo","hex":"#4B0082"}],"type":"color"},"_id":"578fa1f16e7ef4c065933966"}
+
+
+
+
+var search = function*(params,origin) {
 
   db.Metrics.log('search.amazon', params);
 
@@ -60,12 +88,15 @@ var search = function*(params) {
     throw new Error('no query specified');
   }
 
+
+
   amazonParams = {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
     Keywords: params.query,
     Availability: 'Available'
   };
 
+  
   // Amazon price queries are formatted as string of cents...
   if (params.min_price) {
     amazonParams.MinimumPrice = (params.min_price * 100).toFixed(0);
@@ -93,10 +124,31 @@ var search = function*(params) {
   debug('input params', params);
   debug('amazon params', amazonParams);
 
+  // if (amazonParams.type == 'color') {
+    if (params.productGroup && params.browseNodes) {
+        // console.log('west virginia mountain mama ', params.val[0].name);
+         amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name) ? params.val[0].name  + ' ' + amazonParams["Keywords"]:  amazonParams["Keywords"];
+
+        var key;
+        yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
+          key = res;
+        });          
+        if (key) {
+          amazonParams.SearchIndex = key.SearchIndex;
+          amazonParams.BrowseNode = key.BrowseNode;
+        }
+     
+    } 
+
+  // console.log('shiet son' , amazonParams);
   var results = yield get_client().itemSearch(amazonParams);
+  if (results.length >= 1) {
+    kip.debug(`Found ${results.length} results (before paging)`.green)
+  } else {
+    kip.error('no results found (before paging)');
+  }
   results = results.slice(skip, skip + 3);
   results.original_query = params.query
-
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {
     // TODO do the weak search thing.  looks like the weak search thing
@@ -105,8 +157,9 @@ var search = function*(params) {
   // results = yield weakSearch(params); TODO
   // results = results.slice(skip, 3); // yeah whatevers
   }
+  return yield enhance_results(results,origin);
 
-  return yield enhance_results(results);
+
 }
 
 
@@ -115,7 +168,8 @@ params:
 asin
 skip
 */
-var similar = function*(params) {
+var similar = function*(params,origin) {
+
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
     throw new Error('no ASIN specified');
@@ -142,7 +196,7 @@ var similar = function*(params) {
 
   var results = yield get_client().similarityLookup(amazonParams);
   results = results.slice(params.skip, params.skip + 3);
-    results.original_query = params.query
+  results.original_query = params.query;
 
 
   // if there aren't enough results... do a weaker search
@@ -154,12 +208,12 @@ var similar = function*(params) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results);
+  return yield enhance_results(results,origin);
 }
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results) {
+function* enhance_results(results, origin) {
   // enhance the results, naturally.
   yield results.map(r => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
@@ -177,9 +231,9 @@ function* enhance_results(results) {
 
   console.log('incomign results!!!! ',results)
 
-  var urls = yield picstitch.stitchResultsPromise(results); // no way i'm refactoring this right now
+  var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
 
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < urls.length; i++) {
     results[i].picstitch_url = urls[i];
     // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
@@ -277,9 +331,10 @@ module.exports.search = search;
   /_/_/     \/_____/\____\/   /_/_/    \/_/  \_\/ \/_/  \_\____/
 */
 if (!module.parent) {
+  console.log('testing'.yellow);
   co(function*() {
     var result = yield search({
-      query: 'arduino'
+      query: process.argv[2]
     })
 
     console.log(result);

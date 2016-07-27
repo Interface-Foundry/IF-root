@@ -2,6 +2,7 @@ var cheerio = require('cheerio');
 var request = require('request');
 var async = require('async');
 var _ = require('lodash');
+var co = require('co');
 
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var amazonHTML = require('./amazonHTML');
@@ -22,9 +23,9 @@ var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.
 // });
 
 var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
+    awsId: "AKIAJWTPOWIOUPHJYG2Q",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
 });
 
 var searchInitial = function(message) {
@@ -111,6 +112,7 @@ var searchAmazon = function(data, type, query, flag) {
 
                     //parse flags
 
+                    //modifies stuff
                     if (flag.type == 'color' || flag.type == 'size' || flag.type == 'material' || flag.type == 'genericDetail' && flag.val){
 
                         debug('FLAG TYPE &!&!&! ',flag.type);
@@ -1381,7 +1383,7 @@ function removeSpecials(str,callback) {
 
 
 ////////// Amazon Specials /////////
-function parseAmazon(productGroup,browseNodes,callback5){
+function* parseAmazon(productGroup,browseNodes,callback5){
 
     // * * * * * * * *
     // Note: the traverseNodes(browseNodes,['Toys & Games','Clothing, Shoes & Jewelry','Electronics','Office Products']
@@ -2007,6 +2009,7 @@ function truncate(string){
 };
 
 /// exports
+module.exports.parseAmazon  = parseAmazon;
 module.exports.searchInitial = searchInitial;
 module.exports.searchSimilar = searchSimilar;
 module.exports.getReviews = getReviews;

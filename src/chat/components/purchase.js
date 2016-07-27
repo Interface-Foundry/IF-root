@@ -6,9 +6,9 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 //   awsTag: "bubboorev-20"
 // });
 var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
+awsId: "AKIAJWTPOWIOUPHJYG2Q",
+awsSecret: "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",
+awsTag: "eileenog-20"
 });
 
 //pass in data, user chat history

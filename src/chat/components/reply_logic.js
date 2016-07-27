@@ -16,14 +16,14 @@ var purchase = require("./purchase.js");
 // var conversation_botkit = require('./conversation_botkit');
 // var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp2/api');
+var nlp = require('../../nlp/api');
 //set env vars
-var kip = require('kip');
-var config = kip.config;
+var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
 
 //load mongoose models
 var mongoose = require('mongoose');
+var db = require('../../db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
@@ -34,6 +34,7 @@ var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 
 var queue = require('./queue-mongo');
+var kip = require('../../kip');
 
 //temp in-memory mode tracker
 var modes = {};
@@ -112,14 +113,14 @@ queue.topic('incoming').subscribe(incoming => {
     if(incoming.data.action == 'mode.update'){
       modes[user.id] = 'onboarding'
       console.log('UPDATED MODE!!!!')
-      incoming.ack();
+      incoming.ack(); 
       return;
     }
 
     if (!modes[user.id]){
         modes[user.id] = 'shopping';
     }
-
+    
     /////////////////////
 
     //MODE SWITCHER
@@ -148,10 +149,15 @@ queue.topic('incoming').subscribe(incoming => {
         var replies = yield simple_response(message);
         kip.debug('simple replies'.cyan, replies);
 
-        //not a simple reply, do NLP
+        //not a simple reply, do NLP 
         if (!replies || replies.length === 0) {
           replies = yield nlp_response(message);
-          kip.debug('nlp replies'.cyan, replies);
+          kip.debug('nlp replies'.cyan, replies.map(r => {
+            return {
+              text: r.text,
+              execute: r.execute
+            }
+          }));
         }
 
         if (!replies || replies.length === 0) {
@@ -307,7 +313,7 @@ function* nlp_response(message) {
   try {
     yield nlp.parse(message);
     if (process.env.NODE_ENV !== 'production') {
-      var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
+      var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute) + '`');
     }
     var messages = yield execute(message);
   } catch(err) {
@@ -485,7 +491,6 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     _.merge(exec.params, old_params);
     var max_price = Math.max.apply(null, old_results.map(r => parseFloat(r.realPrice.slice(1))));
     if (exec.params.param === 'less') {
-      kip.log('searching for something cheaper');
       exec.params.max_price = max_price * 0.8;
     } else if (exec.params.param === 'more') {
       kip.log('wow someone wanted something more expensive');
@@ -493,8 +498,11 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     }
   }
   else if (exec.params.type === 'genericDetail') {
-      //add handler for all other modifiers here
-
+    //add handler for all other modifiers here
+    kip.debug('old params', old_params);
+    kip.debug('new params', exec.params);
+    // _.merge(exec.params, old_params);
+    return 0;
   }
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
@@ -519,7 +527,6 @@ handlers['shopping.modify.all'] = function*(message, exec) {
 
 // "like 1 but cheaper", "like 2 but blue"
 handlers['shopping.modify.one'] = function*(message, exec) {
-  kip.debug('_using_modify_one_')
   if (!exec.params.focus) {
     kip.err('no focus supplied')
     return default_reply(message);
@@ -527,33 +534,32 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
-
+  kip.debug('old params', old_params);
+  kip.debug('new params', exec.params);
   exec.params.query = old_params.query;
 
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
     var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
-    kip.debug('max_price:', max_price)
     if (exec.params.param === 'less') {
-      kip.log('searching for something cheaper');
       exec.params.max_price = max_price * 0.8;
     } else if (exec.params.param === 'more') {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  }
-  else {
+  } else if (exec.params.type === 'color') {
+    var jsonAmazon = JSON.parse(message.amazon);
+    exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val.name;
+  } else if (exec.params.type === 'genericDetail') {
+    kip.debug('old params', old_params);
+    kip.debug('new params', exec.params);
+  } else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
-
-  // modify the color
-  // if (exec.params.type === 'color') {
-  //   var new_query = (old_results[exec.params.focus - 1].ItemAttributes[0].Title + old_)
-  // }
-  // else {
-  //   throw new Error('this type of modification not handled yet: ' + exec.params.type);
-  // }
+  
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
@@ -577,15 +583,17 @@ handlers['cart.save'] = function*(message, exec) {
     throw new Error('no focus for saving to cart');
   }
 
-  var raw_results = yield getLatestAmazonResults(message);
-console.log('raw_results: ', typeof raw_results, raw_results);
+
+ 
+ var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
+  console.log('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
 
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
-
-  try {
+  console.log('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 )
+;  try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
     kip.err(e);

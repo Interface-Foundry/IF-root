@@ -6,8 +6,8 @@ var querystring = require('querystring');
 const vision = require('node-cloud-vision-api');
 var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
+var db = require('../../db');
 var googl = require('goo.gl');
-var kip = require('../../kip');
 
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
@@ -58,7 +58,7 @@ var updateCountry = function(country, user_id){
 
   })
 
-
+  
   var user = db.Chatuser.findOne({
     id: user_id
   })
@@ -78,7 +78,7 @@ var urlShorten = function(data,callback2) {
         if (data.client_res){
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var url = data.client_res;
-           url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+           url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20');
 
            var escapeAmazon = querystring.escape(url);
 
@@ -119,7 +119,7 @@ var urlShorten = function(data,callback2) {
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var url = data.amazon[i].DetailPageURL[0];
                console.log(url);
-               url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
+               url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20');
                console.log(url);
                var escapeAmazon = querystring.escape(url);
 
@@ -223,13 +223,13 @@ var emoji = {
 }
 
 
-var aws_associate_id = 'quic0b-20';
+var aws_associate_id = 'eileenog-20';
 
 //
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink(url, cart_id) {
-  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20');
   console.log('CART IDDDDDDDDD ',url)
 
   return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
@@ -239,7 +239,7 @@ function getCartLink(url, cart_id) {
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink(url, user_id, item_id) {
-  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
+  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
   var url_swapped = swapAmazonTLD(url, user_id)
