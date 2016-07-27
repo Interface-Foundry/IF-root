@@ -19,10 +19,10 @@ cd nlp
 cd ..
 
 # NLP2
-docker build -t gcr.io/kip-styles/parser:$VERSION -f nlp2/parser.Dockerfile nlp2/
-docker build -t gcr.io/kip-styles/rnn:$VERSION -f nlp2/rnn.Dockerfile nlp2/
-gcloud docker push gcr.io/kip-styles/parser:$VERSION
-gcloud docker push gcr.io/kip-styles/rnn:$VERSION
+# docker build -t gcr.io/kip-styles/parser:$VERSION -f nlp2/parser.Dockerfile nlp2/
+# docker build -t gcr.io/kip-styles/rnn:$VERSION -f nlp2/rnn.Dockerfile nlp2/
+# gcloud docker push gcr.io/kip-styles/parser:$VERSION
+# gcloud docker push gcr.io/kip-styles/rnn:$VERSION
 
 # PICSTITCH
 docker build -t gcr.io/kip-styles/picstitch:$VERSION -f Dockerfiles/picstitch.Dockerfile

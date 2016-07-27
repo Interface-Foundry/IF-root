@@ -1,15 +1,8 @@
 FROM node:6
-
-ENV NODE_ENV=production
-
 RUN mkdir /kip
-
-ADD package.json /kip/package.json
-
 WORKDIR /kip
-
+ENV NODE_ENV=production
+ADD package.json /kip/package.json
 RUN npm install --production && ln -s ../kip.js node_modules/kip.js && ln -s ../db node_modules/db
-
 COPY . /kip
-
-CMD node /kip/chat/components/reply_logic.js
+CMD node chat/components/reply_logic.js

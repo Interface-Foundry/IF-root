@@ -18,7 +18,7 @@ var purchase = require("./purchase.js");
 var kipcart = require('./cart');
 var nlp = require('../../nlp2/api');
 //set env vars
-var kip = require('../../kip.js');
+var kip = require('kip');
 var config = kip.config;
 var mailerTransport = require('../../mail/IF_mail.js');
 

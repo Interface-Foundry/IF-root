@@ -1,4 +1,4 @@
-var kip = require('../../kip');
+var kip = require('kip');
 var co = require('co');
 var rx = require('rx');
 
@@ -83,10 +83,10 @@ function topic(topic) {
       db.Pubsub.update({
         dispatched: true,
         done: { $ne: true },
-        dispatch_time: { $lt: new Date() - 12500 },
+        dispatch_time: { $lt: new Date() - 10000 },
         $or: [
           {retries: {$exists: false}},
-          {retries: {$lt: 2}}
+          {retries: {$lt: 3}}
         ]
       }, {
         $set: { dispatched: false },
@@ -94,7 +94,7 @@ function topic(topic) {
       }, {
         multi: true
       }).exec();
-    }, 12500)
+    }, 10000)
   })
 }
 
