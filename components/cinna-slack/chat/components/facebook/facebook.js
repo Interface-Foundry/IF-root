@@ -154,7 +154,7 @@ app.post('/facebook', function(req, res) {
     var set_greeting = {
       "setting_type" : "greeting",
       "greeting": { 
-            "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and   I'll show you 3 options." 
+            "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options." 
         }
      };
 
