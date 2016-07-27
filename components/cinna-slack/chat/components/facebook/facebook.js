@@ -189,11 +189,20 @@ app.post('/facebook', function(req, res) {
     //else, SHOPPING MODE
     for (i = 0; i < messaging_events.length; i++) {
 
+        event = req.body.entry[0].messaging[i];
+        sender = event.sender.id;
+
+
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
         //@ @ @ @ @ shitty code @ @ @ @ @ @
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
 
-        var userid_z = event.sender.id.toString();
+
+        var zzz = req.body.entry[0].messaging[i];
+
+        console.log('@ @ @ ZZ Z Z Z Z Z @ @ @ ', zzz)
+
+        var userid_z = zzz.recipient.id.toString();
         console.log('@ @ @ GETTING ME @ @ @ ',userid_z)
 
         //gross, in-memory modes and story tracker
@@ -205,26 +214,38 @@ app.post('/facebook', function(req, res) {
         }
 
         console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[userid_z])
+        
+        
+        //non-shopping mode checker
+        //also only capturing text, images, stickers from user to check for current mode to block stuff
+        //if(event.message && event.message.text || !_.get(req.body.entry[0].messaging[i], 'message.sticker_id') && _.get(req.body.entry[0].messaging[i], 'message.attachments[0].type') == 'image' || _.get(req.body.entry[0].messaging[i], 'message.sticker_id') || _.get(req.body.entry[0].messaging[i], 'message.attachments')){
+        if(event.message && event.message.text){
 
-        //non-shopping mode?
-        switch(fb_memory[userid_z].mode){
-            case 'onboarding':
-                console.log('ONBOARDING MODE STOPPING everything else')
+            console.log('@ @ @ @ @ E33333333EEEE3333 @ @ @ @ @ ^ ^ ^')
+            switch(fb_memory[userid_z].mode){
+                case 'onboarding':
+                    console.log('ONBOARDING MODE STOPPING everything else')
 
-                //@ @ @ eventually move this to the onboarding callback function
-                //FIRE STORY!! 
-                //AND same handler goes into button callbacks from story questions
-                send_story(userid_z);
+                    //@ @ @ eventually move this to the onboarding callback function
+                    //FIRE STORY!! 
+                    //AND same handler goes into button callbacks from story questions
+                    send_story(userid_z,sender);
 
-                return;
-            break;
+                    // var x = {text: "Please answer the question above this message, thanks 😊"}
+                    // send_universal_message(x,sender);
+
+                    return;
+                break;
+            }            
+        }else {
+            console.log('ping but nah')
         }
+
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
 
 
-        event = req.body.entry[0].messaging[i];
-        sender = event.sender.id;
+
          var set_menu = {
           "setting_type" : "call_to_actions",
           "thread_state" : "existing_thread",
@@ -480,7 +501,7 @@ app.post('/facebook', function(req, res) {
                                           },
                                           {
                                             "content_type":"text",
-                                            "title":" < Previous Search ",
+                                            "title":" < Back",
                                             "payload": JSON.stringify({
                                                     action: "back",
                                                     type:"last_search"
@@ -584,7 +605,7 @@ app.post('/facebook', function(req, res) {
                               },
                                {
                                 "content_type":"text",
-                                "title":" < Back ",
+                                "title":" < Back",
                                 "payload": JSON.stringify({
                                         action: "back",
                                         type: "last_menu"
@@ -684,7 +705,7 @@ app.post('/facebook', function(req, res) {
                               },
                                {
                                 "content_type":"text",
-                                "title":" < Back ",
+                                "title":" < Back",
                                 "payload": JSON.stringify({
                                         action: "back",
                                         type: "last_menu"
@@ -784,7 +805,7 @@ app.post('/facebook', function(req, res) {
                               },
                                {
                                 "content_type":"text",
-                                "title":" < Back ",
+                                "title":" < Back",
                                 "payload": JSON.stringify({
                                         action: "back",
                                         type: "last_menu"
@@ -827,6 +848,7 @@ app.post('/facebook', function(req, res) {
                 if (text == 'hi'){
                     fb_memory[userid_z].mode = 'onboarding';
                 }
+                //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
 
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
@@ -857,7 +879,7 @@ app.post('/facebook', function(req, res) {
                     queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                 });
         }
-
+        //user sent image
         else if (!_.get(req.body.entry[0].messaging[i], 'message.sticker_id') && _.get(req.body.entry[0].messaging[i], 'message.attachments[0].type') == 'image') {
             var data = { file: {url_private: req.body.entry[0].messaging[i].message.attachments[0].payload.url}};
              process_image.imageSearch(data,'',function(res){
@@ -887,7 +909,7 @@ app.post('/facebook', function(req, res) {
                 }
             });
         }
-
+        //user sent sticker
         else if (_.get(req.body.entry[0].messaging[i], 'message.sticker_id') || _.get(req.body.entry[0].messaging[i], 'message.attachments')) {
             var img_array = [
             'http://kipthis.com/kip_stickers/kip1.png',
@@ -1020,7 +1042,7 @@ app.post('/facebook', function(req, res) {
                                             "buttons": [
                                                {
                                                     "type": "postback",
-                                                    "title": "1. Headphones",
+                                                    "title": "Headphones",
                                                     "payload": JSON.stringify({
                                                         dataId: msg.thread_id,
                                                         action: "button_search",
@@ -1030,7 +1052,7 @@ app.post('/facebook', function(req, res) {
                                                 },
                                                 {
                                                    "type": "postback",
-                                                    "title": "2. 🐔 🍜",
+                                                    "title": "🐔 🍜",
                                                     "payload": JSON.stringify({
                                                         dataId: msg.thread_id,
                                                         action: "button_search",
@@ -1040,7 +1062,7 @@ app.post('/facebook', function(req, res) {
                                                 },
                                                 {
                                                     "type": "postback",
-                                                    "title": "3. Books",
+                                                    "title": "Books",
                                                     "payload": JSON.stringify({
                                                         dataId: msg.thread_id,
                                                         action: "button_search",
@@ -1055,6 +1077,8 @@ app.post('/facebook', function(req, res) {
                                 },
                                 "notification_type": "NO_PUSH"
                             };
+
+                            console.log('HELP CARD OUTPUT ',JSON.stringify(help_card))
 
                             request.post({
                                 url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -1071,6 +1095,15 @@ app.post('/facebook', function(req, res) {
                                 if (err) console.error('post err ', err);
                             })
                         }
+
+                        //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
+                        else if (postback.action === 'story.answer') {
+                            console.log('OK OK OKO @ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K ',postback)
+                            
+                            process_story(postback.story_pointer,postback.selected);
+                        }     
+                        //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //          
+
 
                         else if (postback.action == 'button_search') {
                             var text = postback.text;
@@ -1303,7 +1336,9 @@ app.post('/facebook', function(req, res) {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
 
-                                } else if (postback.action === 'list') {
+                                } 
+
+                                else if (postback.action === 'list') {
                                      var typing_indicator = {
                                           "recipient":{
                                             "id": sender.toString()
@@ -1780,7 +1815,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                               },
                               {
                                 "content_type":"text",
-                                "title":" < Previous Search ",
+                                "title":" < Back",
                                 "payload": JSON.stringify({
                                         action: "back",
                                         type:"last_search"
@@ -1863,7 +1898,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                   },
                   {
                     "content_type":"text",
-                    "title":" < Back ",
+                    "title":" < Back",
                     "payload": JSON.stringify({
                             action: "back",
                             type:"last_menu"
@@ -1931,123 +1966,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             })
         }) 
     }
-
-    // @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ //
-    // @ @ @ @ @ @ @ @ @ @ @ lil cinna house :> @ @ @ @ @ @ @ @ //
-    // @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ //
-
-    //onboarding quiz, sequential stories
-    var onboarding_quiz = [{
-        "recipient": {
-            "id": userid
-        },    
-        "message":{
-            "attachment":{
-              "type":"template",
-              "payload":{
-                "template_type":"button",
-                "text":"What do you want to do next?",
-                "buttons":[
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"1"
-                  },
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"2"
-                  },
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"3"
-                  },
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"4"
-                  }
-                ]
-              }
-            }
-        }
-    },
-    {
-        "recipient": {
-            "id": userid
-        },    
-        "message":{
-            "attachment":{
-              "type":"template",
-              "payload":{
-                "template_type":"button",
-                "text":"What do you want to do next?",
-                "buttons":[
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"1"
-                  },
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"2"
-                  },
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"3"
-                  },
-                  {
-                    "type":"postback",
-                    "title":"eat food blah blah ",
-                    "payload":"4"
-                  }
-                ]
-              }
-            }
-        }
-    }];
-
-
-    function send_story(userid_z){
-
-        var storySender;
-
-        if(fb_memory[userid_z]){
-            var story_pointer = fb_memory[userid_z].story_pointer;
-            if(story_pointer){
-                var storySender = onboarding_quiz[story_pointer];
-            }else {
-                return;
-            }
-        }
-
-        //send res to user
-        request.post({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {
-                access_token: fbtoken
-            },
-            method: "POST",
-            json: true,
-            headers: {
-                "content-type": "application/json",
-            },
-            body: storySender
-        }, function(err, res, body) {
-
-            if (err) console.error('post err ', err);
-
-            fb_memory[userid_z].story_pointer++; //advance the story to next sequence
-
-        })
-    }
-
-
-    // @ @ @ @ @ @ @ @ @ @ @ bye cinna @ @ @ @ @ @ @ @ @ @ @ //
-
 
     function send_cart(channel, text, outgoing) {
           var cart = outgoing.data.data;
@@ -2144,3 +2062,297 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
     }
 
 })
+
+
+// @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ //
+// @ @ @ @ @ @ @ @ @ @ @ lil cinna house :> @ @ @ @ @ @ @ @ //
+// @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ //
+
+//pass any FB body to it
+//** bd == the message body, i.e. {text:'blah'}
+//** sendTo == the FB id of the recipient
+function send_universal_message(bd,sendTo){
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: fbtoken
+        },
+        method: 'POST',
+        json: {
+            recipient: {
+                id: sendTo
+            },
+            message: bd,
+            notification_type: "NO_PUSH"
+        }
+    }, function(err, res, body) {
+        if (err) console.error('post err ', err);
+    });
+}
+
+function start_story(recipient,sender){
+    
+    send_story(recipient,sender);
+
+    //* * * * WHEN STORY MODE IS OVER:
+    //fb_memory[userid_z].mode = 'shopping';
+}
+
+//recipient: id
+//sender: id
+//pointer: which sequence # we're going to 
+//select: which answer did user pick
+function process_story(recipient,sender,pointer,select){
+
+
+    console.log('RECORDING SELECT ',select)
+
+    console.log('RECORDING POINTER ',pointer)
+    //record pointer + select in DB
+
+    //do stuff
+    //store in user DB
+
+    pointer++;
+    send_story(recipient,sender,pointer)
+
+}
+
+function send_story(userid_z,recipient,pointer){
+
+    console.log('SENDING STORY ',userid_z)
+
+    var storySender;
+
+    console.log('IFFFFFF ',fb_memory[userid_z])
+
+    if(fb_memory[userid_z]){
+        var story_pointer = fb_memory[userid_z].story_pointer;
+        console.log('story pointer ',fb_memory[userid_z].story_pointer)
+        if(story_pointer || story_pointer == 0){
+            var storySender = onboarding_quiz[story_pointer];
+            console.log('WHAT IS IT???? ',storySender)
+            storySender.recipient = {
+                id: recipient
+            };
+            console.log('story SENDER FINAL ',storySender)
+        }else {
+            return;
+        }
+    }
+
+    console.log('@ @  @ @ @ @ @ @ STORY SENDER ',JSON.stringify(storySender))
+
+
+
+    //send res to user
+    request.post({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: fbtoken
+        },
+        method: "POST",
+        json: true,
+        headers: {
+            "content-type": "application/json",
+        },
+        body: storySender
+    }, function(err, res, body) {
+
+        if (err) console.error('post err ', err);
+
+        // console.log('RESzzzz ',res)
+        // console.log('body ',body)
+
+        //fb_memory[userid_z].story_pointer++; //advance the story to next sequence
+
+    })
+}
+
+//onboarding quiz, sequential stories
+var onboarding_quiz = [{ 
+    "message":{
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"button",
+            "text":"What do you want to do next?",
+            "buttons":[
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '1',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"food meh ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '2',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '3',
+                                story_pointer: 0
+                            })
+              }
+            ]
+          }
+        }
+    }
+},
+{ 
+    "message":{
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"button",
+            "text":"how weird",
+            "buttons":[
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '1',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '2',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '3',
+                                story_pointer: 0
+                            })
+              }
+            ]
+          }
+        }
+    }
+},
+{ 
+    "message":{
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"button",
+            "text":"22222222",
+            "buttons":[
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '1',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '2',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '3',
+                                story_pointer: 0
+                            })
+              }
+            ]
+          }
+        }
+    }
+},
+{ 
+    "message":{
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"button",
+            "text":"8282828",
+            "buttons":[
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '1',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '2',
+                                story_pointer: 0
+                            })
+              },
+              {
+                "type":"postback",
+                "title":"eat food blah blah ",
+                "payload": JSON.stringify({
+                                dataId: 'zzzz',
+                                object_id: 'zzzz',
+                                action: "story.answer",
+                                selected: '3',
+                                story_pointer: 0
+                            })
+              }
+            ]
+          }
+        }
+    }
+}];
+
+// @ @ @ @ @ @ @ @ @ @ @ bye cinna @ @ @ @ @ @ @ @ @ @ @ //
