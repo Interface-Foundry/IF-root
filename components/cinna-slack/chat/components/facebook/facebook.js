@@ -2360,7 +2360,7 @@ function process_story(recipient,sender,pointer,select){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"   
+                                "text": "Here are some cool things you might like! :)"   
                     },
                     "notification_type": "NO_PUSH"
                 };
