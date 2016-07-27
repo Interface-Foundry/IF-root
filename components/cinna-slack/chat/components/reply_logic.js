@@ -152,7 +152,12 @@ queue.topic('incoming').subscribe(incoming => {
         //not a simple reply, do NLP 
         if (!replies || replies.length === 0) {
           replies = yield nlp_response(message);
-          kip.debug('nlp replies'.cyan, replies);
+          kip.debug('nlp replies'.cyan, replies.map(r => {
+            return {
+              text: r.text,
+              execute: r.execute
+            }
+          }));
         }
 
         if (!replies || replies.length === 0) {
@@ -308,7 +313,7 @@ function* nlp_response(message) {
   try {
     yield nlp.parse(message);
     if (process.env.NODE_ENV !== 'production') {
-      var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute[0]) + '`');
+      var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute) + '`');
     }
     var messages = yield execute(message);
   } catch(err) {
@@ -493,8 +498,11 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     }
   }
   else if (exec.params.type === 'genericDetail') {
-      //add handler for all other modifiers here
-
+    //add handler for all other modifiers here
+    kip.debug('old params', old_params);
+    kip.debug('new params', exec.params);
+    // _.merge(exec.params, old_params);
+    return 0;
   }
   else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
@@ -524,11 +532,10 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     return default_reply(message);
   }
 
-  // console.log('\n\n\n\n\n\n\n\n\n\n WHO IS MR ROBOT? ', message,'\n\n\n\n\n\n\n\n\n\n\n\n')
-
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
-
+  kip.debug('old params', old_params);
+  kip.debug('new params', exec.params);
   exec.params.query = old_params.query;
 
   // modify the params and then do another search.
@@ -541,17 +548,15 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  }
-  else if (exec.params.type === 'color') {
+  } else if (exec.params.type === 'color') {
     var jsonAmazon = JSON.parse(message.amazon);
     exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
     exec.params.color = exec.params.val.name;
-        // console.log('\n\n\n\n\n\n\n\n\n DO THEY SEE ME? ',  exec.params, '\n\n\n\n\n\n\n\n\n')
-
-    // console.log('exec for color search: ', JSON.stringify(exec))
-  }
-  else {
+  } else if (exec.params.type === 'genericDetail') {
+    kip.debug('old params', old_params);
+    kip.debug('new params', exec.params);
+  } else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
   
