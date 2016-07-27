@@ -233,13 +233,91 @@ app.post('/facebook', function(req, res) {
                     //AND same handler goes into button callbacks from story questions
 
 
-                   
+                    //Let's keep track of number of times user does something not within onboarding mode, if more than twice 
+                    //just revert to shoppinf mode and send the help_card
+                    fb_memory[userid_z].exit_count = (fb_memory[userid_z].exit_count < 2) ?  ++fb_memory[userid_z].exit_count : 0;
+                    console.log('incremented exit_count: ', fb_memory[userid_z].exit_count )
+                    if(fb_memory[userid_z].exit_count >= 2) {
+                            fb_memory[userid_z] = {
+                                mode: 'shopping',
+                                story_pointer: 0
+                            };
 
+                            var help_card = {
+                                "recipient": {
+                                    "id": sender.toString()
+                                },
+                                "message": {
+                                    "attachment": {
+                                        "type": "template",
+                                        "payload": {
+                                            "template_type": "button",
+                                            "buttons": [
+                                               {
+                                                    "type": "postback",
+                                                    "title": "Headphones",
+                                                    "payload": JSON.stringify({
+                                                        dataId: "facebook_" + sender.toString(),
+                                                        action: "button_search",
+                                                        text: 'headphones',
+                                                        ts: Date.now()
+                                                    })
+                                                },
+                                                {
+                                                   "type": "postback",
+                                                    "title": "🐔 🍜",
+                                                    "payload": JSON.stringify({
+                                                        dataId: "facebook_" + sender.toString(),
+                                                        action: "button_search",
+                                                        text: '🐔🍜',
+                                                        ts: Date.now()
+                                                    })
+                                                },
+                                                {
+                                                    "type": "postback",
+                                                    "title": "Books",
+                                                    "payload": JSON.stringify({
+                                                        dataId: "facebook_" + sender.toString(),
+                                                        action: "button_search",
+                                                        text: 'books',
+                                                        ts: Date.now()                                                 
+                                                    })
+                                                }
+                                           ],
+                                            "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
+                                        }
+                                    }
+                                },
+                                "notification_type": "NO_PUSH"
+                            };
+
+                            console.log('HELP CARD OUTPUT ',JSON.stringify(help_card))
+
+                            request.post({
+                                url: 'https://graph.facebook.com/v2.6/me/messages',
+                                qs: {
+                                    access_token: fbtoken
+                                },
+                               method: "POST",
+                                json: true,
+                                headers: {
+                                    "content-type": "application/json",
+                                },
+                                body: help_card
+                            }, function(err, res, body) {
+                                if (err) console.error('post err ', err);
+                            })
+                            return
+
+                    } else {
                     var x = {text: "Please answer the question above this message, thanks 😊"}
                     send_universal_message(x,sender);
-                    res.sendStatus(200);
 
                     return;
+                    }
+
+                                       res.sendStatus(200);
+
                 break;
             }            
         }else {
