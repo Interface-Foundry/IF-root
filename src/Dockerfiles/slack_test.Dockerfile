@@ -8,7 +8,7 @@ ADD package.json /kip/package.json
 
 WORKDIR /kip
 
-RUN npm install --production && ln -s ../kip.js node_modules/kip.js && ln -s ../db node_modules/db
+RUN npm install && ln -s ../kip.js node_modules/kip.js && ln -s ../db node_modules/db
 
 ADD . /kip/
 

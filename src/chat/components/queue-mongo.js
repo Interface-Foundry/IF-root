@@ -83,10 +83,10 @@ function topic(topic) {
       db.Pubsub.update({
         dispatched: true,
         done: { $ne: true },
-        dispatch_time: { $lt: new Date() - 10000 },
+        dispatch_time: { $lt: new Date() - 12500 },
         $or: [
           {retries: {$exists: false}},
-          {retries: {$lt: 3}}
+          {retries: {$lt: 2}}
         ]
       }, {
         $set: { dispatched: false },
@@ -94,7 +94,7 @@ function topic(topic) {
       }, {
         multi: true
       }).exec();
-    }, 10000)
+    }, 12500)
   })
 }
 

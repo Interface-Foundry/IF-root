@@ -107,10 +107,12 @@ class McParser:
             self.parts_of_speech.append([cur_word, unicode(i[3])])
             if i[3] in ['NOUN', 'PRON']:
                 self.nouns.append(cur_word)
+
+            if i[3] in ['NOUN']:
                 if not hasattr(self, 'first_noun'):
                     self.first_noun = d_index
-
                 self.last_noun = d_index
+
             if i[3] in ['VERB']:
                 self.verbs.append(cur_word)
             if i[3] in ['ADJ']:
