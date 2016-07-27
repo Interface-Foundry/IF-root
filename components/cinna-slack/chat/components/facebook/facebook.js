@@ -230,6 +230,7 @@ app.post('/facebook', function(req, res) {
                     //FIRE STORY!! 
                     //AND same handler goes into button callbacks from story questions
                     send_story(userid_z,sender);
+                    res.sendStatus(200);
 
                     // var x = {text: "Please answer the question above this message, thanks 😊"}
                     // send_universal_message(x,sender);
@@ -336,6 +337,8 @@ app.post('/facebook', function(req, res) {
             // }
                
             var sub_menu = event.message.quick_reply.payload;
+
+
             try {
                 sub_menu = JSON.parse(sub_menu);
             } catch(err) {
@@ -1017,8 +1020,15 @@ app.post('/facebook', function(req, res) {
                     }, function(err, res, body) {
                         if (err) console.error('post err ', err);
                     })
-
             }
+            //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
+            else if (postback.action === 'story.answer') {
+                console.log('OK OK OKO @ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K ',postback)
+                process_story(userid_z,sender,postback.story_pointer,postback.selected);
+                return;
+            }     
+            //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //          
+            console.log('NOOOOOOOOOOOOOO@ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K');
 
             db.Messages.find({
                 thread_id: postback.dataId
@@ -1029,6 +1039,9 @@ app.post('/facebook', function(req, res) {
                 } else if (messages[0]) {
                     co(function*() {
                         var msg = messages[0];
+
+
+                        console.log('POSTBACK OKOKOKOK @ @ @ @ @ @  ',postback)
                          if (postback.action == 'help') {
                             var help_card = {
                                 "recipient": {
@@ -1095,15 +1108,6 @@ app.post('/facebook', function(req, res) {
                                 if (err) console.error('post err ', err);
                             })
                         }
-
-                        //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
-                        else if (postback.action === 'story.answer') {
-                            console.log('OK OK OKO @ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K ',postback)
-                            
-                            process_story(postback.story_pointer,postback.selected);
-                        }     
-                        //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //          
-
 
                         else if (postback.action == 'button_search') {
                             var text = postback.text;
@@ -2094,8 +2098,7 @@ function start_story(recipient,sender){
     
     send_story(recipient,sender);
 
-    //* * * * WHEN STORY MODE IS OVER:
-    //fb_memory[userid_z].mode = 'shopping';
+
 }
 
 //recipient: id
@@ -2105,41 +2108,66 @@ function start_story(recipient,sender){
 function process_story(recipient,sender,pointer,select){
 
 
+
     console.log('RECORDING SELECT ',select)
 
     console.log('RECORDING POINTER ',pointer)
+
+
+    //IF NO SCORE IN MEMORY, THEN start from x 
+
+    //* * * * WHEN STORY MODE IS OVER:
+    //fb_memory[userid_z].mode = 'shopping';
+
     //record pointer + select in DB
 
     //do stuff
     //store in user DB
 
-    pointer++;
-    send_story(recipient,sender,pointer)
+    //check if we should end story. will stop story after length of quiz question array 
+    if(pointer == onboarding_quiz.length - 1){
+        var x = {text: "Quiz done, you got this present:"}
+        send_universal_message(x,sender);
+        fb_memory[recipient].mode = 'shopping';
+    }else {
+        pointer++;
+        console.log('ADDING POINTER ',pointer)
+        send_story(recipient,sender,pointer)        
+    }
+
 
 }
 
 function send_story(userid_z,recipient,pointer){
 
-    console.log('SENDING STORY ',userid_z)
+    //console.log('SENDING STORY ',userid_z)
 
     var storySender;
 
-    console.log('IFFFFFF ',fb_memory[userid_z])
+    // console.log('IFFFFFF ',fb_memory[userid_z])
 
-    if(fb_memory[userid_z]){
-        var story_pointer = fb_memory[userid_z].story_pointer;
-        console.log('story pointer ',fb_memory[userid_z].story_pointer)
-        if(story_pointer || story_pointer == 0){
-            var storySender = onboarding_quiz[story_pointer];
-            console.log('WHAT IS IT???? ',storySender)
-            storySender.recipient = {
-                id: recipient
-            };
-            console.log('story SENDER FINAL ',storySender)
-        }else {
-            return;
+    // if(fb_memory[userid_z]){
+        //var story_pointer = pointer;
+
+        //start from beginning of we dont have a pointer
+        if(!pointer){
+            pointer = 0;
         }
-    }
+
+        console.log('@ @ @ @ @ @ story pointer @ @ @ @ @  ',pointer)
+        //if(pointer || pointer == 0){
+        var storySender = onboarding_quiz[pointer];
+        console.log('WHAT IS IT???? ',JSON.stringify(storySender))
+        storySender.recipient = {
+            id: recipient
+        };
+        console.log('story SENDER FINAL ',storySender)
+        // }else {
+        //     var x = {text: "I'm sorry, I had brain freeze. I'm not sure what you said"}
+        //     send_universal_message(x,sender);
+        //     return;
+        // }
+    //}
 
     console.log('@ @  @ @ @ @ @ @ STORY SENDER ',JSON.stringify(storySender))
 
@@ -2185,7 +2213,7 @@ var onboarding_quiz = [{
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '1',
+                                selected: 'trending',
                                 story_pointer: 0
                             })
               },
@@ -2196,7 +2224,7 @@ var onboarding_quiz = [{
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '2',
+                                selected: 'lavish',
                                 story_pointer: 0
                             })
               },
@@ -2207,7 +2235,7 @@ var onboarding_quiz = [{
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '3',
+                                selected: 'lavish',
                                 story_pointer: 0
                             })
               }
@@ -2232,7 +2260,7 @@ var onboarding_quiz = [{
                                 object_id: 'zzzz',
                                 action: "story.answer",
                                 selected: '1',
-                                story_pointer: 0
+                                story_pointer: 1
                             })
               },
               {
@@ -2243,7 +2271,7 @@ var onboarding_quiz = [{
                                 object_id: 'zzzz',
                                 action: "story.answer",
                                 selected: '2',
-                                story_pointer: 0
+                                story_pointer: 1
                             })
               },
               {
@@ -2254,7 +2282,7 @@ var onboarding_quiz = [{
                                 object_id: 'zzzz',
                                 action: "story.answer",
                                 selected: '3',
-                                story_pointer: 0
+                                story_pointer: 1
                             })
               }
             ]
@@ -2278,7 +2306,7 @@ var onboarding_quiz = [{
                                 object_id: 'zzzz',
                                 action: "story.answer",
                                 selected: '1',
-                                story_pointer: 0
+                                story_pointer: 2
                             })
               },
               {
@@ -2289,7 +2317,7 @@ var onboarding_quiz = [{
                                 object_id: 'zzzz',
                                 action: "story.answer",
                                 selected: '2',
-                                story_pointer: 0
+                                story_pointer: 2
                             })
               },
               {
@@ -2300,7 +2328,7 @@ var onboarding_quiz = [{
                                 object_id: 'zzzz',
                                 action: "story.answer",
                                 selected: '3',
-                                story_pointer: 0
+                                story_pointer: 2
                             })
               }
             ]
@@ -2323,8 +2351,8 @@ var onboarding_quiz = [{
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '1',
-                                story_pointer: 0
+                                selected: 'trending',
+                                story_pointer: 3
                             })
               },
               {
@@ -2334,8 +2362,8 @@ var onboarding_quiz = [{
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '2',
-                                story_pointer: 0
+                                selected: 'lavish',
+                                story_pointer: 3
                             })
               },
               {
@@ -2345,8 +2373,8 @@ var onboarding_quiz = [{
                                 dataId: 'zzzz',
                                 object_id: 'zzzz',
                                 action: "story.answer",
-                                selected: '3',
-                                story_pointer: 0
+                                selected: 'smart',
+                                story_pointer: 3
                             })
               }
             ]
