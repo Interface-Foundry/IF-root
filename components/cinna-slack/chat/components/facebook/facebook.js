@@ -232,7 +232,6 @@ app.post('/facebook', function(req, res) {
                     //FIRE STORY!! 
                     //AND same handler goes into button callbacks from story questions
                     send_story(userid_z,sender);
-                    res.sendStatus(200);
 
                     // var x = {text: "Please answer the question above this message, thanks 😊"}
                     // send_universal_message(x,sender);
@@ -369,7 +368,6 @@ app.post('/facebook', function(req, res) {
                     // queue it up for processing
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-
                     });
                 }
               })                
