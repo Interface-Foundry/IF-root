@@ -135,6 +135,14 @@ backCache = 0;
 
 app.post('/facebook', function(req, res) {
 
+    kip.debug(req.body);
+
+    // filter out the shit we don't want to process.
+    if (_.get(req, 'body.entry[0].messaging[0].message.is_echo')) {
+        kip.debug('not processing echo message');
+        return res.send(200);
+    }
+
 
     //
     //
@@ -1461,12 +1469,7 @@ app.post('/facebook', function(req, res) {
 //
 kip.debug('subscribing to outgoing.facebook');
 queue.topic('outgoing.facebook').subscribe(outgoing => {
-    console.log('facebook outgoing message');
-    console.log(outgoing);
-    // var data = outgoing.data;
     try {
-        console.log('outgoing message');
-        console.log(outgoing);
         var message = outgoing.data;
 
         var return_data = {};
