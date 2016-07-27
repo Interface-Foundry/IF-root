@@ -143,10 +143,12 @@ app.post('/facebook', function(req, res) {
     // filter out the shit we don't want to process.
     if (_.get(req, 'body.entry[0].messaging[0].message.is_echo')) {
         kip.debug('not processing echo message');
-        return res.send(200);
+        return res.sendStatus(200);
     }
 
-    console.log('HITTING?!??!?!?!!??!!?')
+    // need to send this right away, then process the rest
+    res.sendStatus(200);
+
     //
     //
     //--  Initial API calls to FB to set up  greeting and welcome screen.  
@@ -532,6 +534,37 @@ app.post('/facebook', function(req, res) {
                             }
                         } 
                       })  
+                } else if (sub_menu.action === 'emoji_modify') {
+                    console.log(event.message)
+                    kip.debug('fucking fuck you fucking emoji', sub_menu);
+                    db.Messages.find({
+                        thread_id: 'facebook_' + sender.toString()
+                    }).sort('-ts').exec(function(err, messages) {
+                        if (err) return console.error(err);
+                        if (messages.length == 0) {
+                            return console.log('No message found');
+                        } else if (messages[0]) {
+                            console.log(messages[0])
+                            var msg = messages[0];
+                            var message = new db.Message({
+                                incoming: true,
+                                thread_id: 'facebook_' + sender.toString(),
+                                resolved: false,
+                                user_id: msg.user_id,
+                                origin: 'facebook',
+                                text: 'like 1 but ' + sub_menu.text,
+                                source: msg.source,
+                                amazon: msg.amazon
+                            });
+                        // queue it up for processing
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                        });
+                    }
+                }) 
+
+                } else if (sub_menu.action === 'teenage_wasteland') {
+                    process.exit(1);
                 } else {
                     //Resetting back button count
                     backCache = 0;
@@ -648,8 +681,8 @@ app.post('/facebook', function(req, res) {
                                 "title":"🍪",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'cookie'
+                                        action: "emoji_modify",
+                                        text: 'sweet cookie'
                                     })
                               },
                                {
@@ -657,8 +690,8 @@ app.post('/facebook', function(req, res) {
                                 "title":"👖",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'jeans'
+                                        action: "emoji_modify",
+                                        text: 'denim'
                                     })
                               },
                               {
@@ -666,8 +699,8 @@ app.post('/facebook', function(req, res) {
                                 "title":"🌹",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'flower'
+                                        action: "emoji_modify",
+                                        text: 'floral'
                                     })
                               },
                               {
@@ -675,7 +708,7 @@ app.post('/facebook', function(req, res) {
                                 "title":"☕",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
+                                        action: "emoji_modify",
                                         text: 'coffee'
                                     })
                               },
@@ -684,8 +717,8 @@ app.post('/facebook', function(req, res) {
                                 "title":"🔨",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'hammer'
+                                        action: "emoji_modify",
+                                        text: 'hammer tools'
                                     })
                               },
                               {
@@ -693,8 +726,8 @@ app.post('/facebook', function(req, res) {
                                 "title":"👻",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'ghost'
+                                        action: "emoji_modify",
+                                        text: 'ghost scary goth'
                                     })
                                },
                                {
@@ -702,7 +735,7 @@ app.post('/facebook', function(req, res) {
                                 "title":"💯",
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
+                                        action: "emoji_modify",
                                         text: 'one hundred'
                                     })
                               },
@@ -1556,7 +1589,6 @@ app.post('/facebook', function(req, res) {
             }); // end of db.find
         }
     }
-    res.sendStatus(200);
 });
 
 
