@@ -64,7 +64,7 @@ var stitchResults = function(data,source,callback) {
             }
             else {
 
-              var loopLame = [0,1,2];//lol
+              var loopLame = [0,1,2].slice(0, data.amazon.length);//lol
               async.eachSeries(loopLame, function(i, callback) {
 
                 console.log('WHAT??????? ? ?? ? ? ? ? ? ? ?? ',i);
@@ -72,7 +72,7 @@ var stitchResults = function(data,source,callback) {
                 if (data.amazon && data.amazon[i]){
 
                   console.log('BUILD IMAGE^ ^ ^ ^ ^ ^ ^ ^ ');
-                  buildImage(data.amazon[i],function(res){
+                  buildImage(data,function(res){
                     callback();
                   },i);
                 }else {
