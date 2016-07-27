@@ -1,7 +1,7 @@
 version: "2"
 services:
-  image:
-    container_name: image
+  picstitch:
+    container_name: picstitch
     build:
       context: .
       dockerfile: Dockerfiles/picstitch.Dockerfile
