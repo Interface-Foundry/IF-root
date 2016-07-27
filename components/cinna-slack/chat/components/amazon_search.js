@@ -15,22 +15,24 @@ var db = require('../../db');
 
 var aws_clients = {
   AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
-    awsId: "AKIAIKMXJTAV2ORZMWMQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+    awsId: "AKIAIS2R5G6NPAMLEDNQ",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   }),
   AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
-    awsId: "AKIAIM4IKQAE2WF4MJUQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+    awsId: "AKIAJWTPOWIOUPHJYG2Q",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   })
 };
 
-var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+var DEFAULT_CLIENT = 'AKIAIS2R5G6NPAMLEDNQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
+
 var i = 0;
+// Round-robin method for spreading the load between all our clients.
 function get_client() {
   i++;
   if (i === aws_client_id_list.length) {
