@@ -512,15 +512,27 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
-  else if (exec.params.type === 'genericDetail') {
-    //add handler for all other modifiers here
-    kip.debug('old params', old_params);
-    kip.debug('new params', exec.params);
-    // _.merge(exec.params, old_params);
-    return 0;
+  else if (exec.params.type === 'color') {
+    var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val[0];
+
+    // console.log('exec for color search: ', JSON.stringify(exec))
   }
+  // else if (exec.params.type === 'genericDetail') {
+  //   //add handler for all other modifiers here
+  //   kip.debug('old params', old_params);
+  //   kip.debug('new params', exec.params);
+  //   // _.merge(exec.params, old_params);
+  //   return 0;
+  // }
   else {
-    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+     var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    // exec.params.color = exec.params.val.name;
+    // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
   var results = yield amazon_search.search(exec.params,message.origin);
@@ -568,15 +580,15 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     var results = yield getLatestAmazonResults(message);
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
-    exec.params.color = exec.params.val.name;
+    exec.params.color = exec.params.val[0];
 
     // console.log('exec for color search: ', JSON.stringify(exec))
   }
   else {
-      var results = yield getLatestAmazonResults(message);
+    var results = yield getLatestAmazonResults(message);
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
-    exec.params.color = exec.params.val.name;
+    // exec.params.color = exec.params.val.name;
     // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
   
