@@ -16,7 +16,7 @@ var purchase = require("./purchase.js");
 // var conversation_botkit = require('./conversation_botkit');
 // var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
-var nlp = require('../../nlp/api');
+var nlp = require('../../nlp2/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
@@ -113,14 +113,14 @@ queue.topic('incoming').subscribe(incoming => {
     if(incoming.data.action == 'mode.update'){
       modes[user.id] = 'onboarding'
       console.log('UPDATED MODE!!!!')
-      incoming.ack(); 
+      incoming.ack();
       return;
     }
 
     if (!modes[user.id]){
         modes[user.id] = 'shopping';
     }
-    
+
     /////////////////////
 
     //MODE SWITCHER
@@ -149,7 +149,7 @@ queue.topic('incoming').subscribe(incoming => {
         var replies = yield simple_response(message);
         kip.debug('simple replies'.cyan, replies);
 
-        //not a simple reply, do NLP 
+        //not a simple reply, do NLP
         if (!replies || replies.length === 0) {
           replies = yield nlp_response(message);
           kip.debug('nlp replies'.cyan, replies.map(r => {
@@ -559,7 +559,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   } else {
     throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
-  
+
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
@@ -584,7 +584,7 @@ handlers['cart.save'] = function*(message, exec) {
   }
 
 
- 
+
  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
   console.log('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);

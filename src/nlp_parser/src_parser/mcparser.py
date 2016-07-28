@@ -92,6 +92,7 @@ class McParser:
         for line in self.d_array:
             self.dependency_array.append(line.split('\t'))
 
+        # d2 = self.dependency_array
         # dont sort into tree struct
         # self.dependency_array.sort(key=lambda x: x[6])
 
@@ -141,12 +142,7 @@ class McParser:
             if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append('3')
 
-            # first to last noun advanced query try
-            # if i[3] in ['NOUN', 'PRON']:
-                # self.
             d_index += 1
-
-        # self.noun_phrases = [self.root + ' ' + cur_word]
 
         if hasattr(self, 'first_noun'):
             if self.first_noun is not self.last_noun:
@@ -154,6 +150,8 @@ class McParser:
                     self.tokens[self.first_noun:self.last_noun + 1])
         self.modifier_words = list(set(self.nouns).union(self.adjectives))
         self.nouns_with_adjectives = ' '.join(self.modifier_words)
+
+    # def _create
 
     def _remove_words(self):
         '''
@@ -251,10 +249,10 @@ class McParser:
             self.search_query = self.noun_query
         elif hasattr(self, 'pobj'):
             self.search_query = self.pobj
+        elif len(self.tokens) < 3:
+            self.search_query = ' '.join(self.tokens)
         elif hasattr(self, 'nouns_with_adjectives'):
             self.search_query = self.nouns_with_adjectives
-        # elif len(self.noun_phrases) > 0:
-        #     self.search_query = self.noun_phrases[0]
         else:
             logger.info('using full query')
             self.search_query = self.text
