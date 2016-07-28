@@ -67,7 +67,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
-  console.log('\n\n\nsendmsg: ', msg);
+  // console.log('\n\n\nsendmsg: ', msg);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -96,7 +96,6 @@ queue.topic('incoming').subscribe(incoming => {
         $lte: incoming.data.ts
       }
     }).sort('-ts').limit(20);
-
     var message = history[0];
     message.history = history.slice(1);
 
@@ -104,6 +103,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (message._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct message not retrieved from db');
     }
+
 
     //// MODES STUFF ////
     var user = {
@@ -120,7 +120,7 @@ queue.topic('incoming').subscribe(incoming => {
     if (!modes[user.id]){
         modes[user.id] = 'shopping';
     }
-    
+
     /////////////////////
 
     //MODE SWITCHER
@@ -141,7 +141,6 @@ queue.topic('incoming').subscribe(incoming => {
           console.log('Didnt understand, please choose a country thx')
         }
       break;
-
       //default Kip Mode shopping
       default:
         console.log('DEFAULT SHOPPING MODE')
@@ -548,21 +547,24 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } else if (exec.params.type === 'color') {
-    var jsonAmazon = JSON.parse(message.amazon);
-    exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
-    exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
+  }
+  else if (exec.params.type === 'color') {
+    var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
     exec.params.color = exec.params.val.name;
-  } else if (exec.params.type === 'genericDetail') {
-    kip.debug('old params', old_params);
-    kip.debug('new params', exec.params);
-  } else {
-    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+
+    // console.log('exec for color search: ', JSON.stringify(exec))
+  }
+  else {
+      var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val.name;
+    // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
   
-
   var results = yield amazon_search.search(exec.params,message.origin);
-
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
