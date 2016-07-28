@@ -549,29 +549,39 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
+
   // color modifier
   else if (exec.params.type === 'color') {
     kip.debug('_color_modifier_', old_results[exec.params.focus - 1].ItemAttributes[0])
 
     var new_query
     var new_color = exec.params.val[0].name.toLowerCase()
-    var old_title = old_results[exec.params - 1].ItemAttributes[0].Title[0].toLowerCase()
+    var old_title = old_results[exec.params.focus - 1].ItemAttributes[0].Title[0].toLowerCase()
 
-
-    if (old_results[exec.params - 1].ItemAttributes[0].hasOwnProperty(Color[0])) {
-      var old_color = old_results[exec.params - 1].ItemAttributes[0].Color[0].toLowerCase()
+    if (old_results[exec.params.focus - 1].ItemAttributes[0].hasOwnProperty('Color')) {
+      var old_color = old_results[exec.params.focus - 1].ItemAttributes[0].Color[0].toLowerCase()
       if (_.includes(old_title, old_color)) {
         // swap title
+        kip.log('swapping title: ', old_title)
         new_query = old_title.replace(old_color, new_color)
       }
       else {
+        kip.log('adding color to old_title: ', old_title)
         new_query = old_title + ' ' + new_color
       }
     }
     else {
+      kip.log('adding color to old_title: ', old_title)
       new_query = old_title + ' ' + new_color
     }
+  new_query = new_query.replace(/'/g,'')
+  new_query = new_query.replace(/,/g,' ')
+  new_query = new_query.replace(/\(/g,' ')
+  new_query = new_query.replace(/\)/g,' ')
+  new_query = new_query.replace(/-/g," ")
+
   exec.params.query = new_query
+  kip.log('_new color modified query_:', exec.params.query)
     // var jsonAmazon = JSON.parse(message.amazon);
     // exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
     // exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
