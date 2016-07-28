@@ -127,7 +127,7 @@ var search = function*(params,origin) {
   // if (amazonParams.type == 'color') {
     if (params.productGroup && params.browseNodes) {
         // console.log('west virginia mountain mama ', params.val[0].name);
-        amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name  + ' ' + amazonParams["Keywords"]: ((params.val && params.val[0]) ?  params.val[0]  + ' ' + amazonParams["Keywords"] : amazonParams["Keywords"]);
+        amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase()  + ' ' + amazonParams["Keywords"]: ((params.val && params.val[0]) ?  params.val[0].toLowerCase()  + ' ' + amazonParams["Keywords"] : amazonParams["Keywords"]);
         var key;
         yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
           key = res;

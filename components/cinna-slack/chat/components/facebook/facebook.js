@@ -508,11 +508,12 @@ app.post('/facebook', function (req, res) {
                             source: msg.source,
                             amazon: msg.amazon });
                     // queue it up for processing
+                     if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                            fb_memory[sender].mode = 'shopping';
+                      }
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                         if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                            fb_memory[sender].mode = shopping;
-                         }
+                        
                     });
 
                   
@@ -710,13 +711,13 @@ app.post('/facebook', function (req, res) {
                                 source: msg.source,
                                 amazon: msg.amazon
                             });
-
+                         if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                            fb_memory[sender].mode = 'shopping';
+                         } 
                         // queue it up for processing
                         message.save().then(() => {
                             queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))  
-                                if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                                    fb_memory[sender].mode = shopping;
-                                 }                      
+                                                    
                         });
                     }
                 }) 
@@ -940,106 +941,6 @@ app.post('/facebook', function (req, res) {
                         if (err) console.error('post err ', err);
                     })
                     break;
-
-                case "sub_menu_":
-                      var modify_sub_menu = {
-                        "recipient": {
-                            "id": sender.toString()
-                        },
-                        "message": {
-                          "quick_replies":[
-                             {
-                                "content_type":"text",
-                                "title":"🍪",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'cookie'
-                                    })
-                              },
-                               {
-                                "content_type":"text",
-                                "title":"👖",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'jeans'
-                                    })
-                              },
-                              {
-                                "content_type":"text",
-                                "title":"🌹",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'floral'
-                                    })
-                              },
-                              {
-                                "content_type":"text",
-                                "title":"☕",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'coffee'
-                                    })
-                              },
-                              {
-                                "content_type":"text",
-                                "title":"🔨",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'hammer'
-                                    })
-                              },
-                              {
-                                "content_type":"text",
-                                "title":"👻",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'ghost'
-                                    })
-                               },
-                               {
-                                "content_type":"text",
-                                "title":"💯",
-                                "payload": JSON.stringify({
-                                        dataId: "facebook_" + sender.toString(),
-                                        action: "button_search",
-                                        text: 'one hundred '
-                                    })
-                              },
-                               {
-                                "content_type":"text",
-                                "title":" < Back",
-                                "payload": JSON.stringify({
-                                        action: "back",
-                                        type: "last_menu"
-                                    })
-                              }
-                            ],
-                            "text": "Try these emoji searches"
-                        },
-                        "notification_type": "NO_PUSH"
-                    };
-
-                    request.post({
-                        url: 'https://graph.facebook.com/v2.6/me/messages',
-                        qs: {
-                            access_token: fbtoken
-                        },
-                        method: "POST",
-                        json: true,
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        body: modify_sub_menu
-                    }, function(err, res, body) {
-                        if (err) console.error('post err ', err);
-                    })
-                    break;
                } 
 
         }
@@ -1102,6 +1003,7 @@ app.post('/facebook', function (req, res) {
 
                  //Check if user is still in modify mode 
                 if(fb_memory[sender].mode == 'modify') {
+                     fb_memory[sender].mode = 'shopping';
 
                     //Send modify query instead of the usual
                      var message = new db.Message({
@@ -1126,10 +1028,6 @@ app.post('/facebook', function (req, res) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                          //Reset mode back to shopping
-                        if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                            fb_memory[sender].mode = shopping;
-                         }
-
                     });
                     
                 } else {
@@ -1417,30 +1315,16 @@ app.post('/facebook', function (req, res) {
                                     amazon: msg.amazon                                      });
                             // queue it up for processing
                             var message = new db.Message(new_message);
+                            // queue it up for processing
+                             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                                    fb_memory[sender].mode = 'shopping';
+                              }
+
                             message.save().then(() => {
                                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                             });
                         }
                        
-                        else if (postback.action == 'quick_modify_next') {
-                            var text = postback.text;
-                            text = emojiText.convert(text,{delimiter: ' '});
-                            var new_message = new db.Message({
-                                    incoming: true,
-                                    thread_id: msg.thread_id,
-                                    resolved: false,
-                                    user_id: msg.user_id,
-                                    origin: msg.origin,
-                                    text: text,
-                                    source: msg.source,
-                                    amazon: msg.amazon                                      });
-                            // queue it up for processing
-                            var message = new db.Message(new_message);
-                            message.save().then(() => {
-                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                            });
-                        }
-
                         function* getLatestAmazonResults(message) {
                             message.history = [];
                             var results,
