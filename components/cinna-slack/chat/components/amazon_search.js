@@ -174,6 +174,7 @@ asin
 skip
 */
 var similar = function*(params,origin) {
+  var timer = new kip.SavedTimer('similar.timer', {params: params, origin: origin});
 
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
@@ -199,7 +200,9 @@ var similar = function*(params,origin) {
   debug('input params', params);
   debug('amazon params', amazonParams);
 
+  timer.tic('hitting amazon SililarityLookip api');
   var results = yield get_client().similarityLookup(amazonParams);
+  timer.tic('got results from amazon SimilarityLookup api')
   results = results.slice(params.skip, params.skip + 3);
   results.original_query = params.query;
 
@@ -213,7 +216,9 @@ var similar = function*(params,origin) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results,origin);
+  var er = yield enhance_results(results,origin, timer);
+  timer.stop();
+  return er;
 }
 
 
