@@ -557,7 +557,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     // console.log('exec for color search: ', JSON.stringify(exec))
   }
   else {
-      var results = yield getLatestAmazonResults(message);
+    var results = yield getLatestAmazonResults(message);
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
     exec.params.color = exec.params.val.name;
