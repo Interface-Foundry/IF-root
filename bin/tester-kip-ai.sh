@@ -36,7 +36,6 @@ docker build -t gcr.io/kip-ai/reply:$VERSION -f Dockerfiles/reply_logic.Dockerfi
 gcloud docker push gcr.io/kip-ai/reply:$VERSION
 kubectl run reply --image=gcr.io/kip-ai/reply:$VERSION
 
-
 #parser
 docker build -t gcr.io/kip-ai/parser:$VERSION -f Dockerfiles/parser.Dockerfile .
 gcloud docker push gcr.io/kip-ai/parser:$VERSION
