@@ -89,7 +89,7 @@ var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 
 if (process.env.NODE_ENV === 'development_alyx'){
-    fbtoken = 'EAAD62qJNXSQBAD0LH9w1sfIGBcoNXj4hWehsachzeA3cYUgiIcVy7nAo1wZArzMqTWaGHcdkIW2qZBl6kkPduZBo3ynZBelPBp6yk8QKAtt7KTR4BCENYmN40wZBB9oIfZACkC6mHgOYHliNqbzO7JKSJlZBZAWzjZBkZD';
+    fbtoken = 'EAANOJsoiIyUBACfPbJ2SgpeukLwzDWAiB30gcwfkpZAcw5L2y6CrDkdQzQLvEO3aKF4WyH2oQHPIqbUZA4aajFU2x3AHZAhrjr6KZAZBKVyEqZBmgpGDgZB6AIsAHgbPpCH3zMMoYl7ByX3pspg8mKmKr1NNZBLtJxprmDA5uIrD8gZDZD';
 } else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
 }
@@ -136,9 +136,12 @@ app.get('/facebook', function(req, res) {
 backCache = 0;
 
 
-app.post('/facebook', function(req, res) {
+app.post('/facebook', function (req, res) {
+
 
     kip.debug(req.body);
+
+    console.log('ZZZZZ ',req.body);
 
     // filter out the shit we don't want to process.
     if (_.get(req, 'body.entry[0].messaging[0].message.is_echo')) {
@@ -186,14 +189,17 @@ app.post('/facebook', function(req, res) {
 
     //IF user input: then respond with "skip" button functionality. Will show Kip (help) message
 
-
-
     //else, SHOPPING MODE
     for (i = 0; i < messaging_events.length; i++) {
 
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
 
+       // console.log(sender);
+
+
+
+        //////////
 
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
         //@ @ @ @ @ shitty code @ @ @ @ @ @
@@ -202,21 +208,76 @@ app.post('/facebook', function(req, res) {
 
         var zzz = req.body.entry[0].messaging[i];
 
-        console.log('@ @ @ ZZ Z Z Z Z Z @ @ @ ', zzz)
-
         var userid_z = zzz.recipient.id.toString();
+
         console.log('@ @ @ GETTING ME @ @ @ ',userid_z)
+        console.log('@ @ @ SENDER ID @ @ @ ',sender)
 
         //gross, in-memory modes and story tracker
-        if(!fb_memory[userid_z]){
-            fb_memory[userid_z] = {
+        if(!fb_memory[sender]){
+            console.log('@ @ @ @ @  @ @@ @ @ ',fb_memory[sender])
+            fb_memory[sender] = {
                 mode: 'shopping',
                 story_pointer: 0
             };
         }
 
-        console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[userid_z])
+        console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[sender])
         
+
+
+        // if(event.message && event.message.text){
+        //     console.log('STARTING CHECK OUT CHECK CHECK ',event.message.text)
+
+
+        //     //checking for onboarded or not
+        //     var query = {id: 'facebook_'+sender},
+        //         update = { origin:'facebook' },
+        //         options = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+        //     Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
+                
+        //         console.log('PULL USER ',user)
+
+        //         if(user.onboarded){
+        //             //continue to function 
+        //             console.log('already onboarded proceeed')
+        //             processMessage();
+
+        //         }else {
+        //             console.log('no onboarding yet')
+
+        //             //send_story(userid_z,sender);
+        //             fb_memory[sender].mode = 'onboarding'; 
+
+        //             user.onboarded = true;
+        //             user.save(function (err) {
+        //                 if(err) {
+        //                     console.error('ERROR!');
+        //                 }
+        //             }); 
+
+        //             send_image('cart.png',sender,function(){
+        //                 var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+        //                 //send image here
+        //                 send_universal_message(x,sender);
+        //                 setTimeout(function() {
+        //                     send_story(userid_z,sender);
+        //                 }, 1500);
+                        
+        //             });
+
+        //         }
+
+        //     });
+
+        // }else {
+            processMessage();
+       // }
+
+
+        //shitty (temp) shit code ok bye
+        function processMessage(){
         
         //non-shopping mode checker
         //also only capturing text, images, stickers from user to check for current mode to block stuff
@@ -225,7 +286,7 @@ app.post('/facebook', function(req, res) {
 
             
             console.log('@ @ @ @ @ E33333333EEEE3333 @ @ @ @ @ ^ ^ ^')
-            switch(fb_memory[userid_z].mode){
+            switch(fb_memory[sender].mode){
                 case 'onboarding':
                     console.log('ONBOARDING MODE STOPPING everything else')
 
@@ -236,10 +297,10 @@ app.post('/facebook', function(req, res) {
 
                     //Let's keep track of number of times user does something not within onboarding mode, if more than twice 
                     //just revert to shopping mode and send the help_card
-                    fb_memory[userid_z].exit_count = (fb_memory[userid_z].exit_count < 2) ?  ++fb_memory[userid_z].exit_count : 0;
-                    console.log('incremented exit_count: ', fb_memory[userid_z].exit_count )
-                    if(fb_memory[userid_z].exit_count >= 2) {
-                            fb_memory[userid_z] = {
+                    fb_memory[sender].exit_count = (fb_memory[sender].exit_count < 2) ?  ++fb_memory[sender].exit_count : 0;
+                    console.log('incremented exit_count: ', fb_memory[sender].exit_count )
+                    if(fb_memory[sender].exit_count >= 2) {
+                            fb_memory[sender] = {
                                 mode: 'shopping',
                                 story_pointer: 0
                             };
@@ -418,6 +479,9 @@ app.post('/facebook', function(req, res) {
             //     })
             //      event.message.text = emojiText.convert(text,{delimiter: ' '});
             // }
+
+
+
                
             var sub_menu = event.message.quick_reply.payload;
 
@@ -460,7 +524,7 @@ app.post('/facebook', function(req, res) {
                     });
 
                     //Switching mode back to shopping
-                    fb_memory[userid_z] = {
+                    fb_memory[sender] = {
                         mode: 'shopping'
                     };
                     
@@ -469,7 +533,7 @@ app.post('/facebook', function(req, res) {
             }
             else if (sub_menu.action && sub_menu.action == 'take_quiz'){
                 send_story(userid_z,sender);
-                fb_memory[userid_z].mode = 'onboarding';
+                fb_memory[sender].mode = 'onboarding';
             }
             else if (sub_menu.action && sub_menu.action == 'cheaper') {
                 console.log(event.message)
@@ -633,7 +697,7 @@ app.post('/facebook', function(req, res) {
                         } 
                       })  
                 } else if (sub_menu.action === 'emoji_modify') {
-                       fb_memory[userid_z] = {
+                       fb_memory[sender] = {
                             mode: 'shopping'
                         };
                     
@@ -685,7 +749,7 @@ app.post('/facebook', function(req, res) {
                 case "sub_menu_color": 
 
                     //Switching mode to modify
-                    fb_memory[userid_z] = {
+                    fb_memory[sender] = {
                         mode: 'modify',
                         select: 1
                     };
@@ -1042,7 +1106,7 @@ app.post('/facebook', function(req, res) {
                 text = emojiText.convert(text,{delimiter: ' '});
 
                  //Check if user is still in modify mode 
-                if(fb_memory[userid_z].mode == 'modify') {
+                if(fb_memory[sender].mode == 'modify') {
 
                     //Send modify query instead of the usual
                      var message = new db.Message({
@@ -1067,7 +1131,7 @@ app.post('/facebook', function(req, res) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                             //Reset mode back to shopping
-                        fb_memory[userid_z].mode == 'shopping';
+                        fb_memory[sender].mode == 'shopping';
 
                     });
                     
@@ -1187,7 +1251,7 @@ app.post('/facebook', function(req, res) {
 
                 //then one more text message intro 
                 //then send story
-                fb_memory[userid_z].mode = 'onboarding';
+                fb_memory[sender].mode = 'onboarding';
                 //res.send(200);
                 send_image('cart.png',sender,function(){
                     var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
@@ -1786,7 +1850,8 @@ app.post('/facebook', function(req, res) {
                     }) // end of co
                 }
             }); // end of db.find
-        }
+        } //end of for loop
+        } //end of shitty (temp) function wrapper
     }
 });
 
@@ -2461,34 +2526,34 @@ function process_story(recipient,sender,pointer,select){
         //DELAY
         //SEND PRESENT 
 
-        console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[recipient].quiz)
+        console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[sender].quiz)
 
         //console.log('MAXY KEY ',_.max(Object.keys(fb_memory[recipient].quiz), function (o) { return obj[o]; }))
 
         var item;
 
-        if(fb_memory[recipient].quiz >= 0 && fb_memory[recipient].quiz <= 3){
+        if(fb_memory[sender].quiz >= 0 && fb_memory[sender].quiz <= 3){
             item = 'Flying Sailboat'
             send_image('sailboat.png',sender,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
                 send_universal_message(x,sender);
             });
         }
-        else if(fb_memory[recipient].quiz >= 4 && fb_memory[recipient].quiz <= 7){
+        else if(fb_memory[sender].quiz >= 4 && fb_memory[sender].quiz <= 7){
             item = 'Lucky Goldfish'
             send_image('goldfish.png',sender,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
                 send_universal_message(x,sender);
             });
         }
-        else if(fb_memory[recipient].quiz >= 8 && fb_memory[recipient].quiz <= 9){
+        else if(fb_memory[sender].quiz >= 8 && fb_memory[sender].quiz <= 9){
             item = 'Snowglobe Charm'
             send_image('snowglobe.png',sender,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
                 send_universal_message(x,sender);
             });
         }
-        else if(fb_memory[recipient].quiz >= 10 && fb_memory[recipient].quiz <= 12){
+        else if(fb_memory[sender].quiz >= 10 && fb_memory[sender].quiz <= 12){
             item = 'Rainbow Pearl'
             send_image('pearl.png',sender,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
@@ -2502,7 +2567,7 @@ function process_story(recipient,sender,pointer,select){
             });
         }
 
-        fb_memory[recipient].quiz = 1;
+        fb_memory[sender].quiz = 1;
 
         console.log('COLLECTABLE/////???/ ',item)
 
@@ -2530,7 +2595,7 @@ function process_story(recipient,sender,pointer,select){
         //         });
         // }
 
-        fb_memory[recipient].mode = 'shopping';
+        fb_memory[sender].mode = 'shopping';
 
 
 
@@ -2575,7 +2640,7 @@ function process_story(recipient,sender,pointer,select){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"   
+                                "text": "Here are some cool things you might like! :)"   
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -2759,20 +2824,20 @@ function process_story(recipient,sender,pointer,select){
         pointer++;
 
         //this should really be in a DB asap @@@@@-----@@@@@
-        if(!fb_memory[recipient].quiz){
-            fb_memory[recipient].quiz = 1;
+        if(!fb_memory[sender].quiz){
+            fb_memory[sender].quiz = 1;
         }
 
         console.log('SELECTOR ',select)
         // console.log('SELECTED ',fb_memory[recipient].quiz[select])
 
-        if(fb_memory[recipient].quiz || fb_memory[recipient].quiz == 0){
-            fb_memory[recipient].quiz = fb_memory[recipient].quiz + select;
+        if(fb_memory[sender].quiz || fb_memory[sender].quiz == 0){
+            fb_memory[sender].quiz = fb_memory[sender].quiz + select;
         }else {
             console.log('error: key not found for persona val')
         }
 
-        console.log('@!@!@!@!@!@!@!@!@!@!@!@!@!@!@ ',fb_memory[recipient].quiz);
+        console.log('@!@!@!@!@!@!@!@!@!@!@!@!@!@!@ ',fb_memory[sender].quiz);
 
         console.log('ADDING POINTER ',pointer)
         send_story(recipient,sender,pointer)        
@@ -2785,6 +2850,21 @@ function send_story(userid_z,recipient,pointer){
     //console.log('SENDING STORY ',userid_z)
 
     var storySender;
+
+
+    // var query = {id: 'facebook_'+recipient},
+    //     update = { origin:'facebook' },
+    //     options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    // Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
+    //     if (!user.onboarded){
+    //         user.onboarded = true;
+    //         user.save(function (err) {
+    //             if(err) {
+    //                 console.error('ERROR!');
+    //             }
+    //         });              
+    //     }
+    // });
 
     // console.log('IFFFFFF ',fb_memory[userid_z])
 

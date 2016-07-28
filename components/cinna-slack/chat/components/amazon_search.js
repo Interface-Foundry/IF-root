@@ -141,7 +141,12 @@ var search = function*(params,origin) {
     } 
 
   // console.log('shiet son' , amazonParams);
-  var results = yield get_client().itemSearch(amazonParams); 
+  var results = yield get_client().itemSearch(amazonParams);
+  if (results.length >= 1) {
+    kip.debug(`Found ${results.length} results (before paging)`.green)
+  } else {
+    kip.error('no results found (before paging)');
+  }
   results = results.slice(skip, skip + 3);
   results.original_query = params.query
   // if there aren't enough results... do a weaker search
@@ -228,7 +233,7 @@ function* enhance_results(results, origin) {
 
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
 
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < urls.length; i++) {
     results[i].picstitch_url = urls[i];
     // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
@@ -326,9 +331,10 @@ module.exports.search = search;
   /_/_/     \/_____/\____\/   /_/_/    \/_/  \_\/ \/_/  \_\____/
 */
 if (!module.parent) {
+  console.log('testing'.yellow);
   co(function*() {
     var result = yield search({
-      query: 'arduino'
+      query: process.argv[2]
     })
 
     console.log(result);
