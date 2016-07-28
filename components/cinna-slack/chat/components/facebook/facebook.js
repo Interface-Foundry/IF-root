@@ -224,57 +224,23 @@ app.post('/facebook', function (req, res) {
         
 
         //that string check is at end to prevent a dumb thing from happening where it tries to process the receiver id wtf
-        if(event.message && event.message.text){
-            //console.log('STARTING CHECK OUT CHECK CHECK ',event.message.text)
-
-            // console.log('TEXT EVENT FOUND ',event.message.text)
-            // console.log('TEXT SENDER ',sender)
-
-            //checking for onboarded or not
-            var query = {id: 'facebook_'+sender},
-                update = { origin:'facebook' },
-                options = { upsert: true, new: true, setDefaultsOnInsert: true };
-
-            Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
-                
-                //console.log('PULL USER ',user)
-
-                if(user.onboarded){
-                    //continue to function 
-                    console.log('already onboarded proceeed')
+       if(event.message && event.message.text){
+            Chatuser.count({id: 'facebook_'+sender}, function (err, count){ 
+                if(count>0){
+                    //document exists });
                     processMessage();
-
                 }else {
-                    console.log('no onboarding yet')
-
                     fb_memory[sender].mode = 'onboarding'; 
-
-                    user.onboarded = true;
-                    user.save(function (err) {
-                        if(err) {
-                            console.error('ERROR!');
-                        }
-                       // console.log('FIRING ONBOARD!!!!!!! ','facebook_'+sender)
-
-
-                        send_image('cart.png',sender,function(){
-                            var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
-                            //send image here
-                            send_universal_message(x,sender);
-
-                            setTimeout(function() {
-                                send_story(userid_z,sender);
-                            }, 1500);
-                            
-                        });
-                    }); 
-
-
-
+                    send_image('cart.png',sender,function(){
+                        var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+                        //send image here
+                        send_universal_message(x,sender);
+                        setTimeout(function() {
+                            send_story(userid_z,sender);
+                        }, 1500);
+                    });                    
                 }
-
-            });
-
+            }); 
         }else {
             processMessage();
         }
@@ -303,7 +269,7 @@ app.post('/facebook', function (req, res) {
                     //just revert to shopping mode and send the help_card
                     fb_memory[sender].exit_count = (fb_memory[sender].exit_count < 2) ?  ++fb_memory[sender].exit_count : 0;
                     console.log('incremented exit_count: ', fb_memory[sender].exit_count )
-                    if(fb_memory[sender].exit_count >= 2) {
+                    if(fb_memory[sender].exit_count > 2) {
                             fb_memory[sender] = {
                                 mode: 'shopping',
                                 story_pointer: 0
@@ -497,9 +463,34 @@ app.post('/facebook', function (req, res) {
                 db.Messages.find({
                     thread_id: 'facebook_' + sender.toString()
                 }).sort('-ts').exec(function(err, messages) {
-                    if (err) return console.error(err);
-                    if (messages.length == 0) {
-                        return console.log('No message found');
+                        if (err) return console.error(err);
+                        if (messages.length == 0) {
+                            console.log('No message found');
+                            var message = new db.Message({
+                                incoming: true,
+                                thread_id: 'facebook_' + sender.toString(),
+                                resolved: false,
+                                user_id: "facebook_" + sender.toString(),
+                                origin: 'facebook',
+                                text: sub_menu.text,
+                                source: {
+                                    'origin': 'facebook',
+                                    'channel': sender.toString(),
+                                    'org': "facebook_" + sender.toString(),
+                                    'id': "facebook_" + sender.toString(),
+                                    'user': sender.toString()
+                                },
+                                // amazon: msg.amazon 
+                            });
+                        // queue it up for processing
+                         if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                                fb_memory[sender].mode = 'shopping';
+                          }
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                            
+                        });
+
                     } else if (messages[0]) {
                         var msg = messages[0];
                         var message = new db.Message({
@@ -1229,11 +1220,30 @@ app.post('/facebook', function (req, res) {
                 thread_id: postback.dataId
             }).sort('-ts').exec(function(err, messages) {
                 if (err) return console.error(err);
-                if (messages.length == 0) {
-                    return console.log('No message found');
-                } else if (messages[0]) {
+                   if (messages.length == 0) {
+                        console.log('No message found');
+                        var msg = new db.Message({
+                            incoming: true,
+                            thread_id: 'facebook_' + sender.toString(),
+                            resolved: false,
+                            user_id: "facebook_" + sender.toString(),
+                            origin: 'facebook',
+                            source: {
+                                'origin': 'facebook',
+                                'channel': sender.toString(),
+                                'org': "facebook_" + sender.toString(),
+                                'id': "facebook_" + sender.toString(),
+                                'user': sender.toString()
+                            },
+                            // amazon: msg.amazon 
+                        });
+                    }  else {
+                       var msg = messages[0];
+
+                    }
+
+                   
                     co(function*() {
-                        var msg = messages[0];
 
 
                         console.log('POSTBACK OKOKOKOK @ @ @ @ @ @  ',postback)
@@ -1733,7 +1743,7 @@ app.post('/facebook', function (req, res) {
                             }
                         }
                     }) // end of co
-                }
+                
             }); // end of db.find
         } //end of for loop
         } //end of shitty (temp) function wrapper
@@ -2495,7 +2505,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Athletic socks",
                                     "payload": JSON.stringify({
-                                        
+                                                dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'athletic socks'
                                         })
@@ -2504,6 +2514,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"⛺",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'tent'
                                         })
@@ -2512,6 +2523,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Fitbit",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'fitbit'})
                                   },
@@ -2539,6 +2551,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Phone charger",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'external phone battery'
                                         })
@@ -2547,6 +2560,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"🍧",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'shaved ice'
                                         })
@@ -2555,6 +2569,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Keurig cups",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'keurig cups'})
                                   },
@@ -2582,6 +2597,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Amazon Echo",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'amazon echo'
                                         })
@@ -2590,6 +2606,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"📷",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'camera'
                                         })
@@ -2598,6 +2615,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Safecard wallet",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'safecard wallet'})
                                   },
@@ -2625,6 +2643,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"Moleskin Notebook",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'moleskin notebook'
                                         })
@@ -2633,6 +2652,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"✏️",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'pencil'
                                         })
@@ -2641,6 +2661,7 @@ function process_story(recipient,sender,pointer,select){
                                     "content_type":"text",
                                     "title":"4-port USB hub",
                                     "payload": JSON.stringify({
+                                            dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: '4-port USB hub'})
                                   },
@@ -2735,21 +2756,7 @@ function send_story(userid_z,recipient,pointer){
     var storySender;
 
 
-    console.log('FIRING AGAIN !!!!!!! ','facebook_'+recipient)
 
-    var query = {id: 'facebook_'+recipient},
-        update = { origin:'facebook' },
-        options = { upsert: true, new: true, setDefaultsOnInsert: true };
-    Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
-        if (!user.onboarded){
-            user.onboarded = true;
-            user.save(function (err) {
-                if(err) {
-                    console.error('ERROR!');
-                }
-            });              
-        }
-    });
 
     // console.log('IFFFFFF ',fb_memory[userid_z])
 
