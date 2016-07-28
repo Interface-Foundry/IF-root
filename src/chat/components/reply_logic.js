@@ -457,7 +457,7 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   if (!exec.params.asin) {
     var old_results = yield getLatestAmazonResults(message);
-    console.log(old_results);
+    kip.info(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
 
@@ -548,12 +548,38 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('wow someone wanted something more expensive');
       exec.params.min_price = max_price * 1.1;
     }
-  } else if (exec.params.type === 'color') {
-    var jsonAmazon = JSON.parse(message.amazon);
-    exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
-    exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
-    exec.params.color = exec.params.val.name;
-  } else if (exec.params.type === 'genericDetail') {
+  }
+  // color modifier
+  else if (exec.params.type === 'color') {
+    kip.debug('_color_modifier_', old_results[exec.params.focus - 1].ItemAttributes[0])
+
+    var new_query
+    var new_color = exec.params.val[0].name.toLowerCase()
+    var old_title = old_results[exec.params - 1].ItemAttributes[0].Title[0].toLowerCase()
+
+
+    if (old_results[exec.params - 1].ItemAttributes[0].hasOwnProperty(Color[0])) {
+      var old_color = old_results[exec.params - 1].ItemAttributes[0].Color[0].toLowerCase()
+      if (_.includes(old_title, old_color)) {
+        // swap title
+        new_query = old_title.replace(old_color, new_color)
+      }
+      else {
+        new_query = old_title + ' ' + new_color
+      }
+    }
+    else {
+      new_query = old_title + ' ' + new_color
+    }
+  exec.params.query = new_query
+    // var jsonAmazon = JSON.parse(message.amazon);
+    // exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
+    // exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
+    // exec.params.color = exec.params.val.name;
+  }
+
+
+  else if (exec.params.type === 'genericDetail') {
     kip.debug('old params', old_params);
     kip.debug('new params', exec.params);
   } else {
