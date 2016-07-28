@@ -145,3 +145,46 @@ module.exports.timer = function(name) {
   }
 }
 module.exports.time = module.exports.timer;
+
+//
+// A timer that saves timestamp information to the database.
+// var search_timer = new kip.SavedTimer('search.timer', {query: 'arduino'}); (the meta data can be anything)
+// search_timer.tic('hitting amazn api')
+// search_timer.tic('got amazon api results')
+// search_timer.stop();
+// 
+//
+var SavedTimer = function(name, meta) {
+  if (!(this instanceof SavedTimer)) {
+    return new SavedTimer(name, meta);
+  }
+
+  this.metric = new db.Metric({
+    metric: name,
+    data: meta
+  });
+  this.metric.data.checkpoints = [];
+  this.start = +new Date();
+  this.last = 0;
+  this.tic('start');
+}
+
+SavedTimer.prototype.stop = function() {
+  this.tic('stop');
+  return this.metric.save();
+}
+
+
+SavedTimer.prototype.tic = function(label) {
+  var t = +new Date() - this.start;
+  var interval = t - this.last;
+  this.last = t;
+  console.log('timer:'.grey, this.metric.metric.yellow, label.cyan, t + 'ms', `(+${interval}ms)`.gray)
+  this.metric.data.checkpoints.push({
+    label: label,
+    timestamp: t,
+    interval: interval
+  })
+}
+
+module.exports.SavedTimer = SavedTimer;
