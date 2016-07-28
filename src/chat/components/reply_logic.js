@@ -552,11 +552,12 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
   // color modifier
   else if (exec.params.type === 'color') {
-    kip.debug('_color_modifier_', old_results[exec.params.focus - 1].ItemAttributes[0])
-
-    var new_query
+    // kip.debug('_color_modifier_', old_results[exec.params.focus - 1].ItemAttributes[0])
     var new_color = exec.params.val[0].name.toLowerCase()
     var old_title = old_results[exec.params.focus - 1].ItemAttributes[0].Title[0].toLowerCase()
+    // replace any of the following: [- , ) (] with space
+    old_title = old_title.replace(/[-,),(\,]/g,' ')
+    old_title = old_title.replace(/'/g,'')
 
     if (old_results[exec.params.focus - 1].ItemAttributes[0].hasOwnProperty('Color')) {
       var old_color = old_results[exec.params.focus - 1].ItemAttributes[0].Color[0].toLowerCase()
@@ -574,20 +575,42 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       kip.log('adding color to old_title: ', old_title)
       new_query = old_title + ' ' + new_color
     }
-  new_query = new_query.replace(/'/g,'')
-  new_query = new_query.replace(/,/g,' ')
-  new_query = new_query.replace(/\(/g,' ')
-  new_query = new_query.replace(/\)/g,' ')
-  new_query = new_query.replace(/-/g," ")
 
   exec.params.query = new_query
   kip.log('_new color modified query_:', exec.params.query)
+    // what is this stuff below ?
     // var jsonAmazon = JSON.parse(message.amazon);
     // exec.params.productGroup = jsonAmazon[0].ItemAttributes[0].ProductGroup[0];
     // exec.params.browseNodes = jsonAmazon[0].BrowseNodes[0].BrowseNode;
     // exec.params.color = exec.params.val.name;
   }
 
+  else if (exec.params.type === 'size') {
+    kip.debug('_modifying size_',old_results[exec.params.focus - 1].ItemAttributes[0])
+    kip.debug('_modifying size_',exec.params)
+    var old_title = old_results[exec.params.focus - 1].ItemAttributes[0].Title[0].toLowerCase()
+    var old_size = old_results[exec.params.focus - 1].ItemAttributes[0].Size[0].toLowerCase()
+    kip.debug('_old_title: ', old_title)
+    kip.debug('_old_size: ', old_size)
+    // old_title = old_title.replace(/ [xs,s,m,l,xl] /g, ' ') // remove sizes first
+    old_title = old_title.replace('x-large', ' ')
+    old_title = old_title.replace(' xl ', ' ')
+    old_title = old_title.replace('large', ' ')
+    old_title = old_title.replace(' l ', ' ')
+    old_title = old_title.replace('medium', ' ')
+    old_title = old_title.replace(' m ', ' ')
+    old_title = old_title.replace('small', ' ')
+    old_title = old_title.replace(' s ', ' ')
+    old_title = old_title.replace(' xs ', ' ')
+    old_title = old_title.replace(/'/g,'')
+
+    old_title = old_title.replace(/[-,),(\,]/g,' ')
+    old_title.replace(/[0-9]|[0-9][0-9]/g,' ') // remove all numbers
+
+    new_query = old_title + ' ' + exec.params.val[0]
+    exec.params.query = new_query
+    kip.log('_new size modified query_:', exec.params.query)
+  }
 
   else if (exec.params.type === 'genericDetail') {
     kip.debug('old params', old_params);
