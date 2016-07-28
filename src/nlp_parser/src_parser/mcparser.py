@@ -1,9 +1,8 @@
 import logging
 import subprocess
-from easydict import EasyDict
 
 from word_list import action_terms, price_terms, stopwords, \
-    invalid_adjectives, purchase_terms
+    invalid_adjectives, purchase_terms, periodical_terms
 
 DEBUG_ = False
 logger = logging.getLogger()
@@ -61,7 +60,6 @@ class McParser:
         self.sf_sm = False
 
         self.text = text.lower()
-        self.advanced_query = []
         # self.tokens = [self.text.split(' ')]
         self.tokens = []
         self.focus = []
@@ -80,6 +78,7 @@ class McParser:
         self._remove_words()
         self._get_action_and_mode()
         self._get_last_check()
+        self._not_actually_focus()
         self._simple_case()
 
     def _process_text(self):
@@ -146,12 +145,15 @@ class McParser:
 
         if hasattr(self, 'first_noun'):
             if self.first_noun is not self.last_noun:
-                self.noun_query = ' '.join(
-                    self.tokens[self.first_noun:self.last_noun + 1])
+                self.noun_query = ' '.join(self.tokens[self.first_noun:self.last_noun + 1])
         self.modifier_words = list(set(self.nouns).union(self.adjectives))
         self.nouns_with_adjectives = ' '.join(self.modifier_words)
 
     # def _create
+
+    def _not_actually_focus(self):
+        if any(map(lambda each: each in periodical_terms, self.tokens)):
+            self.focus = []
 
     def _remove_words(self):
         '''
@@ -258,8 +260,7 @@ class McParser:
             self.search_query = self.text
 
     def _simple_case(self):
-        '''possibly self.nouns_without_stopwords.join(' ') but that
-        doesnt include adjectives
+        '''v1 rule based simple_case
         '''
         if not self.had_question and not self.focus:
             self.simple_case = True
@@ -268,15 +269,12 @@ class McParser:
             self._create_search()
             if type(self.search_query) is not str:
                 # coerce query into str
-                logger.info('query isnt a string for some reason')
+                logger.critical('query isnt a string for some reason')
                 try:
-                    logger.info(str(self.search_query))
+                    logger.debug(str(self.search_query))
                 except:
                     logger.critical('_something_wrong_trying_to_strng_')
-            try:
-                logger.info('simple case using query: ' + self.search_query)
-            except:
-                logger.critical('_something_wrong_trying_show_query_')
+            logger.info('simple case using query: ' + self.search_query)
 
         else:
             self.simple_case = False
