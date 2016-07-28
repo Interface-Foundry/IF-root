@@ -269,7 +269,7 @@ app.post('/facebook', function (req, res) {
                     //just revert to shopping mode and send the help_card
                     fb_memory[sender].exit_count = (fb_memory[sender].exit_count < 2) ?  ++fb_memory[sender].exit_count : 0;
                     console.log('incremented exit_count: ', fb_memory[sender].exit_count )
-                    if(fb_memory[sender].exit_count > 2) {
+                    if(fb_memory[sender].exit_count >= 1 ) {
                             fb_memory[sender] = {
                                 mode: 'shopping',
                                 story_pointer: 0
