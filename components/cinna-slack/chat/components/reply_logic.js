@@ -89,6 +89,9 @@ queue.topic('incoming').subscribe(incoming => {
   co(function*() {
     kip.debug('🔥', incoming);
 
+    var timer = new kip.SavedTimer('message.timer', incoming.data);
+
+    timer.tic('getting history');
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -98,6 +101,8 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20);
     var message = history[0];
     message.history = history.slice(1);
+    timer.tic('got history');
+    message._timer = timer;
 
     // fail fast
     if (message._id.toString() !== incoming.data._id.toString()) {
@@ -145,12 +150,16 @@ queue.topic('incoming').subscribe(incoming => {
       default:
         console.log('DEFAULT SHOPPING MODE')
         //try for simple reply
+        timer.tic('getting simple response')
         var replies = yield simple_response(message);
+        timer.tic('got simple response')
         kip.debug('simple replies'.cyan, replies);
 
         //not a simple reply, do NLP 
         if (!replies || replies.length === 0) {
+          timer.tic('getting nlp response')
           replies = yield nlp_response(message);
+          timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan, replies.map(r => {
             return {
               text: r.text,
@@ -166,8 +175,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     kip.debug('num replies', replies.length);
-
+    timer.tic('saving message');
     yield message.save(); // the incoming message has had some stuff added to it :)
+    timer.tic('done saving message');
+    timer.tic('saving replies');
     yield replies.map(r => {
       if (r.save) {
         r.save()
@@ -175,11 +186,14 @@ queue.topic('incoming').subscribe(incoming => {
         console.log('could not save ' + r);
       }
     });
+    timer.tic('done saving replies');
+    timer.tic('sending replies');
     yield replies.map((r, i) => {
       kip.debug('reply', r.mode, r.action);
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
     });
     incoming.ack();
+    timer.stop();
   }).catch(kip.err);
 });
 
@@ -329,6 +343,7 @@ function* nlp_response(message) {
 function execute(message) {
   kip.debug('exec', message.execute);
   return co(function*() {
+    message._timer.tic('getting messages');
     var messages = yield message.execute.reduce((messages, exec) => {
       var route = exec.mode + '.' + exec.action;
       kip.debug('route', route, 'exec', exec);
@@ -380,8 +395,9 @@ var handlers = {};
 
 handlers['shopping.initial'] = function*(message, exec) {
   typing(message);
+  message._timer.tic('starting amazon_search');
   var results = yield amazon_search.search(exec.params,message.origin);
-
+  message._timer.tic('done with amazon_search');
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,

@@ -81,6 +81,7 @@ params:
 
 var search = function*(params,origin) {
 
+  var timer = new kip.SavedTimer('search.timer', {params: params, origin: origin});
   db.Metrics.log('search.amazon', params);
 
   if (!params.query) {
@@ -141,7 +142,9 @@ var search = function*(params,origin) {
     } 
 
   // console.log('shiet son' , amazonParams);
+  timer.tic('requesting amazon ItermSearch api');
   var results = yield get_client().itemSearch(amazonParams);
+  timer.tic('got results from ItermSearch api');
   if (results.length >= 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
   } else {
@@ -157,9 +160,11 @@ var search = function*(params,origin) {
   // results = yield weakSearch(params); TODO
   // results = results.slice(skip, 3); // yeah whatevers
   }
-  return yield enhance_results(results,origin);
-
-
+  timer.tic('enhancing results')
+  var enhanced_results = yield enhance_results(results,origin, timer);
+  timer.tic('done enhancing results');
+  timer.stop();
+  return enhanced_results;
 }
 
 
@@ -213,9 +218,10 @@ var similar = function*(params,origin) {
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results, origin) {
+function* enhance_results(results, origin, timer) {
   // enhance the results, naturally.
-  yield results.map(r => {
+  timer.tic('getting all prices');
+  yield results.map((r, i) => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
       r.mustSelectSize = true;
     }
@@ -228,16 +234,19 @@ function* enhance_results(results, origin) {
       return r;
     })
   });
+  timer.tic('got prices')
 
   console.log('incomign results!!!! ',results)
 
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
+  timer.tic('stitched results');
 
   for (var i = 0; i < urls.length; i++) {
     results[i].picstitch_url = urls[i];
     // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
+  timer.tic('shortened urls');
   // cool i've got the results now...
 
   return results;
