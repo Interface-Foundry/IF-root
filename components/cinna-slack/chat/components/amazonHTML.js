@@ -42,6 +42,7 @@ module.exports.basic = function basic(url, callback) {
     url = url.replace('%26tag%3Dkrista08-20','');
     url = url.replace('%26tag%3Dkrista03-20','');
     url = url.replace('%26tag%3Dquic0b-20','');
+    url = url.replace('%26tag%3Deileenog-20','');
 
 
     // check cache

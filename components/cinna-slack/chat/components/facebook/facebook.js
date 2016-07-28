@@ -139,9 +139,9 @@ backCache = 0;
 app.post('/facebook', function (req, res) {
 
 
-    kip.debug(req.body);
+    //kip.debug(req.body);
 
-    console.log('ZZZZZ ',req.body);
+    ///console.log('ZZZZZ ',req.body);
 
     // filter out the shit we don't want to process.
     if (_.get(req, 'body.entry[0].messaging[0].message.is_echo')) {
@@ -192,13 +192,11 @@ app.post('/facebook', function (req, res) {
     //else, SHOPPING MODE
     for (i = 0; i < messaging_events.length; i++) {
 
+
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
 
-       // console.log(sender);
-
-
-
+    
         //////////
 
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
@@ -210,70 +208,76 @@ app.post('/facebook', function (req, res) {
 
         var userid_z = zzz.recipient.id.toString();
 
-        console.log('@ @ @ GETTING ME @ @ @ ',userid_z)
-        console.log('@ @ @ SENDER ID @ @ @ ',sender)
+        //console.log('@ @ @ GETTING ME @ @ @ ',userid_z)
+        //console.log('@ @ @ SENDER ID @ @ @ ',sender)
 
         //gross, in-memory modes and story tracker
         if(!fb_memory[sender]){
-            console.log('@ @ @ @ @  @ @@ @ @ ',fb_memory[sender])
+            //console.log('@ @ @ @ @  @ @@ @ @ ',fb_memory[sender])
             fb_memory[sender] = {
                 mode: 'shopping',
                 story_pointer: 0
             };
         }
 
-        console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[sender])
+        //console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[sender])
         
 
+        //that string check is at end to prevent a dumb thing from happening where it tries to process the receiver id wtf
+        if(event.message && event.message.text){
+            //console.log('STARTING CHECK OUT CHECK CHECK ',event.message.text)
 
-        // if(event.message && event.message.text){
-        //     console.log('STARTING CHECK OUT CHECK CHECK ',event.message.text)
+            // console.log('TEXT EVENT FOUND ',event.message.text)
+            // console.log('TEXT SENDER ',sender)
 
+            //checking for onboarded or not
+            var query = {id: 'facebook_'+sender},
+                update = { origin:'facebook' },
+                options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-        //     //checking for onboarded or not
-        //     var query = {id: 'facebook_'+sender},
-        //         update = { origin:'facebook' },
-        //         options = { upsert: true, new: true, setDefaultsOnInsert: true };
-
-        //     Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
+            Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
                 
-        //         console.log('PULL USER ',user)
+                //console.log('PULL USER ',user)
 
-        //         if(user.onboarded){
-        //             //continue to function 
-        //             console.log('already onboarded proceeed')
-        //             processMessage();
+                if(user.onboarded){
+                    //continue to function 
+                    console.log('already onboarded proceeed')
+                    processMessage();
 
-        //         }else {
-        //             console.log('no onboarding yet')
+                }else {
+                    console.log('no onboarding yet')
 
-        //             //send_story(userid_z,sender);
-        //             fb_memory[sender].mode = 'onboarding'; 
+                    fb_memory[sender].mode = 'onboarding'; 
 
-        //             user.onboarded = true;
-        //             user.save(function (err) {
-        //                 if(err) {
-        //                     console.error('ERROR!');
-        //                 }
-        //             }); 
+                    user.onboarded = true;
+                    user.save(function (err) {
+                        if(err) {
+                            console.error('ERROR!');
+                        }
+                       // console.log('FIRING ONBOARD!!!!!!! ','facebook_'+sender)
 
-        //             send_image('cart.png',sender,function(){
-        //                 var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
-        //                 //send image here
-        //                 send_universal_message(x,sender);
-        //                 setTimeout(function() {
-        //                     send_story(userid_z,sender);
-        //                 }, 1500);
-                        
-        //             });
 
-        //         }
+                        send_image('cart.png',sender,function(){
+                            var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+                            //send image here
+                            send_universal_message(x,sender);
 
-        //     });
+                            setTimeout(function() {
+                                send_story(userid_z,sender);
+                            }, 1500);
+                            
+                        });
+                    }); 
 
-        // }else {
+
+
+                }
+
+            });
+
+        }else {
             processMessage();
-       // }
+        }
 
 
         //shitty (temp) shit code ok bye
@@ -285,7 +289,7 @@ app.post('/facebook', function (req, res) {
         if(event.message && event.message.text){
 
             
-            console.log('@ @ @ @ @ E33333333EEEE3333 @ @ @ @ @ ^ ^ ^')
+           // console.log('@ @ @ @ @ E33333333EEEE3333 @ @ @ @ @ ^ ^ ^')
             switch(fb_memory[sender].mode){
                 case 'onboarding':
                     console.log('ONBOARDING MODE STOPPING everything else')
@@ -378,12 +382,12 @@ app.post('/facebook', function (req, res) {
                     return;
                     }
 
-                                       res.sendStatus(200);
+                    res.sendStatus(200);
 
                 break;
             }            
         }else {
-            console.log('ping but nah')
+            //console.log('ping but nah')
         }
 
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
@@ -2852,19 +2856,21 @@ function send_story(userid_z,recipient,pointer){
     var storySender;
 
 
-    // var query = {id: 'facebook_'+recipient},
-    //     update = { origin:'facebook' },
-    //     options = { upsert: true, new: true, setDefaultsOnInsert: true };
-    // Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
-    //     if (!user.onboarded){
-    //         user.onboarded = true;
-    //         user.save(function (err) {
-    //             if(err) {
-    //                 console.error('ERROR!');
-    //             }
-    //         });              
-    //     }
-    // });
+    console.log('FIRING AGAIN !!!!!!! ','facebook_'+recipient)
+
+    var query = {id: 'facebook_'+recipient},
+        update = { origin:'facebook' },
+        options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
+        if (!user.onboarded){
+            user.onboarded = true;
+            user.save(function (err) {
+                if(err) {
+                    console.error('ERROR!');
+                }
+            });              
+        }
+    });
 
     // console.log('IFFFFFF ',fb_memory[userid_z])
 
