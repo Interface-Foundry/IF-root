@@ -1,0 +1,6 @@
+env: kip-ai
+mongodb:
+  url: mongodb://10.138.0.6:27017/foundry
+picstitch: http://picstitch:5000
+nlp: http://parser:8083
+nlp_rnn: http://rnn:8085
