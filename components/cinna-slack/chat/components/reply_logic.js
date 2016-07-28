@@ -557,9 +557,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
   
-
   var results = yield amazon_search.search(exec.params,message.origin);
-
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
