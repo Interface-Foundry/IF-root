@@ -133,9 +133,6 @@ module.exports.basic = function basic(url, callback) {
         var $ = cheerio.load(body);
         $('html').find('script').remove()
         $('html').find('style').remove()
-        if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('development') === 0) {
-          fs.writeFileSync('debug.html', $.html());
-        }
 
         product.asin = $('input#ASIN').val();
         product.title = $('#productTitle').text();
