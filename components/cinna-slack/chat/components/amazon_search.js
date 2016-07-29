@@ -132,7 +132,7 @@ var search = function*(params,origin) {
         var key;
         yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
           key = res;
-        });          
+        });
         if (key) {
           amazonParams.SearchIndex = key.SearchIndex;
           amazonParams.BrowseNode = key.BrowseNode;
@@ -142,7 +142,18 @@ var search = function*(params,origin) {
 
   // console.log('shiet son' , amazonParams);
   timer.tic('requesting amazon ItermSearch api');
-  var results = yield get_client().itemSearch(amazonParams);
+  try {
+    var results = yield get_client().itemSearch(amazonParams);
+  } catch (e) {
+    kip.err(e);
+    // modify the params to be more relaxed
+    if (amazonParams.BrowseNode) {
+      delete amazonParams.BrowseNode
+    }
+    
+    amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+    var results = yield get_client().itemSearch(amazonParams);
+  }
   timer.tic('got results from ItermSearch api');
   if (results.length >= 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
