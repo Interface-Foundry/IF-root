@@ -26,6 +26,8 @@ module.exports.err = function(e, message, data) {
     } else {
       message = e.message;
     }
+  } else {
+    message = JSON.stringify(e, null, 2);
   }
 
   console.error(('ERROR: ' + message).red);
