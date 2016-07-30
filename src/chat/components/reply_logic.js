@@ -534,8 +534,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
-  kip.debug('old params', old_params);
-  kip.debug('new params', exec.params);
   exec.params.query = old_params.query;
 
   // modify the params and then do another search.
