@@ -59,14 +59,6 @@ def create_image(images):
     # get all the posted files
     logging.info('received images')
 
-    # DESKTOP_WIDTH = (length + 1) * padding + length * image_width
-    # DESKTOP_HEIGHT = 2 * padding + image_height
-    # max_width = ( DESKTOP_WIDTH  - (length + 1) * PADDING ) / length
-    # max_height = DESKTOP_HEIGHT - 2 * PADDING
-
-    # print max_height
-    # print max_width
-
     length = 3
     biggest_width = 0
     biggest_height = 0
@@ -77,7 +69,6 @@ def create_image(images):
     # where to draw main pics
     PIC_COORDS = [{'x': 14, 'y': 5}, {'x': 24, 'y': 174}, {'x': 24, 'y': 336}]
     # where to draw choice numbers
-    # CHOICE_COORDS = [{'x': 0, 'y': 10}, {'x': 0, 'y': 174}, {'x': 0, 'y': 336}]
     TEXTBOX_COORDS = [{'x': 190, 'y': 10}, {'x': 190, 'y': 174}, {
         'x': 190, 'y': 336}]  # where to draw text boxes
 
@@ -105,27 +96,17 @@ def create_image(images):
     # image object
     img = Image.new('RGB', (CHAT_WIDTH, CHAT_HEIGHT), BGCOLOR)
 
-    # draw a border for skype images
-    # if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-    #     #draw white boxes
-    #     drawBorder = ImageDraw.Draw(img)
-    #     drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
-    #     drawBorder.rectangle(((3,3),(356,187)), fill="white")
-
     for i, im in enumerate(thumbnails):
         # add pics
         x = PIC_COORDS[i]['x']
         y = PIC_COORDS[i]['y']
         img.paste(im, (x, y))
-        # #add numbers
-        # x = CHOICE_COORDS[i][u'x']
-        # y = CHOICE_COORDS[i][u'y']
-        # img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
 
     # add names, text wrapped
     font = ImageFont.truetype(
         THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16)  # price
     font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
+    review_count_font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16)
 
     if images[0]['origin'] and images[0]['origin'] in ['skype', 'facebook']:
         font = ImageFont.truetype(
@@ -139,11 +120,6 @@ def create_image(images):
         y = TEXTBOX_COORDS[i]['y']
         draw = ImageDraw.Draw(img)
 
-        # draw white fill to cover image
-        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        #     #draw white boxes
-        #     print 'boxbox'
-        #     draw.rectangle(((115,0),(400,160)), fill="white")
         if images[0]['origin'] and images[0]['origin'] in ['skype']:
             last_y = last_y + 50
 
@@ -155,7 +131,7 @@ def create_image(images):
 
         # add prime logo
         if im['prime'] == '1' and images[0]['origin'] != 'skype':
-            img.paste(AMAZON_PRIME, (x + 110, last_y + 2), mask=AMAZON_PRIME)
+            img.paste(AMAZON_PRIME, (x + 110, last_y + 2)) #  , mask=AMAZON_PRIME)
 
         logging.debug(last_y)
         last_y = last_y + 28
@@ -192,7 +168,7 @@ def create_image(images):
                       (x, last_y + 3), mask=REVIEW_STARS[selectRating])
 
             if 'reviewCount' in im['reviews']:
-                draw.text((x + 80, last_y), ' - ' + im['reviews']['reviewCount'], font=font2, fill="#2d70c1")
+                draw.text((x + 82, last_y), ' - ' + im['reviews']['reviewCount'], font=review_count_font, fill="#2d70c1")
 
             last_y = last_y + 20
 
@@ -210,17 +186,10 @@ def create_image(images):
 
         last_y = last_y + 5
 
-        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        #     BOX_WIDTH = 26
-
         if images[0]['origin'] and images[0]['origin'] == 'skype' or images[0]['origin'] == 'facebook':
             BOX_WIDTH = 22
         else:
             BOX_WIDTH = 30
-
-        # draw details but not for skype or fbook
-        # if images[0][u'origin'] != 'skype' or images[0][u'origin'] !=
-        # 'facebook':
 
         for z in im['name']:
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
@@ -265,8 +234,6 @@ if __name__ == '__main__':
     # Constants bestowed upon us by a higher power (slack)
     CHAT_WIDTH = 365
     CHAT_HEIGHT = 140
-    # MOBILE_WIDTH = 0 # TODO
-    # MOBILE_HEIGHT = 800 # TODO
 
     PADDING = 5
     BGCOLOR = 'white'
