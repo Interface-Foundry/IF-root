@@ -157,7 +157,6 @@ def create_image(images, REVIEW_STARS, AMAZON_PRIME):
         # draw - (Review Number)
         if 'reviews' in im and 'rating' in im['reviews']:
             image_revs_rating = im['reviews']['rating']
-            logging.info('rating is ' + str(image_revs_rating))
             if image_revs_rating <= 0.5:  # ignoring if 0.0 < rating
                 selectRating = 0.5
             elif image_revs_rating <= 1.0:
