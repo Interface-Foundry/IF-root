@@ -26,6 +26,7 @@ var exec_no_output = function(text) {
   kip.debug(text.gray)
   return new Promise((resolve, reject) => {
     var p = child_process.spawn('sh', ['-c', text], {
+      cwd: repo_root,
       stdio: 'ignore'
     });
 
@@ -43,8 +44,12 @@ var exec_no_output = function(text) {
 function get_commits () {
   kip.debug('getting list of commits')
   return co(function * () {
-    yield exec('git reset --hard HEAD && git pull origin master')
-    return exec('git log --pretty=format:\'{commit: "%h", author: "%an", date: %at}\' -200')
+    var output = yield exec_no_output('git reset --hard HEAD && git pull origin master')
+    var text = yield exec('git log --pretty=format:\'{"commit": "%h", "author": "%an", "date": %at}\' -200')
+    return text.split('\n').map(line => {
+      console.log(line)
+      return JSON.parse(line)
+    });
   })
 }
 
@@ -125,7 +130,8 @@ var build_templates = {
 
 if (!module.parent) {
   co(function * () {
-    return build_latest(['web'])
+    var commits = get_commits(['web'])
+    conosle.log(commits)
   }).catch(e => {
     console.log('error')
     console.log(JSON.stringify(e, null, 2))
