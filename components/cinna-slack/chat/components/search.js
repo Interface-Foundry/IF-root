@@ -13,21 +13,20 @@ var kip = require('kip')
 
 var debug = true || process.env.NODE_ENV=='production' ? function(){} : console.log.bind(console);
 
-
 var aws_clients = {
-  AKIAIKMXJTAV2ORZMWMQ: amazon.createClient({
-    awsId: "AKIAIKMXJTAV2ORZMWMQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+  AKIAJ7JWQNS2HH5UYNVQ: amazon.createClient({
+    awsId: "AKIAJ7JWQNS2HH5UYNVQ",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   }),
-  AKIAIM4IKQAE2WF4MJUQ: amazon.createClient({
-    awsId: "AKIAIM4IKQAE2WF4MJUQ",
-    awsSecret: "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",
-    awsTag: "quic0b-20"
+  AKIAJWTPOWIOUPHJYG2Q: amazon.createClient({
+    awsId: "AKIAJWTPOWIOUPHJYG2Q",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
   })
 };
 
-var DEFAULT_CLIENT = 'AKIAIKMXJTAV2ORZMWMQ';
+var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 

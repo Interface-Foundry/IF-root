@@ -23,7 +23,7 @@ var urlShorten = function(data,callback2) {
         if (data.client_res){
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var url = data.client_res;
-           url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+           url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20');
            var escapeAmazon = querystring.escape(url);
 
             // request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
@@ -36,9 +36,9 @@ var urlShorten = function(data,callback2) {
             // });
 
             if (data.source.origin == 'kik'){
-                callback2('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+                callback2('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
             }else {
-              googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+              googl.shorten('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
               .then(function (shortUrl) {
                   callback2(shortUrl);
               })
@@ -63,15 +63,15 @@ var urlShorten = function(data,callback2) {
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var url = data.amazon[i].DetailPageURL[0];
                console.log(url);
-               url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
+               url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20');
                console.log(url);
                var escapeAmazon = querystring.escape(url);
 
                 if (data.source.origin == 'kik'){
-                  urlArr.push('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                  urlArr.push('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
                   callback()
                 }else {
-                  googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                  googl.shorten('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
                   .then(function (shortUrl) {
                       urlArr.push(shortUrl);
                       callback();
@@ -173,20 +173,20 @@ var aws_associate_id = 'quic0b-20';
 // Shortens a url for a cart object.  I'm not super sure about the id right now.
 //
 function getCartLink(url, cart_id) {
-  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Dquic0b-20');
+  url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20');
   console.log('CART IDDDDDDDDD ',url)
 
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
+  return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
 }
 
 //
 // Shortens a url for an item in the view cart thing.
 //
 function getItemLink(url, user_id, item_id) {
-  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Dquic0b-20');
+  url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20');
   console.log('ITEM IDDDDDDDDD ',url)
 
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
+  return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url) + '/id/' + user_id + '/pid/' + item_id);
 }
 
 //

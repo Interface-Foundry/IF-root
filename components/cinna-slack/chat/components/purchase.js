@@ -6,10 +6,11 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 //   awsTag: "bubboorev-20"
 // });
 var client = amazon.createClient({
-  awsId: "AKIAIKMXJTAV2ORZMWMQ",
-  awsSecret: "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",
-  awsTag: "quic0b-20"
+    awsId: "AKIAJ7JWQNS2HH5UYNVQ",
+    awsSecret: "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",
+    awsTag: "eileenog-20"
 });
+
 
 //pass in data, user chat history
 //cartHistory = user cart items list
