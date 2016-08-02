@@ -49,6 +49,23 @@ function get_commits () {
 }
 
 //
+// Gets the commit hashes for the version running for each deployment
+//
+function get_deployed_commits () {
+  kip.debug('getting deployments')
+  var deployment_names = ['replylogic', 'facebook', 'skype', 'web', 'nlp', 'picstitch']
+  return deployment_names.map(d => {
+    return co(function * () {
+      var json = yield exec(`kubectl get deployment ${d} -o json`)
+      return {
+        service: d,
+        commit: JSON.parse(json).spec.template.spec.containers[0].image.match(/:[^\ ]+"/g)[0]
+      }
+    })
+  })
+}
+
+//
 // Deploying code
 //
 function deploy_latest (services) {
@@ -67,6 +84,10 @@ function deploy_commit (services, commit) {
     kip.debug('built successfully')
     yield services.map(s => {
       return exec(`kubectl rolling-update ${s} --image=gcr.io/kip-styles/${s}:${commit}`)
+    })
+    yield db.Metrics.log('deploy', {
+      service: s,
+      commit: commit
     })
   })
 }
@@ -123,6 +144,7 @@ if (!module.parent) {
 
 module.exports = {
   get_commits: get_commits,
+  get_deployed_commits: get_deployed_commits,
   deploy_latest: deploy_latest,
   deploy_commit: deploy_commit
 }
