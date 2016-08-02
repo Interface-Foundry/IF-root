@@ -84,7 +84,7 @@ var search = function*(params,origin) {
   db.Metrics.log('search.amazon', params);
 
   if (!params.query) {
-    console.log('error params: ', params)
+    debug('error params: ', params)
     throw new Error('no query specified');
   }
 
@@ -96,7 +96,7 @@ var search = function*(params,origin) {
     Availability: 'Available'
   };
 
-  
+
   // Amazon price queries are formatted as string of cents...
   if (params.min_price) {
     amazonParams.MinimumPrice = (params.min_price * 100).toFixed(0);
@@ -104,6 +104,11 @@ var search = function*(params,origin) {
 
   if (params.max_price) {
     amazonParams.MaximumPrice = (params.max_price * 100).toFixed(0);
+  }
+
+  if (params.browseNodes) {
+    debug('using__browse_Node')
+    amazonParams.BrowseNode = params.browseNodes;
   }
 
   var skip = 0;
@@ -132,13 +137,13 @@ var search = function*(params,origin) {
         var key;
         yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
           key = res;
-        });          
+        });
         if (key) {
           amazonParams.SearchIndex = key.SearchIndex;
           amazonParams.BrowseNode = key.BrowseNode;
         }
-     
-    } 
+
+    }
 
   // console.log('shiet son' , amazonParams);
   var results = yield get_client().itemSearch(amazonParams);

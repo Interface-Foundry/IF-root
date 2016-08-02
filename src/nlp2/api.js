@@ -212,6 +212,7 @@ function nlpToResult(nlp, message) {
       params: getModifier(nlp.modifier_words[0])
     }
     exec.params.focus = nlp.focus
+    exec.params.modifier_words = nlp.modifier_words
     message.execute.push(exec)
     return;
   }
