@@ -174,7 +174,7 @@ class PicStitch:
             elif image_revs_rating <= 4.5:
                 selectRating = 4.5
             else:  # ignoring if rating < 5
-                selectRating = 5
+                selectRating = 5.0
 
             selectRating = str(selectRating)
 

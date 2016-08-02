@@ -553,14 +553,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   var old_results = yield getLatestAmazonResults(message);
   var old_focus = old_results[exec.params.focus - 1]
   exec.params.query = old_params.query;
-
-  // kip.debug('_item_attributes:', old_focus.ItemAttributes[0])
-  // kip.debug('__Browse_Nodes1:', old_focus.BrowseNodes[0])
-  // kip.debug('__prodcutGroup__',old_focus.ItemAttributes[0].ProductGroup[0])
-  // kip.debug('__browseNodes__',old_focus.BrowseNodes[0].BrowseNode)
-
-
-
   // modify the params and then do another search.
 
   // price modifier
@@ -586,7 +578,8 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     if (old_focus.ItemAttributes[0].hasOwnProperty('Color')) {
       var old_color = old_focus.ItemAttributes[0].Color[0].toLowerCase()
       if (_.includes(old_title, old_color)) {
-        // swap title
+
+        // swap title but not sure if this matters
         kip.debug('swapping title: ', old_title)
         new_query = old_title.replace(old_color, new_color)
       }
