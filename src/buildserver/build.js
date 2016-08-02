@@ -47,7 +47,6 @@ function get_commits () {
     var output = yield exec_no_output('git reset --hard HEAD && git pull origin master')
     var text = yield exec('git log --pretty=format:\'{"commit": "%h", "author": "%an", "date": %at}\' -200')
     return text.split('\n').map(line => {
-      console.log(line)
       return JSON.parse(line)
     });
   })
@@ -58,13 +57,13 @@ function get_commits () {
 //
 function get_deployed_commits () {
   kip.debug('getting deployments')
-  var deployment_names = ['replylogic', 'facebook', 'skype', 'web', 'nlp', 'picstitch']
+  var deployment_names = ['replylogic', 'facebook', 'web', 'nlp', 'picstitch']
   return deployment_names.map(d => {
     return co(function * () {
       var json = yield exec(`kubectl get deployment ${d} -o json`)
       return {
         service: d,
-        commit: JSON.parse(json).spec.template.spec.containers[0].image.match(/:[^\ ]+"/g)[0]
+        commit: JSON.parse(json).spec.template.spec.containers[0].image.split(':')[1]
       }
     })
   })
@@ -130,8 +129,11 @@ var build_templates = {
 
 if (!module.parent) {
   co(function * () {
-    var commits = get_commits(['web'])
-    conosle.log(commits)
+    var data = yield {
+	    commits: commits = get_commits(),
+	    deployed_commits: get_deployed_commits()
+    }
+    conosle.log(data)
   }).catch(e => {
     console.log('error')
     console.log(JSON.stringify(e, null, 2))
