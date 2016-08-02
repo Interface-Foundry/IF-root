@@ -2,7 +2,7 @@ var co = require('co')
 var path = require('path')
 require('kip')
 
-var repo_root = process.env.NODE_ENV === 'development' ? path.resolve(__dirname, '../') : path.resolve('/git/IF-root/src')
+var repo_root = process.env.NODE_ENV === 'development' ? '/data/kip/IF-root/src' : '/git/IF-root/src'
 
 //
 // Tools
@@ -11,6 +11,7 @@ var repo_root = process.env.NODE_ENV === 'development' ? path.resolve(__dirname,
 // run scripts in the repo root directory
 var _exec = require('promised-exec')
 var exec = function (text) {
+  kip.debug(text.gray)
   return _exec(`cd ${repo_root} && ${text}`)
 }
 
@@ -18,7 +19,10 @@ var exec = function (text) {
 // returns {commit: "68d7fb7", author: "Peter Brandt", date: 1469818960}
 function get_commits () {
   kip.debug('getting list of commits')
-  return exec('git log --pretty=format:\'{commit: "%h", author: "%an", date: %at}\' -200')
+  return co(function * () {
+    yield exec('git reset --hard HEAD && git pull origin master')
+    return exec('git log --pretty=format:\'{commit: "%h", author: "%an", date: %at}\' -200')
+  })
 }
 
 //
@@ -27,6 +31,7 @@ function get_commits () {
 function deploy_latest (services) {
   kip.debug('deploying latest for services', services.join(', ').yellow)
   return co(function * () {
+    yield exec('git reset --hard HEAD && git pull origin master')
     var commit = yield exec("git log --pretty=format:'%h' -n 1")
     return deploy_commit(services, commit)
   })
@@ -49,17 +54,14 @@ function deploy_commit (services, commit) {
 function build_latest (services) {
   kip.debug('building latest for services', services.join(', ').yellow)
   // get the tag for the latest commit and then pass to build_commit
-  return co(function * () {
-    // yield exec('pull')
-    var commit = yield exec("git log --pretty=format:'%h' -n 1")
-    return build_commit(services, commit)
-  })
+  return build_commit(services, 'HEAD')
 }
 
 function build_commit (services, commit) {
   kip.debug('building commit', commit.red, 'for services', services.join(', ').yellow)
   return co(function * () {
     // always rebuild because yeah it's just easier that way
+    yield exec(`git fetch origin master && git reset --hard ${commit}`)
     yield services.map(s => {
       var build_cmd = `docker build -t gcr.io/kip-styles/${s}:${commit} -f Dockerfiles/${s}.Dockerfile . && gcloud docker push gcr.io/kip-styles/${s}:${commit}`; 
       kip.debug('running', build_cmd)
@@ -79,15 +81,15 @@ var build_templates = {
 }
 
 if (!module.parent) {
-  deploy_latest(['facebook']).catch(e => {
+  deploy_latest(['web']).catch(e => {
     console.log('error')
     console.log(JSON.stringify(e, null, 2))
   })
-  co(function * () {
-    // var commits = yield get_commits()
-    // console.log(commits)
-  }).catch(e => {
-    console.log(JSON.stringify(e, null, 2))})
+  // co(function * () {
+  //   // var commits = yield get_commits()
+  //   // console.log(commits)
+  // }).catch(e => {
+  //   console.log(JSON.stringify(e, null, 2))})
 }
 
 module.exports = {
