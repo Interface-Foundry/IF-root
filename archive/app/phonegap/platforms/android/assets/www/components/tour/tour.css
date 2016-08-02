@@ -1,0 +1,332 @@
+.tour {
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	overflow: hidden;
+}
+
+.tour-page {
+	display: block;
+	position:relative;
+	width: 100%;
+	height: 800px;
+}
+
+.small-tour-page {
+	height: 400px;
+}
+
+.tour-panel{
+	background-color: rgba(255,2255,255,0.9);
+	top: 30%;
+	width: 100%;
+	border-radius: 12px;
+	max-width: 750px;
+	position: absolute;
+	z-index: 1000;
+	left: 50%;
+	padding: 15px 20px !important;
+	-webkit-transform: translate3d(-50%, 0, 0);
+	transform: translate3d(-50%, 0, 0);
+}
+
+.tour-features {
+	font-size: 18px;
+	padding-top: 100px;
+	padding-right: 20px !important;
+	padding-left: 20px !important;
+	max-width: 500px;
+	text-align: center;
+}
+
+.tour li {
+text-align: center;
+}
+
+.btn-signup-tour {
+	background-color: #3d66ca !important;
+	border-color: #3d66ca !important;
+}
+
+.tour-page h1 {
+	margin-top: 0;
+	font-size: 22px;
+}
+
+.tour-page h4 {
+	font-size:16px;
+	font-weight: 400;
+	line-height: 1.4;
+}
+
+.tour-icons {
+	width:65px;
+	height: 65px;
+}
+
+.tour-page a {
+	color: #3d66ca;
+}
+
+.tour-page button {
+	margin-bottom: 10px;
+	margin-top: 10px;
+}
+
+.tour-credits {
+	position: absolute;
+	bottom: 20px;
+	width: 100%;
+}
+
+.tour-credits a{
+	color:#545454;
+}
+
+.tour-page.meetupsplash {
+	background-image: url('img/hero.jpg');
+	background-size: cover;
+	background-position: center;
+}
+
+.panel-2 {
+	top: 10%;
+}
+
+.panel-3 {
+	top: 100px;
+}
+
+.tour-iphone {
+	position: absolute;
+	width: 228px;
+	height: 424px;
+	border-radius: 30px;
+	background: rgba(0,0,0,0.7);
+	top:38%;
+	left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%);
+    -webkit-transform: translate(-50%);
+	z-index: 10;
+}
+
+.tour-iphone-screen {
+	position: relative;
+	width: 228px;
+	height: 328px;
+	top: 42px;
+	background: rgba(0,0,0,1);
+}
+
+.tour-thumbnail{
+	background-color: transparent !important;
+	border: none !important;
+	border-radius: 40;
+	cursor:pointer;
+}
+
+.tour-circle-img {
+	cursor:pointer;
+	border-radius: 50%;
+}
+
+.tour-circle-img:hover {
+	opacity:0.7;
+}
+
+
+/* ONLY IN USE FOR MEETUP HTML */
+
+.btn-meetup {
+	color: #FFF;
+	background: #e53935;
+	border: 1px solid #98251d;
+}
+
+.btn.btn-meetup:hover, .btn.btn-meetup:focus, .btn.btn-meetup:focus:hover {
+	color: #FFF;
+	background: #f37d75;
+}
+
+.tour-bubblli {
+	color: #3491ff;
+	text-align: center;
+	margin: 160px 0 63px 0;
+	max-width: 600px;
+	font-weight: 200;	
+}
+
+.tour-clicklogin {
+	margin-top: -28px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+/* RADARS */
+
+.radar1 {
+	position: absolute;
+	top: 400px;
+	left: 200px;
+}
+
+.radar {
+	position: relative;
+	width: 22px;
+	height: 22px;
+}
+
+.radar-inner {
+	position: absolute;
+	width: 22px;
+	height: 22px;
+	border-radius: 100%;
+	background-color: #3491FF;
+	border: 2px solid #1668DA;
+	-webkit-transition: .5s cubic-bezier(.5,.1,0,1) all;
+	transition: .5s cubic-bezier(.5,.1,0,1) all;
+}
+
+.radar-gray .radar-inner {
+	background-color: rgba(157,157,157,1);
+	border: 2px solid #686868;
+}
+
+.radar-outer {
+	position: absolute;
+	top: -22px;
+	left: -22px;
+	width: 66px;
+	height: 66px;
+	border-radius: 100%;
+	-webkit-animation: radar 2s infinite ease-out;
+	animation: radar 2s infinite ease-out;
+	
+	background-color: rgba(83,109,254,0.3);
+	-webkit-transition: .1s cubic-bezier(.5,.1,0,1) all;
+	transition: .1s cubic-bezier(.5,.1,0,1) all;
+}
+
+.radar-gray .radar-outer {
+	background-color: rgba(157,157,157,.2);
+}
+
+@-webkit-keyframes radar {
+	from {-webkit-transform: scale(0.3);}
+	to {-webkit-transform: scale(1.0); opacity:0;}
+}
+
+.radar1 {
+	position: absolute;
+	left: 50%;
+	margin-left: -25px;
+	top: 15px;
+}
+
+.radar2 {
+	position: absolute;
+	left: 50%;
+	margin-left: 74px;
+	top: 236px;
+}
+
+.radar3 {
+	position: absolute;
+	left: 50%;
+	margin-left:-32px;
+	top:520px;
+}
+
+.radar-gray .radar3 {
+	box-shadow: 0px 1px 1px rgba(0,0,0,.3);
+}
+
+.radar3a {
+	position: absolute;
+	right: 7px;
+	bottom: -36px;
+}
+
+.radar3a .radar-inner {
+	background-color: #3491FF;
+	border: 2px solid #1668DA;
+}
+
+.radar-gray .tour-title-corner {
+	background: #FFF;
+	box-shadow: 0px 1px 1px rgba(0,0,0,.3);
+}
+
+.radar-gray .tour-title {
+	color: rgba(0,0,0,1);
+	background: rgba(255,255,255,.96);
+}
+
+.tour-title .radar {
+	float: right;
+	margin: 2px;
+}
+
+.radar4 {
+	position: absolute;
+	left: 50%;
+	margin-left:298px;
+	top:376px;
+}
+
+.radar5 {
+	position: absolute;
+	left: 50%;
+	margin-left:-296px;
+	top:236px;
+}
+
+.radar6 {
+	position: absolute;
+	left: 50%;
+	margin-left:-371px;
+	top:567px;
+}
+
+.radar7 {
+	position: absolute;
+	left: 50%;
+	margin-left:-122px;
+	top:380px;
+}
+
+.radar8 {
+	position: absolute;
+	left: 50%;
+	margin-left:-101px;
+	top:713px;
+}
+
+.radar9 {
+	position: absolute;
+	left: 50%;
+	margin-left:219px;
+	top:776px;
+}
+
+/* MEDIA QUERIES */
+
+
+
+@media (min-width: 416px) {
+	.tour-panel {
+		width: 80%;
+	}
+}
+
+@media (min-width: 768px) {
+	.tour-page h1 {
+		font-size: 30px;
+	}
+
+	.tour-page h4 {
+		font-size: 20px;
+	}
+}
+

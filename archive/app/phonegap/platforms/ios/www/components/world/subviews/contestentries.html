@@ -1,0 +1,33 @@
+<div class="wrap" ng-style="::{'background-color': style.bodyBG_color}">
+	<nav class="message-nav" ng-style="{'background-color': style.titleBG_color}">
+		<h4 class="subnav-header">Contest <em>#{{hashtag}}</em>
+
+      <div class="wtgt">
+        <div class="camera needsclick"
+             ng-file-select
+             ng-file-change="uploadWTGT($files)"
+             ng-file-drop
+             data-accept="image/*">
+          <div class="verifyUpload needsclick" ng-click="verifyUpload($event)">
+          </div>
+        </div>
+      </div>
+    </h4>
+	</nav>
+
+  <div class="instagram-wrap wrap" lazy-load load-more="loadEntries()">
+
+
+
+    <ul>
+      <li ng-repeat="entry in entries track by $index" class="instagram marble-page">
+        <img ng-src="{{entry.imgURL}}">
+        <footer>
+          <p>{{::entry.userTime | date:"MMM d, y h:mm a"}}</p>
+        </footer>
+
+      </li>
+    </ul>
+  </div>
+
+</div>

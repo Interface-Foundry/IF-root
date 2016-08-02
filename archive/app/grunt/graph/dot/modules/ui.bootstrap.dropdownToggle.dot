@@ -1,0 +1,54 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.dropdownToggle"[label="ui.bootstrap.dropdownToggle", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "dropdownToggle"[label="dropdownToggle", color=3]
+      "ui.bootstrap.dropdownToggle" -> "dropdownToggle"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

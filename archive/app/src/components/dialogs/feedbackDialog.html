@@ -1,0 +1,20 @@
+<div class="surface" ng-controller="feedbackController">
+	<h4 class="auth-title">Feedback</h4>
+	<div class="closeWrapper closeElement" ng-click="dialog.close($event)">
+		<img class="closeImg closeElement nav-icon" src="img/icons/ic_clear_black_24dp.png">
+	</div>
+	<div>
+		I have a <select ng-options="item.category for item in feedbackCategories" ng-model="feedbackCategory" />
+	</div>
+	<div>
+		I feel 
+		<div ng-repeat="item in feedbackEmotions"
+			 ng-click="selectEmoji(item)"
+			 class="emoji-selector"
+			 ng-class="{selected: feedbackEmotion.emotion == item.emotion}"
+			 ng-bind-html="item.emoji | emoji">
+		</div>
+	</div>
+	<textarea class="form-control" rows="3" ng-model="feedbackText" style="margin-bottom: 8px;"></textarea>
+	<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
+</div>

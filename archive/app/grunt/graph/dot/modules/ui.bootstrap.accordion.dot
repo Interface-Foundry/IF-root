@@ -1,0 +1,123 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.accordion"[label="ui.bootstrap.accordion", color=1]
+
+    
+      "ui.bootstrap.collapse"[label="ui.bootstrap.collapse", color=1]
+      "ui.bootstrap.collapse" -> "ui.bootstrap.accordion"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "AccordionController"[label="AccordionController", color=4]
+      "ui.bootstrap.accordion" -> "AccordionController"
+    
+      "AccordionController"[label="AccordionController", color=4]
+      "ui.bootstrap.accordion" -> "AccordionController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "accordion"[label="accordion", color=3]
+      "ui.bootstrap.accordion" -> "accordion"
+    
+      "accordionGroup"[label="accordionGroup", color=3]
+      "ui.bootstrap.accordion" -> "accordionGroup"
+    
+      "accordionHeading"[label="accordionHeading", color=3]
+      "ui.bootstrap.accordion" -> "accordionHeading"
+    
+      "accordionTransclude"[label="accordionTransclude", color=3]
+      "ui.bootstrap.accordion" -> "accordionTransclude"
+    
+      "accordion"[label="accordion", color=3]
+      "ui.bootstrap.accordion" -> "accordion"
+    
+      "accordionGroup"[label="accordionGroup", color=3]
+      "ui.bootstrap.accordion" -> "accordionGroup"
+    
+      "accordionHeading"[label="accordionHeading", color=3]
+      "ui.bootstrap.accordion" -> "accordionHeading"
+    
+      "accordionTransclude"[label="accordionTransclude", color=3]
+      "ui.bootstrap.accordion" -> "accordionTransclude"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+        "$transition"[label="$transition"]
+        "$transition" -> "accordionGroup"
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "AccordionController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "AccordionController"
+      
+        "accordionConfig"[label="accordionConfig"]
+        "accordionConfig" -> "AccordionController"
+      
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "AccordionController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "AccordionController"
+      
+        "accordionConfig"[label="accordionConfig"]
+        "accordionConfig" -> "AccordionController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

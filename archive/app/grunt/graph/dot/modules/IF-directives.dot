@@ -1,0 +1,75 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "IF-directives"[label="IF-directives", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "myPostRepeatDirective"[label="myPostRepeatDirective", color=3]
+      "IF-directives" -> "myPostRepeatDirective"
+    
+      "ngEnter"[label="ngEnter", color=3]
+      "IF-directives" -> "ngEnter"
+    
+      "ifTooltip"[label="ifTooltip", color=3]
+      "IF-directives" -> "ifTooltip"
+    
+      "userChip"[label="userChip", color=3]
+      "IF-directives" -> "userChip"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+    
+      
+    
+      
+        "userManager"[label="userManager"]
+        "userManager" -> "userChip"
+      
+        "dialogs"[label="dialogs"]
+        "dialogs" -> "userChip"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

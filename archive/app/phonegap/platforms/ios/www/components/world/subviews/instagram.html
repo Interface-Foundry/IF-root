@@ -1,0 +1,20 @@
+<div class="wrap" ng-style="::{'background-color': style.bodyBG_color}">
+	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
+		<h4 class="subnav-header">Instagram <em>#{{world.resources.hashtag}}</em></h4>
+	</nav>
+	
+	<div class="instagram-wrap wrap" lazy-load load-more="throttledLoadInstagrams()">
+		<ul>
+			<li ng-repeat="instagram in instagrams track by $index" class="instagram marble-page">
+				<a ng-click="newWindowGo('http://instagram.com/{{instagram.user.screen_name}}')">
+					<img if-src="https://s3.amazonaws.com/if.instagram.images/{{instagram.local_path[0]}}">
+					<footer><h4>{{::instagram.user.name}} @{{instagram.user.screen_name}}</h4>
+						<p>{{::instagram.text}}</p>
+						<p>{{::instagram.created | date:"MMM d, y h:mm a"}}</p>
+					</footer>
+				</a>
+			</li>
+		</ul>
+	</div>
+	
+</div>

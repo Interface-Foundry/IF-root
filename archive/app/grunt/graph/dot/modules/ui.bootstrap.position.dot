@@ -1,0 +1,59 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+      "$position"[label="$position", color=6]
+      "ui.bootstrap.position" -> "$position"
+    
+      "$position"[label="$position", color=6]
+      "ui.bootstrap.position" -> "$position"
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+      
+    
+      
+    
+
+    
+
+
+}

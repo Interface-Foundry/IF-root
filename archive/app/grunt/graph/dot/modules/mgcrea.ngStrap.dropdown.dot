@@ -1,0 +1,65 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.dropdown"[label="mgcrea.ngStrap.dropdown", color=1]
+
+    
+      "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.dropdown"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$dropdown"[label="$dropdown", fillcolor=2]
+      "mgcrea.ngStrap.dropdown" -> "$dropdown"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsDropdown"[label="bsDropdown", color=3]
+      "mgcrea.ngStrap.dropdown" -> "bsDropdown"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$dropdown"[label="$dropdown"]
+        "$dropdown" -> "bsDropdown"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

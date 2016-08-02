@@ -1,0 +1,37 @@
+// --------------------IMPORTS
+@import 'variables.less';
+@import 'utilities.less';
+@import 'aperture.less';
+@import 'drawer.less';
+@import 'nav.less';
+@import '../components/home/home.less';
+@import '../components/super_user/superuser.less';
+@import '../components/contest/contest.less';
+@import '../components/announcements/announcements.less';
+@import '../components/splash/splash.less';
+@import '../components/splash/splash.less';
+@import '../components/world/worldMain.less'; // worldMain.less can definitely be broken up more. needs some work
+@import '../components/user/user.less';
+@import '../components/dialogs/dialogs.less';
+@import 'alert.less';
+@import 'calendar.less';
+@import 'loading.less';
+@import 'map.less';
+@import '../components/floor_selector/floorselector.less';
+@import '../components/download_banner/downloadBanner.less';
+@import '../components/userLocation/userLocation.less';
+@import '../components/world/want-this.less';
+@import '../components/world/category_widget/category.widget.less';
+@import '../components/world/search_bar/catSearchBar.less';
+@import '../components/aicp/aicp.less'; // REMOVE AICP
+
+// --------------------DEFAULTS
+nav {
+	pointer-events: auto;
+}
+
+/*remove the irritating blue border*/
+button:active,
+button:focus {
+	outline: none;
+}

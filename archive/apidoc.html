@@ -1,0 +1,399 @@
+<html>
+    <head>
+        <title>Kip API Doc</title>
+        <meta charset="UTF-8">
+        <!-- based on http://codepen.io/javve/pen/zpuKF -->
+        <style>
+            .list {
+                font-family:sans-serif;
+                margin:0;
+                padding:20px 0 0;
+            }
+            .list > li {
+                display:block;
+                background-color: #eee;
+                padding:10px;
+                box-shadow: inset 0 1px 0 #fff;
+            }
+            .avatar {
+                max-width: 150px;
+            }
+            img {
+                max-width: 100%;
+            }
+            h3 {
+                font-size: 16px;
+                margin:0 0 0.3rem;
+                font-weight: normal;
+                font-weight:bold;
+            }
+            p {
+                margin:0;
+            }
+
+            input {
+                border:solid 1px #ccc;
+                border-radius: 5px;
+                padding:7px 14px;
+                margin-bottom:10px
+            }
+            input:focus {
+                outline:none;
+                border-color:#aaa;
+            }
+            .sort {
+                padding:8px 30px;
+                border-radius: 6px;
+                border:none;
+                display:inline-block;
+                color:#fff;
+                text-decoration: none;
+                background-color: #28a8e0;
+                height:30px;
+            }
+            .sort:hover {
+                text-decoration: none;
+                background-color:#1b8aba;
+            }
+            .sort:focus {
+                outline:none;
+            }
+            .sort:after {
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                content:"";
+                position: relative;
+                top:-10px;
+                right:-5px;
+            }
+            .sort.asc:after {
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #fff;
+                content:"";
+                position: relative;
+                top:13px;
+                right:-5px;
+            }
+            .sort.desc:after {
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 5px solid #fff;
+                content:"";
+                position: relative;
+                top:-10px;
+                right:-5px;
+            }
+            .method:after {
+                content: " "
+            }
+            .response:before {
+                content: "reponse: "
+            }
+            .body:before {
+                content: "body: "
+            }
+        </style>
+    </head>
+    <body>
+    <div id="api">
+        <input class="search" placeholder="Search" />
+        <button class="sort" data-sort="route">
+            Sort by route
+        </button>
+
+        <ul class="list">
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId</span></h3>
+                <pre class="response">User</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+                <p class="description">Gets the activity for the specified user.  "/api/users/me/activity" would get the activity for the logged-in user</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/following/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+                <p class="description">Gets the activity for the people that the specified user follows.  "/api/users/me/following/activity" would get the activity for the people that the logged-in user follows.</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+                <p class="description">Gets the activity for the specified user's followers.  "/api/users/me/followers/activity" would get the activity for the logged-in user's followers.  Probably not useful.</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/faves</span></h3>
+                <pre class="response">{result: [Landmark or Look], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/snaps</span></h3>
+                <pre class="response">{result: [Landmark], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/looks</span></h3>
+                <pre class="response">{result: [Look], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/getAll</span></h3>
+                <pre class="response">{result: [Landmark or Look], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers</span></h3>
+                <pre class="response">{result: [User], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/following</span></h3>
+                <pre class="response">{result: [User], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/users/:mongoId/follow</span></h3>
+                <pre class="response">'(⌒‿⌒)'</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/users/:mongoId/unfollow</span></h3>
+                <pre class="response">'(⌒‿⌒)'</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/items/:mongoId</span></h3>
+                <pre class="response">{item: Landmark, parent: Landmark}</pre>
+            </li>
+            <li>
+                <h3><span class="method">PUT</span><span class="route">/api/items/:mongoId</span></h3>
+                <pre class="response">Item</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/delete</span></h3>
+                <pre class="response">200</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/comment</span></h3>
+                <pre class="body">{
+        comment: String,
+        timeCommented: Date,
+        userId: String, (optional, can figure out on back end)
+        userName: String, (optional, can figure out on back end)
+        userAvatar: String, (optional, can figure out on back end)
+        userMongoId: String (optional, can figure out on back end)
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/deletecomment</span></h3>
+                <pre class="body">{
+        comment: String,
+        timeCommented: Date,
+        userId: String, (optional, can figure out on back end)
+        userName: String, (optional, can figure out on back end)
+        userAvatar: String, (optional, can figure out on back end)
+        userMongoId: String (optional, can figure out on back end)
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/tag</span></h3>
+                <pre class="body">{
+	“type”: “colors” or “categories” or “text”,
+	“value”: “whatever”
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/deletetag</span></h3>
+                <pre class="body">{
+	“type”: “colors” or “categories” or “text”,
+	“value”: “whatever”
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/fave</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/unfave</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/reject</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/unreject</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/report</span></h3>
+                <pre class="body">{
+	timeReported: result of +new Date(),
+	comment: “some comment”,
+	reason: “some reason”
+}</pre>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/looks/:mongoId</span></h3>
+                <pre class="response">Look</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/looks</span></h3>
+                <pre class="body">Look</pre>
+                <pre class="response">Look</pre>
+            </li>
+            <li>
+                <h3><span class="method">PUT</span><span class="route">/api/looks/:mongoId</span></h3>
+                <pre class="body">Look</pre>
+                <pre class="response">Look</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/looks/:mongoId/delete</span></h3>
+                <pre class="response">200</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/delete</span></h3>
+                <pre class="response">200</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/snap</span></h3>
+                <pre class="body">Landmark</pre>
+                <pre class="response">Landmark</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/places/:mongoId</span></h3>
+                <pre class="response">Landmark</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/places/:mongoId</span></h3>
+                <pre class="response">Landmark</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/places/nearest</span></h3>
+                <pre class="body">{"lat": lat, "lon": lon}</pre>
+                <pre class="response">[Landmark]</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/search</span></h3>
+                <pre class="body">{
+	text: "something tag la", (required?)
+	colors: ['FF00FF', 'FF00FF'], (optional)
+	categories: ['shoes'], (optional)
+	price: 1, // or 2, 3, or 4 (optional)
+	radius: .5, // miles (optional, defaults to 0.5 miles)
+	loc: {lat: 34, lon: -77} (required)
+}</pre>
+                <pre class="response">{result: [Landmark], links: {}, query: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/trending</span></h3>
+                <pre class="body">{
+	radius: .5, // miles (optional, defaults to 0.5 miles)
+	loc: {lat: 34, lon: -77} (required)
+}</pre>
+                <pre class="response">{
+    "results": [{
+        "category": "Trending in Neighborhood1",
+        "results": [Items]
+    }],
+    "query": (body from above),
+    "links": {
+        "self": "/api/items/trending",
+        "next": "/api/items/trending?page=1",
+        "prev": null,
+        "first": "/api/items/trending",
+        "last": null
+    },
+}
+</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/items/:mongoId/toplooks</span></h3>
+                <pre class="response">{
+    "results": [Items],
+    "links": {
+        "self": "/api/items/:mongoId/toplooks",
+        "next": "/api/items/:mongoId/toplooks?page=1",
+        "prev": null,
+        "first": "/api/items/:mongoId/toplooks",
+        "last": null
+    },
+}
+</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/email/confirm</span></h3>
+                <p class="description">Trigger the sending of a confirmation email.  Must be logged in to use.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/email/confirm</span></h3>
+                <p class="description">This is what users click on in the confirmation email to confirm their identity.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/email/request_confirm/:token</span></h3>
+                <p class="description">This is what users click on to confirm their identity from "email/confirm" view on the web.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/forgot</span></h3>
+                <pre class="body">{"email": String}</pre>
+                <p class="description">Trigger the sending of an email that contains a link to reset your password.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/reset/:token</span></h3>
+                <p class="description">This is what users click on in the confirmation email to reset their password.  It takes you to the the reset password view on the web.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/reset/:token</span></h3>
+                <pre class="body">{"password": String}</pre>
+                <p class="description">Sets a new password for the user.  Also sends a success email telling the user their password was changed.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/resetConfirm/:token</span></h3>
+                <p class="description">Looks like this route is just here for sanity-checking.  (bubblli auth)</p>
+            </li>
+        </ul>
+
+    </div>
+    <script src="http://listjs.com/no-cdn/list.js"></script>
+    <script>
+        var options = {
+            valueNames: [ 'route', 'body', 'response', 'method', 'description' ]
+        };
+
+        var userList = new List('api', options);
+        var s = document.querySelector('input');
+
+        // prepopulate search if q present
+        if (window.location.search) {
+            s.value = window.location.search.replace('?q=', '');
+
+            if ("createEvent" in document) {
+                var evt = document.createEvent("HTMLEvents");
+                evt.initEvent("keyup", false, true);
+                s.dispatchEvent(evt);
+            }
+            else
+                s.fireEvent("onkeyup");
+        }
+
+        if (history.pushState) {
+            userList.on('updated', function () {
+                if (!s.value) {
+                    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                    window.history.pushState({path: newurl}, '', newurl);
+                } else {
+                    newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?q=' + s.value;
+                    window.history.pushState({path: newurl}, '', newurl);
+                }
+            })
+        }
+
+
+    </script>
+    </body>
+</html>

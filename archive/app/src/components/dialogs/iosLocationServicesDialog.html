@@ -1,0 +1,18 @@
+<div class="surface" ng-show="if_phonegap">
+	<p style="font-size: 15px">For more accurate search results, follow these steps to turn on location services:</p>
+	<ul>
+		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-settings.png">Open the Settings App</li>
+		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-privacy.png">Tap "Privacy"</li>
+		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-locationBlue.png">Tap "Location Services"</li>
+		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-toggleGreen.png">Turn on Location Services</li>
+		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-kip.png">Tap "Kip"</li>
+		<li class="dialogLi">Tap "While Using the App"</li>
+	</ul>
+</div>
+
+<div class="surface" ng-show="if_web">
+	<p style="font-size: 15px">For more accurate search results, turn on location services for kipapp.co in your 
+		<span ng-class="{'u-colorLinkBlue u-pointer': deviceManager.browser !== 'other'}" 
+			ng-click="goLocationServices()">browser</span>.
+	</p>
+</div>

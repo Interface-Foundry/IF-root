@@ -1,0 +1,71 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.dialog"[label="ui.bootstrap.dialog", color=1]
+
+    
+      "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+      "ui.bootstrap.transition" -> "ui.bootstrap.dialog"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$dialog"[label="$dialog", fillcolor=2]
+      "ui.bootstrap.dialog" -> "$dialog"
+    
+
+
+    
+      "MessageBoxController"[label="MessageBoxController", color=4]
+      "ui.bootstrap.dialog" -> "MessageBoxController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "MessageBoxController"
+      
+        "dialog"[label="dialog"]
+        "dialog" -> "MessageBoxController"
+      
+        "model"[label="model"]
+        "model" -> "MessageBoxController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

@@ -1,0 +1,43 @@
+<div class="surface">
+	<form ng-submit="userManager.login.login()" name="loginForm">
+		<h4 class="auth-title">Kip</h4>
+		<div class="closeWrapper closeElement" ng-click="dialog.close($event)">
+			<img class="closeImg closeElement nav-icon" src="img/icons/ic_clear_black_24dp.png">
+		</div>
+		<input name="email" type="email" 
+			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />		
+		<input name="password" type="password" 
+			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
+		
+		<button type="submit" class="auth-submit">Log In</button>
+
+		<!-- @ifdef WEB -->
+		<div class="text-center" style="margin:4px 0px;">or</div>
+		
+		<div class="btn-group btn-group-justified" style="margin-bottom:20px;">
+		  <div class="btn-group">
+		    <button type="button" class="btn fb-btn" ng-click="go('auth/facebook')">
+		    	<img src="img/icons/facebook-16.png" width="16px" height="16px"> Connect with Facebook
+		    </button>
+		  </div>
+
+		</div>
+		<!-- @endif -->
+
+		<!-- @ifdef PHONEGAP -->
+	
+		<button type="button" class="btn fb-btn" ng-click="fbLogin()"><img src="img/icons/facebook-16.png" width="16px" height="16px"> Connect with Facebook</button>
+
+		<!-- @endif -->
+		
+		<div ng-if="userManager.login.error">
+			Login failed!
+		</div>
+		<!-- <a if-href="#forgot">Forgot your password?</a> -->
+		<a ng-click="dialog.showDialog('forgotDialog.html')" href="">Forgot your password?</a>
+
+		
+		<button type="button" class="auth-create" ng-click="dialog.showDialog('createAccountDialog.html')">Create Account</button>
+		
+	</form>
+</div>

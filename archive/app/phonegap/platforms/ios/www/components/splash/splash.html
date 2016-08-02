@@ -1,0 +1,13 @@
+<div ng-include="'components/splash/home.html'"></div>
+
+<div ng-include="'components/splash/signin.html'" 
+	ng-if="show.signin || show.register"></div>
+
+<div ng-include="'components/splash/confirm.html'"
+	ng-if="show.confirm"></div>
+
+<div ng-include="'components/splash/confirmThanks.html'"
+	ng-if="show.confirmThanks"></div>
+
+<div ng-include="'components/splash/password.html'"
+	ng-if="show.passwordForgot || show.passwordReset"></div>

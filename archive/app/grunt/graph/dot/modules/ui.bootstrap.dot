@@ -1,0 +1,112 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap"[label="ui.bootstrap", color=1]
+
+    
+      "ui.bootstrap.tpls"[label="ui.bootstrap.tpls", color=1]
+      "ui.bootstrap.tpls" -> "ui.bootstrap"
+    
+      "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+      "ui.bootstrap.transition" -> "ui.bootstrap"
+    
+      "ui.bootstrap.collapse"[label="ui.bootstrap.collapse", color=1]
+      "ui.bootstrap.collapse" -> "ui.bootstrap"
+    
+      "ui.bootstrap.accordion"[label="ui.bootstrap.accordion", color=1]
+      "ui.bootstrap.accordion" -> "ui.bootstrap"
+    
+      "ui.bootstrap.alert"[label="ui.bootstrap.alert", color=1]
+      "ui.bootstrap.alert" -> "ui.bootstrap"
+    
+      "ui.bootstrap.bindHtml"[label="ui.bootstrap.bindHtml", color=1]
+      "ui.bootstrap.bindHtml" -> "ui.bootstrap"
+    
+      "ui.bootstrap.buttons"[label="ui.bootstrap.buttons", color=1]
+      "ui.bootstrap.buttons" -> "ui.bootstrap"
+    
+      "ui.bootstrap.carousel"[label="ui.bootstrap.carousel", color=1]
+      "ui.bootstrap.carousel" -> "ui.bootstrap"
+    
+      "ui.bootstrap.dateparser"[label="ui.bootstrap.dateparser", color=1]
+      "ui.bootstrap.dateparser" -> "ui.bootstrap"
+    
+      "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+      "ui.bootstrap.position" -> "ui.bootstrap"
+    
+      "ui.bootstrap.datepicker"[label="ui.bootstrap.datepicker", color=1]
+      "ui.bootstrap.datepicker" -> "ui.bootstrap"
+    
+      "ui.bootstrap.dropdown"[label="ui.bootstrap.dropdown", color=1]
+      "ui.bootstrap.dropdown" -> "ui.bootstrap"
+    
+      "ui.bootstrap.modal"[label="ui.bootstrap.modal", color=1]
+      "ui.bootstrap.modal" -> "ui.bootstrap"
+    
+      "ui.bootstrap.pagination"[label="ui.bootstrap.pagination", color=1]
+      "ui.bootstrap.pagination" -> "ui.bootstrap"
+    
+      "ui.bootstrap.tooltip"[label="ui.bootstrap.tooltip", color=1]
+      "ui.bootstrap.tooltip" -> "ui.bootstrap"
+    
+      "ui.bootstrap.popover"[label="ui.bootstrap.popover", color=1]
+      "ui.bootstrap.popover" -> "ui.bootstrap"
+    
+      "ui.bootstrap.progressbar"[label="ui.bootstrap.progressbar", color=1]
+      "ui.bootstrap.progressbar" -> "ui.bootstrap"
+    
+      "ui.bootstrap.rating"[label="ui.bootstrap.rating", color=1]
+      "ui.bootstrap.rating" -> "ui.bootstrap"
+    
+      "ui.bootstrap.tabs"[label="ui.bootstrap.tabs", color=1]
+      "ui.bootstrap.tabs" -> "ui.bootstrap"
+    
+      "ui.bootstrap.timepicker"[label="ui.bootstrap.timepicker", color=1]
+      "ui.bootstrap.timepicker" -> "ui.bootstrap"
+    
+      "ui.bootstrap.typeahead"[label="ui.bootstrap.typeahead", color=1]
+      "ui.bootstrap.typeahead" -> "ui.bootstrap"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

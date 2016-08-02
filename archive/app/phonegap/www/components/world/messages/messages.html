@@ -1,0 +1,63 @@
+<button class="message-nav-map" 
+				ng-class="{'sticker-open': editing}"
+				ng-click='toggleMap()'></button>
+
+<div class="message-shelf" ng-style="::{'background-color': style.bodyBG_color}">
+	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
+		<h4 class="subnav-header">Chat</h4>
+	</nav>
+	<div class="wrap">
+		<message-view class="message-list"></message-view>
+	</div>
+</div>
+
+<div class="view-footer" ng-class="{'message-logged-out-footer': !userManager.loginStatus, 'editing': editing}" ng-cloak>
+	<div class="uploading-progress if-animate" ng-show="uploading" ng-style="{'width': uploadProgress+'%'}"></div>
+	<textarea rows="1" 
+		placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" 
+		class="message-input form-control" 
+		ng-model="msg.text" 
+		ng-class="{'textarea-highlight': stickerChange}"
+		ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" 
+		msd-elastic
+		ng-disabled="!userManager.loginStatus"
+		maxlength="140"></textarea>
+		
+	<div class="msg-action-bar">
+		<button class="msg-action-bar-item pull-left" 
+						ng-file-select 
+						ng-file-change="onImageSelect($files)" 
+						accept="image/*"
+						ng-disabled="!userManager.loginStatus">
+			<img src="img/icons/msg/ic_photo_camera_24px.png" width="24" height="24" class="needsclick">
+		</button>
+		<button class="msg-action-bar-item pull-left" 
+						ng-click="showStickers()"
+						ng-disabled="!userManager.loginStatus"> 
+			<img src="img/icons/msg/ic_insert_emoticon_24px.png" width="24" height="24">
+		</button>
+		
+		<button class="msg-action-bar-item pull-right" 
+						ng-click="userManager.loginStatus ? sendMsg() : alert('Sign in to send messages!')"ng-disabled="!userManager.loginStatus">
+			<span class="message-send" ng-class="{'lightblue500': userManager.loginStatus}">Send</span>
+		</button>
+	</div>
+	
+	<div class="sticker-bay">
+		<ul class="stickers">
+			<li class="sticker" 
+				ng-repeat="sticker in stickers" 
+				ng-click="userManager.loginStatus && selectSticker(sticker)"
+				ng-class="{selected: selected === sticker}">
+				<img class="sticker-img" ng-src="{{sticker.img}}">
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div class="sticker-crosshair" sticker-crosshair ng-show="editing">
+	<img src="img/icons/crosshair.png" class="crosshairOffset" width="32" height="32">
+	<img ng-src="{{selected.img}}" class="stickerOffset">
+</div>
+
+<button class="action-button sticker-done-button if-animate" ng-click="userManager.loginStatus && pinSticker()" ng-show="selected"></button>

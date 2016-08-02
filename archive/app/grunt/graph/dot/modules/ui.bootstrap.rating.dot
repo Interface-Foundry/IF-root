@@ -1,0 +1,76 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.rating"[label="ui.bootstrap.rating", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "RatingController"[label="RatingController", color=4]
+      "ui.bootstrap.rating" -> "RatingController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "rating"[label="rating", color=3]
+      "ui.bootstrap.rating" -> "rating"
+    
+      "rating"[label="rating", color=3]
+      "ui.bootstrap.rating" -> "rating"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+        "ratingConfig"[label="ratingConfig"]
+        "ratingConfig" -> "rating"
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "RatingController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "RatingController"
+      
+        "ratingConfig"[label="ratingConfig"]
+        "ratingConfig" -> "RatingController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

@@ -1,0 +1,34 @@
+.fadeMarkers .leaflet-marker-icon {
+	opacity: .5;
+}
+
+/* Map zoom controls positioning for Desktop only */
+@media only screen and (min-width : 736px) {
+	.aperture-full .leaflet-bottom.leaflet-left {
+		top: 60px;
+		left: 1%;
+		display: block;
+	}
+
+	.aperture-third .leaflet-bottom.leaflet-left,
+	.aperture-half .leaflet-bottom.leaflet-left,
+	.aperture-off .leaflet-bottom.leaflet-left {
+		display: none;
+	}
+}
+
+@media only screen and (max-width : 737px) {
+	.leaflet-bottom.leaflet-left {
+		display: none;
+	}
+}
+// end map zoom controls
+
+div.marker-popup-click {
+  height: 42px;
+  width: 100%;
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  cursor: pointer;
+}

@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ -d /opt/kip/App ]
+then 
+rm -rf /opt/kip/App
+fi
+mkdir /opt/kip/App
+chown kip:kip /opt/kip/App

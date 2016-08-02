@@ -1,0 +1,112 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.typeahead"[label="ui.bootstrap.typeahead", color=1]
+
+    
+      "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+      "ui.bootstrap.position" -> "ui.bootstrap.typeahead"
+    
+      "ui.bootstrap.bindHtml"[label="ui.bootstrap.bindHtml", color=1]
+      "ui.bootstrap.bindHtml" -> "ui.bootstrap.typeahead"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+      "typeaheadParser"[label="typeaheadParser", color=6]
+      "ui.bootstrap.typeahead" -> "typeaheadParser"
+    
+      "typeaheadParser"[label="typeaheadParser", color=6]
+      "ui.bootstrap.typeahead" -> "typeaheadParser"
+    
+
+    node[shape="cds"]
+    
+      "typeaheadHighlight"[label="typeaheadHighlight", color=7]
+      "ui.bootstrap.typeahead" -> "typeaheadHighlight"
+    
+      "typeaheadHighlight"[label="typeaheadHighlight", color=7]
+      "ui.bootstrap.typeahead" -> "typeaheadHighlight"
+    
+
+    
+      "typeahead"[label="typeahead", color=3]
+      "ui.bootstrap.typeahead" -> "typeahead"
+    
+      "typeaheadPopup"[label="typeaheadPopup", color=3]
+      "ui.bootstrap.typeahead" -> "typeaheadPopup"
+    
+      "typeahead"[label="typeahead", color=3]
+      "ui.bootstrap.typeahead" -> "typeahead"
+    
+      "typeaheadPopup"[label="typeaheadPopup", color=3]
+      "ui.bootstrap.typeahead" -> "typeaheadPopup"
+    
+      "typeaheadMatch"[label="typeaheadMatch", color=3]
+      "ui.bootstrap.typeahead" -> "typeaheadMatch"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+        "$position"[label="$position"]
+        "$position" -> "typeahead"
+      
+        "typeaheadParser"[label="typeaheadParser"]
+        "typeaheadParser" -> "typeahead"
+      
+    
+      
+    
+      
+        "$position"[label="$position"]
+        "$position" -> "typeahead"
+      
+        "typeaheadParser"[label="typeaheadParser"]
+        "typeaheadParser" -> "typeahead"
+      
+    
+      
+    
+      
+    
+
+
+    
+
+    
+
+    
+      
+    
+      
+    
+
+    
+      
+    
+      
+    
+
+
+}

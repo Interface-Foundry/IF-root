@@ -1,0 +1,153 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "tidepoolsServices"[label="tidepoolsServices", color=1]
+
+    
+      "ngResource"[label="ngResource", color=1]
+      "ngResource" -> "tidepoolsServices"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+      "Landmark"[label="Landmark", color=6]
+      "tidepoolsServices" -> "Landmark"
+    
+      "World"[label="World", color=6]
+      "tidepoolsServices" -> "World"
+    
+      "db"[label="db", color=6]
+      "tidepoolsServices" -> "db"
+    
+      "apertureService"[label="apertureService", color=6]
+      "tidepoolsServices" -> "apertureService"
+    
+      "socket"[label="socket", color=6]
+      "tidepoolsServices" -> "socket"
+    
+      "beaconManager"[label="beaconManager", color=6]
+      "tidepoolsServices" -> "beaconManager"
+    
+      "beaconData"[label="beaconData", color=6]
+      "tidepoolsServices" -> "beaconData"
+    
+      "dialogs"[label="dialogs", color=6]
+      "tidepoolsServices" -> "dialogs"
+    
+      "ifGlobals"[label="ifGlobals", color=6]
+      "tidepoolsServices" -> "ifGlobals"
+    
+      "mapManager"[label="mapManager", color=6]
+      "tidepoolsServices" -> "mapManager"
+    
+      "styleManager"[label="styleManager", color=6]
+      "tidepoolsServices" -> "styleManager"
+    
+      "userGrouping"[label="userGrouping", color=6]
+      "tidepoolsServices" -> "userGrouping"
+    
+      "worldTree"[label="worldTree", color=6]
+      "tidepoolsServices" -> "worldTree"
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+      
+        "$resource"[label="$resource"]
+        "$resource" -> "Landmark"
+      
+    
+      
+        "$resource"[label="$resource"]
+        "$resource" -> "World"
+      
+        "leafletData"[label="leafletData"]
+        "leafletData" -> "World"
+      
+    
+      
+        "$resource"[label="$resource"]
+        "$resource" -> "db"
+      
+    
+      
+        "leafletData"[label="leafletData"]
+        "leafletData" -> "apertureService"
+      
+        "mapManager"[label="mapManager"]
+        "mapManager" -> "apertureService"
+      
+    
+      
+    
+      
+        "alertManager"[label="alertManager"]
+        "alertManager" -> "beaconManager"
+      
+        "beaconData"[label="beaconData"]
+        "beaconData" -> "beaconManager"
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        "leafletData"[label="leafletData"]
+        "leafletData" -> "mapManager"
+      
+    
+      
+    
+      
+    
+      
+        "World"[label="World"]
+        "World" -> "worldTree"
+      
+        "db"[label="db"]
+        "db" -> "worldTree"
+      
+        "geoService"[label="geoService"]
+        "geoService" -> "worldTree"
+      
+    
+
+    
+
+
+}

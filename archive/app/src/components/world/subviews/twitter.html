@@ -1,0 +1,21 @@
+<div class="wrap" ng-style="::{'background-color': style.bodyBG_color}">
+	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
+		<h4 class="subnav-header">Twitter <em>#{{world.resources.hashtag}}</em></h4>
+	</nav>
+	
+	<div class="twitter-wrap wrap" lazy-load load-more="throttledLoadTweets()">
+		<ul>
+			<li ng-repeat="tweet in tweets track by $index" class="tweet marble-page">
+				<a class="u-pointer" ng-click="newWindowGo('https://twitter.com/{{tweet.user.screen_name}}/status/{{tweet.tweetID_str}}')">
+					<img if-src="{{tweet.user.profile_image_url | httpsify}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong> 
+					<hr class="divider">
+				</a>
+					<img if-src="{{tweet.media.media_url | httpsify}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
+					<footer>
+						<div href-listener ng-bind-html="tweet.text | linky"></div>
+						<p>{{::tweet.created | date:"MMM d, y h:mm a"}}</p>
+					</footer>
+			</li>
+		</ul>
+	</div>
+</div>

@@ -1,0 +1,73 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.affix"[label="mgcrea.ngStrap.affix", color=1]
+
+    
+      "mgcrea.ngStrap.helpers.dimensions"[label="mgcrea.ngStrap.helpers.dimensions", color=1]
+      "mgcrea.ngStrap.helpers.dimensions" -> "mgcrea.ngStrap.affix"
+    
+      "mgcrea.ngStrap.helpers.debounce"[label="mgcrea.ngStrap.helpers.debounce", color=1]
+      "mgcrea.ngStrap.helpers.debounce" -> "mgcrea.ngStrap.affix"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$affix"[label="$affix", fillcolor=2]
+      "mgcrea.ngStrap.affix" -> "$affix"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsAffix"[label="bsAffix", color=3]
+      "mgcrea.ngStrap.affix" -> "bsAffix"
+    
+      "bsAffixTarget"[label="bsAffixTarget", color=3]
+      "mgcrea.ngStrap.affix" -> "bsAffixTarget"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$affix"[label="$affix"]
+        "$affix" -> "bsAffix"
+      
+    
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

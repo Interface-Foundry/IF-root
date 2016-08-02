@@ -1,0 +1,16 @@
+env: test
+mongodb:
+  url: mongodb://localhost/foundry
+  options:
+    replset:
+      rs_name: rs0
+elasticsearch:
+  url: http://localhost:9200
+redis:
+  port: 6379
+  url: localhost
+geoipURL: http://localhost:8080/json/
+neighborhoodServer:
+  url: http://localhost:9998
+app:
+  publicAPI: http://pikachu.kipapp.co/api

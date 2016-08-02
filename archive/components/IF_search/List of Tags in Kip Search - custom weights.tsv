@@ -1,0 +1,23 @@
+Weights																								
+terms																								
+2-term																								
+21	gender	major event	item	item	item	item	item	item	style	brand	major event	feeling	style detail	period 	style	major event	period	major event	gender	age	gender	gender	item	
+20	item	item	color	minor event	item detail	fabric	period	feeling	item	gender	brand	brand	brand	style	fabric	style 	major event	fabric	age	major event	style	period	minor item	
+																								
+3-term																								
+21	item	item	item	item	item	item	item	item	item	item	item 	item	major event	gender	gender	gender	gender	item	gender	item	gender	item	size	size
+20	gender	color	minor event	detail	color	fabric	color	style	period	period	color	style	color	major event	style	period	style	gender	major event	gender	item	size	minor event	item
+18	color	brand	brand	brand	detail	detail	fabric	color	color	style	feeling	feeling	item	color	minor event	item	item	fabric	item	feeling	age	color	fabric	major event
+																								
+4-term																								
+9	item																							
+7	gender																							
+6	fabric																							
+4	color																							
+																								
+5-term																								
+27	item																							
+23	gender																							
+21	fabric																							
+19	minor event																							
+10	color																							

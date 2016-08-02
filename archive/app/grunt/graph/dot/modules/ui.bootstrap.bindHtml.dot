@@ -1,0 +1,54 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.bindHtml"[label="ui.bootstrap.bindHtml", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bindHtmlUnsafe"[label="bindHtmlUnsafe", color=3]
+      "ui.bootstrap.bindHtml" -> "bindHtmlUnsafe"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

@@ -1,0 +1,65 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.helpers.dateParser"[label="mgcrea.ngStrap.helpers.dateParser", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+      "$dateParser"[label="$dateParser", fillcolor=2]
+      "mgcrea.ngStrap.helpers.dateParser" -> "$dateParser"
+    
+      "$dateParser"[label="$dateParser", fillcolor=2]
+      "mgcrea.ngStrap.helpers.dateParser" -> "$dateParser"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+        "$localeProvider"[label="$localeProvider"]
+        "$localeProvider" -> "$dateParser"
+      
+    
+      
+        "$localeProvider"[label="$localeProvider"]
+        "$localeProvider" -> "$dateParser"
+      
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

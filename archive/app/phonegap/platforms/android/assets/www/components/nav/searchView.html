@@ -1,0 +1,23 @@
+<input class="search-bar" ng-model="searchText" placeholder="Search Bubbl.li" ng-keypress="searchOnEnter($event, searchText)"><button class="search-btn" ng-click="search(searchText)">Search</button>
+<div class="wrap gray-e6e6e6">
+	<div class="surface">
+		<!--results -->
+		<div ng-if="loading">
+			<div class="loading-spinner">
+				<div class="lspin1"></div>
+				<div class="lspin2"></div>
+			</div>
+		</div>
+		<div ng-if="searching.$$state.status==1">
+			<header class="bubble-group-label"
+				ng-show="!loading">{{searchResult.length}} results for {{lastSearch}}</header>
+			<ul class="bubble-list">
+				<li class="bubble-list-item" ng-repeat="bubble in searchResult track by bubble._id" 
+					ng-click="go('w/'+bubble.id)">
+					<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+					<span>{{::bubble.name}}</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

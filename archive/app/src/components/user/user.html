@@ -1,0 +1,32 @@
+<nav class="subnav-fixed">
+	<select class="menu pull-left" ng-model="menuLink" ng-change="go(menuLink)">
+		<option value="/profile/worlds">My Bubbles ⌄</option>
+		<option value="/profile/me">My Profile ⌄</option>
+	</select>
+	<ul class="tab-group" ng-show="state.myProfile">
+
+		<li class="tab" ng-class="{'selected': state.profile}">
+			<a if-href="#profile/me" class="tab-link">Profile</a></li>
+		<li class="tab hidden" ng-class="{'selected': state.contacts}">
+			<a if-href="#profile/contacts" class="tab-link">Contacts</a></li>
+		<li class="tab hidden" ng-class="{'selected': state.history}">
+			<a if-href="#profile/history" class="tab-link">History</a></li>
+	</ul>
+	<ul class="tab-group" ng-show="state.myWorlds">
+		
+		<span ng-click="goBack()" ng-show="fromMessages" style="cursor:pointer;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
+		
+		<li class="tab" ng-class="{'selected': state.public}">
+			<a if-href="#profile/worlds" class="tab-link" ng-hide="fromMessages" ng-click="calendarActive=false">My Bubbles</a>
+			<a class="tab-link" ng-show="fromMessages">Edit your Display Name & Picture</a>
+		</li>
+		<li class="hidden">Drafts</li>
+		<li class="hidden">Filter</li>
+		<li class="img-tab" ng-click="showCalendar()">
+			<img src="img/icons/calendar-on.png" width="32" height="32" ng-if="calendarActive">
+			<img src="img/icons/calendar-off.png" width="32" height="32" ng-if="!calendarActive">
+		</li>
+	</ul>
+	
+</nav>
+	<div ng-include="state.template" style="height:100%;"></div>

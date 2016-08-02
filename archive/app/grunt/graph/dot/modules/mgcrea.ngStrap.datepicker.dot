@@ -1,0 +1,109 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.datepicker"[label="mgcrea.ngStrap.datepicker", color=1]
+
+    
+      "mgcrea.ngStrap.helpers.dateParser"[label="mgcrea.ngStrap.helpers.dateParser", color=1]
+      "mgcrea.ngStrap.helpers.dateParser" -> "mgcrea.ngStrap.datepicker"
+    
+      "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.datepicker"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$datepicker"[label="$datepicker", fillcolor=2]
+      "mgcrea.ngStrap.datepicker" -> "$datepicker"
+    
+      "datepickerViews"[label="datepickerViews", fillcolor=2]
+      "mgcrea.ngStrap.datepicker" -> "datepickerViews"
+    
+      "$datepicker"[label="$datepicker", fillcolor=2]
+      "mgcrea.ngStrap.datepicker" -> "$datepicker"
+    
+      "datepickerViews"[label="datepickerViews", fillcolor=2]
+      "mgcrea.ngStrap.datepicker" -> "datepickerViews"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsDatepicker"[label="bsDatepicker", color=3]
+      "mgcrea.ngStrap.datepicker" -> "bsDatepicker"
+    
+      "bsDatepicker"[label="bsDatepicker", color=3]
+      "mgcrea.ngStrap.datepicker" -> "bsDatepicker"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+    
+      
+        "$locale"[label="$locale"]
+        "$locale" -> "bsDatepicker"
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "bsDatepicker"
+      
+        "$datepicker"[label="$datepicker"]
+        "$datepicker" -> "bsDatepicker"
+      
+        "$dateParser"[label="$dateParser"]
+        "$dateParser" -> "bsDatepicker"
+      
+    
+      
+        "$locale"[label="$locale"]
+        "$locale" -> "bsDatepicker"
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "bsDatepicker"
+      
+        "$datepicker"[label="$datepicker"]
+        "$datepicker" -> "bsDatepicker"
+      
+        "$dateParser"[label="$dateParser"]
+        "$dateParser" -> "bsDatepicker"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

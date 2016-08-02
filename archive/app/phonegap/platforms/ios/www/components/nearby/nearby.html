@@ -1,0 +1,32 @@
+<div class="container-fluid navfix nearbyBG">
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2 col-xs-12 text-center">
+
+			<span ng-show="showNoLoc">
+				<h4>Sorry, we need your location before entering Kip</h4>
+				
+				<h5>
+					We know privacy is important, so we understand :)
+					<br>
+			    	You can re-enable Location Sharing in your browser settings
+				</h5>
+				<img ng-if="showNoLoc" width="250" ng-src="/img/IF/failfairy.png"/>
+				<br><br>
+			</span>		
+
+			<span ng-show="showCreateNew" class="loading-create-new">
+				
+				
+				<h5><img width="85px" src="img/tidepools/default.jpg">Nearby Places and Events</h5>
+				<button class="btn btn-primary" ng-click="initGeo()"><span class="glyphicon glyphicon-refresh"></span> Refresh</button>
+				<a href="/welcome"><button class="btn btn-default">What are bubbles?</button></a>
+				<a ng-click="newWorld()"><button class="btn btn-default">+ New Bubble</button></a>
+
+
+
+				<br><br>
+			</span>
+		
+		</div>
+	</div>
+</div>

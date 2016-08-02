@@ -1,0 +1,17 @@
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
+	Details
+</header>
+<article class="marble-page-content">
+	<!-- REMOVE AICP -->
+	<div class="media" ng-if="!(routeParams.worldURL.indexOf('aicp_2015') > -1)">
+		<img class="media-object" if-src="{{::world.avatar}}">
+		<div class="media-body">
+			<!-- <h4 class="media-heading">{{::world.name}}</h4> -->
+			<p ng-if="::world.time.start">Starts at {{::world.time.start | date: 'short'}}</p>
+			<p ng-if="::world.time.end">Ends at {{::world.time.end | date: 'short'}}</p>
+		</div>
+	</div>
+	<br ng-if="!(routeParams.worldURL.indexOf('aicp_2015') > -1)">
+	<span href-listener ng-bind-html="world.description" class="world-description"></span>
+</article>

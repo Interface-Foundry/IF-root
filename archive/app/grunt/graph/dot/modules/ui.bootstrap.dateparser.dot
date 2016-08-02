@@ -1,0 +1,60 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.dateparser"[label="ui.bootstrap.dateparser", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+      "dateParser"[label="dateParser", color=5]
+      "ui.bootstrap.dateparser" -> "dateParser"
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+      
+        "$locale"[label="$locale"]
+        "$locale" -> "dateParser"
+      
+        "orderByFilter"[label="orderByFilter"]
+        "orderByFilter" -> "dateParser"
+      
+    
+
+    
+
+    
+
+
+}

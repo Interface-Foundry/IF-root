@@ -1,0 +1,31 @@
+<div class="fullPage">
+	<div class="fullPage-content u-centerXY">
+		<div class="row">
+			<img src="img/kip/kipLogo.svg" style="max-width:49%; margin-left:-31px; margin-bottom:-10px; margin-top: -29px;">
+		</div>
+		<h3>Please Confirm Your Email</h3>
+		<p class="fullPage-p">Email you signed up with:</p>
+		<p class="fullPage-p">
+			<input type="email"
+				name="email" 
+				class="inputEdit u-textAlignCenter u-relative"
+				style="left: 16px; color: rgb(100, 100, 100); padding-right: 22px" 
+				size="24"
+				ng-model="user.newEmail"
+				initial-val="{{ user.newEmail }}"
+				click-to-edit>
+			<img src="img/icons/ic_edit_grey600.png" 
+				class="u-relative u-inlineBlock" 
+				style="width: 24px; top: -2px; left: -12px; z-index:-1">
+		</p>
+
+		<span class="errorMsg u-absolute u-centerX" 
+			ng-if="errorMsg">{{ errorMsg }}</span>
+
+		<button class="btnMain btnMain--redKip u-100X" 
+			style="margin-top: 80px"
+			ng-click="resendEmail()">RESEND EMAIL</button>
+
+	</div>
+	<div class="fullPage-close" ng-click="setShowSplashFalse()"></div>
+</div>

@@ -1,0 +1,57 @@
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
+	Collecting
+</header>
+<div class="col-xs-12">
+<li style="height:235px;" class="message message-card">
+
+	<div style="position:relative; float:left; margin-left:-62px;" ng-hide="temp.finalPresent">
+		<img style="position:absolute;" ng-src="img/IF/createtech/bot_silo.svg">
+		<img style="position:absolute;" ng-src="img/IF/createtech/bot_head.svg">
+
+		<span class="animate-repeat" ng-repeat="present in collectedPresents">
+			<img style="position:absolute;" ng-show="present == 'BubblBot Antenna'" ng-src="img/IF/createtech/bot_antenna.svg">
+			<img style="position:absolute;" ng-show="present == 'BubblBot Body'" ng-src="img/IF/createtech/bot_body.svg">
+			<img style="position:absolute;" ng-show="present == 'BubblBot Arms'" ng-src="img/IF/createtech/bot_arms.svg">
+			<img style="position:absolute;" ng-show="present == 'BubblBot Legs'" ng-src="img/IF/createtech/bot_legs.svg">
+		</span>
+	</div>
+	<div style="margin-left:-62px; position:relative; float:left;" ng-show="temp.finalPresent">
+		<img style="position:absolute;" ng-src="img/IF/createtech/bot_final.gif">
+	</div>
+
+	<p ng-hide="temp.finalPresent || temp.signupCollect" style="float:left; position: absolute; margin-top:230px; margin-left:-25px;"><b>{{presentsLeft}}</b> parts left to find</p>
+
+
+<span ng-show="temp.presentAlreadyCollected">
+	<div style="float:right; width:130px;" ng-switch="landmark.category.name">
+		<p>You already found {{landmark.category.name}}, BubblBot thanks you!</p>
+		<img width="300" style="margin-top:33px; margin-left:-46px;" ng-switch-when="BubblBot Antenna" ng-src="img/IF/createtech/bot_antenna.svg">
+		<img width="300" style="margin-top:-103px; margin-left:-46px;" ng-switch-when="BubblBot Body" ng-src="img/IF/createtech/bot_body.svg">
+		<img width="300" style="margin-top:-110px; margin-left:-46px;" ng-switch-when="BubblBot Arms" ng-src="img/IF/createtech/bot_arms.svg">
+		<img width="300" style="margin-top:-220px; margin-left:-46px;" ng-switch-when="BubblBot Legs" ng-src="img/IF/createtech/bot_legs.svg">
+	</div>
+</span>
+
+<span ng-show="temp.presentCollected">
+	<div style="float:right; width:130px;" ng-switch="landmark.category.name">
+		<p>You collected {{landmark.category.name}}, BubblBot thanks you!</p>
+		<img width="300" style="margin-top:33px; margin-left:-46px;" ng-switch-when="BubblBot Antenna" ng-src="img/IF/createtech/bot_antenna.svg"></img>
+		<img width="300" style="margin-top:-103px; margin-left:-46px;" ng-switch-when="BubblBot Body" ng-src="img/IF/createtech/bot_body.svg"></img>
+		<img width="300" style="margin-top:-110px; margin-left:-46px;" ng-switch-when="BubblBot Arms" ng-src="img/IF/createtech/bot_arms.svg"></img>
+		<img width="300" style="margin-top:-220px; margin-left:-46px;" ng-switch-when="BubblBot Legs" ng-src="img/IF/createtech/bot_legs.svg"></img>
+	</div>
+</span>
+
+<span ng-show="temp.showInitialPresent">
+<p style="float:right; width:130px; clear: both;">Help rebuild our friend BubblBot by collecting bot parts around the NERD center</p>
+<small style="float:right; width:130px; display: block; clear: both;">Explore different iBeacon-enabled rooms in the NERD center to find parts</small>
+</span>
+
+<span ng-show="temp.finalPresent" style="position:relative; float:right; width:163px;">
+	<p style="float:right;">Thanks for building me {{userName || ''}}!</p>
+</span>
+
+</li>
+</div>
+<a ng-click="dialog.showDialog('authDialog.html')" class="marble-btn bottom-right" ng-style="::{'background': style.titleBG_color}" ng-hide="user">Sign Up</a>

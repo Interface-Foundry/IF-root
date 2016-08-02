@@ -1,0 +1,25 @@
+env: production
+isProduction: true
+mongodb:
+  url: mongodb://jolteon.internal.kipapp.co/foundry?&connectTimeoutMS=600000&socketTimeoutMS=600000
+  backuphost: jolteon.internal.kipapp.co
+  options:
+    replset:
+      rs_name: foundry
+      socketOptions:
+        keepAlive: 1
+elasticsearch:
+  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
+elasticsearchElk:
+  url: http://elasticsearch-cerulean.internal.kipapp.co:9200
+redis:
+  port: 6379
+  url: redis-thunder.internal.kipapp.co
+geoipURL: http://localhost:8080/json/
+neighborhoodServer:
+  url: http://localhost:9998
+app:
+  publicAPI: https://kipapp.co/styles/api
+picstitch: http://localhost:5000
+nlp: http://localhost:8083
+doc2vec: http://localhost:8084

@@ -1,0 +1,21 @@
+<div class="compassDropdown if-animate" ng-show="compassState">
+	<header class="compassHeader">
+		<img class="compassHeader-icon" src="img/icons/compass-dark.png" width="32" height="32">
+		Compass
+		<button class="compass-close"></button>
+	</header>
+	<ul class="list">
+		<li ng-if="!nearbyBubbles" class="text-center">
+			<div class="loading-spinner">
+				<div class="lspin1"></div>
+				<div class="lspin2"></div>
+			</div>
+			<span class="lightblue500">Loading...</span>
+		</li>
+		<li ng-repeat="bubble in nearbyBubbles track by bubble._id" class="list-item if-animate">
+			<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
+		</li>
+<!-- 		<li class="list-item">Nearby</li> -->
+	</ul>
+</div>
+

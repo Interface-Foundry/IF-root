@@ -1,0 +1,78 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.popover"[label="ui.bootstrap.popover", color=1]
+
+    
+      "ui.bootstrap.tooltip"[label="ui.bootstrap.tooltip", color=1]
+      "ui.bootstrap.tooltip" -> "ui.bootstrap.popover"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "popoverPopup"[label="popoverPopup", color=3]
+      "ui.bootstrap.popover" -> "popoverPopup"
+    
+      "popover"[label="popover", color=3]
+      "ui.bootstrap.popover" -> "popover"
+    
+      "popoverPopup"[label="popoverPopup", color=3]
+      "ui.bootstrap.popover" -> "popoverPopup"
+    
+      "popover"[label="popover", color=3]
+      "ui.bootstrap.popover" -> "popover"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "popover"
+      
+    
+      
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "popover"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

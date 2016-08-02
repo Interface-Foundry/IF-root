@@ -1,0 +1,44 @@
+<div class="surface">
+<form name="signupForm" ng-submit="userManager.signup.signup()">
+		<h4 class="auth-title">Join Kip!</h4>
+		<div class="closeWrapper closeElement" ng-click="dialog.close($event)">
+			<img class="closeImg closeElement nav-icon" src="img/icons/ic_clear_black_24dp.png">
+		</div>
+		<hr class="nomargin">
+		<div ng-if="userManager.signup.error">
+			{{userManager.signup.error}}
+		</div>
+		<input name="email" type="email" 
+			placeholder="Email" class="auth-input" ng-model="userManager.signup.email" required>
+		<div ng-messages="signupForm.email.$error" ng-if="signupForm.email.$dirty">
+			<div ng-message="required">Email is required.</div>
+			<div ng-message="email">This needs to be an email</div>	
+		</div>
+		<input name="password" type="password"
+			 placeholder="Password" class="auth-input" ng-model="userManager.signup.password" required>
+		<div ng-messages="signupForm.password.$error" ng-if="signupForm.password.$dirty">
+			<div ng-message="required">Password is required</div>
+		</div>		 
+		<button type="submit" class="auth-create" style="margin-bottom:0px">Create Account</button>
+
+		
+		<!-- @ifdef WEB -->
+		<div class="text-center" style="margin:4px 0px;">or</div>
+		
+		<div class="btn-group btn-group-justified" style="margin-bottom:20px;">
+		  <div class="btn-group">
+		    <button type="button" class="btn fb-btn" ng-click="go('auth/facebook')">
+		    	<img src="img/icons/facebook-16.png" width="16px" height="16px"> Connect with Facebook</button>
+		  </div>
+		</div>
+		<!-- @endif -->
+
+		<!-- @ifdef PHONEGAP -->
+	
+		<button type="button" class="btn fb-btn" ng-click="fbLogin()"><img src="img/icons/facebook-16.png" width="16px" height="16px"> Connect with Facebook</button>
+
+		<!-- @endif -->
+		
+		<a ng-click="dialog.showDialog('authDialog.html')" href="" style="display:block; margin: 20px 0px 14px 0px;">Already have an account? Sign in here</a>
+	</form>
+</div>

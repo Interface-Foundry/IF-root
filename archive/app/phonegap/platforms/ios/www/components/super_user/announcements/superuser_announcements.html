@@ -1,0 +1,54 @@
+<nav class="subnav-fixed">
+  <select class="menu pull-left" 
+          ng-change="changeRoute()"
+          ng-model="currentRoute"
+          ng-options="route for route in routes">
+  </select>
+  <p class="superuser-title">{{region | capitalizeFirst}} Announcements</p>
+</nav>
+
+<div id="shelf" class="shelf-surface wrap superuser-background">
+  <div class="container-fluid navfix">
+    <div class="superuser-list">
+      <div ng-if="!showAddAnnouncement"
+              class="add-button"
+              ng-click="toggleNewAnnouncement()">
+        <div class="circle">+</div>
+        Create New Announcement
+      </div>
+      <div ng-if="showAddAnnouncement"
+           ng-include="'components/super_user/announcements/superuser.announcements.new.html'"></div>
+
+      <ul>
+        <li class="announcement" ng-repeat="announcement in announcements">
+          <div class="superuser-left-col">
+            <button ng-if="announcement.live" 
+                    class="btn btn-success"
+                    ng-click="toggleDraftState($index)">Live &#10004;</button>
+            <button ng-if="!announcement.live" 
+                    class="btn btn-default"
+                    ng-click="toggleDraftState($index)">Draft</button>
+            <div class="arrow"
+                 ng-click="changeAnnouncementOrder($index, 'up')"
+                 ng-if="!$first">&and;</div>
+            <div>{{$index + 1}}</div>
+            <div class="arrow"
+                 ng-click="changeAnnouncementOrder($index, 'down')"
+                 ng-if="!$last">&or;</div>
+          </div>
+          <div class="media card superuser-list-item">
+
+            <h4>{{announcement.headline}}<span ng-click="editAnnouncement($index)">&#9998;</span></h4>
+            <p>{{announcement.body}}</p>
+            <a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a>
+
+          </div>
+          <button class="x-button"
+                  ng-click="deleteAnnouncement($index)">x</button>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+  <div class="clearfix"></div>
+</div>

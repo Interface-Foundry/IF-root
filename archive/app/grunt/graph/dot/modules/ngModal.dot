@@ -1,0 +1,62 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ngModal"[label="ngModal", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+      "ngModalDefaults"[label="ngModalDefaults", fillcolor=2]
+      "ngModal" -> "ngModalDefaults"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "modalDialog"[label="modalDialog", color=3]
+      "ngModal" -> "modalDialog"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "ngModalDefaults"[label="ngModalDefaults"]
+        "ngModalDefaults" -> "modalDialog"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

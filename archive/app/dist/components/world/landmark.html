@@ -1,0 +1,53 @@
+<div class="aperture-pop u-pointer" ng-click="aperture.set('full')" ng-show="aperture.state=='aperture-third'"></div>
+<div id="shelf" ng-class="[aperture.state]">
+	<div id='top-shelf' class="noPreventDefault"
+		ng-class="[aperture.navfix, aperture.state]" 
+		ng-style="::{'background-color': style.titleBG_color}" 
+		ng-click="aperture.toggle('full')"
+		ng-swipe-up="aperture.set('off')"
+		ng-swipe-down="aperture.set('full')">
+		<div class="world-title noPreventDefault" fit-font>
+				<span class="vertical-middle noPreventDefault">{{landmark.name}}</span>
+		</div>
+	</div>
+	
+	<div class="shelf-surface wrap" bubble-body>		
+		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
+		<!--PRESENTS-->
+			<div ng-include="temp.showPresentCard==true ? 'components/world/templates/presents.html' : null" class="marble-page">
+			</div>
+	
+			<div class="marble-page landmark">
+				<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">
+					<article>
+						<div class="explore-media clearfix">
+							<img if-src="{{::landmark.avatar}}" class="media-object">
+							<div class="explore-media-body">
+								<h3 class="explore-media-heading">{{::landmark.name}}</h3>
+								<h6>{{::landmark.time.start | date: 'EEE, MMM d | h:mm a'}}
+									<span ng-show="landmark.time.end">-</span>
+									{{::landmark.time.end | date: 'h:mm a'}}
+								</h6>
+								<p ng-show="world.name">
+									Located in<span class="u-colorLinkBlue u-pointer" ng-click="goToWorld()"> {{ ::world.name }}</span>
+								</p>
+								<p>
+									<span ng-show="landmark.loc_info.floor_num">Floor: {{landmark.loc_info.floor_num | floorNumToName }}</span>
+
+									<span ng-show="landmark.loc_info.room_name">Room: {{::landmark.loc_info.room_name}}</span>
+								</p>
+								<p>{{::landmark.summary}}</p>
+								<span href-listener ng-bind-html="landmark.description"></span>
+							</div>
+						</div>
+					</article>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<user-location class="if-animate"
+	style="style"
+	ng-class="[aperture.state]">
+</user-location>

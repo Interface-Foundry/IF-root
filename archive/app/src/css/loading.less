@@ -1,0 +1,81 @@
+.loading-spinner {
+	position: relative;
+	margin: 20px auto;
+	width: 40px;
+	height: 40px;
+
+	z-index: 1050;
+}
+
+.lspin1, .lspin2 {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #2196f3;
+  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-animation: loading-bounce 2.0s infinite ease-in-out;
+  animation: loading-bounce 2.0s infinite ease-in-out;
+}
+
+.lspin2 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+.routeLoading {
+  position: absolute;
+  z-index: 101;
+  top: 48px;
+  height: 4px;
+  // border: 1px solid black;
+  background-color: @color-blue--routeLoadingIndicator;
+}
+
+@-webkit-keyframes routeLoading--left {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 0%}
+  50% {width: 50%; left: 0%}
+  90% {width: 0%; left: 0%}
+  100% {width: 0%; left: 0%}
+}
+
+@keyframes routeLoading--left {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 0%}
+  50% {width: 50%; left: 0%}
+  90% {width: 0%; left: 0%}
+  100% {width: 0%; left: 0%}
+}
+
+@-webkit-keyframes routeLoading--right {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 50%}
+  50% {width: 50%; left: 50%}
+  90% {width: 0%; left: 100%}
+  100% {width: 0%; left: 100%}
+}
+
+@keyframes routeLoading--right {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 50%}
+  50% {width: 50%; left: 50%}
+  90% {width: 0%; left: 100%}
+  100% {width: 0%; left: 100%}
+}
+
+.routeLoading--left {
+  left: 50%;
+  width: 0%;
+  -webkit-animation: routeLoading--left 2s ease-in-out infinite;
+  animation: routeLoading--left 2s ease-in-out infinite;
+}
+
+.routeLoading--right {
+  left: 50%;
+  width: 0%;
+  -webkit-animation: routeLoading--right 2s ease-in-out infinite;
+  animation: routeLoading--right 2s ease-in-out infinite;
+}

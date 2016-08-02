@@ -1,0 +1,94 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap"[label="mgcrea.ngStrap", color=1]
+
+    
+      "mgcrea.ngStrap.modal"[label="mgcrea.ngStrap.modal", color=1]
+      "mgcrea.ngStrap.modal" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.aside"[label="mgcrea.ngStrap.aside", color=1]
+      "mgcrea.ngStrap.aside" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.alert"[label="mgcrea.ngStrap.alert", color=1]
+      "mgcrea.ngStrap.alert" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.button"[label="mgcrea.ngStrap.button", color=1]
+      "mgcrea.ngStrap.button" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.select"[label="mgcrea.ngStrap.select", color=1]
+      "mgcrea.ngStrap.select" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.datepicker"[label="mgcrea.ngStrap.datepicker", color=1]
+      "mgcrea.ngStrap.datepicker" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.timepicker"[label="mgcrea.ngStrap.timepicker", color=1]
+      "mgcrea.ngStrap.timepicker" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.navbar"[label="mgcrea.ngStrap.navbar", color=1]
+      "mgcrea.ngStrap.navbar" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.popover"[label="mgcrea.ngStrap.popover", color=1]
+      "mgcrea.ngStrap.popover" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.dropdown"[label="mgcrea.ngStrap.dropdown", color=1]
+      "mgcrea.ngStrap.dropdown" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.typeahead"[label="mgcrea.ngStrap.typeahead", color=1]
+      "mgcrea.ngStrap.typeahead" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.scrollspy"[label="mgcrea.ngStrap.scrollspy", color=1]
+      "mgcrea.ngStrap.scrollspy" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.affix"[label="mgcrea.ngStrap.affix", color=1]
+      "mgcrea.ngStrap.affix" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.tab"[label="mgcrea.ngStrap.tab", color=1]
+      "mgcrea.ngStrap.tab" -> "mgcrea.ngStrap"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

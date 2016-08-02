@@ -1,0 +1,460 @@
+/* *NAV* Navigation Bar */
+@nav-height: 48px;
+
+nav.main-nav {
+	position: fixed;
+	top: 0; left: 0;
+	width: 100%;
+	height: 48px;
+	margin: 0;
+	padding: 0;
+	background-color: rgba(62, 82, 181, 0.96);
+	z-index: 1000;
+}
+
+.nav-title {
+	display: none;
+	float: left;
+	margin-left: 50px;
+	color: #FFF !important;
+	font-size: 30px;
+	line-height: 48px;
+	font-weight: 500;
+}
+
+@media (min-width: 400px) {
+	nav .nav-title {
+		display: block;
+		font-size: 30px;
+	}
+}
+
+nav .nav-title small {
+	color: #0091EA;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0; 
+}
+
+.nav-item {
+	float: left;
+	height: 40px;
+	position: relative;
+}
+
+.nav-icon {
+	width: 40px;
+	height: 40px;
+	cursor: pointer;
+}
+
+.navbar-right {
+	float: right; 
+	margin: 0px 4px 0px 0px;
+}
+
+.navLogo-wrapper {
+	float: left;
+	margin-left: 10px;
+	width: 48px;
+	height: 48px;
+}
+
+.navLogo-wrapper.is-selected {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.navLogo {
+	width: 42px;
+}
+
+.compass {
+	position: relative;
+	display: block;
+	width: 40px;
+	height: 40px;
+}
+
+.compass-badge.badge {
+	position: absolute;
+	bottom:-2px;
+	right:-2px;
+	z-index: 100;
+	
+	background: #0091EA;
+}
+
+.back-button {
+	float: left;
+	width: 48px;
+	height: 48px;
+	border: none;
+	outline: none;
+	background: url('img/icons/ic_chevron_left_white_48dp.png') center center / 48px 48px no-repeat;
+	&:active {
+		background-color: rgba(0, 0, 0, 0.2);
+	}
+}
+
+.back-button.is-invisible {
+	visibility: hidden;
+}
+
+.view-tabs {
+	display: block;
+	float: right;
+}
+
+.view-tab {
+	display: block;
+	position: relative;
+	float: left;
+	width: 48px;
+	height: 48px;
+	margin: 0px;
+	padding: 0px;
+	border: none;
+	outline: none;
+	padding: none;
+	background: none;
+	cursor: pointer;
+	
+	&.selected:after {
+		content: '';
+		position: absolute;
+		width: 32px;
+		height: 48px;
+		background: rgba(0, 0, 0, 0.2);
+		bottom: 0px;
+		z-index: -1;
+		left: 8px;
+	}
+}
+
+.home-tab {
+	background: center / 32px 32px url('img/icons/nav/home.png') no-repeat;
+}
+
+.explore-tab {
+	background: center / 32px 32px url('img/icons/nav/explore.png') no-repeat;
+}
+
+.search-tab {
+	background: center / 32px 32px url('img/icons/nav/search.png') no-repeat;
+}
+
+.explore-view {
+	position: absolute;
+	top: @nav-height;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	
+	z-index: 100;
+}
+
+/*DEPRACATED*/
+.search-bar {
+	position: absolute;
+	top: 48px; 
+	left: 0px;
+	width: 100%;
+	height: 48px;
+	padding: 2px 80px 2px 8px;
+	font-size: 24px;
+	line-height: 48px;
+	outline: none;
+	border: none;
+}
+
+.search-btn {
+	position: absolute;
+	top: 48px;
+	right: 0px;
+	height: 48px;
+	width: 80px;
+	color: #FFF;
+	background: #00c853;
+	border: none;
+	outline: none;
+}
+
+///USER CHIP
+.user-chip-wrap {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.user-chip {
+	position: relative;
+	float: right;
+	top: 0px; right: 0px;
+	min-width: 48px;
+	height: 32px;
+	margin: 8px;
+	border-radius: 3px;
+	box-shadow: 0px 1px 1px rgba(0,0,0,.2);
+	background: #FFF;
+	cursor: pointer;
+	
+	text-align: center;
+	color: #777;
+
+	&:before {
+		content: ' ';
+		position: absolute;
+		display: block;
+		top: 16px;
+		right: 3px;
+		border-top: 3px solid #999;
+		border-left: 3px solid transparent;
+		border-right: 3px solid transparent;
+	}
+
+	@media only screen and (min-width: 480px) {
+		min-width: 56px;
+		width: auto;
+		text-align: left;
+		font-weight: 400;
+	}
+}
+
+.user-chip-label, .user-chip-label.auth {
+	display: block;
+	line-height: 32px;
+	font-size: 14px;
+	margin: 0px 11px 0px 4px;
+	float: left;
+}
+
+.user-chip-label.auth {
+	margin: 0px 11px 0px 0px;
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.user-chip-img {
+	display: block;
+	height: 24px;
+	width: 24px;
+	border-radius: 12px;
+	margin: 4px auto;
+	@media only screen and (min-width: 480px) {	
+		float: left;
+		margin: 4px;
+	}
+}
+
+.user-map-img {
+	display: inline-block;
+	float: none;
+	position: relative;
+	top: 0px;
+	right: 4px;
+	@media only screen and (min-width: 480px) {
+		top: -2px;
+		right: 4px;
+	}
+}
+
+.leaflet-popup-content p.user-map-text {
+	text-align: center;
+	margin: 0;
+	max-width: 220px;
+}
+
+.avatarWrapper {
+	text-align: center;
+}
+
+
+
+/* } */
+
+@media only screen and (max-width: 480px) {	
+.show-480 {
+	display: none !important;
+}
+}
+
+@media only screen and (min-width: 480px) {	
+	.hide-480 {
+		display: none !important;
+	}
+}
+
+.nav-user-menu {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 192px;
+	background: rgba(255,255,255,.98);
+	border-radius: 3px;
+	box-shadow: 0px 1px 5px 1px rgba(0,0,0,.5);
+	.noselect;
+	overflow: hidden;
+	z-index: 101;
+	text-align: left;
+	font-weight: 400;
+	color: #333;
+}
+
+.nav-user-menu-img {
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	margin: 0px 8px 0px 4px;
+}
+
+.nav-user-menu-title {
+	width: 100%;
+	height: 32px;
+	line-height: 32px;
+	font-size: 14px;
+	padding: 0px 8px;
+}
+
+.nav-user-menu-item {
+	width: 100%;
+	height: 32px; 
+	line-height: 32px;
+	font-size: 14px;
+	padding: 0px 8px;
+}
+
+.nav-user-menu-item:hover {
+	background: #5C6BC0;
+	color: #FFF;
+}
+
+.nav-user-menu-divider {
+	width: 100%;
+	height: 1px;
+	background: #dfdfdf;
+}
+
+.compassDropdown {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 240px;
+	background: #FFF;
+	box-shadow: 0px 2px 2px rgba(0,0,0,.2), 0px 6px 6px rgba(0,0,0,.2); 
+	z-index: 1015;
+	@media only screen and (min-width: 600px) {
+		width: 320px;
+	}
+
+}
+
+.compassDropdown.ng-hide-remove {
+	opacity: 0;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
+}
+
+.compassDropdown.ng-hide-remove.ng-hide-remove-active {
+	opacity: 1;
+}
+
+.compassHeader {
+	position: relative;
+	width: 100%;
+	height: 32px;
+	padding-left: 40px;
+	border-bottom: 1px solid #eee;
+	line-height: 32px;
+	color: #666;
+	font-weight: 500;
+}
+
+.compassHeader-icon {
+	position: absolute;
+	left: 0px;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) -webkit-transform;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) transform;
+
+	transform: translateX(0px);
+	-webkit-transform: translateX(0px);
+}
+
+.ng-hide.ng-hide-remove .compassHeader-icon {
+	transform: translateX(208px);
+	-webkit-transform: translateX(208px);
+}
+
+.ng-hide.ng-hide-remove-active .compassHeader-icon {
+	transform: translateX(0px);
+}
+
+.compass-close {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 48px;
+	height: 48px;
+	background: url('img/icons/ic_clear_grey600_24dp.png') 20px 4px e('/') 24px 24px no-repeat;
+	color: transparent;
+	border: none;
+	outline: none;
+}
+
+// SUBNAV
+.subnav {
+	/* height: 88px; */
+	width: 100%;
+	min-height: 48px;
+	background: #f5f5f5;
+	/* padding: 40px 0px 0px 0px; */
+	text-align: center;
+	z-index: 30;
+}
+
+.subnav-fixed {
+	.subnav(); 
+	position: absolute;
+	margin-top: @nav-height;
+}
+
+.subnavfix {
+	padding-top: 96px !important;
+}
+
+.subnav-header {
+	display: block;
+	font-size: 20px;
+	line-height: 48px;
+	height: 48px;
+	margin: 0px;
+	text-align: center;
+}
+
+.subnav-item {
+	display: block;
+	height: 48px;
+	min-width: 48px;
+}
+
+.subnav-back {
+	width: 48px;
+	height: 48px;
+	float:left;
+	border: none;
+	background: none;
+	outline: none;
+}
+
+span.subnav-back-chevron {
+	display: block;
+	top:0px;
+	float: left;
+	font-size: 24px;
+	margin: 12px 0px;
+	color: #808080;
+}

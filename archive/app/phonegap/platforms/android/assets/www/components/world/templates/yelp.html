@@ -1,0 +1,36 @@
+<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
+	More Info
+</header>
+<article class="marble-page-content">
+	<div style="width:100%; height:40px;">
+		<p><b>From </b><a target="_blank" href="{{world.source_yelp.url}}"><img width="50" style="margin-top:-1px;" src="img/cards/yelp_logo.png"> Yelp.com</a></p>
+	</div>
+
+	<p ng-show="world.source_yelp.rating.rating_img_url_large">
+		<b>Rating </b><br>
+		<img ng-src="{{world.source_yelp.rating_image}}"><br>
+		{{world.source_yelp.rating.review_count}} reviews
+	</p>
+
+	<img class="img-responsive" ng-src="{{world.source_yelp.business_image_l}}">
+
+	<blockquote ng-show="world.summary">{{world.summary}}</blockquote>
+
+	<p ng-show="world.source_yelp.categories">
+		<b>Cuisine </b><br>
+		<span ng-repeat="category in world.source_yelp.categories">{{category[0]}}<br></span>
+	</p>
+
+	<p ng-show="world.source_yelp.locationInfo.display_address">
+		<b>Location </b><br>
+		<span ng-repeat="line in world.source_yelp.locationInfo.display_address">{{line}}<br></span>
+		<span ng-show="world.source_yelp.locationInfo.cross_streets">{{world.source_yelp.locationInfo.cross_streets}}</span>
+	</p>
+
+	<p ng-show="world.source_yelp.display_phone">
+		<b>Phone </b><br> 
+		{{world.source_yelp.display_phone}}
+	</p>
+
+</article>

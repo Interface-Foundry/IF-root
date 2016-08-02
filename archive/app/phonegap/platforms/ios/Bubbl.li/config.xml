@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.if.bubblli" version="0.8.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <preference name="AllowInlineMediaPlayback" value="true" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="BackupWebStorage" value="cloud" />
+    <preference name="DisallowOverscroll" value="false" />
+    <preference name="EnableViewportScale" value="false" />
+    <preference name="FadeSplashScreen" value="true" />
+    <preference name="FadeSplashScreenDuration" value=".25" />
+    <preference name="KeyboardDisplayRequiresUserAction" value="true" />
+    <preference name="MediaPlaybackRequiresUserAction" value="false" />
+    <preference name="ShowSplashScreenSpinner" value="true" />
+    <preference name="SuppressesIncrementalRendering" value="false" />
+    <preference name="TopActivityIndicator" value="gray" />
+    <preference name="GapBetweenPages" value="0" />
+    <preference name="PageLength" value="0" />
+    <preference name="PaginationBreakingMode" value="page" />
+    <preference name="PaginationMode" value="unpaginated" />
+    <feature name="LocalStorage">
+        <param name="ios-package" value="CDVLocalStorage" />
+    </feature>
+    <feature name="EstimoteBeacons">
+        <param name="ios-package" value="EstimoteBeacons" />
+    </feature>
+    <feature name="SplashScreen">
+        <param name="ios-package" value="CDVSplashScreen" />
+        <param name="onload" value="true" />
+    </feature>
+    <feature name="FacebookConnectPlugin">
+        <param name="ios-package" value="FacebookConnectPlugin" />
+        <param name="onload" value="true" />
+    </feature>
+    <plugin name="FacebookConnectPlugin" value="FacebookConnectPlugin" />
+    <access origin="https://m.facebook.com" />
+    <access origin="https://graph.facebook.com" />
+    <access origin="https://api.facebook.com" />
+    <access origin="https://*.fbcdn.net" />
+    <access origin="https://*.akamaihd.net" />
+    <feature name="Geolocation">
+        <param name="ios-package" value="CDVLocation" />
+    </feature>
+    <feature name="Camera">
+        <param name="ios-package" value="CDVCamera" />
+    </feature>
+    <preference name="CameraUsesGeolocation" value="false" />
+    <feature name="StatusBar">
+        <param name="ios-package" value="CDVStatusBar" />
+        <param name="onload" value="true" />
+    </feature>
+    <preference name="StatusBarOverlaysWebView" value="true" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <feature name="InAppBrowser">
+        <param name="ios-package" value="CDVInAppBrowser" />
+    </feature>
+    <feature name="Keychain">
+        <param name="ios-package" value="CDVKeychain" />
+    </feature>
+    <icon height="180" src="res/ios/icon-60@3x.png" width="180" />
+    <icon height="60" src="res/ios/icon-60.png" width="60" />
+    <icon height="120" src="res/ios/icon-60@2x.png" width="120" />
+    <icon height="76" src="res/ios/icon-76.png" width="76" />
+    <icon height="152" src="res/ios/icon-76@2x.png" width="152" />
+    <icon height="40" src="res/ios/icon-40.png" width="40" />
+    <icon height="80" src="res/ios/icon-40@2x.png" width="80" />
+    <icon height="57" src="res/ios/icon.png" width="57" />
+    <icon height="114" src="res/ios/icon@2x.png" width="114" />
+    <icon height="72" src="res/ios/icon-72.png" width="72" />
+    <icon height="144" src="res/ios/icon-72@2x.png" width="144" />
+    <icon height="29" src="res/ios/icon-small.png" width="29" />
+    <icon height="58" src="res/ios/icon-small@2x.png" width="58" />
+    <icon height="50" src="res/ios/icon-50.png" width="50" />
+    <icon height="100" src="res/ios/icon-50@2x.png" width="100" />
+    <splash height="1136" src="res/ios/Default-568h@2x~iphone.png" width="640" />
+    <splash height="1334" src="res/ios/Default-667h.png" width="750" />
+    <splash height="2208" src="res/ios/Default-736h.png" width="1242" />
+    <splash height="960" src="res/ios/Default@2x~iphone.png" width="640" />
+    <splash height="480" src="res/ios/Default~iphone.png" width="320" />
+    <splash height="1242" src="res/ios/Default-Landscape-736h.png" width="2208" />
+    <splash height="1536" src="res/ios/Default-Landscape@2x~ipad.png" width="2048" />
+    <splash height="2048" src="res/ios/Default-Portrait@2x~ipad.png" width="1536" />
+    <splash height="1024" src="res/ios/Default-Portrait~ipad.png" width="768" />
+    <name>Bubbl.li</name>
+    <description>
+        Internet of Places.
+    </description>
+    <author email="hello@interfacefoundry.com" href="http://interfacefoundry.com">
+        Interface Foundry
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <access origin="https://bubbl.li" />
+    <preference name="UIWebViewBounce" value="false" />
+    <preference name="EnableLocation" value="true" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="AutoHideSplashScreen" value="false" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+</widget>

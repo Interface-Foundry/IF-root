@@ -1,0 +1,524 @@
+digraph dependencies {
+  node[shape="ellipse",style="filled",colorscheme=paired12]
+
+  
+    "leaflet-directive"[label="leaflet-directive", color=1]
+  
+    "IF"[label="IF", color=1]
+  
+    "ui.calendar"[label="ui.calendar", color=1]
+  
+    "IF-directives"[label="IF-directives", color=1]
+  
+    "monospaced.elastic"[label="monospaced.elastic", color=1]
+  
+    "tidepoolsFilters"[label="tidepoolsFilters", color=1]
+  
+    "tidepoolsServices"[label="tidepoolsServices", color=1]
+  
+    "mgcrea.ngStrap"[label="mgcrea.ngStrap", color=1]
+  
+    "mgcrea.ngStrap.affix"[label="mgcrea.ngStrap.affix", color=1]
+  
+    "mgcrea.ngStrap.alert"[label="mgcrea.ngStrap.alert", color=1]
+  
+    "mgcrea.ngStrap.aside"[label="mgcrea.ngStrap.aside", color=1]
+  
+    "mgcrea.ngStrap.button"[label="mgcrea.ngStrap.button", color=1]
+  
+    "mgcrea.ngStrap.datepicker"[label="mgcrea.ngStrap.datepicker", color=1]
+  
+    "mgcrea.ngStrap.dropdown"[label="mgcrea.ngStrap.dropdown", color=1]
+  
+    "mgcrea.ngStrap.helpers.dateParser"[label="mgcrea.ngStrap.helpers.dateParser", color=1]
+  
+    "mgcrea.ngStrap.helpers.debounce"[label="mgcrea.ngStrap.helpers.debounce", color=1]
+  
+    "mgcrea.ngStrap.helpers.dimensions"[label="mgcrea.ngStrap.helpers.dimensions", color=1]
+  
+    "mgcrea.ngStrap.helpers.parseOptions"[label="mgcrea.ngStrap.helpers.parseOptions", color=1]
+  
+    "mgcrea.ngStrap.modal"[label="mgcrea.ngStrap.modal", color=1]
+  
+    "mgcrea.ngStrap.popover"[label="mgcrea.ngStrap.popover", color=1]
+  
+    "mgcrea.ngStrap.select"[label="mgcrea.ngStrap.select", color=1]
+  
+    "mgcrea.ngStrap.tab"[label="mgcrea.ngStrap.tab", color=1]
+  
+    "mgcrea.ngStrap.timepicker"[label="mgcrea.ngStrap.timepicker", color=1]
+  
+    "mgcrea.ngStrap.typeahead"[label="mgcrea.ngStrap.typeahead", color=1]
+  
+    "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+  
+    "ui.bootstrap"[label="ui.bootstrap", color=1]
+  
+    "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+  
+    "ui.bootstrap.collapse"[label="ui.bootstrap.collapse", color=1]
+  
+    "ui.bootstrap.accordion"[label="ui.bootstrap.accordion", color=1]
+  
+    "ui.bootstrap.alert"[label="ui.bootstrap.alert", color=1]
+  
+    "ui.bootstrap.buttons"[label="ui.bootstrap.buttons", color=1]
+  
+    "ui.bootstrap.carousel"[label="ui.bootstrap.carousel", color=1]
+  
+    "ui.bootstrap.dialog"[label="ui.bootstrap.dialog", color=1]
+  
+    "ui.bootstrap.dropdownToggle"[label="ui.bootstrap.dropdownToggle", color=1]
+  
+    "ui.bootstrap.modal"[label="ui.bootstrap.modal", color=1]
+  
+    "ui.bootstrap.pagination"[label="ui.bootstrap.pagination", color=1]
+  
+    "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+  
+    "ui.bootstrap.tooltip"[label="ui.bootstrap.tooltip", color=1]
+  
+    "ui.bootstrap.popover"[label="ui.bootstrap.popover", color=1]
+  
+    "ui.bootstrap.progressbar"[label="ui.bootstrap.progressbar", color=1]
+  
+    "ui.bootstrap.rating"[label="ui.bootstrap.rating", color=1]
+  
+    "ui.bootstrap.tabs"[label="ui.bootstrap.tabs", color=1]
+  
+    "ui.bootstrap.typeahead"[label="ui.bootstrap.typeahead", color=1]
+  
+    "ui.bootstrap.tpls"[label="ui.bootstrap.tpls", color=1]
+  
+    "ui.bootstrap.bindHtml"[label="ui.bootstrap.bindHtml", color=1]
+  
+    "ui.bootstrap.dateparser"[label="ui.bootstrap.dateparser", color=1]
+  
+    "ui.bootstrap.datepicker"[label="ui.bootstrap.datepicker", color=1]
+  
+    "ui.bootstrap.dropdown"[label="ui.bootstrap.dropdown", color=1]
+  
+    "ui.bootstrap.timepicker"[label="ui.bootstrap.timepicker", color=1]
+  
+    "template/accordion/accordion-group.html"[label="template/accordion/accordion-group.html", color=1]
+  
+    "template/accordion/accordion.html"[label="template/accordion/accordion.html", color=1]
+  
+    "template/alert/alert.html"[label="template/alert/alert.html", color=1]
+  
+    "template/carousel/carousel.html"[label="template/carousel/carousel.html", color=1]
+  
+    "template/carousel/slide.html"[label="template/carousel/slide.html", color=1]
+  
+    "template/datepicker/datepicker.html"[label="template/datepicker/datepicker.html", color=1]
+  
+    "template/datepicker/day.html"[label="template/datepicker/day.html", color=1]
+  
+    "template/datepicker/month.html"[label="template/datepicker/month.html", color=1]
+  
+    "template/datepicker/popup.html"[label="template/datepicker/popup.html", color=1]
+  
+    "template/datepicker/year.html"[label="template/datepicker/year.html", color=1]
+  
+    "template/modal/backdrop.html"[label="template/modal/backdrop.html", color=1]
+  
+    "template/modal/window.html"[label="template/modal/window.html", color=1]
+  
+    "template/pagination/pager.html"[label="template/pagination/pager.html", color=1]
+  
+    "template/pagination/pagination.html"[label="template/pagination/pagination.html", color=1]
+  
+    "template/tooltip/tooltip-html-unsafe-popup.html"[label="template/tooltip/tooltip-html-unsafe-popup.html", color=1]
+  
+    "template/tooltip/tooltip-popup.html"[label="template/tooltip/tooltip-popup.html", color=1]
+  
+    "template/popover/popover.html"[label="template/popover/popover.html", color=1]
+  
+    "template/progressbar/bar.html"[label="template/progressbar/bar.html", color=1]
+  
+    "template/progressbar/progress.html"[label="template/progressbar/progress.html", color=1]
+  
+    "template/progressbar/progressbar.html"[label="template/progressbar/progressbar.html", color=1]
+  
+    "template/rating/rating.html"[label="template/rating/rating.html", color=1]
+  
+    "template/tabs/tab.html"[label="template/tabs/tab.html", color=1]
+  
+    "template/tabs/tabset-titles.html"[label="template/tabs/tabset-titles.html", color=1]
+  
+    "template/tabs/tabset.html"[label="template/tabs/tabset.html", color=1]
+  
+    "template/timepicker/timepicker.html"[label="template/timepicker/timepicker.html", color=1]
+  
+    "template/typeahead/typeahead-match.html"[label="template/typeahead/typeahead-match.html", color=1]
+  
+    "template/typeahead/typeahead-popup.html"[label="template/typeahead/typeahead-popup.html", color=1]
+  
+    "infinite-scroll"[label="infinite-scroll", color=1]
+  
+    "ngModal"[label="ngModal", color=1]
+  
+
+  node[shape="ellipse",style="filled",color=2]
+  
+    
+  
+    
+      "ngRoute" -> "IF"
+    
+      "ngSanitize" -> "IF"
+    
+      "ngAnimate" -> "IF"
+    
+      "ngTouch" -> "IF"
+    
+      "ngMessages" -> "IF"
+    
+      "tidepoolsFilters" -> "IF"
+    
+      "tidepoolsServices" -> "IF"
+    
+      "leaflet-directive" -> "IF"
+    
+      "angularFileUpload" -> "IF"
+    
+      "IF-directives" -> "IF"
+    
+      "mgcrea.ngStrap" -> "IF"
+    
+      "angularSpectrumColorpicker" -> "IF"
+    
+      "ui.slider" -> "IF"
+    
+      "swipe" -> "IF"
+    
+      "monospaced.elastic" -> "IF"
+    
+      "ui.calendar" -> "IF"
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      "ngResource" -> "tidepoolsServices"
+    
+  
+    
+      "mgcrea.ngStrap.modal" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.aside" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.alert" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.button" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.select" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.datepicker" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.timepicker" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.navbar" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.popover" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.dropdown" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.typeahead" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.scrollspy" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.affix" -> "mgcrea.ngStrap"
+    
+      "mgcrea.ngStrap.tab" -> "mgcrea.ngStrap"
+    
+  
+    
+      "mgcrea.ngStrap.helpers.dimensions" -> "mgcrea.ngStrap.affix"
+    
+      "mgcrea.ngStrap.helpers.debounce" -> "mgcrea.ngStrap.affix"
+    
+  
+    
+      "mgcrea.ngStrap.modal" -> "mgcrea.ngStrap.alert"
+    
+  
+    
+      "mgcrea.ngStrap.modal" -> "mgcrea.ngStrap.aside"
+    
+  
+    
+  
+    
+      "mgcrea.ngStrap.helpers.dateParser" -> "mgcrea.ngStrap.datepicker"
+    
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.datepicker"
+    
+  
+    
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.dropdown"
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.popover"
+    
+  
+    
+  
+    
+  
+    
+      "mgcrea.ngStrap.helpers.dateParser" -> "mgcrea.ngStrap.timepicker"
+    
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.timepicker"
+    
+  
+    
+  
+    
+      "mgcrea.ngStrap.helpers.dimensions" -> "mgcrea.ngStrap.tooltip"
+    
+  
+    
+      "ui.bootstrap.tpls" -> "ui.bootstrap"
+    
+      "ui.bootstrap.transition" -> "ui.bootstrap"
+    
+      "ui.bootstrap.collapse" -> "ui.bootstrap"
+    
+      "ui.bootstrap.accordion" -> "ui.bootstrap"
+    
+      "ui.bootstrap.alert" -> "ui.bootstrap"
+    
+      "ui.bootstrap.bindHtml" -> "ui.bootstrap"
+    
+      "ui.bootstrap.buttons" -> "ui.bootstrap"
+    
+      "ui.bootstrap.carousel" -> "ui.bootstrap"
+    
+      "ui.bootstrap.dateparser" -> "ui.bootstrap"
+    
+      "ui.bootstrap.position" -> "ui.bootstrap"
+    
+      "ui.bootstrap.datepicker" -> "ui.bootstrap"
+    
+      "ui.bootstrap.dropdown" -> "ui.bootstrap"
+    
+      "ui.bootstrap.modal" -> "ui.bootstrap"
+    
+      "ui.bootstrap.pagination" -> "ui.bootstrap"
+    
+      "ui.bootstrap.tooltip" -> "ui.bootstrap"
+    
+      "ui.bootstrap.popover" -> "ui.bootstrap"
+    
+      "ui.bootstrap.progressbar" -> "ui.bootstrap"
+    
+      "ui.bootstrap.rating" -> "ui.bootstrap"
+    
+      "ui.bootstrap.tabs" -> "ui.bootstrap"
+    
+      "ui.bootstrap.timepicker" -> "ui.bootstrap"
+    
+      "ui.bootstrap.typeahead" -> "ui.bootstrap"
+    
+  
+    
+  
+    
+      "ui.bootstrap.transition" -> "ui.bootstrap.collapse"
+    
+  
+    
+      "ui.bootstrap.collapse" -> "ui.bootstrap.accordion"
+    
+  
+    
+  
+    
+  
+    
+      "ui.bootstrap.transition" -> "ui.bootstrap.carousel"
+    
+  
+    
+      "ui.bootstrap.transition" -> "ui.bootstrap.dialog"
+    
+  
+    
+  
+    
+      "ui.bootstrap.transition" -> "ui.bootstrap.modal"
+    
+  
+    
+  
+    
+  
+    
+      "ui.bootstrap.position" -> "ui.bootstrap.tooltip"
+    
+      "ui.bootstrap.bindHtml" -> "ui.bootstrap.tooltip"
+    
+  
+    
+      "ui.bootstrap.tooltip" -> "ui.bootstrap.popover"
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      "ui.bootstrap.position" -> "ui.bootstrap.typeahead"
+    
+      "ui.bootstrap.bindHtml" -> "ui.bootstrap.typeahead"
+    
+  
+    
+      "template/accordion/accordion-group.html" -> "ui.bootstrap.tpls"
+    
+      "template/accordion/accordion.html" -> "ui.bootstrap.tpls"
+    
+      "template/alert/alert.html" -> "ui.bootstrap.tpls"
+    
+      "template/carousel/carousel.html" -> "ui.bootstrap.tpls"
+    
+      "template/carousel/slide.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/datepicker.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/day.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/month.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/popup.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/year.html" -> "ui.bootstrap.tpls"
+    
+      "template/modal/backdrop.html" -> "ui.bootstrap.tpls"
+    
+      "template/modal/window.html" -> "ui.bootstrap.tpls"
+    
+      "template/pagination/pager.html" -> "ui.bootstrap.tpls"
+    
+      "template/pagination/pagination.html" -> "ui.bootstrap.tpls"
+    
+      "template/tooltip/tooltip-html-unsafe-popup.html" -> "ui.bootstrap.tpls"
+    
+      "template/tooltip/tooltip-popup.html" -> "ui.bootstrap.tpls"
+    
+      "template/popover/popover.html" -> "ui.bootstrap.tpls"
+    
+      "template/progressbar/bar.html" -> "ui.bootstrap.tpls"
+    
+      "template/progressbar/progress.html" -> "ui.bootstrap.tpls"
+    
+      "template/progressbar/progressbar.html" -> "ui.bootstrap.tpls"
+    
+      "template/rating/rating.html" -> "ui.bootstrap.tpls"
+    
+      "template/tabs/tab.html" -> "ui.bootstrap.tpls"
+    
+      "template/tabs/tabset.html" -> "ui.bootstrap.tpls"
+    
+      "template/timepicker/timepicker.html" -> "ui.bootstrap.tpls"
+    
+      "template/typeahead/typeahead-match.html" -> "ui.bootstrap.tpls"
+    
+      "template/typeahead/typeahead-popup.html" -> "ui.bootstrap.tpls"
+    
+  
+    
+  
+    
+  
+    
+      "ui.bootstrap.dateparser" -> "ui.bootstrap.datepicker"
+    
+      "ui.bootstrap.position" -> "ui.bootstrap.datepicker"
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+}

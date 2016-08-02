@@ -1,0 +1,105 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.progressbar"[label="ui.bootstrap.progressbar", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "ProgressBarController"[label="ProgressBarController", color=4]
+      "ui.bootstrap.progressbar" -> "ProgressBarController"
+    
+      "ProgressController"[label="ProgressController", color=4]
+      "ui.bootstrap.progressbar" -> "ProgressController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "progress"[label="progress", color=3]
+      "ui.bootstrap.progressbar" -> "progress"
+    
+      "progressbar"[label="progressbar", color=3]
+      "ui.bootstrap.progressbar" -> "progressbar"
+    
+      "progress"[label="progress", color=3]
+      "ui.bootstrap.progressbar" -> "progress"
+    
+      "bar"[label="bar", color=3]
+      "ui.bootstrap.progressbar" -> "bar"
+    
+      "progressbar"[label="progressbar", color=3]
+      "ui.bootstrap.progressbar" -> "progressbar"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+        "$transition"[label="$transition"]
+        "$transition" -> "progressbar"
+      
+    
+      
+    
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "ProgressBarController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "ProgressBarController"
+      
+        "progressConfig"[label="progressConfig"]
+        "progressConfig" -> "ProgressBarController"
+      
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "ProgressController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "ProgressController"
+      
+        "progressConfig"[label="progressConfig"]
+        "progressConfig" -> "ProgressController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

@@ -1,0 +1,86 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.button"[label="mgcrea.ngStrap.button", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+      "$button"[label="$button", fillcolor=2]
+      "mgcrea.ngStrap.button" -> "$button"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsCheckboxGroup"[label="bsCheckboxGroup", color=3]
+      "mgcrea.ngStrap.button" -> "bsCheckboxGroup"
+    
+      "bsCheckbox"[label="bsCheckbox", color=3]
+      "mgcrea.ngStrap.button" -> "bsCheckbox"
+    
+      "bsRadioGroup"[label="bsRadioGroup", color=3]
+      "mgcrea.ngStrap.button" -> "bsRadioGroup"
+    
+      "bsRadio"[label="bsRadio", color=3]
+      "mgcrea.ngStrap.button" -> "bsRadio"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+    
+      
+        "$button"[label="$button"]
+        "$button" -> "bsCheckbox"
+      
+        "$$rAF"[label="$$rAF"]
+        "$$rAF" -> "bsCheckbox"
+      
+    
+      
+    
+      
+        "$button"[label="$button"]
+        "$button" -> "bsRadio"
+      
+        "$$rAF"[label="$$rAF"]
+        "$$rAF" -> "bsRadio"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

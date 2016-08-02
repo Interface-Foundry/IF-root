@@ -1,0 +1,30 @@
+food
+
+yay. where
+
+21 Essex St 10002
+
+here are some options in the area.
+1 pizza place
+2 tacos
+3 juice bar
+If any of those look good to you, tell me which one. or you can search for something else by typing "tacos" or sometihng
+
+mexican
+
+ok, here are some options for mexican near 21 Essex St
+1 casa asada
+2 mission chinese
+3 cantina guadalupe
+if any of thses look good to you, tell me which one.
+
+1
+
+ok, here are some popular menu items and categories.  Type the name of the thing you want and i'll give you more information. 
+Some auto-generated synopsis of the menu.
+
+shrimp tacos
+
+$2.29 shrimp tacos on soft white tortilla. available options are guacamole, hot sauce, and salsa.
+
+

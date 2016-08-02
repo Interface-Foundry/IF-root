@@ -1,0 +1,38 @@
+<div class="walkthrough-wrap">
+	<div class="walkthrough col-lg-6 col-md-6 col-sm-8 col-xs-11">
+		<div class="walkthrough-header">
+			<h2 ng-cloak>{{walk[position].title}}</h2>
+			<span ng-cloak>{{walk[position].caption}}</span>
+		</div>
+		<div class="walkthrough-body" ng-style="{'height': walk[position].height+'px'}" 
+			ng-form name="form">
+			<div class="if-animate walkthrough-view" ng-include="'components/edit/walkthrough/templates/'+walk[position].view">
+			</div>
+		</div>
+		<div class="walkthrough-footer">
+			<div class="walkthrough-footer-top" ng-show="position!=0">
+				<button class="walkthrough-next" ng-click="next()" 
+						ng-class="{disabled: position==walk.length-1}"></button>
+				<button class="walkthrough-prev" ng-click="prev()"></button>
+				<div class="walk-progress" ng-hide="position==0">
+					<span class="walk-page">{{position+'/'+(walk.length-1)}}</span>
+					<div class="progressWrap">
+						<div class="progressFill" ng-style="getProgress()">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="walkthrough-footer-bottom">
+				<button class="save-exit" ng-hide="position==0" ng-click="saveAndExit()">
+				Save & Exit</button>
+				<div class="footer-right">
+					<button class="skip" ng-class="{'skippable': walk[position].skip}"
+							ng-disabled="!walk[position].skip"
+							ng-click="next()">N/A</button>
+					<button class="continue" ng-hide="position!=0"
+							ng-click="next()">Continue</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

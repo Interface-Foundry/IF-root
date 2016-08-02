@@ -1,0 +1,153 @@
+#view > .home {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	padding-top: 48px;
+	pointer-events: none;
+
+	-webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
+}
+
+.home > .wrap {
+	pointer-events: auto;
+}
+
+.home-header {
+	top: 0px;
+	left: 0px;
+	height: 276px;
+	width: 100%;
+	z-index: 1;
+
+	@media only screen and (min-width: 768px) {
+		height: 350px;
+	}
+}
+
+.home-background {
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background: center top / cover url('img/hero.jpg');
+	opacity: 1;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+.home-map-button {
+	position: absolute;
+	right: 8px;
+	bottom: -25px;
+	width: 50px;
+	height: 50px;
+	border-radius: 25px;
+	background: url('img/icons/home_map.png') 5px 5px e('/') 40px 40px no-repeat #ffe558;
+	border: none;
+	outline: none;
+	box-shadow: 0px 2px 2px rgba(0,0,0,.2), 0px 6px 6px rgba(0,0,0,.2);	
+	z-index: 100;
+	pointer-events: auto;
+
+}
+
+
+.home-map-button:active {
+	background: url('img/icons/home_map.png') 5px 5px e('/') 40px 40px no-repeat #e6ce4f;
+}
+
+.home-header-bar {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 56px;
+	padding: 8px;
+	background-color: rgba(62, 82, 181, 0.96);
+	color: #FFF;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	
+		pointer-events: auto;
+
+}
+
+.home-nearby-bar {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 56px;
+	padding: 8px;
+	background-color: rgba(245, 67, 54, 0.96);
+	color: #FFF;
+	
+	-webkit-transform: translate3d(100%, 0, 0);
+	transform: translate3d(100%, 0, 0);
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	
+		pointer-events: auto;
+
+}
+
+.home-header-content > h4 {
+	margin: 0px;
+	font-size: 16px;
+	@media only screen and (min-width: 480px) {
+		font-size: 18px;
+	}
+}
+
+.home-header-content > div {
+	margin: 0px;
+}
+
+.home-header-bar:hover, .home-header-bar:active {
+	color: #FFF;
+}
+
+.home-header-position {
+	position: absolute;
+	width: 100%;
+	height: 0px;
+	bottom: 0px; 
+	left: 0px;
+}
+
+.home-header-content {
+	position: relative;
+	width: 100%;
+	margin: 0 auto;
+	@media only screen and (min-width: 480px) {
+		width: 456px;
+	}
+	@media only screen and (min-width: 768px) {
+		width: 600px;
+	}
+}
+
+.mapOn .home-header-bar  {
+	-webkit-transform: translate3d(-100%, 0, 0);
+	transform: translate3d(-100%, 0, 0);
+}
+
+.mapOn .home-nearby-bar {
+	-webkit-transform: translate3d(0%, 0, 0);
+	transform: translate3d(0%, 0, 0);
+}
+
+.mapOn .home-background {
+	opacity: 0;
+}
+
+.mapOn .home-inspector {
+	-webkit-transform: translate3d(0%, 0, 0);
+	transform: translate3d(0%, 0, 0);
+
+}

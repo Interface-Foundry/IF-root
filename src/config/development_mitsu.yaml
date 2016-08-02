@@ -1,0 +1,27 @@
+# env: development_mitsu
+# mongodb:
+#   url: localhost/foundry
+# elasticsearch:
+#   url: http://localhost:9200
+# app:
+#   publicAPI: http://localhost:2997/api
+# nlp: http://kadabra.kipapp.co:8083
+# # nlp: http://104.196.149.61:8083
+# # nlp_rnn: http://104.196.104.89:8085
+# # picstitch: http://localhost:5000
+# # nlp: http://localhost:8083
+# # doc2vec: http://localhost:8084
+
+
+
+env: development_mitsu
+mongodb:
+  url: localhost/foundry
+elasticsearch:
+  url: http://localhost:9200
+app:
+  publicAPI: http://localhost:2997/api
+picstitch: http://104.196.3.135:5000
+# picstitch: http://104.196.3.135:5000
+nlp: http://104.196.102.37:8083
+nlp_rnn: http://104.196.1.204:8085

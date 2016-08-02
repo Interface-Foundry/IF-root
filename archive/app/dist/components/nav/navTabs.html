@@ -1,0 +1,8 @@
+<button class="view-tab home-tab" 
+	ng-show="routeParams.worldURL"
+	ng-class="{selected: navService.status.world}" 
+	ng-click="goWorld()"></button>
+
+<button class="view-tab search-tab" 
+	ng-class="{selected: navService.status.search}" 
+	ng-click="goSearch()"></button>

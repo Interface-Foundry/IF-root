@@ -1,0 +1,97 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "IF"[label="IF", color=1]
+
+    
+      "ngRoute"[label="ngRoute", color=1]
+      "ngRoute" -> "IF"
+    
+      "ngSanitize"[label="ngSanitize", color=1]
+      "ngSanitize" -> "IF"
+    
+      "ngAnimate"[label="ngAnimate", color=1]
+      "ngAnimate" -> "IF"
+    
+      "ngTouch"[label="ngTouch", color=1]
+      "ngTouch" -> "IF"
+    
+      "ngMessages"[label="ngMessages", color=1]
+      "ngMessages" -> "IF"
+    
+      "tidepoolsFilters"[label="tidepoolsFilters", color=1]
+      "tidepoolsFilters" -> "IF"
+    
+      "tidepoolsServices"[label="tidepoolsServices", color=1]
+      "tidepoolsServices" -> "IF"
+    
+      "leaflet-directive"[label="leaflet-directive", color=1]
+      "leaflet-directive" -> "IF"
+    
+      "angularFileUpload"[label="angularFileUpload", color=1]
+      "angularFileUpload" -> "IF"
+    
+      "IF-directives"[label="IF-directives", color=1]
+      "IF-directives" -> "IF"
+    
+      "mgcrea.ngStrap"[label="mgcrea.ngStrap", color=1]
+      "mgcrea.ngStrap" -> "IF"
+    
+      "angularSpectrumColorpicker"[label="angularSpectrumColorpicker", color=1]
+      "angularSpectrumColorpicker" -> "IF"
+    
+      "ui.slider"[label="ui.slider", color=1]
+      "ui.slider" -> "IF"
+    
+      "swipe"[label="swipe", color=1]
+      "swipe" -> "IF"
+    
+      "monospaced.elastic"[label="monospaced.elastic", color=1]
+      "monospaced.elastic" -> "IF"
+    
+      "ui.calendar"[label="ui.calendar", color=1]
+      "ui.calendar" -> "IF"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

@@ -1,0 +1,106 @@
+
+<div class="page page-table" data-ng-controller="StatusCtrl">
+
+    <div ng-show="loading">LOADING PLEASE WAIT PLEASE!</div>
+
+    <div ng-hide="loading" ng-repeat="server in servers">
+        
+
+        <div class="row ui-section">
+        <div class="col-lg-8 clearfix">
+            <h2 class="section-header">{{server.host}}</h2>
+        </div>
+        <div class="col-md-12">
+            <section class="panel panel-default table-dynamic">
+            <div class="table-filters">
+                <div class="row">
+                <div class="col-sm-6 col-xs-12 filter-result-info">
+                    <span>
+                    Timestamp: {{server['@timestamp']}}
+                    </span>
+                    <br>
+                    <span>
+                    IPs: {{server.ips}}
+                    </span>   
+                    <br>
+                    <span>Drives:</span>
+                    <span ng-repeat="drive in server.drives">  
+                        Total: {{drive.total}}
+                        <b>|</b>
+                        Free: {{drive.free}}
+                        <br>
+                    </span>                   
+                </div>
+                </div>
+            </div>
+
+            <h3>CPU</h3>
+            <table class="table table-bordered table-striped table-responsive">
+                <thead>
+                <tr>
+                    <th><div class="th">
+                    Percent
+                    <span class="fa fa-angle-up"
+                        data-ng-click=" order('percent') "
+                        data-ng-class="{active: row == 'percent'}"></span>
+                    <span class="fa fa-angle-down"
+                        data-ng-click=" order('-percent') "
+                        data-ng-class="{active: row == '-percent'}"></span>
+                    </div></th>
+                    <th><div class="th">
+                    Command
+                    <span class="fa fa-angle-up"
+                        data-ng-click=" order('command') "
+                        data-ng-class="{active: row == 'command'}"></span>
+                    <span class="fa fa-angle-down"
+                        data-ng-click=" order('-command') "
+                        data-ng-class="{active: row == '-command}"></span>
+                    </div></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-ng-repeat="process in server.cpu">
+                    <td>{{process.percent}}</td>
+                    <td>{{process.command}}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h3>Memory</h3>
+            <table class="table table-bordered table-striped table-responsive">
+                <thead>
+                <tr>
+                    <th><div class="th">
+                    Percent
+                    <span class="fa fa-angle-up"
+                        data-ng-click=" order('percent') "
+                        data-ng-class="{active: row == 'percent'}"></span>
+                    <span class="fa fa-angle-down"
+                        data-ng-click=" order('-percent') "
+                        data-ng-class="{active: row == '-percent'}"></span>
+                    </div></th>
+                    <th><div class="th">
+                    Command
+                    <span class="fa fa-angle-up"
+                        data-ng-click=" order('command') "
+                        data-ng-class="{active: row == 'command'}"></span>
+                    <span class="fa fa-angle-down"
+                        data-ng-click=" order('-command') "
+                        data-ng-class="{active: row == '-command}"></span>
+                    </div></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-ng-repeat="process in server.mem">
+                    <td>{{process.percent}}</td>
+                    <td>{{process.command}}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            </section>
+        </div>
+        </div>
+    </div>
+    
+</div>

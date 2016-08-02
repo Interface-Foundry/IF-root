@@ -1,0 +1,23 @@
+<div class="fullPage fullPage--splashImg">
+	<div class="fullPage-content u-centerXY">
+
+		<img src="img/kip/kipLogo.svg" class="fullPage-logo" alt="Logo">
+
+		<p class="fullPage-tagline">
+			<span style="margin-bottom: 8px; font-weight: 600">Never miss a moment</span>
+			<span style="font-size: 17px; font-weight: 500">Sign in and find out what's happening around you</span>
+		</p>
+
+		<button class="btnMain btnMain--redKip u-centerX"
+			ng-click="setShowSplash('register', true); contest.login();">SIGN UP</button>
+
+		<!-- contest.login() not needed here, becasue it is in userManager.login.login() -->
+		<button class="btnMain u-centerX"
+			ng-click="setShowSplash('signin', true)">SIGN IN</button>
+		
+
+	</div>
+	<div class="fullPage-close" 
+		ng-if="show.close" 
+		ng-click="setShowSplashFalse(); contest.close();"></div>
+</div>

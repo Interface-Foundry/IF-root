@@ -1,0 +1,41 @@
+env: default
+isProduction: false
+mongodb:
+  url: mongodb://localhost:27017/foundry
+  backuphost: localhost
+  options:
+    server:
+      poolSize: 5
+      socketOptions:
+        keepAlive: 1
+elasticsearch:
+  url: http://pikachu.kipapp.co:9200
+elasticsearchElk:
+  url: http://pikachu.kipapp.co:9200
+redis:
+  port: 6379
+  url: localhost
+neighborhoodServer:
+  url: http://pikachu.kipapp.co:9998
+geoipURL: http://www.freegeoip.net/json/
+app:
+  port: 2997
+  publicAPI: http://pikachu.kipapp.co/api
+auth:
+  jwtSecret: SlytherinOrGTFO
+facebookAuth:
+  clientID: 1401271990193674
+  clientSecret: 8d7c6cb160c60bd656d8a944d8f1f2bd
+  callbackURL: https://kipapp.co/auth/facebook/callback,
+twitterAuth:
+  consumerKey: 79AqE2SPIW219Bx35So7KfTD1
+  consumerSecret: N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R,
+  callbackURL: https://kipapp.co/auth/twitter/callback
+meetupAuth:
+  consumerKey: vgmujlff2vflhtutplkaf15h
+  consumerSecret: hub4tmkp966ir5q4jaaa41qc4l
+  callbackURL: https://kipapp.co/auth/meetup/callback
+picstitch: http://kadabra.kipapp.co:5000
+# picstitch: http://localhost:5000
+nlp: http://kadabra.kipapp.co:8083
+doc2vec: http://kadabra.kipapp.co:8084

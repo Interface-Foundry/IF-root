@@ -1,0 +1,62 @@
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title Kip Tagging
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css")
+        link(href="/normalize.css" rel="stylesheet" type="text/css")
+        link(href="/skeleton.css" rel="stylesheet" type="text/css")
+        link(href="/kiptags.css" rel="stylesheet" type="text/css")
+
+    body
+        .container
+            .row.images
+                each url in item.itemImageURL
+                    .four.columns
+                        img.u-max-full-width(data-src=url)
+            .row
+                h1 #{item.name}
+
+            .row
+                .six.columns
+                    label(for="type") What type of item is this?
+                        input.u-full-width(name="type" placeholder="top, skirt, dress" id="item-type" autocomplete="off")
+                    label(for="style") What style of item?
+                        input.u-full-width(name="style" placeholder="modern, vintage, cool, cute, sexy" autocomplete="off" id="item-style")
+                    label(for="event") When would someone wear this item?
+                        input.u-full-width(name="event" placeholder="office, date, swimming, party" autocomplete="off" id="item-event")
+                    label(for="detail") Item detail
+                        input.u-full-width(name="detail" placeholder="collar, long sleeve, buttons" autocomplete="off" id="item-detail")
+                    label(for="fabric") Item material
+                        input.u-full-width(name="fabric" placeholder="silk, linen, polka dot, plain" autocomplete="off" id="item-fabric")
+
+                .six.columns
+                    label(for="color") Select the colors you see on the item
+                    .colors
+
+            .row
+                button(onclick="save()") save
+                input(type="hidden" value=item._id id="id")
+
+
+            .row.konami.u-hidden
+                .twelve.columns
+                    label Item
+                    pre
+                        code.
+                            #{JSON.stringify(item, null, 2)}
+            .row.konami.u-hidden
+                .twelve.columns
+                    label User
+                    pre
+                        code.
+                            #{JSON.stringify(user, null, 2)}
+            hr
+            .row
+                .twelve.columns.u-textAlignCenter.
+                    Interface Foundry PBC © 2015
+
+        script(src="/konami.js")
+        script(src="/zepto.min.js")
+        script(src="/Vibrant.min.js")
+        script(src="/kiptags.js")

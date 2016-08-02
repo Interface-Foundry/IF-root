@@ -1,0 +1,67 @@
+.search-cat.marble-page{
+	min-height: 0px;
+	height: 56px;
+	z-index: 21; /*puts above floor switcher*/
+}
+
+.search-cat .marble-page-header-icon {
+	background-color: transparent;
+	padding: 0px;
+}
+
+.search-cat .marble-page-header-icon svg {
+	width: 24px;
+	display: block;
+	position: relative;
+	top: 2px;
+}
+
+.search-cat input {
+	width: 65%;
+	outline: 0;
+	border: 0;
+	height: 28px;
+	line-height: 28px;
+
+	@media only screen and (min-width: 375px) {
+		width: 70%;
+	}
+	@media only screen and (min-width: 414px) {
+		width: 75%;
+	}
+}
+
+.search-cat .clearText {
+	float: right;
+	height: 56px;
+	width: 56px;
+	-webkit-transform: translateY(-100%);
+	transform: translateY(-100%);
+}
+
+.search-cat .clearText-img {
+	float: right;
+	width: 23px;
+	margin-right: 16px;
+	opacity: 0.9;
+}
+
+.search-aperture {
+	position: relative;
+	top: 45px;
+}
+
+.search-aperture .search-cat {
+	@media only screen and (min-width: 0px) and (max-width: 480px) {
+		width: initial;
+		margin-left: 8px;
+		margin-right: 8px;
+	}
+}
+
+.loading-spin.category-search {
+	left: 30px;
+	height: 30px;
+	top: 14px;
+	width: 30px;
+}

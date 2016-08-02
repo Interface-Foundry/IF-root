@@ -1,0 +1,98 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.tabs"[label="ui.bootstrap.tabs", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "TabsController"[label="TabsController", color=4]
+      "ui.bootstrap.tabs" -> "TabsController"
+    
+      "TabsetController"[label="TabsetController", color=4]
+      "ui.bootstrap.tabs" -> "TabsetController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "tabs"[label="tabs", color=3]
+      "ui.bootstrap.tabs" -> "tabs"
+    
+      "pane"[label="pane", color=3]
+      "ui.bootstrap.tabs" -> "pane"
+    
+      "tabset"[label="tabset", color=3]
+      "ui.bootstrap.tabs" -> "tabset"
+    
+      "tab"[label="tab", color=3]
+      "ui.bootstrap.tabs" -> "tab"
+    
+      "tabHeadingTransclude"[label="tabHeadingTransclude", color=3]
+      "ui.bootstrap.tabs" -> "tabHeadingTransclude"
+    
+      "tabContentTransclude"[label="tabContentTransclude", color=3]
+      "ui.bootstrap.tabs" -> "tabContentTransclude"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "TabsController"
+      
+        "$element"[label="$element"]
+        "$element" -> "TabsController"
+      
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "TabsetController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

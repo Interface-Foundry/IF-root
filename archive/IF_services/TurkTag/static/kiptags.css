@@ -1,0 +1,36 @@
+body {
+    font-family: Raleway, arial, sans-serif;
+}
+
+.u-hidden {
+    display: none;
+}
+
+.u-textAlignCenter {
+    text-align: center;
+}
+
+.u-extraPaddingY {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+form {
+    margin-bottom: 0;
+}
+
+.colors>button {
+    height: 50px;
+    width: 50px;
+    padding: 0px;
+    margin: 10px;
+    /*border: none; */
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.colors>button.selected {
+    height: 70px;
+    width: 70px;
+    margin: 0;
+}

@@ -1,0 +1,66 @@
+<modal-dialog id="map_modal" show='myData.modalShown' width="800" dialog-title='ADD NEW MAP' on-close='logClose()'>
+
+	<div class="upload_panel text-center" ng-show="upload_panel">
+		
+		<!-- UPLOAD BUTTON	 -->
+		<span class="btn btn-success btn-lg fileinput-button">
+	    <i class="icon-plus icon-white"></i>
+			<span>Select Image</span>
+			<input id="fileuploadmap" type="file" name="files[]">
+		</span>
+
+		<p class="recommended">Recommended size 3000px x 1000px .png or .jpg</p>
+		
+	</div>
+
+	<div class="map_panel">
+	  	<leaflet id="modalMap" center="center" layers="layers" markers="markers" height="550px" width="1000px"></leaflet>
+	  	<button class="btn btn-success done-button" ng-click='buildMap()' ng-hide="upload_panel">Build Map</button>	
+	</div>
+  
+	<button ng-click='resetMap()'>Reset Map</button>
+	
+		<!-- HIDDEN IMAGE PREVIEW -->
+		<div id="uploaded_map" class="ng-hide"></div>
+		<div id="preview_map"></div>      
+		
+</modal-dialog>
+
+<style>
+	#map_modal .upload_panel{
+		background: rgba(255,255,255,0.6);
+		height: 400px;
+		text-align: center;
+		position: absolute;
+		top:61px;
+		z-index: 4000;
+		height: 450px;
+		width: 800px;
+	}
+	#map_modal .upload_panel .fileinput-button{
+		margin-top: 20%;
+		margin-bottom: 20px;
+	}
+	#map_modal .ng-modal-dialog{
+		top: 40%;
+		padding: 0;
+	}
+	#map_modal .ng-modal-title{
+		padding: 10px;
+		margin: 0;
+	}
+	#preview_map{
+		position: absolute;
+		top: 400000000px;
+		left: 400000000px;
+		z-index: 0;
+	}
+	#map_modal #modalMap{
+	}
+	#map_modal .map_panel .done-button{
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+		z-index: 4001;
+	}
+</style>
