@@ -80,7 +80,7 @@ var search = function*(params,origin) {
   db.Metrics.log('search.amazon', params);
 
   if (!params.query) {
-    console.log('error params: ', params)
+    debug('error params: ', params)
     throw new Error('no query specified');
   }
 

@@ -1,286 +1,238 @@
-from flask import (
-    Flask,
-    abort,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
-
-from PIL import Image, ImageFont, ImageDraw
-import textwrap
-import urllib2 as urllib
-import io
-import boto
-import cStringIO
-import time
+import urllib.request
 import random
-import string
+import uuid
 import os
+import io
+import textwrap
+import logging
+from PIL import Image, ImageFont, ImageDraw
+from config import make_image_configs
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
-app = Flask(__name__)
 
-# Constants bestowed upon us by a higher power (slack)
-
-CHAT_WIDTH = 365
-CHAT_HEIGHT = 140
-# MOBILE_WIDTH = 0 # TODO
-# MOBILE_HEIGHT = 800 # TODO
-
-PADDING = 5
-BGCOLOR = 'white'
-BUCKET = 'if-kip-chat-images'
-REGION = 'us-east-1'
-
-#load images
-NUMBER_IMAGES = []
-for i in [1, 2, 3]:
-    f = THIS_FOLDER + '/numbers/' + `i` + '.png'
-    NUMBER_IMAGES.append(Image.open(f))
-REVIEW_STARS = []
-for i in [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]:
-    f = THIS_FOLDER + '/review_stars/' + `i` + '.png'
-    REVIEW_STARS.append(Image.open(f))
-AMAZON_PRIME = Image.open(THIS_FOLDER + '/amazon/prime.png')
-
-conn = boto.s3.connect_to_region(REGION)
-bucket = conn.get_bucket(BUCKET)
-
-@app.route('/', methods=['POST'])
-def index():
-    # get all the posted files
-    images = request.json
-    print images
-    length = 3
-
-    # DESKTOP_WIDTH = (length + 1) * padding + length * image_width
-    # DESKTOP_HEIGHT = 2 * padding + image_height
-    # max_width = ( DESKTOP_WIDTH  - (length + 1) * PADDING ) / length
-    # max_height = DESKTOP_HEIGHT - 2 * PADDING
-
-    # print max_height
-    # print max_width
-
-    biggest_width = 0
-    biggest_height = 0
-    thumbnails = []
-    PIC_SIZE = 130, 130
-    CHAT_WIDTH = 365
-    CHAT_HEIGHT = 140
-    PIC_COORDS = [{'x': 14, 'y': 5},{'x': 24, 'y': 174},{'x': 24, 'y': 336}] #where to draw main pics
-    CHOICE_COORDS = [{'x': 0, 'y': 10},{'x': 0, 'y': 174},{'x': 0, 'y': 336}] #where to draw choice numbers
-    TEXTBOX_COORDS = [{'x': 190, 'y': 10},{'x': 190, 'y': 174},{'x': 190, 'y': 336}] #where to draw text boxes
-
-    #messenger ratio
-    if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        print 'ahhh -_-'
-        CHAT_HEIGHT = 223
-        CHAT_WIDTH = 425
-        PIC_COORDS = [{'x': 5, 'y': 5}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 250, 'y': 5}] #where to draw text boxes
-        PIC_SIZE = 223, 223
-
-    if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-        print 'ahhhhhhhh'
-        CHAT_HEIGHT = 230
-        CHAT_WIDTH = 381
-        PIC_COORDS = [{'x': 20, 'y': 50}] #where to draw main pics
-        TEXTBOX_COORDS = [{'x': 250, 'y': 100}] #where to draw text boxes
-        PIC_SIZE = 250, 250
-
-    #add images
-    for i, data in enumerate(images):
-        im = download_image(data[u'url'])
-        print PIC_SIZE[0]
-        print PIC_SIZE[1]
-        im.thumbnail(PIC_SIZE, Image.ANTIALIAS)
-        thumbnails.append(im)
-
-    #image object
-    img = Image.new('RGB', (CHAT_WIDTH, CHAT_HEIGHT), BGCOLOR)
-
-    #draw a border for skype images
-    # if images[0][u'origin'] and images[0][u'origin'] == 'skype':
-    #     #draw white boxes
-    #     drawBorder = ImageDraw.Draw(img)
-    #     drawBorder.rectangle(((0,0),(360,191)), fill="#00AFF0")
-    #     drawBorder.rectangle(((3,3),(356,187)), fill="white")
+def load_number_images():
+    '''
+    '''
+    images = []
+    # [1, 2, 3]
+    number_images = [x for x in range(1, 4)]
+    for i in number_images:
+        f = THIS_FOLDER + '/numbers/' + repr(i) + '.png'
+        images.append(Image.open(f))
+    return images
 
 
-    for i, im in enumerate(thumbnails):
-        #add pics
-        x = PIC_COORDS[i][u'x']
-        y = PIC_COORDS[i][u'y']
-        img.paste(im, (x, y))
-        # #add numbers
-        # x = CHOICE_COORDS[i][u'x']
-        # y = CHOICE_COORDS[i][u'y']
-        # img.paste(NUMBER_IMAGES[i], (x, y), mask=NUMBER_IMAGES[i])
+def load_fonts():
+    fonts_file = os.path.join('fonts', 'HelveticaNeue-Regular.ttf')
+    font = {}
+    font_size = [12, 13, 14, 15, 16, 20, 28]
+    for s in font_size:
+        font[s] = ImageFont.truetype(fonts_file, s)
+    return font
 
 
-    #add names, text wrapped
-    font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 16) #price
-    font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 13)
+def load_review_stars():
+    star_images = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
+    rs_dict = {}
+    for i in star_images:
+        f = THIS_FOLDER + '/review_stars/' + str(i) + '.png'
+        rs_dict[str(i)] = Image.open(f)
+    return rs_dict
 
-    if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
-        font = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 28) #price
-        font2 = ImageFont.truetype(THIS_FOLDER + "/HelveticaNeue-Regular.ttf", 20)
 
-    for i, im in enumerate(images):
-        x = TEXTBOX_COORDS[i][u'x'] - 30
-        y = TEXTBOX_COORDS[i][u'y']
+def load_amazon_prime():
+    amzn_prime_logo = Image.open(THIS_FOLDER + '/amazon/prime.png')
+    return amzn_prime_logo
+
+
+def download_image(url):
+    fd = urllib.request.urlopen(url)
+    image_file = io.BytesIO(fd.read())
+    im = Image.open(image_file)
+    return im
+
+
+class PicStitch:
+    '''
+    {'price': '$15.98',
+     'name': ['Size: Large', 'Amoluv', 'Amoluv owns its own trademarks.
+      Trademark number:86522196, The package contains Amoluv Tag'],
+     'origin': 'slack',
+     'reviews': {'rating': 3.2, 'reviewCount': '258'},
+     'prime': '0',
+     'url': 'http://ecx.images-amazon.com/images/I/51cgwKrncWL.jpg'}
+    '''
+
+    def __init__(self,
+                 img_req,
+                 bucket,
+                 amazon_prime_image,
+                 review_stars_images,
+                 font_dict):
+        '''
+        '''
+        self.thumbnails = []
+        self.origin = None
+
+        self.img_req = img_req[0]
+        self.bucket = bucket
+        self.bucket_name = 'if-kip-chat-images'
+
+        self.amazon_prime_image = amazon_prime_image
+        self.review_stars_images = review_stars_images
+        self.font_dict = font_dict
+
+        if self.img_req['prime']:
+            self.prime = True
+        else:
+            self.prime = False
+
+        self._get_config()
+        self._make_image()
+        self._upload_image_to_s3()
+
+    def _get_config(self):
+        if self.img_req['origin']:
+            if self.img_req['origin'] in ['facebook', 'slack', 'skype']:
+                self.origin = self.img_req['origin']
+        else:
+            self.origin = 'slack'
+            logging.critical('NO_ORIGIN__ASSUMING_SLACK')
+        self.config = make_image_configs(self.font_dict, self.origin)
+
+    def _make_image(self):
+        # should be 1 image_req...
+        # image_data = self.img_req
+
+        # create blank image based on source (slack/facebook/skype)
+        img = Image.new(mode='RGB',
+                        size=(self.config['CHAT_WIDTH'],
+                              self.config['CHAT_HEIGHT']),
+                        color=self.config['BGCOLOR'])
+
+        # get image in thumbnail format
+        thumb_img = download_image(self.img_req['url'])
+        thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
+
+        # post image thumbnail
+        img.paste(thumb_img,
+                  (self.config['PIC_COORDS'][0]['x'],
+                   self.config['PIC_COORDS'][0]['y']))
+
+        # post text
+        last_y = 5
+        x = self.config['TEXTBOX_COORDS'][0]['x'] - 30
+        y = self.config['TEXTBOX_COORDS'][0]['y']
         draw = ImageDraw.Draw(img)
 
-        #draw white fill to cover image
-        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        #     #draw white boxes
-        #     print 'boxbox'
-        #     draw.rectangle(((115,0),(400,160)), fill="white")
-
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
-            #draw white boxes
-            print 'boxbox'
-            draw.rectangle(((205,5),(329,160)), fill="white")
-
-
-        last_y = 5
-
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype':
+        if self.origin is 'skype':
             last_y = last_y + 50
 
-        # if images[0][u'origin'] == 'facebook':
-        #     last_y = last_y 
+        if self.origin in ['skype', 'facebook']:
+            draw.rectangle(((205, 5), (329, 160)), fill="white")
 
-        #add price
-        draw.text((x, last_y),im[u'price'],font=font,fill="#f54740")
+        # add price
+        draw.text((x, last_y),
+                  self.img_req['price'],
+                  font=self.config['font1'],
+                  fill="#f54740")
 
-        #add prime logo
-        if im[u'prime'] == '1' and images[0][u'origin'] != 'skype':
-            img.paste(AMAZON_PRIME, (x + 110, last_y + 2), mask=AMAZON_PRIME)
+        # add prime logo
+        if self.prime and self.origin is not 'skype':
+            img.paste(self.amazon_prime_image, (x + 110, last_y + 2))
 
+        last_y = last_y + 28
 
-        print '0'
-        print last_y
-
-        last_y = last_y + 27
-
-        #move reviews down a bit 
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
+        # move reviews down a bit
+        if self.origin in ['skype', 'facebook']:
             last_y = last_y + 10
 
+        # draw - (Review Number)
+        if 'reviews' in self.img_req and 'rating' in self.img_req['reviews']:
+            image_revs_rating = self.img_req['reviews']['rating']
+            if image_revs_rating <= 0.5:  # ignoring if 0.0 < rating
+                selectRating = 0.5
+            elif image_revs_rating <= 1.0:
+                selectRating = 1.0
+            elif image_revs_rating <= 1.5:
+                selectRating = 1.5
+            elif image_revs_rating <= 2.0:
+                selectRating = 2.0
+            elif image_revs_rating <= 2.5:
+                selectRating = 2.5
+            elif image_revs_rating <= 3.0:
+                selectRating = 3.0
+            elif image_revs_rating <= 3.5:
+                selectRating = 3.5
+            elif image_revs_rating <= 4.0:
+                selectRating = 4.0
+            elif image_revs_rating <= 4.5:
+                selectRating = 4.5
+            else:  # ignoring if rating < 5
+                selectRating = 5.0
 
-        if 'reviews' in im and 'rating' in im[u'reviews']:
-            # if isinstance(im[u'reviews'][u'rating'], int) or isinstance(im[u'reviews'][u'rating'], float): #is it an int or float?
-            #add rating
-            if im[u'reviews'][u'rating'] >= 0 and im[u'reviews'][u'rating'] <= 0.5:
-                selectRating = 0
-            if im[u'reviews'][u'rating'] > 0.5 and im[u'reviews'][u'rating'] <= 1:
-                selectRating = 1
-            if im[u'reviews'][u'rating'] > 1 and im[u'reviews'][u'rating'] <= 1.5:
-                selectRating = 2
-            if im[u'reviews'][u'rating'] > 1.5 and im[u'reviews'][u'rating'] <= 2:
-                selectRating = 3
-            if im[u'reviews'][u'rating'] > 2 and im[u'reviews'][u'rating'] <= 2.5:
-                selectRating = 4
-            if im[u'reviews'][u'rating'] > 2.5 and im[u'reviews'][u'rating'] <= 3:
-                selectRating = 5
-            if im[u'reviews'][u'rating'] > 3 and im[u'reviews'][u'rating'] <= 3.5:
-                selectRating = 6
-            if im[u'reviews'][u'rating'] > 3.5 and im[u'reviews'][u'rating'] <= 4:
-                selectRating = 7
-            if im[u'reviews'][u'rating'] > 4 and im[u'reviews'][u'rating'] <= 4.5:
-                selectRating = 8
-            if im[u'reviews'][u'rating'] > 4.5 and im[u'reviews'][u'rating'] <= 5:
-                selectRating = 9
-            img.paste(REVIEW_STARS[selectRating], (x, last_y + 3), mask=REVIEW_STARS[selectRating])
-            #add review count
-            if 'reviewCount' in im[u'reviews']:
-                draw.text((x + 80, last_y),' - ' + im[u'reviews'][u'reviewCount'],font=font2,fill="#2d70c1")
+            selectRating = str(selectRating)
 
+            img.paste(self.review_stars_images[selectRating],
+                      (x, last_y + 3),
+                      mask=self.review_stars_images[selectRating])
+
+            # make number count in blue to right of stars
+            if 'reviewCount' in self.img_req['reviews']:
+                draw.text((x + 82, last_y),
+                          ' - ' + self.img_req['reviews']['reviewCount'],
+                          font=self.config['font1'],
+                          fill="#2d70c1")
             last_y = last_y + 20
 
-        # # #fake reviews for skype!! lmao
-        elif images[0][u'origin'] and images[0][u'origin'] == 'skype':
-            selectRating = random.randint(6,8)
-            img.paste(REVIEW_STARS[selectRating], (x, last_y + 3), mask=REVIEW_STARS[selectRating])
+        # #fake reviews for skype!! lmao <--- uhhh
+        if self.origin is 'skype':
+            selectRating = random.randint(6, 8)
+            img.paste(self.review_stars_images[selectRating],
+                      (x, last_y + 3),
+                      mask=self.review_stars_images[selectRating])
             # selectRating = random.randint(6,7)
-            reviewCount = random.randint(15,1899)
+            reviewCount = random.randint(15, 1899)
             # img.paste(REVIEW_STARS[7], (x, last_y), mask=REVIEW_STARS[7])
-            draw.text((x + 80, last_y),' - ' + str(reviewCount),font=font2,fill="#2d70c1")
+            draw.text((x + 80, last_y),
+                      ' - ' + str(reviewCount),
+                      font=self.config['font2'],
+                      fill="#2d70c1")
             last_y = last_y + 20
 
         last_y = last_y + 5
 
-        # if images[0][u'origin'] and images[0][u'origin'] == 'facebook':
-        #     BOX_WIDTH = 26
-
-        if images[0][u'origin'] and images[0][u'origin'] == 'skype' or images[0][u'origin'] == 'facebook':
-            BOX_WIDTH = 22
-        else:
-            BOX_WIDTH = 30
-
-        #draw details but not for skype or fbook
-        #if images[0][u'origin'] != 'skype' or images[0][u'origin'] != 'facebook':
-
-        print 'z__1'
-        print last_y
-
-        for z in im[u'name']:
-
+        for z in self.img_req['name']:
             # draw.text((x, last_y), z, font=font2, fill="#2d70c1")
             countLines = 0
-            for line in textwrap.wrap(z, width=BOX_WIDTH):
+            for line in textwrap.wrap(z, width=self.config['BOX_WIDTH']):
                 countLines += 1
                 if countLines < 3:
                     filler = ''
                     if countLines == 3:
                         filler = '...'
-                    print 'z____z'
-                    print line
-                    print filler
-                    print last_y
-                    print 'z____z'
-                    draw.text((x - 3, last_y), line + filler, font=font2, fill="#909497")
-                    print 'z__2'
-                    print last_y
-                    last_y += font2.getsize(line)[1]
-                    print 'z__3'
-                    print last_y
+                    draw.text((x - 3, last_y),
+                              line + filler,
+                              font=self.config['font2'],
+                              fill="#909497")
+                    last_y += self.config['font2'].getsize(line)[1]
                     last_y = last_y + 2
-            print 'z__4'
-            print last_y
-            #last_y = y
-        y += font.getsize(line)[1]
-        print 'z__5'
-        print last_y
+        y += self.config['font1'].getsize(line)[1]
         last_y = y
 
+        self.created_image = img
 
-        # #add product names
-        # for line in textwrap.wrap(im[u'name'], width=30):
-        #     draw.text((x, last_y), line, font=font2, fill="#2d70c1")
-        #     y += font.getsize(line)[1]
-        #     last_y = y
-
-        # last_y = last_y + 10
-
-    cStringImg = cStringIO.StringIO()
-    img.save(cStringImg, 'PNG', quality=90)
-    s3filename = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(24)) + '.png'
-    k = bucket.new_key(s3filename)
-    k.set_contents_from_string(cStringImg.getvalue(), headers={"Content-Type": "image/png"})
-
-    return 'https://s3.amazonaws.com/' + BUCKET + '/' + s3filename
-
-def download_image(url):
-    fd = urllib.urlopen(url)
-    image_file = io.BytesIO(fd.read())
-    im = Image.open(image_file)
-    return im
-
-if __name__ == '__main__':
-    print 'running app on port 5k'
-    app.debug = False
-    app.run(host="0.0.0.0")
+    def _upload_image_to_s3(self):
+        s3_file = str(uuid.uuid4())
+        tmp_img = io.BytesIO()
+        self.created_image.save(tmp_img, 'PNG', quality=90)
+        k = self.bucket.new_key(s3_file)
+        k.set_contents_from_string(tmp_img.getvalue(),
+                                   headers={"Content-Type": "image/png"})
+        url_string = 'https://s3.amazonaws.com/' + self.bucket_name + '/' + s3_file
+        self.s3_url = url_string

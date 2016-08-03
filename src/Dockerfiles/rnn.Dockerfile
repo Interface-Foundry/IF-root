@@ -25,8 +25,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip3 install keras pandas flask oauth2client google-api-python-client $TF_DOWNLOAD
 
-ADD nlp_rnn/src_rnn /app
-
 RUN mkdir /root/.keras/ && \
     echo '{"floatx": "float32", "epsilon": 1e-07, "backend": "tensorflow"}' > /root/.keras/keras.json
 
@@ -41,4 +39,6 @@ ENV GOOGLE_APPLICATION_CREDENTIALS=/app/nlp_creds.json
 
 EXPOSE 8085
 
-ENTRYPOINT python3 server.py
+COPY nlp_rnn/src_rnn /app
+
+CMD python3 server.py

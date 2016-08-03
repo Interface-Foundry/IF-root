@@ -1,6 +1,6 @@
 env: development_nlp
 mongodb:
-  url: mongodb://104.196.134.4:27017/foundry
-picstitch: http://picstitch:5000
-nlp: http://parser:8083
-nlp_rnn: http://rnn:8085
+  url: mongodb://localhost:27017/foundry
+picstitch: http://localhost:5000
+nlp: http://localhost:8083
+nlp_rnn: http://localhost:8085
