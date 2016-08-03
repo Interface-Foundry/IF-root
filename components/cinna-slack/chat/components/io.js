@@ -3468,7 +3468,8 @@ function buildCart(cart, isAdmin, isP2P) {
 //
 // view cart......... some complicated logic here to make it faster
 //
-function viewCart(data, show_added_item) {
+
+function viewCart(data, show_added_item, timer) {
 
     if (data.source.origin == 'socket.io' || data.source.origin == 'telegram'){
         return;
@@ -3481,7 +3482,12 @@ function viewCart(data, show_added_item) {
     var timer = kip.timer('view cart');
     db.Metrics.log('cart.view', data);
 
-    var cartDelay = 2000;
+    //patch view cart error loop
+    if (!timer){
+        var cartDelay = 2000;
+    }else {
+        var cartDelay = timer;
+    }
 
     co(function*() {
       // admins have special rights
@@ -3528,7 +3534,7 @@ function viewCart(data, show_added_item) {
             cartDelay = cartDelay + 2000;
             console.log('slowing view cart down ',cartDelay)
           setTimeout(function() {
-            viewCart(data);
+            viewCart(data,null,cartDelay);
           }, cartDelay);
       }else {
             console.log('error retriving cart for view cart')

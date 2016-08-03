@@ -644,7 +644,7 @@ new cron.CronJob('00 00 * * * *', function() {
 
     for (var i = 0; i < carts.length; i++) {
       var cart = carts[i];
-      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+      var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
       var amazon_cart = yield client.getCart({
         CartId: _.get(cart, 'amazon.CartId.0'),
         HMAC: _.get(cart, "amazon.HMAC[0]")
