@@ -8,7 +8,7 @@ import logging
 from PIL import Image, ImageFont, ImageDraw
 from config import make_image_configs
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
