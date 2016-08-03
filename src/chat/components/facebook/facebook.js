@@ -871,7 +871,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but floral'
+                                        text: '1 but flower'
                                     })
                               },
                               {
@@ -889,7 +889,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but hammer'
+                                        text: '1 but tool'
                                     })
                               },
                               {
@@ -907,7 +907,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but hundred'
+                                        text: '1 but best'
                                     })
                               },
                                {

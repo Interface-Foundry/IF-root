@@ -161,32 +161,31 @@ queue.topic('incoming').subscribe(incoming => {
           timer.tic('getting nlp response')
           replies = yield nlp_response(message);
 
-          replies.forEach(function*(r) {
-            if (!r) {
-              var old_query = yield getLatestAmazonQuery(message);
-            console.log('\n\n\n\n\n\n\n\n\n\n\n\n', old_query);
-              // console.log('\n\n\n\n\n\n\n\n\n\n\n\n🏇',message,'\n\n\n\n\n\n\n\n\n');
-              if (message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1  ))
-              message.text = message.text.split('but')[1].trim() + ' ' + old_query;
-              // console.log('\n\n\n\n\n\n\n\n\n\n\n\n',message.text,'\n\n\n\n\n\n\n\n\n', JSON.stringify(old_query), old_query.query);
-              return message.save().then(() => {
-                  return queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-
-              });
-              //redo search him
-              // queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
-            }
-          })
-
-          console.log('lord of the rings')
-
           timer.tic('got nlp response')
-          kip.debug('nlp replies'.cyan, replies.map(r => {
-            return {
-              text: r.text,
-              execute: r.execute
-            }
-          }));
+          kip.debug('nlp replies'.cyan, 
+            replies.map(function*(r){
+              //TODO YO
+            //  if (!r) {
+            //   console.log('\n\n\n\n\n\n Catching empty query from nlp.. old_query is -->: ', old_query);
+            //   console.log('empty reply which means nlp returned undefined', r);
+            //   var old_query = yield getLatestAmazonQuery(message);
+            //   // console.log('\n\n\n\n\n\n\n\n\n\n\n\n🏇',message,'\n\n\n\n\n\n\n\n\n');
+            //   if (message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1  ))
+            //   message.text = message.text.split('but')[1].trim() + ' ' + old_query;
+            //   // console.log('\n\n\n\n\n\n\n\n\n\n\n\n',message.text,'\n\n\n\n\n\n\n\n\n', JSON.stringify(old_query), old_query.query);
+            //   message.save().then(() => {
+            //       return queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+
+            //   });
+            // } 
+            // else {
+                return {
+                  text: r.text,
+                  execute: r.execute
+                  }
+            // }
+          }))
+          // );
         }
 
         if (!replies || replies.length === 0) {
@@ -419,6 +418,27 @@ handlers['shopping.initial'] = function*(message, exec) {
   message._timer.tic('starting amazon_search');
   var results = yield amazon_search.search(exec.params,message.origin);
   message._timer.tic('done with amazon_search');
+
+  var old_params = yield getLatestAmazonQuery(message);
+  var old_results = yield getLatestAmazonResults(message);
+  kip.debug('old params', old_params);
+    kip.debug('new params', exec.params);
+
+  console.log("{[--:)]]]]]]]]]]}", old_params);
+   //fix bug?
+  if(!old_params){
+
+    console.log("{[--:)]]]]]]]]]]}", old_results);
+     console.log("{[--:)]]]]]]]]]]}", message);
+    old_params = {query: ''};
+  }
+  if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
+      exec.params.query = 'elephant';
+
+  }
+    kip.debug('shopping.initial exec', exec);
+
+
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -525,9 +545,37 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
-  kip.debug('new params', exec.params);
-  exec.params.query = old_params.query;
+    kip.debug('new params', exec.params);
 
+  console.log("{[--:)]]]]]]]]]]}", old_params);
+   //fix bug?
+  if(!old_params){
+
+    console.log("{[--:)]]]]]]]]]]}", old_results);
+     console.log("{[--:)]]]]]]]]]]}", message);
+    old_params = {query: ''};
+  }
+
+
+  if (exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
+      console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nsplit modifiers look like :', message.text.split(' but ')[1].split(' '),'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+
+    var all_modifiers = message.text.split(' but ')[1].split(' ');
+      // console.log('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
+    if (all_modifiers.length >= 2) {
+      for (var i = 1; i < all_modifiers.length; i++) {
+         if (all_modifiers[i] && all_modifiers[i] !== '') {
+          exec.params.val.push(all_modifiers[i].replace('_',' ').trim());
+         }
+      }
+    }
+    // console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbut did it work? ', exec.params)
+  }
+  exec.params.query = old_params.query;
+  if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
+      exec.params.query = 'elephant';
+
+  }
   // for "cheaper" modify the params and then do another search.
   if (exec.params.type === 'price') {
     _.merge(exec.params, old_params);
@@ -590,6 +638,15 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
   kip.debug('new params', exec.params);
+        console.log("{[--:)]]]]]]]]]]}", old_params);
+
+  //fix bug?
+  if(!old_params){
+
+    console.log("{[--:)]]]]]]]]]]}", old_results);
+     console.log("{[--:)]]]]]]]]]]}", message);
+    old_params = {query: ''};
+  }
   exec.params.query = old_params.query;
   //patch this leaky hole
   // if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
