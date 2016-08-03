@@ -60,7 +60,6 @@ class McParser:
         self.sf_sm = False
 
         self.text = text.lower()
-        # self.tokens = [self.text.split(' ')]
         self.tokens = []
         self.focus = []
         self.nouns = []
@@ -74,11 +73,15 @@ class McParser:
 
         self._process_text()
         self._parse_terms()
-        self._checks()
-        self._remove_words()
+        # ----------------
+        self._create_noun_query()
+        self._create_modifier_words()
+        self._create_nouns_without_stopwords()
+        self._create_checks()
+        # ----------------
         self._get_action_and_mode()
         self._get_last_check()
-        self._not_actually_focus()
+        self._focus_edgecase()
         self._simple_case()
 
     def _process_text(self):
@@ -86,14 +89,14 @@ class McParser:
         takes base text, pass into syntaxnet_array, put into array form, and
         parse the terms into accessible object
         '''
+        self.text = self.text.replace(':', '')
         self.d_array = syntaxnet_array(self.text)
         self.dependency_array = []
         for line in self.d_array:
             self.dependency_array.append(line.split('\t'))
 
-        # d2 = self.dependency_array
-        # dont sort into tree struct
-        # self.dependency_array.sort(key=lambda x: x[6])
+        self.sorted_array = self.dependency_array
+        self.sorted_array.sort(key=lambda x: x[6])
 
     def _parse_terms(self):
         '''
@@ -143,19 +146,20 @@ class McParser:
 
             d_index += 1
 
+    def _create_noun_query(self):
         if hasattr(self, 'first_noun'):
             if self.first_noun is not self.last_noun:
                 self.noun_query = ' '.join(self.tokens[self.first_noun:self.last_noun + 1])
-        self.modifier_words = list(set(self.nouns).union(self.adjectives))
-        self.nouns_with_adjectives = ' '.join(self.modifier_words)
 
-    # def _create
+    def _create_modifier_words(self):
+        modifier_split = set(['but', 'except']).intersection(self.tokens)
+        if self.adjectives:
+            self.modifier_words = self.adjectives + self.nouns
+        elif modifier_split:
+            split_word = list(modifier_split)[0]
+            self.modifier_words = self.tokens[self.tokens.index(split_word) + 1:]
 
-    def _not_actually_focus(self):
-        if any(map(lambda each: each in periodical_terms, self.tokens)):
-            self.focus = []
-
-    def _remove_words(self):
+    def _create_nouns_without_stopwords(self):
         '''
         removes:
             nouns without stopwords
@@ -163,12 +167,16 @@ class McParser:
         '''
         adj_set = set(self.adjectives)
         nouns_set = set(self.nouns)
-
+        self.nouns_with_adjectives = ' '.join(self.modifier_words)
         self.adjectives = list(adj_set.difference(invalid_adjectives))
         self.invalid_adj = list(adj_set.intersection(invalid_adjectives))
         self.nouns_without_stopwords = list(nouns_set.difference(stopwords))
 
-    def _checks(self):
+    def _focus_edgecase(self):
+        if any(map(lambda each: each in periodical_terms, self.tokens)):
+            self.focus = []
+
+    def _create_checks(self):
         '''check for all the words previously searched for in api.js
 
         old but previously removed 'find'
@@ -227,7 +235,7 @@ class McParser:
                 self.price_modifier = 'less'
                 logger.info('modifying price of one with less')
 
-        elif len(self.modifier_words) > 1:
+        elif len(self.focus) > 1:
             self.action = 'modify.all'
 
         if any(map(lambda each: each in purchase_terms, self.tokens)):

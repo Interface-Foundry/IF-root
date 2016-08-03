@@ -204,17 +204,18 @@ function nlpToResult(nlp, message) {
     return;
   }
 
-  if (nlp.focus.length === 1 && getModifier(nlp.modifier_words[0])) {
-    debug('single focus, unused modifier')
-    var exec = {
-      mode: nlp.mode,
-      action: nlp.action,
-      params: getModifier(nlp.modifier_words[0])
+
+  if (nlp.focus.length === 1) {
+      debug('single focus, modifier_words empty')
+      var exec = {
+        mode: nlp.mode,
+        action: nlp.action,
+        params: nlp.modifier_words.length === 0 ? getModifier(nlp.tokens.slice(-1)) : getModifier(nlp.modifier_words[0])
+      }
+      exec.params.focus = nlp.focus
+      message.execute.push(exec)
+      return;
     }
-    exec.params.focus = nlp.focus
-    message.execute.push(exec)
-    return;
-  }
 
 
   message.execute.map(e => {
