@@ -83,7 +83,7 @@ module.exports.addToCart = function(slack_id, user_id, item) {
 
     // TODO can't check if an item is okay to add if it's their first item in the cart...
     if (!ok && _.get(cart, 'amazon.CartId[0]')) {
-      var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+      var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
       // attempt to add the item to the cart for the first time, check for errors
       var res = yield client.addCart({
         CartId: cart.amazon.CartId[0],
@@ -322,7 +322,7 @@ var getCart = module.exports.getCart = function(slack_id, force_rebuild) {
       cart = team_carts[0];
     }
 
-    var client = aws_clients[cart.aws_client || 'AKIAIKMXJTAV2ORZMWMQ'];
+    var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
 
     //
     // get the amazon cart for this Kip cart
