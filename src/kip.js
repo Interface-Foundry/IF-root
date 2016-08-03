@@ -99,6 +99,8 @@ function timer(name) {
   }
 }
 
+
+
 var ihazinternet;
 function icanhazinternet() {
   return new Promise((resolve, reject) => {

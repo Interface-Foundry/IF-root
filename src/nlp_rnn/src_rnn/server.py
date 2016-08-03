@@ -18,6 +18,7 @@ def predict():
     '''
     '''
     text = request.json['text']
+    logging.info('received text: ' + text)
     resp = m.return_predictions(text)
     return jsonify(resp)
 
