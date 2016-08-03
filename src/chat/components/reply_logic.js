@@ -42,22 +42,6 @@ var modes = {};
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 
-function clean_size_from_title(old_title) {
-    old_title = old_title.replace(/[-,),(\,]/g,' ')
-    old_title.replace(/[0-9]|[0-9][0-9]/g,' ')
-    old_title = old_title + ' '
-    old_title = old_title.replace('x-large', ' ')
-    old_title = old_title.replace(' xl ', ' ')
-    old_title = old_title.replace('large', ' ')
-    old_title = old_title.replace(' l ', ' ')
-    old_title = old_title.replace('medium', ' ')
-    old_title = old_title.replace(' m ', ' ')
-    old_title = old_title.replace('small', ' ')
-    old_title = old_title.replace(' s ', ' ')
-    old_title = old_title.replace(' xs ', ' ')
-    old_title = old_title.replace(/'/g,'')
-    return old_title
-}
 
 
 // I'm sorry i couldn't understand that
@@ -83,7 +67,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
-  console.log('\n\n\nsendmsg: ', msg);
+  // console.log('\n\n\nsendmsg: ', msg);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -105,6 +89,9 @@ queue.topic('incoming').subscribe(incoming => {
   co(function*() {
     kip.debug('🔥', incoming);
 
+    var timer = new kip.SavedTimer('message.timer', incoming.data);
+
+    timer.tic('getting history');
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -112,14 +99,16 @@ queue.topic('incoming').subscribe(incoming => {
         $lte: incoming.data.ts
       }
     }).sort('-ts').limit(20);
-
     var message = history[0];
     message.history = history.slice(1);
+    timer.tic('got history');
+    message._timer = timer;
 
     // fail fast
     if (message._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct message not retrieved from db');
     }
+
 
     //// MODES STUFF ////
     var user = {
@@ -157,17 +146,41 @@ queue.topic('incoming').subscribe(incoming => {
           console.log('Didnt understand, please choose a country thx')
         }
       break;
-
       //default Kip Mode shopping
       default:
         console.log('DEFAULT SHOPPING MODE')
         //try for simple reply
+        timer.tic('getting simple response')
         var replies = yield simple_response(message);
+        timer.tic('got simple response')
         kip.debug('simple replies'.cyan, replies);
 
         //not a simple reply, do NLP
         if (!replies || replies.length === 0) {
+
+          timer.tic('getting nlp response')
           replies = yield nlp_response(message);
+
+          replies.forEach(function*(r) {
+            if (!r) {
+              var old_query = yield getLatestAmazonQuery(message);
+            console.log('\n\n\n\n\n\n\n\n\n\n\n\n', old_query);
+              // console.log('\n\n\n\n\n\n\n\n\n\n\n\n🏇',message,'\n\n\n\n\n\n\n\n\n');
+              if (message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1  ))
+              message.text = message.text.split('but')[1].trim() + ' ' + old_query;
+              // console.log('\n\n\n\n\n\n\n\n\n\n\n\n',message.text,'\n\n\n\n\n\n\n\n\n', JSON.stringify(old_query), old_query.query);
+              return message.save().then(() => {
+                  return queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+
+              });
+              //redo search him
+              // queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
+            }
+          })
+
+          console.log('lord of the rings')
+
+          timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan, replies.map(r => {
             return {
               text: r.text,
@@ -183,8 +196,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     kip.debug('num replies', replies.length);
-
+    timer.tic('saving message');
     yield message.save(); // the incoming message has had some stuff added to it :)
+    timer.tic('done saving message');
+    timer.tic('saving replies');
     yield replies.map(r => {
       if (r.save) {
         r.save()
@@ -192,11 +207,14 @@ queue.topic('incoming').subscribe(incoming => {
         console.log('could not save ' + r);
       }
     });
+    timer.tic('done saving replies');
+    timer.tic('sending replies');
     yield replies.map((r, i) => {
       kip.debug('reply', r.mode, r.action);
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
     });
     incoming.ack();
+    timer.stop();
   }).catch(kip.err);
 });
 
@@ -346,6 +364,7 @@ function* nlp_response(message) {
 function execute(message) {
   kip.debug('exec', message.execute);
   return co(function*() {
+    message._timer.tic('getting messages');
     var messages = yield message.execute.reduce((messages, exec) => {
       var route = exec.mode + '.' + exec.action;
       kip.debug('route', route, 'exec', exec);
@@ -397,8 +416,9 @@ var handlers = {};
 
 handlers['shopping.initial'] = function*(message, exec) {
   typing(message);
+  message._timer.tic('starting amazon_search');
   var results = yield amazon_search.search(exec.params,message.origin);
-
+  message._timer.tic('done with amazon_search');
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -473,7 +493,7 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   if (!exec.params.asin) {
     var old_results = yield getLatestAmazonResults(message);
-    kip.info(old_results);
+    console.log(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
 
@@ -502,6 +522,12 @@ handlers['shopping.modify.all'] = function*(message, exec) {
 
   kip.debug('old params', old_params);
 
+  var old_params = yield getLatestAmazonQuery(message);
+  var old_results = yield getLatestAmazonResults(message);
+  kip.debug('old params', old_params);
+  kip.debug('new params', exec.params);
+  exec.params.query = old_params.query;
+
   // for "cheaper" modify the params and then do another search.
   if (exec.params.type === 'price') {
     _.merge(exec.params, old_params);
@@ -513,15 +539,27 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
-  else if (exec.params.type === 'genericDetail') {
-    //add handler for all other modifiers here
-    kip.debug('old params', old_params);
-    kip.debug('new params', exec.params);
-    // _.merge(exec.params, old_params);
-    return 0;
+  else if (exec.params.type === 'color') {
+    var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val[0];
+
+    // console.log('exec for color search: ', JSON.stringify(exec))
   }
+  // else if (exec.params.type === 'genericDetail') {
+  //   //add handler for all other modifiers here
+  //   kip.debug('old params', old_params);
+  //   kip.debug('new params', exec.params);
+  //   // _.merge(exec.params, old_params);
+  //   return 0;
+  // }
   else {
-    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+     var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    // exec.params.color = exec.params.val.name;
+    // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
   var results = yield amazon_search.search(exec.params,message.origin);
@@ -548,16 +586,19 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     return default_reply(message);
   }
 
-
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
-  var old_focus = old_results[exec.params.focus - 1]
+  kip.debug('old params', old_params);
+  kip.debug('new params', exec.params);
   exec.params.query = old_params.query;
+  //patch this leaky hole
+  // if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
+  //   exec.params.query = old_params
+  // }
   // modify the params and then do another search.
-
-  // price modifier
+  // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
-    var max_price = parseFloat(old_focus.realPrice.slice(1));
+    var max_price = parseFloat(old_results[exec.params.focus - 1].realPrice.slice(1));
     if (exec.params.param === 'less') {
       exec.params.max_price = max_price * 0.8;
     } else if (exec.params.param === 'more') {
@@ -565,69 +606,25 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       exec.params.min_price = max_price * 1.1;
     }
   }
-
-  // color modifier
   else if (exec.params.type === 'color') {
-    kip.debug('_color_modifier_', old_results[exec.params.focus - 1].ItemAttributes[0])
-    var new_color = exec.params.val[0].name.toLowerCase()
-    var old_title = old_focus.ItemAttributes[0].Title[0].toLowerCase()
-    // replace any of the following: [- , ) (] with space
-    old_title = old_title.replace(/[-,),(\,]/g,' ')
-    old_title = old_title.replace(/'/g,'')
+    var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    exec.params.color = exec.params.val[0];
 
-    if (old_focus.ItemAttributes[0].hasOwnProperty('Color')) {
-      var old_color = old_focus.ItemAttributes[0].Color[0].toLowerCase()
-      if (_.includes(old_title, old_color)) {
-
-        // swap title but not sure if this matters
-        kip.debug('swapping title: ', old_title)
-        new_query = old_title.replace(old_color, new_color)
-      }
-      else {
-        kip.debug('adding color to old_title: ', old_title)
-        new_query = old_title + ' ' + new_color
-      }
-    }
-    else {
-      kip.debug('adding color to old_title: ', old_title)
-      new_query = old_title + ' ' + new_color
-    }
-    exec.params.query = new_query
-    kip.log('_new color modified query_:', exec.params.query)
+    // console.log('exec for color search: ', JSON.stringify(exec))
   }
-
-
-  // size modifier
-  else if (exec.params.type === 'size') {
-    var old_title = old_focus.ItemAttributes[0].Title[0].toLowerCase()
-    old_title = clean_size_from_title(old_title)
-    new_query = old_title + ' ' + exec.params.val[0]
-    exec.params.query = new_query
-    kip.log('_new size modified query_:', exec.params.query)
-  }
-
-  // material modifier
-  else if (exec.params.type === 'material') {
-    exec.params.productGroup = old_focus.ItemAttributes[0].ProductGroup[0];
-    exec.params.browseNodes = old_focus.BrowseNodes[0].BrowseNode;
-  }
-
-  // genericDetails  modifier
-  else if (exec.params.type === 'genericDetail') {
-    exec.params.productGroup = old_focus.ItemAttributes[0].ProductGroup[0];
-    exec.params.browseNodes = old_focus.BrowseNodes[0].BrowseNode;
-  }
-
   else {
-    throw new Error('this type of modification not handled yet: ' + exec.params.type);
+    var results = yield getLatestAmazonResults(message);
+    exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
+    exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
+    // exec.params.color = exec.params.val.name;
+    // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
 
-  if (exec.params.productGroup && exec.params.browseNodes) {
-    exec.params.query = exec.params.productGroup + ' ' + exec.params.val[0].toLowerCase()
-  }
+
 
   var results = yield amazon_search.search(exec.params,message.origin);
-
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
