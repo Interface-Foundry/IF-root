@@ -161,30 +161,30 @@ queue.topic('incoming').subscribe(incoming => {
           timer.tic('getting nlp response')
           replies = yield nlp_response(message);
 
-          replies.forEach(function*(r) {
-            if (!r) {
+          timer.tic('got nlp response')
+          // kip.debug('nlp replies'.cyan, 
+            replies.map(function*(r){
+             if (!r) {
+              console.log('\n\n\n\n\n\n Catching empty query from nlp.. old_query is -->: ', old_query);
+              console.log('empty reply which means nlp returned undefined', r);
               var old_query = yield getLatestAmazonQuery(message);
-            console.log('\n\n\n\n\n\n\n\n\n\n\n\n old_query: ', old_query);
               // console.log('\n\n\n\n\n\n\n\n\n\n\n\n🏇',message,'\n\n\n\n\n\n\n\n\n');
               if (message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1  ))
               message.text = message.text.split('but')[1].trim() + ' ' + old_query;
               // console.log('\n\n\n\n\n\n\n\n\n\n\n\n',message.text,'\n\n\n\n\n\n\n\n\n', JSON.stringify(old_query), old_query.query);
-              return message.save().then(() => {
+              message.save().then(() => {
                   return queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                   
               });
-            }
+            } 
+            // else {
+                return {
+                  text: r.text,
+                  execute: r.execute
+                  }
+            // }
           })
-
-          console.log('lord of the rings')
-
-          timer.tic('got nlp response')
-          kip.debug('nlp replies'.cyan, replies.map(r => {
-            return {
-              text: r.text,
-              execute: r.execute
-            }
-          }));
+          // );
         }
 
         if (!replies || replies.length === 0) {
@@ -524,6 +524,20 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
   kip.debug('new params', exec.params);
+  if (exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
+      console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nsplit modifiers look like :', message.text.split(' but ')[1].split(' '),'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+
+    var all_modifiers = message.text.split(' but ')[1].split(' ');
+      // console.log('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
+    if (all_modifiers.length >= 2) {
+      for (var i = 1; i < all_modifiers.length; i++) {
+         if (all_modifiers[i] && all_modifiers[i] !== '') {
+          exec.params.val.push(all_modifiers[i].replace('_',' ').trim());
+         }
+      }
+    }
+    // console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbut did it work? ', exec.params)
+  }
   exec.params.query = old_params.query;
 
   // for "cheaper" modify the params and then do another search.
@@ -817,6 +831,5 @@ function* getLatestAmazonQuery(message) {
 
     i++;
   }
-  console.log('DARTH VADER: ', params)
   return params;
 }

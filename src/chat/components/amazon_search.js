@@ -11,7 +11,7 @@ var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var parseAmazon = require('./search.js').parseAmazon;
 var amazonHTML = promisify(require('./amazonHTML'));
 var db = require('../../db');
-
+var async = require('async');
 
 /*
 Affiliate tag:
@@ -119,45 +119,91 @@ var search = function*(params,origin) {
   debug('amazon params', amazonParams);
 
   // if (amazonParams.type == 'color') {
-    if (params.productGroup && params.browseNodes) {
-        amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase() : ((params.val && params.val[0]) ?  params.val[0].toLowerCase() : amazonParams["Keywords"]);
-        var key;
-        yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
-          key = res;
-        });
-        if (key) {
-          amazonParams.SearchIndex = key.SearchIndex;
-          amazonParams.BrowseNode = key.BrowseNode;
-        }
-        console.log('👺',params, '👺👺👺', amazonParams)
-    }
+  if (params.productGroup && params.browseNodes) {
+      amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase() : ((params.val && params.val[0]) ?  params.val[0].toLowerCase() : amazonParams["Keywords"]);
+      var key;
+      var browseNodeBackup;
+      yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
+        key = res;
+      });
+      if (key) {
+        amazonParams.SearchIndex = key.SearchIndex;
+        amazonParams.BrowseNode = key.BrowseNode;
+        browseNodeBackup = key.BrowseNode.slice(0);
+      }
+      // console.log('',params, '👺👺👺', amazonParams)
+  }
+  var originalParams = Object.assign({},amazonParams);
+  if (params.val && params.val.length > 1) {
+      amazonParams.Keywords = '';
+     for (var i = 1; i < params.val.length; i++) {
+      amazonParams.Keywords = amazonParams.Keywords + ' ' + params.val[i];
+     }
+     var all_modifiers_string = amazonParams.Keywords.split('').slice(0).join('');
+     var all_modifiers_array = all_modifiers_string.split(' ');
+     console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nALL_MODIFIERES : ', all_modifiers_string,'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+  }
 
   timer.tic('requesting amazon ItermSearch api');
   try {
-        console.log('👺1');
+     if (params.query && _.get(amazonParams,'Keywords')) {
+      amazonParams.Keywords = _.get(amazonParams,'Keywords');
+      }
+      console.log('👺1', amazonParams);
       var results = yield get_client().itemSearch(amazonParams);
    } 
    catch (e) {
-
-     kip.err(e);
-
-     if (params.query && _.get(amazonParams,'Keywords')) {
-      amazonParams.Keywords = _.get(amazonParams,'Keywords') + params.query;
-     }
-        try {
-         console.log('👺2');
-         var results = yield get_client().itemSearch(amazonParams);
+      if (all_modifiers_array) {
+        console.log('👺2');
+        for (var i = 0; i < all_modifiers_array.length; i++) {
+          try {
+               var modifier = all_modifiers_array[i]
+               amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
+               console.log('trying : ', amazonParams.Keywords)
+               console.log(amazonParams); 
+               setTimeout(function* (){ 
+                 var results = yield get_client().itemSearch(amazonParams);
+               }, 2000)
+                if (results && results.length >= 1) {
+                   console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGOT RESULTS\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nå')
+                   break;
+                  }
+            }
+            catch (e) {
+            }
         }
-        catch (e) {
-          kip.err(e);
-          // modify the params to be more relaxed
+        if (!results || (results && results.length < 1)) {
+            console.log('👺3');
+            try {
+              if (amazonParams.BrowseNode) {
+                delete amazonParams.BrowseNode;
+              }
+              console.log(amazonParams);
+              var results = yield get_client().itemSearch(originalParams);
+            }
+            catch(err) {
+              amazonParams.Keywords = params.query;
+              amazonParams.BrowseNode = browseNodeBackup;
+              console.log('👺4', amazonParams);
+              var results = yield get_client().itemSearch(amazonParams);
+            }
+        }
+      } else {
+        console.log('👺3.5');
+        try {
           if (amazonParams.BrowseNode) {
-            delete amazonParams.BrowseNode
+            delete amazonParams.BrowseNode;
           }
-          console.log('👺3');
-          // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+          console.log(amazonParams);
+          var results = yield get_client().itemSearch(originalParams);
+        }
+        catch(err) {
+          amazonParams.Keywords = params.query;
+          amazonParams.BrowseNode = browseNodeBackup;
+          console.log('👺4.5', amazonParams);
           var results = yield get_client().itemSearch(amazonParams);
         }
+      }      
   }
   timer.tic('got results from ItermSearch api');
   if (results.length >= 1) {
@@ -169,6 +215,7 @@ var search = function*(params,origin) {
   results.original_query = params.query
   // if there aren't enough results... do a weaker search
   if (results.length < 1) {
+    console.log('👺4', amazonParams);
     // TODO do the weak search thing.  looks like the weak search thing
     // just removes some words from the search query.
     throw new Error('no results found');
