@@ -92,9 +92,9 @@ var urlShorten = function(data,callback2) {
             // });
 
             if (data.source.origin == 'kik'){
-                callback2('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+                callback2('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
             }else {
-              googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
+              googl.shorten('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')
               .then(function (shortUrl) {
                   callback2(shortUrl);
               })
@@ -124,10 +124,10 @@ var urlShorten = function(data,callback2) {
                var escapeAmazon = querystring.escape(url);
 
                 if (data.source.origin == 'kik'){
-                  urlArr.push('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                  urlArr.push('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
                   callback()
                 }else {
-                  googl.shorten('http://findthingsnearby.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
+                  googl.shorten('http://offgrideileen.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/'+data.amazon[i].ASIN[0])
                   .then(function (shortUrl) {
                       urlArr.push(shortUrl);
                       callback();
@@ -232,7 +232,7 @@ function getCartLink(url, cart_id) {
   url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20');
   console.log('CART IDDDDDDDDD ',url)
 
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
+  return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
 }
 
 //
@@ -243,7 +243,7 @@ function getItemLink(url, user_id, item_id) {
   console.log('ITEM IDDDDDDDDD ',url)
 
   var url_swapped = swapAmazonTLD(url, user_id)
-  return googl.shorten('http://findthingsnearby.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
+  return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
 }
 
 
