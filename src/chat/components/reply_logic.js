@@ -164,7 +164,7 @@ queue.topic('incoming').subscribe(incoming => {
           replies.forEach(function*(r) {
             if (!r) {
               var old_query = yield getLatestAmazonQuery(message);
-            console.log('\n\n\n\n\n\n\n\n\n\n\n\n', old_query);
+            console.log('\n\n\n\n\n\n\n\n\n\n\n\n old_query: ', old_query);
               // console.log('\n\n\n\n\n\n\n\n\n\n\n\n🏇',message,'\n\n\n\n\n\n\n\n\n');
               if (message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1  ))
               message.text = message.text.split('but')[1].trim() + ' ' + old_query;
@@ -173,8 +173,6 @@ queue.topic('incoming').subscribe(incoming => {
                   return queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                   
               });
-              //redo search him
-              // queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
             }
           })
 
@@ -819,5 +817,6 @@ function* getLatestAmazonQuery(message) {
 
     i++;
   }
+  console.log('DARTH VADER: ', params)
   return params;
 }

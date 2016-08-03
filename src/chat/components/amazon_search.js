@@ -136,25 +136,28 @@ var search = function*(params,origin) {
   try {
         console.log('👺1');
       var results = yield get_client().itemSearch(amazonParams);
-   } catch (e) {
-     kip.err(e);
-    if (params.query && _.get(amazonParams,'Keywords')) {
+   } 
+   catch (e) {
 
-      amazonParams.Keywords = _.get(amazonParams,'Keywords') + params.query);
-   }
-    try {
-      console.log('👺2');
-     var results = yield get_client().itemSearch(amazonParams);
-    }
-    catch (e) {
-      kip.err(e);
-      // modify the params to be more relaxed
-      if (amazonParams.BrowseNode) {
-        delete amazonParams.BrowseNode
-      }
-      console.log('👺3');
-      // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
-      var results = yield get_client().itemSearch(amazonParams);
+     kip.err(e);
+
+     if (params.query && _.get(amazonParams,'Keywords')) {
+      amazonParams.Keywords = _.get(amazonParams,'Keywords') + params.query;
+     }
+        try {
+         console.log('👺2');
+         var results = yield get_client().itemSearch(amazonParams);
+        }
+        catch (e) {
+          kip.err(e);
+          // modify the params to be more relaxed
+          if (amazonParams.BrowseNode) {
+            delete amazonParams.BrowseNode
+          }
+          console.log('👺3');
+          // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+          var results = yield get_client().itemSearch(amazonParams);
+        }
   }
   timer.tic('got results from ItermSearch api');
   if (results.length >= 1) {
