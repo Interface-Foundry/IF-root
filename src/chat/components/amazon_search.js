@@ -16,13 +16,10 @@ var db = require('../../db');
 /*
 Affiliate tag:
 eileenog-20
-
 Access Key ID:
 AKIAIS2R5G6NPAMLEDNQ
 Secret Access Key:
 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
-
-
 Access Key ID:
 AKIAJWTPOWIOUPHJYG2Q
 Secret Access Key:
@@ -42,7 +39,7 @@ var aws_clients = {
   })
 };
 
-var DEFAULT_CLIENT = 'AKIAIS2R5G6NPAMLEDNQ';
+var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
@@ -66,7 +63,6 @@ params:
   max_price
   min_price
   search_index
-
   http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 */
 
@@ -80,15 +76,13 @@ params:
 
 
 var search = function*(params,origin) {
-
+  var timer = new kip.SavedTimer('search.timer', {params: params, origin: origin});
   db.Metrics.log('search.amazon', params);
 
   if (!params.query) {
     debug('error params: ', params)
     throw new Error('no query specified');
   }
-
-
 
   amazonParams = {
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank',
@@ -104,11 +98,6 @@ var search = function*(params,origin) {
 
   if (params.max_price) {
     amazonParams.MaximumPrice = (params.max_price * 100).toFixed(0);
-  }
-
-  if (params.browseNodes) {
-    debug('using__browse_Node')
-    amazonParams.BrowseNode = params.browseNodes;
   }
 
   var skip = 0;
@@ -131,9 +120,7 @@ var search = function*(params,origin) {
 
   // if (amazonParams.type == 'color') {
     if (params.productGroup && params.browseNodes) {
-        // console.log('west virginia mountain mama ', params.val[0].name);
-         amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name) ? params.val[0].name  + ' ' + amazonParams["Keywords"]:  amazonParams["Keywords"];
-
+        amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase() : ((params.val && params.val[0]) ?  params.val[0].toLowerCase() : amazonParams["Keywords"]);
         var key;
         yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
           key = res;
@@ -142,11 +129,34 @@ var search = function*(params,origin) {
           amazonParams.SearchIndex = key.SearchIndex;
           amazonParams.BrowseNode = key.BrowseNode;
         }
-
+        console.log('👺',params, '👺👺👺', amazonParams)
     }
 
-  // console.log('shiet son' , amazonParams);
-  var results = yield get_client().itemSearch(amazonParams);
+  timer.tic('requesting amazon ItermSearch api');
+  try {
+        console.log('👺1');
+      var results = yield get_client().itemSearch(amazonParams);
+   } catch (e) {
+     kip.err(e);
+    if (params.query && _.get(amazonParams,'Keywords')) {
+
+      amazonParams.Keywords = _.get(amazonParams,'Keywords') + params.query);
+   }
+    try {
+      console.log('👺2');
+     var results = yield get_client().itemSearch(amazonParams);
+    }
+    catch (e) {
+      kip.err(e);
+      // modify the params to be more relaxed
+      if (amazonParams.BrowseNode) {
+        delete amazonParams.BrowseNode
+      }
+      console.log('👺3');
+      // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+      var results = yield get_client().itemSearch(amazonParams);
+  }
+  timer.tic('got results from ItermSearch api');
   if (results.length >= 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
   } else {
@@ -162,9 +172,11 @@ var search = function*(params,origin) {
   // results = yield weakSearch(params); TODO
   // results = results.slice(skip, 3); // yeah whatevers
   }
-  return yield enhance_results(results,origin);
-
-
+  timer.tic('enhancing results')
+  var enhanced_results = yield enhance_results(results,origin, timer);
+  timer.tic('done enhancing results');
+  timer.stop();
+  return enhanced_results;
 }
 
 
@@ -174,6 +186,7 @@ asin
 skip
 */
 var similar = function*(params,origin) {
+  var timer = new kip.SavedTimer('similar.timer', {params: params, origin: origin});
 
   params.asin = params.asin || params.ASIN; // because freedom.
   if (!params.asin) {
@@ -199,7 +212,9 @@ var similar = function*(params,origin) {
   debug('input params', params);
   debug('amazon params', amazonParams);
 
+  timer.tic('hitting amazon SililarityLookip api');
   var results = yield get_client().similarityLookup(amazonParams);
+  timer.tic('got results from amazon SimilarityLookup api')
   results = results.slice(params.skip, params.skip + 3);
   results.original_query = params.query;
 
@@ -213,14 +228,17 @@ var similar = function*(params,origin) {
   // results = results.slice(skip, 3); // yeah whatevers
   }
 
-  return yield enhance_results(results,origin);
+  var er = yield enhance_results(results,origin, timer);
+  timer.stop();
+  return er;
 }
 
 
 // Decorates the results for a party 🎉
-function* enhance_results(results, origin) {
+function* enhance_results(results, origin, timer) {
   // enhance the results, naturally.
-  yield results.map(r => {
+  timer.tic('getting all prices');
+  yield results.map((r, i) => {
     if ((_.get(r, 'Offers[0].TotalOffers[0]') || '0') === '0') {
       r.mustSelectSize = true;
     }
@@ -233,16 +251,19 @@ function* enhance_results(results, origin) {
       return r;
     })
   });
+  timer.tic('got prices')
 
   console.log('incomign results!!!! ',results)
 
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
+  timer.tic('stitched results');
 
   for (var i = 0; i < urls.length; i++) {
     results[i].picstitch_url = urls[i];
     // getItemLink should include user_id to do user_id lookup for link shortening
     results[i].shortened_url = yield processData.getItemLink(results[i].DetailPageURL[0]);
   }
+  timer.tic('shortened urls');
   // cool i've got the results now...
 
   return results;
