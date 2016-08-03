@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import requests
 
 from word_list import action_terms, price_terms, stopwords, \
     invalid_adjectives, purchase_terms, periodical_terms
@@ -27,7 +28,12 @@ def syntaxnet_array(text):
         print('Not Parsed correctly')
         return None
 
-    return out
+    # fix byte input from shell stuff
+    new_out = []
+    for row in out:
+        new_out.append(row.decode('utf'))
+
+    return new_out
 
 
 def syntax_no_script(text):
@@ -100,14 +106,12 @@ class McParser:
 
     def _parse_terms(self):
         '''
-        not sure if i should use unicode(i[1]) or u"{}",format(i[1])" so using
-        cur_word
         '''
         d_index = 0
         for i in self.dependency_array:
-            cur_word = unicode(i[1])
+            cur_word = i[1]
             self.tokens.append(cur_word)
-            self.parts_of_speech.append([cur_word, unicode(i[3])])
+            self.parts_of_speech.append([cur_word, i[3]])
             if i[3] in ['NOUN', 'PRON']:
                 self.nouns.append(cur_word)
 
@@ -160,6 +164,14 @@ class McParser:
             self.modifier_words = self.tokens[self.tokens.index(split_word) + 1:]
 
     def _create_nouns_without_stopwords(self):
+        '''
+        removes:
+            nouns without stopwords
+            adjectives without invalid adjectives
+        '''
+        adj_set = set(self.adjectives)
+        nouns_set = set(self.nouns)
+        self.nouns_with_adjectives = ' '.join(self.modifier_words)
         '''
         removes:
             nouns without stopwords
@@ -223,7 +235,7 @@ class McParser:
             self.action_verb = False
 
         # trigger single focus single modify
-        if (len(self.focus) == 1) and (len(self.modifier_words) == 1):
+        if (len(self.focus) == 1) and (len(self.modifier_words) == 1) and (self.action not in action_terms.keys()):
             self.action = 'modify.one'
             self.single_focus_single_modify = True
 

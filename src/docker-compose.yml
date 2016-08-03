@@ -6,28 +6,28 @@ services:
       context: .
       dockerfile: Dockerfiles/picstitch.Dockerfile
     ports:
-      - "5000"
+      - "5000:5000"
   parser:
     container_name: parser
     build:
       context: .
       dockerfile: Dockerfiles/parser.Dockerfile
     ports:
-      - "8083"
+      - "8083:8083"
   rnn:
     container_name: rnn
     build:
       context: .
       dockerfile: Dockerfiles/rnn.Dockerfile
     ports:
-      - "8085"
-  reply:
-   container_name: reply
-   build:
-     context: .
-     dockerfile: Dockerfiles/reply_logic_test.Dockerfile
-  slack:
-    container_name: slack
-    build:
-      context: .
-      dockerfile: Dockerfiles/slack_test.Dockerfile
+      - "8085:8085"
+  # reply:
+  #  container_name: reply
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfiles/reply_logic_test.Dockerfile
+  # slack:
+  #   container_name: slack
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfiles/slack_test.Dockerfile

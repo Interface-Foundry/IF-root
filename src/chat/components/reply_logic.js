@@ -118,7 +118,7 @@ queue.topic('incoming').subscribe(incoming => {
     if(incoming.data.action == 'mode.update'){
       modes[user.id] = 'onboarding'
       console.log('UPDATED MODE!!!!')
-      incoming.ack(); 
+      incoming.ack();
       return;
     }
 
@@ -155,7 +155,7 @@ queue.topic('incoming').subscribe(incoming => {
         timer.tic('got simple response')
         kip.debug('simple replies'.cyan, replies);
 
-        //not a simple reply, do NLP 
+        //not a simple reply, do NLP
         if (!replies || replies.length === 0) {
 
           timer.tic('getting nlp response')
@@ -171,7 +171,7 @@ queue.topic('incoming').subscribe(incoming => {
               // console.log('\n\n\n\n\n\n\n\n\n\n\n\n',message.text,'\n\n\n\n\n\n\n\n\n', JSON.stringify(old_query), old_query.query);
               return message.save().then(() => {
                   return queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                  
+
               });
               //redo search him
               // queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i);
@@ -623,7 +623,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   }
 
 
-  
+
   var results = yield amazon_search.search(exec.params,message.origin);
   return new db.Message({
     incoming: false,
@@ -646,7 +646,7 @@ handlers['cart.save'] = function*(message, exec) {
   }
 
 
- 
+
  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
   console.log('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
