@@ -154,10 +154,10 @@ class PicStitch:
                   fill="#f54740")
 
         # add prime logo
-        if self.prime and self.origin is not 'skype':
+        if self.prime and self.origin not in ['skype']:
             img.paste(self.amazon_prime_image, (x + 110, last_y + 2))
 
-        last_y = last_y + 28
+        last_y = last_y + 27
 
         # move reviews down a bit
         if self.origin in ['skype', 'facebook']:
@@ -195,9 +195,9 @@ class PicStitch:
 
             # make number count in blue to right of stars
             if 'reviewCount' in self.img_req['reviews']:
-                draw.text((x + 82, last_y),
+                draw.text((x + 80, last_y - 1),
                           ' - ' + self.img_req['reviews']['reviewCount'],
-                          font=self.config['font1'],
+                          font=self.config['font2'],
                           fill="#2d70c1")
             last_y = last_y + 20
 
