@@ -120,8 +120,12 @@ var search = function*(params,origin) {
   debug('input params', params)
   debug('amazon params', amazonParams)
 
+
+  // if (params.type == 'genericDetail'){
+        amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase() : ((params.val && params.val[0]) ?  (typeof params.val[0] == 'object' ? params.val[0] : params.val[0].toLowerCase() ) : amazonParams["Keywords"]);
+  // }
+
   if (params.productGroup && params.browseNodes) {
-      amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase() : ((params.val && params.val[0]) ?  params.val[0].toLowerCase() : amazonParams["Keywords"]);
       var key;
       var browseNodeBackup;
       yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
@@ -132,29 +136,29 @@ var search = function*(params,origin) {
         amazonParams.BrowseNode = key.BrowseNode;
         browseNodeBackup = key.BrowseNode.slice(0);
       }
-      // console.log('',params, '👺👺👺', amazonParams)
   }
   var originalParams = Object.assign({},amazonParams);
-  if (params.val && params.val.length > 1 && typeof params.val[0] !== 'object') {
+  if (params.val && params.val.length > 1) {
+    console.log('found multiple modifiers...')
       amazonParams.Keywords = '';
      for (var i = 1; i < params.val.length; i++) {
       amazonParams.Keywords = amazonParams.Keywords + ' ' + params.val[i];
      }
-     var all_modifiers_string = amazonParams.Keywords.split('').slice(0).join('');
-     var all_modifiers_array = all_modifiers_string.split(' ');
+     if (params.type && params.type == 'genericDetail') {
+      var all_modifiers_string = amazonParams.Keywords.split('').slice(0).join('');
+      var all_modifiers_array = all_modifiers_string.split(' ');
+     }
   }
-
   timer.tic('requesting amazon ItermSearch api');
   try {
-     if (_.get(amazonParams,'Keywords')) {
-      amazonParams.Keywords = _.get(amazonParams,'Keywords');
-      }
-      console.log('👺1', amazonParams);
+      console.log('👺1: modify as is...', amazonParams);
+
       var results = yield get_client().itemSearch(amazonParams);
    } 
    catch (e) {
+      //If more than one modifier
       if (all_modifiers_array) {
-        console.log('👺2');
+        console.log('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
          amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
         for (var i = 0; i < all_modifiers_array.length-1; i++) {
           try {
@@ -183,9 +187,7 @@ var search = function*(params,origin) {
                           console.log('breaking out...')
                          break;
                       } 
-                    } catch(err) {
-
-                    }
+                    } catch(err) {}
                 }
             }
             catch (e) {
@@ -202,7 +204,7 @@ var search = function*(params,origin) {
                       yield wait(500);
                       var res1 = yield get_client().itemSearch(amazonParams);
                     } catch(err) {
-                      
+
                     }
                     if (res1 && res1.length >= 1) {
                      var results = res1
@@ -211,29 +213,66 @@ var search = function*(params,origin) {
                     } 
                 }
             }
-            console.log('welp didnt break out sooo..')
-        }
+        } // end of for loop
         if (!results || (results && results.length < 1)) {
-            console.log('👺3');
+            console.log('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
             amazonParams.Keywords = params.query;
             amazonParams.BrowseNode = browseNodeBackup;
-            console.log('trying : ', amazonParams.Keywords)
-            var results = yield get_client().itemSearch(amazonParams);
+            console.log('trying : ', amazonParams);
+            try {
+              yield wait(500);
+              console.log('trying : ', amazonParams);
+              var results = yield get_client().itemSearch(amazonParams);
+            } catch(err) {
+               if (amazonParams.BrowseNode) {
+                  delete amazonParams.BrowseNode;
+                }
+                try {
+                  yield wait(500);
+                  console.log('trying : ', amazonParams);
+                  var results = yield get_client().itemSearch(amazonParams);
+                } catch(err) {}
+            }
+
         }
+
+
+      // Only one modifier 
       } else {
-        console.log('👺4');
+        console.log('👺4: ');
         try {
+            yield wait(500);
+            amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+            console.log('trying : ', amazonParams);
+            var results = yield get_client().itemSearch(originalParams);
+        }
+        catch(err) {
           if (amazonParams.BrowseNode) {
             delete amazonParams.BrowseNode;
           }
-          console.log(amazonParams);
-          var results = yield get_client().itemSearch(originalParams);
-        }
-        catch(err) {
-          amazonParams.Keywords = params.query;
-          amazonParams.BrowseNode = browseNodeBackup;
           console.log('👺5', amazonParams);
-          var results = yield get_client().itemSearch(amazonParams);
+          try {
+            yield wait(500);
+            console.log('trying : ', amazonParams.Keywords);
+            var results = yield get_client().itemSearch(amazonParams);
+          } catch(err) {
+            try {
+               amazonParams.Keywords = params.query;
+               yield wait(500);
+               console.log('trying : ', amazonParams);
+               var results = yield get_client().itemSearch(originalParams);
+             } catch(err) {
+            }
+          }
+        if (!results || (results && results.length < 1)) {
+           try {
+               amazonParams.Keywords = params.query;
+               yield wait(500);
+               console.log('trying : ', amazonParams);
+               var results = yield get_client().itemSearch(originalParams);
+            } catch(err) {
+            }
+          }
         }
       }      
 

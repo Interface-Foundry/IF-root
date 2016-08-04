@@ -86,12 +86,12 @@ var kipcart = require('../cart');
 var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
-
+var fbtoken;
 if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAANOJsoiIyUBACfPbJ2SgpeukLwzDWAiB30gcwfkpZAcw5L2y6CrDkdQzQLvEO3aKF4WyH2oQHPIqbUZA4aajFU2x3AHZAhrjr6KZAZBKVyEqZBmgpGDgZB6AIsAHgbPpCH3zMMoYl7ByX3pspg8mKmKr1NNZBLtJxprmDA5uIrD8gZDZD';
 }
 else if (process.env.NODE_ENV === 'development_mitsu') {
-    fbtoken = 'EAAas9IZAQHr8BAOncFcion0kvJebZA7ETxdhZByQR3uI71V3rFN0PmsnnJBez3AF37B21OfF3ZBx5OAoAPMCOvJm3bOSZBl6uZAadgQZBU2LuYenUBnMih0vHxwUiA5JYNLCucp8TZCYBBr2IkA134VkdsLhHw1A5LkZD'
+    fbtoken = 'EAAas9IZAQHr8BAOQChNIFxz34dnEKmBe0uZB0xrYcYGazBdZAdCNptOMb7udylQ0UW6fxzcZAZCkAPfrlzaiZAciuLmZB3Pd4mZBjG2rIDUvWtZCvzZApTGIWdzseZBMzP5Vzdyz94qbtm7jW50t9ufqEHRFfrt3iwuZA9IZD'
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
@@ -952,11 +952,6 @@ app.post('/facebook', function (req, res) {
 
                 text = event.message.text;
 
-<<<<<<< HEAD
-=======
-
-
-
 
                 //@ @ @ @ @ @ TEMPORARRY TURN OFF LATER
                 // if (text == 'hi'){
@@ -997,7 +992,6 @@ app.post('/facebook', function (req, res) {
                 // }
                 //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
 
->>>>>>> ffc0cce294fde75958b20c75d68263c1cf065ad7
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
                     text = res;
