@@ -723,7 +723,7 @@ handlers['cart.view'] = function*(message, exec) {
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
-    return text_reply(message, 'It looks like your cart is empty.');
+    return text_reply(message, 'It looks like your cart is empty');
   }
   kip.debug('view cart message', res);
   return res;
@@ -746,7 +746,7 @@ handlers['cart.empty'] = function*(message, exec) {
   res.data = yield kipcart.emptyCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
-    return text_reply(message, 'Your cart is now empty.');
+    return text_reply(message, 'Your cart is now empty');
   }
   kip.debug('empty cart message', res);
   return res;

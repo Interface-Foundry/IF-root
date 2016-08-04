@@ -36,7 +36,7 @@ def load_fonts():
             '/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
         logging.debug('error loading fonts')
     font = {}
-    font_size = [12, 13, 14, 15, 16, 20, 28]
+    font_size = [x for x in range(12,30)]
     for s in font_size:
         font[s] = ImageFont.truetype(fonts_file, s)
     return font
@@ -132,8 +132,8 @@ class PicStitch:
 
         # post image thumbnail
         img.paste(thumb_img,
-                  (self.config['PIC_COORDS'][0]['x'],
-                   self.config['PIC_COORDS'][0]['y']))
+                  (self.config['PIC_COORDS']['x'],
+                   self.config['PIC_COORDS']['y']))
 
         # post text
         last_y = 5
@@ -154,10 +154,10 @@ class PicStitch:
                   fill="#f54740")
 
         # add prime logo
-        if self.prime and self.origin is not 'skype':
+        if self.prime and self.origin not in ['skype']:
             img.paste(self.amazon_prime_image, (x + 110, last_y + 2))
 
-        last_y = last_y + 28
+        last_y = last_y + 27
 
         # move reviews down a bit
         if self.origin in ['skype', 'facebook']:
@@ -195,9 +195,9 @@ class PicStitch:
 
             # make number count in blue to right of stars
             if 'reviewCount' in self.img_req['reviews']:
-                draw.text((x + 82, last_y),
+                draw.text((x + 80, last_y - 1),
                           ' - ' + self.img_req['reviews']['reviewCount'],
-                          font=self.config['font1'],
+                          font=self.config['review_count_font'],
                           fill="#2d70c1")
             last_y = last_y + 20
 
@@ -265,40 +265,43 @@ class PicStitch:
         config['CHAT_WIDTH'] = 365
         config['CHAT_HEIGHT'] = 140
         # where to draw main pics
-        config['PIC_COORDS'] = [{'x': 14, 'y': 5},
-                                {'x': 24, 'y': 174},
-                                {'x': 24, 'y': 336}]
+        config['PIC_COORDS'] = {'x': 14, 'y': 5}
+        #                       {'x': 24, 'y': 174},
+        #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
-        config['TEXTBOX_COORDS'] = [{'x': 190, 'y': 10},
-                                    {'x': 190, 'y': 174},
-                                    {'x': 190, 'y': 336}]
+        config['TEXTBOX_COORDS'] = {'x': 190, 'y': 10}
+        #                           {'x': 190, 'y': 174},
+        #                           {'x': 190, 'y': 336}]
 
         config['BOX_WIDTH'] = 30
         config['font1'] = self.font_dict[16]
         config['font2'] = self.font_dict[13]
+        config['review_count_font'] = self.font_dict[13]
 
         if self.origin in ['facebook']:
             logging.debug('using origin==facebook in config')
             config['BOX_WIDTH'] = 22
             config['CHAT_HEIGHT'] = 223
             config['CHAT_WIDTH'] = 425
-            config['PIC_COORDS'] = [{'x': 5, 'y': 5}]  # where to draw main pic
+            config['PIC_COORDS'] = {'x': 5, 'y': 5}  # where to draw main pic
             # where to draw text boxes
             config['TEXTBOX_COORDS'] = [{'x': 250, 'y': 5}]
             config['PIC_SIZE'] = 223, 223
             config['font1'] = self.font_dict[28]
             config['font2'] = self.font_dict[20]
+            config['review_count_font'] = self.font_dict[18]
 
         if self.origin in ['skype']:
             logging.debug('using origin==skype in config')
             config['BOX_WIDTH'] = 22
             config['CHAT_HEIGHT'] = 230
             config['CHAT_WIDTH'] = 381
-            config['PIC_COORDS'] = [{'x': 20, 'y': 50}]  # where to draw main p
+            config['PIC_COORDS'] = {'x': 20, 'y': 50}  # where to draw main p
             # where to draw text boxes
             config['TEXTBOX_COORDS'] = [{'x': 250, 'y': 100}]
             config['PIC_SIZE'] = 250, 250
             config['font1'] = self.font_dict[28]
             config['font2'] = self.font_dict[20]
+            config['review_count_font'] = self.font_dict[18]
 
         return config

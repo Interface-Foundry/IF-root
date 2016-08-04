@@ -95,10 +95,12 @@ else if (process.env.NODE_ENV === 'development_mitsu') {
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
-} 
+} else if (process.env.NODE_ENV === 'development_nlp') {
+    fbtoken = 'EAAMhCmQMAyQBANJjQ2hSHnh1NBAGSAKYK2nxAyOExE24jeVzPBNeC3z3sZATMZB0USBNZBrtWktNXxqUyXZBAjT9B6oShyjhZC1CHMvcgA7xhdNhsYk7h2lkC7KfByAZAZBdpQw68iApcvYjTKZC3CRY6TtI2RpLkjJGVHn2zRJjoWr49IldyTpr';
+}
 else if (process.env.NODE_ENV === 'production') {
     fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
-} 
+}
 
 //temp. needs to be story in DB
 var fb_memory = {}
@@ -240,10 +242,13 @@ app.post('/facebook', function (req, res) {
                     send_image('cart.png',sender,function(){
                         var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
                         //send image here
-                        send_universal_message(x,sender);
+                        
+                        setTimeout(function() {
+                            send_universal_message(x,sender);
+                        }, 1000);
                         setTimeout(function() {
                             send_story(userid_z,sender);
-                        }, 1500);
+                        }, 1000);
                     });
                 }
             });
@@ -377,6 +382,13 @@ app.post('/facebook', function (req, res) {
               "payload":JSON.stringify({
                     dataId: "facebook_" + sender.toString(),
                     action: "help"
+                })
+            },
+            {
+              "type":"postback",
+              "title":"Retake Quiz",
+              "payload":JSON.stringify({
+                    action: "take_quiz"
                 })
             },
             {
@@ -523,8 +535,8 @@ app.post('/facebook', function (req, res) {
               })
             }
             else if (sub_menu.action && sub_menu.action == 'take_quiz'){
-                send_story(userid_z,sender);
                 fb_memory[sender].mode = 'onboarding';
+                send_story(userid_z,sender);
             }
             else if (sub_menu.action && sub_menu.action == 'cheaper') {
                 console.log(event.message)
@@ -1215,12 +1227,15 @@ app.post('/facebook', function (req, res) {
             }
             //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
             else if (postback.action === 'story.answer') {
-                console.log('OK OK OKO @ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K ',postback)
                 process_story(userid_z,sender,postback.story_pointer,postback.selected);
                 return;
             }
+            else if (postback.action == 'take_quiz'){
+                fb_memory[sender].mode = 'onboarding';
+                send_story(userid_z,sender);
+                return;
+            }
             //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //
-            console.log('NOOOOOOOOOOOOOO@ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K');
 
             db.Messages.find({
                 thread_id: postback.dataId
@@ -2703,7 +2718,7 @@ function process_story(recipient,sender,pointer,select){
             }, function(err, res, body) {
                 if (err) console.error('post err ', err);
             })
-        }, 1000);
+        }, 2000);
 
 
 
