@@ -116,6 +116,7 @@ class PicStitch:
                         color=self.config['BGCOLOR'])
 
         # get image in thumbnail format
+        logging.info('making image for__: ' + str(self.img_req))
         thumb_img = download_image(self.img_req['url'])
         thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
 

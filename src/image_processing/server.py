@@ -7,7 +7,7 @@ from picstitch import load_review_stars, load_amazon_prime, load_fonts, \
     PicStitch
 
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 port_num = 5000
@@ -31,7 +31,6 @@ def main():
     return upload_image_tos_s3(create_image(request.json))
     '''
     img_req = request.json
-    logging.info('image requested...')
     pic = PicStitch(img_req,
                     bucket_kip_chat_images,
                     amazon_images,
