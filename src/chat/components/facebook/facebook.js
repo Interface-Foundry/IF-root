@@ -81,7 +81,7 @@ var httpsServer = require('https').createServer({
 }, app);
 var search_results = require('./search_results');
 var focus = require('./focus');
-// fbtoken = process.env.NODE_ENV === 'production' ? 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'  : 'EAAPkuxFNp9UBAL6JrXOwHVdji0mjpqsKqrWBlhJyVpNdh0mE2C4ZClfmvZCyTXPgEjGESnjeS3PXs5oFcl1qWlJipqAFluTUuFZBpQzbBb9Oa9TMP6WD7d8wro6IgGueCpQk18isez7wRYlUto4KXKZCSbFagFAZD'
+fbtoken = process.env.NODE_ENV === 'production' ? 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'  : 'EAAPkuxFNp9UBAL6JrXOwHVdji0mjpqsKqrWBlhJyVpNdh0mE2C4ZClfmvZCyTXPgEjGESnjeS3PXs5oFcl1qWlJipqAFluTUuFZBpQzbBb9Oa9TMP6WD7d8wro6IgGueCpQk18isez7wRYlUto4KXKZCSbFagFAZD'
 var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
@@ -90,13 +90,13 @@ var Chatuser = db.Chatuser;
 
 if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAANOJsoiIyUBACfPbJ2SgpeukLwzDWAiB30gcwfkpZAcw5L2y6CrDkdQzQLvEO3aKF4WyH2oQHPIqbUZA4aajFU2x3AHZAhrjr6KZAZBKVyEqZBmgpGDgZB6AIsAHgbPpCH3zMMoYl7ByX3pspg8mKmKr1NNZBLtJxprmDA5uIrD8gZDZD';
-} 
+}
 else if (process.env.NODE_ENV === 'development_mitsu') {
     fbtoken = 'EAAas9IZAQHr8BAOncFcion0kvJebZA7ETxdhZByQR3uI71V3rFN0PmsnnJBez3AF37B21OfF3ZBx5OAoAPMCOvJm3bOSZBl6uZAadgQZBU2LuYenUBnMih0vHxwUiA5JYNLCucp8TZCYBBr2IkA134VkdsLhHw1A5LkZD'
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
-} 
+}
 //temp. needs to be story in DB
 var fb_memory = {}
 
@@ -132,7 +132,7 @@ app.get('/facebook', function(req, res) {
 })
 
 //
-//   -Back button state cache- 
+//   -Back button state cache-
 //   What is this you ask? Basically an index to keep track of how many 'backs' you clicked
 //   May refactor in future..
 //
@@ -157,15 +157,15 @@ app.post('/facebook', function (req, res) {
 
     //
     //
-    //--  Initial API calls to FB to set up  greeting and welcome screen.  
+    //--  Initial API calls to FB to set up  greeting and welcome screen.
     //--  *THIS MAY BE MOVED ELSEWHERE, currently it will make redundant calls but just playing it on the safe side for now
     //
     //
 
     var set_greeting = {
       "setting_type" : "greeting",
-      "greeting": { 
-            "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options." 
+      "greeting": {
+            "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options."
         }
      };
 
@@ -179,9 +179,9 @@ app.post('/facebook', function (req, res) {
     }, function(err, body) {
        if (err) console.log('\n\n\n\nWARNING: FB SET WELCOME ERROR: ', err)
     })
-        
+
     messaging_events = req.body.entry[0].messaging;
-    
+
     if (!messaging_events) {
         return console.log('facebook.js messaging events missing:  ', JSON.stringify(req.body.entry[0]));
     }
@@ -199,12 +199,12 @@ app.post('/facebook', function (req, res) {
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
 
-    
+
         //////////
 
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
         //@ @ @ @ @ shitty code @ @ @ @ @ @
-        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
 
 
         var zzz = req.body.entry[0].messaging[i];
@@ -224,16 +224,16 @@ app.post('/facebook', function (req, res) {
         }
 
         //console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[sender])
-        
+
 
         //that string check is at end to prevent a dumb thing from happening where it tries to process the receiver id wtf
        if(event.message && event.message.text){
-            Chatuser.count({id: 'facebook_'+sender}, function (err, count){ 
+            Chatuser.count({id: 'facebook_'+sender}, function (err, count){
                 if(count>0){
                     //document exists });
                     processMessage();
                 }else {
-                    fb_memory[sender].mode = 'onboarding'; 
+                    fb_memory[sender].mode = 'onboarding';
                     send_image('cart.png',sender,function(){
                         var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
                         //send image here
@@ -241,9 +241,9 @@ app.post('/facebook', function (req, res) {
                         setTimeout(function() {
                             send_story(userid_z,sender);
                         }, 1500);
-                    });                    
+                    });
                 }
-            }); 
+            });
         }else {
             processMessage();
         }
@@ -251,24 +251,24 @@ app.post('/facebook', function (req, res) {
 
         //shitty (temp) shit code ok bye
         function processMessage(){
-        
+
         //non-shopping mode checker
         //also only capturing text, images, stickers from user to check for current mode to block stuff
         //if(event.message && event.message.text || !_.get(req.body.entry[0].messaging[i], 'message.sticker_id') && _.get(req.body.entry[0].messaging[i], 'message.attachments[0].type') == 'image' || _.get(req.body.entry[0].messaging[i], 'message.sticker_id') || _.get(req.body.entry[0].messaging[i], 'message.attachments')){
         if(event.message && event.message.text){
 
-            
+
            // console.log('@ @ @ @ @ E33333333EEEE3333 @ @ @ @ @ ^ ^ ^')
             switch(fb_memory[sender].mode){
                 case 'onboarding':
                     console.log('ONBOARDING MODE STOPPING everything else')
 
                     //@ @ @ eventually move this to the onboarding callback function
-                    //FIRE STORY!! 
+                    //FIRE STORY!!
                     //AND same handler ges into button callbacks from story questions
 
 
-                    //Let's keep track of number of times user does something not within onboarding mode, if more than twice 
+                    //Let's keep track of number of times user does something not within onboarding mode, if more than twice
                     //just revert to shopping mode and send the help_card
                     fb_memory[sender].exit_count = (fb_memory[sender].exit_count < 2) ?  ++fb_memory[sender].exit_count : 0;
                     console.log('incremented exit_count: ', fb_memory[sender].exit_count )
@@ -315,7 +315,7 @@ app.post('/facebook', function (req, res) {
                                                         dataId: "facebook_" + sender.toString(),
                                                         action: "button_search",
                                                         text: 'books',
-                                                        ts: Date.now()                                                 
+                                                        ts: Date.now()
                                                     })
                                                 }
                                            ],
@@ -354,13 +354,13 @@ app.post('/facebook', function (req, res) {
                     res.sendStatus(200);
 
                 break;
-            }            
+            }
         }else {
             //console.log('ping but nah')
         }
 
-        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
-        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
+        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
 
 
 
@@ -400,7 +400,7 @@ app.post('/facebook', function (req, res) {
               "setting_type":"call_to_actions",
               "thread_state":"new_thread",
               "call_to_actions":[
-                {   
+                {
                   "payload": JSON.stringify({
                        "type": "GET_STARTED",
                        "dataId":"facebook_" + sender.toString()
@@ -418,7 +418,7 @@ app.post('/facebook', function (req, res) {
             json: set_get_started
         }, function(err, body) {
            if (err) console.log('\n\n\n\nWARNING: FB SET GET STARTED ERROR: ', err);
-        }) 
+        })
 
         if (event.message) {
             var typing_indicator = {
@@ -483,7 +483,7 @@ app.post('/facebook', function (req, res) {
                                     'id': "facebook_" + sender.toString(),
                                     'user': sender.toString()
                                 },
-                                // amazon: msg.amazon 
+                                // amazon: msg.amazon
                             });
                         // queue it up for processing
                          if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
@@ -491,7 +491,7 @@ app.post('/facebook', function (req, res) {
                           }
                         message.save().then(() => {
                             queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                            
+
                         });
 
                     } else if (messages[0]) {
@@ -511,13 +511,13 @@ app.post('/facebook', function (req, res) {
                       }
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                        
+
                     });
 
-                  
-                    
+
+
                 }
-              })                
+              })
             }
             else if (sub_menu.action && sub_menu.action == 'take_quiz'){
                 send_story(userid_z,sender);
@@ -548,7 +548,7 @@ app.post('/facebook', function (req, res) {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
                 }
-              })               
+              })
             } else if (sub_menu.action && sub_menu.action == 'similar') {
                 // console.log(event.message)
                 db.Messages.find({
@@ -574,8 +574,8 @@ app.post('/facebook', function (req, res) {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
                 }
-              })    
-            }  
+              })
+            }
             //
             //  --If user hits back button..--
             //
@@ -585,15 +585,15 @@ app.post('/facebook', function (req, res) {
                     thread_id: 'facebook_' + sender.toString()
                 }).sort('-ts').exec(function(err, messages) {
                     if (err) return console.error(err);
-                    //*This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search. 
+                    //*This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search.
                     var message_to_retrieve = sub_menu.type === 'last_search' ? (messages[3] ? 3 : 2) : (messages[2] ? 2 : (messages[1] ? 1 : 0));
                     if (messages.length == 0) {
                         return console.log('No message found');
-                    } 
+                    }
                          if (messages[message_to_retrieve] && _.get(messages[message_to_retrieve], 'execute[0].params.query')) {
                              backCache = backCache + 1;
                             message_to_retrieve = message_to_retrieve + backCache;
-                            //This will loop through older messages until it finds a query.  
+                            //This will loop through older messages until it finds a query.
                             var i = message_to_retrieve;
                             var found_query = false;
                             while (i >= 0 && !found_query) {
@@ -682,12 +682,12 @@ app.post('/facebook', function (req, res) {
                                         console.log(body);
                                     });
                             }
-                        } 
-                      })  
+                        }
+                      })
                 } else if (sub_menu.action === 'emoji_modify') {
-                   
-                    
-                    // var results = yield getLatestAmazonResults(message) 
+
+
+                    // var results = yield getLatestAmazonResults(message)
                     db.Messages.find({
                         thread_id: 'facebook_' + sender.toString()
                     }).sort('-ts').exec(function(err, messages) {
@@ -711,14 +711,14 @@ app.post('/facebook', function (req, res) {
                             });
                          if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
                             fb_memory[sender].mode = 'shopping';
-                         } 
+                         }
                         // queue it up for processing
                         message.save().then(() => {
-                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))  
-                                                    
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+
                         });
                     }
-                }) 
+                })
 
                 } else if (sub_menu.action === 'teenage_wasteland') {
                     process.exit(1);
@@ -728,21 +728,21 @@ app.post('/facebook', function (req, res) {
                 }
 
                 //
-                //   --  Sub-menu switching -- 
+                //   --  Sub-menu switching --
                 // currently either Color or Emoji
                 //
 
                 // black, white, blue, red, brown, pink
 
                 switch(sub_menu.action) {
-                case "sub_menu_color": 
+                case "sub_menu_color":
 
                     //Switching mode to modify
                     fb_memory[sender] = {
                         mode: 'modify',
                         select: 1
                     };
-                    
+
                      var modify_sub_menu = {
                         "recipient": {
                             "id": sender.toString()
@@ -939,15 +939,15 @@ app.post('/facebook', function (req, res) {
                         if (err) console.error('post err ', err);
                     })
                     break;
-               } 
+               }
 
         }
-       
 
-        //REGULAR INCOMING TEXT MESSAGES 
+
+        //REGULAR INCOMING TEXT MESSAGES
         else if (event.message && event.message.text) {
 
-                text = event.message.text;  
+                text = event.message.text;
 
 
 
@@ -961,7 +961,7 @@ app.post('/facebook', function (req, res) {
                 //     //   -F recipient='{"id":"USER_ID"}' \
                 //     //   -F message='{"attachment":{"type":"image", "payload":{}}}' \
                 //     //   -F filedata=@/tmp/shirt.png \
-                //     //   "https://graph.facebook.com/v2.6/me/messages?access_token=PAGE_ACCESS_TOKEN"    
+                //     //   "https://graph.facebook.com/v2.6/me/messages?access_token=PAGE_ACCESS_TOKEN"
 
                 //     console.log('TRYING THIS STUFF NO@QQQWWWWWW')
                 //     //res.send(200);
@@ -982,7 +982,7 @@ app.post('/facebook', function (req, res) {
                 //     //             id: sender.toString()
                 //     //         },
                 //     //         message: '{"attachment":{"type":"image", "payload":{}}}',
-                //     //         filedata: 
+                //     //         filedata:
                 //     //     }
                 //     // }, function(err, res, body) {
                 //     //     if (err) console.error('post err ', err);
@@ -990,7 +990,7 @@ app.post('/facebook', function (req, res) {
                 //     // });
 
                 // }
-                //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
+                //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
 
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
@@ -1002,7 +1002,7 @@ app.post('/facebook', function (req, res) {
                 if (text.indexOf('🤖') > -1) text = text.replace('🤖','robot')
 
 
-                 //Check if user is still in modify mode 
+                 //Check if user is still in modify mode
                 if(fb_memory[sender].mode == 'modify') {
                      fb_memory[sender].mode = 'shopping';
 
@@ -1030,7 +1030,7 @@ app.post('/facebook', function (req, res) {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                          //Reset mode back to shopping
                     });
-                    
+
                 } else {
                      console.log(JSON.stringify(req.body));
                     var message = new db.Message({
@@ -1054,7 +1054,7 @@ app.post('/facebook', function (req, res) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
-                }               
+                }
         }
         //user sent image
         else if (!_.get(req.body.entry[0].messaging[i], 'message.sticker_id') && _.get(req.body.entry[0].messaging[i], 'message.attachments[0].type') == 'image') {
@@ -1137,7 +1137,7 @@ app.post('/facebook', function (req, res) {
             }
             console.log('\n\n\npostback: ', postback,'\n\n\n');
 
-            //@ @ @ @ @ @ @ @ @ @ @ @ 
+            //@ @ @ @ @ @ @ @ @ @ @ @
             //@ @ @ @ @ ONBOARDING!!!!!!
             //@ @ @ @ @ @ @ @ @ @ @ @ @
             if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
@@ -1145,7 +1145,7 @@ app.post('/facebook', function (req, res) {
 
                 //send welcome image here
 
-                //then one more text message intro 
+                //then one more text message intro
                 //then send story
                 fb_memory[sender].mode = 'onboarding';
                 //res.send(200);
@@ -1156,11 +1156,11 @@ app.post('/facebook', function (req, res) {
                     setTimeout(function() {
                         send_story(userid_z,sender);
                     }, 1500);
-                    
-                });
-                
 
-                 // var get_started = { 
+                });
+
+
+                 // var get_started = {
                  //        "recipient": {
                  //            "id": sender.toString()
                  //        },
@@ -1193,7 +1193,7 @@ app.post('/facebook', function (req, res) {
                  //                                text: 'books'})
                  //                      }
                  //                    ],
-                 //                    "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"   
+                 //                    "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
                  //        },
                  //        "notification_type": "NO_PUSH"
                  //    };
@@ -1218,8 +1218,8 @@ app.post('/facebook', function (req, res) {
                 console.log('OK OK OKO @ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K ',postback)
                 process_story(userid_z,sender,postback.story_pointer,postback.selected);
                 return;
-            }     
-            //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //          
+            }
+            //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //
             console.log('NOOOOOOOOOOOOOO@ @ @ @ @ @ @ @ @ @ @ @ OKKK@@K@K@K@K@K@K');
 
             db.Messages.find({
@@ -1241,14 +1241,14 @@ app.post('/facebook', function (req, res) {
                                 'id': "facebook_" + sender.toString(),
                                 'user': sender.toString()
                             },
-                            // amazon: msg.amazon 
+                            // amazon: msg.amazon
                         });
                     }  else {
                        var msg = messages[0];
 
                     }
 
-                   
+
                     co(function*() {
 
 
@@ -1346,7 +1346,7 @@ app.post('/facebook', function (req, res) {
                                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                             });
                         }
-                       
+
                         function* getLatestAmazonResults(message) {
                             message.history = [];
                             var results,
@@ -1404,8 +1404,8 @@ app.post('/facebook', function (req, res) {
                                         if (err) return console.error(err);
                                         if (messages.length == 0) {
                                             console.log('No message found');
-                                        } 
-                                        else if (messages[0]._id == postback.object_id) { 
+                                        }
+                                        else if (messages[0]._id == postback.object_id) {
                                             // console.log('THIS IS AN ITEM FROM THE LATEST SEARCH');
                                             return 'false'
                                         }
@@ -1539,7 +1539,7 @@ app.post('/facebook', function (req, res) {
                                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                     });
 
-                                } 
+                                }
 
                                 else if (postback.action === 'list') {
                                      var typing_indicator = {
@@ -1751,7 +1751,7 @@ app.post('/facebook', function (req, res) {
                             }
                         }
                     }) // end of co
-                
+
             }); // end of db.find
         } //end of for loop
         } //end of shitty (temp) function wrapper
@@ -1852,7 +1852,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                             dataId: "facebook_" + sender.toString(),
                                             action: "button_search",
                                             text: 'books',
-                                            ts: Date.now()                                                 
+                                            ts: Date.now()
                                         })
                                     }
                                ],
@@ -2029,7 +2029,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                                 ts: outgoing.data.ts
                             })
                         }],
-                    } 
+                    }
             });
 
             cards.push( {
@@ -2059,7 +2059,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                             "template_type": "generic",
                             "elements": cards
                         }
-                    },     
+                    },
                     "quick_replies":[
                               {
                                 "content_type":"text",
@@ -2167,7 +2167,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                   },
                   {
                     "content_type":"text",
-                    "title":"Color",  
+                    "title":"Color",
                     "payload":   JSON.stringify({
                             action: "sub_menu_color",
                             selected: focus_info.selected
@@ -2250,7 +2250,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
                 if (err) console.error('post err ', err);
                 console.log(body)
             })
-        }) 
+        })
     }
 
     function send_cart(channel, text, outgoing) {
@@ -2377,7 +2377,7 @@ function send_universal_message(bd,sendTo){
 }
 
 function start_story(recipient,sender){
-    
+
     send_story(recipient,sender);
 
 
@@ -2385,7 +2385,7 @@ function start_story(recipient,sender){
 
 //recipient: id
 //sender: id
-//pointer: which sequence # we're going to 
+//pointer: which sequence # we're going to
 //select: which answer did user pick
 function process_story(recipient,sender,pointer,select){
 
@@ -2407,25 +2407,25 @@ function process_story(recipient,sender,pointer,select){
             if(err) {
                 console.error('ERROR!');
             }
-        });  
+        });
     });
     //////////
 
 
-    //check if we should end story. will stop story after length of quiz question array 
+    //check if we should end story. will stop story after length of quiz question array
     if(pointer == onboarding_quiz.length - 1){
 
         //ADD TIMER DELAY FOR "TOTALING RESULTS...."
-        
+
 
         //send image here
-        
+
 
 
 
         //SEND PRESENT IMAGE
         //DELAY
-        //SEND PRESENT 
+        //SEND PRESENT
 
         console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[sender].quiz)
 
@@ -2503,7 +2503,7 @@ function process_story(recipient,sender,pointer,select){
         var sendObj;
         switch(item){
             case 'Flying Sailboat':
-             sendObj = { 
+             sendObj = {
                     "recipient": {
                         "id": sender.toString()
                     },
@@ -2543,13 +2543,13 @@ function process_story(recipient,sender,pointer,select){
                                     })
                                   }
                                 ],
-                                "text": "Here are some cool things you might like! :)"   
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
             break;
             case 'Lucky Goldfish':
-             sendObj = { 
+             sendObj = {
                     "recipient": {
                         "id": sender.toString()
                     },
@@ -2589,13 +2589,13 @@ function process_story(recipient,sender,pointer,select){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"   
+                                "text": "Here are a some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
             break;
             case 'Rainbow Pearl':
-             sendObj = { 
+             sendObj = {
                     "recipient": {
                         "id": sender.toString()
                     },
@@ -2635,13 +2635,13 @@ function process_story(recipient,sender,pointer,select){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"   
+                                "text": "Here are a some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
             break;
             case 'Snowglobe Charm':
-             sendObj = { 
+             sendObj = {
                     "recipient": {
                         "id": sender.toString()
                     },
@@ -2681,7 +2681,7 @@ function process_story(recipient,sender,pointer,select){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"   
+                                "text": "Here are a some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -2703,7 +2703,7 @@ function process_story(recipient,sender,pointer,select){
             }, function(err, res, body) {
                 if (err) console.error('post err ', err);
                 console.log('@$@$@$@$@$@$@$@$@$@$@$@$@$ ',body)
-            })           
+            })
         }, 2000);
 
 
@@ -2724,14 +2724,14 @@ function process_story(recipient,sender,pointer,select){
                 if(err) {
                     console.error('ERROR!');
                 }
-            });  
+            });
         });
 
 
-        
+
 
         //SWITCH
-        //CHOOSE PRESENT, display search buttons 
+        //CHOOSE PRESENT, display search buttons
     }else {
         pointer++;
 
@@ -2752,7 +2752,7 @@ function process_story(recipient,sender,pointer,select){
         console.log('@!@!@!@!@!@!@!@!@!@!@!@!@!@!@ ',fb_memory[sender].quiz);
 
         console.log('ADDING POINTER ',pointer)
-        send_story(recipient,sender,pointer)        
+        send_story(recipient,sender,pointer)
     }
 
 }
@@ -2833,7 +2833,7 @@ function send_image(img,sender,callback){
     var form = r.form()
     form.append('recipient', '{"id":"'+sender.toString()+'"}')
     form.append('message', '{"attachment":{"type":"image", "payload":{}}}')
-    form.append('filedata', fs.createReadStream(__dirname +'/assets/'+img))                  
+    form.append('filedata', fs.createReadStream(__dirname +'/assets/'+img))
 }
 
 //onboarding quiz, sequential stories
@@ -2843,7 +2843,7 @@ function send_image(img,sender,callback){
                 // smart:0,
                 // adventure:0
 
-var onboarding_quiz = [{ 
+var onboarding_quiz = [{
     "message":{
         "attachment":{
           "type":"template",
@@ -2889,7 +2889,7 @@ var onboarding_quiz = [{
         }
     }
 },
-{ 
+{
     "message":{
         "attachment":{
           "type":"template",
@@ -2935,7 +2935,7 @@ var onboarding_quiz = [{
         }
     }
 },
-{ 
+{
     "message":{
         "attachment":{
           "type":"template",
@@ -2981,7 +2981,7 @@ var onboarding_quiz = [{
         }
     }
 },
-{ 
+{
     "message":{
         "attachment":{
           "type":"template",
