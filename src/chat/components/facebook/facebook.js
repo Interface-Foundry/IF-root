@@ -88,7 +88,7 @@ var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var fbtoken;
 if (process.env.NODE_ENV === 'development_alyx'){
-    fbtoken = 'EAANOJsoiIyUBACfPbJ2SgpeukLwzDWAiB30gcwfkpZAcw5L2y6CrDkdQzQLvEO3aKF4WyH2oQHPIqbUZA4aajFU2x3AHZAhrjr6KZAZBKVyEqZBmgpGDgZB6AIsAHgbPpCH3zMMoYl7ByX3pspg8mKmKr1NNZBLtJxprmDA5uIrD8gZDZD';
+    fbtoken = 'EAAEkPTERbfgBACRwymE64dZCRxlQ035ZBvg2ZCATLkuZB8YF4wOQBfD2M4DvUwJ52ZBIEgo43hi4LrVu7bxA9pgpZCpTi8GtIhpMETuGrxhXFb1BYjJ0EXeWEgTd6ugHe7ZAIIgSKWfVHoETvKJNujMfFqGU8AK4sWVhQuJJjhEvgZDZD';
 }
 else if (process.env.NODE_ENV === 'development_mitsu') {
     fbtoken = 'EAAas9IZAQHr8BAOQChNIFxz34dnEKmBe0uZB0xrYcYGazBdZAdCNptOMb7udylQ0UW6fxzcZAZCkAPfrlzaiZAciuLmZB3Pd4mZBjG2rIDUvWtZCvzZApTGIWdzseZBMzP5Vzdyz94qbtm7jW50t9ufqEHRFfrt3iwuZA9IZD'
@@ -2702,9 +2702,8 @@ function process_story(recipient,sender,pointer,select){
                 body: sendObj
             }, function(err, res, body) {
                 if (err) console.error('post err ', err);
-                console.log('@$@$@$@$@$@$@$@$@$@$@$@$@$ ',body)
             })
-        }, 2000);
+        }, 1000);
 
 
 
