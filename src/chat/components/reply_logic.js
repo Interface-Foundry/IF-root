@@ -481,8 +481,6 @@ handlers['shopping.similar'] = function*(message, exec) {
     return default_reply(message);
   }
 
-  // var old_params = yield getLatestAmazonQuery(message);
-
   exec.params.skip = 0; //(exec.params.skip || 0) + 3;
 
   if (!exec.params.asin) {
@@ -528,7 +526,6 @@ handlers['shopping.modify.all'] = function*(message, exec) {
       }
     }
   }
-  exec.params.query = old_params.query;
 
   // for "cheaper" modify the params and then do another search.
   if (exec.params.type === 'price') {
@@ -552,7 +549,20 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
   }
-    console.log('!3',exec)
+  console.log('!3', exec)
+  exec.params.query = old_params.query;
+  if (!exec.params.query) {
+    return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
+  
 
   var results = yield amazon_search.search(exec.params,message.origin);
 
@@ -592,18 +602,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
          }
       }
     }
-    // console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbut did it work? ', exec.params)
   }
- 
-  exec.params.query = old_params.query ? old_params.query : '' ;
-  if (!exec.params.query || exec.params.query == undefined) {
-    console.log('query is empty, what are r')
-  }
-
-  //patch this leaky hole
-  // if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
-  //   exec.params.query = old_params
-  // }
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
@@ -633,6 +632,19 @@ handlers['shopping.modify.one'] = function*(message, exec) {
 
 
   console.log('!4', exec)
+  exec.params.query = old_params.query;
+  if (!exec.params.query) {
+    return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
+
 
   var results = yield amazon_search.search(exec.params,message.origin);
   return new db.Message({
