@@ -6,9 +6,8 @@ import io
 import textwrap
 import logging
 from PIL import Image, ImageFont, ImageDraw
-from config import make_image_configs
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -28,7 +27,14 @@ def load_number_images():
 
 
 def load_fonts():
-    fonts_file = os.path.join('fonts', 'HelveticaNeue-Regular.ttf')
+    try:
+        fonts_file = os.path.join(
+            os.getcwd(), 'fonts', 'HelveticaNeue-Regular.ttf')
+        logging.debug('fonts loaded correctly')
+    except:
+        fonts_file = os.path.join(
+            '/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
+        logging.debug('error loading fonts')
     font = {}
     font_size = [12, 13, 14, 15, 16, 20, 28]
     for s in font_size:
@@ -102,8 +108,11 @@ class PicStitch:
                 self.origin = self.img_req['origin']
         else:
             self.origin = 'slack'
-            logging.critical('NO_ORIGIN__ASSUMING_SLACK')
-        self.config = make_image_configs(self.font_dict, self.origin)
+            logging.critical('NO_ORIGIN_ASSUMING_SLACK')
+        logging.debug('using origin: ' + self.origin)
+        self.config = self._make_image_configs()
+        logging.debug('using config: ')
+        logging.debug(self.config)
 
     def _make_image(self):
         # should be 1 image_req...
@@ -118,6 +127,7 @@ class PicStitch:
         # get image in thumbnail format
         logging.info('making image for__: ' + str(self.img_req))
         thumb_img = download_image(self.img_req['url'])
+        logging.debug('using pic_size:' + str(self.config['PIC_SIZE']))
         thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
 
         # post image thumbnail
@@ -231,9 +241,64 @@ class PicStitch:
     def _upload_image_to_s3(self):
         s3_file = str(uuid.uuid4())
         tmp_img = io.BytesIO()
-        self.created_image.save(tmp_img, 'PNG', quality=90)
+        self.created_image.save(tmp_img, 'PNG', quality=100)
         k = self.bucket.new_key(s3_file)
         k.set_contents_from_string(tmp_img.getvalue(),
                                    headers={"Content-Type": "image/png"})
-        url_string = 'https://s3.amazonaws.com/' + self.bucket_name + '/' + s3_file
-        self.s3_url = url_string
+        s3_base = 'https://s3.amazonaws.com/' + self.bucket_name + '/'
+        img_url = s3_base + s3_file
+        logging.info('image posted@ ' + img_url)
+        self.s3_url = img_url
+
+    def _make_image_configs(self):
+        logging.debug('using self._make_image_configs')
+        config = {}
+        config['CHAT_WIDTH'] = 365
+        config['CHAT_HEIGHT'] = 140
+        config['PADDING'] = 5
+        config['BGCOLOR'] = 'white'
+        config['length'] = 3
+        config['biggest_width'] = 0
+        config['biggest_height'] = 0
+        config['thumbnails'] = []
+        config['PIC_SIZE'] = 130, 130
+        config['CHAT_WIDTH'] = 365
+        config['CHAT_HEIGHT'] = 140
+        # where to draw main pics
+        config['PIC_COORDS'] = [{'x': 14, 'y': 5},
+                                {'x': 24, 'y': 174},
+                                {'x': 24, 'y': 336}]
+        # where to draw choice numbers
+        config['TEXTBOX_COORDS'] = [{'x': 190, 'y': 10},
+                                    {'x': 190, 'y': 174},
+                                    {'x': 190, 'y': 336}]
+
+        config['BOX_WIDTH'] = 30
+        config['font1'] = self.font_dict[16]
+        config['font2'] = self.font_dict[13]
+
+        if self.origin in ['facebook']:
+            logging.debug('using origin==facebook in config')
+            config['BOX_WIDTH'] = 22
+            config['CHAT_HEIGHT'] = 223
+            config['CHAT_WIDTH'] = 425
+            config['PIC_COORDS'] = [{'x': 5, 'y': 5}]  # where to draw main pic
+            # where to draw text boxes
+            config['TEXTBOX_COORDS'] = [{'x': 250, 'y': 5}]
+            config['PIC_SIZE'] = 223, 223
+            config['font1'] = self.font_dict[28]
+            config['font2'] = self.font_dict[20]
+
+        if self.origin in ['skype']:
+            logging.debug('using origin==skype in config')
+            config['BOX_WIDTH'] = 22
+            config['CHAT_HEIGHT'] = 230
+            config['CHAT_WIDTH'] = 381
+            config['PIC_COORDS'] = [{'x': 20, 'y': 50}]  # where to draw main p
+            # where to draw text boxes
+            config['TEXTBOX_COORDS'] = [{'x': 250, 'y': 100}]
+            config['PIC_SIZE'] = 250, 250
+            config['font1'] = self.font_dict[28]
+            config['font2'] = self.font_dict[20]
+
+        return config
