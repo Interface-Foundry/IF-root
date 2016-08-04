@@ -95,10 +95,12 @@ else if (process.env.NODE_ENV === 'development_mitsu') {
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
-} 
+} else if (process.env.NODE_ENV === 'development_nlp') {
+    fbtoken = 'EAAMhCmQMAyQBANJjQ2hSHnh1NBAGSAKYK2nxAyOExE24jeVzPBNeC3z3sZATMZB0USBNZBrtWktNXxqUyXZBAjT9B6oShyjhZC1CHMvcgA7xhdNhsYk7h2lkC7KfByAZAZBdpQw68iApcvYjTKZC3CRY6TtI2RpLkjJGVHn2zRJjoWr49IldyTpr';
+}
 else if (process.env.NODE_ENV === 'production') {
     fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
-} 
+}
 
 //temp. needs to be story in DB
 var fb_memory = {}
