@@ -81,7 +81,6 @@ var httpsServer = require('https').createServer({
 }, app);
 var search_results = require('./search_results');
 var focus = require('./focus');
-// fbtoken = process.env.NODE_ENV === 'production' ? 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD'  : 'EAAPkuxFNp9UBAL6JrXOwHVdji0mjpqsKqrWBlhJyVpNdh0mE2C4ZClfmvZCyTXPgEjGESnjeS3PXs5oFcl1qWlJipqAFluTUuFZBpQzbBb9Oa9TMP6WD7d8wro6IgGueCpQk18isez7wRYlUto4KXKZCSbFagFAZD'
 var emojiText = require('emoji-text'); //convert emoji to text
 var kipcart = require('../cart');
 var process_image = require('../process');
@@ -96,6 +95,9 @@ else if (process.env.NODE_ENV === 'development_mitsu') {
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
+} 
+else if (process.env.NODE_ENV === 'production') {
+    fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
 } 
 //temp. needs to be story in DB
 var fb_memory = {}
@@ -949,49 +951,6 @@ app.post('/facebook', function (req, res) {
 
                 text = event.message.text;  
 
-
-
-
-
-                //@ @ @ @ @ @ TEMPORARRY TURN OFF LATER
-                // if (text == 'hi'){
-                //     fb_memory[userid_z].mode = 'onboarding';
-
-                //     // curl  \
-                //     //   -F recipient='{"id":"USER_ID"}' \
-                //     //   -F message='{"attachment":{"type":"image", "payload":{}}}' \
-                //     //   -F filedata=@/tmp/shirt.png \
-                //     //   "https://graph.facebook.com/v2.6/me/messages?access_token=PAGE_ACCESS_TOKEN"    
-
-                //     console.log('TRYING THIS STUFF NO@QQQWWWWWW')
-                //     //res.send(200);
-                //     send_image('cart.png',sender,function(){
-                //         send_story(userid_z,sender);
-                //     });
-
-
-                //     //   //TURN THIS INTO AN IMAGE SENDER!!!
-                //     //  request({
-                //     //     url: 'https://graph.facebook.com/v2.6/me/messages',
-                //     //     qs: {
-                //     //         access_token: fbtoken
-                //     //     },
-                //     //     method: 'POST',
-                //     //     json: {
-                //     //         recipient: {
-                //     //             id: sender.toString()
-                //     //         },
-                //     //         message: '{"attachment":{"type":"image", "payload":{}}}',
-                //     //         filedata: 
-                //     //     }
-                //     // }, function(err, res, body) {
-                //     //     if (err) console.error('post err ', err);
-                //     //     console.log(body);
-                //     // });
-
-                // }
-                //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ 
-
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
                     text = res;
@@ -1010,7 +969,7 @@ app.post('/facebook', function (req, res) {
                      var message = new db.Message({
                         incoming: true,
                         thread_id: "facebook_" + sender.toString(),
-                        original_text: '1 but ' + text,
+                        original_text: text.indexOf(' but ') == -1 ?  '1 but ' + text : text,
                         user_id: "facebook_" + sender.toString(),
                         origin: 'facebook',
                         source: {

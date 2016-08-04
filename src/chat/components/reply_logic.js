@@ -398,20 +398,19 @@ var handlers = {};
 handlers['shopping.initial'] = function*(message, exec) {
   typing(message);
   message._timer.tic('starting amazon_search');
-    //shitty fix'r'us - lets remove this after NLP sorts into shopping initial 100%
+    //NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%
    if (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) {
-    var fake_exec = { mode: 'shopping',
-            action: 'initial',
-            params: { query: message.text.split(' but ')[1] }
-           }
+    var fake_exec = { 
+      mode: 'shopping',
+      action: 'initial',
+      params: { query: message.text.split(' but ')[1] }
+     }
    }
    var exec = fake_exec ? fake_exec : exec;
-  //end of shitty fix'r'us
-
+  //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
   message._timer.tic('done with amazon_search');
 
-  
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -528,11 +527,8 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   kip.debug('new params', exec.params);
 
 
-  if (exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
-      console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nsplit modifiers look like :', message.text.split(' but ')[1].split(' '),'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-
+  if (exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
-      // console.log('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
     if (all_modifiers.length >= 2) {
       for (var i = 1; i < all_modifiers.length; i++) {
          if (all_modifiers[i] && all_modifiers[i] !== '') {
@@ -540,7 +536,6 @@ handlers['shopping.modify.all'] = function*(message, exec) {
          }
       }
     }
-    // console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbut did it work? ', exec.params)
   }
   exec.params.query = old_params.query;
 
@@ -560,22 +555,11 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
     exec.params.color = exec.params.val[0];
-
-    // console.log('exec for color search: ', JSON.stringify(exec))
   }
-  // else if (exec.params.type === 'genericDetail') {
-  //   //add handler for all other modifiers here
-  //   kip.debug('old params', old_params);
-  //   kip.debug('new params', exec.params);
-  //   // _.merge(exec.params, old_params);
-  //   return 0;
-  // }
   else {
-     var results = yield getLatestAmazonResults(message);
+    var results = yield getLatestAmazonResults(message);
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
-    // exec.params.color = exec.params.val.name;
-    // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
     console.log('!3',exec)
 
@@ -607,7 +591,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
   kip.debug('new params', exec.params);
-    if (exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
+    if (exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
       // console.log('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
     if (all_modifiers.length >= 2) {

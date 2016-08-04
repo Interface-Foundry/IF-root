@@ -120,7 +120,6 @@ var search = function*(params,origin) {
   debug('input params', params)
   debug('amazon params', amazonParams)
 
-  // if (amazonParams.type == 'color') {
   if (params.productGroup && params.browseNodes) {
       amazonParams["Keywords"] = (params.val && params.val[0] && params.val[0].name)  ? params.val[0].name.toLowerCase() : ((params.val && params.val[0]) ?  params.val[0].toLowerCase() : amazonParams["Keywords"]);
       var key;
@@ -159,59 +158,70 @@ var search = function*(params,origin) {
          amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
         for (var i = 0; i < all_modifiers_array.length-1; i++) {
           try {
-               var modifier = all_modifiers_array[i]
+               var modifier = all_modifiers_array[i];
+               if (!amazonParams.BrowseNode) {
+                 amazonParams.BrowseNode = browseNodeBackup;
+               }
                amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
-               if (amazonParams.BrowseNode) {
-                delete amazonParams.BrowseNode;
-              }
-               console.log('trying : ', amazonParams.Keywords)
-               console.log(amazonParams); 
-                 try{
-                   var res1 = yield get_client().itemSearch(amazonParams);
-                    if (res1 && res1.length >= 1) {
-                 var results = res1
-                 break;
-                } 
-                 } catch(e) {
-                     if (res1 && res1.length >= 1) {
-                       var results = res1
-                       break;
-                      } 
-                 }
-                 yield wait(500);
+                console.log('trying : ', amazonParams)
+                var res1 = yield get_client().itemSearch(amazonParams);
+                yield wait(500);
                 if (res1 && res1.length >= 1) {
-                  var results = res1
+                 var results = res1
+                 console.log('breaking out...')
                  break;
                 } else {
+                    if (amazonParams.BrowseNode) {
+                     delete amazonParams.BrowseNode;
+                    }
+                    console.log('trying : ', amazonParams)
+                    try{
+                      var res1 = yield get_client().itemSearch(amazonParams);
+                      yield wait(500);
+                      if (res1 && res1.length >= 1) {
+                         var results = res1
+                          console.log('breaking out...')
+                         break;
+                      } 
+                    } catch(err) {
+
+                    }
                 }
             }
             catch (e) {
-              console.log('lel wut',e)
                if (res1 && res1.length >= 1) {
                 var results = res1
+                 console.log('breaking out...')
                  break;
-                } 
+                }  else {
+                  if (amazonParams.BrowseNode) {
+                     delete amazonParams.BrowseNode;
+                    }
+                    console.log('trying : ', amazonParams);
+                    try {
+                      yield wait(500);
+                      var res1 = yield get_client().itemSearch(amazonParams);
+                    } catch(err) {
+                      
+                    }
+                    if (res1 && res1.length >= 1) {
+                     var results = res1
+                     console.log('breaking out...')
+                     break;
+                    } 
+                }
             }
+            console.log('welp didnt break out sooo..')
         }
-
         if (!results || (results && results.length < 1)) {
             console.log('👺3');
-            try {
-              if (amazonParams.BrowseNode) {
-                delete amazonParams.BrowseNode;
-              }
-              console.log(amazonParams);
-              var results = yield get_client().itemSearch(originalParams);
-            }
-            catch(err) {
-              amazonParams.Keywords = params.query;
-              amazonParams.BrowseNode = browseNodeBackup;
-              console.log('👺4', amazonParams);
-              var results = yield get_client().itemSearch(amazonParams);
-            }
+            amazonParams.Keywords = params.query;
+            amazonParams.BrowseNode = browseNodeBackup;
+            console.log('trying : ', amazonParams.Keywords)
+            var results = yield get_client().itemSearch(amazonParams);
         }
       } else {
-        console.log('👺3.5');
+        console.log('👺4');
         try {
           if (amazonParams.BrowseNode) {
             delete amazonParams.BrowseNode;
@@ -222,7 +232,7 @@ var search = function*(params,origin) {
         catch(err) {
           amazonParams.Keywords = params.query;
           amazonParams.BrowseNode = browseNodeBackup;
-          console.log('👺4.5', amazonParams);
+          console.log('👺5', amazonParams);
           var results = yield get_client().itemSearch(amazonParams);
         }
       }      
