@@ -432,10 +432,7 @@ handlers['shopping.focus'] = function*(message, exec) {
     kip.err('no focus supplied');
     return default_reply(message);
   }
-    if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
-      exec.params.query = 'elephant';
-
-  }
+    
   // find the search results this focus query is referencing
   var results = yield getLatestAmazonResults(message);
 
@@ -460,10 +457,7 @@ handlers['shopping.more'] = function*(message, exec) {
     console.log('!2',exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
-    if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
-      exec.params.query = 'elephant';
 
-  }
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -486,10 +480,7 @@ handlers['shopping.similar'] = function*(message, exec) {
     kip.err('no focus supplied')
     return default_reply(message);
   }
-    if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
-      exec.params.query = 'elephant';
 
-  }
   // var old_params = yield getLatestAmazonQuery(message);
 
   exec.params.skip = 0; //(exec.params.skip || 0) + 3;
@@ -527,7 +518,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   kip.debug('new params', exec.params);
 
 
-  if (exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
+  if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
     if (all_modifiers.length >= 2) {
       for (var i = 1; i < all_modifiers.length; i++) {
@@ -591,7 +582,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
   kip.debug('new params', exec.params);
-    if (exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
+    if (exec.params. && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
       // console.log('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
     if (all_modifiers.length >= 2) {
@@ -605,10 +596,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   }
  
   exec.params.query = old_params.query;
- if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
-      exec.params.query = 'elephant';
 
-  }
 
 
   //patch this leaky hole
