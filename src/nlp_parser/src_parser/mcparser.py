@@ -72,6 +72,7 @@ class McParser:
         self.verbs = []
         self.adjectives = []
         self.noun_phrases = []
+        self.modifier_words = []
         self.parts_of_speech = []
         self.item_descriptors = []
         self.entities = []
