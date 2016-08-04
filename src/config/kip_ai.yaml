@@ -1,4 +1,4 @@
-env: kip-ai
+env: kip_ai
 mongodb:
   url: mongodb://104.196.134.4:27017/foundry
 picstitch: http://picstitch:5000

@@ -226,6 +226,7 @@ function nlpToResult(nlp, message) {
 
   if (nlp.had_question) {
     debug('its a question')
+  }
 }
 
 

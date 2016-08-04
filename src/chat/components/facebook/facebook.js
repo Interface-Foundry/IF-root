@@ -862,7 +862,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but denim'
+                                        text: '1 but blue jean'
                                     })
                               },
                               {
@@ -889,7 +889,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but hammer'
+                                        text: '1 but tool'
                                     })
                               },
                               {
@@ -907,7 +907,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but hundred'
+                                        text: '1 but best'
                                     })
                               },
                                {
@@ -998,6 +998,9 @@ app.post('/facebook', function (req, res) {
                 })
                 //converting other emojis into text
                 text = emojiText.convert(text,{delimiter: ' '});
+                //emoji parser doesnt recognize robot emoji wtf
+                if (text.indexOf('🤖') > -1) text = text.replace('🤖','robot')
+
 
                  //Check if user is still in modify mode 
                 if(fb_memory[sender].mode == 'modify') {
@@ -1320,6 +1323,8 @@ app.post('/facebook', function (req, res) {
                         else if (postback.action == 'button_search') {
                             var text = postback.text;
                             text = emojiText.convert(text,{delimiter: ' '});
+                             //emoji parser doesnt recognize robot emoji wtf
+                if (text.indexOf('🤖') > -1) text = text.replace('🤖','robot')
                             // console.log('\n\n\n\nwe got to go: ', text, '\n\n\n\n')
                             var new_message = new db.Message({
                                     incoming: true,
