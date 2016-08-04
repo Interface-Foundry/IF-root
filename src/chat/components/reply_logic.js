@@ -582,7 +582,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
   kip.debug('new params', exec.params);
-    if (exec.params. && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
+    if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
       // console.log('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
     if (all_modifiers.length >= 2) {
@@ -595,9 +595,10 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     // console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbut did it work? ', exec.params)
   }
  
-  exec.params.query = old_params.query;
-
-
+  exec.params.query = old_params.query ? old_params.query : '' ;
+  if (!exec.params.query || exec.params.query == undefined) {
+    console.log('query is empty, what are r')
+  }
 
   //patch this leaky hole
   // if (!exec.params.query || exec.params.query == undefined || exec.params.query == null) {
@@ -822,7 +823,7 @@ function* getLatestAmazonQuery(message) {
     }
 
     var m = message.history[i];
-    if (m.mode === 'shopping' && m.action === 'results') {
+    if (m.mode === 'shopping' && m.action === 'results' && m.execute[0].params.query) {
       params = m.execute[0].params;
     }
 

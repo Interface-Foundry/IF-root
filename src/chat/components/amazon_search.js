@@ -150,7 +150,7 @@ var search = function*(params,origin) {
       var all_modifiers_array = all_modifiers_string.split(' ');
      }
   } else if (params.val && params.val.length == 1) {
-     amazonParams["Keywords"] = (params.val[0].name)  ? params.val[0].name.toLowerCase() : ((typeof params.val[0] == 'string') ?  params.val[0].toLowerCase() : amazonParams["Keywords"]);
+     amazonParams["Keywords"] = (params.val[0].name)  ? params.val[0].name.toLowerCase() + ' ' +params.query : ((typeof params.val[0] == 'string') ?  params.val[0].toLowerCase() + ' ' + params.query : amazonParams["Keywords"]);
   }
   timer.tic('requesting amazon ItermSearch api');
   try {
@@ -245,7 +245,7 @@ var search = function*(params,origin) {
              delete amazonParams.BrowseNode;
           }
             yield wait(1500);
-            amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+            // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
             console.log('trying : ', amazonParams);
             var results = yield get_client().itemSearch(originalParams);
         }
