@@ -1230,6 +1230,11 @@ app.post('/facebook', function (req, res) {
                 process_story(userid_z,sender,postback.story_pointer,postback.selected);
                 return;
             }
+            else if (postback.action == 'take_quiz'){
+                fb_memory[sender].mode = 'onboarding';
+                send_story(userid_z,sender);
+                return;
+            }
             //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //
 
             db.Messages.find({
