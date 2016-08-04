@@ -865,7 +865,7 @@ app.post('/facebook', function (req, res) {
                                 "payload": JSON.stringify({
                                         dataId: "facebook_" + sender.toString(),
                                         action: "emoji_modify",
-                                        text: '1 but blue jean'
+                                        text: '1 but denim'
                                     })
                               },
                               {
