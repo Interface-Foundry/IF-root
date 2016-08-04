@@ -274,6 +274,11 @@ var search = function*(params,origin) {
                 delete amazonParams.BrowseNode;
               }
               console.log('👺6: ', amazonParams);
+              if (amazonParams.Keywords && amazonParams.Keywords.split(' ').length > 2) {
+                kip.debug('someone probably sent a really long string: ', amazonParams.Keywords)
+                  //like if someone sends a paragraph.. patch fix for now todo fix later
+                  return kip.error('no results found (before paging)')
+              }
               try {
                 yield wait(1500);
                 console.log('trying : ', amazonParams.Keywords);
@@ -295,17 +300,18 @@ var search = function*(params,origin) {
                    var results = yield get_client().itemSearch(originalParams);
                 } catch(err) {
               }
+              
             }
         }
       }      
   }
   timer.tic('got results from ItermSearch api')
 
-  if (results.length >= 1) {
+  if (results && results.length >= 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
   }
   else {
-    kip.error('no results found (before paging)')
+    return kip.error('no results found (before paging)')
   }
   results = results.slice(skip, skip + 3)
   results.original_query = params.query
