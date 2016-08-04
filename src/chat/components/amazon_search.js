@@ -143,12 +143,11 @@ var search = function*(params,origin) {
      }
      var all_modifiers_string = amazonParams.Keywords.split('').slice(0).join('');
      var all_modifiers_array = all_modifiers_string.split(' ');
-     console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nALL_MODIFIERES : ', all_modifiers_string,'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
   }
 
   timer.tic('requesting amazon ItermSearch api');
   try {
-     if (params.query && _.get(amazonParams,'Keywords')) {
+     if (_.get(amazonParams,'Keywords')) {
       amazonParams.Keywords = _.get(amazonParams,'Keywords');
       }
       console.log('👺1', amazonParams);
@@ -157,22 +156,44 @@ var search = function*(params,origin) {
    catch (e) {
       if (all_modifiers_array) {
         console.log('👺2');
-        for (var i = 0; i < all_modifiers_array.length; i++) {
+         amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
+        for (var i = 0; i < all_modifiers_array.length-1; i++) {
           try {
                var modifier = all_modifiers_array[i]
                amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
+               if (amazonParams.BrowseNode) {
+                delete amazonParams.BrowseNode;
+              }
                console.log('trying : ', amazonParams.Keywords)
                console.log(amazonParams); 
-                 yield wait(2000);
-                 var results = yield get_client().itemSearch(amazonParams);
-                if (results && results.length >= 1) {
-                 console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGOT RESULTS\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nå')
+                 try{
+                   var res1 = yield get_client().itemSearch(amazonParams);
+                    if (res1 && res1.length >= 1) {
+                 var results = res1
                  break;
+                } 
+                 } catch(e) {
+                     if (res1 && res1.length >= 1) {
+                       var results = res1
+                       break;
+                      } 
+                 }
+                 yield wait(500);
+                if (res1 && res1.length >= 1) {
+                  var results = res1
+                 break;
+                } else {
                 }
             }
             catch (e) {
+              console.log('lel wut',e)
+               if (res1 && res1.length >= 1) {
+                var results = res1
+                 break;
+                } 
             }
         }
+
         if (!results || (results && results.length < 1)) {
             console.log('👺3');
             try {
