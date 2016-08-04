@@ -63,7 +63,7 @@ class McParser:
         self.had_find = False
         self.had_more = False
         self.had_question = False
-        self.sf_sm = False
+        self.single_focus_single_modify = False
 
         self.text = text.lower()
         self.tokens = []
@@ -72,7 +72,9 @@ class McParser:
         self.verbs = []
         self.adjectives = []
         self.noun_phrases = []
+        self.modifier_words = []
         self.parts_of_speech = []
+        self.modifier_words = []
         self.item_descriptors = []
         self.entities = []
         self.d = {}
@@ -101,7 +103,7 @@ class McParser:
         for line in self.d_array:
             self.dependency_array.append(line.split('\t'))
 
-        self.sorted_array = self.dependency_array
+        self.sorted_array = self.dependency_array.copy()
         self.sorted_array.sort(key=lambda x: x[6])
 
     def _parse_terms(self):
@@ -172,14 +174,6 @@ class McParser:
         adj_set = set(self.adjectives)
         nouns_set = set(self.nouns)
         self.nouns_with_adjectives = ' '.join(self.modifier_words)
-        '''
-        removes:
-            nouns without stopwords
-            adjectives without invalid adjectives
-        '''
-        adj_set = set(self.adjectives)
-        nouns_set = set(self.nouns)
-        self.nouns_with_adjectives = ' '.join(self.modifier_words)
         self.adjectives = list(adj_set.difference(invalid_adjectives))
         self.invalid_adj = list(adj_set.intersection(invalid_adjectives))
         self.nouns_without_stopwords = list(nouns_set.difference(stopwords))
@@ -235,7 +229,7 @@ class McParser:
             self.action_verb = False
 
         # trigger single focus single modify
-        if (len(self.focus) == 1) and (len(self.modifier_words) == 1) and (self.action not in action_terms.keys()):
+        if (len(self.focus) == 1) and (len(self.modifier_words) >= 1) and (self.action not in action_terms.keys()):
             self.action = 'modify.one'
             self.single_focus_single_modify = True
 
