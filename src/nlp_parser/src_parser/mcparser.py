@@ -19,6 +19,7 @@ def syntaxnet_array(text):
     else:
         script_location = './parser.sh'
     t = 'echo "' + text + '" | ' + script_location
+    t = t.encode('ascii','ignore')
     p = subprocess.Popen(t, stdout=subprocess.PIPE, shell=True)
     out = p.stdout.read().splitlines()
     # last item in array is ' ' for some reason

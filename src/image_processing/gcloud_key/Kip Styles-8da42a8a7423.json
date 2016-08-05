@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "kip-styles",
+  "private_key_id": "8da42a8a74236e230dc38754d692de364481e20d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCt7EBwNQaA1Cqo\nTaVgaRnc8Mj/ASP15hRyjpBRwyEgzboWl2PUggpqBfEkU9bPRArXPyfUSPO77K/C\nQvL4UNT9P9xqAW4o2B4T6y90c/EFg5NF8p8hopAvbEzLE3RWqBmeMOrs1uPWqVLp\nMmzA05WB72X1LVEoyw6igALzXiSrolyZArYm5NaxnKZRdO0dMk+/X334m4epdnlF\nvhb9iXAaV4sZI7RDQ2sh5/b8AlMTRAjhTYMuhqIPkZPlh8VrfTx2JINxHxoGM5c3\njPfjdyYlaYkRHQnDtl3EQW42wXII0yZqoXd3/36xZd6F0aK+O/n2vV6d6aXpgj+0\nyUYG2H5tAgMBAAECggEAdPbPFybx6q3Eyk79iurjs8xSv/vaXUKQOcJamEHsA42X\nOh4xyvZxXoAEffPMILOXvs4AUSmGkLlKMhCoKgriUjYiWz/+/4ToJWkjDuPyEU09\nO+tAzXPwF5RzyJaaxLRkFhi7xO93ZiOVWLLKpJsmjq2bGdmSHScB/pKsaVLEwo9c\nrHNvR2qdaSwLTFKqKPOBbBwR6fFdW6kTrDKAdyjm0Rpn74syiJC6dZDqA7yCu0Yd\noLp/t46lF/hbLfXW67g969PF8Tz8zQ3Ca8h71BXC1nXx8ohKyBQUUIQd386D87ME\nhwMJKvsTJyOMNXyQs909Z+5WZKix1hi25G2n4wgKGQKBgQD4gkbaM+N10dxlxD+z\nPuS48d8bKm4jHkdoFDE4r6HGmFKXsD+JAkR8xeEO4I9E3Sa199151NPFl/ZEGfzd\nMGD4AoWim5hPQ/DTD2QDYShv6cKNQJLWy8SIoHMV+2eG4qXvV8hcPnBjhCUaGLce\nLt5mxw9+GgANW4zjfNkQgas0UwKBgQCzKmaGBrhB3rVpMl1TFEDpttoFcN0RA0Oz\n2E8NKC1aA5AmMuPDDWXueVQIgLXTiTpfUFDF5xuzA8pFl/swtfmO8y/PpZ0DyRyJ\nzucUDpg6uLzbE1vCTnBEkKQ+NemM5ouujXFm4pgS1atv0Jjicdj2JKgFLw6OyrMa\njba6KDsqPwKBgQDoAbCmTKVCPSBXvkV+Uex1ohKaKR3UGZOu3pMpigcuAs2xInHe\ntsg7+P3pxsrbDuDyKCuUb5catYnMALsrwdv2D1y1+C/VaOewFIFaCl4XRZVGDJBK\nisi8iZeIYUNBEd67Oigrvnts3VVKLOLhAf7O029qWlnMHrnFNKzulTDCUwKBgB3q\ng4n3j0a4aDQzi6+2nwwnUwo7iT4w/FoIUVLSFZiFJcmrD6rfDtkd+zEcRMAYlt2Z\nbJNO/qoKhPjP4sqEaDI9WwtiDPC34QMFwEHyGescM7Sk69pq/IYGXNZibCfxyvsP\ndRMH3PqwINsfypdtCRw4jLGo5NZk9DkH1q4Iz7BDAoGAV06nbtNVmNsIl9uJdyho\nH2GmXMaGz4jjET23nAL9nvtLMLu2Njk8UIcm66VkNbq+kb5SboHQT7lMSbh//Vre\nC02rU1O9OvVR5Oq9doCUGItAvLKzgoJ7N0MJ/XFeLk2FV/+7kEsx0sjs50cTc19q\n+4VMB0EFfMKlTnB74kuCHPo=\n-----END PRIVATE KEY-----\n",
+  "client_email": "gcloud-picstitch@kip-styles.iam.gserviceaccount.com",
+  "client_id": "100176775242113780793",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gcloud-picstitch%40kip-styles.iam.gserviceaccount.com"
+}
