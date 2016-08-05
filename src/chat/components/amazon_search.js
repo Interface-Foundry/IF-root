@@ -455,20 +455,14 @@ var getPrices = function(item, callback) {
 
     verbose('& & & & & & & & & & & &PRODUCT OBJ ', product);
 
-    if (product.reviews) {
+    if (product && product.reviews) {
       reviews = product.reviews;
     }
 
     if (product && product.price) {
-      verbose('returning early with price: ' + product.price);
-      verbose('returning early with rice ' + product.altImage);
-      // if(product.altImage){
-      //   altImage = product.altImage;
-      // }
+      verbose('product.price: ' + product.price + ', price: ' + price);
       return callback(product.price, product.altImage, reviews)
     }
-
-    verbose('product.price: ' + product.price + ', price: ' + price);
 
     price = product.price || price || '';
     verbose('final price: ' + price);
