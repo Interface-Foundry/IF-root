@@ -238,18 +238,91 @@ app.post('/facebook', function (req, res) {
                     //document exists });
                     processMessage();
                 }else {
-                    fb_memory[sender].mode = 'onboarding';
-                    send_image('cart.png',sender,function(){
-                        var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
-                        //send image here
-                        
-                        setTimeout(function() {
-                            send_universal_message(x,sender);
-                        }, 1000);
-                        setTimeout(function() {
-                            send_story(userid_z,sender);
-                        }, 1000);
-                    });
+                    fb_memory[sender].exit_count = (fb_memory[sender].exit_count <= 2) ?  ++fb_memory[sender].exit_count : 0;
+
+                    if (fb_memory[sender].exit_count == 0){
+                            fb_memory[sender].mode = 'onboarding';
+                            send_image('cart.png',sender,function(){
+                                var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+                                //send image here
+                                
+                                setTimeout(function() {
+                                    send_universal_message(x,sender);
+                                }, 1000);
+                                setTimeout(function() {
+                                    send_story(userid_z,sender);
+                                }, 1000);
+                            });
+                    }                   
+                    else if(fb_memory[sender].exit_count && fb_memory[sender].exit_count >= 1 ) {
+                            fb_memory[sender] = {
+                                mode: 'shopping'
+                            };
+
+                            var help_card = {
+                                "recipient": {
+                                    "id": sender.toString()
+                                },
+                                "message": {
+                                    "attachment": {
+                                        "type": "template",
+                                        "payload": {
+                                            "template_type": "button",
+                                            "buttons": [
+                                               {
+                                                    "type": "postback",
+                                                    "title": "Headphones",
+                                                    "payload": JSON.stringify({
+                                                        dataId: "facebook_" + sender.toString(),
+                                                        action: "button_search",
+                                                        text: 'headphones',
+                                                        ts: Date.now()
+                                                    })
+                                                },
+                                                {
+                                                   "type": "postback",
+                                                    "title": "🐔 🍜",
+                                                    "payload": JSON.stringify({
+                                                        dataId: "facebook_" + sender.toString(),
+                                                        action: "button_search",
+                                                        text: '🐔🍜',
+                                                        ts: Date.now()
+                                                    })
+                                                },
+                                                {
+                                                    "type": "postback",
+                                                    "title": "Books",
+                                                    "payload": JSON.stringify({
+                                                        dataId: "facebook_" + sender.toString(),
+                                                        action: "button_search",
+                                                        text: 'books',
+                                                        ts: Date.now()
+                                                    })
+                                                }
+                                           ],
+                                            "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
+                                        }
+                                    }
+                                },
+                                "notification_type": "NO_PUSH"
+                            };
+                            request.post({
+                                url: 'https://graph.facebook.com/v2.6/me/messages',
+                                qs: {
+                                    access_token: fbtoken
+                                },
+                               method: "POST",
+                                json: true,
+                                headers: {
+                                    "content-type": "application/json",
+                                },
+                                body: help_card
+                            }, function(err, res, body) {
+                                if (err) console.error('post err ', err);
+                            })
+                            return
+
+                        } 
                 }
             });
         }else {
@@ -2413,7 +2486,6 @@ function process_story(recipient,sender,pointer,select){
             recipient: recipient,
             sender: sender,
             ts: Date.now(),
-            select: select,
             story: 'intro quiz',
             pointer: pointer - 1
         }

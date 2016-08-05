@@ -126,7 +126,7 @@ var search = function*(params,origin) {
       yield parseAmazon(params.productGroup, params.browseNodes, function(res) {
         key = res;
       });
-      if (key) {
+      if (key && key.BrowseNode) {
         amazonParams.SearchIndex = key.SearchIndex;
         amazonParams.BrowseNode = key.BrowseNode;
         browseNodeBackup = key.BrowseNode.slice(0);
@@ -275,9 +275,9 @@ var search = function*(params,origin) {
               }
               console.log('👺6: ', amazonParams);
               if (amazonParams.Keywords && amazonParams.Keywords.split(' ').length > 2) {
-                kip.debug('someone probably sent a really long string: ', amazonParams.Keywords)
+                kip.debug('someone probably sent a really long string: ', amazonParams.Keywords);
                   //like if someone sends a paragraph.. patch fix for now todo fix later
-                  return kip.error('no results found (before paging)')
+                  return null;
               }
               try {
                 yield wait(1500);
@@ -289,8 +289,7 @@ var search = function*(params,origin) {
                    yield wait(1500);
                    console.log('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
-                 } catch(err) {
-                }
+                 } catch(err) {}
               }
             if (!results || (results && results.length < 1)) {
                try {
@@ -298,32 +297,21 @@ var search = function*(params,origin) {
                    yield wait(1500);
                    console.log('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
-                } catch(err) {
-              }
-              
+                } catch(err) {}
             }
         }
       }      
   }
   timer.tic('got results from ItermSearch api')
 
-  if (results && results.length >= 1) {
+  if (results && results.length > 1) {
     kip.debug(`Found ${results.length} results (before paging)`.green)
   }
   else {
-    return kip.error('no results found (before paging)')
+    return null
   }
   results = results.slice(skip, skip + 3)
   results.original_query = params.query
-  // if there aren't enough results... do a weaker search
-  if (results.length < 1) {
-    console.log('👺4', amazonParams);
-    // TODO do the weak search thing.  looks like the weak search thing
-    // just removes some words from the search query.
-    throw new Error('no results found')
-  // results = yield weakSearch(params); TODO
-  // results = results.slice(skip, 3); // yeah whatevers
-  }
   timer.tic('enhancing results')
   var enhanced_results = yield enhance_results(results,origin, timer)
   timer.tic('done enhancing results')

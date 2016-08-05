@@ -409,6 +409,19 @@ handlers['shopping.initial'] = function*(message, exec) {
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
+
+  if (results == null || !results) {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
+
   message._timer.tic('done with amazon_search');
 
   return new db.Message({
@@ -457,6 +470,17 @@ handlers['shopping.more'] = function*(message, exec) {
     console.log('!2',exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
+   if (results == null || !results) {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
 
   return new db.Message({
     incoming: false,
@@ -490,6 +514,17 @@ handlers['shopping.similar'] = function*(message, exec) {
   }
 
   var results = yield amazon_search.similar(exec.params,message.origin);
+   if (results == null || !results) {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
 
   return new db.Message({
     incoming: false,
@@ -565,6 +600,17 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   
 
   var results = yield amazon_search.search(exec.params,message.origin);
+   if (results == null || !results) {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
 
   return new db.Message({
     incoming: false,
@@ -629,9 +675,20 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     // exec.params.color = exec.params.val.name;
     // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
+  
+   if (results == null || !results) {
+      return new db.Message({
+      incoming: false,
+      thread_id: message.thread_id,
+      resolved: true,
+      user_id: 'kip',
+      origin: message.origin,
+      source: message.source,
+      text: 'Oops! Sorry my brain froze!',
+    })
+  }
 
-
-  console.log('!4', exec)
+  // console.log('!4', exec)
   exec.params.query = old_params.query;
   if (!exec.params.query) {
     return new db.Message({
