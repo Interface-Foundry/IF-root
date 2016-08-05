@@ -4,10 +4,11 @@ import uuid
 import os
 import io
 import textwrap
+import time
 import logging
 from PIL import Image, ImageFont, ImageDraw
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -36,7 +37,7 @@ def load_fonts():
             '/picstitch', 'fonts', 'HelveticaNeue-Regular.ttf')
         logging.debug('error loading fonts')
     font = {}
-    font_size = [x for x in range(12,30)]
+    font_size = [x for x in range(12, 30)]
     for s in font_size:
         font[s] = ImageFont.truetype(fonts_file, s)
     return font
@@ -77,6 +78,7 @@ class PicStitch:
     def __init__(self,
                  img_req,
                  bucket,
+                 gcloud_bucket,
                  amazon_prime_image,
                  review_stars_images,
                  font_dict):
@@ -87,6 +89,7 @@ class PicStitch:
 
         self.img_req = img_req[0]
         self.bucket = bucket
+        self.gcloud_bucket = gcloud_bucket
         self.bucket_name = 'if-kip-chat-images'
 
         self.amazon_prime_image = amazon_prime_image
@@ -100,7 +103,7 @@ class PicStitch:
 
         self._get_config()
         self._make_image()
-        self._upload_image_to_s3()
+        self._upload_to_gcloud()
 
     def _get_config(self):
         if self.img_req['origin']:
@@ -109,6 +112,11 @@ class PicStitch:
         else:
             self.origin = 'slack'
             logging.critical('NO_ORIGIN_ASSUMING_SLACK')
+
+        if self.origin == 'skype':
+            logging.debug('changing skype to facebook tmp')
+            self.origin = 'facebook'
+
         logging.debug('using origin: ' + self.origin)
         self.config = self._make_image_configs()
         logging.debug('using config: ')
@@ -125,7 +133,7 @@ class PicStitch:
                         color=self.config['BGCOLOR'])
 
         # get image in thumbnail format
-        logging.info('making image for__: ' + str(self.img_req))
+        logging.debug('making image for__: ' + str(self.img_req))
         thumb_img = download_image(self.img_req['url'])
         logging.debug('using pic_size:' + str(self.config['PIC_SIZE']))
         thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
@@ -238,17 +246,34 @@ class PicStitch:
 
         self.created_image = img
 
-    def _upload_image_to_s3(self):
-        s3_file = str(uuid.uuid4())
+    def _upload_to_gcloud(self):
+        t1 = time.time()
+        uniq_fn = str(uuid.uuid4())
         tmp_img = io.BytesIO()
         self.created_image.save(tmp_img, 'PNG', quality=100)
-        k = self.bucket.new_key(s3_file)
+
+        object_upload = self.gcloud_bucket.blob('facebook' + '/' + uniq_fn)
+        object_upload.upload_from_string(
+            tmp_img.getvalue(), content_type='image/png')
+
+        self.gcloud_url = object_upload.public_url
+        logging.debug('gcloud_url@ ' + self.gcloud_url)
+        logging.debug('gcloud time taken: ' + str(time.time() - t1))
+
+    def _upload_image_to_s3(self):
+        t1 = time.time()
+        uniq_fn = str(uuid.uuid4())
+        tmp_img = io.BytesIO()
+        self.created_image.save(tmp_img, 'PNG', quality=100)
+        k = self.bucket.new_key(uniq_fn)
         k.set_contents_from_string(tmp_img.getvalue(),
                                    headers={"Content-Type": "image/png"})
+
         s3_base = 'https://s3.amazonaws.com/' + self.bucket_name + '/'
-        img_url = s3_base + s3_file
-        logging.info('image posted@ ' + img_url)
+        img_url = s3_base + uniq_fn
         self.s3_url = img_url
+        logging.debug('s3 image posted@ ' + self.s3_url)
+        logging.debug('s3 time taken: ' + str(time.time() - t1))
 
     def _make_image_configs(self):
         logging.debug('using self._make_image_configs')
@@ -305,3 +330,10 @@ class PicStitch:
             config['review_count_font'] = self.font_dict[18]
 
         return config
+
+    def get_url(self):
+        if hasattr(self, 'gcloud_url'):
+            return self.gcloud_url
+        else:
+            self._upload_image_to_s3()
+            return self.s3_url
