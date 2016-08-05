@@ -101,6 +101,12 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20);
     var message = history[0];
     message.history = history.slice(1);
+
+    //sanitize text input
+    if(message.text){
+      message.text = message.text.replace(/[^0-9a-zA-Z.]/g, ' ')
+    }
+
     timer.tic('got history');
     message._timer = timer;
 
@@ -159,6 +165,8 @@ queue.topic('incoming').subscribe(incoming => {
         if (!replies || replies.length === 0) {
 
           timer.tic('getting nlp response')
+
+
           replies = yield nlp_response(message);
           timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan, 
