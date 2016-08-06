@@ -8,6 +8,29 @@ var memcache = require('memory-cache');
 var fs = require('fs')
 var mailerTransport = require('../../mail/IF_mail.js');
 
+// //start luminati
+// // (this is a proxy server)
+// const Luminati = require('luminati-proxy');
+// const proxy = new Luminati({
+//     customer: 'CUSTOMER', // your customer name
+//     password: 'PASSWORD', // your password
+//     zone: 'gen', // zone to use
+//     proxy_count: 5, //minimum number of proxies to use for distributing requests
+// });
+// proxy.on('response', res=>console.log('Response:', res));
+// proxy.listen(24000, '127.0.0.1').then(()=>new Promise((resolve, reject)=>{
+//     proxy.request('http://lumtest.com/myip', (err, res)=>{
+//         if (err)
+//             return reject(err);
+//         resolve(res);
+//     });
+// })).then(res=>{
+//     console.log('Result:', res.statusCode, res.body);
+// }, err=>{
+//     console.log('Error:', err);
+// }).then(()=>proxy.stop());
+// // end luminati
+
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 var cache = {
@@ -80,7 +103,8 @@ module.exports.basic = function basic(url, callback) {
             // 'Upgrade-Insecure-Requests':'1',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
             // 'Referer':url
-        }
+        },
+        timeout: 500
       });
 
 
@@ -106,20 +130,6 @@ module.exports.basic = function basic(url, callback) {
 
       proxiedRequest.get(url, function(err, response, body) {
 
-
-
-        if (kip.error(err)) {
-          console.error('error amazon get url ' + url)
-          callback(err);
-          return
-        }
-        if(err){
-          debug('&^&^&^&^&^&^&^&^&^');
-          console.error('^^$%$% ERROR ' + err);
-        }
-
-        debug('got reponse for url ' + url)
-
         // we weill fill in these fields 🍹🌴
         var product = {
           price: '',
@@ -127,6 +137,28 @@ module.exports.basic = function basic(url, callback) {
           full_html: '',
           asin: ''
         }
+
+        if(err && err.message){
+          console.error('AAAA ',err.message.code)
+        }
+        
+
+        //timeout from proxy request! return early!
+        if (err && err.message && err.message.code === 'ETIMEDOUT' || err && err.message && err.message.code === 'ESOCKETTIMEDOUT') { 
+          callback(product);
+          return 
+        }
+
+        if (kip.error(err)) {
+          console.error('error amazon get url ' + url)
+          callback(product);
+          return
+        }
+        if(err){
+          console.error('^^$%$% ERROR ' + err);
+        }
+
+        debug('got reponse for url ' + url)
 
         var amazonSitePrice;
 

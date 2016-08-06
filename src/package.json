@@ -43,6 +43,7 @@
     "koat": "^1.0.1",
     "linkifyjs": "^2.0.2",
     "lodash": "^4.13.1",
+    "luminati-proxy": "luminati-io/luminati-proxy",
     "memory-cache": "^0.1.5",
     "moment-timezone": "^0.5.3",
     "mongoose": "^4.4.17",
