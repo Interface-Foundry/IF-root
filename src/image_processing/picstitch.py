@@ -1,18 +1,66 @@
-import urllib.request
-import random
-import uuid
 import os
 import io
-import textwrap
 import time
+import uuid
+import random
 import logging
+import textwrap
+import urllib.request
+
+from gcloud import storage
 from PIL import Image, ImageFont, ImageDraw
+import boto
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+THIS_FOLDER = os.path.dirname(os.getcwd())
 
-THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
+
+def get_s3_cnxn():
+    # aws stuff
+    s3_region = 'us-east-1'
+    s3_bucket_name = 'if-kip-chat-images'
+    conn = boto.s3.connect_to_region(s3_region)
+    s3_bucket = conn.get_bucket(s3_bucket_name)
+    return s3_bucket
+
+
+def _upload_image_to_s3(image, s3_bucket=get_s3_cnxn()):
+    tmp_img = io.BytesIO()
+    image.created_image.save(tmp_img, 'PNG', quality=90)
+    k = s3_bucket.new_key(image.uniq_fn)
+    k.set_contents_from_string(tmp_img.getvalue(),
+                               headers={"Content-Type": "image/png"})
+    s3_base = 'https://s3.amazonaws.com/' + image.bucket_name + '/'
+    img_url = s3_base + self.uniq_fn
+    return img_url
+
+
+def get_gcloud_cnxn():
+    # gcloud stuff
+    gcloud_config = {
+        'proj_name': 'kip_styles',
+        'key': 'KipStyles-8da42a8a7423.json',
+        'bucket': 'if-kip-chat-images'
+    }
+    gcloud_client = storage.Client(project=gcloud_config[
+        'proj_name']).from_service_account_json(
+        'gcloud_key/' + gcloud_config['key'])
+    # gcloud_client = storage.Client(project=).from_service_account_json(
+    # 'gcloud_key/' + gcloud_config['key'])
+    gcloud_bucket = gcloud_client.get_bucket(gcloud_config['bucket'])
+    # gcloud_bucket.make_public(future=True)
+    return gcloud_bucket
+
+
+def upload_to_gcloud(image, gcloud_bucket=get_gcloud_cnxn()):
+    tmp_img = io.BytesIO()
+    image.created_image.save(tmp_img, 'PNG', quality=90)
+    object_upload = gcloud_bucket.blob(image.origin, image.uniq_fn)
+    object_upload.upload_from_string(
+        tmp_img.getvalue(), content_type='image/png')
+    object_upload.public_url
 
 
 def load_number_images():
@@ -78,7 +126,7 @@ class PicStitch:
     def __init__(self,
                  img_req,
                  bucket,
-                 gcloud_bucket,
+                 # gcloud_bucket,
                  amazon_prime_image,
                  review_stars_images,
                  font_dict):
@@ -86,10 +134,13 @@ class PicStitch:
         '''
         self.thumbnails = []
         self.origin = None
+        self.uploaded_to_gcloud = False
+        self.uploaded_to_s3 = False
 
         self.img_req = img_req[0]
+        self.uniq_fn = uuid.uuid4().hex + '.png'
         self.bucket = bucket
-        self.gcloud_bucket = gcloud_bucket
+        self.gcloud_bucket = get_gcloud()
         self.bucket_name = 'if-kip-chat-images'
 
         self.amazon_prime_image = amazon_prime_image
@@ -118,7 +169,7 @@ class PicStitch:
             self.origin = 'facebook'
 
         logging.debug('using origin: ' + self.origin)
-        self.config = self._make_image_configs()
+        self.config = self.make_image_configs()
         logging.debug('using config: ')
         logging.debug(self.config)
 
@@ -246,36 +297,36 @@ class PicStitch:
 
         self.created_image = img
 
-    def _upload_to_gcloud(self):
-        t1 = time.time()
-        uniq_fn = str(uuid.uuid4())
-        tmp_img = io.BytesIO()
-        self.created_image.save(tmp_img, 'PNG', quality=100)
+    # def _upload_to_gcloud(self):
+    #     t1 = time.time()
+    #     tmp_img = io.BytesIO()
+    #     self.created_image.save(tmp_img, 'PNG', quality=90)
+    #     self.object_upload = self.gcloud_bucket.blob(self.uniq_fn)
+    #     self.object_upload.upload_from_string(
+    #         tmp_img.getvalue(), content_type='image/png')
+    #     # self.object_upload.make_public()
+    #     self.uploaded_to_gcloud = True
 
-        object_upload = self.gcloud_bucket.blob('facebook' + '/' + uniq_fn)
-        object_upload.upload_from_string(
-            tmp_img.getvalue(), content_type='image/png')
+    #     # self.gcloud_url = self.object_upload.public_url
+    #     # logging.info('gcloud_url@ ' + self.gcloud_url)
+    #     # logging.debug('gcloud_uniq_id@ ' + self.uniq_fn)
+    #     logging.debug('gcloud time taken: ' + str(time.time() - t1))
 
-        self.gcloud_url = object_upload.public_url
-        logging.debug('gcloud_url@ ' + self.gcloud_url)
-        logging.debug('gcloud time taken: ' + str(time.time() - t1))
+    # def _upload_image_to_s3(self):
+    #     t1 = time.time()
+    #     tmp_img = io.BytesIO()
+    #     self.created_image.save(tmp_img, 'PNG', quality=90)
+    #     k = self.bucket.new_key(self.uniq_fn)
+    #     k.set_contents_from_string(tmp_img.getvalue(),
+    #                                headers={"Content-Type": "image/png"})
 
-    def _upload_image_to_s3(self):
-        t1 = time.time()
-        uniq_fn = str(uuid.uuid4())
-        tmp_img = io.BytesIO()
-        self.created_image.save(tmp_img, 'PNG', quality=100)
-        k = self.bucket.new_key(uniq_fn)
-        k.set_contents_from_string(tmp_img.getvalue(),
-                                   headers={"Content-Type": "image/png"})
+    #     s3_base = 'https://s3.amazonaws.com/' + self.bucket_name + '/'
+    #     img_url = s3_base + self.uniq_fn
+    #     self.s3_url = img_url
+    #     logging.debug('s3 image posted@ ' + self.s3_url)
+    #     logging.debug('s3 time taken: ' + str(time.time() - t1))
 
-        s3_base = 'https://s3.amazonaws.com/' + self.bucket_name + '/'
-        img_url = s3_base + uniq_fn
-        self.s3_url = img_url
-        logging.debug('s3 image posted@ ' + self.s3_url)
-        logging.debug('s3 time taken: ' + str(time.time() - t1))
-
-    def _make_image_configs(self):
+    def make_image_configs(self):
         logging.debug('using self._make_image_configs')
         config = {}
         config['CHAT_WIDTH'] = 365
@@ -332,8 +383,10 @@ class PicStitch:
         return config
 
     def get_url(self):
-        if hasattr(self, 'gcloud_url'):
-            return self.gcloud_url
+        if self.uploaded_to_gcloud:
+            return self.object_upload.public_url
         else:
+            t1 = time.time()
             self._upload_image_to_s3()
+            logging.info('upload time for s3: ' + str(time.time() - t1))
             return self.s3_url
