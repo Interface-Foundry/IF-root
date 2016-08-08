@@ -4,6 +4,7 @@ from keras.models import Model, Sequential
 from pymongo import MongoClient
 from nltk.tokenize import word_tokenize
 import numpy as np
+import pandas as pd
 
 client = MongoClient()
 db = client.amazonData
@@ -11,7 +12,19 @@ products = db.products
 
 data = products.find({'asin': {'$exists': True}, 'name': {'$exists': True}})
 
-data = [("ITEM_" + product['asin'], product['name'], product['frequentlyBought'], product['boughtAfterView'], product['category'], product['alsoBought']) for product in data]
+df = pd.DataFrame(list(data))
+
+asin = {}
+for i, row in df.iterrows():
+    asin[str(row['_id'])] = row['name'][:90]
+
+rev_asin = {}
+for k, v in asin.items():
+    rev_asin[v] = k
+
+
+
+# data = [("ITEM_" + product['asin'], product['name'], product['frequentlyBought'], product['boughtAfterView'], product['category'], product['alsoBought']) for product in data]
 # [0] is asin
 # [1] is name
 # [2] is frequentlyBought
@@ -34,6 +47,7 @@ def preprocess(s):
     return word_tokenize(' '.join(s))
 
 sentences = [preprocess(d[1]) + preprocess(' '.join(d[2])) for d in data]
+
 
 # set up a dict for converting names to ASINs
 names_dict = {}
