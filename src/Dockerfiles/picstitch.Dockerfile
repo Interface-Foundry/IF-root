@@ -20,4 +20,5 @@ ENV AWS_SECRET_ACCESS_KEY=dXx8uwqonshquHCnkJ9sGMEIQ4p62VyOuZD9uxlP
 
 ENV GOOGLE_APPLICATION_CREDENTIALS=/picstitch/gcloud_key/KipStyles-8da42a8a7423.json
 
-CMD python3 server.py
+# CMD python3 server.py
+CMD gunicorn -w 3 --bind 0.0.0.0:5000 main:application
