@@ -8,6 +8,7 @@ from picstitch import load_review_stars, load_amazon_prime, load_fonts, \
 from gcloud import storage
 import boto
 import io
+import time
 import os
 
 
@@ -30,7 +31,8 @@ def upload_to_s3(image, s3_bucket=get_s3()):
     tmp_img = io.BytesIO()
     image.created_image.save(tmp_img, 'PNG', quality=90)
     k = s3_bucket.new_key(image.uniq_fn)
-    k.set_contents_from_string(tmp_img.getvalue(), headers={"Content-Type": "image/png"})
+    k.set_contents_from_string(tmp_img.getvalue(), headers={
+                               "Content-Type": "image/png"})
     s3_base = 'https://s3.amazonaws.com/' + image.bucket_name + '/'
     img_url = s3_base + image.uniq_fn
     return img_url
@@ -55,8 +57,10 @@ def get_gcloud():
 def upload_to_gcloud(image, gcloud_bucket=get_gcloud()):
     tmp_img = io.BytesIO()
     image.created_image.save(tmp_img, 'PNG', quality=90)
-    object_upload = gcloud_bucket.blob(os.path.join(image.origin, image.uniq_fn))
-    object_upload.upload_from_string(tmp_img.getvalue(), content_type='image/png')
+    object_upload = gcloud_bucket.blob(
+        os.path.join(image.origin, image.uniq_fn))
+    object_upload.upload_from_string(
+        tmp_img.getvalue(), content_type='image/png')
     return object_upload.public_url
 
 
@@ -65,6 +69,7 @@ def main():
     '''
     return upload_image_tos_s3(create_image(request.json))
     '''
+    t1 = time.time()
     img_req = request.json
     logging.info('received request to make image')
     pic = PicStitch(img_req=img_req,
@@ -73,16 +78,17 @@ def main():
                     amazon_prime_image=amazon_images,
                     review_stars_images=review_star_images,
                     font_dict=font_dict)
-
-    gc_url = upload_to_gcloud(pic)
+    t2 = time.time()
+    gc_url = upload_to_gcloud(pic, gcloud_bucket)
     logging.info('uploaded to gcloud @ ' + gc_url)
-    # s3_url = upload_to_s3(pic)
-    # logging.info('uploaded @ ' + s3_url)
+    t3 = time.time()
+    logging.info('time taken to make img %s, time taken to upload image %s, total time taken: %s', str(
+        t2 - t1), str(t3 - t2), str(t3 - t1))
     return gc_url
 
 
 # load connections to gcloud and aws
-# gcloud_bucket = get_gcloud()
+gcloud_bucket = get_gcloud()
 review_star_images = load_review_stars()
 amazon_images = load_amazon_prime()
 font_dict = load_fonts()
