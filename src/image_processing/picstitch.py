@@ -1,16 +1,18 @@
-import urllib.request
-import random
-import uuid
 import os
 import io
-import textwrap
 import time
+import uuid
+import random
 import logging
+import textwrap
+import urllib.request
+
+from gcloud import storage
 from PIL import Image, ImageFont, ImageDraw
+import boto
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
@@ -44,6 +46,8 @@ def load_fonts():
 
 
 def load_review_stars():
+    '''
+    '''
     star_images = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
     rs_dict = {}
     for i in star_images:
@@ -60,8 +64,8 @@ def load_amazon_prime():
 def download_image(url):
     fd = urllib.request.urlopen(url)
     image_file = io.BytesIO(fd.read())
-    im = Image.open(image_file)
-    return im
+    image = Image.open(image_file)
+    return image
 
 
 class PicStitch:
@@ -77,8 +81,8 @@ class PicStitch:
 
     def __init__(self,
                  img_req,
-                 bucket,
-                 gcloud_bucket,
+                 # bucket,
+                 # gcloud_bucket,
                  amazon_prime_image,
                  review_stars_images,
                  font_dict):
@@ -86,10 +90,13 @@ class PicStitch:
         '''
         self.thumbnails = []
         self.origin = None
+        self.uploaded_to_gcloud = False
+        self.uploaded_to_s3 = False
 
         self.img_req = img_req[0]
-        self.bucket = bucket
-        self.gcloud_bucket = gcloud_bucket
+        self.uniq_fn = uuid.uuid4().hex
+        # self.bucket = bucket
+        # self.gcloud_bucket = get_gcloud()
         self.bucket_name = 'if-kip-chat-images'
 
         self.amazon_prime_image = amazon_prime_image
@@ -103,9 +110,10 @@ class PicStitch:
 
         self._get_config()
         self._make_image()
-        self._upload_to_gcloud()
 
     def _get_config(self):
+        '''
+        '''
         if self.img_req['origin']:
             if self.img_req['origin'] in ['facebook', 'slack', 'skype']:
                 self.origin = self.img_req['origin']
@@ -113,20 +121,21 @@ class PicStitch:
             self.origin = 'slack'
             logging.critical('NO_ORIGIN_ASSUMING_SLACK')
 
-        if self.origin == 'skype':
+        if self.origin is 'skype':
             logging.debug('changing skype to facebook tmp')
             self.origin = 'facebook'
 
         logging.debug('using origin: ' + self.origin)
-        self.config = self._make_image_configs()
+        self.config = self.make_image_configs()
         logging.debug('using config: ')
         logging.debug(self.config)
 
     def _make_image(self):
-        # should be 1 image_req...
-        # image_data = self.img_req
+        '''
+        should be 1 image_req...
+        create blank image based on source (slack/facebook/skype)
+        '''
 
-        # create blank image based on source (slack/facebook/skype)
         img = Image.new(mode='RGB',
                         size=(self.config['CHAT_WIDTH'],
                               self.config['CHAT_HEIGHT']),
@@ -246,36 +255,7 @@ class PicStitch:
 
         self.created_image = img
 
-    def _upload_to_gcloud(self):
-        t1 = time.time()
-        uniq_fn = str(uuid.uuid4())
-        tmp_img = io.BytesIO()
-        self.created_image.save(tmp_img, 'PNG', quality=100)
-
-        object_upload = self.gcloud_bucket.blob('facebook' + '/' + uniq_fn)
-        object_upload.upload_from_string(
-            tmp_img.getvalue(), content_type='image/png')
-
-        self.gcloud_url = object_upload.public_url
-        logging.debug('gcloud_url@ ' + self.gcloud_url)
-        logging.debug('gcloud time taken: ' + str(time.time() - t1))
-
-    def _upload_image_to_s3(self):
-        t1 = time.time()
-        uniq_fn = str(uuid.uuid4())
-        tmp_img = io.BytesIO()
-        self.created_image.save(tmp_img, 'PNG', quality=100)
-        k = self.bucket.new_key(uniq_fn)
-        k.set_contents_from_string(tmp_img.getvalue(),
-                                   headers={"Content-Type": "image/png"})
-
-        s3_base = 'https://s3.amazonaws.com/' + self.bucket_name + '/'
-        img_url = s3_base + uniq_fn
-        self.s3_url = img_url
-        logging.debug('s3 image posted@ ' + self.s3_url)
-        logging.debug('s3 time taken: ' + str(time.time() - t1))
-
-    def _make_image_configs(self):
+    def make_image_configs(self):
         logging.debug('using self._make_image_configs')
         config = {}
         config['CHAT_WIDTH'] = 365
@@ -332,8 +312,10 @@ class PicStitch:
         return config
 
     def get_url(self):
-        if hasattr(self, 'gcloud_url'):
-            return self.gcloud_url
+        if self.uploaded_to_gcloud:
+            return self.object_upload.public_url
         else:
+            t1 = time.time()
             self._upload_image_to_s3()
+            logging.info('upload time for s3: ' + str(time.time() - t1))
             return self.s3_url
