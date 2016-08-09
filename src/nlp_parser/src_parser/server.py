@@ -1,17 +1,18 @@
 from __future__ import print_function
 from flask import Flask, request, jsonify
 import logging
+import time
 
 import legacy as parser
 from mcparser import McParser
 
 orig_ = False
 port_num = 8083
-app = Flask(__name__)
+application = Flask(__name__)
 
 
 # ---- Logging prefs -----
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -23,11 +24,11 @@ if orig_:
     nlp = English()
 
 
-@app.route('/parse', methods=['GET', 'POST'])
+@application.route('/parse', methods=['GET', 'POST'])
 def parse_message(orig_parser=orig_):
     '''
     '''
-
+    t1 = time.time()
     text = request.json['text']
     # data.history = request.json['history']
     logging.info('query: ' + text)
@@ -53,10 +54,11 @@ def parse_message(orig_parser=orig_):
         logging.debug(resp)
 
     logging.debug('------returning results------')
+    logging.info('total syntaxnet time taken ' + str(time.time() - t1))
     return jsonify(resp)
 
 
-@app.route('/reload')
+@application.route('/reload')
 def reload_parse():
     logging.debug('------trying to reload------')
     reload()
@@ -64,8 +66,8 @@ def reload_parse():
 
 if __name__ == '__main__':
     logging.info('running app on port ' + str(port_num))
-    app.run(host="0.0.0.0",
-            port=port_num,
-            use_debugger=True,
-            debug=True,
-            use_reloader=False)
+    application.run(host="0.0.0.0",
+                    port=port_num,
+                    use_debugger=True,
+                    debug=True,
+                    use_reloader=False)
