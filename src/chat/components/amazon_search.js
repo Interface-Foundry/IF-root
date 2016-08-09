@@ -448,7 +448,11 @@ var getPrices = function(item, callback) {
     }
 
     if (product && product.price) {
-      verbose('product.price: ' + product.price + ', price: ' + price);
+      verbose('returning early with price: ' + product.price);
+      verbose('returning early with rice ' + product.altImage);
+      // if(product.altImage){
+      //   altImage = product.altImage;
+      // }
       return callback(product.price, product.altImage, reviews)
     }
 

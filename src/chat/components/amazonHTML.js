@@ -103,8 +103,7 @@ module.exports.basic = function basic(url, callback) {
             // 'Upgrade-Insecure-Requests':'1',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
             // 'Referer':url
-        },
-        timeout: 500
+        }
       });
 
 
@@ -130,6 +129,18 @@ module.exports.basic = function basic(url, callback) {
 
       proxiedRequest.get(url, function(err, response, body) {
 
+
+
+        if (kip.error(err)) {
+          console.error('error amazon get url ' + url)
+          callback(err);
+          return
+        }
+        if(err){
+          debug('&^&^&^&^&^&^&^&^&^');
+          console.error('^^$%$% ERROR ' + err);
+        }
+
         // we weill fill in these fields 🍹🌴
         var product = {
           price: '',
@@ -138,24 +149,9 @@ module.exports.basic = function basic(url, callback) {
           asin: ''
         }
 
-        if(err && err.message){
-          console.error('AAAA ',err.message.code)
-        }
-        
-
         //timeout from proxy request! return early!
         if (err && err.message && err.message.code === 'ETIMEDOUT' || err && err.message && err.message.code === 'ESOCKETTIMEDOUT') { 
-          callback(product);
-          return 
-        }
-
-        if (kip.error(err)) {
-          console.error('error amazon get url ' + url)
-          callback(product);
-          return
-        }
-        if(err){
-          console.error('^^$%$% ERROR ' + err);
+          return callback(product)
         }
 
         debug('got reponse for url ' + url)
