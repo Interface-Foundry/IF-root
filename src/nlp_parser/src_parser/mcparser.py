@@ -1,12 +1,72 @@
 import logging
 import subprocess
-import requests
+import sys
+
+from googleapiclient import discovery
+import httplib2
+from oauth2client.client import GoogleCredentials
 
 from word_list import action_terms, price_terms, stopwords, \
     invalid_adjectives, purchase_terms, periodical_terms
 
 DEBUG_ = False
 logger = logging.getLogger()
+
+
+def get_service():
+    credentials = GoogleCredentials.get_application_default()
+    scoped_credentials = credentials.create_scoped(
+        ['https://www.googleapis.com/auth/cloud-platform'])
+    http = httplib2.Http()
+    scoped_credentials.authorize(http)
+    return discovery.build('language', 'v1beta1', http=http)
+
+
+def get_native_encoding_type():
+    """Returns the encoding type that matches Python's native strings."""
+    if sys.maxunicode == 65535:
+        return 'UTF16'
+    else:
+        return 'UTF32'
+
+
+def analyze_syntax(text, encoding='UTF32'):
+    body = {
+        'document': {
+            'type': 'PLAIN_TEXT',
+            'content': text,
+        },
+        'features': {
+            'extract_syntax': True,
+        },
+        'encodingType': encoding,
+    }
+
+    service = get_service()
+
+    request = service.documents().annotateText(body=body)
+    response = request.execute()
+
+    return response
+
+
+def convert_api_to_dependency_array(resp):
+    dependency_array = []
+    tokens = resp['tokens']
+    for i, toke in enumerate(tokens):
+        word_array = []
+        word_array.append(str(i))
+        word_array.append(toke['text']['content'])
+        word_array.append('_')
+        word_array.append(toke['partOfSpeech']['tag'])
+        word_array.append('Penn_POS_Not_Provided')
+        word_array.append('_')
+        word_array.append(toke['dependencyEdge']['headTokenIndex'])
+        word_array.append(str(toke['dependencyEdge']['label']))
+        word_array.append('_')
+        word_array.append('_')
+        dependency_array.append(word_array)
+    return dependency_array
 
 
 def syntaxnet_array(text):
@@ -19,7 +79,7 @@ def syntaxnet_array(text):
     else:
         script_location = './parser.sh'
     t = 'echo "' + text + '" | ' + script_location
-    t = t.encode('ascii','ignore')
+    t = t.encode('ascii', 'ignore')
     p = subprocess.Popen(t, stdout=subprocess.PIPE, shell=True)
     out = p.stdout.read().splitlines()
     # last item in array is ' ' for some reason
@@ -37,7 +97,7 @@ def syntaxnet_array(text):
     return new_out
 
 
-def syntax_no_script(text):
+def syntaxnet_gcloud(text):
     '''
     TODO:
         - implement syntaxnet_array without piping from .sh
@@ -55,7 +115,7 @@ class McParser:
 
     '''
 
-    def __init__(self, text):
+    def __init__(self, text, local_or_gcloud='gcloud'):
         '''
         # self.terms = EasyDict({'item_descriptors': [], 'had_find': False})
         '''
@@ -65,6 +125,7 @@ class McParser:
         self.had_more = False
         self.had_question = False
         self.single_focus_single_modify = False
+        self.local_or_gcloud = local_or_gcloud
 
         self.text = text.lower()
         self.tokens = []
@@ -99,13 +160,23 @@ class McParser:
         parse the terms into accessible object
         '''
         self.text = self.text.replace(':', '')
-        self.d_array = syntaxnet_array(self.text)
         self.dependency_array = []
-        for line in self.d_array:
-            self.dependency_array.append(line.split('\t'))
+        if self.local_or_gcloud == 'local':
+            logging.info('using local syntaxnet')
+            self.pos_response = syntaxnet_array(self.text)
+            for line in self.pos_response:
+                self.dependency_array.append(line.split('\t'))
+        elif self.local_or_gcloud == 'gcloud':
+            logging.info('using gcloud syntaxnet')
+            self.pos_response = analyze_syntax(
+                self.text, get_native_encoding_type())
+            self.language = self.pos_response['language']
+            self.entities = self.pos_response['entities']
+            self.dependency_array = convert_api_to_dependency_array(
+                self.pos_response)
 
-        self.sorted_array = self.dependency_array.copy()
-        self.sorted_array.sort(key=lambda x: x[6])
+        # self.sorted_array = self.dependency_array.copy()
+        # self.sorted_array.sort(key=lambda x: x[6])
 
     def _parse_terms(self):
         '''
@@ -156,7 +227,8 @@ class McParser:
     def _create_noun_query(self):
         if hasattr(self, 'first_noun'):
             if self.first_noun is not self.last_noun:
-                self.noun_query = ' '.join(self.tokens[self.first_noun:self.last_noun + 1])
+                self.noun_query = ' '.join(
+                    self.tokens[self.first_noun:self.last_noun + 1])
 
     def _create_modifier_words(self):
         modifier_split = set(['but', 'except']).intersection(self.tokens)
@@ -164,7 +236,8 @@ class McParser:
             self.modifier_words = self.adjectives + self.nouns
         elif modifier_split:
             split_word = list(modifier_split)[0]
-            self.modifier_words = self.tokens[self.tokens.index(split_word) + 1:]
+            self.modifier_words = self.tokens[
+                self.tokens.index(split_word) + 1:]
 
     def _create_nouns_without_stopwords(self):
         '''

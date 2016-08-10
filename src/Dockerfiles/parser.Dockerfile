@@ -1,8 +1,10 @@
-FROM gcr.io/kip-ai/nlp:base
+FROM gcr.io/kip-styles/parser:base
 
 MAINTAINER grahama <graham.annett@gmail.com>
 
-RUN apt update && apt install -y python3-pip && pip3 install flask easydict gunicorn
+ADD nlp_parser/src_parser/requirements.txt  .
+
+RUN apt update && apt install -y python3-pip  && pip3 install -qr requirements.txt
 
 ADD nlp_parser/src_parser /root/
 
@@ -12,4 +14,6 @@ WORKDIR /root
 
 EXPOSE 8083
 
-CMD gunicorn -w 1 --bind 0.0.0.0:8083 main:application
+ENV GOOGLE_APPLICATION_CREDENTIALS /root/gcloud_key/KipStyles-cc4206727706.json
+
+CMD gunicorn -w 2 --bind 0.0.0.0:8083 main:application

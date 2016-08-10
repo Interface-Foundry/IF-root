@@ -51,7 +51,7 @@ def parse_message(orig_parser=orig_):
 
         logging.debug(resp.dependency_array)
         resp = resp.output_form()
-        logging.debug(resp)
+        logging.info(resp)
 
     logging.debug('------returning results------')
     logging.info('total syntaxnet time taken ' + str(time.time() - t1))
