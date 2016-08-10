@@ -417,8 +417,10 @@ handlers['shopping.initial'] = function*(message, exec) {
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
+  // console.log('!1',exec)
 
   if (results == null || !results) {
+      console.log('-1')
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -475,10 +477,12 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-    console.log('!2',exec)
+    // console.log('!2',exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
+          console.log('-2')
+
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -520,9 +524,13 @@ handlers['shopping.similar'] = function*(message, exec) {
     console.log(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
+    console.log('!2', exec)
+
 
   var results = yield amazon_search.similar(exec.params,message.origin);
    if (results == null || !results) {
+          console.log('-3')
+
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -595,6 +603,8 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   console.log('!3', exec)
   exec.params.query = old_params.query;
   if (!exec.params.query) {
+              console.log('-3.5')
+
     return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -608,7 +618,9 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   
 
   var results = yield amazon_search.search(exec.params,message.origin);
-   if (results == null || !results) {
+   if ((results == null || !results) && exec.params.type !== 'price') {
+          console.log('-4')
+
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -657,6 +669,8 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       }
     }
   }
+      console.log('!4', exec)
+
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
@@ -684,7 +698,9 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
   
-   if (results == null || !results) {
+   if ((results == null || !results) && exec.params.type !== 'price')  {
+                  console.log('-5')
+
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -696,8 +712,8 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     })
   }
 
-  // console.log('!4', exec)
   exec.params.query = old_params.query;
+
   if (!exec.params.query) {
     return new db.Message({
       incoming: false,
@@ -732,6 +748,7 @@ handlers['cart.save'] = function*(message, exec) {
     throw new Error('no focus for saving to cart');
   }
 
+  console.log('!!!is it even getting here', exec)
 
 
  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);

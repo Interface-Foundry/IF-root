@@ -87,6 +87,8 @@ var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var fbtoken;
+var next = require("co-next")
+
 if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAAEkPTERbfgBACRwymE64dZCRxlQ035ZBvg2ZCATLkuZB8YF4wOQBfD2M4DvUwJ52ZBIEgo43hi4LrVu7bxA9pgpZCpTi8GtIhpMETuGrxhXFb1BYjJ0EXeWEgTd6ugHe7ZAIIgSKWfVHoETvKJNujMfFqGU8AK4sWVhQuJJjhEvgZDZD';
 }
@@ -144,315 +146,63 @@ app.get('/facebook', function(req, res) {
 backCache = 0;
 
 
-app.post('/facebook', function (req, res) {
-
-
-    //kip.debug(req.body);
-
-    ///console.log('ZZZZZ ',req.body);
-
-    // filter out the shit we don't want to process.
+app.post('/facebook', next(function*(req, res, next) {
+    // filter out echo we don't want to process.
     if (_.get(req, 'body.entry[0].messaging[0].message.is_echo')) {
         kip.debug('not processing echo message');
         return res.sendStatus(200);
     }
-
     // need to send this right away, then process the rest
     res.sendStatus(200);
-
-    //
-    //
-    //--  Initial API calls to FB to set up  greeting and welcome screen.
-    //--  *THIS MAY BE MOVED ELSEWHERE, currently it will make redundant calls but just playing it on the safe side for now
-    //
-    //
-
-    var set_greeting = {
-      "setting_type" : "greeting",
-      "greeting": {
-            "text":"I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options."
-        }
-     };
-
-    request({
-        url: "https://graph.facebook.com/v2.6/me/thread_settings",
-        qs: {
-            access_token: fbtoken
-        },
-        method: 'POST',
-        json: set_greeting
-    }, function(err, body) {
-       if (err) console.log('\n\n\n\nWARNING: FB SET WELCOME ERROR: ', err)
-    })
-
     messaging_events = req.body.entry[0].messaging;
-
     if (!messaging_events) {
         return console.log('facebook.js messaging events missing:  ', JSON.stringify(req.body.entry[0]));
     }
-
-
-
-    //CHECK HERE FOR ONBOARDING!!!!! click through
-
-    //IF user input: then respond with "skip" button functionality. Will show Kip (help) message
-
-    //else, SHOPPING MODE
     for (i = 0; i < messaging_events.length; i++) {
-
-
         event = req.body.entry[0].messaging[i];
         sender = event.sender.id;
-
-
-        //////////
-
-        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
-        //@ @ @ @ @ shitty code @ @ @ @ @ @
-        //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
-
-
+         //Set the persistent menu for user
+        set_menu(sender);
+        
         var zzz = req.body.entry[0].messaging[i];
-
         var userid_z = zzz.recipient.id.toString();
-
-        //console.log('@ @ @ GETTING ME @ @ @ ',userid_z)
-        //console.log('@ @ @ SENDER ID @ @ @ ',sender)
 
         //gross, in-memory modes and story tracker
         if(!fb_memory[sender]){
-            //console.log('@ @ @ @ @  @ @@ @ @ ',fb_memory[sender])
             fb_memory[sender] = {
                 mode: 'shopping',
                 story_pointer: 0
             };
         }
-
-        //console.log('@ @ @ IN MEMORY @ @ @ ',fb_memory[sender])
-
-
-        // if(event.message && event.message.text  && !event.postback){
-        //     Chatuser.count({id: 'facebook_'+sender}, function (err, count){
-        //         if(count>0){
-        //             //document exists });
-        //             processMessage();
-        //         }else {
-        //             fb_memory[sender].mode = 'onboarding';
-        //             send_image('cart.png',sender,function(){
-        //                 var  x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
-        //                 //send image here
-                        
-        //                 setTimeout(function() {
-        //                     send_universal_message(x,sender);
-        //                 }, 1000);
-        //                 setTimeout(function() {
-        //                     send_story(userid_z,sender);
-        //                 }, 1000);
-        //             });
-        //         }
-        //     });
-        // }else {
-            processMessage();
-        // }
-
-
-
-        //shitty (temp) shit code ok bye
-        function processMessage(){
-
         //non-shopping mode checker
         //also only capturing text, images, stickers from user to check for current mode to block stuff
-        //if(event.message && event.message.text || !_.get(req.body.entry[0].messaging[i], 'message.sticker_id') && _.get(req.body.entry[0].messaging[i], 'message.attachments[0].type') == 'image' || _.get(req.body.entry[0].messaging[i], 'message.sticker_id') || _.get(req.body.entry[0].messaging[i], 'message.attachments')){
-        if(event.message && event.message.text){
-
-            console.log('Fb memory is : ', fb_memory[sender])
-
-           // console.log('@ @ @ @ @ E33333333EEEE3333 @ @ @ @ @ ^ ^ ^')
-            switch(fb_memory[sender].mode){
-                case 'onboarding':
-                    console.log('ONBOARDING MODE STOPPING everything else')
-
-                    //@ @ @ eventually move this to the onboarding callback function
-                    //FIRE STORY!!
-                    //AND same handler ges into button callbacks from story questions
-
-
-                    //Let's keep track of number of times user does something not within onboarding mode, if more than twice
-                    //just revert to shopping mode and send the help_card
-                    fb_memory[sender].exit_count = (fb_memory[sender].exit_count < 2) ?  ++fb_memory[sender].exit_count : 0;
-                    console.log('incremented exit_count: ', fb_memory[sender].exit_count )
-                    if(fb_memory[sender].exit_count >= 1 ) {
-                            fb_memory[sender] = {
-                                mode: 'shopping',
-                                story_pointer: 0
-                            };
-
-                            var help_card = {
-                                "recipient": {
-                                    "id": sender.toString()
-                                },
-                                "message": {
-                                    "attachment": {
-                                        "type": "template",
-                                        "payload": {
-                                            "template_type": "button",
-                                            "buttons": [
-                                               {
-                                                    "type": "postback",
-                                                    "title": "Headphones",
-                                                    "payload": JSON.stringify({
-                                                        dataId: "facebook_" + sender.toString(),
-                                                        action: "button_search",
-                                                        text: 'headphones',
-                                                        ts: Date.now()
-                                                    })
-                                                },
-                                                {
-                                                   "type": "postback",
-                                                    "title": "🐔 🍜",
-                                                    "payload": JSON.stringify({
-                                                        dataId: "facebook_" + sender.toString(),
-                                                        action: "button_search",
-                                                        text: '🐔🍜',
-                                                        ts: Date.now()
-                                                    })
-                                                },
-                                                {
-                                                    "type": "postback",
-                                                    "title": "Books",
-                                                    "payload": JSON.stringify({
-                                                        dataId: "facebook_" + sender.toString(),
-                                                        action: "button_search",
-                                                        text: 'books',
-                                                        ts: Date.now()
-                                                    })
-                                                }
-                                           ],
-                                            "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
-                                        }
-                                    }
-                                },
-                                "notification_type": "NO_PUSH"
-                            };
-
-                            console.log('HELP CARD OUTPUT ',JSON.stringify(help_card))
-
-                            request.post({
-                                url: 'https://graph.facebook.com/v2.6/me/messages',
-                                qs: {
-                                    access_token: fbtoken
-                                },
-                               method: "POST",
-                                json: true,
-                                headers: {
-                                    "content-type": "application/json",
-                                },
-                                body: help_card
-                            }, function(err, res, body) {
-                                if (err) console.error('post err ', err);
-                            })
-                            return
-
-                    } else {
-                    var x = {text: "Please answer the question above this message, thanks 😊"}
-                    send_universal_message(x,sender);
-
-                    return;
-                    }
-
-                    res.sendStatus(200);
-
-                break;
+        if(event.message && event.message.text && fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'onboarding'){
+            // console.log('Fb memory is : ', fb_memory[sender])
+            //Keep track of number of times user does something not within onboarding mode, if more than twice
+            //just revert to shopping mode and send the suggestion card
+            fb_memory[sender].exit_count = (fb_memory[sender].exit_count < 2) ?  ++fb_memory[sender].exit_count : 0;
+            console.log('incremented exit_count: ', fb_memory[sender].exit_count )
+            if(fb_memory[sender].exit_count >= 1 ) {
+                fb_memory[sender] = {
+                    mode: 'shopping',
+                    story_pointer: 0
+                };
+                send_suggestions_card(sender);
+                return
+            } else {
+            var x = {text: "Please answer the question above this message, thanks 😊"}
+            send_universal_message(x,sender);
+            return;
             }
-        }else {
-            //console.log('ping but nah')
+            res.sendStatus(200);        
         }
 
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
         //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
-
-
-
-         var set_menu = {
-          "setting_type" : "call_to_actions",
-          "thread_state" : "existing_thread",
-          "call_to_actions":[
-            {
-              "type":"postback",
-              "title":"Help",
-              "payload":JSON.stringify({
-                    dataId: "facebook_" + sender.toString(),
-                    action: "help"
-                })
-            },
-            {
-              "type":"postback",
-              "title":"Retake Quiz",
-              "payload":JSON.stringify({
-                    action: "take_quiz"
-                })
-            },
-            {
-              "type":"postback",
-              "title":"View Cart",
-              "payload":JSON.stringify({
-                    dataId: "facebook_" + sender.toString(),
-                    action: "list"
-                })
-            }
-          ]
-        };
-        request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: set_menu
-        }, function(err, body) {
-           if (err) console.log('\n\n\n\nWARNING: FB SET MENU ERROR: ', err)
-        })
-        var set_get_started = {
-              "setting_type":"call_to_actions",
-              "thread_state":"new_thread",
-              "call_to_actions":[
-                {
-                  "payload": JSON.stringify({
-                       "type": "GET_STARTED",
-                       "dataId":"facebook_" + sender.toString()
-                     })
-                }
-              ]
-           }
-
-        request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: set_get_started
-        }, function(err, body) {
-           if (err) console.log('\n\n\n\nWARNING: FB SET GET STARTED ERROR: ', err);
-        })
-
         if (event.message) {
-            var typing_indicator = {
-              "recipient":{
-                "id": sender.toString()
-              },
-              "sender_action": "typing_on"
-            };
-
-            request({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
-                qs: {
-                    access_token: fbtoken
-                },
-                method: 'POST',
-                json: typing_indicator
-            }, function() { })
+            send_typing_indicator(sender)
         }
+
 
         //
         //
@@ -461,16 +211,7 @@ app.post('/facebook', function (req, res) {
         //
         if (event.message && event.message.quick_reply && event.message.quick_reply.payload) {
 
-            //pre-parse emoji to prevent quickreply emoji  to go to nlp
-            // if (event.message.text) {
-            //     process_emoji( event.message.text, function(res) {
-            //          event.message.text = res;
-            //     })
-            //      event.message.text = emojiText.convert(text,{delimiter: ' '});
-            // }
-
             var sub_menu = event.message.quick_reply.payload;
-
             try {
                 sub_menu = JSON.parse(sub_menu);
             } catch(err) {
@@ -478,62 +219,50 @@ app.post('/facebook', function (req, res) {
             }
             //sub-menu actions
             if (sub_menu.action && sub_menu.action == 'button_search') {
-                console.log(event.message)
-                db.Messages.find({
-                    thread_id: 'facebook_' + sender.toString()
-                }).sort('-ts').exec(function(err, messages) {
-                        if (err) return console.error(err);
-                        if (messages.length == 0) {
-                            console.log('No message found');
-                            var message = new db.Message({
-                                incoming: true,
-                                thread_id: 'facebook_' + sender.toString(),
-                                resolved: false,
-                                user_id: "facebook_" + sender.toString(),
-                                origin: 'facebook',
-                                text: sub_menu.text,
-                                source: {
-                                    'origin': 'facebook',
-                                    'channel': sender.toString(),
-                                    'org': "facebook_" + sender.toString(),
-                                    'id': "facebook_" + sender.toString(),
-                                    'user': sender.toString()
-                                },
-                                // amazon: msg.amazon
-                            });
-                        // queue it up for processing
-                         if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                                fb_memory[sender].mode = 'shopping';
-                          }
-                        message.save().then(() => {
-                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-
-                        });
-
-                    } else if (messages[0]) {
-                        var msg = messages[0];
-                        var message = new db.Message({
-                            incoming: true,
-                            thread_id: 'facebook_' + sender.toString(),
-                            resolved: false,
-                            user_id: msg.user_id,
-                            origin: 'facebook',
-                            text: sub_menu.text,
-                            source: msg.source,
-                            amazon: msg.amazon });
+                console.log(event.message);
+                var last_message = yield get_last_message(sender);
+                if (!last_message) {
+                     var message = new db.Message({
+                        incoming: true,
+                        thread_id: 'facebook_' + sender.toString(),
+                        resolved: false,
+                        user_id: "facebook_" + sender.toString(),
+                        origin: 'facebook',
+                        text: sub_menu.text,
+                        source: {
+                            'origin': 'facebook',
+                            'channel': sender.toString(),
+                            'org': "facebook_" + sender.toString(),
+                            'id': "facebook_" + sender.toString(),
+                            'user': sender.toString()
+                        },
+                    });
                     // queue it up for processing
-                     if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                            fb_memory[sender].mode = 'shopping';
-                      }
+                    if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                        fb_memory[sender].mode = 'shopping';
+                    }
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-
                     });
-
-
-
                 }
-              })
+                else if (last_message) {
+                    var message = new db.Message({
+                        incoming: true,
+                        thread_id: 'facebook_' + sender.toString(),
+                        resolved: false,
+                        user_id: last_message.user_id,
+                        origin: 'facebook',
+                        text: sub_menu.text,
+                        source: last_message.source,
+                        amazon: last_message.amazon });
+                    // queue it up for processing
+                    if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                            fb_memory[sender].mode = 'shopping';
+                    }
+                    message.save().then(() => {
+                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                    });
+                }
             }
             else if (sub_menu.action && sub_menu.action == 'take_quiz'){
                 fb_memory[sender].mode = 'onboarding';
@@ -701,9 +430,6 @@ app.post('/facebook', function (req, res) {
                         }
                       })
                 } else if (sub_menu.action === 'emoji_modify') {
-
-
-                    // var results = yield getLatestAmazonResults(message)
                     db.Messages.find({
                         thread_id: 'facebook_' + sender.toString()
                     }).sort('-ts').exec(function(err, messages) {
@@ -736,12 +462,7 @@ app.post('/facebook', function (req, res) {
                     }
                 })
 
-                } else if (sub_menu.action === 'teenage_wasteland') {
-                    process.exit(1);
-                } else {
-                    //Resetting back button count
-                    backCache = 0;
-                }
+                } 
 
                 //
                 //   --  Sub-menu switching --
@@ -751,7 +472,7 @@ app.post('/facebook', function (req, res) {
                 // black, white, blue, red, brown, pink
 
                 switch(sub_menu.action) {
-                case "sub_menu_color":
+                    case "sub_menu_color":
 
                     //Switching mode to modify
                     fb_memory[sender] = {
@@ -939,7 +660,6 @@ app.post('/facebook', function (req, res) {
                         },
                         "notification_type": "NO_PUSH"
                     };
-
                     request.post({
                         url: 'https://graph.facebook.com/v2.6/me/messages',
                         qs: {
@@ -955,56 +675,11 @@ app.post('/facebook', function (req, res) {
                         if (err) console.error('post err ', err);
                     })
                     break;
-               }
-
+               } // end of switch
         }
-
-
         //REGULAR INCOMING TEXT MESSAGES
         else if (event.message && event.message.text) {
-
                 text = event.message.text;
-
-
-                //@ @ @ @ @ @ TEMPORARRY TURN OFF LATER
-                // if (text == 'hi'){
-                //     fb_memory[userid_z].mode = 'onboarding';
-
-                //     // curl  \
-                //     //   -F recipient='{"id":"USER_ID"}' \
-                //     //   -F message='{"attachment":{"type":"image", "payload":{}}}' \
-                //     //   -F filedata=@/tmp/shirt.png \
-                //     //   "https://graph.facebook.com/v2.6/me/messages?access_token=PAGE_ACCESS_TOKEN"
-
-                //     console.log('TRYING THIS STUFF NO@QQQWWWWWW')
-                //     //res.send(200);
-                //     send_image('cart.png',sender,function(){
-                //         send_story(userid_z,sender);
-                //     });
-
-
-                //     //   //TURN THIS INTO AN IMAGE SENDER!!!
-                //     //  request({
-                //     //     url: 'https://graph.facebook.com/v2.6/me/messages',
-                //     //     qs: {
-                //     //         access_token: fbtoken
-                //     //     },
-                //     //     method: 'POST',
-                //     //     json: {
-                //     //         recipient: {
-                //     //             id: sender.toString()
-                //     //         },
-                //     //         message: '{"attachment":{"type":"image", "payload":{}}}',
-                //     //         filedata:
-                //     //     }
-                //     // }, function(err, res, body) {
-                //     //     if (err) console.error('post err ', err);
-                //     //     console.log(body);
-                //     // });
-
-                // }
-                //@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
-
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
                     text = res;
@@ -1149,15 +824,11 @@ app.post('/facebook', function (req, res) {
                 var postback = event.postback.payload;
             }
             console.log('\n\n\npostback: ', postback,'\n\n\n');
-
             //@ @ @ @ @ @ @ @ @ @ @ @
             //@ @ @ @ @ ONBOARDING!!!!!!
             //@ @ @ @ @ @ @ @ @ @ @ @ @
             if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
-
-
                 //send welcome image here
-
                 //then one more text message intro
                 //then send story
                 fb_memory[sender].mode = 'onboarding';
@@ -1169,62 +840,7 @@ app.post('/facebook', function (req, res) {
                     setTimeout(function() {
                         send_story(userid_z,sender);
                     }, 1500);
-
                 });
-
-
-                 // var get_started = {
-                 //        "recipient": {
-                 //            "id": sender.toString()
-                 //        },
-                 //        "message": {
-                 //                  "quick_replies":[
-                 //                      {
-                 //                        "content_type":"text",
-                 //                        "title":"Headphones",
-                 //                        "payload": JSON.stringify({
-                 //                                dataId: postback.dataId,
-                 //                                action: "button_search",
-                 //                                text: 'headphones'
-                 //                            })
-                 //                      },
-                 //                      {
-                 //                        "content_type":"text",
-                 //                        "title":"🐔 🍜",
-                 //                        "payload": JSON.stringify({
-                 //                                dataId: postback.dataId,
-                 //                                action: "button_search",
-                 //                                text: '🐔 🍜'
-                 //                            })
-                 //                      },
-                 //                      {
-                 //                        "content_type":"text",
-                 //                        "title":"Books",
-                 //                        "payload": JSON.stringify({
-                 //                                dataId: postback.dataId,
-                 //                                action: "button_search",
-                 //                                text: 'books'})
-                 //                      }
-                 //                    ],
-                 //                    "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
-                 //        },
-                 //        "notification_type": "NO_PUSH"
-                 //    };
-
-                 //    request.post({
-                 //        url: 'https://graph.facebook.com/v2.6/me/messages',
-                 //        qs: {
-                 //            access_token: fbtoken
-                 //        },
-                 //        method: "POST",
-                 //        json: true,
-                 //        headers: {
-                 //            "content-type": "application/json",
-                 //        },
-                 //        body: get_started
-                 //    }, function(err, res, body) {
-                 //        if (err) console.error('post err ', err);
-                 //    })
             }
             //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
             else if (postback.action === 'story.answer') {
@@ -1238,541 +854,385 @@ app.post('/facebook', function (req, res) {
             }
             //@ @ @ @ @ @ @ @ byeeeeeee @ @ @ @ @ @ //
 
-            db.Messages.find({
-                thread_id: postback.dataId
-            }).sort('-ts').exec(function(err, messages) {
-                if (err) return console.error(err);
-                   if (messages.length == 0) {
-                        console.log('No message found');
-                        var msg = new db.Message({
-                            incoming: true,
-                            thread_id: 'facebook_' + sender.toString(),
-                            resolved: false,
-                            user_id: "facebook_" + sender.toString(),
-                            origin: 'facebook',
-                            source: {
-                                'origin': 'facebook',
-                                'channel': sender.toString(),
-                                'org': "facebook_" + sender.toString(),
-                                'id': "facebook_" + sender.toString(),
-                                'user': sender.toString()
-                            },
-                            // amazon: msg.amazon
-                        });
-                    }  else {
-                       var msg = messages[0];
+        var messages = yield db.Messages.find({
+            thread_id: postback.dataId
+        }).sort('-ts').exec();
 
+       if (messages.length == 0) {
+            console.log('No message found');
+            var msg = new db.Message({
+                incoming: true,
+                thread_id: 'facebook_' + sender.toString(),
+                resolved: false,
+                user_id: "facebook_" + sender.toString(),
+                origin: 'facebook',
+                source: {
+                    'origin': 'facebook',
+                    'channel': sender.toString(),
+                    'org': "facebook_" + sender.toString(),
+                    'id': "facebook_" + sender.toString(),
+                    'user': sender.toString()
+                },
+                // amazon: msg.amazon
+            });
+        }  else {
+           var msg = messages[0];
+
+        }
+
+        console.log('POSTBACK!!!', postback)
+
+            if (postback.action == 'help') {
+                    send_suggestions_card(sender);
+            }
+            else if (postback.action == 'button_search') {
+                var text = postback.text;
+                text = emojiText.convert(text,{delimiter: ' '});
+                 //emoji parser doesnt recognize robot emoji wtf
+                if (text.indexOf('🤖') > -1) text = text.replace('🤖','robot')
+                // console.log('\n\n\n\nwe got to go: ', text, '\n\n\n\n')
+                var new_message = new db.Message({
+                        incoming: true,
+                        thread_id: msg.thread_id,
+                        resolved: false,
+                        user_id: msg.user_id,
+                        origin: msg.origin,
+                        text: text,
+                        source: msg.source,
+                        amazon: msg.amazon 
+                    });
+                // queue it up for processing
+                var message = new db.Message(new_message);
+                // queue it up for processing
+                 if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                        fb_memory[sender].mode = 'shopping';
+                  }
+
+                message.save().then(() => {
+                    queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                });
+            }
+
+            function* getLatestAmazonResults(message) {
+                message.history = [];
+                var results,
+                    i = 0;
+                while (!results) {
+                    if (!message.history[i]) {
+                        var more_history = yield db.Messages.find({
+                            thread_id: message.thread_id,
+                            ts: {
+                                $lte: message.ts
+                            }
+                        }).sort('-ts').skip(i).limit(20);
+
+                        if (more_history.length === 0) {
+                            // console.log(message);
+                            throw new Error('Could not find amazon results in message history for message ' + message._id);
+                        }
+                        message.history = message.history.concat(more_history);
                     }
 
+                    if (message.history[i].amazon) {
+                        results = message.history[i].amazon;
+                    }
+                    i++;
+                }
+                return results;
+            }
+            var amazon = yield getLatestAmazonResults(msg);
+            msg.amazon = amazon;
+                                                console.log('shrek 100', msg.amazon)
 
-                    co(function*() {
+            if (msg && msg.amazon) {
+                    if (postback.action == 'add' && postback.initial) {
 
-
-                        console.log('POSTBACK OKOKOKOK @ @ @ @ @ @  ',postback)
-                         if (postback.action == 'help') {
-                            var help_card = {
-                                "recipient": {
-                                    "id": sender.toString()
-                                },
-                                "message": {
-                                    "attachment": {
-                                        "type": "template",
-                                        "payload": {
-                                            "template_type": "button",
-                                            "buttons": [
-                                               {
-                                                    "type": "postback",
-                                                    "title": "Headphones",
-                                                    "payload": JSON.stringify({
-                                                        dataId: msg.thread_id,
-                                                        action: "button_search",
-                                                        text: 'headphones',
-                                                        ts: msg.ts
-                                                    })
-                                                },
-                                                {
-                                                   "type": "postback",
-                                                    "title": "🐔 🍜",
-                                                    "payload": JSON.stringify({
-                                                        dataId: msg.thread_id,
-                                                        action: "button_search",
-                                                        text: '🐔🍜',
-                                                        ts: msg.ts
-                                                    })
-                                                },
-                                                {
-                                                    "type": "postback",
-                                                    "title": "Books",
-                                                    "payload": JSON.stringify({
-                                                        dataId: msg.thread_id,
-                                                        action: "button_search",
-                                                        text: 'books',
-                                                        ts: msg.ts
-                                                    })
-                                                }
-                                           ],
-                                            "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
-                                        }
-                                    }
-                                },
-                                "notification_type": "NO_PUSH"
-                            };
-
-                            console.log('HELP CARD OUTPUT ',JSON.stringify(help_card))
-
-                            request.post({
-                                url: 'https://graph.facebook.com/v2.6/me/messages',
-                                qs: {
-                                    access_token: fbtoken
-                                },
-                                method: "POST",
-                                json: true,
-                                headers: {
-                                    "content-type": "application/json",
-                                },
-                                body: help_card
-                            }, function(err, res, body) {
-                                if (err) console.error('post err ', err);
-                            })
-                        }
-
-                        else if (postback.action == 'button_search') {
-                            var text = postback.text;
-                            text = emojiText.convert(text,{delimiter: ' '});
-                             //emoji parser doesnt recognize robot emoji wtf
-                if (text.indexOf('🤖') > -1) text = text.replace('🤖','robot')
-                            // console.log('\n\n\n\nwe got to go: ', text, '\n\n\n\n')
-                            var new_message = new db.Message({
-                                    incoming: true,
-                                    thread_id: msg.thread_id,
-                                    resolved: false,
-                                    user_id: msg.user_id,
-                                    origin: msg.origin,
-                                    text: text,
-                                    source: msg.source,
-                                    amazon: msg.amazon                                      });
-                            // queue it up for processing
-                            var message = new db.Message(new_message);
-                            // queue it up for processing
-                             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                                    fb_memory[sender].mode = 'shopping';
-                              }
-
-                            message.save().then(() => {
-                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                            });
-                        }
-
-                        function* getLatestAmazonResults(message) {
-                            message.history = [];
-                            var results,
-                                i = 0;
-                            while (!results) {
-                                if (!message.history[i]) {
-                                    var more_history = yield db.Messages.find({
-                                        thread_id: message.thread_id,
-                                        ts: {
-                                            $lte: message.ts
-                                        }
-                                    }).sort('-ts').skip(i).limit(20);
-
-                                    if (more_history.length === 0) {
-                                        // console.log(message);
-                                        throw new Error('Could not find amazon results in message history for message ' + message._id);
-                                    }
-                                    message.history = message.history.concat(more_history);
-                                }
-
-                                if (message.history[i].amazon) {
-                                    results = message.history[i].amazon;
-                                }
-                                i++;
+                        send_typing_indicator(sender);
+                        console.log('shrek 101', msg)
+                        //Check if user scrolled up and this item is not from the previous search...
+                        var old_search = yield db.Messages.find({
+                                thread_id: 'facebook_' + sender.toString()
+                        }).sort('-ts').exec(function(err, messages) {
+                            if (err) return console.error(err);
+                            if (messages.length == 0) {
+                                console.log('No message found');
                             }
-                            return results;
-                        }
-                        var amazon = yield getLatestAmazonResults(msg);
-                        msg.amazon = amazon;
-                        if (msg && msg.amazon) {
-                                if (postback.action == 'add' && postback.initial) {
-                                    // console.log('add postback: ', postback);
-
-                                    //Send a typing indicator to user
-                                    var typing_indicator = {
-                                      "recipient":{
-                                        "id": sender.toString()
-                                      },
-                                      "sender_action": "typing_on"
-                                    };
-
-                                    request({
-                                        url: 'https://graph.facebook.com/v2.6/me/messages',
-                                        qs: {
-                                            access_token: fbtoken
-                                        },
-                                        method: 'POST',
-                                        json: typing_indicator
-                                    }, function() {})
-
-                                    //Check if user scrolled up and this item is not from the previous search...
-                                    var old_search = yield db.Messages.find({
-                                            thread_id: 'facebook_' + sender.toString()
-                                    }).sort('-ts').exec(function(err, messages) {
-                                        if (err) return console.error(err);
-                                        if (messages.length == 0) {
-                                            console.log('No message found');
-                                        }
-                                        else if (messages[0]._id == postback.object_id) {
-                                            // console.log('THIS IS AN ITEM FROM THE LATEST SEARCH');
-                                            return 'false'
-                                        }
-                                        else if (messages[0]._id !== postback.object_id) {
-                                            // console.log('THIS IS AN NOOOOT ITEM FROM THE LATEST SEARCH', postback)
-                                            return postback.object_id;
-                                        }
-                                    })
+                            else if (messages[0]._id == postback.object_id) {
+                                // console.log('THIS IS AN ITEM FROM THE LATEST SEARCH');
+                                return 'false'
+                            }
+                            else if (messages[0]._id !== postback.object_id) {
+                                // console.log('THIS IS AN NOOOOT ITEM FROM THE LATEST SEARCH', postback)
+                                return postback.object_id;
+                            }
+                        })
 
 
-                                    if (old_search == 'false') {
-                                        //This is the latest search so just pass it through Kip like normal
-                                           var new_message = new db.Message({
-                                            incoming: true,
-                                            thread_id: msg.thread_id,
-                                            resolved: false,
-                                            user_id: msg.user_id,
-                                            origin: msg.origin,
-                                            text: 'save ' + postback.selected,
-                                            source: msg.source,
-                                            amazon: msg.amazon,
-                                            searchSelect: [postback.selected]
-                                              });
-                                            // queue it up for processing
-                                            var message = new db.Message(new_message);
-                                            message.save().then(() => {
-                                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                            });
-                                    }
-
-                                    else if (old_search && postback.object_id){
-                                        // console.log('Mmkay this is an old search: ', postback);
-
-                                       //Check if user scrolled up and this item is not from the previous search...
-                                        var old_message = yield db.Messages.findById(postback.object_id).exec();
-                                        if (old_message && old_message.amazon && old_message.amazon.length > 0) {
-                                            var new_message = new db.Message({
-                                                incoming: true,
-                                                thread_id: old_message.thread_id,
-                                                resolved: false,
-                                                user_id: old_message.user_id,
-                                                origin: old_message.origin,
-                                                text: 'save ' + postback.selected,
-                                                source: old_message.source,
-                                                amazon: old_message.amazon,
-                                                searchSelect: [postback.selected],
-                                                flags: { old_search: true}
-                                                });
-                                            }
-                                            // queue it up for processing
-                                            var message = new db.Message(new_message);
-                                            message.save().then(() => {
-                                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                            });
-                                        }
-                                }
-                                else if (postback.action == 'add' && !postback.initial) {
-
-                                        var typing_indicator = {
-                                          "recipient":{
-                                            "id": sender.toString()
-                                          },
-                                          "sender_action": "typing_on"
-                                        };
-
-                                        request({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: fbtoken
-                                            },
-                                            method: 'POST',
-                                            json: typing_indicator
-                                        });
-
-                                        co(function*() {
-                                          // console.log('addExtra --> postback: ', postback);
-                                          var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
-                                          var cart = yield kipcart.getCart(cart_id);
-                                          var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
-                                          var item = unique_items[parseInt(postback.selected-1)];
-                                          yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
-                                          var new_message = new db.Message({
-                                            incoming: true,
-                                            thread_id: msg.thread_id,
-                                            resolved: false,
-                                            user_id: msg.user_id,
-                                            origin: msg.origin,
-                                            text: 'view cart',
-                                            source: msg.source,
-                                            amazon: msg.amazon
-                                          });
-
-                                          // queue it up for processing
-                                          var message = new db.Message(new_message);
-                                          message.save().then(() => {
-                                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                          });
-                                        });
-
-                                }
-                                else if (postback.action === 'remove') {
-                                        var typing_indicator = {
-                                          "recipient":{
-                                            "id": sender.toString()
-                                          },
-                                          "sender_action": "typing_on"
-                                        };
-
-                                        request({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: fbtoken
-                                            },
-                                            method: 'POST',
-                                            json: typing_indicator
-                                        }, function() {})
-                                    var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: 'remove ' + postback.selected,
-                                        source: msg.source,
-                                        amazon: msg.amazon,
-                                        searchSelect: [postback.selected]
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
-
-                                }
-
-                                else if (postback.action === 'list') {
-                                     var typing_indicator = {
-                                          "recipient":{
-                                            "id": sender.toString()
-                                          },
-                                          "sender_action": "typing_on"
-                                        };
-
-                                        request({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: fbtoken
-                                            },
-                                            method: 'POST',
-                                            json: typing_indicator
-                                        }, function() {})
-
-                                      var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: 'view cart',
-                                        source: msg.source,
-                                        amazon: msg.amazon
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
-                                }
-                                else if (postback.action === 'focus') {
-                                      var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: postback.selected,
-                                        source: msg.source,
-                                        amazon: msg.amazon
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
-                                }
-                                else if (postback.action === 'similar') {
-                                       var typing_indicator = {
-                                          "recipient":{
-                                            "id": sender.toString()
-                                          },
-                                          "sender_action": "typing_on"
-                                        };
-
-                                        request({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: fbtoken
-                                            },
-                                            method: 'POST',
-                                            json: typing_indicator
-                                        }, function() { })
-
-
-                                    var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: 'more like ' + postback.selected,
-                                        source: msg.source,
-                                        amazon: msg.amazon
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
-                                }
-                                 else if (postback.action === 'cheaper') {
-                                       var typing_indicator = {
-                                          "recipient":{
-                                            "id": sender.toString()
-                                          },
-                                          "sender_action": "typing_on"
-                                        };
-
-                                        request({
-                                            url: 'https://graph.facebook.com/v2.6/me/messages',
-                                            qs: {
-                                                access_token: fbtoken
-                                            },
-                                            method: 'POST',
-                                            json: typing_indicator
-                                        }, function() {})
-
-
-                                      var new_message = new db.Message({
-                                        incoming: true,
-                                        thread_id: msg.thread_id,
-                                        resolved: false,
-                                        user_id: msg.user_id,
-                                        origin: msg.origin,
-                                        text: postback.selected + ' but cheaper',
-                                        source: msg.source,
-                                        amazon: msg.amazon
-                                      });
-                                    // queue it up for processing
-                                    var message = new db.Message(new_message);
-                                    message.save().then(() => {
-                                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                    });
-                                }
-                                else if (postback.action === 'empty') {
-                                    co(function*(){
-                                        var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
-                                          //Diverting team vs. personal cart based on source origin for now
-                                          var cart_type= msg.source.origin == 'slack' ? 'team' : 'personal';
-                                          yield kipcart.removeAllOfItem(cart_id, postback.selected);
-                                        var new_message = new db.Message({
-                                            incoming: true,
-                                            thread_id: msg.thread_id,
-                                            resolved: false,
-                                            user_id: msg.user_id,
-                                            origin: msg.origin,
-                                            text: 'view cart',
-                                            source: msg.source,
-                                            amazon: msg.amazon
-                                          });
-                                        // queue it up for processing
-                                        var message = new db.Message(new_message);
-                                        message.save().then(() => {
-                                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                                        });
-                                    })
-                                }
-                               else if (postback.action === 'more') {
-                                  var new_message = new db.Message({
-                                    incoming: true,
-                                    thread_id: msg.thread_id,
-                                    resolved: false,
-                                    user_id: msg.user_id,
-                                    origin: msg.origin,
-                                    text: 'more',
-                                    source: msg.source,
-                                    amazon: msg.amazon
+                        if (old_search == 'false') {
+                            //This is the latest search so just pass it through Kip like normal
+                               var new_message = new db.Message({
+                                incoming: true,
+                                thread_id: msg.thread_id,
+                                resolved: false,
+                                user_id: msg.user_id,
+                                origin: msg.origin,
+                                text: 'save ' + postback.selected,
+                                source: msg.source,
+                                amazon: msg.amazon,
+                                searchSelect: [postback.selected]
                                   });
                                 // queue it up for processing
                                 var message = new db.Message(new_message);
                                 message.save().then(() => {
                                     queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                 });
-                            }
-                            else if (postback.action === 'home') {
-                                 var home_card = {
-                                    "attachment": {
-                                        "type": "template",
-                                        "payload": {
-                                            "template_type": "generic",
-                                            "elements": [{
-                                                "title": "Home Screen",
-                                                "image_url": "http://kipthis.com/kip_modes/mode_shopping.png",
-                                                 "buttons": [{
-                                                    "type": "postback",
-                                                    "title": "View Cart",
-                                                    "payload": JSON.stringify({
-                                                        dataId: msg.thread_id,
-                                                        action: "list",
-                                                        ts: msg.ts
-                                                    })
-                                                },
-                                                {
-                                                    "type": "postback",
-                                                    "title": "Settings",
-                                                    "payload": JSON.stringify({
-                                                        dataId: msg.thread_id,
-                                                        action: "settings",
-                                                        ts: msg.ts
-                                                    })
-                                                }
-                                                ]
-                                            }]
-                                        }
-                                    }
-                                };
+                        }
 
-                              request({
-                                    url: 'https://graph.facebook.com/v2.6/me/messages',
-                                    qs: {
-                                        access_token: fbtoken
-                                    },
-                                    method: 'POST',
-                                    json: {
-                                        recipient: {
-                                            id: msg.source.channel
-                                        },
-                                        message: home_card,
-                                    }
-                                }, function(err, res, body) {
-                                    if (err) console.error('post err ', err);
-                                    console.log(body);
+                        else if (old_search && postback.object_id){
+                            // console.log('Mmkay this is an old search: ', postback);
+
+                           //Check if user scrolled up and this item is not from the previous search...
+                            var old_message = yield db.Messages.findById(postback.object_id).exec();
+                            if (old_message && old_message.amazon && old_message.amazon.length > 0) {
+                                var new_message = new db.Message({
+                                    incoming: true,
+                                    thread_id: old_message.thread_id,
+                                    resolved: false,
+                                    user_id: old_message.user_id,
+                                    origin: old_message.origin,
+                                    text: 'save ' + postback.selected,
+                                    source: old_message.source,
+                                    amazon: old_message.amazon,
+                                    searchSelect: [postback.selected],
+                                    flags: { old_search: true}
+                                    });
+                                }
+                                // queue it up for processing
+                                var message = new db.Message(new_message);
+                                message.save().then(() => {
+                                    queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                                 });
                             }
-                        }
-                    }) // end of co
+                    }
+                    else if (postback.action == 'add' && !postback.initial) {
 
-            }); // end of db.find
-        } //end of for loop
+                           send_typing_indicator(sender);
+
+                              // console.log('addExtra --> postback: ', postback);
+                              var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
+                              var cart = yield kipcart.getCart(cart_id);
+                              var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
+                              var item = unique_items[parseInt(postback.selected-1)];
+                              yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
+                              var new_message = new db.Message({
+                                incoming: true,
+                                thread_id: msg.thread_id,
+                                resolved: false,
+                                user_id: msg.user_id,
+                                origin: msg.origin,
+                                text: 'view cart',
+                                source: msg.source,
+                                amazon: msg.amazon
+                              });
+
+                              // queue it up for processing
+                              var message = new db.Message(new_message);
+                              message.save().then(() => {
+                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                              });
+                    }
+                    else if (postback.action === 'remove') {
+                        send_typing_indicator(sender);
+                        
+                        var new_message = new db.Message({
+                            incoming: true,
+                            thread_id: msg.thread_id,
+                            resolved: false,
+                            user_id: msg.user_id,
+                            origin: msg.origin,
+                            text: 'remove ' + postback.selected,
+                            source: msg.source,
+                            amazon: msg.amazon,
+                            searchSelect: [postback.selected]
+                          });
+                        // queue it up for processing
+                        var message = new db.Message(new_message);
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                        });
+
+                    }
+
+                    else if (postback.action === 'list') {
+                          send_typing_indicator(sender)
+
+                          var new_message = new db.Message({
+                            incoming: true,
+                            thread_id: msg.thread_id,
+                            resolved: false,
+                            user_id: msg.user_id,
+                            origin: msg.origin,
+                            text: 'view cart',
+                            source: msg.source,
+                            amazon: msg.amazon
+                          });
+                        // queue it up for processing
+                        var message = new db.Message(new_message);
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                        });
+                    }
+                    else if (postback.action === 'focus') {
+                          var new_message = new db.Message({
+                            incoming: true,
+                            thread_id: msg.thread_id,
+                            resolved: false,
+                            user_id: msg.user_id,
+                            origin: msg.origin,
+                            text: postback.selected,
+                            source: msg.source,
+                            amazon: msg.amazon
+                          });
+                        // queue it up for processing
+                        var message = new db.Message(new_message);
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                        });
+                    }
+                    else if (postback.action === 'similar') {
+                        send_typing_indicator(sender);
+
+
+                        var new_message = new db.Message({
+                            incoming: true,
+                            thread_id: msg.thread_id,
+                            resolved: false,
+                            user_id: msg.user_id,
+                            origin: msg.origin,
+                            text: 'more like ' + postback.selected,
+                            source: msg.source,
+                            amazon: msg.amazon
+                          });
+                        // queue it up for processing
+                        var message = new db.Message(new_message);
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                        });
+                    }
+                     else if (postback.action === 'cheaper') {
+                          send_typing_indicator(sender);
+
+
+                          var new_message = new db.Message({
+                            incoming: true,
+                            thread_id: msg.thread_id,
+                            resolved: false,
+                            user_id: msg.user_id,
+                            origin: msg.origin,
+                            text: postback.selected + ' but cheaper',
+                            source: msg.source,
+                            amazon: msg.amazon
+                          });
+                        // queue it up for processing
+                        var message = new db.Message(new_message);
+                        message.save().then(() => {
+                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                        });
+                    }
+                    else if (postback.action === 'empty') {
+                            var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
+                              //Diverting team vs. personal cart based on source origin for now
+                              var cart_type= msg.source.origin == 'slack' ? 'team' : 'personal';
+                              yield kipcart.removeAllOfItem(cart_id, postback.selected);
+                            var new_message = new db.Message({
+                                incoming: true,
+                                thread_id: msg.thread_id,
+                                resolved: false,
+                                user_id: msg.user_id,
+                                origin: msg.origin,
+                                text: 'view cart',
+                                source: msg.source,
+                                amazon: msg.amazon
+                              });
+                            // queue it up for processing
+                            var message = new db.Message(new_message);
+                            message.save().then(() => {
+                                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                            });
+                    }
+                   else if (postback.action === 'more') {
+                      var new_message = new db.Message({
+                        incoming: true,
+                        thread_id: msg.thread_id,
+                        resolved: false,
+                        user_id: msg.user_id,
+                        origin: msg.origin,
+                        text: 'more',
+                        source: msg.source,
+                        amazon: msg.amazon
+                      });
+                    // queue it up for processing
+                    var message = new db.Message(new_message);
+                    message.save().then(() => {
+                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                    });
+                }
+                else if (postback.action === 'home') {
+                     var home_card = {
+                        "attachment": {
+                            "type": "template",
+                            "payload": {
+                                "template_type": "generic",
+                                "elements": [{
+                                    "title": "Home Screen",
+                                    "image_url": "http://kipthis.com/kip_modes/mode_shopping.png",
+                                     "buttons": [{
+                                        "type": "postback",
+                                        "title": "View Cart",
+                                        "payload": JSON.stringify({
+                                            dataId: msg.thread_id,
+                                            action: "list",
+                                            ts: msg.ts
+                                        })
+                                    },
+                                    {
+                                        "type": "postback",
+                                        "title": "Settings",
+                                        "payload": JSON.stringify({
+                                            dataId: msg.thread_id,
+                                            action: "settings",
+                                            ts: msg.ts
+                                        })
+                                    }
+                                    ]
+                                }]
+                            }
+                        }
+                    };
+
+                  request({
+                        url: 'https://graph.facebook.com/v2.6/me/messages',
+                        qs: {
+                            access_token: fbtoken
+                        },
+                        method: 'POST',
+                        json: {
+                            recipient: {
+                                id: msg.source.channel
+                            },
+                            message: home_card,
+                        }
+                    }, function(err, res, body) {
+                        if (err) console.error('post err ', err);
+                        console.log(body);
+                    });
+                }
+            }
+
+            } //end of for loop
         } //end of shitty (temp) function wrapper
-    }
-});
+    
+}));
 
 
 
@@ -1826,83 +1286,12 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
     function send_text(channel, text, outgoing) {
         console.log('send_text: ', fbtoken, channel, text);
 
-
-                //intercept of vanilla help message when user types 'help' instead of clicking help button lel
-            if (text.indexOf("I'm Kip, your penguin shopper.") > -1)
-            {
-                // console.log('YOU SHALL NOT PASS')
-                 var help_card = {
-                    "recipient": {
-                        "id": sender.toString()
-                    },
-                    "message": {
-                        "attachment": {
-                            "type": "template",
-                            "payload": {
-                                "template_type": "button",
-                                "buttons": [
-                                   {
-                                        "type": "postback",
-                                        "title": "Headphones",
-                                        "payload": JSON.stringify({
-                                            dataId: "facebook_" + sender.toString(),
-                                            action: "button_search",
-                                            text: 'headphones',
-                                            ts: Date.now()
-                                        })
-                                    },
-                                    {
-                                       "type": "postback",
-                                        "title": "🐔 🍜",
-                                        "payload": JSON.stringify({
-                                            dataId: "facebook_" + sender.toString(),
-                                            action: "button_search",
-                                            text: '🐔🍜',
-                                            ts: Date.now()
-                                        })
-                                    },
-                                    {
-                                        "type": "postback",
-                                        "title": "Books",
-                                        "payload": JSON.stringify({
-                                            dataId: "facebook_" + sender.toString(),
-                                            action: "button_search",
-                                            text: 'books',
-                                            ts: Date.now()
-                                        })
-                                    }
-                               ],
-                                "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
-                            }
-                        }
-                    },
-                    "notification_type": "NO_PUSH"
-                };
-
-                // console.log('HELP CARD OUTPUT ',JSON.stringify(help_card))
-
-                request.post({
-                    url: 'https://graph.facebook.com/v2.6/me/messages',
-                    qs: {
-                        access_token: fbtoken
-                    },
-                   method: "POST",
-                    json: true,
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                    body: help_card
-                }, function(err, res, body) {
-                    if (err) console.error('post err ', err);
-                })
-                return
-            }
-
-
-
-
-
-
+        //intercept of vanilla help message when user types 'help' instead of clicking help button
+        if (text.indexOf("I'm Kip, your penguin shopper.") > -1)
+        {
+           send_suggestions_card(sender);
+           return
+        }
 
         function chunkString(str, length) {
           return str.match(new RegExp('.{1,' + length + '}', 'g'));
@@ -2429,18 +1818,6 @@ function process_story(recipient,sender,pointer,select){
 
     //check if we should end story. will stop story after length of quiz question array
     if(pointer == onboarding_quiz.length - 1){
-
-        //ADD TIMER DELAY FOR "TOTALING RESULTS...."
-
-
-        //send image here
-
-
-
-
-        //SEND PRESENT IMAGE
-        //DELAY
-        //SEND PRESENT
 
         console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[sender].quiz)
 
@@ -3041,5 +2418,192 @@ var onboarding_quiz = [{
         }
     }
 }];
+
+
+
+/**
+ * This function sends a welcome message plus suggested search buttons
+ * @param {string} input raw sender id sent from fb
+ */
+function send_suggestions_card(sender) {
+
+    var card = {
+            "recipient": {
+                "id": sender.toString()
+            },
+            "message": {
+                "attachment": {
+                    "type": "template",
+                    "payload": {
+                        "template_type": "button",
+                        "buttons": [
+                           {
+                                "type": "postback",
+                                "title": "Headphones",
+                                "payload": JSON.stringify({
+                                    dataId: "facebook_" + sender.toString(),
+                                    action: "button_search",
+                                    text: 'headphones',
+                                    ts: Date.now()
+                                })
+                            },
+                            {
+                               "type": "postback",
+                                "title": "🐔 🍜",
+                                "payload": JSON.stringify({
+                                    dataId: "facebook_" + sender.toString(),
+                                    action: "button_search",
+                                    text: '🐔🍜',
+                                    ts: Date.now()
+                                })
+                            },
+                            {
+                                "type": "postback",
+                                "title": "Books",
+                                "payload": JSON.stringify({
+                                    dataId: "facebook_" + sender.toString(),
+                                    action: "button_search",
+                                    text: 'books',
+                                    ts: Date.now()
+                                })
+                            }
+                       ],
+                        "text": "I'm Kip, your penguin shopper! Tell me what you're looking for and I'll show you 3 options. Change your results by tapping Cheaper or Similar buttons. Discover new and weird things by mixing emojis and photos. Try now:"
+                    }
+                }
+            },
+            "notification_type": "NO_PUSH"
+        };
+
+        request.post({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {
+                access_token: fbtoken
+            },
+           method: "POST",
+            json: true,
+            headers: {
+                "content-type": "application/json",
+            },
+            body: card
+        }, function(err, res, body) {
+            if (err) {console.error('post err ', err); 
+              return false;
+            } else{
+                return true;
+            }
+        });
+
+}
+
+
+
+/**
+ * This function sends a welcome message plus suggested search buttons
+ * @param {string} input raw sender id sent from fb
+ */
+function set_menu(sender) {
+
+         var set_menu = {
+          "setting_type" : "call_to_actions",
+          "thread_state" : "existing_thread",
+          "call_to_actions":[
+            {
+              "type":"postback",
+              "title":"Help",
+              "payload":JSON.stringify({
+                    dataId: "facebook_" + sender.toString(),
+                    action: "help"
+                })
+            },
+            {
+              "type":"postback",
+              "title":"Retake Quiz",
+              "payload":JSON.stringify({
+                    action: "take_quiz"
+                })
+            },
+            {
+              "type":"postback",
+              "title":"View Cart",
+              "payload":JSON.stringify({
+                    dataId: "facebook_" + sender.toString(),
+                    action: "list"
+                })
+            }
+          ]
+        };
+
+        request({
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            qs: {
+                access_token: fbtoken
+            },
+            method: 'POST',
+            json: set_menu
+        }, function(err, body) {
+           if (err) return false
+            else {
+                return true
+            }
+        })
+
+        var set_get_started = {
+              "setting_type":"call_to_actions",
+              "thread_state":"new_thread",
+              "call_to_actions":[
+                {
+                  "payload": JSON.stringify({
+                       "type": "GET_STARTED",
+                       "dataId":"facebook_" + sender.toString()
+                     })
+                }
+              ]
+           }
+
+        request({
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            qs: {
+                access_token: fbtoken
+            },
+            method: 'POST',
+            json: set_get_started
+        }, function(err, body) {
+           if (err) console.log('\n\n\n\nWARNING: FB SET GET STARTED ERROR: ', err);
+        })
+
+}
+
+function send_typing_indicator(sender) {
+    var typing_indicator = {
+          "recipient":{
+            "id": sender.toString()
+          },
+          "sender_action": "typing_on"
+        };
+
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {
+                access_token: fbtoken
+            },
+            method: 'POST',
+            json: typing_indicator
+        }, function() { })
+}
+
+function get_last_message(sender) {
+     db.Messages.find({
+        thread_id: 'facebook_' + sender.toString()
+    }).sort('-ts').exec(function(err, messages) {
+        if (err) return console.error(err);
+        if (messages.length == 0) {
+            return false;
+        } else if (messages[0]) {
+            return messages[0];
+        }
+    })
+}
+
 
 // @ @ @ @ @ @ @ @ @ @ @ bye cinna @ @ @ @ @ @ @ @ @ @ @ //
