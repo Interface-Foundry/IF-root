@@ -618,7 +618,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
   
 
   var results = yield amazon_search.search(exec.params,message.origin);
-   if ((results == null || !results) && exec.params.type !== 'price') {
+   if (results == null || !results) {
           console.log('-4')
 
       return new db.Message({
@@ -748,7 +748,6 @@ handlers['cart.save'] = function*(message, exec) {
     throw new Error('no focus for saving to cart');
   }
 
-  console.log('!!!is it even getting here', exec)
 
 
  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
