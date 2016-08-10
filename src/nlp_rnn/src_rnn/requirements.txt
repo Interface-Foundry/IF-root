@@ -1,0 +1,6 @@
+keras
+flask
+google-api-python-client
+gunicorn
+oauth2client
+pandas

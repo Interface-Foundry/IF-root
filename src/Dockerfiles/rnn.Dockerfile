@@ -23,7 +23,11 @@ RUN apt-get update && apt-get install -y \
     python3-h5py \
     wget
 
-RUN pip3 install keras pandas flask oauth2client google-api-python-client $TF_DOWNLOAD
+RUN pip3 install $TF_DOWNLOAD
+
+ADD nlp_rnn/src_rnn/requirments.txt /app/requirments.txt
+
+RUN pip3 install -r /app/requirments.txt
 
 RUN mkdir /root/.keras/ && \
     echo '{"floatx": "float32", "epsilon": 1e-07, "backend": "tensorflow"}' > /root/.keras/keras.json
@@ -33,12 +37,13 @@ RUN wget -P /app/models/ https://storage.googleapis.com/saved-models-bucket/late
     wget -P /app/pkls/ https://storage.googleapis.com/saved-models-bucket/tokenizer.pkl && \
     wget -P /app/ https://storage.googleapis.com/saved-models-bucket/config.json
 
+
 WORKDIR /app/
+
+COPY nlp_rnn/src_rnn /app
 
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/nlp_creds.json
 
 EXPOSE 8085
-
-COPY nlp_rnn/src_rnn /app
-
-CMD python3 server.py
+# CMD python3 server.py
+CMD gunicorn -w 5 --bind 0.0.0.0:8085 main:application
