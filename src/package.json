@@ -23,6 +23,7 @@
     "botbuilder": "^3.0.0",
     "botkit": "0.0.11",
     "co": "^4.6.0",
+    "co-next": "^1.0.0",
     "co-sleep": "0.0.1",
     "co-wait": "0.0.0",
     "component-emitter": "^1.2.1",

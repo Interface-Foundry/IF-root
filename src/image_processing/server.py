@@ -71,7 +71,7 @@ def main():
     '''
     t1 = time.time()
     img_req = request.json
-    logging.info('received request to make image')
+    logging.info('received req to make image')
     pic = PicStitch(img_req=img_req,
                     # bucket=s3_bucket,
                     # gcloud_bucket=gcloud_bucket,
@@ -82,10 +82,11 @@ def main():
     gc_url = upload_to_gcloud(pic, gcloud_bucket)
     logging.info('uploaded to gcloud @ ' + gc_url)
     t3 = time.time()
-    logging.info('time taken to make img %s, time taken to upload image %s, total time taken: %s', str(
-        t2 - t1), str(t3 - t2), str(t3 - t1))
+    logging.info('time to make img %s, ' +
+                 'time to upload image %s, ' +
+                 'total time: %s',
+                 str(t2 - t1), str(t3 - t2), str(t3 - t1))
     return gc_url
-
 
 # load connections to gcloud and aws
 gcloud_bucket = get_gcloud()
@@ -95,9 +96,8 @@ font_dict = load_fonts()
 
 
 if __name__ == '__main__':
-    port_num = 5001
-
+    port_num = 5000
     # run app
-    logging.info('__threaded__')
+    logging.info('__not_threaded__')
     logging.info('running app on port ' + str(port_num))
-    application.run(host='0.0.0.0', port=port_num)
+    application.run(host='0.0.0.0', port=port_num, debug=True)

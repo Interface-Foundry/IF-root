@@ -6,6 +6,7 @@ import random
 import logging
 import textwrap
 import urllib.request
+import numpy as np
 
 from gcloud import storage
 from PIL import Image, ImageFont, ImageDraw
@@ -148,6 +149,11 @@ class PicStitch:
         thumb_img.thumbnail(self.config['PIC_SIZE'], Image.ANTIALIAS)
 
         # post image thumbnail
+        # arr = np.array(thumb_img)
+        # alpha = arr[:, :, 2]
+        # n1 = len(alpha)
+        # alpha[:] = np.interp(np.arange(n1), [0, 0.55*n1, 0.75*n1, n1], [255, 255, 0, 0])[:,np.newaxis]
+        # thumb_img = Image.fromarray(alpha, mode='RGBA')
         img.paste(thumb_img,
                   (self.config['PIC_COORDS']['x'],
                    self.config['PIC_COORDS']['y']))
@@ -156,13 +162,18 @@ class PicStitch:
         last_y = 5
         x = self.config['TEXTBOX_COORDS'][0]['x'] - 30
         y = self.config['TEXTBOX_COORDS'][0]['y']
-        draw = ImageDraw.Draw(img)
+        draw = ImageDraw.Draw(img, 'RGBA')
 
         if self.origin is 'skype':
             last_y = last_y + 50
 
         if self.origin in ['skype', 'facebook']:
-            draw.rectangle(((205, 5), (329, 160)), fill="white")
+            draw.rectangle(((210, 5), (330, 300)), fill="white")
+            # poly = Image.new('RGBA', (125, 295))
+            # pdraw = ImageDraw.Draw(poly)
+            # poly_offset = (205, 5)  # location in larger image
+            # pdraw.polygon([(0, 0), (0, 256), (125, 295), (256, 0)], fill="white")
+            # img.paste(poly, poly_offset, mask=poly)
 
         # add price
         draw.text((x, last_y),
@@ -212,7 +223,7 @@ class PicStitch:
 
             # make number count in blue to right of stars
             if 'reviewCount' in self.img_req['reviews']:
-                draw.text((x + 80, last_y - 1),
+                draw.text((x + 80, last_y - 2),
                           ' - ' + self.img_req['reviews']['reviewCount'],
                           font=self.config['review_count_font'],
                           fill="#2d70c1")
@@ -294,7 +305,7 @@ class PicStitch:
             config['PIC_SIZE'] = 223, 223
             config['font1'] = self.font_dict[28]
             config['font2'] = self.font_dict[20]
-            config['review_count_font'] = self.font_dict[18]
+            config['review_count_font'] = self.font_dict[20]
 
         if self.origin in ['skype']:
             logging.debug('using origin==skype in config')

@@ -131,12 +131,12 @@ class McParser:
         self.tokens = []
         self.focus = []
         self.nouns = []
+        self.pronouns = []
         self.verbs = []
         self.adjectives = []
         self.noun_phrases = []
         self.modifier_words = []
         self.parts_of_speech = []
-        self.modifier_words = []
         self.item_descriptors = []
         self.entities = []
         self.d = {}
@@ -181,18 +181,18 @@ class McParser:
     def _parse_terms(self):
         '''
         '''
-        d_index = 0
-        for i in self.dependency_array:
+
+        for d_index, i in enumerate(self.dependency_array):
             cur_word = i[1]
             self.tokens.append(cur_word)
             self.parts_of_speech.append([cur_word, i[3]])
-            if i[3] in ['NOUN', 'PRON']:
-                self.nouns.append(cur_word)
-
             if i[3] in ['NOUN']:
+                self.nouns.append(cur_word)
                 if not hasattr(self, 'first_noun'):
                     self.first_noun = d_index
                 self.last_noun = d_index
+            if i[3] in ['PRON']:
+                self.pronouns.append(cur_word)
 
             if i[3] in ['VERB']:
                 self.verbs.append(cur_word)
@@ -222,8 +222,6 @@ class McParser:
             if cur_word.lower() in ['three', '3', 'third']:
                 self.focus.append('3')
 
-            d_index += 1
-
     def _create_noun_query(self):
         if hasattr(self, 'first_noun'):
             if self.first_noun is not self.last_noun:
@@ -238,6 +236,8 @@ class McParser:
             split_word = list(modifier_split)[0]
             self.modifier_words = self.tokens[
                 self.tokens.index(split_word) + 1:]
+        else:
+            self.modifier_words = self.nouns
 
     def _create_nouns_without_stopwords(self):
         '''
@@ -335,7 +335,7 @@ class McParser:
     def _create_search(self):
         '''
         '''
-        if hasattr(self, 'noun_query'):
+        if hasattr(self, 'noun_query'):  # basically noun phrases
             self.search_query = self.noun_query
         elif hasattr(self, 'pobj'):
             self.search_query = self.pobj

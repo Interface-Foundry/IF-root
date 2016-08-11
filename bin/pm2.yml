@@ -1,3 +1,3 @@
 apps:
   - script: src/chat/components/reply_logic.js
-  - script: src/chat/components/slack/slack.js
+  - script: src/chat/components/facebook/facebook.js
