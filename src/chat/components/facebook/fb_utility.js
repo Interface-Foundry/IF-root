@@ -256,6 +256,9 @@ var send_story = function (userid_z,recipient,pointer, sender, fbtoken){
 //select: which answer did user pick
 var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory){
 
+  console.log('process_Story FIRED!!!  stuff: ')
+  console.log(recipient,sender,pointer,select,fbtoken,fb_memory )
+
     //SAVE THIS quiz response TO USERS PERSONA as a session
     var query = {id: 'facebook_'+sender},
         update = { origin:'facebook' },
@@ -279,7 +282,7 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
 
 
     //check if we should end story. will stop story after length of quiz question array
-    if(pointer == onboarding_quiz.length - 1){
+    if(pointer == quiz.length - 1){
 
         console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[sender].quiz)
 
@@ -289,36 +292,36 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
 
         if(fb_memory[sender].quiz >= 0 && fb_memory[sender].quiz <= 3){
             item = 'Flying Sailboat'
-            send_image('sailboat.png',sender,function(){
+            send_image('sailboat.png',sender,fbtoken, function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                fb_utility.send_card(x,sender, fbtoken);
+                send_card(x,sender, fbtoken);
             });
         }
         else if(fb_memory[sender].quiz >= 4 && fb_memory[sender].quiz <= 7){
             item = 'Lucky Goldfish'
-            send_image('goldfish.png',sender,function(){
+            send_image('goldfish.png',sender,fbtoken, function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                fb_utility.send_card(x,sender, fbtoken);
+                send_card(x,sender, fbtoken);
             });
         }
         else if(fb_memory[sender].quiz >= 8 && fb_memory[sender].quiz <= 9){
             item = 'Snowglobe Charm'
-            send_image('snowglobe.png',sender,function(){
+            send_image('snowglobe.png',sender,fbtoken,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                fb_utility.send_card(x,sender, fbtoken);
+                send_card(x,sender, fbtoken);
             });
         }
         else if(fb_memory[sender].quiz >= 10 && fb_memory[sender].quiz <= 12){
             item = 'Rainbow Pearl'
             send_image('pearl.png',sender,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                fb_utility.send_card(x,sender, fbtoken);
+                send_card(x,sender, fbtoken);
             });
         }else {
             item = 'Lucky Goldfish'
             send_image('goldfish.png',sender,function(){
                 var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                fb_utility.send_card(x,sender, fbtoken);
+                send_card(x,sender, fbtoken);
             });
         }
 
@@ -573,7 +576,7 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
         console.log('@!@!@!@!@!@!@!@!@!@!@!@!@!@!@ ',fb_memory[sender].quiz);
 
         console.log('ADDING POINTER ',pointer)
-        fb_utility.send_story(recipient,sender,pointer, sender, fbtoken)
+        send_story(recipient,sender,pointer, sender, fbtoken)
     }
 
 }

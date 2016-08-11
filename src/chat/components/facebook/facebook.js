@@ -343,6 +343,7 @@ app.post('/facebook', next(function*(req, res, next) {
                 console.log(body);
             });
         }
+        //Handle postback responses here
         else if (event.postback) {
            yield handle_postback(event, sender, fb_memory, fbtoken, recipient)
         }
