@@ -8,6 +8,8 @@ ADD image_processing/requirements.txt /tmp/requirements.txt
 
 RUN pip3 install -qr /tmp/requirements.txt
 
+RUN pip3 install numpy
+
 ADD image_processing /picstitch/
 
 WORKDIR /picstitch

@@ -44,4 +44,4 @@ ENV GOOGLE_APPLICATION_CREDENTIALS=/app/nlp_creds.json
 
 EXPOSE 8085
 # CMD python3 server.py
-CMD gunicorn -w 3 --bind 0.0.0.0:8085 main:application
+CMD gunicorn --timeout 120 -w 3 --bind 0.0.0.0:8085 main:application
