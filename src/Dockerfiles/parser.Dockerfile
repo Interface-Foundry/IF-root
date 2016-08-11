@@ -16,4 +16,4 @@ EXPOSE 8083
 
 ENV GOOGLE_APPLICATION_CREDENTIALS /root/gcloud_key/KipStyles-cc4206727706.json
 
-CMD gunicorn -w 5 --bind 0.0.0.0:8083 main:application
+CMD gunicorn -w 3 --bind 0.0.0.0:8083 main:application

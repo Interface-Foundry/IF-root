@@ -8,6 +8,7 @@ application = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 m = ModelPredictor()
 logging.info('model loaded')
 

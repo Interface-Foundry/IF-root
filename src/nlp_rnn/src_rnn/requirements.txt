@@ -1,6 +1,3 @@
-keras
-flask
-google-api-python-client
-gunicorn
-oauth2client
-pandas
+Flask==0.11.1
+gunicorn==19.6.0
+Keras==1.0.6
