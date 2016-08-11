@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
     python3-h5py \
     wget
 
-ADD nlp_rnn/src_rnn/requirments.txt /app/requirments.txt
+ADD nlp_rnn/src_rnn/requirements.txt /app/requirements.txt
 
 RUN pip3 install $TF_DOWNLOAD && pip3 install -r /app/requirements.txt
 
