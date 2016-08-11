@@ -61,6 +61,11 @@ function default_reply(message) {
 function text_reply(message, text) {
   var msg = default_reply(message);
   msg.text = text;
+  msg.execute = msg.execute ? msg.execute : [];
+  msg.execute.push({
+        mode: 'banter',
+        action: 'reply',
+      })
   return msg
 }
 

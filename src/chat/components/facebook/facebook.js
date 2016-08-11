@@ -779,7 +779,7 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
 
     function send_cart(channel, text, outgoing) {
           var cart = outgoing.data.data;
-          // console.log('getting to send_cart, outgoing: ', outgoing.data)
+          console.log('getting to send_cart, cart: ', cart)
           var cartDisplay = {
               "attachment": {
                 "type": "template",
