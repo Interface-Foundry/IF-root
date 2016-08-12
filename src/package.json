@@ -47,7 +47,7 @@
     "luminati-proxy": "luminati-io/luminati-proxy",
     "memory-cache": "^0.1.5",
     "moment-timezone": "^0.5.3",
-    "mongoose": "^4.4.17",
+    "mongoose": "^4.5.8",
     "mongoose-hook-ensure-indexes": "^0.1.4",
     "ms": "^0.7.1",
     "natural": "^0.4.0",
