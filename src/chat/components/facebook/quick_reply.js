@@ -24,7 +24,6 @@ var fb_utility = require('./fb_utility');
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 
     var last_message = yield fb_utility.get_last_message(sender);
-    console.log('shiet whats the last message yo', last_message)
     var sub_menu = event.message.quick_reply.payload;
     try {
         sub_menu = JSON.parse(sub_menu);
@@ -78,7 +77,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (sub_menu.action && sub_menu.action == 'take_quiz'){
         fb_memory[sender].mode = 'onboarding';
-        fb_utility.send_story(recipient,sender);
+        fb_utility.send_story(sender, 0, fbtoken);
     }
     else if (sub_menu.action && sub_menu.action == 'cheaper') {
         console.log(event.message)
@@ -124,8 +123,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     //  --If user hits back button..--
     //
     else if (sub_menu.action && sub_menu.action == 'back') {
-        console.log('\n\n\n\n\n\BackCache: ', backCache,'\n\n\n\n\n')
-        var messages = db.Messages.find({
+        var messages = yield db.Messages.find({
             thread_id: 'facebook_' + sender.toString()
         }).sort('-ts').exec();
         //*This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search.
