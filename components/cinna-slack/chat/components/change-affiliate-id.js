@@ -27,7 +27,6 @@ var newClient = amazon.createClient({
 })
 
 function * migrate_cart(cart) {
-  debugger;
   console.log('migrating cart for slack team', cart.slack_id)
   var cart_items = cart.aggregate_items.reduce(function(cart_items, item, index) {
     cart_items['Item.' + index + '.ASIN'] = item.ASIN
@@ -36,7 +35,12 @@ function * migrate_cart(cart) {
   }, {})
   var amazonCart = yield newClient.createCart(cart_items)
   cart.amazon = amazonCart;
-  cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+  try {
+    cart.link = yield processData.getCartLink(_.get(cart, 'amazon.PurchaseURL[0]'), cart._id)
+  } catch (e) {
+    console.error('ERROR', cart._id, 'no url', _.get(cart, 'amazon.PurchaseURL[0]'))
+    return
+  }
 
   for (var i = 0; i < cart.items.length; i++) {
     try {
@@ -62,7 +66,7 @@ co(function * () {
 
   for (var i = 0; i < carts.length; i++) {
     yield migrate_cart(carts[i]);
-    sleep(100);
+    sleep(300);
   }
 }).then(() => {
   console.log('done')
