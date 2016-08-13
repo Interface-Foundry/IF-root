@@ -1,8 +1,9 @@
 stitch = require('../../image_processing/api.js');
 var async = require('async');
+var winston = require('winston');
 
 var stitchResultsPromise = function(items,origin) {
-  console.log('originSTITCH ',origin)
+  winston.debug('originSTITCH ',origin)
   return new Promise((resolve, reject) => {
     stitchResults({
       origin: origin,
@@ -54,7 +55,7 @@ var stitchResults = function(data,source,callback) {
               ],
               function(err, rez){
                   if (err){
-                      console.error('Error: parallel scrape ',err);
+                      winston.debugerror('Error: parallel scrape ',err);
                   }
                   callback(stitchURLs);
 
@@ -67,11 +68,11 @@ var stitchResults = function(data,source,callback) {
               var loopLame = [0,1,2].slice(0, data.amazon.length);//lol
               async.eachSeries(loopLame, function(i, callback) {
 
-                console.log('WHAT??????? ? ?? ? ? ? ? ? ? ?? ',i);
+                winston.debug('WHAT??????? ? ?? ? ? ? ? ? ? ?? ',i);
 
                 if (data.amazon && data.amazon[i]){
 
-                  console.log('BUILD IMAGE^ ^ ^ ^ ^ ^ ^ ^ ');
+                  winston.debug('BUILD IMAGE^ ^ ^ ^ ^ ^ ^ ^ ');
                   buildImage(data,function(res){
                     callback();
                   },i);
@@ -82,7 +83,7 @@ var stitchResults = function(data,source,callback) {
 
               }, function done(){
                   //fireStitch();
-                  console.log('peeell222 ',stitchURLs);
+                  winston.debug('peeell222 ',stitchURLs);
                   callback(stitchURLs);
               });
 
@@ -91,7 +92,7 @@ var stitchResults = function(data,source,callback) {
 
           function buildImage(data,callbackG,tracker){ //the tracker is to keep track of which URL is which in parallel process
 
-              console.log('OK OK OK ',data);
+              winston.debug('OK OK OK ',data);
 
               var origin = data.origin;
 
@@ -159,11 +160,11 @@ var stitchResults = function(data,source,callback) {
               //well, do you have it at all??
               else if (amazonObj.altImage){
                   imageURL = amazonObj.altImage;
-                  console.log('OMG OMG using scraped image URL ', imageURL);
+                  winston.debug('OMG OMG using scraped image URL ', imageURL);
               }
               //fine...here's a penguin!!!!!
               else {
-                  console.log('NO IMAGE FOUND ',amazonObj);
+                  winston.debug('NO IMAGE FOUND ',amazonObj);
                   imageURL = 'https://pbs.twimg.com/profile_images/425274582581264384/X3QXBN8C.jpeg'; //TEMP!!!!
               }
 
@@ -172,7 +173,7 @@ var stitchResults = function(data,source,callback) {
                 delete amazonObj.reviews;
               }
 
-              console.log('REVIEWS ',amazonObj.reviews);
+              winston.debug('REVIEWS ',amazonObj.reviews);
 
               //if itemattribs exists in amazon result
               if (amazonObj && amazonObj.ItemAttributes){
@@ -180,7 +181,7 @@ var stitchResults = function(data,source,callback) {
                 var cString = [];
                 var attribs = amazonObj.ItemAttributes[0];
 
-                console.log(attribs);
+                winston.debug(attribs);
                 ///// build product details string //////
                 //get size
                 if (attribs.ClothingSize){
@@ -295,7 +296,7 @@ var stitchResults = function(data,source,callback) {
                     cString.push(truncate("Hazardous Type: " + attribs.HazardousMaterialType[0]));
                 }
 
-                console.log('cString ',cString);
+                winston.debug('cString ',cString);
 
                 if(cString.length < 1){
                   cString.push('');
@@ -321,7 +322,7 @@ var stitchResults = function(data,source,callback) {
                 });
               }
               fireStitch(tracker,function(){
-                console.log('BUILD IMAGE3333333^ ^ ^ ^ ^ ^ ^ ^ ');
+                winston.debug('BUILD IMAGE3333333^ ^ ^ ^ ^ ^ ^ ^ ');
                 callbackG();
               });
 
@@ -333,12 +334,12 @@ var stitchResults = function(data,source,callback) {
         //call to stitch service
         stitch(toStitch, function(e, stitched_url){
             if(e){
-                console.log('stitch err ',e);
+                winston.debug('stitch err ',e);
             }
             if (tracker || tracker == 0){
               stitchURLs[tracker] = stitched_url;
-              console.log('TRACKER STITCH NUM',tracker);
-              console.log('TRACKER STITCH ',stitchURLs[tracker]);
+              winston.debug('TRACKER STITCH NUM',tracker);
+              winston.debug('TRACKER STITCH ',stitchURLs[tracker]);
             }else {
               stitchURLs.push(stitched_url);
             }
