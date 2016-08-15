@@ -5,13 +5,15 @@
 var assert = require('assert');
 var expect = require('chai').expect;
 var queue = require('../chat/components/queue-mongo');
-
-var json = { 
+var co = require('co');
+var message = new db.Message({ 
+	thread_id: 'facebook_1000206960095603',
   text: 'hello',
   incoming: true,
   original_text: 'hello',
-  origin: 'facebook' };
-var key  = 'facebook_unit_test_' + Date.now
+  origin: 'facebook',
+  ts: Date.now() });
+var key  = 'facebook_unit_test'
 
 describe('the sum of', function() {
   describe('2 and 2', function() {
@@ -25,19 +27,20 @@ describe('the sum of', function() {
 
 describe('when we send', function(){
     describe('a hello message to the queue', function(){
-	it('should return the standard response', function(){
-        queue.publish('incoming', json, key);
+	it('should return the standard response', function*( done){
+        yield queue.publish('incoming', message, key);
 	    var returnData;
-	    beforeEach(function(callback) {
+	    // beforeEach(function(callback) {
 	    
-		queue.topic('incoming').subscribe(incoming => {		    
-		    
-		    returnData = incoming;
-		    callback();
-		})
-		
-	    })
-            expect.returnData.to.exist;
+			yield queue.topic('incoming').subscribe(incoming => {		    
+			    
+			    returnData = incoming;
+			})
+
+			yield done()
+
+	    // })
+            expect(returnData).text.equals('hello');
 	})
     })
 })
