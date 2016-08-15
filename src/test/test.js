@@ -27,10 +27,17 @@ describe('when we send', function(){
     describe('a hello message to the queue', function(){
 	it('should return the standard response', function(){
         queue.publish('incoming', json, key);
-        queue.topic('incoming').subscribe(incoming => {
-        		expect.incoming.to.exist
-	        	// assert.equal();
-        })
+	    var returnData;
+	    beforeEach(function(callback) {
+	    
+		queue.topic('incoming').subscribe(incoming => {		    
+		    
+		    returnData = incoming;
+		    callback();
+		})
+		
+	    })
+            expect.returnData.to.exist;
 	})
     })
 })
