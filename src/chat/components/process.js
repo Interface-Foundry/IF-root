@@ -8,6 +8,7 @@ var nlp = require('../../nlp2/api');
 var banter = require("./banter.js");
 var db = require('../../db');
 var googl = require('goo.gl');
+var winston = require('winston');
 
 if (process.env.NODE_ENV === 'development') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
@@ -58,7 +59,7 @@ var updateCountry = function(country, user_id){
 
   })
 
-  
+
   var user = db.Chatuser.findOne({
     id: user_id
   })
@@ -74,7 +75,7 @@ var urlShorten = function(data,callback2) {
 
     //single url for checkouts
     if (data.bucket == 'purchase' && data.action == 'checkout' || data.bucket == 'purchase' && data.action == 'save'){
-        console.log('Mitsuprocess10: ',data)
+        winston.debug('Mitsuprocess10: ',data)
         if (data.client_res){
            //var replaceReferrer = data.client_res.replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
            var url = data.client_res;
@@ -84,7 +85,7 @@ var urlShorten = function(data,callback2) {
 
             // request.get('https://api-ssl.bitly.com/v3/shorten?access_token=da558f7ab202c75b175678909c408cad2b2b89f0&longUrl='+querystring.escape('http://kipbubble.com/product/'+escapeAmazon+'/id/'+data.source.id+'/pid/shoppingcart')+'&format=txt', function(err, res, body) {
             //   if(err){
-            //     console.log('URL SHORTEN error ',err);
+            //     winston.debug('URL SHORTEN error ',err);
             //   }
             //   else {
             //     callback2(body);
@@ -106,7 +107,7 @@ var urlShorten = function(data,callback2) {
 
         }
         else {
-            console.log('error: client_res missing from urlShorten')
+            winston.debug('error: client_res missing from urlShorten')
         }
 
     }
@@ -118,9 +119,9 @@ var urlShorten = function(data,callback2) {
             if (data.amazon[i]){
                //var replaceReferrer = data.amazon[i].DetailPageURL[0].replace('kipsearch-20','bubboorev-20'); //obscure use of API on bubboorev-20
                var url = data.amazon[i].DetailPageURL[0];
-               console.log(url);
+               winston.debug(url);
                url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20');
-               console.log(url);
+               winston.debug(url);
                var escapeAmazon = querystring.escape(url);
 
                 if (data.source.origin == 'kik'){
@@ -230,7 +231,7 @@ var aws_associate_id = 'eileenog-20';
 //
 function getCartLink(url, cart_id) {
   url = url.replace(/(%26|\&)associate-id(%3D|=)[^%]+/, '%26associate-id%3Deileenog-20');
-  console.log('CART IDDDDDDDDD ',url)
+  winston.debug('CART IDDDDDDDDD ',url)
 
   return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url) + '/id/' + cart_id + '/pid/shoppingcart');
 }
@@ -240,7 +241,7 @@ function getCartLink(url, cart_id) {
 //
 function getItemLink(url, user_id, item_id) {
   url = url.replace(/(%26|\&)tag(%3D|=)[^%]+/, '%26tag%3Deileenog-20');
-  console.log('ITEM IDDDDDDDDD ',url)
+  winston.debug('ITEM IDDDDDDDDD ',url)
 
   var url_swapped = swapAmazonTLD(url, user_id)
   return googl.shorten('http://offgrideileen.com/product/' + querystring.escape(url_swapped) + '/id/' + user_id + '/pid/' + item_id);
@@ -282,7 +283,7 @@ var imageSearch = function(data,token,callback){
         // send single request
         vision.annotate(req).then((res) => {
           // handling response
-          console.log(JSON.stringify(res.responses));
+          winston.debug(JSON.stringify(res.responses));
 
           var searchTerms = [];
 
@@ -332,7 +333,7 @@ var imageSearch = function(data,token,callback){
 
           // check for search terms
           if(searchTerms.length > 0){
-            console.log(searchTerms);
+            winston.debug(searchTerms);
             callback(Array.from(new Set(searchTerms)).join(" ")); //remove dupes and make into string on return
           }
           else {
@@ -342,7 +343,7 @@ var imageSearch = function(data,token,callback){
           fs.unlinkSync(savePath); //remove temp image
 
         }, (e) => {
-          console.log('Error: ', e);
+          winston.debug('Error: ', e);
           fs.unlinkSync(savePath); //remove temp image
           callback();
         })
@@ -375,7 +376,7 @@ var imageSearch = function(data,token,callback){
         // send single request
         vision.annotate(req).then((res) => {
           // handling response
-          console.log(JSON.stringify(res.responses));
+          winston.debug(JSON.stringify(res.responses));
 
           var searchTerms = [];
 
@@ -425,7 +426,7 @@ var imageSearch = function(data,token,callback){
 
           // check for search terms
           if(searchTerms.length > 0){
-            console.log(searchTerms);
+            winston.debug(searchTerms);
             callback(Array.from(new Set(searchTerms)).join(" ")); //remove dupes and make into string on return
           }
           else {
@@ -435,7 +436,7 @@ var imageSearch = function(data,token,callback){
           fs.unlinkSync(savePath); //remove temp image
 
         }, (e) => {
-          console.log('Error: ', e);
+          winston.debug('Error: ', e);
           fs.unlinkSync(savePath); //remove temp image
           callback();
         })
@@ -458,15 +459,15 @@ var modeHandle = function(input,context,callback){
 
     banter.checkModes(inputTxt,context,function(mode,res){
 
-      console.log('MODE FROM BANTER.JS ',mode);
-      console.log('RES FROM BANTER.JS ',res);
+      winston.debug('MODE FROM BANTER.JS ',mode);
+      winston.debug('RES FROM BANTER.JS ',res);
 
       //nothing found in canned
       if(!mode && !res){
           //try for NLP parse
           nlp.parse(inputTxt, function(e, res) {
               if (e){
-                console.log('NLP error ',e);
+                winston.debug('NLP error ',e);
                 callback();
               }
               else {
@@ -505,7 +506,7 @@ var modeHandle = function(input,context,callback){
       }
       else {
 
-        console.log('NO MODE FOUND!!!!! heres mode: ',mode)
+        winston.debug('NO MODE FOUND!!!!! heres mode: ',mode)
         callback();
       }
 
@@ -538,7 +539,7 @@ var modeHandle = function(input,context,callback){
 //BUILDS KIP DATA OBJECT FROM NLP RESPONSES
 var buildKipObject = function(res,callback){
 
-    //console.log('INCOMING BUILD KIP OBJ ',res);
+    //winston.debug('INCOMING BUILD KIP OBJ ',res);
 
 
     var data = {};
@@ -585,7 +586,7 @@ var buildKipObject = function(res,callback){
         if (res.tokens && res.tokens[0].indexOf('but') > -1){
             var modDetail = res.tokens[0].replace(res.searchSelect[0],''); //remove select num from string
             modDetail = modDetail.replace('but','').trim();
-            console.log('mod string ',modDetail);
+            winston.debug('mod string ',modDetail);
 
             data.tokens = res.tokens;
             data.searchSelect = res.searchSelect;
@@ -596,7 +597,7 @@ var buildKipObject = function(res,callback){
                 val:[modDetail]
             };
 
-            console.log('constructor ',data);
+            winston.debug('constructor ',data);
 
             callback(data);
         }
@@ -606,7 +607,7 @@ var buildKipObject = function(res,callback){
             data.bucket = 'search';
             data.action = 'initial';
 
-            console.log('un struct ',data);
+            winston.debug('un struct ',data);
 
             callback(data);
         }
