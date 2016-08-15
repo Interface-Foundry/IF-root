@@ -71,7 +71,6 @@ var busboy = require('connect-busboy');
 var fs = require('fs');
 //set env vars
 var config = require('../../../config');
-
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -91,6 +90,11 @@ var fbtoken;
 var next = require("co-next")
 var fb_utility = require('./fb_utility');
 var handle_postback = require('./postback');
+var send_results = require('./send_results');
+var send_text = require('./send_text');
+var send_focus = require('./send_focus');
+var send_cart = require('./send_cart');
+
 
 
 if (process.env.NODE_ENV === 'development_alyx'){
@@ -143,10 +147,8 @@ app.get('/facebook', function(req, res) {
 })
 
 //
-//   -Back button state cache-
-//   What is this you ask? Basically an index to keep track of how many 'backs' you clicked
-//   May refactor in future..
-//
+//   -Back button state cache- *currently not in use
+
 backCache = 0;
 
 
@@ -355,18 +357,17 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
         co(function*() {
             if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
                 return_data = yield search_results(message);
-                return fb_utility.send_results(message.source.channel, message.text, return_data, outgoing, fbtoken);
+                return yield send_results(message.source.channel, message.text, return_data, outgoing, fbtoken);
             }
             else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-                console.log('focus message :', message);
                 return_data = yield focus(message);
-                return fb_utility.send_focus(message.source.channel, message.text, return_data, outgoing, fbtoken);
+                return yield send_focus(message.source.channel, message.text, return_data, outgoing, fbtoken);
             }
             else if (message.mode === 'cart' && message.action === 'view') {
-                return fb_utility.send_cart(message.source.channel, message.text, outgoing, fbtoken);
+                return yield send_cart(message.source.channel, message.text, outgoing, fbtoken);
             }
             else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
-                return fb_utility.send_text(message.source.channel, message.text, outgoing, fbtoken)
+                return yield send_text(message.source.channel, message.text, outgoing, fbtoken)
             }
          outgoing.ack();
         }).then(() => {

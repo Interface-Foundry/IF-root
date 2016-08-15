@@ -20,6 +20,7 @@ var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var next = require("co-next") 
 var fb_utility = require('./fb_utility');
+var send_cart = require('./send_cart');
 
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 
