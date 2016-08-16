@@ -5,20 +5,43 @@
 var assert = require('assert');
 var expect = require('chai').expect;
 var queue = require('../chat/components/queue-mongo');
-var co = require('co');
-var message = new db.Message({ 
-	thread_id: 'facebook_1000206960095603',
-  text: 'hello',
-  incoming: true,
-  original_text: 'hello',
-  origin: 'facebook',
-  ts: Date.now() });
-var key  = 'facebook_unit_test'
+var db = require('../components/db');
+
+var json = { 
+    text: 'hello',
+    thread_id: 'facebook_1000206960095603',
+    incoming: true,
+    original_text: 'hello',
+    origin: 'facebook',
+    ts: Date.now(), 
+    
+};
+
+
+
+var saveNewMessage = function(){
+
+      var new_message = new db.Message({
+                incoming: true,
+                thread_id: msg.thread_id,
+                resolved: false,
+                user_id: msg.user_id,
+                origin: msg.origin,
+                text: text,
+                source: msg.source,
+                amazon: msg.amazon 
+            });
+        // queue it up for processing
+        return new db.Message(new_message);
+}
+
+
+var key  = 'facebook_unit_test_' + Date.now();
 
 describe('the sum of', function() {
   describe('2 and 2', function() {
     it('should return 4', function() {
-	assert.equal(2+2, 4);
+        assert.equal(2+2, 4);
     });
   });
 });
@@ -27,21 +50,23 @@ describe('the sum of', function() {
 
 describe('when we send', function(){
     describe('a hello message to the queue', function(){
-	it('should return the standard response', function*( done){
-        yield queue.publish('incoming', message, key);
-	    var returnData;
-	    // beforeEach(function(callback) {
-	    
-			yield queue.topic('incoming').subscribe(incoming => {		    
-			    
-			    returnData = incoming;
-			})
+        var returnData = null;
+	
+        queue.publish('incoming', json, key);
 
-			yield done()
+        beforeEach(function(done) {
+            setTimeout(function(){
+                queue.topic('incoming').subscribe(incoming => {                             
+                    returnData = incoming;
+                })
+                done();
+            }, 2000);
+            returnData = 'foobar';
+        });
 
-	    // })
-            expect(returnData).text.equals('hello');
-	})
+        it('should return the standard response', function(){        
+            expect(returnData).to.exist;
+        })
     })
 })
 

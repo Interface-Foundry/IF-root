@@ -1,4 +1,4 @@
-env: development_foo
+env: development_dtaylor
 mongodb:
   url: localhost/foundry
 elasticsearch:
@@ -6,5 +6,6 @@ elasticsearch:
 app:
   publicAPI: http://localhost:2997/api
 picstitch: http://localhost:5000
-# nlp: http://localhost:8083
+nlp: http://104.196.51.184:8083
+npl_rnn: http://104.196.1.204:8085/
 # doc2vec: http://localhost:8084
