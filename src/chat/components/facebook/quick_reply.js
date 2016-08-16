@@ -25,6 +25,9 @@ var fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 var FBResponder = require('./responders');
 
+const DEFAULT_MODE = 'shopping';
+
+
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 
     var last_message = yield fb_utility.get_last_message(sender);
@@ -34,6 +37,9 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     } catch(err) {
         console.log(err)
     }
+
+    sub_menu['mode'] = DEFAULT_MODE;
+
     //sub-menu actions
     if (sub_menu.action && sub_menu.action == 'button_search') {
         if (!last_message || last_message == null) {
@@ -94,7 +100,9 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
+		// also pass in an indicator of which submenu action was selected
                 new FBResponder(sender).respond(last_message, sub_menu);
+		
 		/*
                 var message = new db.Message({
                     incoming: true,

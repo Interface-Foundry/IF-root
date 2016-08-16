@@ -95,7 +95,9 @@ var send_text = require('./send_text');
 var send_focus = require('./send_focus');
 var send_cart = require('./send_cart');
 
-
+if (process.env.NODE_ENV === 'development_dtaylor'){
+    fbtoken = process.env.FBTOKEN;
+}
 
 if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAAEkPTERbfgBACRwymE64dZCRxlQ035ZBvg2ZCATLkuZB8YF4wOQBfD2M4DvUwJ52ZBIEgo43hi4LrVu7bxA9pgpZCpTi8GtIhpMETuGrxhXFb1BYjJ0EXeWEgTd6ugHe7ZAIIgSKWfVHoETvKJNujMfFqGU8AK4sWVhQuJJjhEvgZDZD';

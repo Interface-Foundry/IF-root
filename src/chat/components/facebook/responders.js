@@ -27,17 +27,35 @@ class FBResponder {
     }
 
     respond(lastMessage, subMenu) {
+
+	// if a control was actuated, 
+	// the message must include the control name and the selection (or component mode) 
+	// control event == action
+	// possible actions are [ button_press | menu_select ]
+	// actions have a category, called a Mode
+	// [shopping | onboarding | settings | ...]
+	
+	
+	
         var message = new db.Message({
-                incoming: true,
-                thread_id: this.responderType + '_' + this.sender.toString(),
-                resolved: false,
-                user_id: lastMessage.user_id,
-                origin: this.responderType,
-                text: this.mapActionToText(subMenu),
-                source: lastMessage.source,
-                amazon: lastMessage.amazon
-              });
-            console.log(0, lastMessage, subMenu)
+            incoming: true,
+            thread_id: this.responderType + '_' + this.sender.toString(),
+            resolved: false,
+            user_id: lastMessage.user_id,	       
+            origin: this.responderType,	    	    
+            text: this.mapActionToText(subMenu),
+            source: lastMessage.source,
+            amazon: lastMessage.amazon,
+	    execute: [
+		{
+		    mode: subMenu.mode,
+		    action: subMenu.action,
+		    params: {},
+		    selected: subMenu.selected
+		}
+	    ]
+        });
+        console.log(0, lastMessage, subMenu)
 
         // queue it up for processing
         message.save().then(() => {
