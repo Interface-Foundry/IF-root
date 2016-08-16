@@ -15,21 +15,19 @@ var FacebookResponder = function(sender, subMenu) {
     };
 
     this.mapActionToText = function(subMenuAction){
-	
-	var text = this.actionTextMap[subMenuAction];
-	if(text === null || text === undefined){
-	    text = ''; // whatever the default is
+	var converter = this.actionTextMap[subMenuAction];
+	if(converter === null || converter === undefined){
+	    return ''; // whatever the default is 
 	}
 
-	return text;
+	return converter();
     }
     return this;
 };
 
 
 FacebookResponder.prototype.respond = function(last_message){
-
-    
+	
     var message = new db.Message({
                     incoming: true,
                     thread_id: this.responderType + '_' + this.sender.toString(),
