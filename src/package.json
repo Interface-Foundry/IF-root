@@ -80,5 +80,8 @@
     "env": {
       "es6": true
     }
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
   }
 }
