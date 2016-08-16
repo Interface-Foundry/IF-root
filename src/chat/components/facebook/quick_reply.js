@@ -1,3 +1,5 @@
+"use strict";
+
 var co = require('co');
 var kip = require('kip');
 var queue = require('../queue-mongo');
@@ -21,8 +23,7 @@ var Chatuser = db.Chatuser;
 var next = require("co-next") 
 var fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
-
-var FBResponder = require('./responders').FBResponder;
+var FBResponder = require('./responders');
 
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 
@@ -84,34 +85,16 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (sub_menu.action && sub_menu.action == 'cheaper') {
         console.log(event.message)
-	
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
-		new FBResponder(sender).respond(last_message, sub_menu);
-	    /*	
-                var message = new db.Message({
-                    incoming: true,
-                    thread_id: 'facebook_' + sender.toString(),
-                    resolved: false,
-                    user_id: last_message.user_id,
-                    origin: 'facebook',
-                    text: sub_menu.selected + ' but cheaper',
-                    source: last_message.source,
-                    amazon: last_message.amazon
-                  });
-            // queue it up for processing
-            message.save().then(() => {
-                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-            });
-	    */
-		
+        		 new FBResponder(sender).respond(last_message, sub_menu);
             }
     } else if (sub_menu.action && sub_menu.action == 'similar') {
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
-		new FBResponder(sender).respond(last_message, sub_menu);
+                new FBResponder(sender).respond(last_message, sub_menu);
 		/*
                 var message = new db.Message({
                     incoming: true,
@@ -258,8 +241,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
              if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
                 fb_memory[sender].mode = 'shopping';
              }
-	
-	    new FBResponder(sender).respond(last_message, sub_menu); 
+	         new FBResponder(sender).respond(last_message, sub_menu);
+
             // queue it up for processing
 	    /*
             message.save().then(() => {
