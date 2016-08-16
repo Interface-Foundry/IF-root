@@ -1,4 +1,3 @@
-"use strict"
 
 /*eslint-env es6*/
 var async = require('async');
@@ -94,6 +93,12 @@ function typing(message) {
 }
 
 
+
+//TODO: IF EXECUTE PROPERTY EXISTS, SKIP NLP PARSING
+
+
+
+
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
@@ -180,6 +185,7 @@ queue.topic('incoming').subscribe(incoming => {
           timer.tic('getting nlp response')
 
           winston.info('👽 passing to nlp: ', message.text);
+          
           replies = yield nlp_response(message);
           timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan,

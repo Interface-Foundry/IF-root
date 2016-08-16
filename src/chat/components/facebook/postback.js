@@ -17,12 +17,11 @@ var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var fbtoken;
 var next = require("co-next")
-var fb_utility = require('./fb_utility');
+fb_utility = require('./fb_utility');
+var FBResponder = require('./responders');
 
 var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
-
-
-  try {
+    try {
         var postback = JSON.parse(event.postback.payload);
     } catch(err) {
         console.log('POSTBACK PARSE ERR: ',err)

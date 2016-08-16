@@ -86,7 +86,7 @@ var messageSchema = mongoose.Schema({
         callback_id: String
     },
     original_query: String,
-    menus: [mongoose.Schema.Types.Mixed],
+    control_group: [mongoose.Schema.Types.Mixed],
     nlp: Boolean
 });
 
