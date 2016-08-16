@@ -48,6 +48,7 @@ winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 winston.debug('debug ', modes)
 
+
 // I'm sorry i couldn't understand that
 function default_reply(message) {
   return new db.Message({

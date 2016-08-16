@@ -22,6 +22,8 @@ var next = require("co-next")
 var fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 
+var FBResponder = require('./responders').FBResponder;
+
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 
     var last_message = yield fb_utility.get_last_message(sender);
@@ -82,9 +84,12 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (sub_menu.action && sub_menu.action == 'cheaper') {
         console.log(event.message)
+	
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
+		new FBResponder(sender).respond(last_message, sub_menu);
+	    /*	
                 var message = new db.Message({
                     incoming: true,
                     thread_id: 'facebook_' + sender.toString(),
@@ -99,11 +104,15 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             message.save().then(() => {
                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
             });
-        }
+	    */
+		
+            }
     } else if (sub_menu.action && sub_menu.action == 'similar') {
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
+		new FBResponder(sender).respond(last_message, sub_menu);
+		/*
                 var message = new db.Message({
                     incoming: true,
                     thread_id: 'facebook_' + sender.toString(),
@@ -118,6 +127,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             message.save().then(() => {
                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
             });
+	    */
         }
     }
     //
@@ -139,7 +149,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 var i = message_to_retrieve;
                 var found_query = false;
                 while (i >= 0 && !found_query) {
-                      if (_.get(messages[i], 'execute[0].params.query')) {
+                      if (_.get(messages[i], 'execute[0].params.query')) {			
                         found_query = true;
                         message_to_retrieve = i;
                         var msg = messages[message_to_retrieve];
@@ -232,6 +242,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             else if (last_message) {
                 // var emoji_query = (_.get(JSON.parse(msg.amazon)[0], 'ItemAttributes[0].ProductGroup[0]') && sub_menu.text) ?  (_.get(JSON.parse(msg.amazon)[0], 'ItemAttributes[0].ProductGroup[0]').toLowerCase()  + ' ' + sub_menu.text) : sub_menu.text;
                 // console.log('emoji_query: ', emoji_query)
+
+		/*
                 var message = new db.Message({
                     incoming: true,
                     thread_id: 'facebook_' + sender.toString(),
@@ -242,13 +254,18 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                     source: last_message.source,
                     amazon: last_message.amazon
                 });
+		*/
              if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
                 fb_memory[sender].mode = 'shopping';
              }
+	
+	    new FBResponder(sender).respond(last_message, sub_menu); 
             // queue it up for processing
+	    /*
             message.save().then(() => {
                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
             });
+	    */
           }
         } 
 
