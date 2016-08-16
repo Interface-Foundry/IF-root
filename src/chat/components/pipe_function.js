@@ -11,16 +11,11 @@ var fs = require('fs');
 //set env vars
 var config = require('../../config'); 
 
-var send_to_pipe = function(json, menus) {
-	var key;
-	switch(json.source.origin) {
-		case: 'facebook'
-			key = ['facebook_', sender.toString(), message.ts].join('.');	
-			break;
-		case: 'slack'
-			
-	} 
+var send_to_pipe = function(json, menus, nlp) {
+	 var key =  [json.source.origin, json.source.channel.toString(), json.ts].join('.');	
 	 var message = new db.Message(json);
+	 message.menus = menus;
+	 message.nlp = nlp;
 	 message.save().then(() => {
         queue.publish('incoming', message, key);
      });

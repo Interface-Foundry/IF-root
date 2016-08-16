@@ -1,3 +1,5 @@
+"use strict"
+
 /*eslint-env es6*/
 var async = require('async');
 var request = require('request');

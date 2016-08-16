@@ -85,7 +85,9 @@ var messageSchema = mongoose.Schema({
     slackData: {
         callback_id: String
     },
-    original_query: String
+    original_query: String,
+    menus: [mongoose.Schema.Types.Mixed],
+    nlp: Boolean
 });
 
 module.exports = mongoose.model('Message', messageSchema);
