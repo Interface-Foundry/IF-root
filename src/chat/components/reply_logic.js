@@ -172,7 +172,6 @@ queue.topic('incoming').subscribe(incoming => {
       break;
       //default Kip Mode shopping
       default:
-
         winston.debug('DEFAULT SHOPPING MODE')
         //try for simple reply
         timer.tic('getting simple response')
@@ -181,19 +180,13 @@ queue.topic('incoming').subscribe(incoming => {
         kip.debug('simple replies'.cyan, replies);
 
         //not a simple reply, do NLP
-	if (!replies || replies.length === 0) {
+        if (!replies || replies.length === 0) {
 
           timer.tic('getting nlp response')
 
           winston.info('👽 passing to nlp: ', message.text);
           
-	    if(message.execute){
-		 replies = yield execute(message);
-	    }
-	    else{
-		replies = yield nlp_response(message);
-	    }
-          
+          replies = yield nlp_response(message);
           timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan,
             replies.map(function*(r){
@@ -376,7 +369,7 @@ function* nlp_response(message) {
 }
 
 // do the things
-function* execute(message) {
+function execute(message) {
   kip.debug('exec', message.execute);
   return co(function*() {
     message._timer.tic('getting messages');

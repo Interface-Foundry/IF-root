@@ -17,8 +17,8 @@ class FBResponder {
         };
 
         //abstract out to yaml later
-	// TODO: make sure we're getting button groups from ONE place
-	//
+    	// TODO: make sure we're getting button groups from ONE place
+    	//
         this.postbackToControlGroupMap = {
             'button_search': function(){ return [{type: 'fb_quick_reply', buttons: ['headphones','🐔 🍜','books']}] },
             'emoji_modify': function(){ return [{type: 'fb_quick_reply', buttons: ['🍪','👖','🌹','☕','🔨', '👻','💯']}]  },

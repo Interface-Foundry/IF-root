@@ -68,11 +68,9 @@ var stitchResults = function(data,source,callback) {
               var loopLame = [0,1,2].slice(0, data.amazon.length);//lol
               async.eachSeries(loopLame, function(i, callback) {
 
-                winston.debug('WHAT??????? ? ?? ? ? ? ? ? ? ?? ',i);
 
                 if (data.amazon && data.amazon[i]){
 
-                  winston.debug('BUILD IMAGE^ ^ ^ ^ ^ ^ ^ ^ ');
                   buildImage(data,function(res){
                     callback();
                   },i);
@@ -83,7 +81,6 @@ var stitchResults = function(data,source,callback) {
 
               }, function done(){
                   //fireStitch();
-                  winston.debug('peeell222 ',stitchURLs);
                   callback(stitchURLs);
               });
 
@@ -91,9 +88,6 @@ var stitchResults = function(data,source,callback) {
 
 
           function buildImage(data,callbackG,tracker){ //the tracker is to keep track of which URL is which in parallel process
-
-              winston.debug('OK OK OK ',data);
-
               var origin = data.origin;
 
               if(!origin){
