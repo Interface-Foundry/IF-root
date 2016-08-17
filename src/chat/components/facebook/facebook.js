@@ -209,6 +209,8 @@ app.post('/facebook', next(function*(req, res, next) {
         //REGULAR INCOMING TEXT MESSAGES
         else if (event.message && event.message.text) {
                 text = event.message.text;
+                //lel wtf
+                if (text == 'illii.illelli') return
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
                     text = res;

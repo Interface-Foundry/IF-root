@@ -78,7 +78,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (sub_menu.action && sub_menu.action == 'take_quiz'){
         fb_memory[sender].mode = 'onboarding';
-        fb_utility.send_story(sender, 0, fbtoken);
+        var pointer = postback.story_pointer ? postback.story_pointer : 0;
+        fb_utility.send_story(sender, pointer, fbtoken);
     }
     else if (sub_menu.action && sub_menu.action == 'cheaper') {
         console.log(event.message)

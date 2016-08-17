@@ -29,24 +29,17 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
         var postback = event.postback.payload;
     }
     console.log('\n\n\npostback: ', postback,'\n\n\n');
-    //@ @ @ @ @ @ @ @ @ @ @ @
-    //@ @ @ @ @ ONBOARDING!!!!!!
-    //@ @ @ @ @ @ @ @ @ @ @ @ @
+    //Onboarding:
     if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
-        //send welcome image here
-        //then one more text message intro
-        //then send story
         fb_memory[sender].mode = 'onboarding';
-        //res.send(200);
-        fb_utility.send_image('cart.png',sender,fbtoken, function(){
-            var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
-            //send image here
-            fb_utility.send_card(x,sender, fbtoken);
-            setTimeout(function() {
+        yield fb_utility.send_image('cart.png',sender,fbtoken, null)
+        var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+        //send image here
+        fb_utility.send_card(x,sender, fbtoken);
+        setTimeout(function() {
             var pointer = postback.story_pointer ? postback.story_pointer : 0;
             fb_utility.send_story(sender, pointer, fbtoken)
             }, 1500);
-        });
     }
     //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
     else if (postback.action === 'story.answer') {
@@ -55,7 +48,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (postback.action == 'take_quiz'){
         fb_memory[sender].mode = 'onboarding';
-        var pointer = 0;
+        var pointer = postback.story_pointer ? postback.story_pointer : 0;
         fb_utility.send_story(sender, pointer, fbtoken)
         return;
     }
