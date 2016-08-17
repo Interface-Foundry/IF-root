@@ -8,22 +8,24 @@ var memcache = require('memory-cache');
 var fs = require('fs')
 var mailerTransport = require('../../mail/IF_mail.js');
 
-// //start luminati
-// // (this is a proxy server)
+//start luminati
+// (this is a proxy server)
 // const Luminati = require('luminati-proxy');
 // const proxy = new Luminati({
-//     customer: 'CUSTOMER', // your customer name
-//     password: 'PASSWORD', // your password
+//     customer: 'kipthis', // your customer name
+//     password: 'e49d4ega1696', // your password
 //     zone: 'gen', // zone to use
 //     proxy_count: 5, //minimum number of proxies to use for distributing requests
 // });
 // proxy.on('response', res=>console.log('Response:', res));
 // proxy.listen(24000, '127.0.0.1').then(()=>new Promise((resolve, reject)=>{
+
 //     proxy.request('http://lumtest.com/myip', (err, res)=>{
 //         if (err)
 //             return reject(err);
 //         resolve(res);
 //     });
+
 // })).then(res=>{
 //     console.log('Result:', res.statusCode, res.body);
 // }, err=>{
@@ -103,7 +105,8 @@ module.exports.basic = function basic(url, callback) {
             // 'Upgrade-Insecure-Requests':'1',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+Math.floor(Math.random() * 9) + 1+') AppleWebKit/'+Math.floor(Math.random() * 999) + 111+'.'+Math.floor(Math.random() * 99) + 11+' (KHTML, like Gecko) Chrome/'+Math.floor(Math.random() * 99) + 11+'.0.'+Math.floor(Math.random() * 9999) + 1001+'2623.110 Safari/'+Math.floor(Math.random() * 999) + 111+'.36',
             // 'Referer':url
-        }
+        },
+        timeout:800
       });
 
 
@@ -253,7 +256,10 @@ module.exports.basic = function basic(url, callback) {
         cache.put(url, product);
         callback(null, product);
       });
-    })
+    }).on('error', function(err) {
+      
+    console.log('proxy timeout or err! ',err)
+  })
 }
 
 // get the questions and ansewrs for a specific product url
