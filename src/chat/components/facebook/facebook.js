@@ -244,7 +244,7 @@ app.post('/facebook', next(function*(req, res, next) {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
                 } else {
-                     console.log(JSON.stringify(req.body));
+                    console.log(JSON.stringify(req.body));
                     var message = new db.Message({
                         incoming: true,
                         thread_id: "facebook_" + sender.toString(),

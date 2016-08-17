@@ -18,6 +18,7 @@ var topics = {
 // publishes a message in the given topic. returns a promise
 //
 function publish(topic, data, key) {
+  console.log('topic: ', topic, 'data: ', data, 'key: ',key)
   kip.debug('publishing to topic', topic);
   if (typeof topic !== 'string') {
     throw new Error('pub/sub topic must be a string, ex queue.publish("messages", {})')
