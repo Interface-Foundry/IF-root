@@ -45,8 +45,6 @@ var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
-
-
 var i = 0;
 // Round-robin method for spreading the load between all our clients.
 function get_client() {
@@ -393,8 +391,6 @@ function* enhance_results(results, origin, timer) {
     })
   });
   timer.tic('got prices')
-
-  winston.debug('incomign results!!!! ',results)
 
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
   timer.tic('stitched results');
