@@ -187,7 +187,7 @@ queue.topic('incoming').subscribe(incoming => {
 
           winston.info('👽 passing to nlp: ', message.text);
           
-	    if(message.execute){
+	    if(message.execute && message.execute.length >= 1){
 		 replies = yield execute(message);
 	    }
 	    else{
