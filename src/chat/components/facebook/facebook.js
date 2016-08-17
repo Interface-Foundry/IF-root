@@ -88,7 +88,7 @@ var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var fbtoken;
 var next = require("co-next")
-var fb_utility = require('./fb_utility');
+fb_utility = require('./fb_utility');
 var handle_postback = require('./postback');
 var send_results = require('./send_results');
 var send_text = require('./send_text');

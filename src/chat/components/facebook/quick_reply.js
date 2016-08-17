@@ -1,4 +1,3 @@
-"use strict";
 
 var co = require('co');
 var kip = require('kip');
@@ -21,15 +20,15 @@ var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var next = require("co-next") 
-var fb_utility = require('./fb_utility');
+fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 var FBResponder = require('./responders');
+const EventTypes = require('./event_types');
 
 const DEFAULT_MODE = 'shopping';
 
 
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
-
     var last_message = yield fb_utility.get_last_message(sender);
     var sub_menu = event.message.quick_reply.payload;
     try {
@@ -43,7 +42,11 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     //sub-menu actions
     if (sub_menu.action && sub_menu.action == 'button_search') {
         if (!last_message || last_message == null) {
-             var message = new db.Message({
+            // queue it up for processing
+            if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                fb_memory[sender].mode = 'shopping';
+            }
+            var message = new db.Message({
                 incoming: true,
                 thread_id: 'facebook_' + sender.toString(),
                 resolved: false,
@@ -58,31 +61,17 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                     'user': sender.toString()
                 },
             });
-            // queue it up for processing
-            if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                fb_memory[sender].mode = 'shopping';
-            }
             message.save().then(() => {
                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
             });
         }
         else if (last_message) {
-            var message = new db.Message({
-                incoming: true,
-                thread_id: 'facebook_' + sender.toString(),
-                resolved: false,
-                user_id: last_message.user_id,
-                origin: 'facebook',
-                text: sub_menu.text,
-                source: last_message.source,
-                amazon: last_message.amazon });
             // queue it up for processing
             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
                     fb_memory[sender].mode = 'shopping';
             }
-            message.save().then(() => {
-                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-            });
+	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+            new FBResponder(sender).respond(last_message, sub_menu);
         }
     }
     else if (sub_menu.action && sub_menu.action == 'take_quiz'){
@@ -94,14 +83,16 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
-        		 new FBResponder(sender).respond(last_message, sub_menu);
+		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+        	new FBResponder(sender).respond(last_message, userInputEvent);
             }
     } else if (sub_menu.action && sub_menu.action == 'similar') {
             if (!last_message) {
                 return console.log('No message found');
             } else if (last_message) {
 		// also pass in an indicator of which submenu action was selected
-                new FBResponder(sender).respond(last_message, sub_menu);
+		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+                new FBResponder(sender).respond(last_message, userInputEvent);
 		
 		/*
                 var message = new db.Message({
@@ -249,7 +240,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
              if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
                 fb_memory[sender].mode = 'shopping';
              }
-	         new FBResponder(sender).respond(last_message, sub_menu);
+		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+	        new FBResponder(sender).respond(last_message, userInputEvent);
 
             // queue it up for processing
 	    /*
