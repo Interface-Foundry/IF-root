@@ -25,7 +25,7 @@ var send_cart = require('./send_cart');
 var FBResponder = require('./responders');
 var FBButton = require('./fbcontrols');
 const EventTypes = require('./constants');
-const constants = EventTypes;
+const constants = require('./constants');
 
 const DEFAULT_MODE = constants.SHOPPING;
 

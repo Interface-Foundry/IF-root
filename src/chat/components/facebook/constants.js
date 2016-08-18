@@ -13,6 +13,8 @@ define('MENU_SELECTION', 'menu_select');
 define('MODIFY_ONE', 'modify.one'); 
 define('SHOPPING', 'shopping');
 define('ONBOARDING', 'onboarding');
+define('CHEAPER', 'cheaper');
+define('GENERIC_DETAIL', 'genericDetail');
 
 
 

@@ -2,6 +2,7 @@
 
 var db = require('../../../db');
 var queue = require('../queue-mongo');
+var _ = require('lodash');
 const EventTypes = require('./constants');
 
 
@@ -26,21 +27,26 @@ class FBResponder {
             'sub_menu_color': function(){ return [{type: 'fb_sub_menu_color', buttons: ['Black','White','Blue','Red','Brown', 'Pink']}] }
         }
 
+	const shoppingMode = EventTypes.SHOPPING;
+	const modifyOneAction = EventTypes.MODIFY_ONE;
+	const cheaperInstruction = EventTypes.CHEAPER;
+	const genericDetailInstruction = EventTypes.GENERIC_DETAIL;
 
-	this.actionToParamGenMap = {
-
-	    'modify.one': { 
-		'cheaper': function(userInputControl) { return { 'focus': userInputControl.selector, 
+	this.actionToParamGenMap = {	    
+	    shoppingMode: {
+		modifyOneAction: { 
+		    cheaperInstruction: function(userInputControl) { return { 'focus': userInputControl.selector, 
 								 'param': 'less', 
 								 'type': 'price' 
 							       }
 						      },
 				
-		'genericDetail': function(userInputControl) { return { 'focus': userInputControl.selector,
+		    genericDetailInstruction: function(userInputControl) { return { 'focus': userInputControl.selector,
 							        'param': userInputControl.instruction, 
 							        'type': userInputControl.searchAttributeValue 
 								     } 		
 							    }
+		}
 	    }
 	}
 
@@ -63,11 +69,11 @@ class FBResponder {
         }
 
 	
-	this.getParamsForAction = function(userInput){
-	    kip.debug('>>> userInput is: ' + JSON.stringify(userInput));
-	    var paramGenerator = this.actionToParamGenMap[userInput.mode][userInput.action];
-	    if(paramGenerator === null || paramGenerator === undefined){
-		//return {} // default params? Or throw exception?
+	this.mapActionToParams = function(userInput){
+	    console.log('>>> userInput is: ' + JSON.stringify(userInput));
+
+	    var paramGenerator = _.get(this.actionToParamGenMap, '[userInput.mode][userInput.action][userInput.instruction]', null);
+	    if(paramGenerator === null){		
 		throw '>> Sorry, I could not understand your input.';
 	    }
 	    return paramGenerator(userInput);	    
@@ -100,7 +106,7 @@ class FBResponder {
 		{
 		    mode: userInputEvent.data.mode,
 		    action: userInputEvent.data.action,
-		    params: this.getParamsForAction(userInputEvent.data),
+		    params: this.mapActionToParams(userInputEvent.data),
 		    selected: userInputEvent.data.selected
 		}
 	    ]
