@@ -81,7 +81,7 @@ function JobRunner(opts) {
 JobRunner.prototype.run = function() {
     var me = this;
 
-    kip.debug('looking for document in job queue', me.opts.name);
+    //kip.debug('looking for document in job queue', me.opts.name);
     db.Jobs.findOne({
         name: me.opts.name,
         'flags.complete': false,
@@ -94,7 +94,7 @@ JobRunner.prototype.run = function() {
         }
 
         if (!doc) {
-            kip.debug('no doc found for job', me.opts.name, ' - waiting for', me.opts.currentColdWaitPeriod, 'milliseconds');
+            //kip.debug('no doc found for job', me.opts.name, ' - waiting for', me.opts.currentColdWaitPeriod, 'milliseconds');
             // wait a while and then continue processing
             setTimeout(function() {
                 if (me.opts.currentColdWaitPeriod <= 1000 * 60 * 60) {
@@ -104,10 +104,10 @@ JobRunner.prototype.run = function() {
                 me.run();
             }, me.opts.currentColdWaitPeriod)
         } else {
-            kip.debug('found doc for job', me.opts.name);
-            kip.debug(doc);
+            //kip.debug('found doc for job', me.opts.name);
+            //kip.debug(doc);
 
-            kip.debug('resetting cold wait period to', me.opts.coldWaitPeriod);
+            //kip.debug('resetting cold wait period to', me.opts.coldWaitPeriod);
             me.opts.currentColdWaitPeriod = me.opts.coldWaitPeriod;
 
             doc.timestamps.started = new Date();
