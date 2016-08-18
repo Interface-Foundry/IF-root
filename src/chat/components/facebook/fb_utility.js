@@ -8,16 +8,17 @@ var _ = require('lodash');
 var http = require('http');
 var request = require('request');
 var async = require('async');
-var bodyParser = require('body-parser');
-var busboy = require('connect-busboy');
 var fs = require('fs');
 //set env vars
 var config = require('../../../config');
 var quiz = require('./onboard_quiz');
+var send_cart = require('./send_cart');
 
 /**
- * This function sends a welcome message plus suggested search buttons
- * @param {string} input raw sender id sent from fb
+ * This function sends basic text send messages to messenger
+ * @param {string} bd: body of json object to send to messenger api
+ * @param {string} sendTo: input raw sender id sent from fb
+ * @param {string} fbtoken: facebook send api token
  */
 var send_card = function(bd,sendTo, fbtoken){
     request({
@@ -38,9 +39,13 @@ var send_card = function(bd,sendTo, fbtoken){
     });
 }
 
-
+/**
+ * This function sends a basic welcome to kip message along with 3 suggested search buttons
+ * @param {string} sender: input raw sender id sent from fb
+ * @param {string} fbtoken: facebook send api token
+ * @returns {boolean} true or false whether api send was successful
+ */
 var send_suggestions_card = function(sender, fbtoken) {
-
     var card = {
             "recipient": {
                 "id": sender.toString()
@@ -88,7 +93,6 @@ var send_suggestions_card = function(sender, fbtoken) {
             },
             "notification_type": "NO_PUSH"
         };
-
         request.post({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
@@ -107,14 +111,12 @@ var send_suggestions_card = function(sender, fbtoken) {
                 return true;
             }
         });
-
 }
 
-
-
 /**
- * This function sends a welcome message plus suggested search buttons
- * @param {string} input raw sender id sent from fb
+ * This function sets the persistent menu for fb app
+ * @param {string} sender: input raw sender id sent from fb
+ * @param {string} fbtoken: facebook send api token
  */
 var set_menu = function(sender, fbtoken) {
 
@@ -188,6 +190,11 @@ var set_menu = function(sender, fbtoken) {
 
 }
 
+/**
+ * This function sends a typing indicator to the user
+ * @param {string} sender: input raw sender id sent from fb
+ * @param {string} fbtoken: facebook send api token
+ */
 var send_typing_indicator = function(sender, fbtoken) {
     var typing_indicator = {
           "recipient":{
@@ -206,6 +213,12 @@ var send_typing_indicator = function(sender, fbtoken) {
         }, function() { })
 }
 
+/**
+ * This function retrieves the last message related to user by thread_id from mongo
+ * @param {string} sender: input raw sender id sent from fb
+ * @returns {object} latest message object from user
+ * @returns {boolean} returns false if no message received
+ */
 var get_last_message = function*(sender) {
     var result = yield db.Messages.find({
         thread_id: 'facebook_' + sender.toString()
@@ -214,24 +227,23 @@ var get_last_message = function*(sender) {
     else return false
 }
 
-
-var send_story = function (userid_z,recipient,pointer, sender, fbtoken){
-    console.log('SENDING STORY ',userid_z)
-
+/**
+ * This function sends the appropriate question from the pre-set quiz based on a pointer
+ * @param {string} sender: input raw sender id sent from fb
+ * @param {number} pointer: which question the user is on
+ * @param {string} fbtoken: facebook send api token
+ */
+var send_story = function (sender,pointer,fbtoken){
     var storySender;
         //start from beginning of we dont have a pointer
         if(!pointer){
             pointer = 0;
         }
-
-        console.log('@ @ @ @ @ @ story pointer @ @ @ @ @  ',pointer)
         //if(pointer || pointer == 0){
         var storySender = quiz[pointer];
-        console.log('WHAT IS IT???? ',JSON.stringify(storySender))
         storySender.recipient = {
-            id: recipient
+            id: sender
         };
-        console.log('story SENDER FINAL ',storySender)
     //send res to user
     request.post({
         url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -250,22 +262,20 @@ var send_story = function (userid_z,recipient,pointer, sender, fbtoken){
 }
 
 
-//recipient: id
-//sender: id
-//pointer: which sequence # we're going to
-//select: which answer did user pick
-var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory){
-
-  console.log('process_Story FIRED!!!  stuff: ')
-  console.log(recipient,sender,pointer,select,fbtoken,fb_memory )
-
+/**
+ * This function checks if user is stored in mongo, then starts or ends the quiz as necessary
+ * @param {string} sender: input raw sender id sent from fb
+ * @param {number} pointer: which question the user is on
+ * @param {string} fbtoken: facebook send api token
+ */
+var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
     //SAVE THIS quiz response TO USERS PERSONA as a session
     var query = {id: 'facebook_'+sender},
         update = { origin:'facebook' },
         options = { upsert: true, new: true, setDefaultsOnInsert: true };
     Chatuser.findOneAndUpdate(query, update, options, function(err, user) {
         var obj = {
-            recipient: recipient,
+            recipient: sender,
             sender: sender,
             ts: Date.now(),
             story: 'intro quiz',
@@ -278,61 +288,45 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
             }
         });
     });
-    //////////
-
-
     //check if we should end story. will stop story after length of quiz question array
     if(pointer == quiz.length - 1){
-
-        console.log('FINAL RESULTS !!! ! ! ! ! ! ! ',fb_memory[sender].quiz)
-
-        //console.log('MAXY KEY ',_.max(Object.keys(fb_memory[recipient].quiz), function (o) { return obj[o]; }))
-
         var item;
-
         if(fb_memory[sender].quiz >= 0 && fb_memory[sender].quiz <= 3){
             item = 'Flying Sailboat'
-            send_image('sailboat.png',sender,fbtoken, function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+            console.log('but i ask again 1')
+            yield send_image('sailboat.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         else if(fb_memory[sender].quiz >= 4 && fb_memory[sender].quiz <= 7){
             item = 'Lucky Goldfish'
-            send_image('goldfish.png',sender,fbtoken, function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+                        console.log('but i ask again 2')
+            yield send_image('goldfish.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         else if(fb_memory[sender].quiz >= 8 && fb_memory[sender].quiz <= 9){
             item = 'Snowglobe Charm'
-            send_image('snowglobe.png',sender,fbtoken,function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+                        console.log('but i ask again 3')
+            yield send_image('snowglobe.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         else if(fb_memory[sender].quiz >= 10 && fb_memory[sender].quiz <= 12){
             item = 'Rainbow Pearl'
-            send_image('pearl.png',sender,function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+            console.log('but i ask again 4')
+            yield send_image('pearl.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }else {
             item = 'Lucky Goldfish'
-            send_image('goldfish.png',sender,function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+            console.log('but i ask again 5')
+            yield send_image('goldfish.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
-
         fb_memory[sender].quiz = 1;
-
-        console.log('COLLECTABLE/////???/ ',item)
-
         fb_memory[sender].mode = 'shopping';
-
-
-
         var sendObj;
         switch(item){
             case 'Flying Sailboat':
@@ -422,7 +416,7 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -468,7 +462,7 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -514,13 +508,12 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
             break;
         }
-
         setTimeout(function() {
             request.post({
                 url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -537,7 +530,6 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
                 if (err) console.error('post err ', err);
             })
         }, 2000);
-
         //SAVE ITEM TO USER PROFILE
         var query = {id: 'facebook_'+sender},
             update = { origin:'facebook' },
@@ -558,47 +550,44 @@ var process_story = function*(recipient,sender,pointer,select,fbtoken,fb_memory)
         //CHOOSE PRESENT, display search buttons
     }else {
         pointer++;
-
         //this should really be in a DB asap @@@@@-----@@@@@
         if(!fb_memory[sender].quiz){
             fb_memory[sender].quiz = 1;
         }
-
-        console.log('SELECTOR ',select)
-        // console.log('SELECTED ',fb_memory[recipient].quiz[select])
-
         if(fb_memory[sender].quiz || fb_memory[sender].quiz == 0){
             fb_memory[sender].quiz = fb_memory[sender].quiz + select;
         }else {
             console.log('error: key not found for persona val')
         }
-
-        console.log('@!@!@!@!@!@!@!@!@!@!@!@!@!@!@ ',fb_memory[sender].quiz);
-
-        console.log('ADDING POINTER ',pointer)
-        send_story(recipient,sender,pointer, sender, fbtoken)
+        send_story(sender,pointer,fbtoken)
     }
-
 }
 
 
-
-
-//for higher quality images, upload them directly to FB
-//img: local image url
-var send_image = function (img,sender,fbtoken,callback){
-    var r = request.post('https://graph.facebook.com/v2.6/me/messages?access_token='+fbtoken, function optionalCallback (err, httpResponse, body) {
-      if (err) {
-        callback();
-        return console.error('upload failed:', err);
-      }
-      console.log('Upload successful!');
-      callback();
-    })
+/**
+ * This function sends an image to messenger
+ * @param {string} img: name of file
+ * @param {string} sender: input raw sender id sent from fb
+ * @param {string} fbtoken: facebook send api token
+ * @param {object} callback: callback function
+ */
+var send_image = function*(img,sender,fbtoken,callback){ 
+    if (!callback || callback == undefined || callback == null) {
+        callback = function(){}
+    }
+    console.log('\n\n\n i mean bro ', img, sender, fbtoken, callback, '\n\n\n');
+    var r = request.post({url: 'https://graph.facebook.com/v2.6/me/messages?access_token='+fbtoken, formData: form},function (err, httpResponse, body) {
+          if (err) {
+            kip.debug('upload failed:', err);
+          }
+          console.log('Upload successful!  Server responded with:', body);
+          callback();
+        });
     var form = r.form()
     form.append('recipient', '{"id":"'+sender.toString()+'"}')
     form.append('message', '{"attachment":{"type":"image", "payload":{}}}')
     form.append('filedata', fs.createReadStream(__dirname +'/assets/'+img))
+    // return this;
 }
 
 

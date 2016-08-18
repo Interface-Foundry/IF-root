@@ -122,7 +122,7 @@ class PicStitch:
             self.origin = 'slack'
             logging.critical('NO_ORIGIN_ASSUMING_SLACK')
 
-        if self.origin is 'skype':
+        if self.origin in ['skype']:
             logging.debug('changing skype to facebook tmp')
             self.origin = 'facebook'
 

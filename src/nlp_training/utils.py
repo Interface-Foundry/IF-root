@@ -26,7 +26,7 @@ def gcloud_upload(tk='tokenizer',
         - tokenizer:    tokenizer.pkl
     '''
     client = storage.Client()
-    bucket = client.get_bucket('saved-models-bucket')
+    bucket = client.get_bucket('kip-nlp-bucket')
     json_blob = bucket.blob(model + '.json')
     conf_blob = bucket.blob(conf + '.json')
     model_blob = bucket.blob(model + '.hdf5')
