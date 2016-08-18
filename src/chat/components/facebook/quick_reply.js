@@ -82,37 +82,36 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         fb_memory[sender].mode = constants.ONBOARDING;
         fb_utility.send_story(sender, 0, fbtoken);
     }
-    else if (postback.action && postback.action == 'cheaper') {
-        console.log(event.message)
+    else if (postback.instruction && postback.instruction == 'cheaper') {
+        console.log('+++ ' + event.message)
         if (!last_message) {
             return console.log('No message found');
         } 
-	else if (last_message) {
-	    //sub_menu.action = constants.MODIFY_ONE
-	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+	else if (last_message) {	    
+	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
             new FBResponder(sender).respond(last_message, userInputEvent);
         }
     } 
-    else if (sub_menu.action && sub_menu.action == 'similar') {
+    else if (postback.action && postback.action == 'similar') {
         if (!last_message) {
             return console.log('No message found');
         } 
 	else if (last_message) {
 	    // also pass in an indicator of which submenu action was selected
-	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
             new FBResponder(sender).respond(last_message, userInputEvent);			
         }
     }
     //
     //  --If user hits back button..--
     //
-    else if (sub_menu.action && sub_menu.action == 'back') {
+    else if (postback.action && postback.action == 'back') {
         var messages = yield db.Messages.find({
             thread_id: 'facebook_' + sender.toString()
         }).sort('-ts').exec();
 
         //*This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search.
-        var message_to_retrieve = sub_menu.type === 'last_search' ? (messages[3] ? 3 : 2) : (messages[2] ? 2 : (messages[1] ? 1 : 0));
+        var message_to_retrieve = postback.type === 'last_search' ? (messages[3] ? 3 : 2) : (messages[2] ? 2 : (messages[1] ? 1 : 0));
         if (messages.length == 0) {
             return console.log('No message found');
         }
@@ -211,7 +210,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 }
             }
         } 
-        else if (sub_menu.action === 'modify.one') {
+        else if (postback.action === 'modify.one') {
             if (!last_message) {
                     return console.log('No message found');
             } 
@@ -219,7 +218,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 		if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
                     fb_memory[sender].mode = 'shopping';
 		}
-		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
 	        new FBResponder(sender).respond(last_message, userInputEvent);           
           }
         } 
@@ -231,7 +230,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 
         // black, white, blue, red, brown, pink
 
-        switch(sub_menu.action) {
+        switch(postback.action) {
             case "sub_menu_color":
 
             //Switching mode to modify
