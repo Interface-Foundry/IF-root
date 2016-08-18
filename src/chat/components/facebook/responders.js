@@ -2,7 +2,7 @@
 
 var db = require('../../../db');
 var queue = require('../queue-mongo');
-const EventTypes = require('./event_types');
+const EventTypes = require('./constants');
 
 
 class FBResponder {
@@ -10,10 +10,10 @@ class FBResponder {
         this.responderType = 'facebook';
         this.sender = sender;
         this.actionTextMap = {
-            'cheaper': function(userInput){ return userInput.selected + ' but cheaper'; },
-            'similar': function(userInput){ return 'more like ' + userInput.selected; },
-            'emoji_modify': function(userInput){ return userInput.text },
-            'button_search': function(userInput){ return userInput.text }
+            'cheaper': function(userInputControl){ return userInputControl.selected + ' but cheaper'; },
+            'similar': function(userInputControl){ return 'more like ' + userInputControl.selected; },
+            'emoji_modify': function(userInputControl){ return userInputControl.text },
+            'button_search': function(userInputControl){ return userInputControl.text }
         };
 
         //abstract out to yaml later
@@ -26,21 +26,54 @@ class FBResponder {
             'sub_menu_color': function(){ return [{type: 'fb_sub_menu_color', buttons: ['Black','White','Blue','Red','Brown', 'Pink']}] }
         }
 
+
+	this.actionToParamGenMap = {
+
+	    'modify.one': { 
+		'cheaper': function(userInputControl) { return { 'focus': userInputControl.selector, 
+								 'param': 'less', 
+								 'type': 'price' 
+							       }
+						      },
+				
+		'genericDetail': function(userInputControl) { return { 'focus': userInputControl.selector,
+							        'param': userInputControl.instruction, 
+							        'type': userInputControl.searchAttributeValue 
+								     } 		
+							    }
+	    }
+	}
+
+
         this.mapActionToMenuText = function(userInput){
-        var menuConverter = this.menuTextMap[userInput.action];
+        var menuConverter = this.postbackToControlGroupMap[userInput.action];
             if(menuConverter === null || menuConverter === undefined){
                 return [{type: 'default', buttons: ['Cheaper','Similar','Color','Emoji']}]; 
             }
             return menuConverter();
         }
 
+
         this.mapActionToText = function(userInput){
-        var converter = this.actionTextMap[userInput.action];
+            var converter = this.actionTextMap[userInput.action];
             if(converter === null || converter === undefined){
                 return '...'; // whatever the default is 
             }
             return converter(userInput);
         }
+
+	
+	this.getParamsForAction = function(userInput){
+	    kip.debug('>>> userInput is: ' + JSON.stringify(userInput));
+	    var paramGenerator = this.actionToParamGenMap[userInput.mode][userInput.action];
+	    if(paramGenerator === null || paramGenerator === undefined){
+		//return {} // default params? Or throw exception?
+		throw '>> Sorry, I could not understand your input.';
+	    }
+	    return paramGenerator(userInput);	    
+	}
+	
+
         return this;
     }
 
@@ -67,7 +100,7 @@ class FBResponder {
 		{
 		    mode: userInputEvent.data.mode,
 		    action: userInputEvent.data.action,
-		    params: {},
+		    params: this.getParamsForAction(userInputEvent.data),
 		    selected: userInputEvent.data.selected
 		}
 	    ]

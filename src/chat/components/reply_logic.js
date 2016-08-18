@@ -192,6 +192,7 @@ queue.topic('incoming').subscribe(incoming => {
 	    }
 	    else{
 		replies = yield nlp_response(message);
+		kip.debug('+++ NLPRESPONSE ' + replies);
 	    }
           
           timer.tic('got nlp response')

@@ -23,24 +23,28 @@ var next = require("co-next")
 fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 var FBResponder = require('./responders');
-const EventTypes = require('./event_types');
+var FBButton = require('./fbcontrols');
+const EventTypes = require('./constants');
+const constants = EventTypes;
 
-const DEFAULT_MODE = 'shopping';
+const DEFAULT_MODE = constants.SHOPPING;
 
 
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     var last_message = yield fb_utility.get_last_message(sender);
-    var sub_menu = event.message.quick_reply.payload;
+    var postback = event.message.quick_reply.payload;
+
     try {
-        sub_menu = JSON.parse(sub_menu);
-    } catch(err) {
+        postback = JSON.parse(postback);
+    } 
+    catch(err) {
         console.log(err)
     }
 
-    sub_menu['mode'] = DEFAULT_MODE;
+    postback['mode'] = DEFAULT_MODE;
 
     //sub-menu actions
-    if (sub_menu.action && sub_menu.action == 'button_search') {
+    if (postback.action && postback.action == 'button_search') {
         if (!last_message || last_message == null) {
             // queue it up for processing
             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
@@ -52,7 +56,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 resolved: false,
                 user_id: "facebook_" + sender.toString(),
                 origin: 'facebook',
-                text: sub_menu.text,
+                text: postback.text,
                 source: {
                     'origin': 'facebook',
                     'channel': sender.toString(),
@@ -68,48 +72,35 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         else if (last_message) {
             // queue it up for processing
             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                    fb_memory[sender].mode = 'shopping';
+                    fb_memory[sender].mode = constants.SHOPPING;
             }
-	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
-            new FBResponder(sender).respond(last_message, sub_menu);
+	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
+            new FBResponder(sender).respond(last_message, postback);
         }
     }
-    else if (sub_menu.action && sub_menu.action == 'take_quiz'){
-        fb_memory[sender].mode = 'onboarding';
+    else if (postback.action && postback.action == 'take_quiz'){
+        fb_memory[sender].mode = constants.ONBOARDING;
         fb_utility.send_story(sender, 0, fbtoken);
     }
-    else if (sub_menu.action && sub_menu.action == 'cheaper') {
+    else if (postback.action && postback.action == 'cheaper') {
         console.log(event.message)
-            if (!last_message) {
-                return console.log('No message found');
-            } else if (last_message) {
-		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
-        	new FBResponder(sender).respond(last_message, userInputEvent);
-            }
-    } else if (sub_menu.action && sub_menu.action == 'similar') {
-            if (!last_message) {
-                return console.log('No message found');
-            } else if (last_message) {
-		// also pass in an indicator of which submenu action was selected
-		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
-                new FBResponder(sender).respond(last_message, userInputEvent);
-		
-		/*
-                var message = new db.Message({
-                    incoming: true,
-                    thread_id: 'facebook_' + sender.toString(),
-                    resolved: false,
-                    user_id: last_message.user_id,
-                    origin: 'facebook',
-                    text: 'more like ' + sub_menu.selected,
-                    source: last_message.source,
-                    amazon: last_message.amazon
-                  });
-            // queue it up for processing
-            message.save().then(() => {
-                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-            });
-	    */
+        if (!last_message) {
+            return console.log('No message found');
+        } 
+	else if (last_message) {
+	    //sub_menu.action = constants.MODIFY_ONE
+	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+            new FBResponder(sender).respond(last_message, userInputEvent);
+        }
+    } 
+    else if (sub_menu.action && sub_menu.action == 'similar') {
+        if (!last_message) {
+            return console.log('No message found');
+        } 
+	else if (last_message) {
+	    // also pass in an indicator of which submenu action was selected
+	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
+            new FBResponder(sender).respond(last_message, userInputEvent);			
         }
     }
     //
@@ -119,51 +110,53 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         var messages = yield db.Messages.find({
             thread_id: 'facebook_' + sender.toString()
         }).sort('-ts').exec();
+
         //*This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search.
         var message_to_retrieve = sub_menu.type === 'last_search' ? (messages[3] ? 3 : 2) : (messages[2] ? 2 : (messages[1] ? 1 : 0));
         if (messages.length == 0) {
             return console.log('No message found');
         }
-             if (messages[message_to_retrieve] && _.get(messages[message_to_retrieve], 'execute[0].params.query')) {
-                 backCache = backCache + 1;
-                message_to_retrieve = message_to_retrieve + backCache;
-                //This will loop through older messages until it finds a query.
-                var i = message_to_retrieve;
-                var found_query = false;
-                while (i >= 0 && !found_query) {
-                      if (_.get(messages[i], 'execute[0].params.query')) {			
-                        found_query = true;
-                        message_to_retrieve = i;
-                        var msg = messages[message_to_retrieve];
-                        var message = new db.Message({
-                            incoming: true,
-                            thread_id: 'facebook_' + sender.toString(),
-                            resolved: false,
-                            user_id: msg.user_id,
-                            origin: 'facebook',
-                            text:  _.get(messages[i], 'execute[0].params.query'),
-                            source: msg.source,
-                            amazon: msg.amazon
-                          });
-                        message.save().then(() => {
-                            queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                        });
-                    }
-                    i--;
+        if (messages[message_to_retrieve] && _.get(messages[message_to_retrieve], 'execute[0].params.query')) {
+            backCache = backCache + 1;
+            message_to_retrieve = message_to_retrieve + backCache;
+            //This will loop through older messages until it finds a query.
+            var i = message_to_retrieve;
+            var found_query = false;
+            while (i >= 0 && !found_query) {
+                if (_.get(messages[i], 'execute[0].params.query')) {			
+                    found_query = true;
+                    message_to_retrieve = i;
+                    var msg = messages[message_to_retrieve];
+                    var message = new db.Message({
+                        incoming: true,
+                        thread_id: 'facebook_' + sender.toString(),
+                        resolved: false,
+                        user_id: msg.user_id,
+                        origin: 'facebook',
+                        text:  _.get(messages[i], 'execute[0].params.query'),
+                        source: msg.source,
+                        amazon: msg.amazon
+                    });
+                    message.save().then(() => {
+                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
+                    });
                 }
+                i--;
+            }
 
-                if (!found_query) {
-                     var main_sub_menu = {
-                        "quick_replies":[
-                              {
-                                "content_type":"text",
-                                "title":"Cheaper",
-                                "payload": JSON.stringify({
-                                        action: "cheaper",
-                                        selected: '1'
-                                    })
-                              },
-                              {
+            if (!found_query) {
+                var main_sub_menu = {
+                    "quick_replies":[
+                        /*{
+                          "content_type":"text",
+                          "title":"Cheaper",
+                          "payload": JSON.stringify({
+                          action: "cheaper",
+                          selected: '1'
+                          })
+                          }*/
+			new FBButton('Cheaper', 'modify.one', 'cheaper', sender, 'cheaper').render(),
+                        {
                                 "content_type":"text",
                                 "title":"Similar",
                                 "payload": JSON.stringify({
@@ -217,38 +210,17 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                         });
                 }
             }
-        } else if (sub_menu.action === 'emoji_modify') {
+        } 
+        else if (sub_menu.action === 'modify.one') {
             if (!last_message) {
                     return console.log('No message found');
             } 
-            else if (last_message) {
-                // var emoji_query = (_.get(JSON.parse(msg.amazon)[0], 'ItemAttributes[0].ProductGroup[0]') && sub_menu.text) ?  (_.get(JSON.parse(msg.amazon)[0], 'ItemAttributes[0].ProductGroup[0]').toLowerCase()  + ' ' + sub_menu.text) : sub_menu.text;
-                // console.log('emoji_query: ', emoji_query)
-
-		/*
-                var message = new db.Message({
-                    incoming: true,
-                    thread_id: 'facebook_' + sender.toString(),
-                    resolved: false,
-                    user_id: last_message.user_id,
-                    origin: 'facebook',
-                    text: sub_menu.text,
-                    source: last_message.source,
-                    amazon: last_message.amazon
-                });
-		*/
-             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                fb_memory[sender].mode = 'shopping';
-             }
+            else if (last_message) {                
+		if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
+                    fb_memory[sender].mode = 'shopping';
+		}
 		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': sub_menu }
-	        new FBResponder(sender).respond(last_message, userInputEvent);
-
-            // queue it up for processing
-	    /*
-            message.save().then(() => {
-                queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-            });
-	    */
+	        new FBResponder(sender).respond(last_message, userInputEvent);           
           }
         } 
 
@@ -372,6 +344,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 },
                 "message": {
                   "quick_replies":[
+		      /*
                      {
                         "content_type":"text",
                         "title":"🍪",
@@ -380,7 +353,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                                 action: "emoji_modify",
                                 text: '1 but cookie'
                             })
-                      },
+                      }*/
+		      new FBButton('🍪', 'modify.one', 'genericDetail', sender, 'cookie').render(),
                        {
                         "content_type":"text",
                         "title":"👖",
