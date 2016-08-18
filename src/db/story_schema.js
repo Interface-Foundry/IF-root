@@ -4,7 +4,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var storySchema = mongoose.Schema({
+var storyAnswers = mongoose.Schema({
     id: {
       type: String,
       unique: true,
@@ -31,3 +31,5 @@ var storySchema = mongoose.Schema({
     	channel_id: String
     }
 });
+
+module.exports = mongoose.model('storyAnswers', storyAnswers);

@@ -1,33 +1,39 @@
 //Text file with Survey Questions
 
 1. We value your feedback and would like to get your input on how to make Kip better! Do you have time for a quick survey?
-	YES (2)
-	NO (Thanks anyway! If you change your mind X)
+	YES 
+	NO (Thanks anyway! If you change your mind, please send any feedback to hello@kipthis.com)
 
-2. Is Kip essential to you? 
-	A. No, I don't need Kip (3)
-	B. Meh, Doesn't Matter (3)
-	C. Yes, I need Kip (4)
+1. How would you feel if you could no longer use Kip? 
+	A. Very disappointed 
+	B. Somewhat disappointed 
+	C. Not disappointed 
+	D. No longer using Kip
 
-3.1 What services do you usually prefer/use to perform group shopping? 
+2. What makes shopping on Kip the most difficult for you? 
+	A. Unrelated search results
+	B. Slow search results
+	C. Wrong price point
+	D. Lack of integrations
+	E. Other
+
+3. Would you like early access to new features as a Beta tester? 
+	A. Yes 
+	B. No 
+-----------------------------------------------------------------
+3.1 What other services do you use to perform group shopping? 
 	A. Amazon
 	B. Retailers (Walmart, Target, etc)
 	C. Delivery.com 
 	D. Jet.com
 	E. Other
 
-3.2 How do you typically use Kip? 
-	A. Personal Shopping
-	B. Business Group Shopping -> 3.3
-	C. Group Shopping (Family, Friends) -> 3.3
-	D. Other
-
-3.3 How many other people do you typically shop for? 
-A. 1-5 
-B. 5-10
-C. 10-25
-D. 25-50 
-E. 50+ 
+4. What features would you want added to Kip? 
+A. 
+B. Buttons for price range 
+C.
+D. 
+E. Other
 
 3.3 What information do you mmost 
 
@@ -35,4 +41,9 @@ E. 50+
 
 5. What would make Kip more helpful to you? 
 	A. Food Delivery
-	B. 
+
+3.2 How do you typically use Kip? 
+	A. Personal Shopping
+	B. Business Group Shopping -> 3.3
+	C. Group Shopping (Family, Friends) -> 3.3
+	D. Other
