@@ -178,6 +178,7 @@ app.post('/facebook', next(function*(req, res, next) {
                 story_pointer: 0
             };
         }
+        kip.debug('\n\n\n🤖 fb_memory is : ', fb_memory[sender],'\n\n\n');
         //Process onboarding quiz
         if(event.message && event.message.text && _.get(fb_memory, '[sender].mode' == 'onboarding')) {
             //Exit quiz if user doesnt want to take it
