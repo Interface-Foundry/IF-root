@@ -6,7 +6,8 @@ var async = require('async');
 var requestPromise = require('request-promise');
 var mongoose = require('mongoose');
 var co = require('co');
-var job = require('../JobQueue/job');
+var job = require('./job');
+var db = require('./job_schema.js')
 
 //CONNECTION POOLING HERE
 var proxyPool = []; //current good sessions
@@ -15,7 +16,7 @@ var user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like G
 var luminatiReady = false;
 
 // setup mongodb
-mongoose.connect('mongodb://localhost/amazonData');
+mongoose.connect('mongodb://localhost/amazonData2');
 
 // co(function * () {
 	var productSchema = mongoose.Schema( {
@@ -24,15 +25,19 @@ mongoose.connect('mongodb://localhost/amazonData');
 		topLevelURL: String,
 		category: [String],
 		alsoBought: [String],
-		alsoViewed: [String]
+		alsoViewed: [String],
 
-		// ****************************************
-		// Ignore these 2 other features for now
-		// ****************************************
-		// frequentlyBought: [String]
-		// boughtAfterView: [String]
+		frequentlyBought: [String],
+		boughtAfterView: [String],
+
+		textParts: {
+			featureBulletText: String,
+			descriptionText: String,
+			productDetails: String,
+			aplusProductDescription: String
+		},
+		reviews: [String]
 	});
-
 
 	var Product = mongoose.model('Product', productSchema);
 
@@ -57,7 +62,9 @@ mongoose.connect('mongodb://localhost/amazonData');
 		}
 	});
 
-	var rootCategoryPage = 'https://www.amazon.com/electronics-store/b/ref=topnav_storetab_e?ie=UTF8&node=172282';
+    // var rootCategoryPage = 'https://www.amazon.com/books-used-books-textbooks/b/ref=sd_allcat_bo?ie=UTF8&node=283155';
+	// var rootCategoryPage = 'https://www.amazon.com/electronics-store/b/ref=topnav_storetab_e?ie=UTF8&node=172282';
+	var rootCategoryPage = 'https://www.amazon.com/s/ref=lp_2622272011_nr_n_0?fst=as%3Aoff&rh=n%3A468642%2Cn%3A%2111846801%2Cn%3A2622269011%2Cn%3A2622272011%2Cn%3A3074359011&bbn=2622272011&ie=UTF8&qid=1469480386&rnid=2622272011';
 	// var url = 'https://www.amazon.com/dp/B0033RVDVC/ref=nav_timeline_asin?_encoding=UTF8&psc=1';
 	
 	//*********************************
@@ -70,26 +77,39 @@ mongoose.connect('mongodb://localhost/amazonData');
 // });
 
 var crawler = job('crawler-job', function(data, done) {
-	scrapePage('https://www.amazon.com/dp/' + data) //+ '/ref=nav_timeline_asin?_encoding=UTF8&psc=1') 
-	setTimeout(function () { done(null, 'woooow') }, 500)
+	console.log('Searching ASIN');
+	scrapePage(data) //+ '/ref=nav_timeline_asin?_encoding=UTF8&psc=1') 
+	setTimeout(function () { done(null, 'woooow') }, 1000)
 })
 
 var categoryCrawler = job('categoryCrawler-job', function(data, done) {
+	console.log('Searching category');
 	findSubcategories(data) 
-	setTimeout(function () { done(null, 'woooow') }, 1000)
+	setTimeout(function () { done(null, 'woooow') }, 50000)
 })
 
 var readPageCrawler = job('readPageCrawler-job', function(data, done) {
+	console.log('Searching results');
 	readPage(data);
-	setTimeout(function () { done(null, 'woooow') }, 1000)
+	setTimeout(function () { done(null, 'woooow') }, 50000)
 })
 
 function readPage(url)
 {	
+    if (url.indexOf('product') > -1)
+    {
+        crawler(url);
+        return;
+    }
+
 	proxiedRequest.get(url, function(err, response, body) {
 		try {
-			if (response.statusCode != 200) 
+            co(function * () {
+            
+			if (response.statusCode != 200) {
 				setTimeout(function () { readPageCrawler(url); }, 1000);
+                return;
+            }
 
 			var $ = cheerio.load(body);
 			$('html').find('script').remove();
@@ -100,27 +120,40 @@ function readPage(url)
 				var asin = $(this).attr('data-asin');
 				var url = 'https://www.amazon.com/dp/' + asin;
 				// console.log(url);
-				Product.count( {asin: asin}, function (err, count) {
-					if (count === 0)
-						scrapePage(url);		
+				db.count( {inputData: 'https://www.amazon.com/dp/' + elem}, function (err, cnt) {
+					Product.count( {asin: asin}, function (err, count) {
+						if (count === 0 && cnt === 0)
+							setTimeout(function () { crawler(url); }, 50) 
+					});
 				});
 			});
 
 			if ($('a#pagnNextLink').attr('href'))
 				readPageCrawler('https://www.amazon.com' + $('a#pagnNextLink').attr('href'));
+            delete $
+            });
 		} catch(err) {
-			setTimeout(function () { readPageCrawler(url); }, 1000);
+			setTimeout(function () { readPageCrawler(url); }, 100);
 		}
 	});
-	
 }
 
 function findSubcategories(url)
 {
+    if (url.indexOf('product') > -1)
+    {
+        crawler(url);
+        return;
+    }
+    if (url.indexOf('www.amazon.comhttps') > -1)
+        return;
+
 	proxiedRequest.get(url, function(err, response, body) {
 		try {
-			if (response.statusCode != 200) 
-				setTimeout(function () { findSubcategories(url); }, 1000);
+			if (response.statusCode != 200) { 
+				setTimeout(function () { categoryCrawler(url); }, 1000);
+                return;
+            }
 
 			var $ = cheerio.load(body);
 			$('html').find('script').remove();
@@ -132,10 +165,12 @@ function findSubcategories(url)
 				{
 					if ($(this).parent().attr('href'))
 					{
-						var child = 'https://www.amazon.com' + $(this).parent().attr('href');
-						hasChildren = true;
-
-						setTimeout(function() { categoryCrawler(child); }, 1000);	
+                        if (child.indexOf('amazon.com') === -1)
+                        {
+						    var child = 'https://www.amazon.com' + $(this).parent().attr('href');
+						    hasChildren = true;
+						    setTimeout(function() { categoryCrawler(child); }, 1000);
+                        }
 					}
 				}
 			});
@@ -143,12 +178,14 @@ function findSubcategories(url)
 			$('div[class="left_nav browseBox"] ul li a').each(function(i, elem) {
 				var child = 'https://www.amazon.com' + $(this).attr('href');
 				hasChildren = true;
-
+                
 				setTimeout(function () { categoryCrawler(child); }, 1000);
 			});
 
-			if (!hasChildren) 
+			if (!hasChildren) { 
 				readPageCrawler(url);
+                return;
+            }
 
 		} catch(err) {
 			setTimeout(function () { categoryCrawler(url) }, 5000);
@@ -159,11 +196,15 @@ function findSubcategories(url)
 function checkASINs(asins)
 {
 	async.forEach(asins, function (elem, callback) {
-		Product.count( {asin: elem}, function (err, count) {
-			if (count === 0) 
-				setTimeout(function () { crawler(elem); }, 1250);
-				// ^ enqueue asins
-		});
+        db.count( {inputData: 'https://www.amazon.com/dp/' + elem}, function (err, cnt) {
+		    Product.count( {asin: elem}, function (err, count) {
+			    if (count === 0 && cnt === 0) {
+                    var url = 'https://www.amazon.com/dp/' + elem
+				    setTimeout(function () { crawler(url); }, 100);
+				    // ^ enqueue asins
+                }
+		    });
+        });
 	});
 }
 
@@ -180,7 +221,8 @@ function scrapePage(url)
 			// Try again?
 			if (response.statusCode != 200) {
 				console.log(':(');
-				setTimeout(function () { scrapePage(url); }, 1000);
+				setTimeout(function () { crawler(url); }, 1000);
+                return;
 			}
 
 			// Cheerio
@@ -234,16 +276,39 @@ function scrapePage(url)
 				alsoViewedASINs = scrapeData(alsoViewedIDFeature);
 
 			// Frequently Bought Feature
+			var frequentlyBought = [];
 			$('#sims-fbt-container div img').each(function(i, elem) {
 				frequentlyBought.push($(this).attr('alt'));
 			});
 			// the first item is the product itself
 			frequentlyBought.shift();
-
+			
 			// What Other Customers Bought after Viewing this Item
+			var boughtAfterView = [];
 			$('#view_to_purchase-sims-feature img').each(function(i, elem) {
 				boughtAfterView.push($(this).attr('alt'));
 			});
+
+			//
+			// MORE FEATURES
+			//
+			
+			//Get reviews
+			var reviews = [];
+			$('div#revMHRL.a-section>div.a-section.celwidget>div.a-row.a-spacing-small>div.a-section').each(function(i, elem) {
+				if ($(this))
+					reviews.push($(this).text().replace(/<br>([^<br>]*)<\/br>/g, '' ).replace('\n', ' '))
+			})
+			// var reviewCount = $('#acrCustomerReviewText').text().trim();
+			// var rating = $('#acrPopover').text().trim();
+
+			// Text Parts
+			var textParts = {
+				featureBulletText: $('#featurebullets_feature_div').text().replace(/\s+/g, ' '),
+				descriptionText: $('#productDescription').text().replace(/\s+/g, ' '),
+				productDetails: $('#productDetailsTable').text().replace(/<li>([^<li>]*)<\/li>/g, ' $1. ').replace(/\s+/g, ' '),
+				aplusProductDescription: $('#aplusProductDescription').text().replace(/\s+/g, ' ')
+			};
 
 			var node = new Product( {
 				asin: num,
@@ -254,23 +319,25 @@ function scrapePage(url)
 				alsoViewed: alsoViewedASINs,
 
 				frequentlyBought: frequentlyBought,
-				boughtAfterView: boughtAfterView
+				boughtAfterView: boughtAfterView,
+
+				textParts: textParts,
+				reviews: reviews
 			});
 
 			co(function * () {
 				Product.count( {name: title}, function (err, count) {
-					if (count === 0) {
-						node.save( function(err, node) 
-						{
-							if (err)
-								console.log(err);
+				    if (count === 0) {
+					    console.log('checking...')
+					    node.save( function(err, node) 
+			    	    {
+						    if (err)
+						    	console.log(err);
 							else {
 								// throw into queue
-								console.log(title);
+                                delete $
 								checkASINs(alsoBoughtASINs);
-								// checkASINs(alsoViewedASINs);
-								// checkASINs(frequentlyBought);
-								// checkASINs(boughtAfterView);
+								console.log(title);
 							}
 						});
 					}
@@ -278,31 +345,29 @@ function scrapePage(url)
 			});
 
 		} catch(err) {
-			setTimeout(function () { 
-				scrapePage(url); 
-			}, 5000);
+			setTimeout(function () { crawler(url); }, 5000);
+            return;
 		}
-
 	});
 }
 
-var isEmpty = false;
+
+var missedMinutes = 0;
 setInterval(function () {
 	co(function () {
-		if (isEmpty === true) {
+		if (missedMinutes === 5) {
 			console.log("############### EXITING ###############");
 			process.exit(0);
 		}
-		crawler.count(function (err, count) {
+		db.count({'flags.inProgress': true}, function (err, count) {
 			if (!err && count === 0) {
 				console.log("############### QUEUE IS EMPTY ###############");
-				isEmpty = true;
-			}
+				missedMinutes++;
+			} else 
+                missedMinutes = 0;
 		});
 	});
 }, 60000);
-
-
 
 
 
