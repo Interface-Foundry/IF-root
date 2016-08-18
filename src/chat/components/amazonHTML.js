@@ -135,6 +135,10 @@ module.exports.basic = function basic(url, callback) {
 
 
         if (kip.error(err)) {
+          if(err.code == 'ETIMEDOUT') {
+             return callback(product)
+
+          }
           console.error('error amazon get url ' + url)
           callback(err);
           return
@@ -150,11 +154,6 @@ module.exports.basic = function basic(url, callback) {
           text: '',
           full_html: '',
           asin: ''
-        }
-
-        //timeout from proxy request! return early!
-        if (err && err.message && err.message.code === 'ETIMEDOUT' || err && err.message && err.message.code === 'ESOCKETTIMEDOUT') { 
-          return callback(product)
         }
 
         debug('got reponse for url ' + url)
