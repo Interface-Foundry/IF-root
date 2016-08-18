@@ -394,8 +394,6 @@ function* enhance_results(results, origin, timer) {
   });
   timer.tic('got prices')
 
-  winston.debug('incomign results!!!! ',results)
-
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
   timer.tic('stitched results');
   for (var i = 0; i < urls.length; i++) {
