@@ -8,6 +8,10 @@ var request = require('request');
 var async = require('async');
 var co = require('co');
 
+// var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+
+var slack = require('@slack/client');
+
 
 //connect slack here
 
@@ -19,8 +23,9 @@ var co = require('co');
 // }, 2000);
 
 
-// website 🌏
+// start server 🌏
 var express = require('express');
+var bodyParser = require('body-parser')
 var app = express();
 var server = require('http').createServer(app);
 app.use(express.static(__dirname + '/static'))
@@ -37,6 +42,44 @@ server.listen(8000, function(e) {
   if (e) { console.error(e) }
   console.log('chat app listening on port 8000 🌏 💬')
 })
+//* * * * * //
+
+
+//incoming slack action
+app.post('/slackaction', function(req, res) {
+    // ioKip.newSlack();
+
+    console.log('REQ ',req)
+
+    console.log('incoming Slack action BODY: ',req.body);
+
+
+
+    // if (req.body && req.body.payload){
+    //   var parsedIn = JSON.parse(req.body.payload);
+
+    //   //sends back original chat
+    //   if (parsedIn.response_url && parsedIn.original_message){
+    //     var stringOrig = JSON.stringify(parsedIn.original_message);
+    //     request.post(
+    //         parsedIn.response_url,
+    //         { payload: stringOrig },
+    //         function (err, res, body) {
+    //           console.error('post err ',err);
+    //         }
+    //     );
+    //   }else {
+    //     console.error('slack buttons broke, need a response_url');
+    //     return;
+    //   }
+    // }else {
+    //   console.log('nah');
+    //   res.sendStatus(200);
+    // }
+
+});
+
+
 
 
 
@@ -59,28 +102,40 @@ function gatherSurveyTeams(){
     co(function*() {
 
         var rtm = new slack.RtmClient('xoxb-70749650870-uMgtEUHaw6C6eQrzSdOspkpm');
+        var web = new slack.WebClient('xoxb-70749650870-uMgtEUHaw6C6eQrzSdOspkpm');
 
-        //
+        rtm.start();
+
+        //  
         rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-          kip.log('loaded slack team');
+          console.log('loaded slack team');
         })
 
         //incoming slack messages
         rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
 
-          // don't talk to yourself
-          if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
-            kip.debug("don't talk to yourself");
+          // // don't talk to yourself
+          if (data.bot_id === 'B22NK1M18') {
+            //console.log("don't talk to yourself");
             return; // drop the message before saving.
           }
 
           // other random things
           if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
-            kip.debug('will not handle this message');
+            console.debug('will not handle this message');
             return;
           }
 
+          //store incoming messages
+          var message = new db.Message({
+            incoming: true,
+            thread_id: data.channel,
+            original_text: data.text,
+            user_id: data.user,
+            origin: 'slack',
+            source: data,
+          });
 
 
           // clean up the text
@@ -92,6 +147,62 @@ function gatherSurveyTeams(){
 
 
 
+          console.log(message)
+
+
+
+        //'hiiiiiiii '+'<@'+data.user+'>'
+
+          // //send message
+          // rtm.sendMessage(zz, data.channel, function messageSent() {
+          //   // optionally, you can supply a callback to execute once the message has been sent
+          // });
+
+
+            var msgData = {
+                icon_url:'http://kipthis.com/img/kip-icon.png',
+                username:'The Botfather'
+            };
+        //co(function*() {
+
+            var zz = {
+                "text": "Would you like to play a game??",
+                "attachments": [
+                    {
+                        "text": "Choose a game to play",
+                        "fallback": "You are unable to choose a game",
+                        "callback_id": "wopr_game",
+                        "color": "#3AA3E3",
+                        "attachment_type": "default",
+                        "actions": [
+                            {
+                                "name": "chess",
+                                "text": "Chess",
+                                "type": "button",
+                                "value": "chess"
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            web.chat.postMessage(message.source.channel, '', zz);
+
+
+          
+
+          // bot.rtm.sendMessage(message.text, message.source.channel, () => {
+          //   outgoing.ack();
+          // })
+
+        // }).catch(e => {
+        //   console.log(e.stack);
+
+        //   // bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
+        //   //   outgoing.ack();
+        //   // })
+        // })
+
           // // queue it up for processing
           // message.save().then(() => {
           //   queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
@@ -100,35 +211,6 @@ function gatherSurveyTeams(){
         })
 
 
-
-        //incoming slack action
-        app.post('/slackaction', function(req, res) {
-            // ioKip.newSlack();
-            console.log('incoming Slack action BODY: ',req.body);
-
-            if (req.body && req.body.payload){
-              var parsedIn = JSON.parse(req.body.payload);
-
-              //sends back original chat
-              if (parsedIn.response_url && parsedIn.original_message){
-                var stringOrig = JSON.stringify(parsedIn.original_message);
-                request.post(
-                    parsedIn.response_url,
-                    { payload: stringOrig },
-                    function (err, res, body) {
-                      console.error('post err ',err);
-                    }
-                );
-              }else {
-                console.error('slack buttons broke, need a response_url');
-                return;
-              }
-            }else {
-              console.log('nah');
-              res.sendStatus(200);
-            }
-
-        });
 
 
       // var slackbots = yield db.Slackbots.find({
@@ -265,7 +347,8 @@ function startSurvey(team,admin){
       //build next question for correct platform
       var builtStory = yield buildStory('slack',startQuestion);
 
-      console.log('built for slack: ',JSON.stringify(builtStory))
+      //console.log('built for slack: ',JSON.stringify(builtStory))
+
       //send built story back user (next question)
       send_story(builtStory,team,admin)
 
@@ -504,12 +587,17 @@ function buildStory(origin,incoming){
     return storyObj;
 }
 
+//ㅣㅐㅣ
+var send_story = function (builtStory,channel,team){
 
-var send_story = function (builtStory,team,admin){
 
-    console.log('hope this works ',builtStory)
-    console.log('hope this works ',team)
-    console.log('hope this works ',admin)
+    //send story back to user
+
+    console.log("SENDING STORY")
+
+    // console.log('hope this works ',builtStory)
+    // console.log('hope this works ',team)
+    // console.log('hope this works ',admin)
 
     //slack sender 
 
@@ -538,4 +626,4 @@ var send_story = function (builtStory,team,admin){
 }
 
 //process_story()
- gatherSurveyTeams()
+gatherSurveyTeams()

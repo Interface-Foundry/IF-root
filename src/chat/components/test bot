@@ -1,0 +1,17 @@
+//test bot
+{
+    "_id" : ObjectId("5671f5113de2650a2bcdb49c"),
+    "access_token" : "xoxp-16858648337-16858648545-16866162066-d74fc3e57a",
+    "scope" : "identify,bot",
+    "team_name" : "test222",
+    "team_id" : "T0GR8K29X",
+    "meta" : {
+        "initialized" : true,
+        "dateAdded" : ISODate("2015-12-16T23:34:41.927Z")
+    },
+    "bot" : {
+        "bot_user_id" : "U0GR9LJN4",
+        "bot_access_token" : "xoxb-16859698752-NZGFiJkFyPLQKPl2RUdFtwF9"
+    },
+    "__v" : 0
+}
