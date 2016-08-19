@@ -6,8 +6,8 @@ var survey1 = [
     "text": "We value your feedback and would like to get your input on how to make Kip better! Do you have time for 3 quick questions?",
     "template_type": "survey-1",
     "actions": [{
-      "name": "button 1",
-      "text": "Button 1",
+      "name": "Yes",
+      "text": "Yes",
       "type": "button",
       "value": {
           selected: "yes",
