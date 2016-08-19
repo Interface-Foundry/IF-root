@@ -76,20 +76,20 @@ class FBResponder {
         }
 
 
-	this.createParamGenKey = function(userInput){
-	    return [userInput.mode, userInput.action, userInput.instruction].join('_');
+	this.createParamGenKey = function(userInputData){
+	    return [userInputData.mode, userInputData.action, userInputData.instruction].join('_');
 	}
 
 	
-	this.mapActionToParams = function(userInput){
-	    console.log('>>> userInput is: ' + JSON.stringify(userInput));
-	    var paramGenKey = this.createParamGenKey(userInput);
+	this.mapActionToParams = function(userInputEvent){
+	    console.log('>>> userInput is: ' + JSON.stringify(userInputEvent));
+	    var paramGenKey = this.createParamGenKey(userInputEvent.data);
 	    console.log('paramgen key is: ' + paramGenKey)
 	    var paramGenerator = this.paramGenMap[paramGenKey];
 	    if(paramGenerator === null || paramGenerator === undefined){		
 		throw 'EXCEPTION: No parameter map defined for user input ' + JSON.stringify(userInput) + ' yielding key ' + paramGenKey;
 	    }
-	    return paramGenerator(userInput);	    
+	    return paramGenerator(userInputEvent.data);	    
 	}
 	
 
@@ -126,16 +126,14 @@ class FBResponder {
 
 	    message.execute = [  
 		{
-		    mode: userInputEvent.mode,
-		    action: userInputEvent.action,
+		    mode: userInputEvent.data.mode,
+		    action: userInputEvent.data.action,
 		    params: this.mapActionToParams(userInputEvent),
-		    selected: userInputEvent.selected
+		    selected: userInputEvent.data.selected
 		}
 	    ]
 	}
-	           
-        console.log(0, lastMessage, userInputEvent.data)
-
+	                   
         // queue it up for processing
         message.save().then(() => {
             queue.publish('incoming', message, [this.responderType, sender.toString(), message.ts].join('.'))
