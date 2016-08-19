@@ -27,34 +27,35 @@ class FBResponder {
             'sub_menu_color': function(){ return [{type: 'fb_sub_menu_color', buttons: ['Black','White','Blue','Red','Brown', 'Pink']}] }
         }	
 
-
-	this.actionToInstructionMap = { 'modify.one': { 'cheaper': function(userInputControl) { return { 'focus': userInputControl.selector, 
-								 'param': 'less', 
-								 'type': 'price' 
-												       }
-											      },				
-							'genericDetail': function(userInputControl) { return { 'focus': userInputControl.selector,
-							        'param': userInputControl.instruction, 
-							        'type': userInputControl.searchAttributeValue 
-													     } 		
-												    }
-						      }
-
-	this.actionToParamGenMap = {	    
-	    'shopping': {
-		'modify.one': { 'cheaper': function(userInputControl) { return { 'focus': userInputControl.selector, 
+	
+	this.paramGenMap = {	    
+	    'shopping_modify.one_cheaper': function(userInputControl) { return { 'focus': userInputControl.focus, 
 								 'param': 'less', 
 								 'type': 'price' 
 							       }
 						      },				
-				'genericDetail': function(userInputControl) { return { 'focus': userInputControl.selector,
+	    'shopping_modify.one_genericDetail': function(userInputControl) { return { 'focus': userInputControl.focus,
 							        'param': userInputControl.instruction, 
 							        'type': userInputControl.searchAttributeValue 
-								     } 		
-							    }
-		}
-	    }
+							}
+ 									    },									   
+	    'shopping_modify.one_similar': function(userInputControl) { return {'focus': userInputControl.focus,
+										'param': userInputControl.instruction,
+										'type': userInputControl.searchAttributeValue
+									       }
+								      }, 
+	    'shopping_modify.one_color': function(userInputControl) { return {'focus': userInputControl.focus,
+										'param': userInputControl.instruction,
+										'type': userInputControl.searchAttributeValue
+									       }
+								    },
+	    'shopping_modify.one_emoji': function(userInputControl) { return {'focus': userInputControl.focus,
+										'param': userInputControl.instruction,
+										'type': userInputControl.searchAttributeValue
+									       }
+								    }
 	}
+	    
 
 
         this.mapActionToMenuText = function(userInput){
@@ -74,15 +75,19 @@ class FBResponder {
             return converter(userInput);
         }
 
+
+	this.createParamGenKey = function(userInput){
+	    return [userInput.mode, userInput.action, userInput.instruction].join('_');
+	}
+
 	
 	this.mapActionToParams = function(userInput){
 	    console.log('>>> userInput is: ' + JSON.stringify(userInput));
-	    console.log('>>> actions for shopping mode: ' + this.actionToParamGenMap[userInput.mode])
-	    console.log('>>> actions for shopping mode and modify.one action: ' + JSON.stringify(this.actionToParamGenMap[userInput.mode][userInput.action]))
-
-	    var paramGenerator = _.get(this.actionToParamGenMap, '[userInput.mode][userInput.action][userInput.instruction]', null);
-	    if(paramGenerator === null){		
-		throw '>> Sorry, I could not understand your input.';
+	    var paramGenKey = this.createParamGenKey(userInput);
+	    console.log('paramgen key is: ' + paramGenKey)
+	    var paramGenerator = this.paramGenMap[paramGenKey];
+	    if(paramGenerator === null || paramGenerator === undefined){		
+		throw 'EXCEPTION: No parameter map defined for user input ' + JSON.stringify(userInput) + ' yielding key ' + paramGenKey;
 	    }
 	    return paramGenerator(userInput);	    
 	}
@@ -106,8 +111,8 @@ class FBResponder {
             resolved: false,
             user_id: lastMessage.user_id,	       
             origin: this.responderType,	    	    
-            text: this.mapActionToText(userInputEvent.data),
-	    control_group: this.mapActionToMenuText(userInputEvent.data),
+            text: this.mapActionToText(userInputEvent),
+	    control_group: this.mapActionToMenuText(userInputEvent),
             source: lastMessage.source,
             amazon: lastMessage.amazon
 	});
@@ -121,10 +126,10 @@ class FBResponder {
 
 	    message.execute = [  
 		{
-		    mode: userInputEvent.data.mode,
-		    action: userInputEvent.data.action,
-		    params: this.mapActionToParams(userInputEvent.data),
-		    selected: userInputEvent.data.selected
+		    mode: userInputEvent.mode,
+		    action: userInputEvent.action,
+		    params: this.mapActionToParams(userInputEvent),
+		    selected: userInputEvent.selected
 		}
 	    ]
 	}

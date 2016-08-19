@@ -104,24 +104,9 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
                     "elements": cards
                 }
             },
-            "quick_replies":[
-                      /*{
-                        "content_type":"text",
-                        "title":"Cheaper",
-                        "payload": JSON.stringify({
-                                action: "cheaper",
-                                selected: '1'
-                            })
-                      }*/
-		new FBButton('CheaperX', constants.MODIFY_ONE, constants.CHEAPER, channel, constants.CHEAPER).render(),
-                      {
-                        "content_type":"text",
-                        "title":"Similar",
-                        "payload": JSON.stringify({
-                                action: "similar",
-                                selected: "1"
-                            })
-                      },
+            "quick_replies":[                     
+		new FBButton('Cheaper', constants.MODIFY_ONE, constants.CHEAPER, channel, constants.CHEAPER).render(),                     
+		new FBButton('Similar', constants.MODIFY_ONE, constants.SIMILAR, channel, constants.SIMILAR).render(),
                       {
                         "content_type":"text",
                         "title":"Color",
@@ -130,6 +115,7 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
                                 selected: "1"
                             })
                       },
+		//new FBButton('Color', constants.MODIFY_ONE, constants.COLOR_SUBMENU, channel, constants.COLOR).render(),
                       {
                         "content_type":"text",
                         "title":"Emoji",
@@ -139,6 +125,7 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
                                 selected: "1"
                             })
                       }
+		//new FBButton('Emoji', constants.MODIFY_ONE, constants.EMOJI, channel, constants.EMOJI).render()
                     ]
         };
 

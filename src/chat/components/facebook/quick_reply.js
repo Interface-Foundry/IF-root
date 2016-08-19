@@ -89,7 +89,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         else if (last_message) {
             // queue it up for processing
             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
-                    fb_memory[sender].mode = SHOPPING;
+                    fb_memory[sender].mode = EventTypes.SHOPPING;
             }
 	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
             new FBResponder(sender).respond(last_message, postback);
@@ -244,7 +244,28 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 	        new FBResponder(sender).respond(last_message, userInputEvent);           
           }
         } 
+        /*	  
+        else if (postback.action === 'show_menu') {
 
+	    fb_memory[sender] = {
+                mode: 'modify',
+                select: 1
+            };
+
+
+	    var color_menu = {
+                "recipient": {
+                    "id": sender.toString()
+                },
+		'message': {
+
+		    'quick_replies': [
+			new FBButton('Black', 'modify.one', 'genericDetail', sender, 'black').render(),
+			new FBButton('Black', constants.BUTTON_SEARCH, constants.COLOR, channel, constants.COLOR).render(),
+		    ]
+		}
+        }
+	*/
         //
         //   --  Sub-menu switching --
         // currently either Color or Emoji
