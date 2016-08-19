@@ -12,7 +12,7 @@ var fs = require('fs');
 var config = require('../../../config');
 var quiz = require('./onboard_quiz');
 var FBButton = require('./fbcontrols');
-var constants = require('./constants');
+var constants = require('../constants');
 
 
 /**

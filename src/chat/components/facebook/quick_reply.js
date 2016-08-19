@@ -22,10 +22,10 @@ var Chatuser = db.Chatuser;
 var next = require("co-next") 
 fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
-var FBResponder = require('./responders');
+var FBResponder = require('../responders');
 var FBButton = require('./fbcontrols');
-const EventTypes = require('./constants');
-const constants = require('./constants');
+const EventTypes = require('../constants');
+const constants = require('../constants');
 
 
 const DEFAULT_MODE = constants.SHOPPING;

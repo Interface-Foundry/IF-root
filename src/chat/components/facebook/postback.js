@@ -18,7 +18,7 @@ var Chatuser = db.Chatuser;
 var fbtoken;
 var next = require("co-next")
 fb_utility = require('./fb_utility');
-var FBResponder = require('./responders');
+var FBResponder = require('../responders');
 
 var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
     try {
