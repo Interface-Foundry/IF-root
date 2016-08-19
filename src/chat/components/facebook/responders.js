@@ -25,23 +25,29 @@ class FBResponder {
             'emoji_modify': function(){ return [{type: 'fb_quick_reply', buttons: ['🍪','👖','🌹','☕','🔨', '👻','💯']}]  },
             'sub_menu_emoji': function(){ return [{type: 'fb_emoji_modify', buttons: ['🍪','👖','🌹','☕','🔨', '👻','💯']}]  },
             'sub_menu_color': function(){ return [{type: 'fb_sub_menu_color', buttons: ['Black','White','Blue','Red','Brown', 'Pink']}] }
-        }
+        }	
 
-	const shoppingMode = EventTypes.SHOPPING;
-	const modifyOneAction = EventTypes.MODIFY_ONE;
-	const cheaperInstruction = EventTypes.CHEAPER;
-	const genericDetailInstruction = EventTypes.GENERIC_DETAIL;
+
+	this.actionToInstructionMap = { 'modify.one': { 'cheaper': function(userInputControl) { return { 'focus': userInputControl.selector, 
+								 'param': 'less', 
+								 'type': 'price' 
+												       }
+											      },				
+							'genericDetail': function(userInputControl) { return { 'focus': userInputControl.selector,
+							        'param': userInputControl.instruction, 
+							        'type': userInputControl.searchAttributeValue 
+													     } 		
+												    }
+						      }
 
 	this.actionToParamGenMap = {	    
-	    shoppingMode: {
-		modifyOneAction: { 
-		    cheaperInstruction: function(userInputControl) { return { 'focus': userInputControl.selector, 
+	    'shopping': {
+		'modify.one': { 'cheaper': function(userInputControl) { return { 'focus': userInputControl.selector, 
 								 'param': 'less', 
 								 'type': 'price' 
 							       }
-						      },
-				
-		    genericDetailInstruction: function(userInputControl) { return { 'focus': userInputControl.selector,
+						      },				
+				'genericDetail': function(userInputControl) { return { 'focus': userInputControl.selector,
 							        'param': userInputControl.instruction, 
 							        'type': userInputControl.searchAttributeValue 
 								     } 		
@@ -71,6 +77,8 @@ class FBResponder {
 	
 	this.mapActionToParams = function(userInput){
 	    console.log('>>> userInput is: ' + JSON.stringify(userInput));
+	    console.log('>>> actions for shopping mode: ' + this.actionToParamGenMap[userInput.mode])
+	    console.log('>>> actions for shopping mode and modify.one action: ' + JSON.stringify(this.actionToParamGenMap[userInput.mode][userInput.action]))
 
 	    var paramGenerator = _.get(this.actionToParamGenMap, '[userInput.mode][userInput.action][userInput.instruction]', null);
 	    if(paramGenerator === null){		
@@ -84,6 +92,10 @@ class FBResponder {
     }
 
     respond(lastMessage, userInputEvent) { 
+
+
+	console.log('############# Inside FBResponder.respond().')
+	console.log('############ user input event : ' + JSON.stringify(userInputEvent))
 	
 	// if a control was actuated, 
 	// the message must include the control name and the selection (or component mode) 
@@ -102,6 +114,11 @@ class FBResponder {
 
 	if(userInputEvent.type === EventTypes.BUTTON_PRESS){
 	    // NOTE: a better name for this would be "message.context", because woof.
+
+	    console.log('################ inside FBResponder.respond().');
+	    console.log('################ userInputEvent data is: ' + JSON.stringify(userInputEvent.data));
+
+
 	    message.execute = [  
 		{
 		    mode: userInputEvent.data.mode,

@@ -11,6 +11,9 @@ var fs = require('fs');
 //set env vars
 var config = require('../../../config');
 var quiz = require('./onboard_quiz');
+var FBButton = require('./fbcontrols');
+var constants = require('./constants');
+
 
 /**
  * This function send results to user
@@ -102,14 +105,15 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
                 }
             },
             "quick_replies":[
-                      {
+                      /*{
                         "content_type":"text",
                         "title":"Cheaper",
                         "payload": JSON.stringify({
                                 action: "cheaper",
                                 selected: '1'
                             })
-                      },
+                      }*/
+		new FBButton('CheaperX', constants.MODIFY_ONE, constants.CHEAPER, channel, constants.CHEAPER).render(),
                       {
                         "content_type":"text",
                         "title":"Similar",

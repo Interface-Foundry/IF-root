@@ -1,22 +1,17 @@
+"use strict";
 
 
-
-function define(name, value) {
-    Object.defineProperty(exports, name, {
-        value:      value,
-        enumerable: true
-    });
-}
-
-define('BUTTON_PRESS', 'button_press');
-define('MENU_SELECTION', 'menu_select');
-define('MODIFY_ONE', 'modify.one'); 
-define('SHOPPING', 'shopping');
-define('ONBOARDING', 'onboarding');
-define('CHEAPER', 'cheaper');
-define('GENERIC_DETAIL', 'genericDetail');
-
-
-
+module.exports = Object.freeze({
+    SHOPPING:  'shopping',
+    BUTTON_PRESS: 'button_press',
+    MENU_SELECTION: 'menu_select',
+    MODIFY_ONE: 'modify.one',
+    ONBOARDING:   'onboarding',
+    CHEAPER:  'cheaper',
+    GENERIC_DETAIL: 'genericDetail',
+    TAKE_QUIZ: 'take_quiz',
+    SIMILAR: 'similar',
+    BACK: 'back',
+});
 
 
