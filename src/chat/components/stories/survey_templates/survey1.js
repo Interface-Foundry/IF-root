@@ -10,9 +10,9 @@ var survey1 = [
       "text": "Yes",
       "type": "button",
       "value": {
-          selected: "yes",
-          story_pointer: 0,
-          handler: "story.answer"
+          "selected": "yes",
+          "story_pointer": 0,
+          "handler": "story.answer"
       } 
     },
     {

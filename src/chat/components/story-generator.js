@@ -48,18 +48,41 @@ server.listen(8000, function(e) {
 //incoming slack action
 app.post('/slackaction', function(req, res) {
 
-    res.sendStatus(200);
+
+    console.log('?????')
+
+    //res.sendStatus(200);
+
+
 
     co(function* () {
 
         //save the incoming result to mongo
 
+            // console.log('👑 ?',process_story())
+            // console.log('👑 2 ?',req.body.payload)
 
-        //advance the pointer
+        // //advance the pointer
         if (req.body && req.body.payload){
-            console.log('WORKING ?!?!?!?!?!?')
-            console.log(req.body.payload)
-            yield process_story(req.body.payload) 
+            //console.log('WORKING ?!?!?!?!?!?')
+            //console.log(req.body.payload)
+
+            // console.log('👑 ?',process_story())
+            // console.log('👑 2 ?',req.body.payload)
+
+            console.log('AAAAAAAAAA')
+
+            var processStory = yield process_story(req.body.payload) 
+
+            console.log(processStory)
+
+            var builtStory = yield buildStory('slack',processStory);
+
+            res.json(builtStory);
+
+            console.log('👑cool!👑 ',builtStory);
+
+
         }
        
 
@@ -79,6 +102,7 @@ app.post('/slackaction', function(req, res) {
 
     }).catch(function(err){
         //???
+        console.log('👑👑')
         console.error('co err ',err);
     });
 
@@ -86,9 +110,11 @@ app.post('/slackaction', function(req, res) {
 
     // ioKip.newSlack();
 
-    console.log('REQ ',req)
+   // console.log('REQ ',req)
 
-    console.log('incoming Slack action BODY: ',req.body);
+    //console.log('incoming Slack action BODY: ',req.body);
+
+
 
 
 
@@ -288,6 +314,8 @@ function gatherSurveyTeams(){
 
             array = JSON.stringify(array);
 
+            console.log('???? !??!!? !? ! ',array)
+
             var msgData = {
               // attachments: [...],
                 icon_url:'http://kipthis.com/img/kip-icon.png',
@@ -336,30 +364,30 @@ function gatherSurveyTeams(){
 }
 
 
-function startSurvey(team,admin){
+// function startSurvey(team,admin){
 
-    co(function* () {
+//     co(function* () {
 
-      var startQuestion = survey.survey1[0];
+//       var startQuestion = survey.survey1[0];
 
-      //build next question for correct platform
-      var builtStory = yield buildStory('slack',startQuestion);
+//       //build next question for correct platform
+//       var builtStory = yield buildStory('slack',startQuestion);
 
-      //console.log('built for slack: ',JSON.stringify(builtStory))
+//       //console.log('built for slack: ',JSON.stringify(builtStory))
 
-      //send built story back user (next question)
-      send_story(builtStory,team,admin)
+//       //send built story back user (next question)
+//       send_story(builtStory,team,admin)
 
-    }).catch(function(err){
-        //???
-        console.error('co err ',err);
-    });
-}
+//     }).catch(function(err){
+//         //???
+//         console.error('co err ',err);
+//     });
+// }
  
 
 //expect entire response from user on button push
 //response.origin = incoming origin
-var process_story = function(response,origin){
+var process_story = function*(response,origin){
 
     var story_pointer;
     var story_answer;
@@ -367,45 +395,18 @@ var process_story = function(response,origin){
     //MOCK ORIGIN
     origin = 'slack';
 
-    //prepocess slack button response (will happen outside of function )
-    //MOCK RESPONSE
-    // response = {
-    //   "actions": [
-    //     {
-    //       "name": "button 1",
-    //       "value": {selected: "yes", story_pointer: 0, handler: "story.answer"}
-    //     },
-    //   ],
-    //   "callback_id": "story_19238",
-
-    //   "team": {
-    //     "id": "T47563693",
-    //     "domain": "watermelonsugar"
-    //   },
-    //   "channel": {
-    //     "id": "C065W1189",
-    //     "name": "forgotten-works"
-    //   },
-    //   "user": {
-    //     "id": "U045VRZFT",
-    //     "name": "brautigan"
-    //   },
-    //   "action_ts": "1458170917.164398",
-    //   "message_ts": "1458170866.000004",
-    //   "attachment_id": "1",
-    //   "token": "xAB3yVzGS4BQ3O9FACTa8Ho4",
-    //   "original_message": "{\"text\":\"New comic book alert!\",\"attachments\":[{\"title\":\"The Further Adventures of Slackbot\",\"fields\":[{\"title\":\"Volume\",\"value\":\"1\",\"short\":true},{\"title\":\"Issue\",\"value\":\"3\",\"short\":true}],\"author_name\":\"Stanford S. Strickland\",\"author_icon\":\"https://api.slack.com/img/api/homepage_custom_integrations-2x.png\",\"image_url\":\"http://i.imgur.com/OJkaVOI.jpg?1\"},{\"title\":\"Synopsis\",\"text\":\"After @episod pushed exciting changes to a devious new branch back in Issue 1, Slackbot notifies @don about an unexpected deploy...\"},{\"fallback\":\"Would you recommend it to customers?\",\"title\":\"Would you recommend it to customers?\",\"callback_id\":\"comic_1234_xyz\",\"color\":\"#3AA3E3\",\"attachment_type\":\"default\",\"actions\":[{\"name\":\"recommend\",\"text\":\"Recommend\",\"type\":\"button\",\"value\":\"recommend\"},{\"name\":\"no\",\"text\":\"No\",\"type\":\"button\",\"value\":\"bad\"}]}]}",
-    //   "response_url": "https://hooks.slack.com/actions/T47563693/6204672533/x7ZLaiVMoECAW50Gw1ZYAXEM"
-    // }
+    response = JSON.parse(response)
 
 
+    if(response && response.actions && response.actions[0]){
 
-    //get button response from incoming user button reply
-
-    if(response && response.actions && response.actions.value){
+        //response.actions = response.actions
         //turn stringified object into object
-        story_pointer = response.actions.value.story_pointer;
-        story_answer = response.actions.value.selected;
+
+        console.log(response.actions[0])
+
+        story_pointer = response.actions[0].value.story_pointer;
+        story_answer = response.actions[0].value.selected;
         
     }else {
         console.error('missing response.actions.value from SLACK');
@@ -452,24 +453,34 @@ var process_story = function(response,origin){
     }   
     //advance to next question
     else {
+
+         console.log('CCCCCCCC')
+
         story_pointer++;
 
-        co(function* () {
+        var nextQuestion = survey.survey1[story_pointer];
 
-          var nextQuestion = survey.survey1[story_pointer];
+        return nextQuestion;
 
-          //build next question for correct platform
+        // co(function* () {
 
-          var builtStory = yield buildStory(origin,nextQuestion);
+          
 
-          console.log('built for slack: ',JSON.stringify(builtStory))
-          //send built story back user (next question)
-          //send_story(builtStory)
+        //   //build next question for correct platform
 
-        }).catch(function(err){
-            //???
-            console.error('co err ',err);
-        });
+         
+
+        //   console.log('built for slack: ',JSON.stringify(builtStory))
+        //   //send built story back user (next question)
+        //   //send_story(builtStory)
+
+        //   return builtStory;
+
+        // }).catch(function(err){
+        //     //???
+        //     console.log('😂😂')
+        //     console.error('co err ',err);
+        // });
 
         //build story     
         
@@ -479,85 +490,15 @@ var process_story = function(response,origin){
 
 function buildStory(origin,incoming){
 
+    console.log('DDDDDDDDDD')
+
     var storyObj = {
         attachments:[]
     };
 
-    // {
-    //     "attachments": [
-    //         {
-    //             "text": "Choose a game to play",
-    //             "fallback": "You are unable to choose a game",
-    //             "callback_id": "wopr_game",
-    //             "color": "#3AA3E3",
-    //             "attachment_type": "default",
-    //             "actions": [
-    //                 {
-    //                     "name": "chess",
-    //                     "text": "Chess",
-    //                     "type": "button",
-    //                     "value": "chess"
-    //                 },
-    //                 {
-    //                     "name": "maze",
-    //                     "text": "Falken's Maze",
-    //                     "type": "button",
-    //                     "value": "maze"
-    //                 },
-    //                 {
-    //                     "name": "war",
-    //                     "text": "Thermonuclear War",
-    //                     "style": "primary",
-    //                     "type": "button",
-    //                     "value": "war",
-    //                     "confirm": {
-    //                         "title": "Are you sure?",
-    //                         "text": "Wouldn't you prefer a good game of chess?",
-    //                         "ok_text": "Yes",
-    //                         "dismiss_text": "No"
-    //                     }
-    //                 }
-    //             ]
-    //         }
-    //     ]
-    // }
-
     switch(origin){
         //built object for slack
         case 'slack':
-
-            // "name": "button 1",
-            // "text": "Button 1",
-            // "type": "button",
-            // "value": {
-            //   selected: "yes",
-            //   story_pointer: 0,
-            //   handler: "story.answer"
-            // }      
-
-
-            //loop through incoming actions array
-            //build array of buttons for slack
-
-
-            // {
-            //   "name": "button 1",
-            //   "text": "Button 1",
-            //   "type": "button",
-            //   "value": {
-            //       selected: "yes",
-            //       story_pointer: 0,
-            //       handler: "story.answer"
-            //   } 
-            // },
-
-                    // {
-                    //     "name": "chess",
-                    //     "text": "Chess",
-                    //     "type": "button",
-                    //     "value": "chess"
-                    // },
-
             //map buttons for slack
             var buttonArray = incoming.actions.map(function(obj){ 
                 var rObj = {};
