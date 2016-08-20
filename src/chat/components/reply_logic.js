@@ -90,6 +90,7 @@ function typing(message) {
 //
 queue.topic('incoming').subscribe(incoming => {
   co(function*() {
+
     kip.debug('🔥', incoming);
     var timer = new kip.SavedTimer('message.timer', incoming.data);
 
