@@ -2,25 +2,15 @@
 
 var survey = require('./stories/survey_templates/survey1.js')
 var db = require('../../db');
-var storyAnswers = db.storyAnswers;
+var Story = db.Story;
+
 var http = require('http');
 var request = require('request');
 var async = require('async');
 var co = require('co');
 
-// var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
-
 var slack = require('@slack/client');
 
-
-//connect slack here
-
-
-
-//lol
-// setTimeout(function() {
-   
-// }, 2000);
 
 
 // start server 🌏
@@ -48,195 +38,90 @@ server.listen(8000, function(e) {
 //incoming slack action
 app.post('/slackaction', function(req, res) {
 
-
-    console.log('?????')
-
-    //res.sendStatus(200);
-
-
-
     co(function* () {
-
-        //save the incoming result to mongo
-
-            // console.log('👑 ?',process_story())
-            // console.log('👑 2 ?',req.body.payload)
 
         // //advance the pointer
         if (req.body && req.body.payload){
-            //console.log('WORKING ?!?!?!?!?!?')
-            //console.log(req.body.payload)
-
-            // console.log('👑 ?',process_story())
-            // console.log('👑 2 ?',req.body.payload)
-
-            console.log('AAAAAAAAAA')
 
             var processStory = yield process_story(req.body.payload) 
 
-            console.log(processStory)
+            console.log('PROCESS STORY ', processStory)
 
             var builtStory = yield buildStory('slack',processStory);
+
+            console.log('BUILT STORY ', builtStory)
 
             res.json(builtStory);
 
             console.log('👑cool!👑 ',builtStory);
-
-
         }
        
-
-        //grab story, build for slack
-
-        //send back to slack here
-
-
-      // var nextQuestion = survey.survey1[story_pointer];
-
-      // //build next question for correct platform
-      // var builtStory = yield buildStory(origin,nextQuestion);
-
-      // console.log('built for slack: ',JSON.stringify(builtStory))
-      // //send built story back user (next question)
-      // //send_story(builtStory)
-
     }).catch(function(err){
-        //???
         console.log('👑👑')
         console.error('co err ',err);
     });
 
-    //fire our process story, pass in the incoming params
-
-    // ioKip.newSlack();
-
-   // console.log('REQ ',req)
-
-    //console.log('incoming Slack action BODY: ',req.body);
-
-
-
-
-
-    // if (req.body && req.body.payload){
-    //   var parsedIn = JSON.parse(req.body.payload);
-
-    //   //sends back original chat
-    //   if (parsedIn.response_url && parsedIn.original_message){
-    //     var stringOrig = JSON.stringify(parsedIn.original_message);
-    //     request.post(
-    //         parsedIn.response_url,
-    //         { payload: stringOrig },
-    //         function (err, res, body) {
-    //           console.error('post err ',err);
-    //         }
-    //     );
-    //   }else {
-    //     console.error('slack buttons broke, need a response_url');
-    //     return;
-    //   }
-    // }else {
-    //   console.log('nah');
-    //   res.sendStatus(200);
-    // }
-
 });
 
-//incoming slack action
-app.get('/slackauth', function(req, res) {
+// //incoming slack action
+// app.get('/slackauth', function(req, res) {
 
-    //https://slack.com/oauth/pick_reflow?scope=commands+bot+users%3Aread&client_id=2804113073.70750953120
+//     //https://slack.com/oauth/pick_reflow?scope=commands+bot+users%3Aread&client_id=2804113073.70750953120
 
-    // ioKip.newSlack();
+//     // ioKip.newSlack();
 
-   // console.log('REQ ',req)
+//    // console.log('REQ ',req)
 
-    console.log('incoming Slack action BODY: ',req.body);
+//     console.log('incoming Slack action BODY: ',req.body);
 
-    res.redirect('/thanks')
+//     res.redirect('/thanks')
 
-    var clientID = '2804113073.70750953120';
-    var clientSecret = 'f551ddfc0e294e49a5ebacb8633bbd86';
-    var redirect_uri = 'https://39645f46.ngrok.io/slackauth';
+//     var clientID = '2804113073.70750953120';
+//     var clientSecret = 'f551ddfc0e294e49a5ebacb8633bbd86';
+//     var redirect_uri = 'https://39645f46.ngrok.io/slackauth';
 
-    var body = {
-      code: req.query.code,
-      redirect_uri: redirect_uri
-    }
+//     var body = {
+//       code: req.query.code,
+//       redirect_uri: redirect_uri
+//     }
 
-    //ㅔㅐㄴㅅ ㄱㄷ볃ㄴㅅ 랙 
-    //post request for auth token
-    request({
-      url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
-      method: 'POST',
-      form: body
-    }, function(e, r, b) {
-        if (e) {
-          console.log('error connecting to slack api');
-          console.log(e);
-        }
-        if (typeof b === 'string') {
-            b = JSON.parse(b);
-        }
-        if (!b.ok) {
-            console.error('error connecting with slack, ok = false')
-            console.error('body was', body)
-            console.error('response was', b)
-            return;
-        } else if (!b.access_token || !b.scope) {
-            console.error('error connecting with slack, missing prop')
-            console.error('body was', body)
-            console.error('response was', b)
-            return;
-        }
+//     //ㅔㅐㄴㅅ ㄱㄷ볃ㄴㅅ 랙 
+//     //post request for auth token
+//     request({
+//       url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
+//       method: 'POST',
+//       form: body
+//     }, function(e, r, b) {
+//         if (e) {
+//           console.log('error connecting to slack api');
+//           console.log(e);
+//         }
+//         if (typeof b === 'string') {
+//             b = JSON.parse(b);
+//         }
+//         if (!b.ok) {
+//             console.error('error connecting with slack, ok = false')
+//             console.error('body was', body)
+//             console.error('response was', b)
+//             return;
+//         } else if (!b.access_token || !b.scope) {
+//             console.error('error connecting with slack, missing prop')
+//             console.error('body was', body)
+//             console.error('response was', b)
+//             return;
+//         }
 
-        console.log('got positive response from slack')
-        console.log('body was', body)
-        console.log('response was', b)
+//         console.log('got positive response from slack')
+//         console.log('body was', body)
+//         console.log('response was', b)
 
-    })
+//     })
+// });
 
-  //   response was { ok: true,
-  // access_token: 'xoxp-2804113073-62926693712-71155053959-acfc5621fe',
-  // scope: 'identify,bot,commands,users:read,tokens.basic',
-  // user_id: 'U1UT8LDLY',
-  // team_name: 'kip',
-  // team_id: 'T02PN3B25',
-  // bot:
-  //  { bot_user_id: 'U234T34Q2',
-  //    bot_access_token: 'xoxb-71163106818-IVHA9vHytuV2OIl3YuT1TW3s' } }
-
-
-
-
-    // if (req.body && req.body.payload){
-    //   var parsedIn = JSON.parse(req.body.payload);
-
-    //   //sends back original chat
-    //   if (parsedIn.response_url && parsedIn.original_message){
-    //     var stringOrig = JSON.stringify(parsedIn.original_message);
-    //     request.post(
-    //         parsedIn.response_url,
-    //         { payload: stringOrig },
-    //         function (err, res, body) {
-    //           console.error('post err ',err);
-    //         }
-    //     );
-    //   }else {
-    //     console.error('slack buttons broke, need a response_url');
-    //     return;
-    //   }
-    // }else {
-    //   console.log('nah');
-    //   res.sendStatus(200);
-    // }
-
-});
-
-app.get('/thanks', function(req, res) {
-  //var thanks = fs.readFileSync(__dirname + '/thanks.html', 'utf8');
-  res.send('<html>ok</html>');
-})
+// app.get('/thanks', function(req, res) {
+//   //var thanks = fs.readFileSync(__dirname + '/thanks.html', 'utf8');
+//   res.send('<html>ok</html>');
+// })
 
 
 
@@ -263,7 +148,6 @@ function gatherSurveyTeams(){
 
         rtm.start();
 
-        //  
         rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
           console.log('loaded slack team');
         })
@@ -271,66 +155,46 @@ function gatherSurveyTeams(){
         //incoming slack messages
         rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
+            // // don't talk to yourself
+            if (data.bot_id === 'B234K1NS3') {
+                //console.log("don't talk to yourself");
+                return; // drop the message before saving.
+            }
 
-          // // don't talk to yourself
-          if (data.bot_id === 'B234K1NS3') {
-            //console.log("don't talk to yourself");
-            return; // drop the message before saving.
-          }
+            // other random things
+            if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
+                console.log('will not handle this message');
+                return;
+            }
 
-          // other random things
-          if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
-            console.log('will not handle this message');
-            return;
-          }
-
-          //store incoming messages
-          var message = new db.Message({
-            incoming: true,
-            thread_id: data.channel,
-            original_text: data.text,
-            user_id: data.user,
-            origin: 'slack',
-            source: data,
-          });
-
-
-          // clean up the text
-          message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-          if (message.text.charAt(0) == ':') {
-            message.text = message.text.substr(1); //remove : from beginning of string
-          }
-          message.text = message.text.trim(); //remove extra spaces on edges of string
-
-
-
-          console.log(message)
-
-
-           // "value": {selected: "yes", story_pointer: 0, handler: "story.answer"}
-            var array = []
-
-            array.push(survey.survey1[0]);
-
-            array = JSON.stringify(array);
-
-            console.log('???? !??!!? !? ! ',array)
-
-            var msgData = {
-              // attachments: [...],
-                icon_url:'http://kipthis.com/img/kip-icon.png',
-                username:'Kip',
-                attachments: array,
-                // replace_original: false,
-                // delete_original: false,
-                response_type: "in_channel"
-            };
-            web.chat.postMessage(message.source.channel, '', msgData, function(err,res) {
-                console.log(err)
+            //store incoming messages
+            var message = new db.Message({
+                incoming: true,
+                thread_id: data.channel,
+                original_text: data.text,
+                user_id: data.user,
+                origin: 'slack',
+                source: data,
             });
 
-        })
+            // clean up the text
+            message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+            if (message.text.charAt(0) == ':') {
+                message.text = message.text.substr(1); //remove : from beginning of string
+            }
+            message.text = message.text.trim(); //remove extra spaces on edges of string
 
+            co(function*() {
+                var builtStory = yield buildStory('slack',survey.survey1[0]);
+                web.chat.postMessage(message.source.channel, '', builtStory, function(err,res) {
+                    console.log(err)
+                });
+
+            }).catch((e) => {
+              kip.error(e, 'error loading slackbots');
+            })
+
+        })
 
     }).catch((e) => {
       kip.error(e, 'error loading slackbots');
@@ -389,6 +253,36 @@ function gatherSurveyTeams(){
 //response.origin = incoming origin
 var process_story = function*(response,origin){
 
+
+    //SAVING INCOMING ANSWER TO MONGO DB
+
+
+
+    // id: {
+    //   type: String,
+    //   unique: true,
+    //   index: true
+    // },
+    // answer: {
+    //     selected: String, //user response
+    //     handler: String, //how we're processing incoming button tap from user (i.e. story answer)
+    //     story_pointer: Number, //position in story
+    //     template_type: String, //button template i.e. survey1
+    //     text: String, //prompt question
+    //     type: String, //button probably
+    //     name: String //button label
+    // },
+    // ts: {
+    //   type: Date,
+    //   default: Date.now
+    // },
+    // origin: String,
+    // user: {
+    //     team_id: String,
+    //     user_id: String,
+    //     name: String,
+    //     channel_id: String
+    // }
     var story_pointer;
     var story_answer;
 
@@ -397,16 +291,75 @@ var process_story = function*(response,origin){
 
     response = JSON.parse(response)
 
+    //construct mongo answer
+    var cMongo = {
+        answer: {},
+        user: {},
+        team: {},
+        channel: {},
+        origin: 'slack'
+    }
 
-    if(response && response.actions && response.actions[0]){
+    if(response && response.actions && response.actions[0] && response.actions[0].value){
 
-        //response.actions = response.actions
-        //turn stringified object into object
+        //save results to mongo
+        cMongo.answer.name = response.actions[0].name;
 
-        console.log(response.actions[0])
+        var parseVal = JSON.parse(response.actions[0].value);   
+        cMongo.answer.selected = parseVal.selected;
+        cMongo.answer.story_pointer = parseVal.story_pointer;
+        cMongo.answer.handler = parseVal.handler;
 
-        story_pointer = response.actions[0].value.story_pointer;
-        story_answer = response.actions[0].value.selected;
+
+        //// * * * * * * * these are used for processing story
+        // story_pointer = parseVal.story_pointer;
+        // story_answer = parseVal.selected;
+    }
+
+    //STORE PROMPT
+    if(response && response.original_message && response.original_message.attachments && response.original_message.attachments[0]){
+        cMongo.answer.text = response.original_message.attachments[0].text; //get original prompt 
+    }
+
+    //STORE SOURCE OF QUESTIONS
+    if(response.user){
+        cMongo.user.id = response.user.id;
+        cMongo.user.name = response.user.name;
+    }
+    if(response.team){
+        cMongo.team.id = response.team.id;
+        cMongo.team.domain = response.team.domain;
+    }
+    if(response.channel){
+        cMongo.channel.id = response.channel.id;
+        cMongo.channel.name = response.channel.name;
+    }
+
+
+    console.log('???????????????? ',cMongo)
+    //save answer
+    var answer = new Story(cMongo);
+    answer.save(function (err) {
+      if (err) {
+        console.log(JSON.stringify(err));
+      } else {
+        console.log('meow');
+      }
+    });
+
+    //
+
+
+
+
+    
+
+    if(response && response.actions && response.actions[0] && response.actions[0].value){
+
+        var parseVal = JSON.parse(response.actions[0].value);
+
+        story_pointer = parseVal.story_pointer;
+        story_answer = parseVal.selected;
         
     }else {
         console.error('missing response.actions.value from SLACK');
@@ -417,25 +370,14 @@ var process_story = function*(response,origin){
         story_pointer= 0;
     }
 
-    console.log(story_pointer)
-    console.log(story_answer)
-
   
     //SAVE THIS quiz response TO USERS PERSONA as a session
 
-    // var query = {id: 'slack_'+sender},
-    //     update = { origin: sender.origin },
-    //     options = { upsert: true, new: true, setDefaultsOnInsert: true };
+
 
     // //change Chatuser to Storyuser and change var at head
-    // Storyuser.insert(query, update, options, function(err, user) {
-    //     var obj = {
-    //         recipient: sender,
-    //         sender: sender,
-    //         ts: Date.now(),
-    //         story: 'survey1',
-    //         pointer: pointer - 1
-    //     }
+    // Storyuser.insert(, function(err, user) {
+
     //     user.answers.push(JSON.stringify(obj))
     //     user.save(function (err) {
     //         if(err) {
@@ -444,53 +386,39 @@ var process_story = function*(response,origin){
     //     });
     // });
 
+
+
     if (story_pointer == survey.survey1.length - 1){
-        console.log('FIRING??!?!')
+
+        var sendText = {
+            text: 'Thanks for taking our survey - happy shopping! :blush:'
+        }
+
+        return sendText;
+        
         //stop running, send final message to user
-    }else if(story_answer == 'no'){
-        console.log('FIRING NO??!?!')
+    }else if(story_answer == 'no' && story_pointer == 0){
+
+        var sendText= {
+            text: 'Damn :('
+        }
+
+        return sendText; 
+
         //send other text back
     }   
     //advance to next question
     else {
-
-         console.log('CCCCCCCC')
-
         story_pointer++;
-
         var nextQuestion = survey.survey1[story_pointer];
 
         return nextQuestion;
-
-        // co(function* () {
-
-          
-
-        //   //build next question for correct platform
-
-         
-
-        //   console.log('built for slack: ',JSON.stringify(builtStory))
-        //   //send built story back user (next question)
-        //   //send_story(builtStory)
-
-        //   return builtStory;
-
-        // }).catch(function(err){
-        //     //???
-        //     console.log('😂😂')
-        //     console.error('co err ',err);
-        // });
-
-        //build story     
         
     }
 }
 
 
 function buildStory(origin,incoming){
-
-    console.log('DDDDDDDDDD')
 
     var storyObj = {
         attachments:[]
@@ -500,33 +428,54 @@ function buildStory(origin,incoming){
         //built object for slack
         case 'slack':
             //map buttons for slack
-            var buttonArray = incoming.actions.map(function(obj){ 
-                var rObj = {};
-                rObj.name = obj.name;
-                rObj.text = obj.text;
-                rObj.type = obj.type;
 
-                //stringify value object before sending to slack
-                rObj.value = JSON.stringify(obj.value);
-                return rObj;
-            });
+            if (incoming && incoming.actions){
+                var buttonArray = incoming.actions.map(function(obj){ 
+                    var rObj = {};
+                    rObj.name = obj.name;
+                    rObj.text = obj.text;
+                    rObj.type = obj.type;
 
-            var attachment = {
-                "text": incoming.text,
-                "fallback": incoming.text,
-                "callback_id": incoming.callback_id,
-                "color": "#3AA3E3",
-                "attachment_type": "default",
-                "actions": buttonArray
+                    //stringify value object before sending to slack
+                    rObj.value = JSON.stringify(obj.value);
+                    return rObj;
+                });
+
+                console.log('BUTTON ARRAY ',buttonArray)
+
+                var attachment = {
+                    "text": incoming.text,
+                    "fallback": incoming.text,
+                    "callback_id": incoming.callback_id,
+                    "color": "#3AA3E3",
+                    "attachment_type": "default",
+                    "actions": buttonArray
+                }
+
+                console.log('WE ATTACH THIS ',attachment)
+
+                //add buttons to obj to push to attachements:
+                storyObj.attachments.push(attachment)        
             }
+            else if (incoming && incoming.text){
 
-            //add buttons to obj to push to attachements:
-            storyObj.attachments.push(attachment)
-
+                var attachment = {
+                    "text": incoming.text,
+                    "fallback": incoming.text
+                }
+                storyObj.attachments.push(attachment)
+            }
+            else {
+                var attachment = {
+                    "text": 'error',
+                    "fallback": 'error',
+                    "color": "#3AA3E3"
+                }
+                storyObj.attachments.push(attachment)
+            }
             //adding slack specific stuff to the object
         break;
     }
-    
     return storyObj;
 }
 
