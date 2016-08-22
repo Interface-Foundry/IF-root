@@ -12,37 +12,38 @@ class SlackResponder {
     constructor() {
 	this.responderType = 'slack';
 	this.imageFileExtensions = ['png', 'jpg', 'gif', 'jpeg', 'sgv'];
-	return this;
-    }
 
-    createMessage(userData) {
+	this.createMessage(userData) {
 
-	return new db.Message({
-            incoming: true,
-            thread_id: data.channel,
-            original_text: data.text,
-            user_id: data.user,
-            origin: this.responderType,
-            source: data,
-	});
-    }
-
-
-    isImageSearchMessage(data) {
-	if (data.subtype === 'file_share' && imageFileExtensions.indexOf(data.file.filetype.toLowerCase()) >= 0){
-	    return true;
-	}
-	return false;
-    }
-
-    searchForImage(data) {
-	message = this.createMessage(data);
-	return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
-	    message.text = res;
-	    message.save().then(() => {
-		queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'));
+	    return new db.Message({
+		incoming: true,
+		thread_id: data.channel,
+		original_text: data.text,
+		user_id: data.user,
+		origin: this.responderType,
+		source: data,
 	    });
-        });
+	}
+
+
+	this.isImageSearchMessage(data) {
+	    if (data.subtype === 'file_share' && this.imageFileExtensions.indexOf(data.file.filetype.toLowerCase()) >= 0){
+		return true;
+	    }
+	    return false;
+	}
+
+
+	this.searchForImage(data) {
+	    message = this.createMessage(data);
+	    return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
+		message.text = res;
+		message.save().then(() => {
+		    queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'));
+		});
+            });
+	}
+	return this;
     }
 
     respond(data) {
