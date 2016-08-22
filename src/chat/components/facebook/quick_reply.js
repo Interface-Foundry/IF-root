@@ -20,7 +20,7 @@ var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
 var next = require("co-next") 
-fb_utility = require('./fb_utility');
+const fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 var FBResponder = require('../responders');
 var FBButton = require('./fbcontrols');
@@ -92,13 +92,14 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                     fb_memory[sender].mode = EventTypes.SHOPPING;
             }
 	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-            new FBResponder(sender).respond(last_message, postback);
+            new FBResponder().respond(last_message, postback, sender);
         }
     }
     else if (postback.action && postback.action == EventTypes.TAKE_QUIZ){
         fb_memory[sender].mode = EventTypes.ONBOARDING;
         fb_utility.send_story(sender, 0, fbtoken);
     }
+    /*
     else if (postback.action && postback.action == EventTypes.CHEAPER) {  // this is where we should be for a "cheaper" button press
 
         console.log('#################### found the missing link!')
@@ -107,9 +108,10 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         } 
 	else if (last_message) {	    
 	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-            new FBResponder(sender).respond(last_message, userInputEvent);
+            new FBResponder().respond(last_message, userInputEvent, sender);
         }
     } 
+    */
     else if (postback.action && postback.action == EventTypes.MODIFY_ONE) {  // this is where we should be for a "cheaper" button press
 
         console.log('+++ ' + event.message)
@@ -118,7 +120,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         } 
 	else if (last_message) {	    
 	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-            new FBResponder(sender).respond(last_message, userInputEvent);
+            new FBResponder().respond(last_message, userInputEvent, sender);
         }
     } 
     else if (postback.action && postback.action == EventTypes.SIMILAR) {
@@ -128,7 +130,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 	else if (last_message) {
 	    // also pass in an indicator of which submenu action was selected
 	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-            new FBResponder(sender).respond(last_message, userInputEvent);			
+            new FBResponder().respond(last_message, userInputEvent, sender);			
         }
     }
     //
@@ -241,7 +243,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                     fb_memory[sender].mode = 'shopping';
 		}
 		userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-	        new FBResponder(sender).respond(last_message, userInputEvent);           
+	        new FBResponder().respond(last_message, userInputEvent, sender);           
           }
         } 
         /*	  

@@ -7,9 +7,9 @@ const EventTypes = require('./constants');
 
 
 class FBResponder {
-    constructor(sender)  {
-        this.responderType = 'facebook';
-        this.sender = sender;
+    constructor()  {
+        this.responderType = 'facebook';        
+
         this.actionTextMap = {
             'cheaper': function(userInputControl){ return userInputControl.selected + ' but cheaper'; },
             'similar': function(userInputControl){ return 'more like ' + userInputControl.selected; },
@@ -91,31 +91,52 @@ class FBResponder {
 	    }
 	    return paramGenerator(userInputEvent.data);	    
 	}
+
+	this.generateID = function(sender) {
+	    return [this.responderType, sender.toString()].join('_');
+	}
 	
 
         return this;
     }
 
-    respond(lastMessage, userInputEvent) { 
+    respond(lastMessage, userInputEvent, sender) { 
 
 
-	console.log('############# Inside FBResponder.respond().')
-	console.log('############ user input event : ' + JSON.stringify(userInputEvent))
+	console.log('############# Inside FBResponder.respond().');
+	console.log('############ user input event : ' + JSON.stringify(userInputEvent));
+	console.log('############ user input event type is ' + userInputEvent.type);
 	
+
+	var inputText = _.get(userInputEvent, 'text', '').trim();
+	if(userInputEvent.type ==  EventTypes.TEXT_INPUT && inputText === ''){
+    
+	    throw 'EXCEPTION: Attempting to process a text-type input event with no text.'
+	}
+
 	// if a control was actuated, 
 	// the message must include the control name and the selection (or component mode) 
 	
         var message = new db.Message({
             incoming: true,
-            thread_id: this.responderType + '_' + this.sender.toString(),
+            thread_id: this.generateID(sender),
             resolved: false,
             user_id: lastMessage.user_id,	       
-            origin: this.responderType,	    	    
-            text: this.mapActionToText(userInputEvent),
+            origin: this.responderType,	  
+  	    original_text: _.get(userInputEvent, 'text', ''),
+            text: inputText,
 	    control_group: this.mapActionToMenuText(userInputEvent),
-            source: lastMessage.source,
+	    source: {
+                            'origin': this.responderType,
+                            'channel': sender.toString(),
+		            'org': this.generateID(sender),
+                            'id': this.generateID(sender),
+                            'user': sender.toString()
+                        },
             amazon: lastMessage.amazon
 	});
+
+	console.log('################ Generated message:\n' + JSON.stringify(message, null, 4))
 
 	if(userInputEvent.type === EventTypes.BUTTON_PRESS){
 	    // NOTE: a better name for this would be "message.context", because woof.

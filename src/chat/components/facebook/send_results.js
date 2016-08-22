@@ -27,10 +27,10 @@ var send_results = function* (channel, text, results, outgoing, fbtoken) {
 
   var giphy_gif = ''
 
+// TODO: convince people to STOP PUTTING SECRETS IN CODE
 request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
     if (err) console.log(err);
 
-    // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
     giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
 
     var cards = results.map((result, i) => {
@@ -115,7 +115,8 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
                                 selected: "1"
                             })
                       },
-		//new FBButton('Color', constants.MODIFY_ONE, constants.COLOR_SUBMENU, channel, constants.COLOR).render(),
+		// TODO: find out the proper taxonomy for color submenu and emoji; are they actions or instructions?
+		// new FBButton('Color', constants.MODIFY_ONE, constants.COLOR_SUBMENU, channel, constants.COLOR).render(),
                       {
                         "content_type":"text",
                         "title":"Emoji",
@@ -125,22 +126,9 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
                                 selected: "1"
                             })
                       }
-		//new FBButton('Emoji', constants.MODIFY_ONE, constants.EMOJI, channel, constants.EMOJI).render()
+		// new FBButton('Emoji', constants.MODIFY_ONE, constants.EMOJI, channel, constants.EMOJI).render()
                     ]
         };
-
-        //prevents showing back when there's no back
-        // if (backCache > 0){
-        //     console.log('BACK CACHE')
-        //     modify_menu.quick_replies.push({
-        //         "content_type":"text",
-        //         "title":" < Back",
-        //         "payload": JSON.stringify({
-        //                 action: "back",
-        //                 type:"last_search"
-        //             })
-        //       });
-        // }
 
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',

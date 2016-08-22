@@ -95,8 +95,15 @@ var send_text = require('./send_text');
 var send_focus = require('./send_focus');
 var send_cart = require('./send_cart');
 
+const EventTypes = require('./constants');
+var FBResponder = require('../responders');
+
+
 if (process.env.NODE_ENV === 'development_dtaylor'){
     fbtoken = process.env.FBTOKEN;
+    if(fbtoken === null || fbtoken === undefined){
+	throw('EXCEPTION: the environment variable FBTOKEN has not been set.')
+    }
 }
 
 if (process.env.NODE_ENV === 'development_alyx'){
@@ -210,7 +217,9 @@ app.post('/facebook', next(function*(req, res, next) {
         }
         //REGULAR INCOMING TEXT MESSAGES
         else if (event.message && event.message.text) {
-                text = event.message.text;
+	     //var postback =event.message.quick_reply.payload;
+
+                text = event.message.text; // TODO: get rid of global variables
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
                     text = res;
@@ -219,11 +228,16 @@ app.post('/facebook', next(function*(req, res, next) {
                 text = emojiText.convert(text,{delimiter: ' '});
                 //emoji parser doesnt recognize robot emoji wtf
                 if (text.indexOf('🤖') > -1) text = text.replace('🤖','robot')
+
                  //Check if user is still in modify mode
                 if(fb_memory[sender].mode == 'modify') {
                      //Reset mode back to shopping
                      fb_memory[sender].mode = 'shopping';
                     //Send modify query instead of the usual
+
+		    var userInputEvent = { 'type': EventTypes.TEXT_INPUT, 'text': text }
+		    new FBResponder().respond(event.message, userInputEvent, sender);
+		    /*
                      var message = new db.Message({
                         incoming: true,
                         thread_id: "facebook_" + sender.toString(),
@@ -245,8 +259,13 @@ app.post('/facebook', next(function*(req, res, next) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
-                } else {
-                    console.log(JSON.stringify(req.body));
+		    */
+            } 
+	    else {
+		var userInputEvent = { 'type': EventTypes.TEXT_INPUT, 'text': text }
+		new FBResponder().respond(event.message, userInputEvent, sender);
+                    //console.log(JSON.stringify(req.body));
+		    /*
                     var message = new db.Message({
                         incoming: true,
                         thread_id: "facebook_" + sender.toString(),
@@ -268,6 +287,7 @@ app.post('/facebook', next(function*(req, res, next) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
+		    */
                 }
         }
         //user sent image
@@ -378,7 +398,8 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             console.log(e);
             outgoing.ack();
         })
-    } catch ( e ) {
+    } 
+    catch ( e ) {
         kip.err(e);
     }
 
