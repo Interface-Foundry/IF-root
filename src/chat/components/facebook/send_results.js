@@ -11,7 +11,7 @@ var fs = require('fs');
 //set env vars
 var config = require('../../../config');
 var quiz = require('./onboard_quiz');
-var FBButton = require('./fbcontrols');
+var FBButton = require('../controls').FBButton;
 var constants = require('../constants');
 
 

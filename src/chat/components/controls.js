@@ -36,4 +36,6 @@ class FBButton{
 };
 
 
-module.exports = FBButton;
+module.exports = {
+    'FBButton': FBButton
+};

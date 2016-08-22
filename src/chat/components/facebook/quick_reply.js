@@ -23,7 +23,7 @@ var next = require("co-next")
 const fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 var FBResponder = require('../responders');
-var FBButton = require('./fbcontrols');
+var FBButton = require('../controls').FBButton;
 const EventTypes = require('../constants');
 const constants = require('../constants');
 
@@ -99,19 +99,6 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         fb_memory[sender].mode = EventTypes.ONBOARDING;
         fb_utility.send_story(sender, 0, fbtoken);
     }
-    /*
-    else if (postback.action && postback.action == EventTypes.CHEAPER) {  // this is where we should be for a "cheaper" button press
-
-        console.log('#################### found the missing link!')
-        if (!last_message) {
-            return console.log('No message found');
-        } 
-	else if (last_message) {	    
-	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-            new FBResponder().respond(last_message, userInputEvent, sender);
-        }
-    } 
-    */
     else if (postback.action && postback.action == EventTypes.MODIFY_ONE) {  // this is where we should be for a "cheaper" button press
 
         console.log('+++ ' + event.message)

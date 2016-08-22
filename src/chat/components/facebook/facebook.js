@@ -95,7 +95,7 @@ var send_text = require('./send_text');
 var send_focus = require('./send_focus');
 var send_cart = require('./send_cart');
 
-const EventTypes = require('./constants');
+const EventTypes = require('../constants');
 var FBResponder = require('../responders');
 
 

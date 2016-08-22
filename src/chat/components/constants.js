@@ -2,6 +2,7 @@
 
 
 module.exports = Object.freeze({
+    TEXT_INPUT: 'text_input',
     SHOPPING:  'shopping',
     BUTTON_PRESS: 'button_press',
     MENU_SELECTION: 'menu_select',
