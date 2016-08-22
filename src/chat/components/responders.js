@@ -14,11 +14,7 @@ class SlackResponder {
 	this.imageFileExtensions = ['png', 'jpg', 'gif', 'jpeg', 'sgv'];
 
 
-	return this;
-    }
-
-
-    	createMessage(userData) {
+	this.createMessage = function(userData) {
 
 	    return new db.Message({
 		incoming: true,
@@ -31,7 +27,7 @@ class SlackResponder {
 	}
 
 
-	isImageSearchMessage(data) {
+	this.messageIsImageSearch = function(data) {
 	    if (data.subtype === 'file_share' && this.imageFileExtensions.indexOf(data.file.filetype.toLowerCase()) >= 0){
 		return true;
 	    }
@@ -39,7 +35,7 @@ class SlackResponder {
 	}
 
 
-	searchForImage(data) {
+	this.searchForImage = function(data) {
 	    message = this.createMessage(data);
 	    return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
 		message.text = res;
@@ -49,8 +45,13 @@ class SlackResponder {
             });
 	}
 
+	return this;
+    }
+
 
     respond(data) {
+	console.log('################ inside SlackResponder.respond().');
+
 	var message = this.createMessage(data);
 
 	// clean up the text

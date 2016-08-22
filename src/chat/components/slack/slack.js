@@ -112,7 +112,7 @@ co(function*() {
 	}
 
 	var responder = new SlackResponder();
-	if(responder.detectImageSearch(data)) {
+	if(responder.messageIsImageSearch(data)) {
 	    return responder.searchForImage(data);	    
 	}
 
