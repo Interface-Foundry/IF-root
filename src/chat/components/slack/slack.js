@@ -111,7 +111,7 @@ co(function*() {
             return; // drop the message before saving.
 	}
 
-	responder = new SlackResponder();
+	var responder = new SlackResponder();
 	if responder.detectImageSearch(data) {
 	    return responder.searchForImage(data);	    
 	}
