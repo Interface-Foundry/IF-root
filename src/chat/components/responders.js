@@ -6,6 +6,64 @@ var _ = require('lodash');
 const EventTypes = require('./constants');
 
 
+
+class SlackResponder {
+
+    constructor() {
+	this.responderType = 'slack';
+	this.imageFileExtensions = ['png', 'jpg', 'gif', 'jpeg', 'sgv'];
+	return this;
+    }
+
+    createMessage(userData) {
+
+	return new db.Message({
+            incoming: true,
+            thread_id: data.channel,
+            original_text: data.text,
+            user_id: data.user,
+            origin: this.responderType,
+            source: data,
+	});
+    }
+
+
+    isImageSearchMessage(data) {
+	if (data.subtype === 'file_share' && imageFileExtensions.indexOf(data.file.filetype.toLowerCase()) >= 0){
+	    return true;
+	}
+	return false;
+    }
+
+    searchForImage(data) {
+	message = this.createMessage(data);
+	return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
+	    message.text = res;
+	    message.save().then(() => {
+		queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'));
+	    });
+        });
+    }
+
+    respond(data) {
+	var message this.createMessage(data);
+
+	// clean up the text
+	message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+	if (message.text.charAt(0) == ':') {
+            message.text = message.text.substr(1); //remove : from beginning of string
+	}
+	message.text = message.text.trim(); //remove extra spaces on edges of string
+
+	// queue it up for processing
+	message.save().then(() => {
+            queue.publish('incoming', message, [this.responderType, data.channel, data.ts].join('.'))
+	});
+   }
+}
+
+
+
 class FBResponder {
     constructor()  {
         this.responderType = 'facebook';        
@@ -96,7 +154,6 @@ class FBResponder {
 	    return [this.responderType, sender.toString()].join('_');
 	}
 	
-
         return this;
     }
 
@@ -162,4 +219,7 @@ class FBResponder {
     }
 };
 
-module.exports = FBResponder;
+module.exports = {
+    'FBResponder': FBResponder,
+    'SlackResponder': SlackResponder
+}

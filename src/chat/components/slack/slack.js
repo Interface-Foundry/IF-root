@@ -51,6 +51,9 @@ var image_search = require('../image_search');
 var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
+
+var SlackResponder = require('./responders').SlackResponder;
+
 var slackConnections = {};
 
 //
@@ -99,9 +102,22 @@ co(function*() {
     //
     rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
-      kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
-      kip.debug(data);
+	kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
+	kip.debug(data);
 
+	// don't talk to yourself
+	if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
+            kip.debug("don't talk to yourself");
+            return; // drop the message before saving.
+	}
+
+	responder = new SlackResponder();
+	if responder.detectImageSearch(data) {
+	    return responder.searchForImage(data);	    
+	}
+
+	responder.respond(data);
+      /*
       var message = new db.Message({
         incoming: true,
         thread_id: data.channel,
@@ -146,6 +162,7 @@ co(function*() {
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
       });
+      */
     })
   });
 }).catch((e) => {
