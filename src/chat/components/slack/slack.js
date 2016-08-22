@@ -52,7 +52,7 @@ var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
 
-var SlackResponder = require('./responders').SlackResponder;
+var SlackResponder = require('../responders').SlackResponder;
 
 var slackConnections = {};
 
@@ -112,7 +112,7 @@ co(function*() {
 	}
 
 	var responder = new SlackResponder();
-	if responder.detectImageSearch(data) {
+	if(responder.detectImageSearch(data)) {
 	    return responder.searchForImage(data);	    
 	}
 

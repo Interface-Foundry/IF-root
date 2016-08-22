@@ -13,20 +13,25 @@ class SlackResponder {
 	this.responderType = 'slack';
 	this.imageFileExtensions = ['png', 'jpg', 'gif', 'jpeg', 'sgv'];
 
-	this.createMessage(userData) {
+
+	return this;
+    }
+
+
+    	createMessage(userData) {
 
 	    return new db.Message({
 		incoming: true,
-		thread_id: data.channel,
-		original_text: data.text,
-		user_id: data.user,
+		thread_id: userData.channel,
+		original_text: userData.text,
+		user_id: userData.user,
 		origin: this.responderType,
-		source: data,
+		source: userData
 	    });
 	}
 
 
-	this.isImageSearchMessage(data) {
+	isImageSearchMessage(data) {
 	    if (data.subtype === 'file_share' && this.imageFileExtensions.indexOf(data.file.filetype.toLowerCase()) >= 0){
 		return true;
 	    }
@@ -34,7 +39,7 @@ class SlackResponder {
 	}
 
 
-	this.searchForImage(data) {
+	searchForImage(data) {
 	    message = this.createMessage(data);
 	    return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
 		message.text = res;
@@ -43,11 +48,10 @@ class SlackResponder {
 		});
             });
 	}
-	return this;
-    }
+
 
     respond(data) {
-	var message this.createMessage(data);
+	var message = this.createMessage(data);
 
 	// clean up the text
 	message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
