@@ -16,6 +16,16 @@
 "use strict";
 
 
+class OptionSet{
+
+    constructor(setName, optionArray) {
+
+	this.setName = setName;
+	this.options = optionArray
+    }
+}
+
+
 
 /**
  * FBButton class for encapsulating Facebook UI buttons

@@ -2,19 +2,23 @@
 
 
 module.exports = Object.freeze({
-    TEXT_INPUT: 'text_input',
-    SHOPPING:  'shopping',
-    BUTTON_PRESS: 'button_press',
+    // user event modes
+    ONBOARDING: 'onboarding',
+    SHOPPING: 'shopping',    
+    // user actions    
     MENU_SELECTION: 'menu_select',
     MODIFY_ONE: 'modify.one', 
-    COLOR_SUBMENU: 'sub_menu_color',
-    ONBOARDING:   'onboarding',
-    CHEAPER:  'cheaper',
-    EMOJI: 'emoji',
-    GENERIC_DETAIL: 'genericDetail',
-    TAKE_QUIZ: 'take_quiz',
     SIMILAR: 'similar',
-    BACK: 'back',
+    COLOR_SUBMENU: 'sub_menu_color',    
+    // instructions
+    CHEAPER:  'cheaper',
+    GENERIC_DETAIL: 'genericDetail',
+    EMOJI: 'emoji',
+    // other
+    TAKE_QUIZ: 'take_quiz',    
+    BUTTON_PRESS: 'button_press',
+    TEXT_INPUT: 'text_input',
+    BACK: 'back'
 });
 
 
