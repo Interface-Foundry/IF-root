@@ -1,12 +1,13 @@
 /*eslint-env es6*/
-var db = require('../../db')
-var _ = require('lodash')
-var moment = require('moment')
-var co = require('co')
-var sleep = require('co-sleep')
-var natural = require('natural')
+var db = require('../../db');
+var _ = require('lodash');
+var moment = require('moment');
+var co = require('co');
+var sleep = require('co-sleep');
+var natural = require('natural');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var async = require('async');
+var amazon_variety = require('amazon_variety');
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
@@ -61,7 +62,15 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     // api can and will return items that you cannot buy.  So we have to just
     // ignore these things.
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
-    return Promise.reject('Item not available');
+
+    // REMOVE ALL OF THIS LATER
+    try {
+
+    }
+    catch (err)
+    {
+      return Promise.reject('Item not available');
+    }
   }
 
   return co(function*() {
@@ -94,7 +103,7 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     if (!ok && _.get(cart, 'amazon.CartId[0]')) {
       var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
       if (typeof client === 'undefined') client = aws_clients[DEFAULT_CLIENT];
-      
+
       // attempt to add the item to the cart for the first time, check for errors
       var res = yield client.addCart({
         CartId: cart.amazon.CartId[0],
@@ -291,7 +300,7 @@ module.exports.removeAllOfItem = function(slack_id, number) {
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
-    
+
     var unique_items = _.uniqBy(cart.aggregate_items, 'ASIN');
     var ASIN_to_remove = _.get(unique_items, `${number - 1}.ASIN`);
     var item_to_remove = _.get(unique_items, `${number - 1}.title`);

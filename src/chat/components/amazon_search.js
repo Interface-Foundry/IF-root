@@ -70,11 +70,44 @@ params:
 */
 
 
+/*
+* Lookup object based on ASIN
+*
+* @param {Object} params should be Object like {asin: ASIN, IdType: 'ASIN'}
+*/
+var lookup = function*(params, origin) {
+  var timer = new kip.SavedTimer('lookup.timer', {params: params})
+  db.Metrics.log('lookup.amazon', params)
+  if (!params.asin) {
+    winston.info('error params: ', params)
+    throw new Error('No Asin provided')
+  }
 
+  params.IdType = params.IdType || 'ASIN'
+
+  amazonParams = {
+    Condition: 'New',
+    IdType: params.IdType,
+    ItemId: params.asin
+  }
+  timer.tic('requesting amazon ItemLookup api');
+  try {
+    winston.debug('looking up asin', amazonParams);
+    var result = yield get_client().itemLookup(amazonParams);
+  }
+  catch (e) {
+    throw new Error('Something something asin lookup failed')
+  }
+  timer.tic('got results from ItemLookup api')
+
+  var enhanced_results = yield enhance_results(result,origin, timer)
+  timer.tic('done enhancing result')
+  timer.stop()
+  return enhanced_results
+}
  // {"mode":"shopping",
  // "action":"modify.one",
  // "params":{"query":"shoes","focus":[1],"val":[{"hsl":[170,255,127],"rgb":[0,0,255],"name":"Blue","hex":"#0000FF"},{"hsl":[170,255,64],"rgb":[0,0,128],"name":"Navy Blue","hex":"#000080"},{"hsl":[159,185,145],"rgb":[65,105,225],"name":"Royal Blue","hex":"#4169E1"},{"hsl":[194,255,65],"rgb":[75,0,130],"name":"Indigo","hex":"#4B0082"}],"type":"color"},"_id":"578fa1f16e7ef4c065933966"}
-
 
 var search = function*(params,origin) {
   var timer = new kip.SavedTimer('search.timer', {params: params, origin: origin})
@@ -484,6 +517,7 @@ var getPricesPromise = function(item) {
 
 module.exports.similar = similar;
 module.exports.search = search;
+module.exports.lookup = lookup;
 
 /*  TESTING
   _______     _____  ______   _______   __    __   __    ______
