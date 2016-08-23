@@ -23,7 +23,7 @@ var mailerTransport = require('../../mail/IF_mail.js');
 
 //load mongoose models
 var mongoose = require('mongoose');
-var db = require('../../db');
+require('kip');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
@@ -34,7 +34,8 @@ var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 
 var queue = require('./queue-mongo');
-var kip = require('../../kip');
+var onboarding = require('./modes/onboarding')
+var shopping = require('./modes/shopping')
 
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
@@ -84,6 +85,34 @@ function typing(message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
+function isCancelIntent(message) {
+  var text = message.text.toLowerCase().replace(/^[a-z]/g, '')
+  var cancelPhrases = [
+    'stop',
+    'exit',
+    'cancel',
+    'start over',
+    'quit'
+  ]
+
+  return cancelPhrases.indexOf(text) >= 0
+
+}
+
+function printMode(message) {
+  switch (message.mode) {
+    case 'shopping':
+      winston.debug('In', 'SHOPPING'.rainbow, 'mode 👚👖👗👝👛👜🏬🏪💳🛍')
+      break
+    case 'onboarding':
+      winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
+      break
+    default:
+      winston.debug('no mode known such mystery 🕵 ')
+      break
+  }
+}
+
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
@@ -118,9 +147,28 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     // Check if the user is trying to escape some mode
-    if (backToShopping(message)) {
-
+    if (isCancelIntent(message)) {
+      winston.debug('cancel intent triggered')
+      message.mode = 'shopping'
     }
+
+    if (message.text.indexOf('onboard') >= 0) {
+      message.mode = 'onboarding'
+    }
+
+    debugger;
+
+    if (!message.mode) {
+      if (_.get(message, 'history[0].mode')) {
+        message.mode = _.get(message, 'history[0].mode')
+      } else if (_.get(message, 'history[1].mode')) {
+        message.mode = _.get(message, 'history[1].mode')
+      } else {
+        message.mode = 'shopping'
+      }
+    }
+
+    printMode(message)
 
     // Otherwise, handle the mode that the user is in
 
@@ -128,19 +176,21 @@ queue.topic('incoming').subscribe(incoming => {
     //MODE SWITCHER
     switch(message.mode) {
       case 'onboarding':
-        winston.debug('ONBAORDING MODE')
+        if (message.origin === 'slack') {
+          var replies = yield onboarding.handle(message)
+        } else {
+          //check for valid country
+          //turn this into a function
+          if (text == 'Singapore' || text == 'United States') {
+            winston.debug('SAVING TO DB')
+            replies = ['Saved country!'];
 
-        //check for valid country
-        //turn this into a function
-        if(text == 'Singapore' || text == 'United States'){
-          winston.debug('SAVING TO DB')
-          replies = ['Saved country!'];
-
-          //access onboard template per source origin!!!!
-          modes[user.id] = 'shopping';
-        }else {
-          replies = ['Didnt understand, please choose a country thx'];
-          winston.debug('Didnt understand, please choose a country thx')
+            //access onboard template per source origin!!!!
+            modes[user.id] = 'shopping';
+          } else {
+            replies = ['Didnt understand, please choose a country thx'];
+            winston.debug('Didnt understand, please choose a country thx')
+          }
         }
       break;
       //default Kip Mode shopping

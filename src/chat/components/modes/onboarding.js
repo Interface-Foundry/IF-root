@@ -17,6 +17,8 @@ function * handle(message) {
   }
 }
 
+module.exports.handle = handle;
+
 /**
  * Starts the onboarding conversation
  * 
@@ -39,10 +41,14 @@ handlers['get-admins.ask'] = function * (message) {
   var reply = 'Who manages the office purchases? Type something like `me` or `me and @jane`'
   
   // if not slack, move on to the next part of the onboarding convo
-  if (message.source !== 'slack') {
+  if (message.origin !== 'slack') {
+    kip.err('not slack showing up in slack-only onboarding')
     return handlers['finished'](message);
   }
-  return message_tools.text_reply(message, reply)
+  var msg = message_tools.text_reply(message, reply)
+  msg.mode = 'onboarding'
+  msg.action = 'get-admins.ask'
+  return msg;
 }
 
 /**
@@ -60,100 +66,45 @@ handlers['get-admins.response'] = function * (message) {
     'source.team_id': message.source.team_id
   }).exec()
 
-  // fire the gremlins because they suck at their job
-  function * fireGremlins(){
-    // check for mentioned users
-    // for a typed message like "that would be @dan"
-    // the response.text would be like  "that would be <@U0R6H9BKN>"
-    var office_gremlins = message.text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
-    message.text = response.text.replace(/(\<\@[^\s]+\>|\bme\b)/ig, '');
+  // check for mentioned users
+  // for a typed message like "that would be @dan"
+  // the response.text would be like  "that would be <@U0R6H9BKN>"
+  var office_gremlins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
+  
+  // replace "me" with the user's id, and <@U12345> with just U12345
+  office_gremlins = office_gremlins.map(g => {
+    if (g === 'me') {
+      return message.user_id
+    } else {
+      return g.replace(/(\<\@|\>)/g, '')
+    }
+  })
 
-    // also look for users mentioned by name without the @ symbol
-    var users = yield db.Chatusers.find({
-      team_id: convo.slackbot.team_id,
-      is_bot: {$ne: true},
-      deleted: {$ne: true}
-    }).select('id name')
 
-      users.map((u) => {
-        var re = new RegExp('\\b' + u.name + '\\b', 'i')
-        if (response.text.match(re)) {
-          office_gremlins.push('<@' + u.id + '>');
-        }
-      })
+  // also look for users mentioned by name without the @ symbol
+  var users = yield db.Chatusers.find({
+    team_id: team.team_id,
+    is_bot: {$ne: true},
+    deleted: {$ne: true}
+  }).select('id name')
 
-      if (office_gremlins && office_gremlins.length > 0 && !user_is_admin) {
-        team.meta.office_assistants = office_gremlins.map(function(handle) {
-          if (handle.toLowerCase() === 'me') {
-            user_is_admin = true;
-            return response.user;
-          } else {
-            return handle.replace(/(\<\@|\>)/g, '');
-          }
-        })
+  users.map((u) => {
+    var re = new RegExp('\\b' + u.name + '\\b', 'i')
+    if (message.original_text.match(re)) {
+      office_gremlins.push(u.id);
+    }
+  })
 
-        console.log('0🔸',office_gremlins)
-        office_gremlins = office_gremlins.map(function(handle) {
-          if (handle.toLowerCase() === 'me') {
-            return 'you';
-          } else {
-            return handle;
-          }
-        });
-        console.log('1🔸',office_gremlins)
+  office_gremlins = _.uniq(office_gremlins)
 
-        if (office_gremlins.length > 1) {
-          var last = office_gremlins.pop();
-          office_gremlins[office_gremlins.length-1] += ' and ' + last;
-        }
+  // add the admin strings into the reply message
+  reply_success = reply_success.replace('$ADMINS', office_gremlins.map(g => {
+    return '<@' + g + '>'
+  }).join(', ').replace(/,([^,]*)$/, ' and $1'))
 
-      }
+  // TODO send special message to admins
 
-      // check if we didn't get it
-      if (!team.meta.office_assistants || team.meta.office_assistants.length === 0) {
-        // we didn't get it... ask again.
-        convo.say('I didn\'t quite understand that.  Type "skip" to skip')
-        askWhoManagesPurchases(response, convo);
-        return convo.next();
-      }
-
-      db.Slackbots.update({_id: convo.slackbot._id}, {$set: {'meta.office_assistants': team.meta.office_assistants}}, function(e) {
-        if (e) { console.error(e) }
-
-        // send the office admins welcome messages and show them all the welcome video
-        team.meta.office_assistants.map(function(id) {
-          if (id === response.user) { return; }
-          console.log('starting admin welcome conversation with ' + id)
-          var slackbot = convo.slackbot;
-
-          var bot = controller.spawn({
-            token: slackbot.bot.bot_access_token
-          })
-
-          bot.startRTM(function(err, bot, payload) {
-            if (err) {
-              throw new Error('Could not connect to Slack');
-            }
-
-            bot.startPrivateConversation({user: id}, function(response, convo) {
-              // inject the slackbot into the convo so that we can save it in the db
-              if (!convo) {
-                return; // i guess this user doesn't exist anymore?
-              }
-              convo.slackbot = slackbot;
-              convo.on('end', function() {
-
-                bot.closeRTM();
-
-                var objData = {
-                  mode:'shopping',
-                  source: {
-                    id: convo.slackbot.team_id + "_" + id,
-                  }
-                }
-                ioKip.updateMode(objData);
-              })
-
+/*
               var attachments = [
                   {
                     // "pretext": "Ok thanks! Done with cart members 😊",
@@ -220,99 +171,34 @@ handlers['get-admins.response'] = function * (message) {
                     "fallback":"Welcome"
                   }
               ];
+              */
 
-              var resStatus = {
-                username: 'Kip',
-                text: "",
-                attachments: attachments,
-                fallback: 'Welcome'
-              };
-
-              convo.say(resStatus);
-
-              convo.next()
-              // convo.next()
-              //welcomeVid(response, convo);
-            });
-          });
-
-        })
-
-        // show this user the welcome video
-        //welcomeVid(response, convo);
-      });
-  }
-
-  if (message.source !== 'slack') {
-    kip.err(`cannot parse admins for any platform besides slack, got message.source: ${message.source}, message._id: ${message._id.toString()}`)
-    admins = [message.user_id]
-    user_is_admin = true;
-    var reply_message = message_tools.text_reply(message, reply_success)
-  } else {
-    //
-    // parse out all the admins in the text
-    //
-
-    // check for "me" or "i do" but no other users on slack
-    if (message.text.indexOf('<@') < 0 && message.text.toLowerCase().match(/(\bme\b|\bi do\b)/) || message.text.toLowerCase().trim() === 'skip') {
-      team.meta.office_assistants = [message.user_id];
-      user_is_admin = true;
-      specialAdminMessage();
-
-    //contains me && <@user> but w.out 'and'
-    } else if (message.text.indexOf('me ') > -1){
-
-      fireGremlins();
-
-      team.meta.office_assistants = [message.user];
-      user_is_admin = true;
-
-      var attachments = [
-          {
-            "image_url":"http://kipthis.com/kip_modes/mode_welcome.png",
-            "color":"#45a5f4",
-            "fallback":"Welcome",
-            'text':''
-          },
-          {
-            "text": "Great!  I'll keep you and the other admins up-to-date on what your team members are adding to the office shopping cart 😊",
-            // "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
-            "color":"#45a5f4",
-            "fallback":"Welcome"
-          }
-      ];
-
-      var resStatus = {
-        username: 'Kip',
-        text: "",
-        attachments: attachments,
-        fallback: 'Welcome'
-      };
+  // if (message.origin !== 'slack') {
+  //   kip.err(`cannot parse admins for any platform besides slack, got message.source: ${message.origin}, message._id: ${message._id.toString()}`)
+  //   admins = [message.user_id]
+  //   var reply_message = message_tools.text_reply(message, reply_success)
+  // } else {
 
 
-      convo.say(resStatus);
-      //convo.next()
-      specialAdminMessage();
-    }
+  //   // check for something like "nobody"
+  //   else if (message.text.toLowerCase().match(/^(no one|nobody|noone)/)) {
+  //     team.meta.office_assistants = [message.user];
+  //     user_is_admin = true;
+  //     specialAdminMessage();
+  //   }
 
-    // check for something like "nobody"
-    else if (message.text.toLowerCase().match(/^(no one|nobody|noone)/)) {
-      team.meta.office_assistants = [message.user];
-      user_is_admin = true;
-      specialAdminMessage();
-    }
+  //   //add slack members only, no "me"
+  //   else if (message.text.indexOf('<@') > -1) {
+  //     fireGremlins();
+  //   }
+  //   //send error
+  //   else {
+  //     var ask = yield handlers['get-admins.ask'](message)
+  //     return [message_tools.default_reply(message), ask]
+  //   }
+  // }
 
-    //add slack members only, no "me"
-    else if (message.text.indexOf('<@') > -1) {
-      fireGremlins();
-    }
-    //send error
-    else {
-      var ask = yield handlers['get-admins.ask'](message)
-      return [message_tools.default_reply(message), ask]
-    }
-  }
-
+  var reply_message = message_tools.text_reply(message, reply_success)
   var next_message = yield handlers['finished'](message)
   return [reply_message, next_message]
 }
@@ -326,10 +212,8 @@ handlers['get-admins.response'] = function * (message) {
  * @param message the latest message from the user
  */
 handlers['finished'] = function * (message) {
-  var finished = 'Well done! *Kip* has been set up for your team 😊'
+  var finished = "Thanks for the info! Why don't you try searching for something? Type something like 'headphones' to search"
   var finished_message = message_tools.text_reply(message, finished)
-  var tutorial = "Why don't you try searching for something? Type something like 'headphones' to search"
-  var tutorial_message = message_tools.text_reply(message, tutorial)
-  tutorial_message.mode = 'shopping'
-  return [finished_message, tutorial_message]
+  finished_message.mode = 'shopping'
+  return finished_message
 }
