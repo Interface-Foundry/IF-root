@@ -9,6 +9,22 @@ var handlers = {}
 module.exports = {}
 module.exports.handlers = handlers
 
+/**
+ * Main handler which decides what part of the onbaording process the user is at 
+ * 
+ * @param {any} message
+ */
+function * handle(message) {
+  var last_action = _.get(message, 'history[0].action')
+  if (!last_action) {
+    return yield handlers['shopping.initial'](message)
+  } else {
+    return yield handlers['get-admins.response'](message)
+  }
+}
+
+module.exports.handle = handle
+
 handlers['shopping.initial'] = function*(message, exec) {
   // typing(message);
   message._timer.tic('starting amazon_search');
