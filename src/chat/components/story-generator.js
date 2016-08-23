@@ -48,27 +48,12 @@ server.listen(8000, function(e) {
 //incoming slack action
 app.post('/slackaction', function(req, res) {
 
-
     console.log('?????')
-
-    //res.sendStatus(200);
-
-
 
     co(function* () {
 
-        //save the incoming result to mongo
-
-            // console.log('👑 ?',process_story())
-            // console.log('👑 2 ?',req.body.payload)
-
         // //advance the pointer
         if (req.body && req.body.payload){
-            //console.log('WORKING ?!?!?!?!?!?')
-            //console.log(req.body.payload)
-
-            // console.log('👑 ?',process_story())
-            // console.log('👑 2 ?',req.body.payload)
 
             console.log('AAAAAAAAAA')
 
@@ -81,75 +66,45 @@ app.post('/slackaction', function(req, res) {
             res.json(builtStory);
 
             console.log('👑cool!👑 ',builtStory);
-
-
         }
-       
-
-        //grab story, build for slack
-
-        //send back to slack here
-
-
-      // var nextQuestion = survey.survey1[story_pointer];
-
-      // //build next question for correct platform
-      // var builtStory = yield buildStory(origin,nextQuestion);
-
-      // console.log('built for slack: ',JSON.stringify(builtStory))
-      // //send built story back user (next question)
-      // //send_story(builtStory)
-
+    
     }).catch(function(err){
         //???
         console.log('👑👑')
         console.error('co err ',err);
     });
 
-    //fire our process story, pass in the incoming params
 
-    // ioKip.newSlack();
+    //handle incoming slack buttons
+    if (req.body && req.body.payload){
+      var parsedIn = JSON.parse(req.body.payload);
 
-   // console.log('REQ ',req)
-
-    //console.log('incoming Slack action BODY: ',req.body);
-
-
-
-
-
-    // if (req.body && req.body.payload){
-    //   var parsedIn = JSON.parse(req.body.payload);
-
-    //   //sends back original chat
-    //   if (parsedIn.response_url && parsedIn.original_message){
-    //     var stringOrig = JSON.stringify(parsedIn.original_message);
-    //     request.post(
-    //         parsedIn.response_url,
-    //         { payload: stringOrig },
-    //         function (err, res, body) {
-    //           console.error('post err ',err);
-    //         }
-    //     );
-    //   }else {
-    //     console.error('slack buttons broke, need a response_url');
-    //     return;
-    //   }
-    // }else {
-    //   console.log('nah');
-    //   res.sendStatus(200);
-    // }
+      //sends back original chat
+      if (parsedIn.response_url && parsedIn.original_message){
+        var stringOrig = JSON.stringify(parsedIn.original_message);
+        request.post(
+            parsedIn.response_url,
+            { payload: stringOrig },
+            function (err, res, body) {
+              console.error('post err ',err);
+            }
+        );
+      }else {
+        console.error('slack buttons broke, need a response_url');
+        return;
+      }
+    }else {
+      console.log('nah');
+      res.sendStatus(200);
+    }
 
 });
 
 //incoming slack action
 app.get('/slackauth', function(req, res) {
 
+    //test auth with this URL:
     //https://slack.com/oauth/pick_reflow?scope=commands+bot+users%3Aread&client_id=2804113073.70750953120
-
-    // ioKip.newSlack();
-
-   // console.log('REQ ',req)
 
     console.log('incoming Slack action BODY: ',req.body);
 
@@ -195,16 +150,6 @@ app.get('/slackauth', function(req, res) {
         console.log('response was', b)
 
     })
-
-  //   response was { ok: true,
-  // access_token: 'xoxp-2804113073-62926693712-71155053959-acfc5621fe',
-  // scope: 'identify,bot,commands,users:read,tokens.basic',
-  // user_id: 'U1UT8LDLY',
-  // team_name: 'kip',
-  // team_id: 'T02PN3B25',
-  // bot:
-  //  { bot_user_id: 'U234T34Q2',
-  //    bot_access_token: 'xoxb-71163106818-IVHA9vHytuV2OIl3YuT1TW3s' } }
 
 
 

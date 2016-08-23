@@ -44,6 +44,7 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 var slack = require('@slack/client');
 var co = require('co');
 var _ = require('lodash');
+var winston = require('winston');
 
 var kip = require('kip');
 var queue = require('../queue-mongo');
@@ -52,6 +53,7 @@ var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
 var slackConnections = {};
+
 
 //
 // slackbots
@@ -78,7 +80,7 @@ co(function*() {
     };
 
     // TODO figure out how to tell when auth is invalid
-    // right now the library just console.log's a message and I can't figure out
+    // right now the library just winston.debug's a message and I can't figure out
     // how to intercept that event.
     // rtm.on(slack.CLIENT_EVENTS.RTM.INVALID_AUTH, (err) => {
     //   kip.log('invalid auth', slackbot.team_id, slackbot.team_name);
@@ -158,8 +160,8 @@ co(function*() {
 kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
   try {
-    console.log('outgoing message');
-    console.log(outgoing);
+    winston.debug('outgoing message');
+    winston.debug(outgoing);
     var message = outgoing.data;
 
     var bot = slackConnections[message.source.team];
@@ -203,7 +205,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     }).then(() => {
       outgoing.ack();
     }).catch(e => {
-      console.log(e.stack);
+      winston.debug(e.stack);
       bot.rtm.sendMessage("I'm sorry I couldn't quite understand that", message.source.channel, () => {
         outgoing.ack();
       })
@@ -212,3 +214,313 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     kip.err(e);
   }
 })
+
+
+
+
+// slack auth server 🌏
+var express = require('express');
+var bodyParser = require('body-parser')
+var app = express();
+var server = require('http').createServer(app);
+app.use(express.static(__dirname + '/static'))
+app.get('/healthcheck', function (req, res) {
+  res.send('💬 🌏')
+})
+
+//parse incoming body
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+server.listen(8000, function(e) {
+  if (e) { winston.debug(e) }
+  winston.debug('chat app listening on port 8000 🌏 💬')
+})
+//* * * * * //
+
+
+
+/**
+ * This /slackaction POST function handles Slack actions (i.e. button taps)
+ * @param {Object} req incoming message object from Slack
+ * @returns {Object} res send same, modified, or no message object back to Slack
+ */
+app.post('/slackaction', function(req, res) {
+
+    co(function* () {
+
+        //handle incoming slack buttons
+        if (req.body && req.body.payload){
+
+          var parsedIn = JSON.parse(req.body.payload);  
+
+
+
+          if (!req.body || !req.body.payload) {
+            kip.err('slack action did not have a body or payload');
+            res.sendStatus(500);
+          }
+
+          var parsedIn = JSON.parse(req.body.payload);
+          kip.debug('got slack action', parsedIn.actions[0].name);
+
+          //validating real button call
+          if (parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP') {
+            kip.debug('slack action token did not match 👻 ', parsedIn.token)
+          }
+
+          if (!parsedIn.response_url || !parsedIn.original_message) {
+            kip.error('slack buttons broke, need a response_url and original_message');
+            res.sendStatus(500);
+            return;
+          }
+
+          var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
+
+          //penguin nav button
+          if (parsedIn.actions[0].name == 'home') {
+
+            navHistory[navId] = JSON.stringify(parsedIn.original_message); //saving current nav
+
+            var reformattedArray = parsedIn.original_message.attachments.map(function(obj) {
+              if (obj.actions) {
+
+                //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
+                obj.actions.map(function(obj2) {
+                  if (obj2.name == 'home') {
+                    obj.actions = buttonTemplate.slack_home;
+                  }
+                })
+              }
+              return obj;
+            });
+
+
+            var newRes = parsedIn.original_message;
+
+            newRes.attachments = reformattedArray;
+
+            kip.debug('PARSE OUT ', newRes)
+
+            res.json(newRes);
+
+          } else if (parsedIn.actions[0].name == 'back') {
+
+            if (navHistory[navId]) {
+              res.json(JSON.parse(navHistory[navId]));
+            }
+
+          } else {
+
+            // var stringOrig = JSON.stringify(parsedIn.original_message);
+
+            // kip.debug('STRING ORG22222 ', stringOrig)
+            // request.post(
+            //   parsedIn.response_url,
+            //   {
+            //     payload: stringOrig
+            //   },
+            //   function(err, res, body) {
+            //     kip.err(err, 'error posting to slack api in response to the slack action');
+            //   }
+            // );
+
+            res.send(parsedIn.original_message);
+
+            ioKip.incomingMsgAction(req.body, 'slack');
+
+          }
+
+
+          //* * * *  **  * * * * * * *//
+
+          // response_url {String} 
+          if (parsedIn.response_url && parsedIn.original_message){
+            var stringOrig = JSON.stringify(parsedIn.original_message);
+            //send back original message using reponse_url
+            request.post(
+                parsedIn.response_url,
+                { payload: stringOrig },
+                function (err, res, body) {
+                  winston.debug('post err ',err)
+                }
+            );
+          }else {
+            winston.debug('slack buttons broke, need a response_url');
+            return;
+          }
+        }else {
+          res.sendStatus(200);
+        }
+    }).catch(function(err){
+        winston.debug('co err ',err);
+    });
+
+});
+
+
+/**
+ * This /slackauth GET function handles Slack app auth requests 
+ * @param {Object} req incoming user auth object from Slack
+ * @returns {Object} res redirect authed user to Success page
+ */
+app.get('/slackauth', function(req, res) {
+
+
+    //test auth with this URL:
+    //https://slack.com/oauth/pick_reflow?scope=commands+bot+users%3Aread&client_id=2804113073.70750953120
+
+    winston.debug('incoming Slack action BODY: ',req.body);
+
+    //redirect user after Slack auth
+    res.redirect('/thanks')
+
+
+
+    //save team to DB 
+    //start onboarding for team
+
+
+});
+
+app.get('/thanks', function(req, res) {
+  //var thanks = fs.readFileSync(__dirname + '/thanks.html', 'utf8');
+  res.send('<html>ok</html>');
+})
+
+
+
+// app.get('/newslack', function(req, res) {
+
+// });
+
+
+//
+// incoming slack action
+//
+app.post('/slackaction', function(req, res) {
+  if (!req.body || !req.body.payload) {
+    kip.err('slack action did not have a body or payload');
+    res.sendStatus(500);
+  }
+
+  var parsedIn = JSON.parse(req.body.payload);
+  kip.debug('got slack action', parsedIn.actions[0].name);
+
+  //validating real button call
+  if (parsedIn.token !== 'FMdYRIajPq9BdVztkGRpgSEP') {
+    kip.debug('slack action token did not match 👻 ', parsedIn.token)
+  }
+
+  if (!parsedIn.response_url || !parsedIn.original_message) {
+    kip.error('slack buttons broke, need a response_url and original_message');
+    res.sendStatus(500);
+    return;
+  }
+
+  var navId = parsedIn.team.id + '_' + parsedIn.channel.id + '_' + parsedIn.user.id;
+
+  //penguin nav button
+  if (parsedIn.actions[0].name == 'home') {
+
+    navHistory[navId] = JSON.stringify(parsedIn.original_message); //saving current nav
+
+    var reformattedArray = parsedIn.original_message.attachments.map(function(obj) {
+      if (obj.actions) {
+
+        //DONT SHOW MEMBERS LIST BUTTON TO NON ADMINS
+        obj.actions.map(function(obj2) {
+          if (obj2.name == 'home') {
+            obj.actions = buttonTemplate.slack_home;
+          }
+        })
+      }
+      return obj;
+    });
+
+
+    var newRes = parsedIn.original_message;
+
+    newRes.attachments = reformattedArray;
+
+    kip.debug('PARSE OUT ', newRes)
+
+    res.json(newRes);
+
+  } else if (parsedIn.actions[0].name == 'back') {
+
+    if (navHistory[navId]) {
+      res.json(JSON.parse(navHistory[navId]));
+    }
+
+  } else {
+
+    // var stringOrig = JSON.stringify(parsedIn.original_message);
+
+    // kip.debug('STRING ORG22222 ', stringOrig)
+    // request.post(
+    //   parsedIn.response_url,
+    //   {
+    //     payload: stringOrig
+    //   },
+    //   function(err, res, body) {
+    //     kip.err(err, 'error posting to slack api in response to the slack action');
+    //   }
+    // );
+
+    res.send(parsedIn.original_message);
+
+    ioKip.incomingMsgAction(req.body, 'slack');
+
+  }
+});
+
+
+
+
+// incoming email from sendgrid
+// In development we're currently using peter's sendgrid api key etc
+app.post('/emailincoming', busboy({
+  immediate: true
+}), function(req, res) {
+  kip.debug('hitting /emailincoming')
+  req.body = {};
+  req.busboy.on('field', (k, v) => {
+    req.body[k] = v;
+  })
+
+  req.busboy.on('finish', () => {
+    db.Metrics.log('email.incoming', req.body);
+    email.process(req.body).catch((e) => {
+      kip.error(e.stack);
+    })
+    res.sendStatus(200);
+  })
+})
+
+//user hit unsubsctibe link in email
+app.get('/unsubscribe/:email', function(req, res) {
+  var email = req.params.email.slice(0, req.params.email.length-1).replace('-at-','@');
+  console.log('hitting /unsubscribe ', email);
+  db.Metrics.log('email.unsubscribe', {email: email});
+
+    var post_body = {
+        "recipient_emails": [
+          email
+        ]
+      }
+
+    request({
+          url: 'https://api.sendgrid.com/v3/asm/suppressions/global',
+          headers: {
+            'Authorization': 'Bearer EAAT6cw81jgoBAFtp7OBG0gO100ObFqKsoZAIyrtClnNuUZCpWtzoWhNVZC1OI2jDBKXhjA0qPB58Dld1VrFiUjt9rKMemSbWeZCsbuAECZCQaom2P0BtRyTzpdKhrIh8HAw55skgYbwZCqLBSj6JVqHRB6O3nwGsx72AwpaIovTgZDZD'
+          },
+          method: 'DELETE',
+          json: post_body
+      }, function(err, res, body) {
+          if (err) console.error('post err ', err);
+          console.log(body);
+      });
+
+});
