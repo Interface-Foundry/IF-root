@@ -1,48 +1,36 @@
-const getSearchCounts = (messages) =>
-  new Promise((resolve, reject) => {
-    messages.aggregate([
-      {
-        $match:
-        {
-          bucket: 'search',
-          action: {
-            $in: ['initial', 'modify'],
-          },
-        },
-      },
-        { $group: {
-          _id: {
-            action: '$action',
-            prov: '$source.origin',
-          },
-          count: {
-            $sum: 1,
-          },
-        },
-      },
-        { $group: {
-          _id: '$_id.action',
-          count: {
-            $sum: '$count',
-          },
-          sources: {
-            $addToSet: {
-              source: '$_id.prov', count: '$count',
-            },
-          },
-        },
-      },
-    ], (err, result) => {
-      if (err) { reject(err); }
-      const searchCounts = {};
-      result.forEach(type => {
-        searchCounts[type._id] = searchCounts[type._id] || {};
-        searchCounts[type._id].total = type.count;
-        type.sources.forEach(source => {
-          searchCounts[type._id][source.source] = source.count;
-        });
+const getBucketSearchCounts = require('./getBucketSearchCounts');
+const getExecSearchCounts = require('./getExecSearchCounts');
+
+const parse = results => {
+  const searchCounts = {};
+  results.forEach(result => {
+    for (const type in result) {
+      searchCounts[type] = searchCounts[type] || {};
+      for (const source in result[type]) {
+        searchCounts[type][source] = searchCounts[type][source] ?
+        searchCounts[type][source] + result[type][source] : result[type][source];
+      }
+    }
+  });
+  return searchCounts;
+};
+
+const getSearchCounts = dbs =>
+  new Promise((outerResolve, outerReject) => {
+    const bucketPromises = new Promise((resolve, reject) => {
+      const promises = dbs.map(messages => getBucketSearchCounts(messages));
+      Promise.all(promises).then(results => {
+        resolve(parse(results));
       });
-      resolve(searchCounts);
+    });
+    const execPromises = new Promise((resolve, reject) => {
+      const promises = dbs.map(messages => getExecSearchCounts(messages));
+      Promise.all(promises).then(results => {
+        resolve(parse(results));
+      });
+    });
+    Promise.all([bucketPromises, execPromises]).then(results => {
+      outerResolve(parse(results));
     });
   });
 

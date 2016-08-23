@@ -9,10 +9,15 @@ const _ = require('underscore');
 const auth = require('basic-auth-connect');
 
 const mongoose = require('mongoose');
-// connect our DB
-const db = require('../../db');
-const Message = db.Message;
-const Slackbots = db.Slackbots;
+// connect our DBs
+const db1 = mongoose.createConnection(config.mongodb.url);
+const db2 = mongoose.createConnection(config.mongodb2.url);
+
+const Message = require('../../db/message_schema');
+db1.model('Message', Message);
+db2.model('Message', Message);
+const db1Msgs = db1.model('Message');
+const db2Msgs = db2.model('Message');
 
 const getSearchCounts = require('./queries/getSearchCounts');
 const getBanterCounts = require('./queries/getBanterCounts');
@@ -87,22 +92,17 @@ app.post('/vc/slackstats', function(req, res) {
 
     res.send(rez);
   });
-
 });
 
-
 const getData = messages => {
-  getSearchCounts(messages).then(searchCounts => {
+  getSearchCounts([db1Msgs, db2Msgs]).then(searchCounts => {
     Object.assign(results.searchCounts, searchCounts);
-    console.log(searchCounts);
   });
-  getBanterCounts(messages).then(banterCounts => {
+  getBanterCounts([db1Msgs, db2Msgs]).then(banterCounts => {
     Object.assign(results.banterCounts, banterCounts);
-    console.log(banterCounts);
   });
   getDayofWeekStats(messages).then(dayOfWeekStats => {
     Object.assign(results.dayOfWeekStats, dayOfWeekStats);
-    console.log(dayOfWeekStats);
   });
 };
 
