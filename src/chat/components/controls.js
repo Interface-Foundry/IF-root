@@ -1,10 +1,35 @@
+/**
+ * @fileOverview Classes representing outbound data to be rendered into a platform-specific UI object.
+ * @author <a href="mailto:binarymachineshop@gmail.com">Dexter Taylor</a>
+ */
 
+/**
+ * @example
+ * // create a Facebook button and output its information as JSON data
+ * // assume preexisting sender object
+ * // This creates a facebook button labeled "Cheaper" whose action 
+ * // is modify.one and whose instruction is cheaper
+ * new FBButton('Cheaper', 'modify.one', 'cheaper', sender, 'cheaper').render();
+ * 
+ */
 
 "use strict";
-// new FBButton("some_emoji", "modify.one", "generic_detail", userObj, "blue")
 
+
+
+/**
+ * FBButton class for encapsulating Facebook UI buttons
+ * @classdesc create an instance and call render() to generate outbound data for button rendering
+ *
+ */
 class FBButton{
-
+    /** 
+     * @param {string} title the button's label
+     * @param {string} actionName the action attribute of the user event
+     * @param {string} instructionName the instruction attribute of the user event
+     * @param {Object} sender the FB sender object
+     * @param {String} searchAttrValue optional 
+     */
     constructor(title, actionName, instructionName, sender, searchAttrValue) {		
 	  this.title = title;  
       	  this.dataID = 'facebook_' + sender.toString();
@@ -12,8 +37,6 @@ class FBButton{
 	  this.instruction = instructionName;
 	  this.searchAttributeValue = searchAttrValue;	  
 	  this.selector = 1;
-
-	console.log('########### Inside FBButton constructor. Action is ' + this.action + ' and instruction is ' + this.instruction);
 
 	this.render = function() {
 	    var data = {
@@ -27,7 +50,6 @@ class FBButton{
 		    search_attribute_value: this.searchAttributeValue		    
 		})
 	    };
-	    console.log('############# ' + JSON.stringify(data));
 	    return data;
 	}
     

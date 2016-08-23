@@ -117,52 +117,7 @@ co(function*() {
 	}
 
 	responder.respond(data);
-      /*
-      var message = new db.Message({
-        incoming: true,
-        thread_id: data.channel,
-        original_text: data.text,
-        user_id: data.user,
-        origin: 'slack',
-        source: data,
-      });
-
-      // don't talk to yourself
-      if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
-        kip.debug("don't talk to yourself");
-        return; // drop the message before saving.
-      }
-
-      // other random things
-      if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
-        kip.debug('will not handle this message');
-        return;
-      }
-
-      //
-      // 🖼 image search
-      //
-      if (data.subtype === 'file_share' && ['png', 'jpg', 'gif', 'jpeg', 'sgv'].indexOf(data.file.filetype.toLowerCase()) >= 0) {
-        return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
-          message.text = res;
-          message.save().then(() => {
-            queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'));
-          });
-        });
-      }
-
-      // clean up the text
-      message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-      if (message.text.charAt(0) == ':') {
-        message.text = message.text.substr(1); //remove : from beginning of string
-      }
-      message.text = message.text.trim(); //remove extra spaces on edges of string
-
-      // queue it up for processing
-      message.save().then(() => {
-        queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
-      });
-      */
+      
     })
   });
 }).catch((e) => {

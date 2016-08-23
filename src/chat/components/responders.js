@@ -1,3 +1,21 @@
+/**
+ * @fileOverview Responder classes to consolidate message handling logic.
+ * @author <a href="mailto:binarymachineshop@gmail.com">Dexter Taylor</a>
+ */
+
+/**
+ * @example
+ * // create a responder and call its respond method with user-originated data
+ * new SlackResponder().respond(userData);
+ * 
+ * // a FacebookResponder requires different args passed to respond()
+ * // assume last_mesage, postback, and sender vars
+ * var userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback };
+ * new FBResponder().respond(last_message, userInputEvent, sender);
+ *
+ */
+
+
 "use strict";
 
 var db = require('../../db');
@@ -6,27 +24,36 @@ var _ = require('lodash');
 const EventTypes = require('./constants');
 
 
-
+/**
+ * SlackResponder class for Slack message handling
+ * @classdesc create an instance to handle inbound user-originated data. 
+ */
 class SlackResponder {
 
     constructor() {
         this.responderType = 'slack';
         this.imageFileExtensions = ['png', 'jpg', 'gif', 'jpeg', 'svg'];
 
-
-        this.createMessage = function(userData) {
+	/**
+	 * @param {userDataObject} data the data attached to the inbound message from Slack
+	 * @returns {a new Message object, ready to be pushed on the queue}
+	 */
+        this.createMessage = function(data) {
 
             return new db.Message({
                 incoming: true,
-                thread_id: userData.channel,
-                original_text: userData.text,
-                user_id: userData.user,
+                thread_id: data.channel,
+                original_text: data.text,
+                user_id: data.user,
                 origin: this.responderType,
-                source: userData
+                source: data
             });
         }
 
-
+	/**
+	 * @param {userDataObject} data the data attached to the inbound message from Slack
+	 * @returns {true iff user initiated an image seaarch}
+	 */
         this.messageIsImageSearch = function(data) {
             if (data.subtype === 'file_share' && this.imageFileExtensions.indexOf(data.file.filetype.toLowerCase()) >= 0){
                 return true;
@@ -35,6 +62,11 @@ class SlackResponder {
         }
 
 
+	/**
+	 * call this only if the inbound message is requesting an image search
+	 * @param {userDataObject} data the data attached to the inbound message from Slack
+	 * @returns {results of call to image_search(...)}
+	 */
         this.searchForImage = function(data) {
             message = this.createMessage(data);
             return image_search(data.file.url_private, slackbot.bot.bot_access_token, function(res) {
@@ -48,10 +80,12 @@ class SlackResponder {
         return this;
     }
 
-
+    /**
+     * Core data handling method. 
+     * @param {userDataObject} data the data attached to the inbound message from Slack
+     *
+     */
     respond(data) {
-        console.log('################ inside SlackResponder.respond().');
-
         var message = this.createMessage(data);
 
         // clean up the text
@@ -69,7 +103,10 @@ class SlackResponder {
 }
 
 
-
+/**
+ * FBResponder class for Facebook-specific message handling
+ * @classdesc create an instance to handle inbound user-originated data. 
+ */
 class FBResponder {
     constructor()  {
         this.responderType = 'facebook';        
@@ -81,6 +118,7 @@ class FBResponder {
             'button_search': function(userInputControl){ return userInputControl.text }
         };
 
+
         //abstract out to yaml later
         // TODO: make sure we're getting button groups from ONE place
         //
@@ -91,7 +129,11 @@ class FBResponder {
             'sub_menu_color': function(){ return [{type: 'fb_sub_menu_color', buttons: ['Black','White','Blue','Red','Brown', 'Pink']}] }
         }       
 
-        
+        /** @member {Object}
+	 * table of function pointers mapping generated keys to functions returning a parameter dictionary.
+	 * Each key is a concatenation of the MODE, ACTION, and INSTRUCTION of the inbound user input event
+	 * (with underscores as spacers).
+	 */
         this.paramGenMap = {        
             'shopping_modify.one_cheaper': function(userInputControl) { return { 'focus': userInputControl.focus, 
                                                                  'param': 'less', 
@@ -120,7 +162,6 @@ class FBResponder {
                                                                     }
         }
             
-
 
         this.mapActionToMenuText = function(userInput){
         var menuConverter = this.postbackToControlGroupMap[userInput.action];
@@ -163,14 +204,15 @@ class FBResponder {
         return this;
     }
 
+
+    /**
+     * Core data handling method. 
+     * @param {Object} lastMessage the previous user event 
+     * @param {Object} userUnputEvent an object representing the user event data
+     * @param {Object} sender ...
+     *
+     */
     respond(lastMessage, userInputEvent, sender) { 
-
-
-        console.log('############# Inside FBResponder.respond().');
-        console.log('############ user input event : ' + JSON.stringify(userInputEvent));
-        console.log('############ user input event type is ' + userInputEvent.type);
-        
-
         var inputText = _.get(userInputEvent, 'text', '').trim();
         if(userInputEvent.type ==  EventTypes.TEXT_INPUT && inputText === ''){
     
@@ -189,25 +231,18 @@ class FBResponder {
             original_text: _.get(userInputEvent, 'text', ''),
             text: inputText,
             control_group: this.mapActionToMenuText(userInputEvent),
-            source: {
-                            'origin': this.responderType,
-                            'channel': sender.toString(),
-                            'org': this.generateID(sender),
-                            'id': this.generateID(sender),
-                            'user': sender.toString()
-                        },
+            source:{
+                'origin': this.responderType,
+                'channel': sender.toString(),
+                'org': this.generateID(sender),
+                'id': this.generateID(sender),
+                'user': sender.toString()
+            },
             amazon: lastMessage.amazon
         });
 
-        console.log('################ Generated message:\n' + JSON.stringify(message, null, 4))
-
         if(userInputEvent.type === EventTypes.BUTTON_PRESS){
             // NOTE: a better name for this would be "message.context", because woof.
-
-            console.log('################ inside FBResponder.respond().');
-            console.log('################ userInputEvent data is: ' + JSON.stringify(userInputEvent.data));
-
-
             message.execute = [  
                 {
                     mode: userInputEvent.data.mode,

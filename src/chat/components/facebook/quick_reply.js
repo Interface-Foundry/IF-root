@@ -32,14 +32,8 @@ const DEFAULT_MODE = constants.SHOPPING;
 
 
 var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
-
-    console.log('#############  inside quick_reply function.')
-
-    console.log('#############  retrieving previous message...')
     var last_message = yield fb_utility.get_last_message(sender);
     var postback = event.message.quick_reply.payload;
-
-    console.log('#############  retrieved previous message.')
 
     try {
         postback = JSON.parse(postback);
@@ -48,20 +42,11 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         console.log(err)
     }
 
-    console.log('#############  parsed postback data:')
-    console.log('#############  data: ' + JSON.stringify(postback))
-
-
     postback['mode'] = DEFAULT_MODE;
 
     //sub-menu actions
     if (postback.action && postback.action == 'button_search') {
-
-	console.log('############# initiating button search...')
-
         if (!last_message || last_message == null) {
-
-	    console.log('#############  we are sending the initial message.')
 
             // queue it up for processing
             if(fb_memory[sender] && fb_memory[sender].mode && fb_memory[sender].mode == 'modify') {
@@ -92,7 +77,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                     fb_memory[sender].mode = EventTypes.SHOPPING;
             }
 	    userInputEvent = { 'type': EventTypes.BUTTON_PRESS, 'data': postback }
-            new FBResponder().respond(last_message, postback, sender);
+            new FBResponder().respond(last_message, userInputEvent, sender);
         }
     }
     else if (postback.action && postback.action == EventTypes.TAKE_QUIZ){
@@ -101,7 +86,6 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (postback.action && postback.action == EventTypes.MODIFY_ONE) {  // this is where we should be for a "cheaper" button press
 
-        console.log('+++ ' + event.message)
         if (!last_message) {
             return console.log('No message found');
         } 
@@ -128,7 +112,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             thread_id: 'facebook_' + sender.toString()
         }).sort('-ts').exec();
 
-        //*This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search.
+        // This var will retrieve the correct message for back button depending on whether you are going back from a sub-menu or from a newer search.
         var message_to_retrieve = postback.type === 'last_search' ? (messages[3] ? 3 : 2) : (messages[2] ? 2 : (messages[1] ? 1 : 0));
         if (messages.length == 0) {
             return console.log('No message found');
@@ -165,7 +149,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 var main_sub_menu = {
                     "quick_replies":[
                        
-			new FBButton('Cheaper2', 'modify.one', 'cheaper', sender, 'cheaper').render(),
+			new FBButton('Cheaper', 'modify.one', 'cheaper', sender, 'cheaper').render(),
                         {
                                 "content_type":"text",
                                 "title":"Similar",
@@ -233,28 +217,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
 	        new FBResponder().respond(last_message, userInputEvent, sender);           
           }
         } 
-        /*	  
-        else if (postback.action === 'show_menu') {
-
-	    fb_memory[sender] = {
-                mode: 'modify',
-                select: 1
-            };
-
-
-	    var color_menu = {
-                "recipient": {
-                    "id": sender.toString()
-                },
-		'message': {
-
-		    'quick_replies': [
-			new FBButton('Black', 'modify.one', 'genericDetail', sender, 'black').render(),
-			new FBButton('Black', constants.BUTTON_SEARCH, constants.COLOR, channel, constants.COLOR).render(),
-		    ]
-		}
-        }
-	*/
+        
         //
         //   --  Sub-menu switching --
         // currently either Color or Emoji
@@ -374,17 +337,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                     "id": sender.toString()
                 },
                 "message": {
-                  "quick_replies":[
-		      /*
-                     {
-                        "content_type":"text",
-                        "title":"🍪",
-                        "payload": JSON.stringify({
-                                dataId: "facebook_" + sender.toString(),
-                                action: "emoji_modify",
-                                text: '1 but cookie'
-                            })
-                      }*/
+                  "quick_replies":[		      
+		      // TODO: replace the rest of this code with FBButton.render() calls
 		      new FBButton('🍪', 'modify.one', 'genericDetail', sender, 'cookie').render(),
                        {
                         "content_type":"text",
@@ -454,6 +408,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 "notification_type": "NO_PUSH"
             };
             request.post({
+		// TODO: get this magic URL out of here
                 url: 'https://graph.facebook.com/v2.6/me/messages',
                 qs: {
                     access_token: fbtoken
