@@ -1,5 +1,5 @@
 var request = require('request');
-var db = require('../../db');
+var db = require('../../../db');
 var exec = require('child_process').exec;
 var child;
 // executes `pwd`
@@ -32,9 +32,8 @@ module.exports =  manual_request = function(url) {
     }, function(err, res, body) {
         var end= Date.now();
         var timeSpent=(end-begin)/10000;
-           console.log('\n\n\n\nManual luminati took : ', timeSpent,'\n\n\n\n');
         if (err) {
-           // db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: false, error: err})
+           db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: false, error: err})
            reject(err);
         }
         else if (res.body.length > 0 && res.statusCode == 200) {
@@ -42,7 +41,7 @@ module.exports =  manual_request = function(url) {
            resolve(res.body);
         } 
         else {
-           // db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: false, error: 'fail'})
+           db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: false, error: 'fail'})
            reject()
         }
     })

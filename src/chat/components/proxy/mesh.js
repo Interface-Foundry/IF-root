@@ -1,8 +1,8 @@
 var request = require('request');
-var db = require('../../db');
+var db = require('../../../db');
 
 
-var mesh_request = function (url, busy) {
+module.exports = mesh_request = function (url, busy) {
     return new Promise(function(resolve,reject) {
       console.log('firing mesh request...');
       var begin= Date.now();
@@ -29,24 +29,17 @@ var mesh_request = function (url, busy) {
          var end= Date.now();
          var timeSpent=(end-begin)/10000+"milliseconds";
            if (err) {
-            // kip.debug('mesh1')
-             // db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: fail, error: err})
+             db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: fail, error: err})
              reject(err);
           }
           else if (res.statusCode == 200 && body.length > 0){
-            // kip.debug('mesh2')
              db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: true})
              resolve(body);
           }
           else {
-            // kip.debug('mesh3')
-             // db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: fail, error: 'fail'})
+             db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: fail, error: 'fail'})
              reject('fail')
           }
     });
   })
-}
-
-module.exports = {
-  mesh_request: mesh_request
 }

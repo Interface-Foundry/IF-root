@@ -8,9 +8,7 @@ var mailerTransport = require('../../mail/IF_mail.js');
 const hutil = require('hutil');
 var co = require('co');
 var promisify = require("promisify-node");
-// try {
-var proxyX = require('./proxyX');
-// } catch{}
+var proxy_lib = require('./proxy/proxy_request');
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 var cache = {
@@ -43,7 +41,7 @@ module.exports.basic = function(url, callback) {
           return;
         }
         busy= false;
-        var response = proxyX.request(url, busy)
+        var response = proxy_lib.request(url, busy)
         .then(function(response) {
               process_data(response, product, url, callback);
         },function(err) {
