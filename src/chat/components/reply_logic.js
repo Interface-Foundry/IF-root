@@ -4,7 +4,6 @@ var request = require('request');
 var co = require('co');
 var _ = require('lodash');
 var fs = require('fs');
-
 var banter = require("./banter.js");
 // var history = require("./history.js");
 // var search = require("./search.js");
@@ -20,34 +19,24 @@ var nlp = require('../../nlp2/api');
 //set env vars
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
-
 //load mongoose models
 var mongoose = require('mongoose');
 var db = require('../../db');
 var Message = db.Message;
 var Chatuser = db.Chatuser;
 var Slackbots = db.Slackbots;
-
-// var supervisor = require('./supervisor');
 var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
-
 var queue = require('./queue-mongo');
 var kip = require('../../kip');
-
 //temp in-memory mode tracker
 var modes = {};
-
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
-
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
-
-
 winston.debug('debug ', modes)
-
 // I'm sorry i couldn't understand that
 function default_reply(message) {
   return new db.Message({
@@ -611,7 +600,6 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
   }
-  kip.debug('!3', exec)
   exec.params.query = old_params.query;
   if (!exec.params.query) {
               winston.debug('-3.5')
@@ -664,14 +652,12 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     kip.err('no focus supplied')
     return default_reply(message);
   }
-
   var old_params = yield getLatestAmazonQuery(message);
   var old_results = yield getLatestAmazonResults(message);
   kip.debug('old params', old_params);
   kip.debug('new params', exec.params);
     if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
-      // winston.debug('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
     if (all_modifiers.length >= 2) {
       for (var i = 1; i < all_modifiers.length; i++) {
          if (all_modifiers[i] && all_modifiers[i] !== '') {
@@ -680,8 +666,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       }
     }
   }
-      kip.debug('!4', exec)
-
+  kip.debug('!4', exec);
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
@@ -698,7 +683,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
     exec.params.color = exec.params.val[0];
-
     // winston.debug('exec for color search: ', JSON.stringify(exec))
   }
   else {
@@ -708,7 +692,6 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     // exec.params.color = exec.params.val.name;
     // throw new Error('this type of modification not handled yet: ' + exec.params.type);
   }
-
    if ((results == null || !results) && exec.params.type !== 'price')  {
                   winston.debug('-5')
 
