@@ -19,7 +19,7 @@ var saveStory = function(){
     	var questions = yield loadQuestions()
 
     	//get answer IDs
-    	questions = yield loadIds(questions)
+    	//questions = yield loadIds(questions)
 
     	//POST questions
     	yield createQuestions(questions) 
@@ -54,22 +54,22 @@ var loadQuestions = function*(){
 }
 
 
-
-var loadIds = function*(questions){
-	//map questions
-	questions = questions.map(function(q) {
-	  var qObj = q
-	  //map answers in questions
-	  var answers = q.answers.map(function(a) {
-	  	var aObj = a
-	  	aObj.id = 'A'+shortid.generate() //generate answer id 
-	  	return aObj
-	  })
-	  q.answers = answers
-	  return qObj
-	});
-	return questions
-}
+// //* * * NOTE: this needs to removed from the loader and stored directly in survey
+// var loadIds = function*(questions){
+// 	//map questions
+// 	questions = questions.map(function(q) {
+// 	  var qObj = q
+// 	  //map answers in questions
+// 	  var answers = q.answers.map(function(a) {
+// 	  	var aObj = a
+// 	  	aObj.id = 'A'+shortid.generate() //generate answer id 
+// 	  	return aObj
+// 	  })
+// 	  q.answers = answers
+// 	  return qObj
+// 	});
+// 	return questions
+// }
 
 
 /**

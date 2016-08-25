@@ -4,11 +4,13 @@ var survey1 = {
     'Q1':{
         prompt: 'Hey do you have a moment?',
         answers: [{
+            id:'A1',
             label: 'Yes',
             value: 'yes',
             target_q_id: 'Q2'
         },
-        {
+        { 
+            id: 'A2',
             label: 'No',
             value: 'no',
             target_q_id: 'Q3'
@@ -17,11 +19,13 @@ var survey1 = {
     'Q2':{
         prompt: '??',
         answers: [{
+            id: 'A3',
             label: 'Yes',
             value: 'yes',
             target_q_id: 'Q2'
         },
-        {
+        { 
+            id: 'A4',
             label: 'No',
             value: 'no',
             target_q_id: 'Q3'

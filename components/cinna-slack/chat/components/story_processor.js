@@ -88,7 +88,6 @@ var incomingAction = function(req,callback){
         }
        
     }).catch(function(err){
-        console.log('👑👑')
         console.error('co err ',err);
     });
 }
@@ -151,8 +150,12 @@ function gatherSurveyTeams(){
             }
             message.text = message.text.trim(); //remove extra spaces on edges of string
 
+
+            //start survey on slack event
             co(function*() {
-                var builtStory = yield buildStory('slack',survey.survey1[0]);
+
+                var builtStory = yield buildStory('slack',survey.survey1['Q1'],'Q1');
+
                 web.chat.postMessage(message.source.channel, '', builtStory, function(err,res) {
                     console.log(err)
                 });
@@ -207,7 +210,7 @@ var process_story = function*(response,origin){
 
     response = JSON.parse(response)
 
-    //construct mongo answer
+    //Construct mongo answer
     var cMongo = {
         answer: {},
         user: {},
@@ -248,7 +251,8 @@ var process_story = function*(response,origin){
 
 
     console.log('???????????????? ',cMongo)
-    //save answer
+
+    //save answer to DB
     var answer = new Story(cMongo);
     answer.save(function (err) {
       if (err) {
@@ -259,8 +263,6 @@ var process_story = function*(response,origin){
     });
 
     
-
-
     //continue parsing story
     if(response && response.actions && response.actions[0] && response.actions[0].value){
 
@@ -279,6 +281,7 @@ var process_story = function*(response,origin){
     }
 
 
+    //SURVEY FINISHED!
     if (story_pointer == survey.survey1.length - 1){
 
         var sendText = {
@@ -287,29 +290,45 @@ var process_story = function*(response,origin){
 
         return sendText;
         
-        //stop running, send final message to user
-    }else if(story_answer == 'no' && story_pointer == 0){
+    }
+    
+    //stop running, send final message to user
+    else if(story_answer == 'no' && story_pointer == 0){
 
         var sendText= {
             text: 'Damn :('
         }
 
         return sendText; 
-
-        //send other text back
     }   
+
     //advance to next question
     else {
-        story_pointer++;
-        var nextQuestion = survey.survey1[story_pointer];
 
-        return nextQuestion;
+
+        //var nextQuestion = 
+
+        // story_pointer++;
+        // var nextQuestion = survey.survey1[story_pointer];
+
+        return yield getNextQuestion('','')
         
     }
 }
 
 
-function buildStory(origin,incoming){
+function getNextQuestion(){
+
+    //add POST request here to Neomodel
+    //service returns qId for next question
+
+    var qId = 'Q2' //mock id
+
+    return survey.survey1[qId]
+}
+
+
+function buildStory(origin,incoming,qId){
 
     var storyObj = {
         attachments:[]
@@ -321,14 +340,17 @@ function buildStory(origin,incoming){
             //map buttons for slack
 
             if (incoming && incoming.actions){
-                var buttonArray = incoming.actions.map(function(obj){ 
+                var buttonArray = incoming.answers.map(function(obj){ 
                     var rObj = {};
-                    rObj.name = obj.name;
-                    rObj.text = obj.text;
-                    rObj.type = obj.type;
+                    rObj.name = obj.value;
+                    rObj.text = obj.label;
+                    rObj.type = 'button';
 
                     //stringify value object before sending to slack
-                    rObj.value = JSON.stringify(obj.value);
+                    rObj.value = JSON.stringify({
+                        q_id: qId, //question ID
+                        a_id: obj.id//answer ID
+                    });
                     return rObj;
                 });
 
