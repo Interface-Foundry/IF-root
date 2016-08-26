@@ -7,7 +7,7 @@ var sleep = require('co-sleep');
 var natural = require('natural');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var async = require('async');
-var amazon_variety = require('amazon_variety');
+var amazon_variety = require('./amazon_variety');
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
@@ -65,7 +65,8 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
 
     // REMOVE ALL OF THIS LATER
     try {
-
+      amazon_variety.getVariations(item.ASIN[0])
+      amazon_variety.createItemReqs(item.ASIN[0])
     }
     catch (err)
     {

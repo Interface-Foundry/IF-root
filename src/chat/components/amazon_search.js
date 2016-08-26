@@ -14,7 +14,9 @@ var db = require('../../db');
 var async = require('async');
 var wait = require('co-wait');
 
-var winston = require('winston');
+var logging = require('winston');
+logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+
 /*
 Affiliate tag:
 eileenog-20
@@ -74,33 +76,37 @@ params:
 * Lookup object based on ASIN
 *
 * @param {Object} params should be Object like {asin: ASIN, IdType: 'ASIN'}
+* @return {Object} enhanced_result for specific item
 */
 var lookup = function*(params, origin) {
+  console.log('Using Amazon Lookup')
   var timer = new kip.SavedTimer('lookup.timer', {params: params})
   db.Metrics.log('lookup.amazon', params)
   if (!params.asin) {
-    winston.info('error params: ', params)
+    logging.info('error params: ', params)
     throw new Error('No Asin provided')
   }
 
   params.IdType = params.IdType || 'ASIN'
 
   amazonParams = {
+    Availability: 'Available',
     Condition: 'New',
     IdType: params.IdType,
-    ItemId: params.asin
+    ItemId: params.asin,
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
   }
+
   timer.tic('requesting amazon ItemLookup api');
   try {
-    winston.debug('looking up asin', amazonParams);
+    logging.debug('looking up asin', amazonParams);
     var result = yield get_client().itemLookup(amazonParams);
-  }
-  catch (e) {
+  } catch (e) {
     throw new Error('Something something asin lookup failed')
   }
   timer.tic('got results from ItemLookup api')
 
-  var enhanced_results = yield enhance_results(result,origin, timer)
+  var enhanced_results = yield enhance_results(result, origin, timer)
   timer.tic('done enhancing result')
   timer.stop()
   return enhanced_results
@@ -114,7 +120,7 @@ var search = function*(params,origin) {
   db.Metrics.log('search.amazon', params)
 
   if (!params.query) {
-    winston.debug('error params: ', params)
+    logging.debug('error params: ', params)
     throw new Error('no query specified')
   }
 
@@ -173,7 +179,7 @@ var search = function*(params,origin) {
     amazonParams.Keywords = params.color.name;
   }
   else if (params.val && params.val.length > 1 && params.type !== 'color') {
-      winston.debug('found multiple modifiers...')
+      logging.debug('found multiple modifiers...')
       amazonParams.Keywords = '';
      for (var i = 1; i < params.val.length; i++) {
       var val = (typeof params.val[i] == 'object' ? params.val[i] : (typeof params.val[i] == 'string' ? params.val[i].toLowerCase() : params.val[i]));
@@ -188,13 +194,13 @@ var search = function*(params,origin) {
   }
   timer.tic('requesting amazon ItermSearch api');
   try {
-      winston.debug('👺1: as is...', amazonParams);
+      logging.debug('👺1: as is...', amazonParams);
       var results = yield get_client().itemSearch(amazonParams);
    }
    catch (e) {
       //If more than one modifier
       if (all_modifiers_array) {
-        winston.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
+        logging.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
          amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
         for (var i = 0; i < all_modifiers_array.length-1; i++) {
           try {
@@ -203,24 +209,24 @@ var search = function*(params,origin) {
                  amazonParams.BrowseNode = browseNodeBackup;
                }
                amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
-                winston.debug('trying : ', amazonParams)
+                logging.debug('trying : ', amazonParams)
                 var res1 = yield get_client().itemSearch(amazonParams);
                 yield wait(1500);
                 if (res1 && res1.length >= 1) {
                  var results = res1
-                 winston.debug('breaking out...')
+                 logging.debug('breaking out...')
                  break;
                 } else {
                     if (amazonParams.BrowseNode) {
                      delete amazonParams.BrowseNode;
                     }
-                    winston.debug('trying : ', amazonParams)
+                    logging.debug('trying : ', amazonParams)
                     try{
                       var res1 = yield get_client().itemSearch(amazonParams);
                       yield wait(1500);
                       if (res1 && res1.length >= 1) {
                          var results = res1
-                          winston.debug('breaking out...')
+                          logging.debug('breaking out...')
                          break;
                       }
                     } catch(err) {}
@@ -229,13 +235,13 @@ var search = function*(params,origin) {
             catch (e) {
                if (res1 && res1.length >= 1) {
                 var results = res1
-                 winston.debug('breaking out...')
+                 logging.debug('breaking out...')
                  break;
                 }  else {
                   if (amazonParams.BrowseNode) {
                      delete amazonParams.BrowseNode;
                     }
-                    winston.debug('trying : ', amazonParams);
+                    logging.debug('trying : ', amazonParams);
                     try {
                       yield wait(1500);
                       var res1 = yield get_client().itemSearch(amazonParams);
@@ -244,20 +250,20 @@ var search = function*(params,origin) {
                     }
                     if (res1 && res1.length >= 1) {
                      var results = res1
-                     winston.debug('breaking out...')
+                     logging.debug('breaking out...')
                      break;
                     }
                 }
             }
         } // end of for loop
         if (!results || (results && results.length < 1)) {
-            winston.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
+            logging.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
             amazonParams.Keywords = params.query;
             amazonParams.BrowseNode = browseNodeBackup;
-            winston.debug('trying : ', amazonParams);
+            logging.debug('trying : ', amazonParams);
             try {
               yield wait(1500);
-              winston.debug('trying : ', amazonParams);
+              logging.debug('trying : ', amazonParams);
               var results = yield get_client().itemSearch(amazonParams);
             } catch(err) {
                if (amazonParams.BrowseNode) {
@@ -265,7 +271,7 @@ var search = function*(params,origin) {
                 }
                 try {
                   yield wait(1500);
-                  winston.debug('trying : ', amazonParams);
+                  logging.debug('trying : ', amazonParams);
                   var results = yield get_client().itemSearch(amazonParams);
                 } catch(err) {}
             }
@@ -273,22 +279,22 @@ var search = function*(params,origin) {
         }
       // Only one modifier
       } else {
-        winston.debug('👺4 One modifier, as is did not work... ');
+        logging.debug('👺4 One modifier, as is did not work... ');
         try {
           if (amazonParams.BrowseNode) {
              delete amazonParams.BrowseNode;
           }
             yield wait(1500);
             // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
-            winston.debug('trying : ', amazonParams);
+            logging.debug('trying : ', amazonParams);
             var results = yield get_client().itemSearch(originalParams);
         }
         catch(err) {
-          winston.debug('👺5', amazonParams);
+          logging.debug('👺5', amazonParams);
             try {
                amazonParams.Keywords = params.query;
                yield wait(1500);
-               winston.debug('trying : ', amazonParams);
+               logging.debug('trying : ', amazonParams);
                var results = yield get_client().itemSearch(originalParams);
              } catch(err) {
             }
@@ -297,7 +303,7 @@ var search = function*(params,origin) {
            try {
                amazonParams.Keywords = params.query;
                yield wait(1500);
-               winston.debug('trying : ', amazonParams);
+               logging.debug('trying : ', amazonParams);
                var results = yield get_client().itemSearch(originalParams);
             } catch(err) {
             }
@@ -307,7 +313,7 @@ var search = function*(params,origin) {
              if (amazonParams.BrowseNode) {
                 delete amazonParams.BrowseNode;
               }
-              winston.debug('👺6: ', amazonParams);
+              logging.debug('👺6: ', amazonParams);
               if (amazonParams.Keywords && amazonParams.Keywords.split(' ').length > 2) {
                 kip.debug('someone probably sent a really long string: ', amazonParams.Keywords);
                   //like if someone sends a paragraph.. patch fix for now todo fix later
@@ -315,13 +321,13 @@ var search = function*(params,origin) {
               }
               try {
                 yield wait(1500);
-                winston.debug('trying : ', amazonParams.Keywords);
+                logging.debug('trying : ', amazonParams.Keywords);
                 var results = yield get_client().itemSearch(amazonParams);
               } catch(err) {
                 try {
                    amazonParams.Keywords = params.query;
                    yield wait(1500);
-                   winston.debug('trying : ', amazonParams);
+                   logging.debug('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
                  } catch(err) {}
               }
@@ -329,7 +335,7 @@ var search = function*(params,origin) {
                try {
                    amazonParams.Keywords = params.query;
                    yield wait(1500);
-                   winston.debug('trying : ', amazonParams);
+                   logging.debug('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
                 } catch(err) {}
             }
@@ -347,7 +353,7 @@ var search = function*(params,origin) {
   results = results.slice(skip, skip + 3)
   results.original_query = params.query
   timer.tic('enhancing results')
-  var enhanced_results = yield enhance_results(results,origin, timer)
+  var enhanced_results = yield enhance_results(results, origin, timer)
   timer.tic('done enhancing results')
   timer.stop()
   return enhanced_results
@@ -427,7 +433,7 @@ function* enhance_results(results, origin, timer) {
   });
   timer.tic('got prices')
 
-  winston.debug('incomign results!!!! ',results)
+  logging.debug('incomign results!!!! ',results)
 
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
   timer.tic('stitched results');
@@ -517,7 +523,7 @@ var getPricesPromise = function(item) {
 
 module.exports.similar = similar;
 module.exports.search = search;
-module.exports.lookup = lookup;
+// module.exports.lookup = lookup;
 
 /*  TESTING
   _______     _____  ______   _______   __    __   __    ______

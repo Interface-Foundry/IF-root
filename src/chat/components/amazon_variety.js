@@ -1,12 +1,18 @@
 var request = require('request');
 var cheerio = require('cheerio');
-var db = require('../db');
+
+var co = require('co');
+var async = require('async');
+var wait = require('co-wait');
+
+var db = require('db');
 var _ = require('lodash');
 var ItemVariation = db.itemvariation;
-var amazon = require('../amazon-product-api_modified');
+var amazon_search = require('./amazon_search.js');
 
 var logging = require('winston');
 logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+
 
 /*
 * given objects like:
@@ -27,7 +33,7 @@ logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 *    convert to:
 *     [{asin: 'B01CI6RY52', size_name: '6 B(M) US', color_name: 'Gray'] ...{ }}
 */
-function create_item_array(variationValues, asinVariationValues) {
+function createItemArray(variationValues, asinVariationValues) {
   var init_array = []
   for (var asin in asinVariationValues) {
     var item_var = {id: asin}
@@ -44,12 +50,35 @@ function create_item_array(variationValues, asinVariationValues) {
 }
 
 
+/*
+* createItemReqs should present user in facebook or slack or whatever with
+* buttons to click for each object in variationValues and return what items
+* were clicked
+*
+* @param {Object} variationValues {key_1:[Val1,..,Val3],..,key_n: [Val1,.]}
+* @returns {Object} itemAttribsToUse {key_1: val_1,...,key_n:val_n}
+*/
+function createItemReqs(variationValues){
+  var itemAttribsToUse = {}
+  logging.debug('SELECT ONE OF THE FOLLOWING: ', Object.keys(variationValues))
+  // BUTTONS AND STUFF WOULD BE RIGHT HERE, along
+  // need to get itemAttribsToUse and origin
+
+  // select random sample being:
+  for (var key in variationValues) {
+    itemAttribsToUse[key] = _.sample(variationValues[key])
+  }
+  logging.debug('Item Atrbs to use: ', itemAttribsToUse)
+  return itemAttribsToUse
+}
+
+
 /**
 * given asin, goto amazon page, scrape variations.
 * @param {string} product with no offer codes.
 * @returns {Object}  variations and respective asins
 */
-function get_variations(asin) {
+function getVariations(asin) {
 
   var v = {
     base_asin: asin,
@@ -68,7 +97,7 @@ function get_variations(asin) {
         eval(data) // returns value that contains dataToReturn var
         v.variationValues = dataToReturn.variationValues
         v.asinVariationValues = dataToReturn.asinVariationValues
-        v.asins = create_item_array(v.variationValues, v.asinVariationValues)
+        v.asins = createItemArray(v.variationValues, v.asinVariationValues)
       })
     }
 
@@ -84,18 +113,27 @@ function get_variations(asin) {
   });
 };
 
+
 /*
 * Picks Item ASIN from created
 *
 * @param {string} ASIN identifier
+* @returns {}
 */
 function pickItem(asin) {
   ItemVariation.findOne({ASIN: asin}, function(err,obj) {
     var itemAttribsToUse = createItemReqs(obj.variationValues)
     var goodItem = _.filter(obj.asins, _.matches(itemAttribsToUse))
     if (goodItem.length > 0) {
-      console.log('ADD TO CART ASIN: ', goodItem[0].id)
+      logging.debug('ADD TO CART ASIN: ', goodItem[0].id)
       // lookup item and add to cart
+      var item = {
+        asin: goodItem[0].id,
+        origin: 'facebook'
+      }
+
+      var results = amazon_search.lookup(item, item.origin)
+      logging.info(results)
     }
     else {
       throw new Error('no Item Matches the reqs provided by user')
@@ -103,33 +141,15 @@ function pickItem(asin) {
   });
 }
 
-/*
-* createItemReqs should present user in facebook or slack or whatever with
-* buttons to click for each object in variationValues and return what items
-* were clicked
-*
-* @param {Object} variationValues {key_1:[Val1,..,Val3],..,key_n: [Val1,.]}
-* @returns {Object} itemAttribsToUse {key_1: val_1,...,key_n:val_n}
-*/
-function createItemReqs(variationValues){
-  var itemAttribsToUse = {}
-  logging.debug('SELECT ONE OF THE FOLLOWING: ', Object.keys(variationValues))
-  // BUTTONS AND STUFF WOULD BE RIGHT HERE:
-  //
 
-  // select random sample being:
-  for (var key in variationValues) {
-    itemAttribsToUse[key] = _.sample(variationValues[key])
-  }
-  logging.debug('Item Atrbs to use: ', itemAttribsToUse)
-
-  return itemAttribsToUse
-}
+// exportz
+module.exports.createItemReqs = createItemReqs;
+module.exports.getVariations = getVariations;
 
 
 // TESTING BELOW
 var ASIN = 'B01CI6RTRK';
 
-pickItem(ASIN)
 // var z = get_variations(ASIN)
+pickItem(ASIN)
 
