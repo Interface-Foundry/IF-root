@@ -1,30 +1,72 @@
 var async = require('async');
 var request = require('request');
 var status = {};
+var cheerio = require('cheerio');
+var sets = require('./settings').sets;
+var proxy_opt = {
+    customer: 'kipthis', 
+    password: 'e49d4ega1696', 
+    zone: 'gen', 
+    proxy_count: 3,
+    // country: 'us',
+    // request_timeout: 2,
+    // sticky_ip: true,
+    // proxy_switch: true,
+    // pool_size: 9,
+    max_requests: 5,
+    log: 'NONE'
+};
+module.exports = { check: check, options: proxy_opt, current_index: 0}
+// module.exports.current_index = 0;
+
 async.whilst(
     function () { 
       return true; 
     },
     function (callback) {
+      var amazon_url = 'http://www.amazon.com/Helens-Pinkmartini-Colors-Sports-Sneakers/dp/B019MPDGHM'
+      var test_url = 'http://kipthis.com/DONTTOUCH.txt'
       var options = {
-        url: 'http://www.amazon.com/Helens-Pinkmartini-Colors-Sports-Sneakers/dp/B019MPDGHM%3Fpsc%3D1%26SubscriptionId%3DAKIAJWTPOWIOUPHJYG2Q%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3DB019MPDGHM', 
-        proxy: 'http://127.0.0.1:24000'
+        url: amazon_url, 
+        proxy: 'http://127.0.0.1:24000',
+        timeout: 3000
       };
       var begin= Date.now();
+      status.last_ping= Date.now();
       request(options,function(err, res, body){ 
         if (err) {
-          setTimeout(function () {
-            callback()
-          }, 5000);
-        } 
-        else if (res && res.statusCode == 200 && body.length > 0) {
-          status.last_ping= Date.now();
           var end= Date.now();
           status.latency=(end-begin)/10000;
-          console.log('\nSTATUS: ',status,'\n')
+          status.success = false;
+          status.age = (Date.now() - status.last_ping)/10000;
+          console.log('\n\n...checking status...', status,'\n\nusing option set #', module.exports.current_index,'\n\n');
+          db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: sets[module.exports.current_index].config}); 
           setTimeout(function () {
             callback()
-          }, 3000);
+          }, 300000);
+        } 
+        else if (res && res.statusCode == 200 && body.length > 0) {
+          var $ = cheerio.load(body);
+          var reviews = $('#revMHRL').text();
+          var end= Date.now();
+          status.latency=(end-begin)/10000;
+          status.success = reviews ? true : false;
+          status.age = (Date.now() - status.last_ping)/10000;
+          console.log('\n\n...checking status...', status,'\n\nusing option set #',module.exports.current_index,'\n\n')
+          db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: true, status: status, options: sets[module.exports.current_index].config});
+          setTimeout(function () {
+            callback()
+          },300000);
+        } else {
+          var end= Date.now();
+          status.latency=(end-begin)/10000;
+          status.success = false;
+          status.age = (Date.now() - status.last_ping)/10000;
+          console.log('\n\n...checking status...', status,'\n\nusing option set #',module.exports.current_index,'\n\n')
+            db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: sets[module.exports.current_index].config}); 
+           setTimeout(function () {
+            callback()
+          },300000);
         }
       });
     },
@@ -32,13 +74,12 @@ async.whilst(
 ); 
 
 var check = function() {
-    console.log('\n',status,'\n');
+    console.log('\n\n\n\n',status,'\n\n\n\n');
     status.age = (Date.now() - status.last_ping)/10000;
-    if (status.latency < 0.06 && status.age < 3) {
-      return true;
+    if (status.success == true && status.latency <= 1 && status.age <= 60) {
+      return {ready: true, status: status };
     } else {
-      return false;
+      return {ready: false, status: status };
     }
 }
 
-module.exports = { check: check}

@@ -1,7 +1,7 @@
 var request = require('request');
 var db = require('../../../db');
-
-module.exports = luminati_request = function (url, proxy) {
+var options = require('./status').options;
+module.exports = luminati_request = function (url, proxy, status) {
     return new Promise((resolve, reject)=>{
         var begin= Date.now();
         proxy.request({ 
@@ -20,15 +20,15 @@ module.exports = luminati_request = function (url, proxy) {
                var end= Date.now();
                var timeSpent=(end-begin)/10000;
             if (err) {
-               db.Metrics.log('proxy', { proxy: 'luminati', request_url: url, delay_ms: timeSpent, success: false, error: err})
+               db.Metrics.log('proxy', { proxy: 'luminati', check: false,request_url: url, delay_ms: timeSpent, success: false, options: options, error: err, status: status})
                reject(err);
             }
             else if (res.body.length > 0 && res.statusCode == 200) {
-               db.Metrics.log('proxy', { proxy: 'luminati', request_url: url, delay_ms: timeSpent, success: true})
+               db.Metrics.log('proxy', { proxy: 'luminati', check: false, request_url: url, delay_ms: timeSpent, success: true, status: status, options: options})
                resolve(res.body);
             } 
             else {
-               db.Metrics.log('proxy', { proxy: 'luminati', request_url: url, delay_ms: timeSpent, success: false, error: 'fail'})
+               db.Metrics.log('proxy', { proxy: 'luminati', check: false,request_url: url, delay_ms: timeSpent, success: false, error: 'fail', status: status, options: options})
                reject()
             }
         });

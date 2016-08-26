@@ -1,5 +1,6 @@
 var request = require('request');
 var db = require('../../../db');
+var options = require('./status').options;
 var exec = require('child_process').exec;
 var child;
 // executes `pwd`
@@ -13,7 +14,7 @@ child = exec("luminati --customer lum-customer-kipthis-zone-gen --password e49d4
 
 
 
-module.exports =  manual_request = function(url) {
+module.exports =  manual_request = function(url, status) {
   return new Promise((resolve, reject)=>{
     var begin=Date.now();
     request({
@@ -33,15 +34,15 @@ module.exports =  manual_request = function(url) {
         var end= Date.now();
         var timeSpent=(end-begin)/10000;
         if (err) {
-           db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: false, error: err})
+           db.Metrics.log('proxy', { proxy: 'manual_luminati', check: false,request_url: url, delay_ms: timeSpent, success: false, options: options, error: err, status: status})
            reject(err);
         }
         else if (res.body.length > 0 && res.statusCode == 200) {
-           db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: true})
+           db.Metrics.log('proxy', { proxy: 'manual_luminati', check: false, request_url: url, delay_ms: timeSpent, success: true, status: status, options: options})
            resolve(res.body);
         } 
         else {
-           db.Metrics.log('proxy', { proxy: 'manluminati', request_url: url, delay_ms: timeSpent, success: false, error: 'fail'})
+           db.Metrics.log('proxy', { proxy: 'manual_luminati', check: false,request_url: url, delay_ms: timeSpent, success: false, error: 'fail', status: status, options: options})
            reject()
         }
     })

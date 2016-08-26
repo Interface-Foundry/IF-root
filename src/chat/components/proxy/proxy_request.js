@@ -9,29 +9,41 @@ var mesh_request = require('./mesh');
 var luminati_request = require('./lib_luminati');
 var manual_request = require('./manual_luminati');
 const Luminati = require('luminati-proxy').Luminati;
-var status = require('./status');
-const proxy = new Luminati({
-    customer: 'kipthis', 
-    password: 'e49d4ega1696', 
-    zone: 'gen', 
-    proxy_count: 5,
-    // proxy_switch: true,
-    pool_size: 9,
-    max_requests: 100,
-    log: 'NONE'
+var proxy_status = require('./status');
+var sets = require('./settings').sets;
+var sets_index = require('./settings').current_set;
+var IntervalTimer = require('./IntervalTimer').IntervalTimer;
+var async = require('async');
+
+async.eachSeries(sets, function iterator(set, callback) {
+   if (proxy) {
+    console.log('\n\n🤖stopping previous proxy...\n\n');
+    proxy.stop();
+   }
+    proxy_status.current_index = sets_index
+    console.log('\n\n\n\n🤖starting #', sets_index,' proxy with options: ', set.config,' ...\nfor ',set.time_in_seconds,' seconds...\n\n\n\n');
+    var proxy = new Luminati(sets[sets_index].config);
+    proxy.listen(24000, '127.0.0.1');
+    setTimeout(function() {
+      console.log('\n\n🤖time to live elapsed... trying next set...\n\n');
+      sets_index = sets_index + 1;
+      return callback(null);
+  }, set.time_in_seconds * 1000);
+  }, function complete(err, res) {
+
 });
 
-proxy.listen(24000, '127.0.0.1')
 
 module.exports.request = function(url) {
-      var ready = status.check();
+      var status = proxy_status.check();
       var res;
-      if (ready) {
-        kip.debug('firing luminati...')
-        res = luminati_request(url, proxy)
-      } else{
-        kip.debug('firing mesh...')
-        res = mesh_request(url)
-      }
+      // if (status.ready) {
+        // kip.debug('firing luminati...')
+        res1 = luminati_request(url, proxy, status.status);
+      // } else{
+        // kip.debug('firing mesh...')
+        res = mesh_request(url, status.status);
+      // }
       return res;
-}
+};
+

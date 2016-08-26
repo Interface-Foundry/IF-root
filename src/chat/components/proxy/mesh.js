@@ -1,10 +1,10 @@
 var request = require('request');
 var db = require('../../../db');
+var options = require('./status').options;
 
 
-module.exports = mesh_request = function (url, busy) {
+module.exports = mesh_request = function (url, status) {
     return new Promise(function(resolve,reject) {
-      console.log('firing mesh request...');
       var begin= Date.now();
       var user = 'alyx';
       var password = '9fSvNH@aB4Hs2s>qcatsoupkanyecandle';
@@ -27,17 +27,17 @@ module.exports = mesh_request = function (url, busy) {
         }
       }, function(err, res, body) {
          var end= Date.now();
-         var timeSpent=(end-begin)/10000+"milliseconds";
+         var timeSpent=(end-begin)/10000;
            if (err) {
-             db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: fail, error: err})
+             db.Metrics.log('proxy', { proxy: 'mesh', check: false,request_url: url, delay_ms: timeSpent, success: false, error: err})
              reject(err);
           }
           else if (res.statusCode == 200 && body.length > 0){
-             db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: true})
+             db.Metrics.log('proxy', { proxy: 'mesh', check: false, request_url: url, delay_ms: timeSpent, success: true})
              resolve(body);
           }
           else {
-             db.Metrics.log('proxy', { proxy: 'mesh', request_url: url, delay_ms: timeSpent, success: fail, error: 'fail'})
+             db.Metrics.log('proxy', { proxy: 'mesh', check: false,request_url: url, delay_ms: timeSpent, success: false, error: 'fail'})
              reject('fail')
           }
     });
