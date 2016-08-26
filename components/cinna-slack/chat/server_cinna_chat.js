@@ -71,6 +71,9 @@ app.get('/healthcheck', function(req, res) {
   res.send('💬 🌏')
 })
 
+//survey tools
+var story_processor = require('./components/story_processor.js')
+
 //parse incoming body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -177,12 +180,31 @@ app.get('/newslack', function(req, res) {
 // incoming slack action
 //
 app.post('/slackaction', function(req, res) {
+
+  //if callback.id
+
   if (!req.body || !req.body.payload) {
     kip.err('slack action did not have a body or payload');
     res.sendStatus(500);
   }
 
   var parsedIn = JSON.parse(req.body.payload);
+
+
+  //is this a survey button?
+  if(parsedIn.callback_id == 'survey_55'){
+
+    console.log('CALLBACK ID!!!!!!!!!')
+
+    story_processor.incomingAnswer(parsedIn,function(){
+      res.json()
+    })
+
+    
+
+    return
+  }
+
   kip.debug('got slack action', parsedIn.actions[0].name);
 
   //validating real button call

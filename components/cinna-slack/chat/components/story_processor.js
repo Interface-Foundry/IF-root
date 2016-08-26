@@ -1,7 +1,6 @@
 //This is a survey generator that modifies the survey template for each platform
 
-var survey = require('./stories/survey_templates/survey1.js')
-var db = require('../../db');
+var db = require('db');
 var Story = db.Story;
 
 var http = require('http');
@@ -9,6 +8,8 @@ var request = require('request');
 var async = require('async');
 var co = require('co');
 
+var survey = require( __dirname +'/stories/survey_templates/survey1.js')
+var story_saver = require( __dirname +'/story_saver.js')
 
 
 
@@ -61,155 +62,366 @@ var co = require('co');
 //on incoming action, query dexter's external service for next question id to advance to user
 
 
+var startSurvey = function(kipUser,callback){
+
+
+
+    //GET TEAMS TO QUERY HERE
+    //& &* &* &* &* NOTE: /!\ : add message to user ping: "only admins see this message"
+    // ----------------------->> add mode sticker to message
+
+    //start sync operation
+    co(function*() {
+
+        console.log('_Z_Z_Z_Z_Z ',survey.survey1['Q1'])
+            
+
+
+        var builtStory = yield buildStory('slack',survey.survey1['Q1'],'Q1');
+
+        //getSurveyTeams
+
+        sendFirstQuestion(builtStory,kipUser,survey.teamList)
+
+        console.log('BUILT FIRST STORY!!!! ',builtStory)
+
+        callback('👹🍀')
+
+    }).catch((e) => {
+      kip.error(e, 'error loading slackbots');
+    })
+}
+
+
+
+function sendFirstQuestion(question,kipUser,teamList){
+
+    async.eachSeries(teamList, function (team, callback) {
+        
+        async.eachSeries(team.admins, function (admin, callback2) {
+
+            //startSurvey(team.team_id,admin)
+
+
+            msgData.attachments = question;
+
+            console.log('QUESTION ???? ',question)
+            console.log('ADMIN ???? ',admin)
+            console.log('TEAM ???? ',team)
+
+            //console.log('SEND DATA NOW _ NORMAL ',msgData);
+            slackUsers_web[team].chat.postMessage(admin, '', question, function(err,res) {
+
+
+                // if(data.action == 'list'){
+
+                //     data.source.ts = res.ts;
+
+                //     console.log('🍀👹6',data.source.ts);
+                //     history.saveHistory(data,false,function(res){
+                //         //whatever
+                //     });
+                // }
+
+
+                //callback();
+            });
+
+            //ping each admin every 5 minutes
+            setTimeout(function() {
+                callback2();
+            }, 300000);
+
+        }, function (err) {
+          if (err) { throw err; }
+
+          console.log('DONE SENDING TO TEAM: ',team.team_id);
+
+          callback(); //dont progress to next team until done w this one thx
+        });
+      
+    }, function (err) {
+      if (err) { throw err; }
+      console.log('DONE SENDING TO ALL TEAMS!');
+    });
+
+}
 
 
 // var slack = require('@slack/client');
 
-var incomingAction = function(req,callback){
+
+/**
+ * This function processes incoming story answers
+ * @param {Object} req incoming user auth object from Slack
+ * @returns {Object} res redirect authed user to Success page
+ */
+var incomingAnswer = function(processAnswer,callback){
+
     co(function* () {
 
+        //SAVE ANSWER TO MONGO HERE
+
         // //advance the pointer
-        if (req.body && req.body.payload){
+        //if (req.body && req.body.payload){
 
-            var processStory = yield process_story(req.body.payload) 
+        //var processAnswer = yield process_answer(req.body.payload) 
 
-            //console.log('PROCESS STORY ', processStory)
+        console.log('____PROCESS STORY: ', processAnswer)
 
-            var builtStory = yield buildStory('slack',processStory);
+        processAnswer = yield story_saver.loadIds(processAnswer)
 
-            //console.log('BUILT STORY ', builtStory)
+        console.log('____PROCESS ANSWER: ', processStory)
 
-            //SEND BACK TO SERVER CINNA CHAT
-           // res.json(builtStory);
+        var builtStory = yield buildStory('slack',processAnswer,'Q1')
 
-            //console.log('👑cool!👑 ',builtStory);
 
-            callback(builtStory)
-        }
+        //YIELD get teams
+
+        //YIELD send to team
+
+
+        //console.log('BUILT STORY ', builtStory)
+
+        //SEND BACK TO SERVER CINNA CHAT
+       // res.json(builtStory);
+
+        //console.log('👑cool!👑 ',builtStory);
+
+        callback('👑cool!👑')
+        //}
        
     }).catch(function(err){
         console.error('co err ',err);
     });
 }
 
-function gatherSurveyTeams(){
+function getSurveyTeams(){
 
     //select some entries from the slackbots collection
     //extract team ID and lsit of admin users from each slackbot document
 
-    var teamList = [{
-        'team_id':'T2234980',
-        'admins':['U234233','U2342342','U24394834']
-    },
-    {
-        'team_id':'T2234980',
-        'admins':['U234233','U2342342','U24394834']
-    }]
-
-    //start sync operation
-    co(function*() {
-
-        var rtm = new slack.RtmClient('xoxb-71163106818-IVHA9vHytuV2OIl3YuT1TW3s');
-        var web = new slack.WebClient('xoxb-71163106818-IVHA9vHytuV2OIl3YuT1TW3s');
-
-        rtm.start();
-
-        rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
-          console.log('loaded slack team');
-        })
-
-        //incoming slack messages
-        rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
-
-            // // don't talk to yourself
-            if (data.bot_id === 'B234K1NS3') {
-                //console.log("don't talk to yourself");
-                return; // drop the message before saving.
-            }
-
-            // other random things
-            if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
-                console.log('will not handle this message');
-                return;
-            }
-
-            //store incoming messages
-            var message = new db.Message({
-                incoming: true,
-                thread_id: data.channel,
-                original_text: data.text,
-                user_id: data.user,
-                origin: 'slack',
-                source: data,
-            });
-
-            // clean up the text
-            message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-            if (message.text.charAt(0) == ':') {
-                message.text = message.text.substr(1); //remove : from beginning of string
-            }
-            message.text = message.text.trim(); //remove extra spaces on edges of string
 
 
-            //start survey on slack event
-            co(function*() {
+        // web.chat.postMessage(message.source.channel, '', builtStory, function(err,res) {
+        //     console.log(err)
+        // });
 
-                var builtStory = yield buildStory('slack',survey.survey1['Q1'],'Q1');
 
-                web.chat.postMessage(message.source.channel, '', builtStory, function(err,res) {
-                    console.log(err)
-                });
+        // var rtm = new slack.RtmClient('xoxb-71163106818-IVHA9vHytuV2OIl3YuT1TW3s');
+        // var web = new slack.WebClient('xoxb-71163106818-IVHA9vHytuV2OIl3YuT1TW3s');
 
-            }).catch((e) => {
-              kip.error(e, 'error loading slackbots');
-            })
+        //rtm.start();
 
-        })
+    //     rtm.on(slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (startData) => {
+    //       console.log('loaded slack team');
+    //     })
 
-    }).catch((e) => {
-      kip.error(e, 'error loading slackbots');
-    })
+    //     //incoming slack messages
+    //     rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
+
+    //         // // don't talk to yourself
+    //         if (data.bot_id === 'B234K1NS3') {
+    //             //console.log("don't talk to yourself");
+    //             return; // drop the message before saving.
+    //         }
+
+    //         // other random things
+    //         if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
+    //             console.log('will not handle this message');
+    //             return;
+    //         }
+
+    //         //store incoming messages
+    //         var message = new db.Message({
+    //             incoming: true,
+    //             thread_id: data.channel,
+    //             original_text: data.text,
+    //             user_id: data.user,
+    //             origin: 'slack',
+    //             source: data,
+    //         });
+
+    //         // clean up the text
+    //         message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+    //         if (message.text.charAt(0) == ':') {
+    //             message.text = message.text.substr(1); //remove : from beginning of string
+    //         }
+    //         message.text = message.text.trim(); //remove extra spaces on edges of string
+
+    //     })
+
+
 
     //select a team from the array
 
-    // async.eachSeries(teamList, function (team, callback) {
-        
-    //     async.eachSeries(team.admins, function (admin, callback2) {
 
-    //         startSurvey(team.team_id,admin)
-
-    //         //ping each admin every 5 minutes
-    //         setTimeout(function() {
-    //             callback2();
-    //         }, 300000);
-
-    //     }, function (err) {
-    //       if (err) { throw err; }
-
-    //       console.log('DONE SENDING TO TEAM: ',team.team_id);
-
-    //       callback(); //dont progress to next team until done w this one thx
-    //     });
-      
-    // }, function (err) {
-    //   if (err) { throw err; }
-    //   console.log('DONE SENDING TO ALL TEAMS!');
-    // });
 }
 
 
 //expect entire response from user on button push
 //response.origin = incoming origin
-var process_story = function*(response,origin){
+var process_answer = function*(response,origin){
 
-    var story_pointer;
-    var story_answer;
+    var qId, aId, story_end, answer_val
 
     //MOCK ORIGIN
-    origin = 'slack';
+    origin = 'slack'
 
-    response = JSON.parse(response)
+    //response = JSON.parse(response)
 
+    saveAnswer(response) //save to mongo
+
+    
+    //continue parsing story
+    if(response && response.actions && response.actions[0] && response.actions[0].value){
+
+        var parseVal = JSON.parse(response.actions[0].value);
+        console.log('EXTRACT ',parseVal)
+
+        story_end = parseVal.story_end //get story end value, we'll use later to end story
+
+        console.log('EXTRACT QUESTION ID & ANSWER ID here')
+
+        qId = parseVal.qId
+
+        
+    }else {
+        console.error('missing response.actions.value from SLACK')
+    }
+
+    //check for question id
+    if(!qId){
+        story_pointer = 'Q1'
+    }
+
+
+    //CHECK HERE FOR FINISHED
+
+    //SURVEY FINISHED!
+    if (story_end){
+
+        var sendText = {
+            text: 'Thanks for taking our survey - happy shopping! :blush:'
+        }
+
+        return sendText
+        
+    }
+    
+    //stop running, send final message to user
+    else if(answer_val == 'no' && qId == 'Q1'){
+
+        var sendText= {
+            text: 'Damn :('
+        }
+
+        return sendText
+    }   
+
+    //advance to next question
+    else {
+
+
+        //var nextQuestion = 
+
+        // story_pointer++;
+        // var nextQuestion = survey.survey1[story_pointer];
+
+
+        return yield getNextQuestion(qId,aId)
+        
+    }
+}
+
+
+function getNextQuestion(qId,aId){
+
+    //add POST request here to Neomodel
+    //service returns qId for next question
+
+    qId = 'Q2' //mock id
+
+    return survey.survey1[qId]
+}
+
+
+//build story to send to slack
+function buildStory(origin,incoming,qId){
+
+    var storyObj = {
+        attachments:[]
+    };
+
+    
+    switch(origin){
+        //built object for slack
+        case 'slack':
+            //map buttons for slack
+
+            if (incoming && incoming.answers){
+                var buttonArray = incoming.answers.map(function(obj){ 
+                    var rObj = {}
+                    var story_end = false;
+
+                    rObj.name = obj.value;
+                    rObj.text = obj.label;
+                    rObj.type = 'button';
+
+                    //should we end story after this last user action
+                    if(obj.target_q_id == 'false'){
+                        story_end = true
+                    }
+
+                    //stringify value object before sending to slack
+                    rObj.value = JSON.stringify({
+                        q_id: qId, //question ID
+                        a_id: obj.id,//answer ID
+                        story_end: story_end //should we end story after this question is answered?
+                    });
+                    return rObj;
+                });
+
+                console.log('BUTTON ARRAY ',buttonArray)
+
+                var attachment = {
+                    "text": incoming.prompt,
+                    "fallback": incoming.prompt,
+                    "callback_id": 'survey_55',
+                    "color": "#3AA3E3",
+                    "attachment_type": "default",
+                    "actions": buttonArray
+                }
+
+                console.log('WE ATTACH THIS ',attachment)
+
+                //add buttons to obj to push to attachements:
+                storyObj.attachments.push(attachment)        
+            }
+            else if (incoming && incoming.text){
+
+                var attachment = {
+                    "text": incoming.text,
+                    "fallback": incoming.text
+                }
+                storyObj.attachments.push(attachment)
+            }
+            else {
+                var attachment = {
+                    "text": 'error',
+                    "fallback": 'error',
+                    "color": "#3AA3E3"
+                }
+                storyObj.attachments.push(attachment)
+            }
+            //adding slack specific stuff to the object
+        break;
+    }
+    return storyObj;
+}
+
+
+function saveAnswer(response){
     //Construct mongo answer
     var cMongo = {
         answer: {},
@@ -249,9 +461,6 @@ var process_story = function*(response,origin){
         cMongo.channel.name = response.channel.name;
     }
 
-
-    console.log('???????????????? ',cMongo)
-
     //save answer to DB
     var answer = new Story(cMongo);
     answer.save(function (err) {
@@ -261,140 +470,11 @@ var process_story = function*(response,origin){
         console.log('meow');
       }
     });
-
-    
-    //continue parsing story
-    if(response && response.actions && response.actions[0] && response.actions[0].value){
-
-        var parseVal = JSON.parse(response.actions[0].value);
-
-        story_pointer = parseVal.story_pointer;
-        story_answer = parseVal.selected;
-        
-    }else {
-        console.error('missing response.actions.value from SLACK');
-    }
-
-    //check for pointer val
-    if(!story_pointer && story_pointer !== 0){
-        story_pointer= 0;
-    }
-
-
-    //SURVEY FINISHED!
-    if (story_pointer == survey.survey1.length - 1){
-
-        var sendText = {
-            text: 'Thanks for taking our survey - happy shopping! :blush:'
-        }
-
-        return sendText;
-        
-    }
-    
-    //stop running, send final message to user
-    else if(story_answer == 'no' && story_pointer == 0){
-
-        var sendText= {
-            text: 'Damn :('
-        }
-
-        return sendText; 
-    }   
-
-    //advance to next question
-    else {
-
-
-        //var nextQuestion = 
-
-        // story_pointer++;
-        // var nextQuestion = survey.survey1[story_pointer];
-
-        return yield getNextQuestion('','')
-        
-    }
 }
-
-
-function getNextQuestion(){
-
-    //add POST request here to Neomodel
-    //service returns qId for next question
-
-    var qId = 'Q2' //mock id
-
-    return survey.survey1[qId]
-}
-
-
-function buildStory(origin,incoming,qId){
-
-    var storyObj = {
-        attachments:[]
-    };
-
-    switch(origin){
-        //built object for slack
-        case 'slack':
-            //map buttons for slack
-
-            if (incoming && incoming.actions){
-                var buttonArray = incoming.answers.map(function(obj){ 
-                    var rObj = {};
-                    rObj.name = obj.value;
-                    rObj.text = obj.label;
-                    rObj.type = 'button';
-
-                    //stringify value object before sending to slack
-                    rObj.value = JSON.stringify({
-                        q_id: qId, //question ID
-                        a_id: obj.id//answer ID
-                    });
-                    return rObj;
-                });
-
-                console.log('BUTTON ARRAY ',buttonArray)
-
-                var attachment = {
-                    "text": incoming.text,
-                    "fallback": incoming.text,
-                    "callback_id": incoming.callback_id,
-                    "color": "#3AA3E3",
-                    "attachment_type": "default",
-                    "actions": buttonArray
-                }
-
-                console.log('WE ATTACH THIS ',attachment)
-
-                //add buttons to obj to push to attachements:
-                storyObj.attachments.push(attachment)        
-            }
-            else if (incoming && incoming.text){
-
-                var attachment = {
-                    "text": incoming.text,
-                    "fallback": incoming.text
-                }
-                storyObj.attachments.push(attachment)
-            }
-            else {
-                var attachment = {
-                    "text": 'error',
-                    "fallback": 'error',
-                    "color": "#3AA3E3"
-                }
-                storyObj.attachments.push(attachment)
-            }
-            //adding slack specific stuff to the object
-        break;
-    }
-    return storyObj;
-}
-
 
 
 //process_story()
-gatherSurveyTeams()
+//gatherSurveyTeams()
 
-module.exports.incomingAction = incomingAction
+module.exports.incomingAnswer = incomingAnswer
+module.exports.startSurvey = startSurvey

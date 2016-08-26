@@ -146,7 +146,8 @@ var saveHistory = function(data,incoming,callbackZZ) { //incoming == 1 or 0
                     msg.kikData = JSON.stringify(msg.kikData);
                 }
 
-                if (msg.amazon){
+                if (msg.amazon && msg.amazon.length > 0){
+
                     msg.amazon = [];
                     async.eachSeries(data.amazon, function(item, callback) {
                         //fuck amazon '$' keys littering their object results. go stringify and die.

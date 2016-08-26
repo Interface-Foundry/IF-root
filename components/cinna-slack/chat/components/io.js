@@ -54,59 +54,62 @@ var upload = require('../../../../IF_services/upload.js');
 var email = require('./email');
 var emojiText = require('emoji-text'); //convert emoji to text
 
+//load stories controller
+var story_processor = require('./story_processor.js')
+
 
 
 /////////// LOAD INCOMING ////////////////
 
 
 //- - - - - - - TELEGRAM - - - - - - //
-var telegram = require('telegram-bot-api');
+// var telegram = require('telegram-bot-api');
 
-var telegramToken;
-if (process.env.NODE_ENV == 'development_alyx'){
-    telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
-}else if (process.env.NODE_ENV == 'development_mitsu'){
-    telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
-}else{
-    telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
-}
+// var telegramToken;
+// if (process.env.NODE_ENV == 'development_alyx'){
+//     telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+// }else if (process.env.NODE_ENV == 'development_mitsu'){
+//     telegramToken = '187934179:AAG7_UuhOETnyWEce3k24QCd2OhTBBQcYnk';
+// }else{
+//     telegramToken = '144478430:AAG1k609USwh5iUORHLdNK-2YV6YWHQV4TQ';
+// }
 
 
-if (process.env.NODE_ENV !== 'development') {
-  var tg = new telegram({
-          token: telegramToken,
-          updates: {
-              enabled: true
-      }
-  });
+// if (process.env.NODE_ENV !== 'development') {
+//   var tg = new telegram({
+//           token: telegramToken,
+//           updates: {
+//               enabled: true
+//       }
+//   });
 
-  tg.on('message', function(msg){
+//   tg.on('message', function(msg){
 
-      //if user sends sticker msg.msg will be undefined
-      if (msg.sticker) {
-          console.log('Telegram message is a sticker: ',msg)
-          return
-      }
+//       //if user sends sticker msg.msg will be undefined
+//       if (msg.sticker) {
+//           console.log('Telegram message is a sticker: ',msg)
+//           return
+//       }
 
-      var newTg = {
-          source: {
-              'origin':'telegram',
-              'channel':msg.from.id.toString(),
-              'org':'telegram',
-              'id':'telegram' + "_" + msg.from.id, //for retrieving chat history in node memory,
-          },
-          'msg':msg.text
-      }
+//       var newTg = {
+//           source: {
+//               'origin':'telegram',
+//               'channel':msg.from.id.toString(),
+//               'org':'telegram',
+//               'id':'telegram' + "_" + msg.from.id, //for retrieving chat history in node memory,
+//           },
+//           'msg':msg.text
+//       }
 
-      //console.log('asdf ',newTg);
-      if (process.env.NODE_ENV !== 'development') {
-        console.log("incoming telegram message");
-        console.log(msg);
-        console.log(newTg);
-        preProcess(newTg);
-      }
-  });
-}
+//       //console.log('asdf ',newTg);
+//       if (process.env.NODE_ENV !== 'development') {
+//         console.log("incoming telegram message");
+//         console.log(msg);
+//         console.log(newTg);
+//         preProcess(newTg);
+//       }
+//   });
+// }
 
 
 //get stored slack users from mongo
@@ -114,50 +117,62 @@ var initSlackUsers = function(env){
     console.log('loading with env: ',env);
     cinnaEnv = env;
     //load kip-pepper for testing
-    // if (env === 'development_alyx') {
+    if (env === 'development_alyx') {
 
-    //     //KIP on Slack
-    //     // var testUser = [{
-    //     //     team_id:'T02PN3B25',
-    //     //     dm:'D0H6X6TA8',
-    //     //     bot: {
-    //     //         bot_user_id: 'U0GRJ9BJS',
-    //     //         bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
-    //     //     },
-    //     //     meta: {
-    //     //         initialized: true
-    //     //     }
-    //     // }];
+        //]KIP on Slack
+        // var testUser = [{
+        //     team_id:'T02PN3B25',
+        //     dm:'D0H6X6TA8',
+        //     bot: {
+        //         bot_user_id: 'U0GRJ9BJS',
+        //         bot_access_token:'xoxb-16868317638-4pB4v3sor5LNIu6jtIKsVLkB'
+        //     },
+        //     meta: {
+        //         initialized: true
+        //     }
+        // }];
 
-    //     //CINNA-PEPPER
-    //     // var testUser = [{
-    //     //     team_id:'T0H72FMNK',
-    //     //     dm:'D0H6X6TA8',
-    //     //     bot: {
-    //     //         bot_user_id: 'U0H6YHBNZ',
-    //     //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
-    //     //     },
-    //     //     meta: {
-    //     //         initialized: false
-    //     //     }
-    //     // }];
+        //CINNA-PEPPER
+        // var testUser = [{
+        //     team_id:'T0H72FMNK',
+        //     dm:'D0H6X6TA8',
+        //     bot: {
+        //         bot_user_id: 'U0H6YHBNZ',
+        //         bot_access_token:'xoxb-17236589781-HWvs9k85wv3lbu7nGv0WqraG'
+        //     },
+        //     meta: {
+        //         initialized: false
+        //     }
+        // }];
 
-    //     //KIP-PAPRIKA
-    //     var testUser = [{
-    //         team_id:'T02PN3B25',
-    //         dm:'D0H6X6TA8',
-    //         bot: {
-    //             bot_user_id: 'U0H6YHBNZ',
-    //             bot_access_token:'xoxb-29684927943-TWPCjfJzcObYRrf5MpX5YJxv'
-    //         },
-    //         meta: {
-    //             initialized: true
-    //         }
-    //     }];
+    // { ok: true,
+    //   access_token: 'xoxp-72990018007-72987532037-73079544164-2dc5784273',
+    //   scope: 'identify,bot,commands,users:read',
+    //   user_id: 'U24V1FN13',
+    //   team_name: 'kip_playground',
+    //   team_id: 'T24V40J07',
+    //   bot:
+    //    { bot_user_id: 'U252DR0ES',
+    //      bot_access_token: 'xoxb-73081850502-Qq9GRjW2X9qh2Tev6FMeAQxM' } }
 
 
-    //     loadSlackUsers(testUser);
-    // }
+        //KIP-PLAYGROUND
+        var testUser = [{
+            team_id:'T24V40J07',
+            access_token: 'xoxp-72990018007-72987532037-73079544164-2dc5784273',
+            scope : "identify,bot,commands,users:read",
+            bot : {
+                bot_user_id : "U252DR0ES",
+                bot_access_token : "xoxb-73081850502-Qq9GRjW2X9qh2Tev6FMeAQxM"
+            },
+            meta: {
+                initialized: true
+            }
+        }];
+
+
+       loadSlackUsers(testUser);
+    }
     if (env === 'development_mitsu'){
         var testUser = [{
             team_id:'T0HLZP09L',
@@ -231,7 +246,6 @@ function loadSlackUsers(users){
     console.log('loading '+users.length+' Slack users');
 
     async.eachSeries(users, function(user, callback) {
-
 
         var token = user.bot.bot_access_token || '';
 
@@ -390,7 +404,8 @@ function loadSlackUsers(users){
 
         //on messages sent to Slack
         slackUsers[user.team_id].on(RTM_EVENTS.MESSAGE, function (data) {
-            console.log('🔥')
+            
+            console.log('🔥🔥 ',data)
 
 
             //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71'
@@ -399,6 +414,9 @@ function loadSlackUsers(users){
               console.log("don't talk to urself")
               return;
             }
+
+
+
 
             // Less cyncical comment: might be useful to have history here,
             // but idk how and we'll probably rewrite this segment to handle
@@ -486,6 +504,7 @@ function loadSlackUsers(users){
                         else {
                             console.log('\n\n EXANPLE DATA EWJTWREGSEW', data)
                             data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+
                             if (data.text.charAt(0) == ':'){
                                 data.text = data.text.substr(1); //remove : from beginning of string
                             }
@@ -540,6 +559,18 @@ function loadSlackUsers(users){
                     //not a file share, process normally
                     else {
                         data.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+
+                        //TEMP!!!!!
+                        //🔥🔥 check to intitiate survey 
+                        if (data.text == '11991dB3survey'){
+                            story_processor.startSurvey(kipUser,function(res){
+                                console.log('🔥',res)
+
+                                //SEND MESSAGE TO USER HERE!!!! 
+                            })
+                            return
+                        }
+
                         incomingSlack(data);
                     }
                 }
@@ -1945,6 +1976,7 @@ var checkOutgoingBanter = function(data){
 //send back msg to user, based on source.origin
 var sendResponse = function(data,flag){
 
+
     //SAVE OUTGOING MESSAGES TO MONGO
     if (data.bucket && data.action && !(data.flags && data.flags.searchResults)){
         console.log('SAVING OUTGOING RESPONSE ',data.action);
@@ -2900,9 +2932,13 @@ var sendResponse = function(data,flag){
     //* * * * * * * *
     // Slack Outgoing
     //* * * * * * * *
+
+
     else if (!(data.flags && data.flags.email) && data.source && data.source.channel && data.source.origin == 'slack' || (data.flags && data.flags.toClient)){
 
         //console.log('🍀SENDING RESPONSE🍀 ',data)
+
+        console.log('🍀🍀 ',data)
 
         //eventually cinna can change emotions in this pic based on response type
         var params = {

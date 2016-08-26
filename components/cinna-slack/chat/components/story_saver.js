@@ -13,13 +13,16 @@ var survey = require( __dirname + '/stories/survey_templates/survey1.js')
  * @returns {Object} res redirect authed user to Success page
  */
 var saveStory = function(){
+
     co(function* () {
 
     	//get questions from JSON file
     	var questions = yield loadQuestions()
 
     	//get answer IDs
-    	//questions = yield loadIds(questions)
+    	questions = yield loadIds(questions)
+
+    	console.log('ZZZ ',JSON.stringify(questions,undefined,2))
 
     	//POST questions
     	yield createQuestions(questions) 
@@ -55,21 +58,27 @@ var loadQuestions = function*(){
 
 
 // //* * * NOTE: this needs to removed from the loader and stored directly in survey
-// var loadIds = function*(questions){
-// 	//map questions
-// 	questions = questions.map(function(q) {
-// 	  var qObj = q
-// 	  //map answers in questions
-// 	  var answers = q.answers.map(function(a) {
-// 	  	var aObj = a
-// 	  	aObj.id = 'A'+shortid.generate() //generate answer id 
-// 	  	return aObj
-// 	  })
-// 	  q.answers = answers
-// 	  return qObj
-// 	});
-// 	return questions
-// }
+var loadIds = function*(questions){
+
+	console.log('INCOMING load IDs ',questions)
+
+	var counter = 0
+	//map questions
+	questions = questions.map(function(q) {
+	  var qObj = q
+	  //map answers in questions
+	  var answers = q.answers.map(function(a) {
+	  	counter++
+	  	var aObj = a
+	  	aObj.value = aObj.label.trim().toLowerCase() //temp value from label
+	  	aObj.id = 'A'+counter //generate answer id 
+	  	return aObj
+	  })
+	  q.answers = answers
+	  return qObj
+	});
+	return questions
+}
 
 
 /**
@@ -123,6 +132,11 @@ var createLinks = function*(questions){
 }
 
 
-saveStory()
+var dumbHack = false
+if(dumbHack){
+	saveStory()
+}
+
+module.exports.loadIds = loadIds
 
 
