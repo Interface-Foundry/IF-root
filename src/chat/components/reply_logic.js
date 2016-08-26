@@ -146,7 +146,7 @@ queue.topic('incoming').subscribe(incoming => {
       throw new Error('correct message not retrieved from db');
     }
 
-    // Check if the user is trying to escape some mode
+    // mode guessing
     if (isCancelIntent(message)) {
       winston.debug('cancel intent triggered')
       message.mode = 'shopping'
@@ -155,8 +155,6 @@ queue.topic('incoming').subscribe(incoming => {
     if (message.text.indexOf('onboard') >= 0) {
       message.mode = 'onboarding'
     }
-
-    debugger;
 
     if (!message.mode) {
       if (_.get(message, 'history[0].mode')) {
@@ -170,15 +168,13 @@ queue.topic('incoming').subscribe(incoming => {
 
     printMode(message)
 
-    // Otherwise, handle the mode that the user is in
-
-
     //MODE SWITCHER
     switch(message.mode) {
       case 'onboarding':
         if (message.origin === 'slack') {
           var replies = yield onboarding.handle(message)
         } else {
+          // facebook
           //check for valid country
           //turn this into a function
           if (text == 'Singapore' || text == 'United States') {
@@ -193,6 +189,7 @@ queue.topic('incoming').subscribe(incoming => {
           }
         }
       break;
+
       //default Kip Mode shopping
       default:
         winston.debug('DEFAULT SHOPPING MODE')
@@ -389,6 +386,8 @@ function* nlp_response(message) {
     return messages;
   }
 }
+
+var handlers = shopping.handlers;
 
 // do the things
 function execute(message) {

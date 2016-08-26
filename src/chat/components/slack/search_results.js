@@ -4,41 +4,21 @@ var buttons = function(num) {
   return [
     {
       "name": "addcart",
-      "text": "⭐ add to cart",
+      "text": "Add to Cart",
       "style": "primary",
       "type": "button",
       "value": num
-      // "confirm": {
-      //   "title": "Are you sure?",
-      //   "text": "This will approve the request.",
-      //   "ok_text": "Yes",
-      //   "dismiss_text": "No"
-      // }
     },
     {
       "name": "cheaper",
-      "text": "💎 cheaper",
-      "style": "default",
-      "type": "button",
-      "value": num
-    },
-    {
-      "name": "similar",
-      "text": "⚡ similar",
-      "style": "default",
-      "type": "button",
-      "value": num
-    },
-    {
-      "name": "modify",
-      "text": "🌀 modify",
+      "text": "Find Cheaper",
       "style": "default",
       "type": "button",
       "value": num
     },
     {
       "name": "moreinfo",
-      "text": "💬 info",
+      "text": "More Info",
       "style": "default",
       "type": "button",
       "value": num
@@ -63,8 +43,7 @@ var emojis = {
 // Generate the slack reponse for the search results
 //
 function* results(message) {
-  var amazon = JSON.parse(message.amazon);
-  console.log(amazon);
+  var amazon = JSON.parse(message.amazon)
 
   var results = amazon.map((r, i) => {
     return {
@@ -72,9 +51,27 @@ function* results(message) {
       color: '#45a5f4',
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
-      fallback: 'Search Results'
+      fallback: 'Search Results',
+      actions: buttons(i+1)
     }
   });
+
+  results.push({
+    fallback: 'Search Results',
+    actions: [{
+      name: "more",
+      text: "See More Results",
+      style: "default",
+      type: "button",
+      value: "more"
+    }, {
+      name: "home",
+      text: "🐧",
+      style: "default",
+      type: "button",
+      value: "home"
+    }]
+  })
 
   return results;
 }

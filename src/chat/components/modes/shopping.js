@@ -1,6 +1,11 @@
 require('kip')
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+var _ = require('lodash')
+
+var amazon_search = require('../amazon_search.js');
+var picstitch = require("../picstitch.js");
+var processData = require("../process.js");
 
 //
 // Handlers take something from the message.execute array and turn it into new messages
@@ -8,22 +13,6 @@ winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 var handlers = {}
 module.exports = {}
 module.exports.handlers = handlers
-
-/**
- * Main handler which decides what part of the onbaording process the user is at 
- * 
- * @param {any} message
- */
-function * handle(message) {
-  var last_action = _.get(message, 'history[0].action')
-  if (!last_action) {
-    return yield handlers['shopping.initial'](message)
-  } else {
-    return yield handlers['get-admins.response'](message)
-  }
-}
-
-module.exports.handle = handle
 
 handlers['shopping.initial'] = function*(message, exec) {
   // typing(message);

@@ -51,6 +51,7 @@ var image_search = require('../image_search');
 var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
+var actions = require('./actions');
 var slackConnections = {};
 
 //
@@ -159,7 +160,7 @@ kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
   try {
     console.log('outgoing message');
-    console.log(outgoing);
+    // console.log(outgoing);
     var message = outgoing.data;
 
     var bot = slackConnections[message.source.team];
