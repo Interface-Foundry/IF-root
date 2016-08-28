@@ -1,17 +1,21 @@
 <div class="page page-dashboard">
 
     <div class="row" data-ng-controller="DashboardController as dashboardCtrl">
-        <div class="col-md-12">
+      <div class="col-md-6 affix">
+        <div class="panel panel-default panel-minimal sources">
+            <span
+              ng-repeat="source in dashboardCtrl.searchSources"
+              ng-click="dashboardCtrl.setSearchCountScope(source)"
+              class="source"
+              ng-class=" {'selected-source': source === dashboardCtrl.searchCountScope}"
+            >{{source}} </span>
+          </div>
+        </div>
+        <div class="col-md-12 searches">
             <div class="panel panel-default panel-minimal">
                 <div class="divider divider-md"></div>
                 <div class="panel-heading">{{dashboardCtrl.searchCountScope}} Searches</div>
                 <div class="panel-body">
-                    Show:
-                    <span
-                      ng-repeat="source in dashboardCtrl.searchSources"
-                      ng-click="dashboardCtrl.setSearchCountScope(source)"
-                    >{{source}}
-                    </span>
                     <div class="row">
                         <div class="col-md-3 box-stats">
                             <span class="box-desc">Intial</span>
@@ -34,6 +38,38 @@
             </div>
             <div class="panel panel-default panel-minimal">
                 <div class="divider divider-md"></div>
+                <div class="panel-heading">Active Users</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <span>Daily</span>
+                            <canvas
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.dailyActiveUsers.data"
+                              chart-labels="dashboardCtrl.data.dailyActiveUsers.labels"
+                            ></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <span>Monthly</span>
+                            <canvas
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.monthlyActiveUsers.data"
+                              chart-labels="dashboardCtrl.data.monthlyActiveUsers.labels"
+                            ></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <span>Monthly Slack Teams</span>
+                            <canvas
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.monthlySlackTeams.data"
+                              chart-labels="dashboardCtrl.data.monthlySlackTeams.labels"
+                            ></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default panel-minimal">
+                <div class="divider divider-md"></div>
                 <div class="panel-heading">Time Based</div>
                 <div class="panel-body">
                     <div class="row">
@@ -43,6 +79,22 @@
                               class="chart chart-bar"
                               chart-data="dashboardCtrl.data.dayOfWeekStats.data"
                               chart-labels="dashboardCtrl.data.dayOfWeekStats.labels"
+                            ></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <span>Month</span>
+                            <canvas
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.monthStats.data"
+                              chart-labels="dashboardCtrl.data.monthStats.labels"
+                            ></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <span>Last Thirty Days</span>
+                            <canvas
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.thirtyDayStats.data"
+                              chart-labels="dashboardCtrl.data.thirtyDayStats.labels"
                             ></canvas>
                         </div>
                     </div>

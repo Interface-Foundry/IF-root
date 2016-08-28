@@ -3,6 +3,12 @@ const getSearchCounts = (messages) =>
   new Promise((resolve, reject) => {
     messages.aggregate([
       {
+        $match:
+        {
+          execute: { $exists: true },
+        },
+      },
+      {
         $group: {
           _id: {
             day: {

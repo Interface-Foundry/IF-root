@@ -21,12 +21,22 @@ const db2Msgs = db2.model('Message');
 
 const getSearchCounts = require('./queries/getSearchCounts');
 const getBanterCounts = require('./queries/getBanterCounts');
-const getDayofWeekStats = require('./queries/getDayofWeekStats');
+const mapDayofWeekStats = require('./mapping/mapDayStats');
+const mapMonthStats = require('./mapping/mapMonthStats');
+const mapThirtyDayStats = require('./mapping/mapThirtyDayStats');
+const mapDailyActiveUsers = require('./mapping/mapDailyActiveUsers');
+const mapMonthlyActiveUsers = require('./mapping/mapMonthlyActiveUsers');
+const mapMonthlySlackTeams = require('./mapping/mapMonthlySlackTeams');
 
 const results = {};
 results.searchCounts = {};
 results.banterCounts = {};
 results.dayOfWeekStats = {};
+results.monthStats = {};
+results.thirtyDayStats = {};
+results.dailyActiveUsers = {};
+results.monthlyActiveUsers = {};
+results.monthlySlackTeams = {};
 
 app.use(bodyParser.json());
 app.use(morgan());
@@ -94,22 +104,39 @@ app.post('/vc/slackstats', function(req, res) {
   });
 });
 
-const getData = messages => {
+const getData = () => {
   getSearchCounts([db1Msgs, db2Msgs]).then(searchCounts => {
     Object.assign(results.searchCounts, searchCounts);
   });
   getBanterCounts([db1Msgs, db2Msgs]).then(banterCounts => {
     Object.assign(results.banterCounts, banterCounts);
   });
-  getDayofWeekStats(messages).then(dayOfWeekStats => {
+  mapDayofWeekStats([db1Msgs, db2Msgs]).then(dayOfWeekStats => {
     Object.assign(results.dayOfWeekStats, dayOfWeekStats);
+  });
+  mapMonthStats([db1Msgs, db2Msgs]).then(monthStats => {
+    Object.assign(results.monthStats, monthStats);
+  });
+  mapThirtyDayStats([db1Msgs, db2Msgs]).then(thirtyDayStats => {
+    Object.assign(results.thirtyDayStats, thirtyDayStats);
+  });
+  mapDailyActiveUsers([db1Msgs, db2Msgs]).then(dailyActiveUsers => {
+    Object.assign(results.dailyActiveUsers, dailyActiveUsers);
+  });
+  mapMonthlyActiveUsers([db1Msgs, db2Msgs]).then(monthlyActiveUsers => {
+    Object.assign(results.monthlyActiveUsers, monthlyActiveUsers);
+  });
+  mapMonthlySlackTeams([db1Msgs, db2Msgs]).then(monthlySlackTeams => {
+    Object.assign(results.monthlySlackTeams, monthlySlackTeams);
   });
 };
 
-getData(Message);
+getData();
+
+// update data everything 30 minutes
 setInterval(() => {
   getData(Message);
-}, 120000);
+}, 1800000);
 
 app.get('/data', (req, res) => {
   res.send(results);

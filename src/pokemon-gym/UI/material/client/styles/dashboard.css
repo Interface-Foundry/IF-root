@@ -1,0 +1,22 @@
+.page-dashboard .source {
+  font-size: 24px;
+}
+.page-dashboard .sources {
+  background-color: #262B33;
+  color: #fff;
+  padding-left: 10px;
+  z-index: 99;
+}
+
+.page-dashboard .selected-source {
+  color: #009688;
+  font-size: 32px;
+  }
+
+.page-dashboard .searches {
+  margin-top: 62px;
+}
+
+.page-dashboard .affix {
+  z-index: 99;
+}

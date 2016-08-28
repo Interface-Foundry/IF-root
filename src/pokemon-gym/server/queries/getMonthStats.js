@@ -5,8 +5,8 @@ const getSearchCounts = (messages) =>
       {
         $group: {
           _id: {
-            day: {
-              $dayOfWeek: '$ts',
+            month: {
+              $month: '$ts',
             },
             prov: '$source.origin',
           },
@@ -15,7 +15,7 @@ const getSearchCounts = (messages) =>
       },
         { $group: {
           _id: {
-            day: '$_id.day',
+            month: '$_id.month',
           },
           sources: {
             $addToSet: {
@@ -27,14 +27,14 @@ const getSearchCounts = (messages) =>
       },
     ], (err, result) => {
       if (err) { reject(err); }
-      const days = result.map(day => {
-        const sources = day.sources.filter(source => source.name);
-        const total = day.sources.reduce((prevSource, source) =>
+      const months = result.map(month => {
+        const sources = month.sources.filter(source => source.name);
+        const total = month.sources.reduce((prevSource, source) =>
           ({ num: prevSource.num + source.num })).num;
 
         return {
-          idString: date.daysOfWeek[day._id.day],
-          idNumber: day._id.day,
+          idString: date.months[month._id.month],
+          idNumber: month._id.month,
           total,
           sources: [...sources, {
             name: 'total',
@@ -42,7 +42,7 @@ const getSearchCounts = (messages) =>
           }],
         };
       });
-      resolve(days);
+      resolve(months);
     });
   });
 

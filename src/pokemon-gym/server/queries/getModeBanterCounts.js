@@ -4,6 +4,7 @@ const getModeBanterCounts = messages =>
       {
         $match:
         {
+          execute: { $exists: true },
           'execute.mode': { $exists: false },
         },
       },
