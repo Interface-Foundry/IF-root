@@ -16,7 +16,7 @@ var IntervalTimer = require('./IntervalTimer').IntervalTimer;
 var async = require('async');
 var argv = require('minimist')(process.argv.slice(2));
 var test_mode = argv.proxy ? argv.proxy : false;
-// node reply_logic --proxy --interval=6000
+// e.g. run example for test mode: node reply_logic --proxy --interval=6000
 
 if (test_mode) {
   console.log('Running proxy test mode..')
@@ -60,7 +60,6 @@ module.exports.request = function(url) {
         kip.debug('firing mesh...')
         res = mesh_request(url, status.status);
       }
-      heapdump.writeSnapshot('~/proxy_prod_mode_' + Date.now() + '.heapsnapshot');
       proxy.stop();
       return res;
 };

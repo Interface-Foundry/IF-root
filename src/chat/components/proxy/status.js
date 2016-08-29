@@ -41,7 +41,7 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.success = false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
+          if (test_mode)console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
           if (test_mode) db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config } }); 
           setTimeout(function () {
             callback()
@@ -54,7 +54,7 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.success = reviews ? true : false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
+          if (test_mode)console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
           if (test_mode) db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: true, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}});
           setTimeout(function () {
             callback()
@@ -64,7 +64,7 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.success = false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
+         if (test_mode)console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
           if (test_mode) db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}}); 
           setTimeout(function () {
             callback()
