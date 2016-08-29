@@ -13,6 +13,8 @@ var itemvariationSchema = mongoose.Schema({
 
   asins: [],
 
+  source: {}
+
 });
 
 module.exports = mongoose.model('ItemVariations', itemvariationSchema);

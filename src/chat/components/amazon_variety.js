@@ -6,6 +6,7 @@ var async = require('async');
 var wait = require('co-wait');
 
 var db = require('db');
+var queue = require('./queue-mongo');
 var _ = require('lodash');
 var ItemVariation = db.itemvariation;
 var amazon_search = require('./amazon_search.js');
@@ -13,6 +14,17 @@ var amazon_search = require('./amazon_search.js');
 var logging = require('winston');
 logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
+/*
+* create pubsub with
+*
+*/
+function variationPubSub(message, variationData) {
+  logging.debug('\n\n\ncreating variation for: ', variationData);
+  queue.publish(
+    'outgoing.' + message.origin,
+    variationData,
+    message._id + '.variation.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+}
 
 /*
 * given objects like:
@@ -64,7 +76,7 @@ function createItemReqs(variationValues){
   // BUTTONS AND STUFF WOULD BE RIGHT HERE, along
   // need to get itemAttribsToUse and origin
 
-  // select random sample being:
+  // SELECT RANDOM SAMPLE FOR TIME BEING:
   for (var key in variationValues) {
     itemAttribsToUse[key] = _.sample(variationValues[key])
   }
@@ -78,9 +90,9 @@ function createItemReqs(variationValues){
 * @param {string} product with no offer codes.
 * @returns {Object}  variations and respective asins
 */
-function getVariations(asin) {
+function getVariations(asin, message) {
 
-  var v = {
+  var v_bag = {
     base_asin: asin,
     url: 'https://www.amazon.com/dp/'  + asin,
     asins: []
@@ -100,17 +112,21 @@ function getVariations(asin) {
         v.asins = createItemArray(v.variationValues, v.asinVariationValues)
       })
     }
+  return
 
   var item = new ItemVariation({
     ASIN: v.base_asin,
     variationValues: v.variationValues,
-    asins: v.asins
+    asins: v.asins,
+    source: message.source
   })
 
   item.save(function(err) {
     if (err) throw err;
   });
   });
+  console.log('ZZZ', item)
+  return item
 };
 
 
@@ -121,7 +137,7 @@ function getVariations(asin) {
 * @returns {}
 */
 function pickItem(asin) {
-  ItemVariation.findOne({ASIN: asin}, function(err,obj) {
+  ItemVariation.findOne({ASIN: asin, user}, function(err,obj) {
     var itemAttribsToUse = createItemReqs(obj.variationValues)
     var goodItem = _.filter(obj.asins, _.matches(itemAttribsToUse))
     if (goodItem.length > 0) {
@@ -150,6 +166,6 @@ module.exports.getVariations = getVariations;
 // TESTING BELOW
 var ASIN = 'B01CI6RTRK';
 
-// var z = get_variations(ASIN)
-pickItem(ASIN)
+var z = get_variations(ASIN)
+// pickItem(ASIN)
 

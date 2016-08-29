@@ -7,7 +7,6 @@ var sleep = require('co-sleep');
 var natural = require('natural');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var async = require('async');
-var amazon_variety = require('./amazon_variety');
 // var client = amazon.createClient({
 //   awsId: "AKIAILD2WZTCJPBMK66A",
 //   awsSecret: "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",
@@ -46,7 +45,8 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, user_id, item, type) {
+module.exports.addToCart = function(slack_id, message, item, type) {
+  var user_id = message.user_id
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
@@ -62,15 +62,7 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     // api can and will return items that you cannot buy.  So we have to just
     // ignore these things.
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
-
-    // REMOVE ALL OF THIS LATER
-    try {
-      amazon_variety.getVariations(item.ASIN[0])
-      amazon_variety.createItemReqs(item.ASIN[0])
-    }
-    catch (err)
-    {
-      return Promise.reject('Item not available');
+    return Promise.reject('Item not available');
     }
   }
 
