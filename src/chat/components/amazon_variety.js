@@ -1,6 +1,7 @@
 var request = require('request');
 var cheerio = require('cheerio');
 
+var uuid = require('uuid');
 var co = require('co');
 var async = require('async');
 var wait = require('co-wait');
@@ -18,12 +19,12 @@ logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 * create pubsub with
 *
 */
-function variationPubSub(message, variationData) {
-  logging.debug('\n\n\ncreating variation for: ', variationData);
+function pubsubVariation(item) {
+  logging.debug('\n\n\ncreating variation for: ', item.ASIN);
   queue.publish(
-    'outgoing.' + message.origin,
-    variationData,
-    message._id + '.variation.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+    'variation.' + item.source.origin,
+    item,
+    item._id + '.variation.' + uuid.v4())
 }
 
 /*
@@ -62,6 +63,53 @@ function createItemArray(variationValues, asinVariationValues) {
 }
 
 
+
+/**
+* given asin, goto amazon page, scrape variations.
+* @param {string} product with no offer codes.
+* @returns {Object}  variations and respective asins
+*/
+function getVariations(asin, message) {
+
+
+
+  var variation = {
+    base_asin: asin,
+    url: 'https://www.amazon.com/dp/'  + asin,
+    asins: []
+  };
+
+  request(variation.url, function(error, response, html) {
+    if (!error && response.statusCode == 200) {
+      var $ = cheerio.load(html);
+      $('#twisterJsInitializer_feature_div > script').each(function(i, element) {
+        var data = element.children[0].data
+        var lines = data.split('\n');
+        lines = lines.slice(2, lines.length - 3)
+        var data = lines.join('\n');
+        eval(data) // returns value that contains dataToReturn var
+        variation.variationValues = dataToReturn.variationValues
+        variation.asinVariationValues = dataToReturn.asinVariationValues
+        variation.asins = createItemArray(variation.variationValues, variation.asinVariationValues)
+      })
+    }
+
+
+  var item = new ItemVariation({
+    ASIN: variation.base_asin,
+    variationValues: variation.variationValues,
+    asins: variation.asins,
+    source: message
+  })
+  item.save(function(err) {
+    if (err) throw err;
+  });
+
+  pubsubVariation(item)
+  });
+};
+
+
 /*
 * createItemReqs should present user in facebook or slack or whatever with
 * buttons to click for each object in variationValues and return what items
@@ -85,51 +133,6 @@ function createItemReqs(variationValues){
 }
 
 
-/**
-* given asin, goto amazon page, scrape variations.
-* @param {string} product with no offer codes.
-* @returns {Object}  variations and respective asins
-*/
-function getVariations(asin, message) {
-
-  var v_bag = {
-    base_asin: asin,
-    url: 'https://www.amazon.com/dp/'  + asin,
-    asins: []
-  };
-
-  request(v.url, function(error, response, html) {
-    if (!error && response.statusCode == 200) {
-      var $ = cheerio.load(html);
-      $('#twisterJsInitializer_feature_div > script').each(function(i, element) {
-        var data = element.children[0].data
-        var lines = data.split('\n');
-        lines = lines.slice(2, lines.length - 3)
-        var data = lines.join('\n');
-        eval(data) // returns value that contains dataToReturn var
-        v.variationValues = dataToReturn.variationValues
-        v.asinVariationValues = dataToReturn.asinVariationValues
-        v.asins = createItemArray(v.variationValues, v.asinVariationValues)
-      })
-    }
-  return
-
-  var item = new ItemVariation({
-    ASIN: v.base_asin,
-    variationValues: v.variationValues,
-    asins: v.asins,
-    source: message.source
-  })
-
-  item.save(function(err) {
-    if (err) throw err;
-  });
-  });
-  console.log('ZZZ', item)
-  return item
-};
-
-
 /*
 * Picks Item ASIN from created
 *
@@ -137,7 +140,7 @@ function getVariations(asin, message) {
 * @returns {}
 */
 function pickItem(asin) {
-  ItemVariation.findOne({ASIN: asin, user}, function(err,obj) {
+  ItemVariation.findOne({ASIN: asin}, function(err,obj) {
     var itemAttribsToUse = createItemReqs(obj.variationValues)
     var goodItem = _.filter(obj.asins, _.matches(itemAttribsToUse))
     if (goodItem.length > 0) {
@@ -148,8 +151,8 @@ function pickItem(asin) {
         origin: 'facebook'
       }
 
-      var results = amazon_search.lookup(item, item.origin)
-      logging.info(results)
+      // var results = amazon_search.lookup(item, item.origin)
+      // console.log(results)
     }
     else {
       throw new Error('no Item Matches the reqs provided by user')
@@ -165,7 +168,14 @@ module.exports.getVariations = getVariations;
 
 // TESTING BELOW
 var ASIN = 'B01CI6RTRK';
+var message = {
+  user : "914619145317222",
+  id : "facebook_914619145317222",
+  org : "facebook_914619145317222",
+  channel : "914619145317222",
+  origin : "facebook"
+}
 
-var z = get_variations(ASIN)
+// var z = getVariations(ASIN, message)
 // pickItem(ASIN)
 
