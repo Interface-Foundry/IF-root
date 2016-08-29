@@ -14,36 +14,54 @@ var sets = require('./settings').sets;
 var sets_index = require('./settings').current_set;
 var IntervalTimer = require('./IntervalTimer').IntervalTimer;
 var async = require('async');
+var argv = require('minimist')(process.argv.slice(2));
+var test_mode = argv.proxy ? argv.proxy : false;
+// node reply_logic --proxy --interval=6000
 
-async.eachSeries(sets, function iterator(set, callback) {
+if (test_mode) {
+  console.log('Running proxy test mode..')
+  async.eachSeries(sets, function iterator(set, callback) {
    if (proxy) {
     console.log('\n\n🤖stopping previous proxy...\n\n');
     proxy.stop();
    }
-    proxy_status.current_index = sets_index
+    proxy_status.current_index = sets_index;
     console.log('\n\n\n\n🤖starting #', sets_index,' proxy with options: ', set.config,' ...\nfor ',set.time_in_seconds,' seconds...\n\n\n\n');
     var proxy = new Luminati(sets[sets_index].config);
     proxy.listen(24000, '127.0.0.1');
     setTimeout(function() {
       console.log('\n\n🤖time to live elapsed... trying next set...\n\n');
       sets_index = sets_index + 1;
+      proxy.stop();
       return callback(null);
-  }, set.time_in_seconds * 1000);
+    }, set.time_in_seconds * 1000);
   }, function complete(err, res) {
-
-});
-
+      proxy.stop();
+  });
+} 
+else {
+  const proxy = new Luminati({
+    customer: 'kipthis', 
+    password: 'e49d4ega1696', 
+    zone: 'gen', 
+    proxy_count: 3,
+    log: 'NONE'
+  });
+  proxy.listen(24000, '127.0.0.1')
+}
 
 module.exports.request = function(url) {
       var status = proxy_status.check();
       var res;
-      // if (status.ready) {
-        // kip.debug('firing luminati...')
-        res1 = luminati_request(url, proxy, status.status);
-      // } else{
-        // kip.debug('firing mesh...')
+      if (status.ready) {
+        kip.debug('firing luminati...')
+        res = luminati_request(url, proxy, status.status);
+      } else{
+        kip.debug('firing mesh...')
         res = mesh_request(url, status.status);
-      // }
+      }
+      heapdump.writeSnapshot('~/proxy_prod_mode_' + Date.now() + '.heapsnapshot');
+      proxy.stop();
       return res;
 };
 

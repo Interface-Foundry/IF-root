@@ -16,8 +16,10 @@ var proxy_opt = {
     max_requests: 5,
     log: 'NONE'
 };
-module.exports = { check: check, options: proxy_opt, current_index: 0}
-// module.exports.current_index = 0;
+module.exports = { check: check, options: proxy_opt, current_index: 0};
+var argv = require('minimist')(process.argv.slice(2));
+var test_mode = argv.proxy ? argv.proxy : false;
+var ping_interval = (argv.proxy && argv.interval) ? argv.interval : 300000;
 
 async.whilst(
     function () { 
@@ -39,11 +41,11 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.success = false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\n\n...checking status...', status,'\n\nusing option set #', module.exports.current_index,'\n\n');
-          db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: sets[module.exports.current_index].config}); 
+          console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
+          if (test_mode) db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config } }); 
           setTimeout(function () {
             callback()
-          }, 300000);
+          }, ping_interval);
         } 
         else if (res && res.statusCode == 200 && body.length > 0) {
           var $ = cheerio.load(body);
@@ -52,21 +54,21 @@ async.whilst(
           status.latency=(end-begin)/10000;
           status.success = reviews ? true : false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\n\n...checking status...', status,'\n\nusing option set #',module.exports.current_index,'\n\n')
-          db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: true, status: status, options: sets[module.exports.current_index].config});
+          console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
+          if (test_mode) db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: true, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}});
           setTimeout(function () {
             callback()
-          },300000);
+          },ping_interval);
         } else {
           var end= Date.now();
           status.latency=(end-begin)/10000;
           status.success = false;
           status.age = (Date.now() - status.last_ping)/10000;
-          console.log('\n\n...checking status...', status,'\n\nusing option set #',module.exports.current_index,'\n\n')
-            db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: sets[module.exports.current_index].config}); 
-           setTimeout(function () {
+          console.log('\nstatus:', ping_interval,' : using option set #',  module.exports.current_index ,': ',status,'\n');
+          if (test_mode) db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: test_url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}}); 
+          setTimeout(function () {
             callback()
-          },300000);
+          },ping_interval);
         }
       });
     },
