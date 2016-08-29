@@ -60,7 +60,6 @@ module.exports.request = function(url) {
         kip.debug('firing mesh...')
         res = mesh_request(url, status.status);
       }
-      heapdump.writeSnapshot('~/proxy_prod_mode_' + Date.now() + '.heapsnapshot');
       proxy.stop();
       return res;
 };
