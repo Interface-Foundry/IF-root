@@ -31,23 +31,23 @@ var survey1 = {
        prompt: 'It’s too bad you’re too busy right now! You could win $100 of free money by taking the quiz later. Can i bug you some other time?',
        answers: [{
            label: '1hr',
-           target_q_id: 'false' // redirect to shopping mode & set up reminder alerts
+           target_q_id: null // redirect to shopping mode & set up reminder alerts
        },
        {
            label: '3hr',
-           target_q_id: 'false' 
+           target_q_id: null 
        },
        {
            label: 'Tomorrow',
-           target_q_id: 'false' 
+           target_q_id: null 
        },
        {
            label: 'Next Week',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Never',
-           target_q_id: 'false'
+           target_q_id: null
        }]
    },
 
@@ -335,23 +335,23 @@ var survey1 = {
        prompt: 'What do you normally shop for?',
        answers: [{
            label: 'Electronics',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Drinks & Snacks',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Home & Personal',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Stationery',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Other',
-           target_q_id: 'false'
+           target_q_id: null
        }]
    },
    'Q6A3':{
@@ -401,19 +401,19 @@ var survey1 = {
        prompt: 'What added feature would be most helpful to you?',
        answers: [{
            label: 'Expense reports',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Ways to contact plp',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Reminders',
-           target_q_id: 'false'
+           target_q_id: null
        },
        {
            label: 'Saving on costs',
-           target_q_id: 'false'
+           target_q_id: null
        }]
    }
 }
@@ -423,6 +423,54 @@ var teamList = [{
     'team_id':'T24V40J07',
     'admins':['U24V1FN13']
 }]
+
+
+//take full list, reduce down 
+// ---> put single occurance links only here, with answer ids. remove links with multiples, put single (of multiple) items in seperate array 
+//branchlinks
+// var branchLinks = [ 
+//   { source_q_id: 'Q1', target_q_id: 'Q2A' },
+//   { source_q_id: 'Q1', target_q_id: 'Q2B' },
+//   { source_q_id: 'Q2A', target_q_id: 'Q3A' },
+//   { source_q_id: 'Q2A', target_q_id: 'Q3B' },
+//   { source_q_id: 'Q3A', target_q_id: 'Q3B' },
+//   { source_q_id: 'Q3B', target_q_id: 'Q4B' },
+//   { source_q_id: 'Q3B', target_q_id: 'Q4C' },
+//   { source_q_id: 'Q3B', target_q_id: 'Q4D' },
+//   { source_q_id: 'Q3C', target_q_id: 'Q4B' },
+//   { source_q_id: 'Q3C', target_q_id: 'Q4C' },
+//   { source_q_id: 'Q3C', target_q_id: 'Q4D' },
+//   { source_q_id: 'Q4A', target_q_id: 'Q6A3' },
+//   { source_q_id: 'Q4B', target_q_id: 'Q5A' },
+//   { source_q_id: 'Q4E', target_q_id: 'Q5C' },
+//   { source_q_id: 'Q4E', target_q_id: 'Q5D' },
+//   { source_q_id: 'Q4E', target_q_id: 'Q6A1' },
+//   { source_q_id: 'Q5B', target_q_id: 'Q6A2' }
+// ]
+
+
+// //directlinks ----> 
+// var directLinks = [ 
+//   { source_q_id: 'Q2B', target_q_id: null },
+//   { source_q_id: 'Q3A', target_q_id: 'Q4A' },
+//   { source_q_id: 'Q3B', target_q_id: 'Q4E' },
+//   { source_q_id: 'Q3C', target_q_id: 'Q4E' },
+//   { source_q_id: 'Q4A', target_q_id: 'Q6A1' },
+//   { source_q_id: 'Q4B', target_q_id: 'Q6A1' },
+//   { source_q_id: 'Q4C', target_q_id: 'Q6A1' },
+//   { source_q_id: 'Q4D', target_q_id: 'Q6A1' },
+//   { source_q_id: 'Q4E', target_q_id: 'Q5B' },
+//   { source_q_id: 'Q5A', target_q_id: 'Q6A2' },
+//   { source_q_id: 'Q5B', target_q_id: 'Q6A' },
+//   { source_q_id: 'Q5B', target_q_id: 'Q6B' },
+//   { source_q_id: 'Q5C', target_q_id: 'Q7' },
+//   { source_q_id: 'Q5D', target_q_id: 'Q7' },
+//   { source_q_id: 'Q6A1', target_q_id: 'Q7' },
+//   { source_q_id: 'Q6A2', target_q_id: null },
+//   { source_q_id: 'Q6A3', target_q_id: 'Q7' },
+//   { source_q_id: 'Q6B', target_q_id: 'Q6A2' },
+//   { source_q_id: 'Q7', target_q_id: null }
+// ]
 
 
 // var survey1 = {

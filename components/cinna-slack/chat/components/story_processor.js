@@ -7,9 +7,13 @@ var http = require('http');
 var request = require('request');
 var async = require('async');
 var co = require('co');
+var rp = require('request-promise');
+
 
 var survey = require( __dirname +'/stories/survey_templates/survey1.js')
-var story_saver = require( __dirname +'/story_saver.js')
+//var story_saver = require( __dirname +'/story_saver.js')
+
+var urlBase = 'http://192.168.1.7:5000/'
 
 
 
@@ -62,7 +66,7 @@ var story_saver = require( __dirname +'/story_saver.js')
 //on incoming action, query dexter's external service for next question id to advance to user
 
 
-var startSurvey = function(kipUser,callback){
+var startSurvey = function(slackUsers_web,callback){
 
 
 
@@ -71,19 +75,15 @@ var startSurvey = function(kipUser,callback){
     // ----------------------->> add mode sticker to message
 
     //start sync operation
-    co(function*() {
-
-        console.log('_Z_Z_Z_Z_Z ',survey.survey1['Q1'])
-            
-
+    co(function*() {            
 
         var builtStory = yield buildStory('slack',survey.survey1['Q1'],'Q1');
 
+        //console.log('BUILT FIRST STORY!!!! ',builtStory)
+
         //getSurveyTeams
 
-        sendFirstQuestion(builtStory,kipUser,survey.teamList)
-
-        console.log('BUILT FIRST STORY!!!! ',builtStory)
+        sendFirstQuestion(builtStory,slackUsers_web,survey.teamList)
 
         callback('👹🍀')
 
@@ -94,43 +94,92 @@ var startSurvey = function(kipUser,callback){
 
 
 
-function sendFirstQuestion(question,kipUser,teamList){
+function sendFirstQuestion(question,slackUsers_web,teamList){
+
+    // console.log('Q:::: ',question)
+    // console.log('slackUsers_web ',slackUsers_web)
+    // console.log('teamList ',teamList)
 
     async.eachSeries(teamList, function (team, callback) {
+
+        //console.log('TEAM ',team)
         
         async.eachSeries(team.admins, function (admin, callback2) {
 
             //startSurvey(team.team_id,admin)
 
+            //console
+            // var msgData = {
+            //     attachments = question
+            // }
+           // msgData.attachments = question;
 
-            msgData.attachments = question;
+            // console.log('???? ',slackUsers_web[team.team_id])
+            // // console.log('ADMIN ???? ',admin)
+            // // console.log('TEAM ???? ',team.team_id)
 
-            console.log('QUESTION ???? ',question)
-            console.log('ADMIN ???? ',admin)
-            console.log('TEAM ???? ',team)
-
-            //console.log('SEND DATA NOW _ NORMAL ',msgData);
-            slackUsers_web[team].chat.postMessage(admin, '', question, function(err,res) {
-
-
-                // if(data.action == 'list'){
-
-                //     data.source.ts = res.ts;
-
-                //     console.log('🍀👹6',data.source.ts);
-                //     history.saveHistory(data,false,function(res){
-                //         //whatever
-                //     });
-                // }
+            // slackUsers_web[team.team_id].user.info(admin,function(err, info) {
+            //   if (err) {
+            //     console.log('Error:', err);
+            //   } else {
+            //     console.log('user Info:', info);
+            //   }
+            // });
 
 
-                //callback();
+ 
+
+
+
+            var token = slackUsers_web[team.team_id]._token
+
+            console.log('urllll ','https://slack.com/api/users.info?token='+token+'&user='+admin)
+
+
+            https://api.slack.com/methods/im.open
+
+            request.get({
+              url: 'https://slack.com/api/im.open?token='+token+'&user='+admin
+            }, function(error, response, body){
+
+              var p = JSON.parse(body)
+
+              //get user id
+                slackUsers_web[team.team_id].chat.postMessage(p.channel.id, '', question, function(err,res) {
+
+                    console.log('ERRRRR ',err)
+                    console.log('RESSSS ',res)
+
+                    // if(data.action == 'list'){
+
+                    //     data.source.ts = res.ts;
+
+                    //     console.log('🍀👹6',data.source.ts);
+                    //     history.saveHistory(data,false,function(res){
+                    //         //whatever
+                    //     });
+                    // }
+
+
+                    //callback();
+                });
+
+                //ping each admin every 5 minutes
+                setTimeout(function() {
+                    callback2();
+                }, 300000);
             });
 
-            //ping each admin every 5 minutes
-            setTimeout(function() {
-                callback2();
-            }, 300000);
+
+            ///look up channel id for user
+
+            // kipUser.chat.update(data.source.ts, data.source.channel, '', msgData, function(err,res) {
+            //   console.log(err, res);
+            // });
+
+            // //console.log('SEND DATA NOW _ NORMAL ',msgData);
+
+
 
         }, function (err) {
           if (err) { throw err; }
@@ -169,9 +218,9 @@ var incomingAnswer = function(processAnswer,callback){
 
         console.log('____PROCESS STORY: ', processAnswer)
 
-        processAnswer = yield story_saver.loadIds(processAnswer)
+       // processAnswer = yield story_saver.loadIds(processAnswer)
 
-        console.log('____PROCESS ANSWER: ', processStory)
+        ///console.log('____PROCESS ANSWER: ', processStory)
 
         var builtStory = yield buildStory('slack',processAnswer,'Q1')
 
@@ -276,15 +325,15 @@ var process_answer = function*(response,origin){
     //continue parsing story
     if(response && response.actions && response.actions[0] && response.actions[0].value){
 
-        var parseVal = JSON.parse(response.actions[0].value);
-        console.log('EXTRACT ',parseVal)
+        //var parseVal = JSON.parse(response.actions[0].value);
+        //console.log('EXTRACT ',parseVal)
 
-        story_end = parseVal.story_end //get story end value, we'll use later to end story
+        //story_end = parseVal.story_end //get story end value, we'll use later to end story
 
         console.log('EXTRACT QUESTION ID & ANSWER ID here')
 
-        qId = parseVal.qId
-
+        qId = response.actions[0].value
+        answer_val = response.actions[0].name
         
     }else {
         console.error('missing response.actions.value from SLACK')
@@ -299,28 +348,24 @@ var process_answer = function*(response,origin){
     //CHECK HERE FOR FINISHED
 
     //SURVEY FINISHED!
-    if (story_end){
+    // if (story_end == null){
 
-        var sendText = {
-            text: 'Thanks for taking our survey - happy shopping! :blush:'
-        }
 
-        return sendText
         
-    }
+    // }
     
     //stop running, send final message to user
-    else if(answer_val == 'no' && qId == 'Q1'){
+    // if(answer_val == 'no' && qId == 'Q1'){
 
-        var sendText= {
-            text: 'Damn :('
-        }
+    //     var sendText= {
+    //         text: 'Damn :('
+    //     }
 
-        return sendText
-    }   
+    //     return sendText
+    // }   
 
-    //advance to next question
-    else {
+    // //advance to next question
+    // else {
 
 
         //var nextQuestion = 
@@ -328,31 +373,75 @@ var process_answer = function*(response,origin){
         // story_pointer++;
         // var nextQuestion = survey.survey1[story_pointer];
 
+    var nextQ = yield getNextQuestion(qId,answer_val)
 
-        return yield getNextQuestion(qId,aId)
-        
+    if(nextQ == null){
+        return {
+            text: 'Thanks for taking our survey - happy shopping! :blush:'
+        }
+    }else {
+        return nextQ
     }
+
+
+    //}
 }
 
 
-function getNextQuestion(qId,aId){
+function getNextQuestion(qId,aVal){
+
+    console.log('QID NEXT Q: ',qId)
+    console.log('A VAL NEXT Q: ',aVal)
 
     //add POST request here to Neomodel
     //service returns qId for next question
 
+    // var options = {
+    //     method: 'POST',
+    //     uri: urlBase + '/survey-next',
+    //     body: {
+    //         source_q_id: qId,
+    //         answer_value: aVal
+    //     },
+    //     json: true // Automatically stringifies the body to JSON 
+    // };
+     
+    // rp(options)
+    // .then(function (parsedBody) {
+    //     // POST succeeded... 
+        
+
+
+    // })
+    // .catch(function (err) {
+    //     // POST failed... 
+    //     console.log('post err: ',err)
+    // });
+
+
     qId = 'Q2' //mock id
 
-    return survey.survey1[qId]
+    if(qId == null){
+        return null
+    }else {
+        return survey.survey1[qId]
+    }
+
+    
 }
 
 
 //build story to send to slack
 function buildStory(origin,incoming,qId){
 
+
+    ///* * * * * * SHOW 2/6 question counter
+
     var storyObj = {
         attachments:[]
     };
 
+    console.log('Z__Z: ',JSON.stringify(incoming,undefined,2))
     
     switch(origin){
         //built object for slack
@@ -361,25 +450,32 @@ function buildStory(origin,incoming,qId){
 
             if (incoming && incoming.answers){
                 var buttonArray = incoming.answers.map(function(obj){ 
+
+                    console.log('obj ',obj)
                     var rObj = {}
-                    var story_end = false;
+                    //var story_end = false;
 
-                    rObj.name = obj.value;
-                    rObj.text = obj.label;
-                    rObj.type = 'button';
+                    rObj.name = obj.label.trim().toLowerCase().replace(/ /g,"_")
+                    rObj.text = obj.label
+                    rObj.type = 'button'
 
-                    //should we end story after this last user action
-                    if(obj.target_q_id == 'false'){
-                        story_end = true
-                    }
+                    // //should we end story after this last user action
+                    // if(obj.target_q_id == 'false'){
+                    //     story_end = true
+                    // }
+
+                    rObj.value = qId
 
                     //stringify value object before sending to slack
-                    rObj.value = JSON.stringify({
-                        q_id: qId, //question ID
-                        a_id: obj.id,//answer ID
-                        story_end: story_end //should we end story after this question is answered?
-                    });
-                    return rObj;
+                    // rObj.value = JSON.stringify({
+                    //     q_id: qId //question ID
+                    //     //a_id: obj.value,//answer ID
+
+                    //     //story_end: story_end //should we end story after this question is answered?
+                    // });
+
+                    console.log('rObj ',rObj)
+                    return rObj
                 });
 
                 console.log('BUTTON ARRAY ',buttonArray)
@@ -393,7 +489,7 @@ function buildStory(origin,incoming,qId){
                     "actions": buttonArray
                 }
 
-                console.log('WE ATTACH THIS ',attachment)
+                //console.log('WE ATTACH THIS ',attachment)
 
                 //add buttons to obj to push to attachements:
                 storyObj.attachments.push(attachment)        
@@ -417,7 +513,9 @@ function buildStory(origin,incoming,qId){
             //adding slack specific stuff to the object
         break;
     }
-    return storyObj;
+
+   // console.log('))))) ',storyObj)
+    return storyObj
 }
 
 

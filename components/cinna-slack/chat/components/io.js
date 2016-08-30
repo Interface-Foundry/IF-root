@@ -410,7 +410,7 @@ function loadSlackUsers(users){
 
             //mitsu testing change user.bot.bot_user_id to 'U0HLZLB71'
             // don't talk to urself  TODO why does data sometimes have a bot_id instead of user id?
-            if (data.user === user.bot.bot_user_id || data.username === 'Kip') {
+            if (data.bot_id || data.user === user.bot.bot_user_id || data.username === 'Kip') {
               console.log("don't talk to urself")
               return;
             }
@@ -563,7 +563,8 @@ function loadSlackUsers(users){
                         //TEMP!!!!!
                         //🔥🔥 check to intitiate survey 
                         if (data.text == '11991dB3survey'){
-                            story_processor.startSurvey(kipUser,function(res){
+
+                            story_processor.startSurvey(slackUsers_web,function(res){
                                 console.log('🔥',res)
 
                                 //SEND MESSAGE TO USER HERE!!!! 
