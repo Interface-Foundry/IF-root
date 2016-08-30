@@ -171,7 +171,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
     var msgData = {
         icon_url:'http://kipthis.com/img/kip-icon.png',
-        username:'Kip'
+        username:'Kip',
     };
     co(function*() {
 

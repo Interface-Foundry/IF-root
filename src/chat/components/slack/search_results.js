@@ -52,6 +52,7 @@ function* results(message) {
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
       fallback: 'Search Results',
+      callback_id: message._id.toString() + '.' + i,
       actions: buttons(i+1)
     }
   });
