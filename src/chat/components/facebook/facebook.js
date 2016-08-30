@@ -105,11 +105,13 @@ else if (process.env.NODE_ENV === 'development_mitsu') {
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
-} else if (process.env.NODE_ENV === 'development_nlp') {
+}
+else if (process.env.NODE_ENV === 'development_nlp') {
     fbtoken = 'EAAMhCmQMAyQBANJjQ2hSHnh1NBAGSAKYK2nxAyOExE24jeVzPBNeC3z3sZATMZB0USBNZBrtWktNXxqUyXZBAjT9B6oShyjhZC1CHMvcgA7xhdNhsYk7h2lkC7KfByAZAZBdpQw68iApcvYjTKZC3CRY6TtI2RpLkjJGVHn2zRJjoWr49IldyTpr';
 }
 else if (process.env.NODE_ENV === 'production') {
-    fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
+    fbtoken = 'EAAT6cw81jgoBANmOs6mu6uPRcAac6RPCiLVAcYJ92ArpDogK9uWFhzkkjfFxwZAedmMa6KZBlIOjgx3ZAfv7IddFNe2T5HVGJ0hzdSDvx7VwZCwZCmYJ5sZC6MscRLvmI4VYbcUzEoo1pgDer6Bi0QzphDt32ViXE1mCAY1ZCepsAZDZD'
+    // fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
 }
 
 //temp. needs to be story in DB
@@ -196,7 +198,7 @@ app.post('/facebook', next(function*(req, res, next) {
             fb_utility.send_card(x,sender,fbtoken);
             return;
             }
-            res.sendStatus(200);        
+            res.sendStatus(200);
         }
 
         if (event.message) {
@@ -345,7 +347,7 @@ app.post('/facebook', next(function*(req, res, next) {
         else if (event.postback) {
            yield handle_postback(event, sender, fb_memory, fbtoken, recipient)
         }
-      } //end of for loop    
+      } //end of for loop
 }));
 
 
