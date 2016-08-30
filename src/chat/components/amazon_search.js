@@ -47,8 +47,6 @@ var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
-
-
 var i = 0;
 // Round-robin method for spreading the load between all our clients.
 function get_client() {
@@ -78,11 +76,11 @@ params:
 * @param {Object} params should be Object like {asin: ASIN, IdType: 'ASIN'}
 * @return {Object} enhanced_result for specific item
 */
-var lookup = function*(params, origin) {
+var lookup = function* (params, origin) {
   console.log('Using Amazon Lookup')
   var timer = new kip.SavedTimer('lookup.timer', {params: params})
   db.Metrics.log('lookup.amazon', params)
-  if (!params.asin) {
+  if (!params.ASIN) {
     logging.info('error params: ', params)
     throw new Error('No Asin provided')
   }
@@ -93,7 +91,7 @@ var lookup = function*(params, origin) {
     Availability: 'Available',
     Condition: 'New',
     IdType: params.IdType,
-    ItemId: params.asin,
+    ItemId: params.ASIN,
     ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
   }
 
@@ -102,7 +100,7 @@ var lookup = function*(params, origin) {
     logging.debug('looking up asin', amazonParams);
     var result = yield get_client().itemLookup(amazonParams);
   } catch (e) {
-    throw new Error('Something something asin lookup failed')
+    return Promise.reject('Item not available');
   }
   timer.tic('got results from ItemLookup api')
 
@@ -111,16 +109,20 @@ var lookup = function*(params, origin) {
   timer.stop()
   return enhanced_results
 }
+
+
+
  // {"mode":"shopping",
  // "action":"modify.one",
  // "params":{"query":"shoes","focus":[1],"val":[{"hsl":[170,255,127],"rgb":[0,0,255],"name":"Blue","hex":"#0000FF"},{"hsl":[170,255,64],"rgb":[0,0,128],"name":"Navy Blue","hex":"#000080"},{"hsl":[159,185,145],"rgb":[65,105,225],"name":"Royal Blue","hex":"#4169E1"},{"hsl":[194,255,65],"rgb":[75,0,130],"name":"Indigo","hex":"#4B0082"}],"type":"color"},"_id":"578fa1f16e7ef4c065933966"}
+
 
 var search = function*(params,origin) {
   var timer = new kip.SavedTimer('search.timer', {params: params, origin: origin})
   db.Metrics.log('search.amazon', params)
 
   if (!params.query) {
-    logging.debug('error params: ', params)
+    winston.debug('error params: ', params)
     throw new Error('no query specified')
   }
 
@@ -179,7 +181,7 @@ var search = function*(params,origin) {
     amazonParams.Keywords = params.color.name;
   }
   else if (params.val && params.val.length > 1 && params.type !== 'color') {
-      logging.debug('found multiple modifiers...')
+      winston.debug('found multiple modifiers...')
       amazonParams.Keywords = '';
      for (var i = 1; i < params.val.length; i++) {
       var val = (typeof params.val[i] == 'object' ? params.val[i] : (typeof params.val[i] == 'string' ? params.val[i].toLowerCase() : params.val[i]));
@@ -190,17 +192,17 @@ var search = function*(params,origin) {
       var all_modifiers_array = all_modifiers_string.split(' ');
      }
   } else if (params.val && params.val.length == 1) {
-     amazonParams["Keywords"] = (params.val[0].name)  ? params.val[0].name.toLowerCase() + ' ' +params.query : ((typeof params.val[0] == 'string') ?  params.val[0].toLowerCase() + ' ' + params.query : amazonParams["Keywords"]);
+     amazonParams["Keywords"] = (params.val[0].name)  ? params.val[0].name.toLowerCase() + ' ' + params.query : ((typeof params.val[0] == 'string') ?  params.val[0].toLowerCase() + ' ' + params.query : amazonParams["Keywords"]);
   }
   timer.tic('requesting amazon ItermSearch api');
   try {
-      logging.debug('👺1: as is...', amazonParams);
+      winston.debug('👺1: as is...', amazonParams);
       var results = yield get_client().itemSearch(amazonParams);
    }
    catch (e) {
       //If more than one modifier
       if (all_modifiers_array) {
-        logging.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
+        winston.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
          amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
         for (var i = 0; i < all_modifiers_array.length-1; i++) {
           try {
@@ -209,24 +211,24 @@ var search = function*(params,origin) {
                  amazonParams.BrowseNode = browseNodeBackup;
                }
                amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
-                logging.debug('trying : ', amazonParams)
+                winston.debug('trying : ', amazonParams)
                 var res1 = yield get_client().itemSearch(amazonParams);
                 yield wait(1500);
                 if (res1 && res1.length >= 1) {
                  var results = res1
-                 logging.debug('breaking out...')
+                 winston.debug('breaking out...')
                  break;
                 } else {
                     if (amazonParams.BrowseNode) {
                      delete amazonParams.BrowseNode;
                     }
-                    logging.debug('trying : ', amazonParams)
+                    winston.debug('trying : ', amazonParams)
                     try{
                       var res1 = yield get_client().itemSearch(amazonParams);
                       yield wait(1500);
                       if (res1 && res1.length >= 1) {
                          var results = res1
-                          logging.debug('breaking out...')
+                          winston.debug('breaking out...')
                          break;
                       }
                     } catch(err) {}
@@ -235,13 +237,13 @@ var search = function*(params,origin) {
             catch (e) {
                if (res1 && res1.length >= 1) {
                 var results = res1
-                 logging.debug('breaking out...')
+                 winston.debug('breaking out...')
                  break;
                 }  else {
                   if (amazonParams.BrowseNode) {
                      delete amazonParams.BrowseNode;
                     }
-                    logging.debug('trying : ', amazonParams);
+                    winston.debug('trying : ', amazonParams);
                     try {
                       yield wait(1500);
                       var res1 = yield get_client().itemSearch(amazonParams);
@@ -250,20 +252,20 @@ var search = function*(params,origin) {
                     }
                     if (res1 && res1.length >= 1) {
                      var results = res1
-                     logging.debug('breaking out...')
+                     winston.debug('breaking out...')
                      break;
                     }
                 }
             }
         } // end of for loop
         if (!results || (results && results.length < 1)) {
-            logging.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
+            winston.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
             amazonParams.Keywords = params.query;
             amazonParams.BrowseNode = browseNodeBackup;
-            logging.debug('trying : ', amazonParams);
+            winston.debug('trying : ', amazonParams);
             try {
               yield wait(1500);
-              logging.debug('trying : ', amazonParams);
+              winston.debug('trying : ', amazonParams);
               var results = yield get_client().itemSearch(amazonParams);
             } catch(err) {
                if (amazonParams.BrowseNode) {
@@ -271,7 +273,7 @@ var search = function*(params,origin) {
                 }
                 try {
                   yield wait(1500);
-                  logging.debug('trying : ', amazonParams);
+                  winston.debug('trying : ', amazonParams);
                   var results = yield get_client().itemSearch(amazonParams);
                 } catch(err) {}
             }
@@ -279,22 +281,22 @@ var search = function*(params,origin) {
         }
       // Only one modifier
       } else {
-        logging.debug('👺4 One modifier, as is did not work... ');
+        winston.debug('👺4 One modifier, as is did not work... ');
         try {
           if (amazonParams.BrowseNode) {
              delete amazonParams.BrowseNode;
           }
             yield wait(1500);
             // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
-            logging.debug('trying : ', amazonParams);
+            winston.debug('trying : ', amazonParams);
             var results = yield get_client().itemSearch(originalParams);
         }
         catch(err) {
-          logging.debug('👺5', amazonParams);
+          winston.debug('👺5', amazonParams);
             try {
                amazonParams.Keywords = params.query;
                yield wait(1500);
-               logging.debug('trying : ', amazonParams);
+               winston.debug('trying : ', amazonParams);
                var results = yield get_client().itemSearch(originalParams);
              } catch(err) {
             }
@@ -303,7 +305,7 @@ var search = function*(params,origin) {
            try {
                amazonParams.Keywords = params.query;
                yield wait(1500);
-               logging.debug('trying : ', amazonParams);
+               winston.debug('trying : ', amazonParams);
                var results = yield get_client().itemSearch(originalParams);
             } catch(err) {
             }
@@ -313,7 +315,7 @@ var search = function*(params,origin) {
              if (amazonParams.BrowseNode) {
                 delete amazonParams.BrowseNode;
               }
-              logging.debug('👺6: ', amazonParams);
+              winston.debug('👺6: ', amazonParams);
               if (amazonParams.Keywords && amazonParams.Keywords.split(' ').length > 2) {
                 kip.debug('someone probably sent a really long string: ', amazonParams.Keywords);
                   //like if someone sends a paragraph.. patch fix for now todo fix later
@@ -321,13 +323,13 @@ var search = function*(params,origin) {
               }
               try {
                 yield wait(1500);
-                logging.debug('trying : ', amazonParams.Keywords);
+                winston.debug('trying : ', amazonParams.Keywords);
                 var results = yield get_client().itemSearch(amazonParams);
               } catch(err) {
                 try {
                    amazonParams.Keywords = params.query;
                    yield wait(1500);
-                   logging.debug('trying : ', amazonParams);
+                   winston.debug('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
                  } catch(err) {}
               }
@@ -335,7 +337,7 @@ var search = function*(params,origin) {
                try {
                    amazonParams.Keywords = params.query;
                    yield wait(1500);
-                   logging.debug('trying : ', amazonParams);
+                   winston.debug('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
                 } catch(err) {}
             }
@@ -353,7 +355,7 @@ var search = function*(params,origin) {
   results = results.slice(skip, skip + 3)
   results.original_query = params.query
   timer.tic('enhancing results')
-  var enhanced_results = yield enhance_results(results, origin, timer)
+  var enhanced_results = yield enhance_results(results,origin, timer)
   timer.tic('done enhancing results')
   timer.stop()
   return enhanced_results
@@ -432,8 +434,6 @@ function* enhance_results(results, origin, timer) {
     })
   });
   timer.tic('got prices')
-
-  logging.debug('incomign results!!!! ',results)
 
   var urls = yield picstitch.stitchResultsPromise(results,origin); // no way i'm refactoring this right now
   timer.tic('stitched results');
@@ -520,10 +520,9 @@ var getPricesPromise = function(item) {
   })
 }
 
-
+module.exports.lookup = lookup;
 module.exports.similar = similar;
 module.exports.search = search;
-// module.exports.lookup = lookup;
 
 /*  TESTING
   _______     _____  ______   _______   __    __   __    ______

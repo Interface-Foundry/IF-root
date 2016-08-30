@@ -13,7 +13,9 @@ var itemvariationSchema = mongoose.Schema({
 
   asins: [],
 
-  source: {}
+  source: {},
+
+  variationSelected: {}
 
 });
 

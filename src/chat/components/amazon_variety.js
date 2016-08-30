@@ -59,6 +59,9 @@ function createItemArray(variationValues, asinVariationValues) {
       }
     init_array.push(item_var);
     }
+  if (init_array.length === []) {
+    return Promise.reject('No variations');
+  }
   return init_array
 }
 
@@ -70,9 +73,6 @@ function createItemArray(variationValues, asinVariationValues) {
 * @returns {Object}  variations and respective asins
 */
 function getVariations(asin, message) {
-
-
-
   var variation = {
     base_asin: asin,
     url: 'https://www.amazon.com/dp/'  + asin,
@@ -122,7 +122,7 @@ function createItemReqs(variationValues){
   var itemAttribsToUse = {}
   logging.debug('SELECT ONE OF THE FOLLOWING: ', Object.keys(variationValues))
   // BUTTONS AND STUFF WOULD BE RIGHT HERE, along
-  // need to get itemAttribsToUse and origin
+  // LISTEN TO PUBSUB FOR RESPONSE
 
   // SELECT RANDOM SAMPLE FOR TIME BEING:
   for (var key in variationValues) {
@@ -139,20 +139,22 @@ function createItemReqs(variationValues){
 * @param {string} ASIN identifier
 * @returns {}
 */
-function pickItem(asin) {
-  ItemVariation.findOne({ASIN: asin}, function(err,obj) {
+function pickItem(item) {
+  var to_ret = {}
+  ItemVariation.findOne({ASIN: item.ASIN}, function(err,obj) {
     var itemAttribsToUse = createItemReqs(obj.variationValues)
     var goodItem = _.filter(obj.asins, _.matches(itemAttribsToUse))
     if (goodItem.length > 0) {
       logging.debug('ADD TO CART ASIN: ', goodItem[0].id)
       // lookup item and add to cart
-      var item = {
-        asin: goodItem[0].id,
+      var i = {
+        ASIN: goodItem[0].id,
         origin: 'facebook'
-      }
 
-      // var results = amazon_search.lookup(item, item.origin)
-      // console.log(results)
+      }
+      console.log('using amazon_search')
+      var results = amazon_search.lookup(i, i.origin)
+      return results
     }
     else {
       throw new Error('no Item Matches the reqs provided by user')
@@ -164,6 +166,7 @@ function pickItem(asin) {
 // exportz
 module.exports.createItemReqs = createItemReqs;
 module.exports.getVariations = getVariations;
+module.exports.pickItem = pickItem;
 
 
 // TESTING BELOW
@@ -175,7 +178,8 @@ var message = {
   channel : "914619145317222",
   origin : "facebook"
 }
+var item = {ASIN: 'B01CI6RTRK'}
 
 // var z = getVariations(ASIN, message)
-// pickItem(ASIN)
+pickItem(item)
 

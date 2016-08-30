@@ -1,10 +1,10 @@
 /*eslint-env es6*/
-var db = require('../../db');
-var _ = require('lodash');
-var moment = require('moment');
-var co = require('co');
-var sleep = require('co-sleep');
-var natural = require('natural');
+var db = require('../../db')
+var _ = require('lodash')
+var moment = require('moment')
+var co = require('co')
+var sleep = require('co-sleep')
+var natural = require('natural')
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var async = require('async');
 // var client = amazon.createClient({
@@ -45,8 +45,7 @@ module.exports = {};
 // user_id: the user who added the item
 // item: the item from amazon result i guess
 //
-module.exports.addToCart = function(slack_id, message, item, type) {
-  var user_id = message.user_id
+module.exports.addToCart = function(slack_id, user_id, item, type) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
 
@@ -63,7 +62,6 @@ module.exports.addToCart = function(slack_id, message, item, type) {
     // ignore these things.
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
     return Promise.reject('Item not available');
-    }
   }
 
   return co(function*() {

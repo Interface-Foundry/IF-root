@@ -9,7 +9,7 @@ var banter = require("./banter.js");
 // var history = require("./history.js");
 // var search = require("./search.js");
 var amazon_search = require('./amazon_search.js');
-var amazon_variety = require('./amazon_variety');
+var amazon_variety = require('./amazon_variety.js');
 
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
@@ -44,11 +44,11 @@ var modes = {};
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 
-var logging = require('winstxn');
-logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+var winston = require('winston');
+winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 
-logging.debug('debug ', modes)
+winston.debug('debug ', modes)
 
 // I'm sorry i couldn't understand that
 function default_reply(message) {
@@ -78,7 +78,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
-  logging.debug('\n\n\nsendmsg: ', msg);
+  // winston.debug('\n\n\nsendmsg: ', msg);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -135,7 +135,7 @@ queue.topic('incoming').subscribe(incoming => {
 
     if(incoming.data.action == 'mode.update'){
       modes[user.id] = 'onboarding'
-      logging.debug('UPDATED MODE!!!!')
+      winston.debug('UPDATED MODE!!!!')
       incoming.ack();
       return;
     }
@@ -145,28 +145,29 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     /////////////////////
-
     //MODE SWITCHER
+    /////////////////////
+
     switch(modes[user.id]){
       case 'onboarding':
-        logging.debug('ONBAORDING MODE')
+        winston.debug('ONBAORDING MODE')
 
         //check for valid country
         //turn this into a function
         if(text == 'Singapore' || text == 'United States'){
-          logging.debug('SAVING TO DB')
+          winston.debug('SAVING TO DB')
           replies = ['Saved country!'];
 
           //access onboard template per source origin!!!!
           modes[user.id] = 'shopping';
         }else {
           replies = ['Didnt understand, please choose a country thx'];
-          logging.debug('Didnt understand, please choose a country thx')
+          winston.debug('Didnt understand, please choose a country thx')
         }
       break;
       //default Kip Mode shopping
       default:
-        logging.debug('DEFAULT SHOPPING MODE')
+        winston.debug('DEFAULT SHOPPING MODE')
         //try for simple reply
         timer.tic('getting simple response')
         var replies = yield simple_response(message);
@@ -178,7 +179,7 @@ queue.topic('incoming').subscribe(incoming => {
 
           timer.tic('getting nlp response')
 
-          logging.info('👽 passing to nlp: ', message.text);
+          winston.info('👽 passing to nlp: ', message.text);
           replies = yield nlp_response(message);
           timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan,
@@ -205,7 +206,7 @@ queue.topic('incoming').subscribe(incoming => {
       if (r.save) {
         r.save()
       } else {
-        logging.debug('could not save ' + r);
+        winston.debug('could not save ' + r);
       }
     });
     timer.tic('done saving replies');
@@ -227,7 +228,7 @@ function* simple_response(message) {
 
   //check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
-  // logging.debug('\n\n\n\n\n\nBEFORE BANTER: ', message);
+  // winston.debug('\n\n\n\n\n\nBEFORE BANTER: ', message);
   var reply = banter.checkForCanned(message);
 
   kip.debug('prefab reply from banter.js', reply);
@@ -327,10 +328,10 @@ function* simple_response(message) {
       break;
     case 'cancel': //just respond, no actions
       //send message
-      logging.debug('Kip response cancelled');
+      winston.debug('Kip response cancelled');
       break;
     default:
-      logging.debug('error: canned action flag missing');
+      winston.debug('error: canned action flag missing');
   }
 
   var messages = yield execute(message);
@@ -384,7 +385,7 @@ function execute(message) {
     }, [])
     // only return messages
     var replies = messages.reduce((all, m) => {
-      logging.debug(typeof m);
+      winston.debug(typeof m);
       if (m instanceof Array) {
         all = all.concat(m);
       } else {
@@ -429,10 +430,10 @@ handlers['shopping.initial'] = function*(message, exec) {
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
-  logging.debug('!1',exec)
+  kip.debug('!1',exec)
 
   if (results == null || !results) {
-      logging.debug('-1')
+      winston.debug('-1')
       return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -489,11 +490,11 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-    logging.debug('!2', exec)
+    kip.debug('!2', exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
-          logging.debug('-2')
+          winston.debug('-2')
 
       return new db.Message({
       incoming: false,
@@ -533,15 +534,15 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   if (!exec.params.asin) {
     var old_results = yield getLatestAmazonResults(message);
-    logging.debug(old_results);
+    kip.debug(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
-    logging.debug('!2', exec)
+    winston.debug('!2', exec)
 
 
   var results = yield amazon_search.similar(exec.params,message.origin);
    if (results == null || !results) {
-          logging.debug('-3')
+          winston.debug('-3')
 
       return new db.Message({
       incoming: false,
@@ -612,10 +613,10 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
   }
-  logging.debug('!3', exec)
+  kip.debug('!3', exec)
   exec.params.query = old_params.query;
   if (!exec.params.query) {
-              logging.debug('-3.5')
+              winston.debug('-3.5')
 
     return new db.Message({
       incoming: false,
@@ -631,7 +632,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
-          logging.debug('-4')
+          kip.debug('-4')
 
       return new db.Message({
       incoming: false,
@@ -672,7 +673,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   kip.debug('new params', exec.params);
     if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1){
     var all_modifiers = message.text.split(' but ')[1].split(' ');
-      // logging.debug('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
+      // winston.debug('\n\n\n\n\n\nall_modifiers: ', message.text,'\n\n\n\n\n\n\n')
     if (all_modifiers.length >= 2) {
       for (var i = 1; i < all_modifiers.length; i++) {
          if (all_modifiers[i] && all_modifiers[i] !== '') {
@@ -681,7 +682,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       }
     }
   }
-      logging.debug('!4', exec)
+      kip.debug('!4', exec)
 
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
@@ -700,7 +701,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
     exec.params.color = exec.params.val[0];
 
-    // logging.debug('exec for color search: ', JSON.stringify(exec))
+    // winston.debug('exec for color search: ', JSON.stringify(exec))
   }
   else {
     var results = yield getLatestAmazonResults(message);
@@ -711,7 +712,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
   }
 
    if ((results == null || !results) && exec.params.type !== 'price')  {
-                  logging.debug('-5')
+                  winston.debug('-5')
 
       return new db.Message({
       incoming: false,
@@ -763,31 +764,23 @@ handlers['cart.save'] = function*(message, exec) {
 
 
  var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message);
-  logging.debug('raw_results: ', typeof raw_results, raw_results);
+  winston.debug('raw_results: ', typeof raw_results, raw_results);
  var results = (typeof raw_results == 'array' || typeof raw_results == 'object' ) ? raw_results : JSON.parse(raw_results);
 
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
-  logging.debug('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 );
-  try {
-    yield kipcart.addToCart(cart_id, message, results[exec.params.focus - 1], cart_type)
-  } catch (e) { // item was possibly too general and need specific as in
+  winston.debug('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 )
+;  try {
+    yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
+  } catch (e) {
     try {
-      v_bag = amazon_variety.getVariations(asin) // if you can buy OG you can blow a bag
-      if (v_vag) {
-
-      }
-
-      }
-
-
-    }
-      else{
+      amazon_variety.getVariations(results[exec.params.focus - 1], message)
+    } catch (err) {
       kip.err(e);
       return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
-      }
   }
+}
 
   // view the cart
   return yield handlers['cart.view'](message, exec);
@@ -824,7 +817,7 @@ handlers['cart.view'] = function*(message, exec) {
     focus: exec && _.get(exec, 'params.focus')
   })
   var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
-  logging.debug('reply-473: cart_reference_id: ', cart_reference_id)
+  winston.debug('reply-473: cart_reference_id: ', cart_reference_id)
   res.data = yield kipcart.getCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
@@ -847,7 +840,7 @@ handlers['cart.empty'] = function*(message, exec) {
     action: 'empty'
   });
   var cart_reference_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO
-  logging.debug('reply_logic cart.empty handler: cart_reference_id: ', cart_reference_id, ' message: ', message.source);
+  winston.debug('reply_logic cart.empty handler: cart_reference_id: ', cart_reference_id, ' message: ', message.source);
   res.data = yield kipcart.emptyCart(cart_reference_id);
   res.data = res.data.toObject();
   if (res.data.items.length < 1) {
@@ -898,7 +891,7 @@ function* getLatestAmazonResults(message) {
       }).sort('-ts').skip(i).limit(20);
 
       if (more_history.length === 0) {
-        logging.debug(message);
+        winston.debug(message);
         throw new Error('Could not find amazon results in message history for message ' + message._id)
       }
 
