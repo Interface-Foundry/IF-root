@@ -22,8 +22,10 @@ function* results(message) {
   //console.log(amazon);
 
   var results = amazon.map((r, i) => {
-      console.log('emojis[i+1]/ / / /  ',emojis[i+1])
-      console.log('emojis[i+2]/ / / /  ',emojis[i+1] + truncate(_.get(r, 'ItemAttributes[0].Title[0]')))
+
+
+      // console.log('emojis[i+1]/ / / /  ',emojis[i+1])
+      // console.log('emojis[i+2]/ / / /  ',emojis[i+1] + truncate(_.get(r, 'ItemAttributes[0].Title[0]')))
        // make the description text
       var attrs = _.get(r, 'ItemAttributes[0]');
       var description = [
@@ -43,9 +45,19 @@ function* results(message) {
         var final_description = (description.length > 200) ? (description.substring(0, 150) + '...') : description;
       }
 
+      var image;
+        try {
+          image = r.picstitch_url ? r.picstitch_url : ((_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') :  'http://kipthis.com/images/header_partners.png'))
+            // (_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') : 'http://kipthis.com/images/header_partners.png' )) 
+        } catch(err) {
+          image = 'http://kipthis.com/images/header_partners.png'
+        } 
+
+      console.log('\n\n\n\n\nimage: ', image,'\n\n\n\n\n');
+
       return {
         title: truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
-        image_url: r.picstitch_url,
+        image_url: image,
         title_link: r.shortened_url,
         fallback: 'Search Results',
         description: final_description

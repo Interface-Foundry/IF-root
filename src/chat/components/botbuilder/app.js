@@ -45,8 +45,8 @@ httpsServer.listen(4343, function(e) {
 //=========================================================
 var credentials = {
   mitsu: {
-    appId: 'f9fb0129-81e7-4885-a5c3-39be043f3926',
-    appPassword: 'eWVg3F8oD6mjZPdE1BpTtqf'
+    appId:'589f13e8-1c04-4823-832d-195b793faf20',
+    appPassword: 'EFePMpRio0eO0Trubona4O2'
   },
   alyx: {
     appId: '318a63f8-c9bc-406a-adf1-0bea5b333f3d',
@@ -88,7 +88,7 @@ var bots = names.map(name => {
   kip.log('Loading bot', name.cyan);
 
   var connector = new builder.ChatConnector(credentials[name]);
-  app.post('/api/messages/' + name, connector.listen());
+  app.post('/api/messages/', connector.listen());
   var bot = new builder.UniversalBot(connector);
   setup_bot(bot);
 })
@@ -399,7 +399,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 return send_results(message.source.channel, message.text, return_data, outgoing);
             }
             else if (message.mode === 'cart' && message.action === 'save') {
-                console.log('at least it gettingheah')
                 console.log('2💀')
                 return send_cart(message.source.channel, message.text, outgoing);
             }
@@ -446,15 +445,17 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         co(function*(){
             var cards = results.map((result, i) => {
                 var n = i + 1 + '';
-
+                // var image = result.image_url;
                 //get picstitch image
                 if (result && result.image_url){
-                    var image = ((result.image_url.indexOf('http') > -1) ? result.image_url : 'http://kipthis.com/images/header_partners.png')
-                } else {
+                    var image = ((result.image_url.indexOf('http://') > -1) ? result.image_url.replace('http://','https://') : 'http://kipthis.com/images/header_partners.png')
+                } 
+                else {
                     kip.debug('error: no result.image_url (picstitch) found');
                     var image = 'http://kipthis.com/images/header_partners.png';
                 }
-
+                // var image = "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/PikePlaceMarket.jpg/800px-PikePlaceMarket.jpg";
+                console.log(i,'\n\n\nlel wtf is image mate: ',image,'\n\n\n');
                 return card = new builder.HeroCard(session)
                     .title(result.title)
                     .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
@@ -474,7 +475,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
             request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
                 if (err) console.log(err);
-                console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
                 giphy_gif = 'http://kipthis.com/images/header_partners.png'
                 // JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_height :  'http://kipthis.com/images/header_partners.png';
                 cards.push(new builder.HeroCard(session)
@@ -522,9 +522,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     function send_cart(channel, text, outgoing) {
         var cart = outgoing.data.data;
         console.log('CART OBJECT : ', cart)
-        debugger;
-
         var cart_items = cart.aggregate_items.map((el, i) => {
+            // console.log('\n\n\n\n\n  EL IS : ', el, '\n\n\n\n\n');
           var description = `<b>Price: ${el.price}\nQuantity: ${el.quantity}</b>`;
            var card = new builder.ThumbnailCard(session)
                 .title(`${i+1}. ${truncate(el.title)}`)
