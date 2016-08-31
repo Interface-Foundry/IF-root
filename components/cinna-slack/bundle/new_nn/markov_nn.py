@@ -1,3 +1,15 @@
+
+
+"""
+Still left incomplete:
+1.) Fix the vectorization.
+2.) Add neural network to connect to predicted category to the categories of
+    similar products.
+3.) Add neural network to map from predicted categories of similar products
+    to actual products to form bundle.
+"""
+
+
 from sklearn.externals import joblib
 
 from keras.models import Sequential, Model
