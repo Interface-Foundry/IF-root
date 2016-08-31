@@ -6,6 +6,7 @@ var _ = require('lodash')
 var amazon_search = require('../amazon_search.js');
 var picstitch = require("../picstitch.js");
 var processData = require("../process.js");
+var kipcart = require('../cart');
 
 //
 // Handlers take something from the message.execute array and turn it into new messages
@@ -443,3 +444,99 @@ handlers['cart.empty'] = function*(message, exec) {
   kip.debug('empty cart message', res);
   return res;
 };
+
+
+
+
+//
+// Returns the amazon results as it is stored in the db (json string)
+// Recalls more history from the db if it needs to, and the history is just appended
+// to the existing history so you don't need to worry about stuff getting too messed up.
+//
+function* getLatestAmazonResults(message) {
+  var results, i = 0;
+  while (!results) {
+    if (!message.history[i]) {
+      var more_history = yield db.Messages.find({
+        thread_id: message.thread_id,
+        ts: {
+          $lte: message.ts
+        }
+      }).sort('-ts').skip(i).limit(20);
+
+      if (more_history.length === 0) {
+        winston.debug(message);
+        throw new Error('Could not find amazon results in message history for message ' + message._id)
+      }
+
+      message.history = message.history.concat(more_history);
+    }
+
+    try {
+      results = JSON.parse(message.history[i].amazon);
+      results[0].ASIN[0]; // check to make sure there is an actual result
+    } catch (e) {
+      results = false;
+      // welp no results here.
+    }
+
+    i++;
+  }
+  return results;
+}
+
+//
+// Gets the most recent set of params used to search amazon
+//
+function* getLatestAmazonQuery(message) {
+  var params, i = 0;
+  while (!params) {
+    if (!message.history[i]) {
+      var more_history = yield db.Messages.find({
+        thread_id: message.thread_id,
+        ts: {
+          $lte: message.ts
+        }
+      }).sort('-ts').skip(i).limit(20);
+
+      if (more_history.length === 0) {
+        throw new Error('Could not find amazon results in message history for message ' + message._id)
+      }
+
+      message.history = message.history.concat(more_history);
+    }
+
+    var m = message.history[i];
+    if (m.mode === 'shopping' && m.action === 'results' && m.execute[0].params.query) {
+      params = m.execute[0].params;
+    }
+
+    i++;
+  }
+  return params;
+}
+
+// I'm sorry i couldn't understand that
+function default_reply(message) {
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    text: "I'm sorry I couldn't quite understand that",
+    source: message.source
+  })
+}
+
+// get a simple text message
+function text_reply(message, text) {
+  var msg = default_reply(message);
+  msg.text = text;
+  msg.execute = msg.execute ? msg.execute : [];
+  msg.execute.push({
+        mode: 'banter',
+        action: 'reply',
+      })
+  return msg
+}

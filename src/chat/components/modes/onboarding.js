@@ -25,6 +25,7 @@ module.exports.handle = handle;
  * @param message a fake message that has the source information about the origin of the conversation (slack, facebook, etc)
  */
 handlers['start'] = function * (message) {
+  kip.debug('starting onboarding conversation')
   var welcome = 'Well done! *Kip* has been enabled for your team 😊'
   var welcome_message = message_tools.text_reply(message, welcome)
   var next_message = yield handlers['get-admins.ask'](message);

@@ -163,7 +163,9 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     // console.log(outgoing);
     var message = outgoing.data;
 
-    var bot = slackConnections[message.source.team];
+    debugger;
+    var team = _.get(message, 'source.team.id') || _.get(message, 'source.team');
+    var bot = slackConnections[team];
 
     if (typeof bot === 'undefined') {
       throw new Error('rtm client not registered for slack team ' + message.source.team);
