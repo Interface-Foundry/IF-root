@@ -18,6 +18,18 @@ normalizer = Normalizer(copy=False)
 
 # preprocess sentences and remove noise making words
 def preprocess(s, tokenize_words=False):
+    """
+    @param s: String to preprocess
+    @param tokenize_words: bool
+
+    returns preprocessed sentence
+
+    This function removes random symbols and deals with words that may lead 
+    cause noise in the vectorization and have little meaning. The 
+    tokenize_words param determines whether to return the sentence as one
+    complete string or as an array of words. It defaults to returning the 
+    sentence as a string.
+    """
     s = s.lower()
     s = s.replace('-', ' ')
     s = ''.join(x for x in s if x not in [',', '®', ':', '+', '%', '#'])
@@ -37,6 +49,14 @@ def preprocess(s, tokenize_words=False):
     return s
 
 def normalize_in_list(row, type='cat'):
+    """
+    This function acts as a wrapper for the preprocessing function. 
+
+    @param row: list of strings that are either a category or a product name
+    @param type: String to classify whether to tokenize the row.
+
+    returns the preprocessed row.
+    """
     tmp = []
     for x in row:
         if type == 'cat':
@@ -46,7 +66,29 @@ def normalize_in_list(row, type='cat'):
     return tmp
 
 def flatten_lists(l):
+    """
+    @param l: list of lists
+
+    returns a flattened list.
+    For example:
+        l = [[1,2,3], [4], [5,6]]
+        flatten_lists(l) == [1,2,3,4,5,6]
+    """
     return [item for sublist in l for item in sublist]
+
+
+
+"""
+BELOW:
+1.) Reads the data line by line to collect category names, brand names, and 
+Product names. The category/class names can be treated as sets since we only
+need to record one of each.
+2.) Save the categories and brands.
+3.) Vectorize the product names using TF-IDF
+4.) Reduce the dimensionality of the vectorization and normalize.
+5.) Save the vectorization
+
+"""
 
 
 # GET VOCABULARY FOR PRODUCT NAMES
@@ -67,20 +109,20 @@ with gzip.open('productMeta.txt.gz', 'rb') as f:
                 titles.append(product_json['title'])
             
             # get categories
-            #if 'categories' in product_json.keys():
-            #    classes.append(product_json['categories'][0])
-            #elif 'salesRank' in product_json.keys():
-            #    classes.append(product_json['salesRank'].keys())
+            if 'categories' in product_json.keys():
+               classes.append(product_json['categories'][0])
+            elif 'salesRank' in product_json.keys():
+               classes.append(product_json['salesRank'].keys())
                     
             # brands
-            #if 'brand' in product_json.keys():
-            #    brands.append(product_json['brand'])
+            if 'brand' in product_json.keys():
+               brands.append(product_json['brand'])
             
             index += 1
             if (index % 100000 == 0):
                 print(str(index) + " lines parsed so far!")
                 # cast to set for memory control
-                #classes = list(set(classes))
+                classes = list(set(classes))
                 brands = list(set(brands))
             
         line = f.readline().decode().strip()
@@ -138,19 +180,19 @@ print('tf-idf product name vectorizer saved to vectorizer.pkl')
 del vectorizer
 del titles
 
-#category_vectorizer = pipe_it_up.fit_transform(classes)
-#joblib.dump(category_vectorizer, 'category2vec.pkl')
-#print('tf-idf categories vectorizer saved to category2vec.pkl')
-#del classes
-#del category_vectorizer
+category_vectorizer = pipe_it_up.fit_transform(classes)
+joblib.dump(category_vectorizer, 'category2vec.pkl')
+print('tf-idf categories vectorizer saved to category2vec.pkl')
+del classes
+del category_vectorizer
 
-#with open('brands.txt', 'w') as f:
-#    f.write('|'.join(brands))
-#print('Brands saved to brands.txt')
+with open('brands.txt', 'w') as f:
+   f.write('|'.join(brands))
+print('Brands saved to brands.txt')
 
-#with open('categories.txt', 'w') as f:
-#    f.write('|'.join(list(classes)))
-#print('Categories saved to categories.txt')
+with open('categories.txt', 'w') as f:
+   f.write('|'.join(list(classes)))
+print('Categories saved to categories.txt')
 
 
 

@@ -20,6 +20,18 @@ hidden_layer_size = 512
 
 # preprocess sentences and remove noise making words
 def preprocess(s, tokenize_words=False):
+    """
+    @param s: String to preprocess
+    @param tokenize_words: bool
+
+    returns preprocessed sentence
+
+    This function removes random symbols and deals with words that may lead 
+    cause noise in the vectorization and have little meaning. The 
+    tokenize_words param determines whether to return the sentence as one
+    complete string or as an array of words. It defaults to returning the 
+    sentence as a string.
+    """
     s = s.lower()
     s = s.replace('-', ' ')
     s = ''.join(x for x in s if x not in [',', '®', ':', '+', '%', '#'])
@@ -39,6 +51,14 @@ def preprocess(s, tokenize_words=False):
     return s
 
 def normalize_in_list(row, type='cat'):
+    """
+    This function acts as a wrapper for the preprocessing function. 
+
+    @param row: list of strings that are either a category or a product name
+    @param type: String to classify whether to tokenize the row.
+
+    returns the preprocessed row.
+    """
     tmp = []
     for x in row:
         if type == 'cat':
@@ -48,6 +68,14 @@ def normalize_in_list(row, type='cat'):
     return tmp
 
 def flatten_lists(l):
+    """
+    @param l: list of lists
+
+    returns a flattened list.
+    For example:
+        l = [[1,2,3], [4], [5,6]]
+        flatten_lists(l) == [1,2,3,4,5,6]
+    """
     return [item for sublist in l for item in sublist]
 
 
@@ -70,6 +98,36 @@ def functional_model(input_shape, aux_shape, output_shape):
 """
 
 def create_model(input_shape, output_shape):
+    """
+    @param input_shape: int describing the length of the main input data
+    @output_shape: int describing the output length of the neueral network
+
+    returns a simple sequential neural network with 2 Dense layers.
+
+    Two ReLU layers were used in this case since we are predicting a numerical
+    value and a probability distribution provided by a softmax would not return
+    the array-like structure we want.
+
+    For this model, rather than classification, we measure loss by cosine
+    proximity to a vector in n-space. Each class is treated as a vector rather
+    than a one hot encoded class. This is done since we can apply inverse
+    document frequency to lower the relative importance of certain categories.
+
+    Each product possesses several categories. Then we may first embed the 
+    categories so that the set of categories form an orthogonal basis. The
+    resulting space is an N-space, where N is the number of categories. The
+    category of a specific product would be given by:
+
+        V = k_1 * c_1 + ... + k_N * c_N,
+
+    where k_i is a weight corresponding to the category, c_i. Category weights
+    are scaled down based on the number of times the word occurs in the corpus.
+    
+    Then each item is mapped to an expected vector in N-space and the neural
+    network attempts to predict the direction of the vector by minimizing the
+    angular offset from the expected vector. This loss function is cosine
+    proximity, which minimizes the dot product.
+    """
     model = Sequential()
     model.add(Dense(hidden_layer_size, input_dim=input_shape, activation='relu'))
     model.add(Dropout(0.3))
@@ -77,6 +135,20 @@ def create_model(input_shape, output_shape):
     return model
     
 def train_model(model, input_data, labels, n_version):
+    """
+    @param model: theano neural network model
+    @param input_data: name data in the form of normalized vectors
+    @param labels: expected vector corresponding to the category for the 
+        Product
+    @param n_version: int of the number of batches that have already passed
+        through the neural network
+    
+    The model is compiled then fit using the input data for 30 epochs. Cosine
+    proximity is chosen as a loss function since the categories are now 
+    normalized vectors in N-space. 
+
+    After the training, the model is saved.
+    """
     model.compile(loss='cosine_proximty', optimizer='adam')
     model.fit(input_data, labels, batch_size=128, 
               shuffle=True, nb_epoch=30,  verbose=1, 
@@ -85,6 +157,19 @@ def train_model(model, input_data, labels, n_version):
 
 # fill in empty data
 def fill_data(product_dict):
+    """
+    @param product_dict: dictionary containing the information from the data
+
+    returns the product_dict with values filled in for empty keys for
+    consistency.
+
+    Some products in the dataset are missing fields, such as categories.
+    These values are filled to make the data easier to process later. Most of 
+    the fields are filled with empty strings, lists, or dicts corresponding to
+    the expected type. However, the categories field sometimes shares
+    information with the salesRank field and can be filled with information 
+    from the salesRank.
+    """
     fields = {'categories': [],
               'salesRank': {},
               'title': '',
@@ -106,6 +191,16 @@ def fill_data(product_dict):
 
 # convert batch of json lines into a pandas dataframe to work with
 def to_df(first_line, f, batch_size):
+    """
+    @param first_line: String containing the first line or data entry
+    @param f: the file object to read data from
+    @param batch_size: int containing the number of items to read from the file
+
+    returns pandas dataframe with a row for each data entry.
+
+    This function converts the data from the file into a pandas dataframe to
+    make the data easier to manipulate and input into the neural network.
+    """
     df = {}
     line = first_line
     index = 0
@@ -129,6 +224,13 @@ def to_df(first_line, f, batch_size):
 
 # embed a new batch of product names
 def embed(vectorizer, series):
+    """
+    @param vectorizer: A scikit-learn pipeline to convert words to vectors and
+        normalize.
+    @param df: dataframe containing the names and data.
+
+    returns the vectorized product titles transformed into vectors
+    """
     return vectorizer.transform(series).astype('float32')
 
 # UNNECESSARY FUNCTION BELOW
@@ -147,6 +249,13 @@ def create_expected_bundle_categories(df, categorizer):
 # load vectorizers
 vectorizer = joblib.load('vectorizer.pkl')
 categorizer = joblib.load('category2vec.pkl')
+
+
+"""
+BELOW:
+1.) Read the data in batches and convert each batch into a dataframe.
+2.) Use the data in the dataframe to train the neural network.
+"""
 
 
 # train model
