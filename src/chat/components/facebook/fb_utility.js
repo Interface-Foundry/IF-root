@@ -22,7 +22,7 @@ var send_cart = require('./send_cart');
  */
 var send_card = function(bd,sendTo, fbtoken){
     request({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
+        url: 'https://graph.facebook.com/v2.7/me/messages',
         qs: {
             access_token: fbtoken
         },
@@ -94,7 +94,7 @@ var send_suggestions_card = function(sender, fbtoken) {
             "notification_type": "NO_PUSH"
         };
         request.post({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
+            url: 'https://graph.facebook.com/v2.7/me/messages',
             qs: {
                 access_token: fbtoken
             },
@@ -105,7 +105,7 @@ var send_suggestions_card = function(sender, fbtoken) {
             },
             body: card
         }, function(err, res, body) {
-            if (err) {console.error('post err ', err); 
+            if (err) {console.error('post err ', err);
               return false;
             } else{
                 return true;
@@ -151,7 +151,7 @@ var set_menu = function(sender, fbtoken) {
         };
 
         request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            url: "https://graph.facebook.com/v2.7/me/thread_settings",
             qs: {
                 access_token: fbtoken
             },
@@ -178,7 +178,7 @@ var set_menu = function(sender, fbtoken) {
            }
 
         request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
+            url: "https://graph.facebook.com/v2.7/me/thread_settings",
             qs: {
                 access_token: fbtoken
             },
@@ -204,7 +204,7 @@ var send_typing_indicator = function(sender, fbtoken) {
         };
 
         request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
+            url: 'https://graph.facebook.com/v2.7/me/messages',
             qs: {
                 access_token: fbtoken
             },
@@ -246,7 +246,7 @@ var send_story = function (sender,pointer,fbtoken){
         };
     //send res to user
     request.post({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
+        url: 'https://graph.facebook.com/v2.7/me/messages',
         qs: {
             access_token: fbtoken
         },
@@ -516,7 +516,7 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
         }
         setTimeout(function() {
             request.post({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },
@@ -571,12 +571,12 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
  * @param {string} fbtoken: facebook send api token
  * @param {object} callback: callback function
  */
-var send_image = function*(img,sender,fbtoken,callback){ 
+var send_image = function*(img,sender,fbtoken,callback){
     if (!callback || callback == undefined || callback == null) {
         callback = function(){}
     }
     console.log('\n\n\n i mean bro ', img, sender, fbtoken, callback, '\n\n\n');
-    var r = request.post({url: 'https://graph.facebook.com/v2.6/me/messages?access_token='+fbtoken, formData: form},function (err, httpResponse, body) {
+    var r = request.post({url: 'https://graph.facebook.com/v2.7/me/messages?access_token='+fbtoken, formData: form},function (err, httpResponse, body) {
           if (err) {
             kip.debug('upload failed:', err);
           }
@@ -591,10 +591,10 @@ var send_image = function*(img,sender,fbtoken,callback){
 }
 
 
-module.exports = { 
-  send_card: send_card, 
+module.exports = {
+  send_card: send_card,
   send_image: send_image,
-  send_typing_indicator: send_typing_indicator, 
+  send_typing_indicator: send_typing_indicator,
   get_last_message: get_last_message,
   set_menu: set_menu,
   send_suggestions_card: send_suggestions_card,

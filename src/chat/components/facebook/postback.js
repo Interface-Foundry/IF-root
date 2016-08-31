@@ -98,7 +98,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                 origin: msg.origin,
                 text: text,
                 source: msg.source,
-                amazon: msg.amazon 
+                amazon: msg.amazon
             });
         // queue it up for processing
         var message = new db.Message(new_message);
@@ -238,7 +238,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
             }
             else if (postback.action === 'remove') {
                 fb_utility.send_typing_indicator(sender, fbtoken)
-                
+
                 var new_message = new db.Message({
                     incoming: true,
                     thread_id: msg.thread_id,
@@ -403,7 +403,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
             };
 
           request({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },
