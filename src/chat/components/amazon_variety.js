@@ -3,6 +3,8 @@ var cheerio = require('cheerio');
 
 var uuid = require('uuid');
 var co = require('co');
+var promisify = require('promisify-node');
+
 var async = require('async');
 var wait = require('co-wait');
 
@@ -141,8 +143,9 @@ function createItemReqs(variationValues){
 */
 function pickItem(item) {
   var to_ret = {}
-  ItemVariation.findOne({ASIN: item.ASIN}, function(err,obj) {
-    var itemAttribsToUse = createItemReqs(obj.variationValues)
+  ItemVariation.findOne({'source.id': item.id}, function(err,obj) {
+    // var itemAttribsToUse = createItemReqs(obj.variationValues) // get this from incoming pubsubs after buttons
+    var itemAttribsToUse = item.variations
     var goodItem = _.filter(obj.asins, _.matches(itemAttribsToUse))
     if (goodItem.length > 0) {
       logging.debug('ADD TO CART ASIN: ', goodItem[0].id)
@@ -150,10 +153,8 @@ function pickItem(item) {
       var i = {
         ASIN: goodItem[0].id,
         origin: 'facebook'
-
       }
-      console.log('using amazon_search')
-      var results = amazon_search.lookup(i, i.origin)
+      var results =  amazon_search.lookup(i, i.origin)
       return results
     }
     else {
@@ -162,6 +163,12 @@ function pickItem(item) {
   });
 }
 
+// this is just for slotting into reply_logic at later date if we dont use a mode
+function interceptIncoming(item) {
+  if (incoming.data.mode === 'variation.mode') {
+    var results = pickItem(item)
+  }
+}
 
 // exportz
 module.exports.createItemReqs = createItemReqs;
@@ -178,8 +185,15 @@ var message = {
   channel : "914619145317222",
   origin : "facebook"
 }
-var item = {ASIN: 'B01CI6RTRK'}
+var item = {ASIN: 'B01CI6RTRK',
+            id: 'facebook_914619145317xxx',
+            variations: {
+              color_name: 'Gray',
+              size_name: '8 B(M) US'
+            }}
 
 // var z = getVariations(ASIN, message)
-pickItem(item)
+// pickItem(item)
+// interceptIncoming(item)
+
 

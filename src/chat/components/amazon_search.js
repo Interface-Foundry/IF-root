@@ -76,8 +76,9 @@ params:
 * @param {Object} params should be Object like {asin: ASIN, IdType: 'ASIN'}
 * @return {Object} enhanced_result for specific item
 */
-var lookup = function* (params, origin) {
-  console.log('Using Amazon Lookup')
+
+var lookup = function (params, origin) {
+  logging.debug('Using Amazon Lookup')
   var timer = new kip.SavedTimer('lookup.timer', {params: params})
   db.Metrics.log('lookup.amazon', params)
   if (!params.ASIN) {
@@ -97,19 +98,19 @@ var lookup = function* (params, origin) {
 
   timer.tic('requesting amazon ItemLookup api');
   try {
-    logging.debug('looking up asin', amazonParams);
-    var result = yield get_client().itemLookup(amazonParams);
+    co(function *(){
+      logging.debug('looking up asin', amazonParams);
+      var results = yield get_client().itemLookup(amazonParams)
+      timer.tic('got results from ItemLookup api')
+      var enhanced = yield enhance_results(results, origin, timer)
+      timer.tic('done enhancing result')
+      timer.stop()
+      return enhanced
+    })
   } catch (e) {
     return Promise.reject('Item not available');
   }
-  timer.tic('got results from ItemLookup api')
-
-  var enhanced_results = yield enhance_results(result, origin, timer)
-  timer.tic('done enhancing result')
-  timer.stop()
-  return enhanced_results
 }
-
 
 
  // {"mode":"shopping",
