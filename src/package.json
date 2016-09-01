@@ -20,7 +20,7 @@
     "async": "^2.0.0-rc.6",
     "aws-sdk": "^2.3.12",
     "body-parser": "^1.15.2",
-    "botbuilder": "^3.0.0",
+    "botbuilder": "^3.2.3",
     "botkit": "0.0.11",
     "chai": "^3.5.0",
     "co": "^4.6.0",

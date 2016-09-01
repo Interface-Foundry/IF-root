@@ -19,7 +19,7 @@ var quiz = require('./onboard_quiz');
  * @param {object} outgoing: the entire outgoing message object
  * @param {string} fbtoken: facebook send api token
  */
- 
+
 var send_focus = function* (channel, text, focus_info, outgoing, fbtoken) {
   var img_card = {
        "recipient": {
@@ -112,7 +112,7 @@ var send_focus = function* (channel, text, focus_info, outgoing, fbtoken) {
   };
 
    request.post({
-      url: 'https://graph.facebook.com/v2.6/me/messages',
+      url: 'https://graph.facebook.com/v2.7/me/messages',
       qs: {
           access_token: fbtoken
       },
@@ -126,7 +126,7 @@ var send_focus = function* (channel, text, focus_info, outgoing, fbtoken) {
       if (err) console.error('post err ', err);
       console.log(body)
       request.post({
-          url: 'https://graph.facebook.com/v2.6/me/messages',
+          url: 'https://graph.facebook.com/v2.7/me/messages',
           qs: {
               access_token: fbtoken
           },

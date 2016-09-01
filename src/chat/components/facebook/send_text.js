@@ -19,7 +19,7 @@ var quiz = require('./onboard_quiz');
  * @param {string} fbtoken: facebook send api token
  * @param {object} callback: callback function
  */
- 
+
 var send_text = function* (channel, text, outgoing, fbtoken) {
   //intercept of vanilla help message when user types 'help' instead of clicking help button
   if (text.indexOf("I'm Kip, your penguin shopper.") > -1)
@@ -39,7 +39,7 @@ var send_text = function* (channel, text, outgoing, fbtoken) {
           char_count = char_count + chunk.length;
           if (el_count == text_array.length-1) {
                request({
-                  url: 'https://graph.facebook.com/v2.6/me/messages',
+                  url: 'https://graph.facebook.com/v2.7/me/messages',
                   qs: {
                       access_token: fbtoken
                   },
@@ -62,7 +62,7 @@ var send_text = function* (channel, text, outgoing, fbtoken) {
           }
           else if (char_count > 125) {
                request({
-                  url: 'https://graph.facebook.com/v2.6/me/messages',
+                  url: 'https://graph.facebook.com/v2.7/me/messages',
                   qs: {
                       access_token: fbtoken
                   },
@@ -95,7 +95,7 @@ var send_text = function* (channel, text, outgoing, fbtoken) {
     }
   else {
      request({
-          url: 'https://graph.facebook.com/v2.6/me/messages',
+          url: 'https://graph.facebook.com/v2.7/me/messages',
           qs: {
               access_token: fbtoken
           },

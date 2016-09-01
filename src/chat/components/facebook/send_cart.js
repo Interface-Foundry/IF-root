@@ -19,7 +19,7 @@ var quiz = require('./onboard_quiz');
  * @param {object} outgoing: the entire outgoing message object
  * @param {string} fbtoken: facebook send api token
  */
- 
+
 var send_cart = function* (channel, text, outgoing, fbtoken) {
     var cart = outgoing.data.data;
     console.log('getting to send_cart, cart: ', cart)
@@ -58,7 +58,7 @@ var send_cart = function* (channel, text, outgoing, fbtoken) {
         }
 
   request.post({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
+        url: 'https://graph.facebook.com/v2.7/me/messages',
         qs: {access_token: fbtoken},
         method: "POST",
         json: {
@@ -97,7 +97,7 @@ var send_cart = function* (channel, text, outgoing, fbtoken) {
               };
 
               request.post({
-                  url: 'https://graph.facebook.com/v2.6/me/messages',
+                  url: 'https://graph.facebook.com/v2.7/me/messages',
                   qs: {
                       access_token: fbtoken
                   },
