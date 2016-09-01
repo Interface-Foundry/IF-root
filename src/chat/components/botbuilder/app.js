@@ -74,7 +74,7 @@ var credentials = {
 
 
 //pick the credentials we need
-if(process.env.NODE_ENV == 'development_mitsu'){
+if(process.env.NODE_ENV == 'development_mitsu') {
   var names = ['mitsu'];
 } else if (process.env.NODE_ENV == 'development') {
   names = ['test-a', 'test-b'];
@@ -276,9 +276,9 @@ bot.dialog('/results', [
                 //amazon images
                 var parsedAmazon = JSON.parse(session.outgoing.data.amazon);
                 // console.log('\n\n\n DOOOO ',parsedAmazon[0])
-                var image1 = ((session.results[0].image_url.indexOf('http') > -1) ? session.results[0].image_url : 'http://kipthis.com/images/header_partners.png')
-                var image2 = ((session.results[1].image_url.indexOf('http') > -1) ? session.results[1].image_url : 'http://kipthis.com/images/header_partners.png')
-                var image3 = ((session.results[2].image_url.indexOf('http') > -1) ? session.results[2].image_url : 'http://kipthis.com/images/header_partners.png')
+                var image1 = ((session.results[0].image_url.indexOf('http') > -1) ? session.results[0].image_url : 'http://kipthis.com/images/header_partners.png');
+                var image2 = ((session.results[1].image_url.indexOf('http') > -1) ? session.results[1].image_url : 'http://kipthis.com/images/header_partners.png');
+                var image3 = ((session.results[2].image_url.indexOf('http') > -1) ? session.results[2].image_url : 'http://kipthis.com/images/header_partners.png');
             }
             // console.log('SEND_RESULTS FIRED, RESULTS: ', results)
             //Ask the user to select an item from a carousel.
@@ -296,7 +296,7 @@ bot.dialog('/results', [
                         ])
                         .tap(builder.CardAction.openUrl(session, session.results[0].title_link))
                         .buttons([
-                            builder.CardAction.imBack(session, 'save 1'
+                            builder.CardAction.imBack(session, '<context value="weeeeeee"/>'
                             , "Add to Cart"),
                             builder.CardAction.imBack(session, "1 but cheaper" , "Find Cheaper"),
                             builder.CardAction.imBack(session, "1", "More Info")
@@ -455,7 +455,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     var image = 'http://kipthis.com/images/header_partners.png';
                 }
                 // var image = "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/PikePlaceMarket.jpg/800px-PikePlaceMarket.jpg";
-                console.log(i,'\n\n\nlel wtf is image mate: ',image,'\n\n\n');
+                // console.log(i,'\n\n\nlel wtf is image mate: ',image,'\n\n\n');
                 return card = new builder.HeroCard(session)
                     .title(result.title)
                     .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
@@ -465,7 +465,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     ])
                     .tap(builder.CardAction.openUrl(session, result.title_link))
                     .buttons([
-                        builder.CardAction.imBack(session, 'save ' + n, "Add to Cart"),
+                        // <meta hiddenID="save 1" />
+                        builder.CardAction.imBack(session, '<context hidden="save 1" />', "Add to Cart"),
                         builder.CardAction.imBack(session, n + " but cheaper" , "Find Cheaper"),
                         builder.CardAction.imBack(session, n, "More Info")
                     ]);
@@ -521,25 +522,29 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
     function send_cart(channel, text, outgoing) {
         var cart = outgoing.data.data;
-        console.log('CART OBJECT : ', cart)
+        console.log('\n\n\n\n\nCART OBJECT : ', cart, outgoing,'\n\n\n\n\n');
+
         var cart_items = cart.aggregate_items.map((el, i) => {
             // console.log('\n\n\n\n\n  EL IS : ', el, '\n\n\n\n\n');
           var description = `<b>Price: ${el.price}\nQuantity: ${el.quantity}</b>`;
-           var card = new builder.ThumbnailCard(session)
+          var card = new builder.ThumbnailCard(session)
                 .title(`${i+1}. ${truncate(el.title)}`)
                 .text(description)
                 .buttons([
                     builder.CardAction.postBack(session, `remove ${i+1}` , 'Remove Item')
-                    // builder.CardAction.postBack(session, 'add ' + el._id, '+ Increase Quantity'),
-                    // builder.CardAction.postBack(session, 'remove ' + el._id, '- Decrease Quantity')
                 ])
-
             if (el.image) {
+                if (el.image.indexOf('images-na.ssl-images-amazon.com') > -1 || el.image.indexOf('images-na.ssl-images-amazon.com') > -1) {
+                  el.image = 'http://kipthis.com/images/kip_head.png';
+                }
+              el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
+              // console.log('\n\n\n\n\n\n\nLE IMAGE!!!!\n\n\n\n\n\n', el.image);
               card.images([
                   builder.CardImage.create(session, el.image)
                       .tap(builder.CardAction.showImage(session, el.image))
-              ]);
-            }
+              ]); 
+            };
+
             return card;
         })
 

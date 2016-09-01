@@ -47,7 +47,7 @@ function* results(message) {
 
       var image;
         try {
-          image = r.picstitch_url ? r.picstitch_url : ((_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') :  'http://kipthis.com/images/header_partners.png'))
+          image = r.picstitch_url ? r.picstitch_url : ((_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') :  (_.get(r, 'MediumImage[0].URL[0]') ? _.get(r, 'MediumImage[0].URL[0]') :  'http://kipthis.com/images/header_partners.png')))
             // (_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') : 'http://kipthis.com/images/header_partners.png' )) 
         } catch(err) {
           image = 'http://kipthis.com/images/header_partners.png'

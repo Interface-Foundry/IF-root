@@ -48,12 +48,10 @@ module.exports = {};
 module.exports.addToCart = function(slack_id, user_id, item, type) {
   console.log('adding item to cart for ' + slack_id + ' by user ' + user_id);
   console.log('ITEM ZZZZ ',JSON.stringify(item, null, 2))
-
   //fixing bug to convert string to to int
   if (item.reviews && item.reviews.reviewCount){
     item.reviews.reviewCount = parseInt(item.reviews.reviewCount);
   }
-
   // Handle the case where the search api returns items that we can't add to cart
   var total_offers = parseInt(_.get(item, 'Offers[0].TotalOffers[0]') || '0');
   if (total_offers === 0) {
@@ -63,14 +61,13 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AvailabilityParameter.html
     return Promise.reject('Item not available');
   }
-
   return co(function*() {
     console.log('type: ', type)
-
     //please do not remove changes below. it is required for fb to work.
     if (type == 'personal') {
       cart = yield getCart(slack_id, type);
-    } else {
+    } 
+    else {
       var team_carts = yield db.Carts.find({slack_id: slack_id, purchased: false, deleted: false}).populate('items -source_json').exec();
       if (team_carts.length === 1) {
       var cart = team_carts[0];
@@ -79,8 +76,6 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
       }
     }
     console.log(cart);
-
-
     // make sure we can add this item to the cart
     // know it's ok if the item already exists in the cart
     var ok = false;
@@ -110,13 +105,26 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
 
     var link = yield processData.getItemLink(_.get(item, 'ItemLinks[0].ItemLink[0].URL[0]'), user_id, _.get(item, 'ASIN[0]'));
 
+    var smallImage = _.get(item, 'SmallImage[0].URL[0]');
+    var mediumImage = _.get(item, 'MediumImage[0].URL[0]');
+    var largeImage = _.get(item, 'LargeImage[0].URL[0]');
+    var altImage = item.altImage;
+    var image;
+    //http://images-na.ssl-images-amazon.com/images/I/61WRcLLvdpL._SL1100_.jpg
+    if (smallImage.indexOf('images-na.ssl-images-amazon.com') > -1 || mediumImage.indexOf('images-na.ssl-images-amazon.com') > -1) {
+      image = 'http://kipthis.com/images/kip_head.png';
+    }
+    else {
+      image = item.altImage || _.get(item, 'SmallImage[0].URL[0]')
+    }
+
     console.log('creating item in database')
     var i = yield (new db.Item({
       cart_id: cart._id,
       ASIN: _.get(item, 'ASIN[0]'),
       title: _.get(item, 'ItemAttributes[0].Title'),
       link: link,
-      image: item.altImage || _.get(item, 'SmallImage[0].URL[0]'),
+      image: image,
       price: item.realPrice,
       rating: _.get(item, 'reviews.rating'),
       review_count: _.get(item, 'reviews.reviewCount'),

@@ -246,7 +246,8 @@ app.post('/facebook', next(function*(req, res, next) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
-                } else {
+                } 
+                else {
                     console.log(JSON.stringify(req.body));
                     var message = new db.Message({
                         incoming: true,
@@ -322,7 +323,7 @@ app.post('/facebook', next(function*(req, res, next) {
                     "url": img_array[Math.floor(Math.random()*img_array.length)]
                   }
                 }
-              }
+              };
 
              request({
                 url: 'https://graph.facebook.com/v2.6/me/messages',
