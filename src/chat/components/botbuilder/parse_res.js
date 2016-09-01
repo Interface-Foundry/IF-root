@@ -45,15 +45,10 @@ function* results(message) {
         var final_description = (description.length > 200) ? (description.substring(0, 150) + '...') : description;
       }
 
-      var image;
-        try {
-          image = r.picstitch_url ? r.picstitch_url : ((_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') :  (_.get(r, 'MediumImage[0].URL[0]') ? _.get(r, 'MediumImage[0].URL[0]') :  'http://kipthis.com/images/header_partners.png')))
-            // (_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') : 'http://kipthis.com/images/header_partners.png' )) 
-        } catch(err) {
-          image = 'http://kipthis.com/images/header_partners.png'
-        } 
+      var image = r.picstitch_url ? r.picstitch_url : ((_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') :  (_.get(r, 'MediumImage[0].URL[0]') ? _.get(r, 'MediumImage[0].URL[0]') :  'http://kipthis.com/images/header_partners.png')))
 
-      console.log('\n\n\n\n\nimage: ', image,'\n\n\n\n\n');
+
+      // console.log('\nimage: ', image,'\n');
 
       return {
         title: truncate(_.get(r, 'ItemAttributes[0].Title[0]')),

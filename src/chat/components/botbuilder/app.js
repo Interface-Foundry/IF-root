@@ -296,9 +296,11 @@ bot.dialog('/results', [
                         ])
                         .tap(builder.CardAction.openUrl(session, session.results[0].title_link))
                         .buttons([
-                            builder.CardAction.imBack(session, '<context value="weeeeeee"/>'
+                            builder.CardAction.imBack(session, 
+                                'Added!<context hidden="save 1" />'
+                                // '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"1\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
                             , "Add to Cart"),
-                            builder.CardAction.imBack(session, "1 but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, "Cheaper!<context hidden='1 but cheaper' />" , "Find Cheaper"),
                             builder.CardAction.imBack(session, "1", "More Info")
                         ]),
                     new builder.HeroCard(session)
@@ -311,9 +313,11 @@ bot.dialog('/results', [
                         ])
                         .tap(builder.CardAction.openUrl(session, session.results[1].title_link))
                         .buttons([
-                            builder.CardAction.imBack(session, '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"2\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
+                            builder.CardAction.imBack(session, 
+                                'Added!<context hidden="save 2" />'
+                                // '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"2\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
                             , "Add to Cart"),
-                            builder.CardAction.imBack(session, "2 but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, "Cheaper!<context hidden='2 but cheaper' />" , "Find Cheaper"),
                             builder.CardAction.imBack(session, "2", "More Info")
                         ]),
                     new builder.HeroCard(session)
@@ -326,9 +330,11 @@ bot.dialog('/results', [
                         ])
                         .tap(builder.CardAction.openUrl(session, session.results[2].title_link))
                         .buttons([
-                            builder.CardAction.imBack(session, '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"3\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
+                            builder.CardAction.imBack(session, 
+                                'Added!<context hidden="save 3" />'
+                                // '<dataId:' + session.outgoing.data.thread_id + ', action=\"add\", selected=\"3\", ts: '+ session.outgoing.data.ts + ', initial:\"true\" />'
                             , "Add to Cart"),
-                            builder.CardAction.imBack(session, "3 but cheaper" , "Find Cheaper"),
+                            builder.CardAction.imBack(session, "Cheaper!<context hidden='3  but cheaper' />" , "Find Cheaper"),
                             builder.CardAction.imBack(session, "3", "More Info")
                         ])
                  ]);
@@ -395,30 +401,29 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 // session.results = return_data;
                 // session.outgoing = outgoing;
                 // return session.beginDialog('/results');
-                console.log('1💀')
+                // console.log('1💀')
                 return send_results(message.source.channel, message.text, return_data, outgoing);
             }
             else if (message.mode === 'cart' && message.action === 'save') {
-                console.log('2💀')
+                // console.log('2💀')
                 return send_cart(message.source.channel, message.text, outgoing);
             }
             else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-                console.log('focus message :', message);
+                // console.log('focus message :', message);
                 return_data = yield focus(message);
-                console.log('3💀')
+                // console.log('3💀')
                 return send_focus(message.source.channel, message.text, return_data, outgoing);
             }
             else if (message.mode === 'cart' && message.action === 'view') {
-                console.log('4💀')
+                // console.log('4💀')
                 return send_cart(message.source.channel, message.text, outgoing);
             }
             // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
             //     return send_text(message.source.channel, message.text, outgoing)
             // }
             else if (message.text){
-                console.log('5💀')
+                // console.log('5💀')
                 session.send(message.text);
-
             }
             else {
                 console.log('\nhmm, shouldnt be getting here..', message);
@@ -426,7 +431,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             // outgoing.ack();
         }).then(() => {
 
-            console.log('.x.x.x.')
             //if(message.text){
             outgoing.ack();
             //}
@@ -448,7 +452,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 // var image = result.image_url;
                 //get picstitch image
                 if (result && result.image_url){
-                    var image = ((result.image_url.indexOf('http://') > -1) ? result.image_url.replace('http://','https://') : 'http://kipthis.com/images/header_partners.png')
+                    var image = ((result.image_url.indexOf('http://') > -1) ? result.image_url.replace('http://','https://') : result.image_url)
                 } 
                 else {
                     kip.debug('error: no result.image_url (picstitch) found');
@@ -466,8 +470,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     .tap(builder.CardAction.openUrl(session, result.title_link))
                     .buttons([
                         // <meta hiddenID="save 1" />
-                        builder.CardAction.imBack(session, '<context hidden="save 1" />', "Add to Cart"),
-                        builder.CardAction.imBack(session, n + " but cheaper" , "Find Cheaper"),
+                        builder.CardAction.imBack(session, 'Added!<context hidden="save ' + n + '" />', "Add to Cart"),
+                        builder.CardAction.imBack(session, "Cheaper!<context hidden='" + n + " but cheaper' />" , "Find Cheaper"),
                         builder.CardAction.imBack(session, n, "More Info")
                     ]);
             });
@@ -511,9 +515,9 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
             ])
             .tap(builder.CardAction.openUrl(session, focus_info.title_link))
             .buttons([
-                builder.CardAction.imBack(session, "save " + focus_info.selected, "Add to Cart"),
+                builder.CardAction.imBack(session, 'Added!<context hidden="save ' + focus_info.selected + '" />', "Add to Cart"),
                 builder.CardAction.imBack(session, 'more like ' + focus_info.selected, "Similar"),
-                builder.CardAction.imBack(session, focus_info.selected  + " but cheaper", "Find Cheaper"),
+                builder.CardAction.imBack(session, "Cheaper!<context hidden='" + focus_info.selected + " but cheaper' />", "Find Cheaper"),
                 // builder.CardAction.imBack(session, "select:101", "More Info")
             ]);
         var msg = new builder.Message(session).attachments([card]);
@@ -522,7 +526,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
     function send_cart(channel, text, outgoing) {
         var cart = outgoing.data.data;
-        console.log('\n\n\n\n\nCART OBJECT : ', cart, outgoing,'\n\n\n\n\n');
+        // console.log('\n\n\n\n\nCART OBJECT : ', cart, outgoing,'\n\n\n\n\n');
 
         var cart_items = cart.aggregate_items.map((el, i) => {
             // console.log('\n\n\n\n\n  EL IS : ', el, '\n\n\n\n\n');
@@ -534,11 +538,12 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     builder.CardAction.postBack(session, `remove ${i+1}` , 'Remove Item')
                 ])
             if (el.image) {
-                if (el.image.indexOf('images-na.ssl-images-amazon.com') > -1 || el.image.indexOf('images-na.ssl-images-amazon.com') > -1) {
+              // console.log('\n\nLE NONFIN IMAGE!!!!\n\n', el.image); 
+                if (el.image.indexOf('images-na.ssl-images-amazon.com') > -1) {
                   el.image = 'http://kipthis.com/images/kip_head.png';
                 }
-              el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
-              // console.log('\n\n\n\n\n\n\nLE IMAGE!!!!\n\n\n\n\n\n', el.image);
+                el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
+              // console.log('\n\nLE FIN IMAGE!!!!\n\n', el.image);
               card.images([
                   builder.CardImage.create(session, el.image)
                       .tap(builder.CardAction.showImage(session, el.image))
