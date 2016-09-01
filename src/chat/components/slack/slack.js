@@ -51,6 +51,7 @@ var image_search = require('../image_search');
 var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
+var delivery = require('./delivery.com');
 var slackConnections = {};
 
 //
@@ -192,6 +193,16 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'cart' && message.action === 'view') {
         msgData.attachments = yield cart(message, bot.slackbot, false);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+      if (message.mode === 'food' && message.action === 'restaurant.list') {
+        msgData.attachments = yield delivery.com.results(message);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+      if (message.mode === 'food' && message.action === 'restaurant.info') {
+        msgData.attachments = yield delivery.com.menuResults(message);
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
