@@ -10,7 +10,7 @@ var db = require('../../db');
 var googl = require('goo.gl');
 var winston = require('winston');
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'developmentxxx') {
     googl.setKey('AIzaSyCKGwgQNKQamepKkpjgb20JcMBW_v2xKes')
 } else {
     googl.setKey('AIzaSyC9fmVX-J9f0xWjUYaDdPPA9kG4ZoZYsWk');
