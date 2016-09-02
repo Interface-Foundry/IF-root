@@ -8,6 +8,8 @@ var fs = require('fs');
 
 var banter = require("./banter.js");
 var amazon_search = require('./amazon_search.js');
+var amazon_variety = require('./amazon_variety.js');
+
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
@@ -77,7 +79,7 @@ function text_reply(message, text) {
 // sends a simple text reply
 function send_text_reply(message, text) {
   var msg = text_reply(message, text);
-  winston.debug('\n\n\nsendmsg: ', msg);
+  // winston.debug('\n\n\nsendmsg: ', msg);
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -150,8 +152,9 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     /////////////////////
-
     //MODE SWITCHER
+    /////////////////////
+
     switch(modes[user.id]){
       case 'onboarding':
         winston.debug('ONBAORDING MODE')
@@ -443,7 +446,7 @@ handlers['shopping.initial'] = function*(message, exec) {
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
   var results = yield amazon_search.search(exec.params,message.origin);
-  winston.debug('!1',exec)
+  kip.debug('!1',exec)
 
   if (results == null || !results) {
       winston.debug('-1')
@@ -503,7 +506,7 @@ handlers['shopping.focus'] = function*(message, exec) {
 handlers['shopping.more'] = function*(message, exec) {
   exec.params = yield getLatestAmazonQuery(message);
   exec.params.skip = (exec.params.skip || 0) + 3;
-    winston.debug('!2', exec)
+    kip.debug('!2', exec)
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
@@ -547,7 +550,7 @@ handlers['shopping.similar'] = function*(message, exec) {
 
   if (!exec.params.asin) {
     var old_results = yield getLatestAmazonResults(message);
-    winston.debug(old_results);
+    kip.debug(old_results);
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0];
   }
     winston.debug('!2', exec)
@@ -626,7 +629,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0];
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode;
   }
-  winston.debug('!3', exec)
+  kip.debug('!3', exec)
   exec.params.query = old_params.query;
   if (!exec.params.query) {
               winston.debug('-3.5')
@@ -645,7 +648,7 @@ handlers['shopping.modify.all'] = function*(message, exec) {
 
   var results = yield amazon_search.search(exec.params,message.origin);
    if (results == null || !results) {
-          winston.debug('-4')
+          kip.debug('-4')
 
       return new db.Message({
       incoming: false,
@@ -695,7 +698,7 @@ handlers['shopping.modify.one'] = function*(message, exec) {
       }
     }
   }
-      winston.debug('!4', exec)
+      kip.debug('!4', exec)
 
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
@@ -787,9 +790,13 @@ handlers['cart.save'] = function*(message, exec) {
 ;  try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
   } catch (e) {
-    kip.err(e);
-    return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+    try {
+      amazon_variety.getVariations(results[exec.params.focus - 1], message)
+    } catch (err) {
+      kip.err(e);
+      return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
   }
+}
 
   // view the cart
   return yield handlers['cart.view'](message, exec);

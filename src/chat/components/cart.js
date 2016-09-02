@@ -94,7 +94,7 @@ module.exports.addToCart = function(slack_id, user_id, item, type) {
     if (!ok && _.get(cart, 'amazon.CartId[0]')) {
       var client = aws_clients[cart.aws_client || DEFAULT_CLIENT];
       if (typeof client === 'undefined') client = aws_clients[DEFAULT_CLIENT];
-      
+
       // attempt to add the item to the cart for the first time, check for errors
       var res = yield client.addCart({
         CartId: cart.amazon.CartId[0],
@@ -291,7 +291,7 @@ module.exports.removeAllOfItem = function(slack_id, number) {
 
     // need to watch out for items that have multiple quantities
     // check to make sure this item exists
-    
+
     var unique_items = _.uniqBy(cart.aggregate_items, 'ASIN');
     var ASIN_to_remove = _.get(unique_items, `${number - 1}.ASIN`);
     var item_to_remove = _.get(unique_items, `${number - 1}.title`);

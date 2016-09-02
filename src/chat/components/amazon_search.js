@@ -14,7 +14,9 @@ var db = require('../../db');
 var async = require('async');
 var wait = require('co-wait');
 
-var winston = require('winston');
+var logging = require('winston');
+logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+
 /*
 Affiliate tag:
 eileenog-20
@@ -45,8 +47,6 @@ var DEFAULT_CLIENT = 'AKIAJ7JWQNS2HH5UYNVQ';
 
 var aws_client_id_list = Object.keys(aws_clients);
 
-
-
 var i = 0;
 // Round-robin method for spreading the load between all our clients.
 function get_client() {
@@ -69,6 +69,48 @@ params:
   http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 */
 
+
+/*
+* Lookup object based on ASIN
+*
+* @param {Object} params should be Object like {asin: ASIN, IdType: 'ASIN'}
+* @return {Object} enhanced_result for specific item
+*/
+
+var lookup = function (params, origin) {
+  logging.debug('Using Amazon Lookup')
+  var timer = new kip.SavedTimer('lookup.timer', {params: params})
+  db.Metrics.log('lookup.amazon', params)
+  if (!params.ASIN) {
+    logging.info('error params: ', params)
+    throw new Error('No Asin provided')
+  }
+
+  params.IdType = params.IdType || 'ASIN'
+
+  amazonParams = {
+    Availability: 'Available',
+    Condition: 'New',
+    IdType: params.IdType,
+    ItemId: params.ASIN,
+    ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank'
+  }
+
+  timer.tic('requesting amazon ItemLookup api');
+  try {
+    co(function *(){
+      logging.debug('looking up asin', amazonParams);
+      var results = yield get_client().itemLookup(amazonParams)
+      timer.tic('got results from ItemLookup api')
+      var enhanced = yield enhance_results(results, origin, timer)
+      timer.tic('done enhancing result')
+      timer.stop()
+      return enhanced
+    })
+  } catch (e) {
+    return Promise.reject('Item not available');
+  }
+}
 
 
  // {"mode":"shopping",
@@ -151,7 +193,7 @@ var search = function*(params,origin) {
       var all_modifiers_array = all_modifiers_string.split(' ');
      }
   } else if (params.val && params.val.length == 1) {
-     amazonParams["Keywords"] = (params.val[0].name)  ? params.val[0].name.toLowerCase() + ' ' +params.query : ((typeof params.val[0] == 'string') ?  params.val[0].toLowerCase() + ' ' + params.query : amazonParams["Keywords"]);
+     amazonParams["Keywords"] = (params.val[0].name)  ? params.val[0].name.toLowerCase() + ' ' + params.query : ((typeof params.val[0] == 'string') ?  params.val[0].toLowerCase() + ' ' + params.query : amazonParams["Keywords"]);
   }
   timer.tic('requesting amazon ItermSearch api');
   try {
@@ -479,7 +521,7 @@ var getPricesPromise = function(item) {
   })
 }
 
-
+module.exports.lookup = lookup;
 module.exports.similar = similar;
 module.exports.search = search;
 
