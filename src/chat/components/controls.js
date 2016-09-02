@@ -18,10 +18,157 @@
 
 class OptionSet{
 
-    constructor(setName, optionArray) {
+    constructor(setName, buttonArray) {
 
-	this.setName = setName;
+	this.name = setName;
 	this.options = optionArray
+
+	return this;
+    }
+
+};
+
+
+class ButtonGroupConfigBuilder() {
+
+    constructor() {
+	this.config = { "attachment_type": "default" };
+	this.numRequiredFieldsMissing = 4;
+	return this;
+    }
+
+    this.isComplete() = function() {
+	return this.numRequiredFieldsMissing === 0;
+    }
+
+
+    this.setTitle = function(title) {
+	this.config.title = title;
+	this.numRequiredFieldsMissing--;
+	return this;
+    }
+
+
+    this.setHeader = function(header) {
+	this.config.header = header;
+	this.numRequiredFieldsMissing--;
+	return this;
+    }
+
+
+    this.setPrompt = function(prompt) {
+	this.config.prompt = prompt;
+	this.numRequiredFieldsMissing--;
+	return this;
+    }
+
+
+    this.setAttachmentType = function(attachmentType) {
+	this.attachmentType = attachmentType
+	this.numRequiredFieldsMissing--;
+	return this;
+    }
+
+    
+
+    this.build(){
+	//return JSON object?
+    }
+    
+}
+
+
+
+
+
+
+class SlackButtonGroup {
+
+    constructor(header, optionSet, bgConfig) {
+	// TODO	
+    }
+
+}
+
+
+os1 = new OptionSet('sizes', ['small', 'medium', 'large']);
+os2 = new OptionSet('color', ['blue', 'red', 'green-blue']);
+ 
+
+
+
+
+new SlackButtonGroup("would you like to play a game?", [attachments], os1).render();
+
+    this.render = function(){
+
+	return {
+	    "text": this.header,
+	    "attachments": [
+		{
+		    "text": this.title,
+		    "fallback": "You are unable to choose a game",
+		    "callback_id": "wopr_game",
+		    "color": "#3AA3E3",
+		    "attachment_type": "default",
+		    //"image_url": "",
+		    //"thumb_url": "",
+		    "actions": [
+			{
+			    "name": "chess",
+			    "text": "Chess",
+			    "type": "button",
+			    "value": "chess"
+			},
+			{
+			    "name": "maze",
+			    "text": "Falken's Maze",
+			    "type": "button",
+			    "value": "maze"
+			},
+			{
+			    "name": "war",
+			    "text": "Thermonuclear War",
+			    "style": "primary",
+			    "type": "button",
+			    "value": "war",
+			    "confirm": {
+				"title": "Are you sure?",
+				"text": "Wouldn't you prefer a good game of chess?",
+				"ok_text": "Yes",
+				"dismiss_text": "No"
+			    }
+			}
+		    ]
+		}
+	    ]
+	}
+    }
+}
+
+
+class FBButtonMenu {
+
+    constructor(optionSet) {
+
+	this.buttonArray = []
+	buttonArray.map(function(value, index) {
+	    buttonArray.push{}
+	    primaryOptions[buttonName] = button;	    
+	});
+	return this;
+    }
+
+    	
+    this.addOptions = function(optionName, buttonArray) {
+
+	this.optionSets[optionName] = buttonArray
+	return this;
+    }
+
+
+    this.selectPrimaryOption = function() {
+	    
     }
 }
 
