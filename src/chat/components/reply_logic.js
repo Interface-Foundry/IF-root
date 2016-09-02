@@ -205,7 +205,13 @@ queue.topic('incoming').subscribe(incoming => {
           timer.tic('getting nlp response')
 
           winston.info('👽 passing to nlp: ', message.text);
-          replies = yield nlp_response(message);
+          
+	    if(message.execute && message.execute.length > 0) {
+		 replies = yield execute(message);
+	    }
+        else{
+      replies = yield nlp_response(message);
+	    }
           timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan,
             replies.map(function*(r){

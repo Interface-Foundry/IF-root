@@ -1,17 +1,20 @@
 var processData = require('../process');
 
-module.exports = function*(message, slackbot, show_added_item) {
+module.exports = function*(message, slackbot, highlight_added_item) {
   var cart = message.data;
+
   // admins have special rights
   var isAdmin = slackbot.meta.office_assistants.indexOf(message.source.user) >= 0;
   var isP2P = slackbot.meta.office_assistants.length === 0;
+  var show_everything = isAdmin || isP2P;
 
   // get the latest added item if we need to highlight it
-  if (show_added_item) {
+  if (highlight_added_item) {
     var added_item = cart.items[cart.items.length - 1];
     var added_asin = added_item.ASIN;
   }
 
+  // all the messages which compose the cart
   var cartObj = [];
 
   //add mode sticker
@@ -23,66 +26,68 @@ module.exports = function*(message, slackbot, show_added_item) {
 
   for (var i = 0; i < cart.aggregate_items.length; i++) {
     var item = cart.aggregate_items[i];
+
+    // the slack message for just this item in the cart list
+    var item_message = {
+      mrkdwn_in: ['text', 'pretext'],
+      color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
+      thumb_url: item.image
+    }
+
+    // multiple people could have added an item to the cart, so construct a string appropriately
     var userString = item.added_by.map(function(u) {
       return '<@' + u + '>';
     }).join(', ');
 
-    if (isAdmin || isP2P) {
+    // only allow links for admins/p2p
+    if (show_everything) {
       var link = yield processData.getItemLink(item.link, message.source.user, item._id.toString());
-      console.log(link);
     }
 
-    var actionObj = [
-      {
-        "name": "RemoveItem",
-        "text": "➖",
-        "style": "danger",
+    // make the text for this item's message
+    item_message.text = [
+      `${processData.emoji[i + 1].slack} ` + (show_everything ? `<${link}|${item.title}>` : item.title),
+      `*${item.price}* each`,
+      `Quantity: ${item.quantity}`,
+      show_everything ? `_Added by: ${userString}_` : false
+    ].filter(Boolean).join('\n');
+
+    // add the item actions if needed
+    if (show_everything) {
+      item_message.callback_id = item._id.toString();
+      var buttons = [{
+        "name": "additem",
+        "text": "+",
+        "style": "default",
         "type": "button",
-        "value": "no",
-        "confirm": {
-          "title": "Are you sure?",
-          "text": "This will approve the request.",
-          "ok_text": "Yes",
-          "dismiss_text": "No"
-        }
-      },
-      {
-        "name": "AddItem",
-        "text": "➕",
-        "style": "primary",
+        "value": "add"
+      }, {
+        "name": "removeitem",
+        "text": "-",
+        "style": "default",
         "type": "button",
-        "value": "yes"
+        "value": "remove" 
+      }];
+
+      if (item.quantity > 1) {
+        buttons.push({
+          name: "removeall",
+          text: 'Remove All',
+          style: 'default',
+          type: 'button',
+          value: 'removeall'
+        })
       }
-    ];
 
-    // add title, which is a link for admins/p2p and text otherwise
-    var emojiType = 'slack';
-    if (isAdmin || isP2P) {
-      var text = [
-        `${processData.emoji[i + 1][emojiType]} <${link}|${item.title}>`,
-        `*${item.price}* each`,
-        `Quantity: ${item.quantity}`,
-        `_Added by: ${userString}_`
-      ].join('\n');
-    } else {
-      var text = [
-        `${processData.emoji[i + 1][emojiType]} *${item.title}*`,
-        `Quantity: ${item.quantity}`,
-        `_Added by: ${userString}_`
-      ].join('\n');
+      item_message.actions = buttons;
     }
+    
 
-    cartObj.push({
-      text: text,
-      mrkdwn_in: ['text', 'pretext'],
-      color: item.ASIN === added_asin ? '#7bd3b6' : '#45a5f4',
-      thumb_url: item.image
-    // actions: actionObj
-    })
+    cartObj.push(item_message)
   }
 
   // Only show the purchase link in the summary for office admins.
-  if (isAdmin || isP2P) {
+  if (show_everything) {
     var summaryText = `_Summary: Team Cart_
  Total: *${cart.total}*`;
     summaryText += `

@@ -32,12 +32,16 @@ function simple_action_handler(action) {
       return action.value
     case'more':
       return 'more'
-    case 'home':
-      return 'exit'
     
     //
     // Item info buttons
     //
+
+    //
+    // Other buttons
+    //
+    case 'home':
+      return 'exit'
   }
 }
 
