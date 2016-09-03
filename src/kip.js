@@ -1,7 +1,9 @@
 var path = require('path');
-require('colors');
-global.db = require('./db');
 var config = require('./config');
+require('colors');
+
+global.db = require('./db');
+global.logging = require('./logging.js')
 
 /**
  * Prints an error to the screen and returns true.
