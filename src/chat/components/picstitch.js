@@ -1,9 +1,11 @@
+require('kip');
+
 stitch = require('../../image_processing/api.js');
 var async = require('async');
-var winston = require('winston');
+
 
 var stitchResultsPromise = function(items,origin) {
-  winston.debug('originSTITCH ',origin)
+  logging.debug('originSTITCH ',origin)
   return new Promise((resolve, reject) => {
     stitchResults({
       origin: origin,
@@ -55,7 +57,7 @@ var stitchResults = function(data,source,callback) {
               ],
               function(err, rez){
                   if (err){
-                      winston.debugerror('Error: parallel scrape ',err);
+                      logging.debugerror('Error: parallel scrape ',err);
                   }
                   callback(stitchURLs);
 
@@ -288,7 +290,7 @@ var stitchResults = function(data,source,callback) {
                     cString.push(truncate("Hazardous Type: " + attribs.HazardousMaterialType[0]));
                 }
 
-                winston.debug('cString ',cString);
+                logging.debug('cString ',cString);
 
                 if(cString.length < 1){
                   cString.push('');
@@ -325,7 +327,7 @@ var stitchResults = function(data,source,callback) {
         //call to stitch service
         stitch(toStitch, function(e, stitched_url){
             if(e){
-                winston.debug('stitch err ',e);
+                logging.debug('stitch err ',e);
             }
             if (tracker || tracker == 0){
               stitchURLs[tracker] = stitched_url;

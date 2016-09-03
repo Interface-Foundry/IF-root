@@ -1,10 +1,10 @@
 /*eslint-env es6*/
+require('kip');
 var promisify = require('promisify-node');
 var co = require('co');
 var _ = require('lodash');
 var debug = process.env.NODE_ENV == 'production' ? function() {} : console.log.bind(console);
 var verbose = process.env.VERBOSE ? console.log.bind(console) : function() {};
-var kip = require('../../kip');
 var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
@@ -14,7 +14,6 @@ var db = require('../../db');
 var async = require('async');
 var wait = require('co-wait');
 
-var winston = require('winston');
 /*
 Affiliate tag:
 eileenog-20
@@ -79,7 +78,7 @@ var search = function*(params,origin) {
   db.Metrics.log('search.amazon', params)
 
   if (!params.query) {
-    winston.debug('error params: ', params)
+    logging.debug('error params: ', params)
     throw new Error('no query specified')
   }
 
@@ -138,7 +137,7 @@ var search = function*(params,origin) {
     amazonParams.Keywords = params.color.name;
   }
   else if (params.val && params.val.length > 1 && params.type !== 'color') {
-      winston.debug('found multiple modifiers...')
+      logging.debug('found multiple modifiers...')
       amazonParams.Keywords = '';
      for (var i = 1; i < params.val.length; i++) {
       var val = (typeof params.val[i] == 'object' ? params.val[i] : (typeof params.val[i] == 'string' ? params.val[i].toLowerCase() : params.val[i]));
@@ -153,13 +152,13 @@ var search = function*(params,origin) {
   }
   timer.tic('requesting amazon ItermSearch api');
   try {
-      winston.debug('👺1: as is...', amazonParams);
+      logging.debug('👺1: as is...', amazonParams);
       var results = yield get_client().itemSearch(amazonParams);
    }
    catch (e) {
       //If more than one modifier
       if (all_modifiers_array) {
-        winston.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
+        logging.debug('👺2: remove each keyword one-by-one, and try both with node-traversal and without...');
          amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
         for (var i = 0; i < all_modifiers_array.length-1; i++) {
           try {
@@ -168,24 +167,24 @@ var search = function*(params,origin) {
                  amazonParams.BrowseNode = browseNodeBackup;
                }
                amazonParams.Keywords = amazonParams.Keywords.replace(modifier.trim(), '').trim();
-                winston.debug('trying : ', amazonParams)
+                logging.debug('trying : ', amazonParams)
                 var res1 = yield get_client().itemSearch(amazonParams);
                 yield wait(1500);
                 if (res1 && res1.length >= 1) {
                  var results = res1
-                 winston.debug('breaking out...')
+                 logging.debug('breaking out...')
                  break;
                 } else {
                     if (amazonParams.BrowseNode) {
                      delete amazonParams.BrowseNode;
                     }
-                    winston.debug('trying : ', amazonParams)
+                    logging.debug('trying : ', amazonParams)
                     try{
                       var res1 = yield get_client().itemSearch(amazonParams);
                       yield wait(1500);
                       if (res1 && res1.length >= 1) {
                          var results = res1
-                          winston.debug('breaking out...')
+                          logging.debug('breaking out...')
                          break;
                       }
                     } catch(err) {}
@@ -194,13 +193,13 @@ var search = function*(params,origin) {
             catch (e) {
                if (res1 && res1.length >= 1) {
                 var results = res1
-                 winston.debug('breaking out...')
+                 logging.debug('breaking out...')
                  break;
                 }  else {
                   if (amazonParams.BrowseNode) {
                      delete amazonParams.BrowseNode;
                     }
-                    winston.debug('trying : ', amazonParams);
+                    logging.debug('trying : ', amazonParams);
                     try {
                       yield wait(1500);
                       var res1 = yield get_client().itemSearch(amazonParams);
@@ -209,20 +208,20 @@ var search = function*(params,origin) {
                     }
                     if (res1 && res1.length >= 1) {
                      var results = res1
-                     winston.debug('breaking out...')
+                     logging.debug('breaking out...')
                      break;
                     }
                 }
             }
         } // end of for loop
         if (!results || (results && results.length < 1)) {
-            winston.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
+            logging.debug('👺3: cutting modifiers failed, search just the original query in a node-traversal search, then try a non-node-traversal search... ');
             amazonParams.Keywords = params.query;
             amazonParams.BrowseNode = browseNodeBackup;
-            winston.debug('trying : ', amazonParams);
+            logging.debug('trying : ', amazonParams);
             try {
               yield wait(1500);
-              winston.debug('trying : ', amazonParams);
+              logging.debug('trying : ', amazonParams);
               var results = yield get_client().itemSearch(amazonParams);
             } catch(err) {
                if (amazonParams.BrowseNode) {
@@ -230,7 +229,7 @@ var search = function*(params,origin) {
                 }
                 try {
                   yield wait(1500);
-                  winston.debug('trying : ', amazonParams);
+                  logging.debug('trying : ', amazonParams);
                   var results = yield get_client().itemSearch(amazonParams);
                 } catch(err) {}
             }
@@ -238,22 +237,22 @@ var search = function*(params,origin) {
         }
       // Only one modifier
       } else {
-        winston.debug('👺4 One modifier, as is did not work... ');
+        logging.debug('👺4 One modifier, as is did not work... ');
         try {
           if (amazonParams.BrowseNode) {
              delete amazonParams.BrowseNode;
           }
             yield wait(1500);
             // amazonParams.Keywords = amazonParams.Keywords + ' ' + params.query;
-            winston.debug('trying : ', amazonParams);
+            logging.debug('trying : ', amazonParams);
             var results = yield get_client().itemSearch(originalParams);
         }
         catch(err) {
-          winston.debug('👺5', amazonParams);
+          logging.debug('👺5', amazonParams);
             try {
                amazonParams.Keywords = params.query;
                yield wait(1500);
-               winston.debug('trying : ', amazonParams);
+               logging.debug('trying : ', amazonParams);
                var results = yield get_client().itemSearch(originalParams);
              } catch(err) {
             }
@@ -262,7 +261,7 @@ var search = function*(params,origin) {
            try {
                amazonParams.Keywords = params.query;
                yield wait(1500);
-               winston.debug('trying : ', amazonParams);
+               logging.debug('trying : ', amazonParams);
                var results = yield get_client().itemSearch(originalParams);
             } catch(err) {
             }
@@ -272,7 +271,7 @@ var search = function*(params,origin) {
              if (amazonParams.BrowseNode) {
                 delete amazonParams.BrowseNode;
               }
-              winston.debug('👺6: ', amazonParams);
+              logging.debug('👺6: ', amazonParams);
               if (amazonParams.Keywords && amazonParams.Keywords.split(' ').length > 2) {
                 kip.debug('someone probably sent a really long string: ', amazonParams.Keywords);
                   //like if someone sends a paragraph.. patch fix for now todo fix later
@@ -280,13 +279,13 @@ var search = function*(params,origin) {
               }
               try {
                 yield wait(1500);
-                winston.debug('trying : ', amazonParams.Keywords);
+                logging.debug('trying : ', amazonParams.Keywords);
                 var results = yield get_client().itemSearch(amazonParams);
               } catch(err) {
                 try {
                    amazonParams.Keywords = params.query;
                    yield wait(1500);
-                   winston.debug('trying : ', amazonParams);
+                   logging.debug('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
                  } catch(err) {}
               }
@@ -294,7 +293,7 @@ var search = function*(params,origin) {
                try {
                    amazonParams.Keywords = params.query;
                    yield wait(1500);
-                   winston.debug('trying : ', amazonParams);
+                   logging.debug('trying : ', amazonParams);
                    var results = yield get_client().itemSearch(originalParams);
                 } catch(err) {}
             }
