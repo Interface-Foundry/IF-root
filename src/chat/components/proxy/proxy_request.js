@@ -17,7 +17,7 @@ var async = require('async');
 var argv = require('minimist')(process.argv.slice(2));
 var test_mode = argv.proxy ? argv.proxy : false;
 // e.g. run example for test mode: node reply_logic --proxy --interval=6000
-
+var proxy;
 if (test_mode) {
   console.log('Running proxy test mode..')
   async.eachSeries(sets, function iterator(set, callback) {
@@ -27,7 +27,7 @@ if (test_mode) {
    }
     proxy_status.current_index = sets_index;
     console.log('\n\n\n\n🤖starting #', sets_index,' proxy with options: ', set.config,' ...\nfor ',set.time_in_seconds,' seconds...\n\n\n\n');
-    var proxy = new Luminati(sets[sets_index].config);
+    proxy = new Luminati(sets[sets_index].config);
     proxy.listen(24000, '127.0.0.1');
     setTimeout(function() {
       console.log('\n\n🤖time to live elapsed... trying next set...\n\n');
@@ -40,7 +40,8 @@ if (test_mode) {
   });
 } 
 else {
-  const proxy = new Luminati({
+  console.log('Running proxy normal mode..')
+  proxy = new Luminati({
       customer: 'kipthis', 
       password: 'e49d4ega1696', 
       zone: 'gen', 
