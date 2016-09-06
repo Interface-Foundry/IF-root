@@ -22,14 +22,12 @@ class OptionSet{
 
 	this.name = setName;
 	this.options = optionArray
-
 	return this;
     }
-
 };
 
 
-class ButtonGroupConfigBuilder() {
+class ButtonGroupConfigBuilder{
 
     constructor() {
 	this.config = { "attachment_type": "default" };
@@ -70,107 +68,66 @@ class ButtonGroupConfigBuilder() {
     }
 
     
-
     this.build(){
-	//return JSON object?
+	// TODO: return JSON object; verify the format 
     }
     
 }
 
 
 
+class FacebookButtonGroup {
 
-
-
-class SlackButtonGroup {
-
-    constructor(header, optionSet, bgConfig) {
-	// TODO	
-    }
-
-}
-
-
-os1 = new OptionSet('sizes', ['small', 'medium', 'large']);
-os2 = new OptionSet('color', ['blue', 'red', 'green-blue']);
- 
-
-
-
-
-new SlackButtonGroup("would you like to play a game?", [attachments], os1).render();
-
-    this.render = function(){
-
-	return {
-	    "text": this.header,
-	    "attachments": [
-		{
-		    "text": this.title,
-		    "fallback": "You are unable to choose a game",
-		    "callback_id": "wopr_game",
-		    "color": "#3AA3E3",
-		    "attachment_type": "default",
-		    //"image_url": "",
-		    //"thumb_url": "",
-		    "actions": [
-			{
-			    "name": "chess",
-			    "text": "Chess",
-			    "type": "button",
-			    "value": "chess"
-			},
-			{
-			    "name": "maze",
-			    "text": "Falken's Maze",
-			    "type": "button",
-			    "value": "maze"
-			},
-			{
-			    "name": "war",
-			    "text": "Thermonuclear War",
-			    "style": "primary",
-			    "type": "button",
-			    "value": "war",
-			    "confirm": {
-				"title": "Are you sure?",
-				"text": "Wouldn't you prefer a good game of chess?",
-				"ok_text": "Yes",
-				"dismiss_text": "No"
-			    }
-			}
-		    ]
-		}
-	    ]
-	}
+    constructor(bgConfig, buttons) {
+	this.buttonGroupConfig = bgConfig;
+	this.buttons = buttons
     }
 }
+
 
 
 class FBButtonMenu {
 
-    constructor(optionSet) {
+    // TODO: find out whether G would rather pass an array, or a ButtonGroup object
+    constructor(buttonArray) {
 
-	this.buttonArray = []
-	buttonArray.map(function(value, index) {
-	    buttonArray.push{}
-	    primaryOptions[buttonName] = button;	    
-	});
+	this.buttonArray = buttonArray	
+	this.optionSets = {}
 	return this;
     }
+    
 
-    	
-    this.addOptions = function(optionName, buttonArray) {
+    // TODO: the remaining question here is how to derive the optionName.
+    // If it comes from the action and the corresponding instruction, 
+    // change the signature so that the caller doesn't need to assemble the key
+    // by hand
+    this.addSecondaryOptions = function(optionName, buttonArray) {
 
-	this.optionSets[optionName] = buttonArray
+	this.optionSets[optionName] = buttonArray;
 	return this;
-    }
+    };
 
+
+    this.createOptionKey = function(action, instruction, selector) {
+	return [action, instruction, selector].join(':');
+    }
 
     this.selectPrimaryOption = function() {
-	    
+	return this.buttonArray;
+    };
+
+
+    
+    this.selectSecondaryOption = function(optionName){
+
+	secondaryButtonGroup = this.optionSets[optionName];
+	if secondaryButttonGroup === null or secondaryButtonGroup === undefined {	    
+	    return []
+	}
+	return secondaryButttonGroup;
     }
-}
+
+};
 
 
 
