@@ -3,6 +3,23 @@ var sets = [];
 
 //*Increasing proxy counts
 
+// SETUP 0
+var setup0 = { 
+     id: 0,
+     time_in_seconds: 3600,
+     config:{
+      customer: 'kipthis', 
+      password: 'e49d4ega1696', 
+      zone: 'gen'
+      // max_requests: 20,
+      // country: 'us',
+      // log: 'NONE'
+    }
+};
+
+sets.push(setup0);
+
+
 // SETUP 1 
 var setup1 = {
     id: 1,

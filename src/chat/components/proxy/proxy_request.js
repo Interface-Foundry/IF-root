@@ -17,7 +17,8 @@ var async = require('async');
 var argv = require('minimist')(process.argv.slice(2));
 var test_mode = argv.proxy ? argv.proxy : false;
 // e.g. run example for test mode: node reply_logic --proxy --interval=6000
-var proxy;
+proxy = {};
+options = {};
 if (test_mode) {
   console.log('Running proxy test mode..')
   async.eachSeries(sets, function iterator(set, callback) {
@@ -41,29 +42,38 @@ if (test_mode) {
 } 
 else {
   console.log('Running proxy normal mode..')
-  proxy = new Luminati({
-      customer: 'kipthis', 
-      password: 'e49d4ega1696', 
-      zone: 'gen', 
-      proxy_count: 3, 
-      max_requests: 20,
-      country: 'us',
-      log: 'NONE'
-  });
-  proxy.listen(24000, '127.0.0.1')
+  // options = {
+  //     customer: 'kipthis', 
+  //     password: 'e49d4ega1696', 
+  //     zone: 'gen', 
+  //     max_requests: 1,
+  //     pool_size: 1 
+  //     // max_requests: 20,
+  //     // country: 'us',
+  //     // log: 'NONE'
+  // }
+  // proxy = new Luminati(options);
+  // proxy.listen(24000, '127.0.0.1')
 }
 
 module.exports.request = function(url) {
       var status = proxy_status.check();
       var res;
       if (status.ready) {
-        kip.debug('firing luminati...')
-        res = luminati_request(url, proxy, status.status);
+        console.log('\nfiring luminati...')
+        res = manual_request(url, status.status);
+        if (res instanceof Error || res == null) {
+          console.log('\n\n\n\n\n\n\n\n\nOops TRYING MESH\n\n\n\n\n\n\n\n\n\n')
+          res = mesh_request(url, status.status);
+        }
+        // res = luminati_request(url, proxy, status.status);
       } else{
-        kip.debug('firing mesh...')
+        kip.debug('\nfiring mesh...')
         res = mesh_request(url, status.status);
       }
-      proxy.stop();
+      // setTimeout(function(){
+      //   proxy.stop();
+      // },2000)
       return res;
 };
 

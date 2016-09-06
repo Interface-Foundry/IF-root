@@ -139,7 +139,6 @@ httpsServer.listen(4343, function(e) {
 });
 
 app.get('/facebook', function(req, res) {
-
     if (req.query['hub.verify_token'] === fbtoken) {
         res.send(req.query['hub.challenge']);
     } else {
@@ -152,7 +151,6 @@ app.get('/facebook', function(req, res) {
 //   -Back button state cache- *currently not in use
 
 backCache = 0;
-
 
 app.post('/facebook', next(function*(req, res, next) {
     // filter out echo we don't want to process.

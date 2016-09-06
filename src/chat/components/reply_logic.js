@@ -36,7 +36,7 @@ var modes = {};
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
-winston.debug('debug ', modes)
+winston.debug('debug ', modes);
 // I'm sorry i couldn't understand that
 function default_reply(message) {
   return new db.Message({
