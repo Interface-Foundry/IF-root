@@ -236,58 +236,11 @@ app.post('/facebook', next(function*(req, res, next) {
                     //Send modify query instead of the usual
 
 		    var userInputEvent = { 'type': EventTypes.TEXT_INPUT, 'text': text }
-		    new FBResponder().respond(event.message, userInputEvent, sender);
-		    /*
-                     var message = new db.Message({
-                        incoming: true,
-                        thread_id: "facebook_" + sender.toString(),
-                        original_text: text.indexOf(' but ') == -1 ?  '1 but ' + text : text,
-                        user_id: "facebook_" + sender.toString(),
-                        origin: 'facebook',
-                        source: {
-                            'origin': 'facebook',
-                            'channel': sender.toString(),
-                            'org': "facebook_" + sender.toString(),
-                            'id': "facebook_" + sender.toString(),
-                            'user': sender.toString()
-                        },
-                        ts: Date.now()
-                    });
-                    // clean up the text
-                    message.text = message.original_text.trim(); //remove extra spaces on edges of string
-                    // queue it up for processing
-                    message.save().then(() => {
-                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                    });
-		    */
+		    new FBResponder().respond(event.message, userInputEvent, sender);		   
             } 
 	    else {
 		var userInputEvent = { 'type': EventTypes.TEXT_INPUT, 'text': text }
-		new FBResponder().respond(event.message, userInputEvent, sender);
-                    //console.log(JSON.stringify(req.body));
-		    /*
-                    var message = new db.Message({
-                        incoming: true,
-                        thread_id: "facebook_" + sender.toString(),
-                        original_text: text,
-                        user_id: "facebook_" + sender.toString(),
-                        origin: 'facebook',
-                        source: {
-                            'origin': 'facebook',
-                            'channel': sender.toString(),
-                            'org': "facebook_" + sender.toString(),
-                            'id': "facebook_" + sender.toString(),
-                            'user': sender.toString()
-                        },
-                        ts: Date.now()
-                    });
-                    // clean up the text
-                    message.text = message.original_text.trim(); //remove extra spaces on edges of string
-                    // queue it up for processing
-                    message.save().then(() => {
-                        queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
-                    });
-		    */
+		new FBResponder().respond(event.message, userInputEvent, sender);                   
                 }
         }
         //user sent image

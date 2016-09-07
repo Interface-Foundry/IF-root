@@ -168,6 +168,44 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                     }
                 })
 
+		
+		      // TODO: This is repeated in a subsequent block. Factor into a single function call.
+		
+		      // does this item require further option selection?
+	              var variations = amazon_variety.getVariations(msg.amazon[postback.selected].ASIN[0], msg);
+
+	              // if there are item variations, do the following: 
+		      var buttonGroupBuilder = new FBButtonSetBuilder(variations);
+	              var requiredAttrs = new RequiredAttributeGroup(variations);
+
+                      var selectedAttrs = /* TODO: pull the user's previous attribute selection(s) off the queue/out of storage */;
+	              requiredAttrs.update(selectedAttrs);
+	              
+	              if(! requiredAttrs.isComplete()){
+			  var buttonGroup = buttonGroupBuilder.build(requiredAttrs.getNextEmptyAttributeName());
+
+			  // send button ui back to user
+			  request.post({
+			      // TODO: get this magic URL out of here
+			      url: 'https://graph.facebook.com/v2.6/me/messages',
+			      qs: {
+				  access_token: fbtoken
+			      },
+			      method: "POST",
+			      json: true,
+			      headers: {
+				  "content-type": "application/json",
+			      },
+			      body: buttonGroup
+			  }, function(err, res, body) {
+			      if (err) console.error('post err ', err);
+			  });			  
+		      }
+		
+		// show button group to user
+		// save the state of required attribute group
+		
+
 
                 if (old_search == 'false') {
                     //This is the latest search so just pass it through Kip like normal
@@ -215,7 +253,8 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                         });
                     }
             }
-            else if (postback.action == 'add' && !postback.initial) {
+	
+	else if (postback.action == 'add' && !postback.initial) {
 
                     fb_utility.send_typing_indicator(sender, fbtoken)
 
@@ -224,7 +263,41 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                       var cart = yield kipcart.getCart(cart_id);
                       var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
                       var item = unique_items[parseInt(postback.selected-1)];
+
+		      // does this item require further option selection?
+	              var variations = amazon_variety.getVariations(msg.amazon[postback.selected].ASIN[0], msg);
+
+	              // if there are item variations, do the following: 
+		      var buttonGroupBuilder = new FBButtonSetBuilder(variations);
+	              var requiredAttrs = new RequiredAttributeGroup(variations);
+
+                      var selectedAttrs = /* TODO: pull the user's previous attribute selection(s) off the queue/out of storage */;
+	              requiredAttrs.update(selectedAttrs);
+	              
+	              if(! requiredAttrs.isComplete()){
+			  var buttonGroup = buttonGroupBuilder.build(requiredAttrs.getNextEmptyAttributeName());
+
+			  // send button ui back to user
+			  request.post({
+			      // TODO: get this magic URL out of here
+			      url: 'https://graph.facebook.com/v2.6/me/messages',
+			      qs: {
+				  access_token: fbtoken
+			      },
+			      method: "POST",
+			      json: true,
+			      headers: {
+				  "content-type": "application/json",
+			      },
+			      body: buttonGroup
+			  }, function(err, res, body) {
+			      if (err) console.error('post err ', err);
+			  });			  
+		      }
+		      
+
                       yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
+
                       var new_message = new db.Message({
                         incoming: true,
                         thread_id: msg.thread_id,
@@ -241,7 +314,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                       message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                       });
-            }
+            }	
             else if (postback.action === 'remove') {
                 fb_utility.send_typing_indicator(sender, fbtoken)
                 

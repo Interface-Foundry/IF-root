@@ -445,6 +445,8 @@ handlers['shopping.initial'] = function*(message, exec) {
    }
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
+   
+
   var results = yield amazon_search.search(exec.params,message.origin);
   kip.debug('!1',exec)
 
@@ -462,6 +464,13 @@ handlers['shopping.initial'] = function*(message, exec) {
   }
 
   message._timer.tic('done with amazon_search');
+     // TODO: get variations on amazon catalog item
+    
+    variationSets = []
+    results.map(function(record){
+	var asin = record.ASIN
+	var variation = amazon_variety.getVariations(asin, );
+    })
 
   return new db.Message({
     incoming: false,
@@ -786,12 +795,17 @@ handlers['cart.save'] = function*(message, exec) {
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
-  winston.debug('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 )
+  winston.debug('INSIDE REPLY_LOGIC SAVE   :   ', exec.params.focus - 1 )
 ;  try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
-  } catch (e) {
+  } 
+  catch (e) {
     try {
-      amazon_variety.getVariations(results[exec.params.focus - 1], message)
+	// We'll assume that Amazon threw an exception because we hadn't selected one or more
+	// required product attributes (i.e., ordered shoes but didn't select size).
+	// So capture the item attributes from Amazon ("variations") and push them to the queue:
+	amazon_variety.getVariations(results[exec.params.focus - 1], message)
+
     } catch (err) {
       kip.err(e);
       return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')

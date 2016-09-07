@@ -24,8 +24,9 @@ logging.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 function pubsubVariation(item) {
   logging.debug('\n\n\ncreating variation for: ', item.ASIN);
   queue.publish(
-    'variation.' + item.source.origin,
-    item,
+    //'variation.' + item.source.origin,
+    [constants.ITEM_ADD, constants.BY_ATTRIBUTE].join(':')
+    item,=
     item._id + '.variation.' + uuid.v4())
 }
 

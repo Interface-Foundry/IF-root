@@ -19,9 +19,10 @@
 
 
 class RequiredAttributeGroup{
+
     constructor(variationValues) {
 	this.attributes = {}
-	this.attributeNames = Object.keys(variationValues);
+	this.requiredAttributeNames = Object.keys(variationValues);
 	this.numRequiredAttribsMissing = optionNames.length;
     }
 
@@ -33,13 +34,41 @@ class RequiredAttributeGroup{
     }
 
     this.setAttribute = function(name, value){
-	if(this.attributeNames.find(name)){
+	if(this.requiredAttributeNames.find(name)){
 	    this.attributes[name] = value;
 	    if(! this.isComplete()){
 		this.numRequiredAttribsMissing--;
 	    }
 	}
     }
+
+    this.getNextEmptyAttributeName = function(){
+	var populatedAttributes = Object.keys(this.attributes);
+	if(populatedAttributes.length == requiredAttributeNames.length){
+	    return null;
+	}
+	result = null;
+	
+	for (var i=0; i < this.requiredAttributeNames.length; i++) {
+	    index = populatedAttributes.indexOf(this.requiredAttributeNames[i]);
+	    if (index == -1) {
+		result = this.requiredAttributeNames[i];
+		break;
+	    }
+	}
+	return result;
+    }
+
+    this.update = function(data) {
+	Object.keys(data).map(function(key){
+	    this.setAttribute(key, data[key]);
+	})
+    }
+
+    this.getAttributes = function() {
+	return this.attributes;
+    }
+	
 }
 
 
@@ -99,14 +128,14 @@ class ButtonGroupConfigBuilder{
  */
 class FBButtonSetBuilder {
 
-    constructor(variantMap) {	
+    constructor(variantMap, sender) {	
 	this.buttonSetMap = {}
 	Object.keys(variantMap).map(function(variantName){
 	    
 	    var variantValues = variantMap[variantName]
 	    var buttons = []
 	    for(v in variantValues) {
-		buttons.push(new FBButton(v, constants.ITEM_ADD, constants.BY_ATTRIBUTE, 'sender', this.normalizeName(v))); // TODO: where do we get the sender?
+		buttons.push(new FBButton(v, constants.ITEM_ADD, constants.BY_ATTRIBUTE, sender, this.normalizeName(v)));
 	    }
 	    this.buttonSetMap[variantName] = buttons	    
 	});
@@ -141,8 +170,6 @@ class FBButtonSetBuilder {
 action for new buttons is "Add"
 instruction for new buttons is -- make one up  
 searchAttrValue is the actual selection val, lowercased and with underscores instead of whitespace
-
-
 
 */
 

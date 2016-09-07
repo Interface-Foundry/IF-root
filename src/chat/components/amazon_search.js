@@ -359,6 +359,8 @@ var search = function*(params,origin) {
   var enhanced_results = yield enhance_results(results,origin, timer)
   timer.tic('done enhancing results')
   timer.stop()
+
+    
   return enhanced_results
 }
 
