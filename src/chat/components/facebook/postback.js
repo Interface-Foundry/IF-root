@@ -217,7 +217,8 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                       var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
                       var cart = yield kipcart.getCart(cart_id);
                       var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
-                      var item = unique_items[parseInt(postback.selected-1)];
+                      var item = unique_items[parseInt(parseInt(postback.selected) - 1)];
+                      console.log('\n\n\n\n\n\n\n\n\n\nTEST THIS THEORY: ', item, postback.selected, unique_items,'\n\n\n\n\n\n\n')
                       yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
                       var new_message = new db.Message({
                         incoming: true,

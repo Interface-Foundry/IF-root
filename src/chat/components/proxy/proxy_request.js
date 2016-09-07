@@ -6,7 +6,8 @@ var async = require('async');
 var request = require('request');
 var db = require('../../../db');
 var mesh_request = require('./mesh');
-var luminati_request = require('./lib_luminati');
+var luminati_request = require('./lib_luminati').luminati_request;
+var ensured_luminati_request = require('./lib_luminati').ensured_luminati_request;
 var manual_request = require('./manual_luminati');
 const Luminati = require('luminati-proxy').Luminati;
 var proxy_status = require('./status');
@@ -42,38 +43,66 @@ if (test_mode) {
 } 
 else {
   console.log('Running proxy normal mode..')
-  // options = {
-  //     customer: 'kipthis', 
-  //     password: 'e49d4ega1696', 
-  //     zone: 'gen', 
-  //     max_requests: 1,
-  //     pool_size: 1 
-  //     // max_requests: 20,
-  //     // country: 'us',
-  //     // log: 'NONE'
-  // }
-  // proxy = new Luminati(options);
-  // proxy.listen(24000, '127.0.0.1')
+  options = {
+      customer: 'kipthis', 
+      password: 'e49d4ega1696', 
+      zone: 'gen', 
+      proxy_count: 3, 
+      max_requests: 20,
+      country: 'us'
+  };
+  proxy = new Luminati(options);
+  proxy.listen(24000, '127.0.0.1')
 }
 
-module.exports.request = function(url) {
+var request = function(url) {
       var status = proxy_status.check();
       var res;
       if (status.ready) {
-        console.log('\nfiring luminati...')
-        res = manual_request(url, status.status);
-        if (res instanceof Error || res == null) {
-          console.log('\n\n\n\n\n\n\n\n\nOops TRYING MESH\n\n\n\n\n\n\n\n\n\n')
+        try {
+          console.log('\nfiring luminati...\n')
+          res = luminati_request(url, proxy, status.status);
+        } 
+        catch(err) {  
+          console.log('\nluminati failed... firing mesh instead...\n')
           res = mesh_request(url, status.status);
         }
-        // res = luminati_request(url, proxy, status.status);
-      } else{
-        kip.debug('\nfiring mesh...')
-        res = mesh_request(url, status.status);
       }
-      // setTimeout(function(){
-      //   proxy.stop();
-      // },2000)
+       else{
+        console.log('\nfiring mesh...\n')
+        res = mesh_request(url, status.status)
+      }
+      
+      stopProxy(proxy, 1000);
       return res;
 };
 
+
+var ensured_request = function(url) {
+      var status = proxy_status.check();
+      var res;
+      if (status.ready) {
+          console.log('\n\n\nfiring ensured_luminati...\n\n\n')
+          res = ensured_luminati_request(url, proxy, status.status);
+      } else {
+          console.log('\n\n\nOops firing mesh instead...\n\n\n')
+          res = mesh_request(url, status.status);
+      }
+      stopProxy(proxy, 1000);
+      return res;
+};
+
+
+function stopProxy(proxy, ms) {
+   setTimeout(function(){
+        // if (res instanceof Error || res == null) { 
+          // console.log('\n\n\nProxy error: ', res.statusCode,'\n\n\n');
+          proxy.stop();
+        // }
+      },ms)
+}
+
+module.exports = {
+  request: request,
+  ensured_request: ensured_request
+}

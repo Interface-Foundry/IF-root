@@ -11,10 +11,10 @@ module.exports = mesh_request = function (url, status) {
       var hostArr = ['us-dc.proxymesh.com','us-fl.proxymesh.com','us-ny.proxymesh.com','us-il.proxymesh.com','us-ca.proxymesh.com']; //avail proxies
       var host = hostArr[Math.floor(Math.random()*hostArr.length)]; //get random host from array
       var port = '31280';
-      var proxy = "http://" + user + ":" + password + "@" + host + ":" + port;
+      var mesh_proxy = "http://" + user + ":" + password + "@" + host + ":" + port;
       request({
         url: url,
-        proxy: proxy,
+        proxy: mesh_proxy,
         headers: {
             'Accept': 'text/html,application/xhtml+xml',
             'Accept-Language':'en-US,en;q=0.8',

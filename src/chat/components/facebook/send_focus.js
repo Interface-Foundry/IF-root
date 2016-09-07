@@ -101,7 +101,8 @@ var send_focus = function* (channel, text, focus_info, outgoing, fbtoken) {
                           object_id: outgoing.data._id,
                           action: "add",
                           selected: focus_info.selected,
-                          ts: outgoing.data.ts
+                          ts: outgoing.data.ts,
+                          initial: true
                       })
                   }],
               "text": (focus_info.title + '\n' + focus_info.description + '\n').substring(0,300)
