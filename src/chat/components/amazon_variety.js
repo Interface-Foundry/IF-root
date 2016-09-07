@@ -121,17 +121,35 @@ function getVariations(asin, message) {
 * @returns {Object} itemAttribsToUse {key_1: val_1,...,key_n:val_n}
 */
 function createItemReqs(variationValues){
-  var itemAttribsToUse = {}
-  logging.debug('SELECT ONE OF THE FOLLOWING: ', Object.keys(variationValues))
-  // BUTTONS AND STUFF WOULD BE RIGHT HERE, along
-  // LISTEN TO PUBSUB FOR RESPONSE
+    var itemAttribsToUse = {}
+    logging.debug('SELECT ONE OF THE FOLLOWING: ', Object.keys(variationValues))
 
-  // SELECT RANDOM SAMPLE FOR TIME BEING:
-  for (var key in variationValues) {
-    itemAttribsToUse[key] = _.sample(variationValues[key])
-  }
-  logging.debug('Item Atrbs to use: ', itemAttribsToUse)
-  return itemAttribsToUse
+    // BUTTONS AND STUFF WOULD BE RIGHT HERE, along
+
+    var buttonSetBuilder = new FBButtonSetBuilder(variationValues);
+    // at this point, calling buttonSetBuilder.build('color_name') would give you
+    // a set of buttons labeled "Black", "Gray", "Blue", "Purple"
+
+    var optionGroup = new RequiredOptionGroup(variationValues);
+    // optionGroup.isComplete() should yield false because you haven't
+    // made enough selections to satisfy the group's parameters
+    
+    // now, in response to each user button click, you can call:
+    // optionGroup.setOption('color_name', '<color_name_here>')
+    // optionGroup.setOption('size_name', '<shoe_size_here>')
+    // 
+    // optionGroup.isComplete() should now yield true; you've set the required parameters
+    // 
+
+
+    // LISTEN TO PUBSUB FOR RESPONSE
+
+    // SELECT RANDOM SAMPLE FOR TIME BEING:
+    for (var key in variationValues) {
+	itemAttribsToUse[key] = _.sample(variationValues[key])
+    }
+    logging.debug('Item Atrbs to use: ', itemAttribsToUse)
+    return itemAttribsToUse
 }
 
 
@@ -163,12 +181,14 @@ function pickItem(item) {
   });
 }
 
+
 // this is just for slotting into reply_logic at later date if we dont use a mode
 function interceptIncoming(item) {
   if (incoming.data.mode === 'variation.mode') {
     var results = pickItem(item)
   }
 }
+
 
 // exportz
 module.exports.createItemReqs = createItemReqs;

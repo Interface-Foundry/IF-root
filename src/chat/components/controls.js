@@ -16,15 +16,32 @@
 "use strict";
 
 
-class OptionSet{
 
-    constructor(setName, buttonArray) {
 
-	this.name = setName;
-	this.options = optionArray
-	return this;
+class RequiredOptionGroup{
+    constructor(variationValues) {
+	this.optionValues = {}
+	this.optionNames = Object.keys(variationValues);
+	this.numRequiredValuesMissing = optionNames.length;
     }
-};
+
+    this.isComplete = function(){
+	if(this.numRequiredValuesMissing < 1){
+	    return true;
+	}
+	return false;
+    }
+
+    this.setOption = function(name, value){
+	if(this.optionNames.find(name)){
+	    this.optionValues[name] = value;
+	    this.numRequiredValuesMissing--;
+	}
+    }
+}
+
+
+
 
 
 class ButtonGroupConfigBuilder{
@@ -75,59 +92,58 @@ class ButtonGroupConfigBuilder{
 }
 
 
+/**
+ * @param {Object} variationValues {key_1:[Val1,..,Val3],..,key_n: [Val1,.]}
+ * 
+ */
+class FBButtonSetBuilder {
 
-class FacebookButtonGroup {
+    constructor(variantMap) {	
+	this.buttonSetMap = {}
+	Object.keys(variantMap).map(function(variantName){
+	    
+	    var variantValues = variantMap[variantName]
+	    var buttons = []
+	    for(v in variantValues) {
+		buttons.push(new FBButton(v, constants.ITEM_ADD, constants.BY_ATTRIBUTE, 'sender', this.normalizeName(v))); // TODO: where do we get the sender?
+	    }
+	    this.buttonSetMap[variantName] = buttons	    
+	});
+    }
 
-    constructor(bgConfig, buttons) {
-	this.buttonGroupConfig = bgConfig;
-	this.buttons = buttons
+
+    this.normalizeName = function(name) {
+	var re = /(\s+)/g;
+	return name.toLowerCase().replace(re, '_'); 
+    }
+
+
+    this.build = function(key) {
+	var response = []
+	var buttons = this.buttonSetMap[key]
+	if(buttons === null || buttons === undefined){
+	    return response
+	}
+	
+	buttons.map(function(b){
+	    response.push(b.render())
+	})
+	
+	return response
     }
 }
 
 
 
-class FBButtonMenu {
+/*
 
-    // TODO: find out whether G would rather pass an array, or a ButtonGroup object
-    constructor(buttonArray) {
-
-	this.buttonArray = buttonArray	
-	this.optionSets = {}
-	return this;
-    }
-    
-
-    // TODO: the remaining question here is how to derive the optionName.
-    // If it comes from the action and the corresponding instruction, 
-    // change the signature so that the caller doesn't need to assemble the key
-    // by hand
-    this.addSecondaryOptions = function(optionName, buttonArray) {
-
-	this.optionSets[optionName] = buttonArray;
-	return this;
-    };
+action for new buttons is "Add"
+instruction for new buttons is -- make one up  
+searchAttrValue is the actual selection val, lowercased and with underscores instead of whitespace
 
 
-    this.createOptionKey = function(action, instruction, selector) {
-	return [action, instruction, selector].join(':');
-    }
 
-    this.selectPrimaryOption = function() {
-	return this.buttonArray;
-    };
-
-
-    
-    this.selectSecondaryOption = function(optionName){
-
-	secondaryButtonGroup = this.optionSets[optionName];
-	if secondaryButttonGroup === null or secondaryButtonGroup === undefined {	    
-	    return []
-	}
-	return secondaryButttonGroup;
-    }
-
-};
+*/
 
 
 

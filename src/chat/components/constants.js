@@ -9,11 +9,13 @@ module.exports = Object.freeze({
     MENU_SELECTION: 'menu_select',
     MODIFY_ONE: 'modify.one', 
     SIMILAR: 'similar',
-    COLOR_SUBMENU: 'sub_menu_color',    
+    COLOR_SUBMENU: 'sub_menu_color',
+    ITEM_ADD: 'item.add',
     // instructions
     CHEAPER:  'cheaper',
     GENERIC_DETAIL: 'genericDetail',
     EMOJI: 'emoji',
+    BY_ATTRIBUTE: 'by_attribute'
     // other
     TAKE_QUIZ: 'take_quiz',    
     BUTTON_PRESS: 'button_press',
