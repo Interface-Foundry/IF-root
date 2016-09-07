@@ -148,7 +148,44 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
     var amazon = yield getLatestAmazonResults(msg);
     msg.amazon = amazon;
     if (msg && msg.amazon) {
-            if (postback.action == 'add' && postback.initial) {
+
+	// this is a new action type we will push in the button set
+	if(postback.action == 'specify_option'){ 
+	    // we are here because we showed an option set to the user and they selected one
+	    // does the catalog item require further option selection?
+
+	    // TODO: don't call this; get the item variations from the queue -- they must be 
+	    // there already. getVariations does an additional scrape, which kills performance
+	    var variations = amazon_variety.getVariations(msg.amazon[postback.selected].ASIN[0], msg);
+
+	    // if there are item variations, do the following: 	    
+	    var requiredAttrs = new RequiredAttributeGroup(variations);
+            var selectedAttrs = /* TODO: pull the user's previous attribute selection(s) off the queue/out of storage */;
+	    requiredAttrs.update(selectedAttrs);
+	    
+	    if(! requiredAttrs.isComplete()){
+		var buttonGroupBuilder = new FBButtonSetBuilder(variations, sender);
+		var buttonGroup = buttonGroupBuilder.build(requiredAttrs.getNextEmptyAttributeName());
+
+		// send button ui back to user
+		request.post({
+		    // TODO: get this magic URL out of here
+		    url: 'https://graph.facebook.com/v2.6/me/messages',
+		    qs: {
+			access_token: fbtoken
+		    },
+		    method: "POST",
+		    json: true,
+		    headers: {
+			"content-type": "application/json",
+		    },
+		    body: buttonGroup
+		}, function(err, res, body) {
+		    if (err) console.error('post err ', err);
+		});			  
+	    }			    
+	}
+	if (postback.action == 'add' && postback.initial) {
                 fb_utility.send_typing_indicator(sender, fbtoken)
                 //Check if user scrolled up and this item is not from the previous search...
                 var old_search = yield db.Messages.find({
@@ -167,46 +204,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                         return postback.object_id;
                     }
                 })
-
 		
-		      // TODO: This is repeated in a subsequent block. Factor into a single function call.
-		
-		      // does this item require further option selection?
-	              var variations = amazon_variety.getVariations(msg.amazon[postback.selected].ASIN[0], msg);
-
-	              // if there are item variations, do the following: 
-		      var buttonGroupBuilder = new FBButtonSetBuilder(variations);
-	              var requiredAttrs = new RequiredAttributeGroup(variations);
-
-                      var selectedAttrs = /* TODO: pull the user's previous attribute selection(s) off the queue/out of storage */;
-	              requiredAttrs.update(selectedAttrs);
-	              
-	              if(! requiredAttrs.isComplete()){
-			  var buttonGroup = buttonGroupBuilder.build(requiredAttrs.getNextEmptyAttributeName());
-
-			  // send button ui back to user
-			  request.post({
-			      // TODO: get this magic URL out of here
-			      url: 'https://graph.facebook.com/v2.6/me/messages',
-			      qs: {
-				  access_token: fbtoken
-			      },
-			      method: "POST",
-			      json: true,
-			      headers: {
-				  "content-type": "application/json",
-			      },
-			      body: buttonGroup
-			  }, function(err, res, body) {
-			      if (err) console.error('post err ', err);
-			  });			  
-		      }
-		
-		// show button group to user
-		// save the state of required attribute group
-		
-
-
                 if (old_search == 'false') {
                     //This is the latest search so just pass it through Kip like normal
                        var new_message = new db.Message({
@@ -263,38 +261,6 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                       var cart = yield kipcart.getCart(cart_id);
                       var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
                       var item = unique_items[parseInt(postback.selected-1)];
-
-		      // does this item require further option selection?
-	              var variations = amazon_variety.getVariations(msg.amazon[postback.selected].ASIN[0], msg);
-
-	              // if there are item variations, do the following: 
-		      var buttonGroupBuilder = new FBButtonSetBuilder(variations);
-	              var requiredAttrs = new RequiredAttributeGroup(variations);
-
-                      var selectedAttrs = /* TODO: pull the user's previous attribute selection(s) off the queue/out of storage */;
-	              requiredAttrs.update(selectedAttrs);
-	              
-	              if(! requiredAttrs.isComplete()){
-			  var buttonGroup = buttonGroupBuilder.build(requiredAttrs.getNextEmptyAttributeName());
-
-			  // send button ui back to user
-			  request.post({
-			      // TODO: get this magic URL out of here
-			      url: 'https://graph.facebook.com/v2.6/me/messages',
-			      qs: {
-				  access_token: fbtoken
-			      },
-			      method: "POST",
-			      json: true,
-			      headers: {
-				  "content-type": "application/json",
-			      },
-			      body: buttonGroup
-			  }, function(err, res, body) {
-			      if (err) console.error('post err ', err);
-			  });			  
-		      }
-		      
 
                       yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
 

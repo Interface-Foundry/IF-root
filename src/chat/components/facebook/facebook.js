@@ -320,6 +320,19 @@ app.post('/facebook', next(function*(req, res, next) {
       } //end of for loop    
 }));
 
+// TODO: fill in the blanks with the code that 
+// (a) pulls the item variations
+// (b) populates the initial button group and sends it out
+//
+queue.topic('<item variation topic name>').subscribe(outgoing => {
+
+    try{
+	
+    }
+    catch(e){
+	kip.err(e);
+    }
+})
 
 //
 // Inserting outgoing messages into outgoing reply logic queue
