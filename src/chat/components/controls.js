@@ -18,28 +18,29 @@
 
 
 
-class RequiredOptionGroup{
+class RequiredAttributeGroup{
     constructor(variationValues) {
-	this.optionValues = {}
-	this.optionNames = Object.keys(variationValues);
-	this.numRequiredValuesMissing = optionNames.length;
+	this.attributes = {}
+	this.attributeNames = Object.keys(variationValues);
+	this.numRequiredAttribsMissing = optionNames.length;
     }
 
     this.isComplete = function(){
-	if(this.numRequiredValuesMissing < 1){
+	if(this.numRequiredAttribsMissing == 0){
 	    return true;
 	}
 	return false;
     }
 
-    this.setOption = function(name, value){
-	if(this.optionNames.find(name)){
-	    this.optionValues[name] = value;
-	    this.numRequiredValuesMissing--;
+    this.setAttribute = function(name, value){
+	if(this.attributeNames.find(name)){
+	    this.attributes[name] = value;
+	    if(! this.isComplete()){
+		this.numRequiredAttribsMissing--;
+	    }
 	}
     }
 }
-
 
 
 

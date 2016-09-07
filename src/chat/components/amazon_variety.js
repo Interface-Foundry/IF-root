@@ -130,13 +130,13 @@ function createItemReqs(variationValues){
     // at this point, calling buttonSetBuilder.build('color_name') would give you
     // a set of buttons labeled "Black", "Gray", "Blue", "Purple"
 
-    var optionGroup = new RequiredOptionGroup(variationValues);
+    var optionGroup = new RequiredAttribueGroup(variationValues);
     // optionGroup.isComplete() should yield false because you haven't
     // made enough selections to satisfy the group's parameters
     
     // now, in response to each user button click, you can call:
-    // optionGroup.setOption('color_name', '<color_name_here>')
-    // optionGroup.setOption('size_name', '<shoe_size_here>')
+    // optionGroup.setAttribute('color_name', '<color_name_here>')
+    // optionGroup.setAttribute('size_name', '<shoe_size_here>')
     // 
     // optionGroup.isComplete() should now yield true; you've set the required parameters
     // 
