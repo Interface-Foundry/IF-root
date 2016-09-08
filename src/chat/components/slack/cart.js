@@ -46,10 +46,11 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
     // make the text for this item's message
     item_message.text = [
-      `${processData.emoji[i + 1].slack} ` + (show_everything ? `<${link}|${item.title}>` : item.title),
-      `*${item.price}* each`,
-      `Quantity: ${item.quantity}`,
-      show_everything ? `_Added by: ${userString}_` : false
+      `*${i + 1}.* ` + (show_everything ? `<${link}|${item.title}>` : item.title),
+      `*Price:* ${item.price} each`,
+      show_everything ? `*Added by:* ${userString}` : false,
+      `*Quantity:* ${item.quantity}`,
+      
     ].filter(Boolean).join('\n');
 
     // add the item actions if needed
@@ -63,7 +64,7 @@ module.exports = function*(message, slackbot, highlight_added_item) {
         "value": "add"
       }, {
         "name": "removeitem",
-        "text": "-",
+        "text": "—",
         "style": "default",
         "type": "button",
         "value": "remove" 
@@ -81,17 +82,16 @@ module.exports = function*(message, slackbot, highlight_added_item) {
 
       item_message.actions = buttons;
     }
-    
 
     cartObj.push(item_message)
   }
 
   // Only show the purchase link in the summary for office admins.
   if (show_everything) {
-    var summaryText = `_Summary: Team Cart_
- Total: *${cart.total}*`;
+    var summaryText = `*Team Cart Summary*
+ *Total:* ${cart.total}`;
     summaryText += `
- <${cart.link}|» Purchase Items >`;
+ <${cart.link}|*➤ Click Here to Checkout*>`;
     cartObj.push({
       text: summaryText,
       mrkdwn_in: ['text', 'pretext'],
