@@ -24,7 +24,8 @@ class RequiredAttributeGroup{
 	this.attributes = {}
 	this.requiredAttributeNames = Object.keys(variationValues);
 	this.numRequiredAttribsMissing = optionNames.length;
-    }
+	return this;
+    
 
     this.isComplete = function(){
 	if(this.numRequiredAttribsMissing == 0){
@@ -68,7 +69,7 @@ class RequiredAttributeGroup{
     this.getAttributes = function() {
 	return this.attributes;
     }
-	
+    }
 }
 
 
