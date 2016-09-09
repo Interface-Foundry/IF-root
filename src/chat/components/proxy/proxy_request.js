@@ -30,9 +30,9 @@ if (test_mode) {
     proxy_status.current_index = sets_index;
     console.log('\n\n\n\n🤖starting #', sets_index,' proxy with options: ', set.config,' ...\nfor ',set.time_in_seconds,' seconds...\n\n\n\n');
     proxy = new Luminati(sets[sets_index].config);
-    proxy.listen(24000, '127.0.0.1');
+    proxy.listen(24000, 'localhost');
     setTimeout(function() {
-      console.log('\n\n🤖time to live elapsed... trying next set...\n\n');
+      console.log('\n\n🤖time to live elapsed... try ing next set...\n\n');
       sets_index = sets_index + 1;
       proxy.stop();
       return callback(null);
@@ -59,16 +59,10 @@ var request = function(url) {
       var status = proxy_status.check();
       var res;
       if (status.ready) {
-        try {
           console.log('\nfiring luminati...\n')
           res = luminati_request(url, proxy, status.status);
-        } 
-        catch(err) {  
-          console.log('\nluminati failed... firing mesh instead...\n')
-          res = mesh_request(url, status.status);
-        }
       }
-       else{
+      else{
         console.log('\nfiring mesh...\n')
         res = mesh_request(url, status.status)
       }

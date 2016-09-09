@@ -40,8 +40,7 @@ module.exports.basic = function(url, callback) {
           callback(null, product);
           return;
         }
-        busy= false;
-        var response = proxy_lib.request(url, busy)
+        var response = proxy_lib.request(url)
         .then(function(response) {
               process_data(response, product, url, callback);
         },function(err) {
@@ -96,8 +95,7 @@ function process_data(body, product, url, callback) {
         else {
           debug('NO PRICE FOUND 😊😊😊😊😊😊😊 ',url);
           // debug('🍹 ',err);
-          debug('🍹 ',response);
-          debug('🍹 ',body);
+        
         }
         //* * * * * * * * * *//
         //we have price from website
