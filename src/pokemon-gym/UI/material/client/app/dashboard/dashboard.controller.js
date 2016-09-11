@@ -40,6 +40,7 @@
       data.searchCounts = result.data.searchCounts;
       data.banterCounts = result.data.banterCounts;
       data.monthlySlackTeams = result.data.monthlySlackTeams;
+      data.averageSlackTeamSize = result.data.averageSlackTeamSize;
 
       sources = Object.keys(data.banterCounts);
       sources.forEach(source => {

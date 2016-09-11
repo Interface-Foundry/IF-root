@@ -7,6 +7,7 @@ const request = require('request');
 const async = require('async');
 const _ = require('underscore');
 const auth = require('basic-auth-connect');
+const axios = require('axios');
 
 const mongoose = require('mongoose');
 // connect our DBs
@@ -19,6 +20,12 @@ db2.model('Message', Message);
 const db1Msgs = db1.model('Message');
 const db2Msgs = db2.model('Message');
 
+const Slackbot = require('../../db/slackbot_schema');
+db1.model('Slackbot', Slackbot);
+db2.model('Slackbot', Slackbot);
+const db1Slackbots = db1.model('Slackbot');
+const db2Slackbots = db2.model('Slackbot');
+
 const getSearchCounts = require('./queries/getSearchCounts');
 const getBanterCounts = require('./queries/getBanterCounts');
 const mapDayofWeekStats = require('./mapping/mapDayStats');
@@ -27,6 +34,7 @@ const mapThirtyDayStats = require('./mapping/mapThirtyDayStats');
 const mapDailyActiveUsers = require('./mapping/mapDailyActiveUsers');
 const mapMonthlyActiveUsers = require('./mapping/mapMonthlyActiveUsers');
 const mapMonthlySlackTeams = require('./mapping/mapMonthlySlackTeams');
+const mapSlackBotTokens = require('./mapping/mapSlackBotTokens');
 
 const results = {};
 results.searchCounts = {};
@@ -37,6 +45,8 @@ results.thirtyDayStats = {};
 results.dailyActiveUsers = {};
 results.monthlyActiveUsers = {};
 results.monthlySlackTeams = {};
+results.averageSlackTeamSize = 0;
+const tempMonthlySlackTeams = { users: 0, teams: 0 };
 
 app.use(bodyParser.json());
 app.use(morgan());
@@ -131,12 +141,47 @@ const getData = () => {
   });
 };
 
-getData();
+const getSlackTeamUserLists = tokens => {
+  if (!tokens.length) {
+    results.averageSlackTeamSize = tempMonthlySlackTeams.users / tempMonthlySlackTeams.teams;
+    return;
+  }
+  axios.get(`https://slack.com/api/users.list?token=${tokens.shift()}`)
+  .then(response => {
+    const { ok, members } = response.data;
+    if (!ok) {
+      setTimeout(() => getSlackTeamUserLists(tokens), 1000);
+      return;
+    }
+    tempMonthlySlackTeams.teams++;
+    tempMonthlySlackTeams.users += members.length;
+    setTimeout(() => getSlackTeamUserLists(tokens), 1000);
+  })
+  .catch(error => {
+    console.log(error);
+  });
+};
 
-// update data everything 30 minutes
+const getSlackTeamSize = () => {
+  mapSlackBotTokens([db1Slackbots, db2Slackbots]).then(slackbotTokens => {
+    tempMonthlySlackTeams.teams = 0;
+    tempMonthlySlackTeams.users = 0;
+    getSlackTeamUserLists(slackbotTokens);
+  });
+};
+
+getData();
+getSlackTeamSize();
+
+// update data every 30 minutes
 setInterval(() => {
-  getData(Message);
-}, 1800000);
+  getData();
+}, 30 * 60 * 1000);
+
+// update slack team size every day
+setInterval(() => {
+  getSlackTeamSize();
+}, 24 * 60 * 60 * 1000);
 
 app.get('/data', (req, res) => {
   res.send(results);

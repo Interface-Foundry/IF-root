@@ -32,7 +32,7 @@ const getSearchCounts = (messages) =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const days = result.map(day => {
         const sources = day.sources.filter(source => source.name);
         const total = day.sources.reduce((prevSource, source) =>

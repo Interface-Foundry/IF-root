@@ -32,7 +32,7 @@ const getExecSearchCounts = messages =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return;}
       const searchCounts = {};
       result.forEach(type => {
         const typeString = type._id === 'initial' ? type._id : 'modify';

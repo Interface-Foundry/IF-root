@@ -28,7 +28,7 @@ const getMonthlySlackTeams = (messages) =>
         },
      },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const months = result.map(month =>
         ({
           idString: `${dateHelper.months[month._id.month]} ${month._id.year}`,

@@ -50,7 +50,7 @@ const getMonthlyActiveUsers = (messages) =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const dates = result.map(messageDate => {
         const date = new Date(messageDate._id.year, messageDate._id.month - 1, 1)
         const sources = messageDate.sources.filter(source => source.name);

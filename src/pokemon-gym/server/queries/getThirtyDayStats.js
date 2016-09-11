@@ -34,7 +34,7 @@ const getSearchCounts = (messages) =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const dates = result.map(messageDate => {
         const date = new Date(messageDate._id.year, messageDate._id.month - 1, messageDate._id.day)
         const sources = messageDate.sources.filter(source => source.name);

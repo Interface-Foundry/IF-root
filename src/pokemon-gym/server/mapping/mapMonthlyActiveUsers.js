@@ -1,24 +1,24 @@
 const getMonthlyActiveUsersQuery = require('../queries/getMonthlyActiveUsers');
 
 const parse = results => {
-  const dailyActiveUsers = {};
+  const monthlyActiveUsers = {};
   results.forEach(result => {
     result.forEach(day => {
       const { idString, idNumber, sources } = day;
-      dailyActiveUsers[idString] = dailyActiveUsers[idString] || {};
-      dailyActiveUsers[idString].idString = idString;
-      dailyActiveUsers[idString].idNumber = idNumber;
+      monthlyActiveUsers[idString] = monthlyActiveUsers[idString] || {};
+      monthlyActiveUsers[idString].idString = idString;
+      monthlyActiveUsers[idString].idNumber = idNumber;
 
       sources.forEach(source => {
-        dailyActiveUsers[idString][source.name] = dailyActiveUsers[idString][source.name] ?
-        dailyActiveUsers[idString][source.name] + source.num : source.num;
+        monthlyActiveUsers[idString][source.name] = monthlyActiveUsers[idString][source.name] ?
+        monthlyActiveUsers[idString][source.name] + source.num : source.num;
       });
     });
   });
-  return dailyActiveUsers;
+  return monthlyActiveUsers;
 };
 
-const getDailyActiveUsers = dbs =>
+const getMonthlyActiveUsers = dbs =>
   new Promise((resolve, reject) => {
     const promises = dbs.map(messages => getMonthlyActiveUsersQuery(messages));
     Promise.all(promises).then(results => {
@@ -27,4 +27,4 @@ const getDailyActiveUsers = dbs =>
     });
   });
 
-module.exports = getDailyActiveUsers;
+module.exports = getMonthlyActiveUsers;

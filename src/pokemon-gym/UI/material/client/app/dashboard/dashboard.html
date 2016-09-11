@@ -41,7 +41,7 @@
                 <div class="panel-heading">Active Users</div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <span>Daily</span>
                             <canvas
                               class="chart chart-bar"
@@ -49,7 +49,7 @@
                               chart-labels="dashboardCtrl.data.dailyActiveUsers.labels"
                             ></canvas>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <span>Monthly</span>
                             <canvas
                               class="chart chart-bar"
@@ -57,7 +57,20 @@
                               chart-labels="dashboardCtrl.data.monthlyActiveUsers.labels"
                             ></canvas>
                         </div>
-                        <div class="col-md-4">
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default panel-minimal" ng-show="dashboardCtrl.searchCountScope === 'slack' || dashboardCtrl.searchCountScope === 'total'">
+                <div class="divider divider-md"></div>
+                <div class="panel-heading">Slack</div>
+                <div class="panel-body">
+                    <div class="row">
+                      <div class="col-md-6 box-stats">
+                          <span class="box-desc">Average Slack Team Size</span>
+                          <p class="box-num" ng-show="dashboardCtrl.data.averageSlackTeamSize">{{dashboardCtrl.data.averageSlackTeamSize | number}}</span></p>
+                          <p class="box-num" ng-show="!dashboardCtrl.data.averageSlackTeamSize">Calculating</span></p>
+                      </div>
+                        <div class="col-md-6">
                             <span>Monthly Slack Teams</span>
                             <canvas
                               class="chart chart-bar"
@@ -70,7 +83,7 @@
             </div>
             <div class="panel panel-default panel-minimal">
                 <div class="divider divider-md"></div>
-                <div class="panel-heading">Time Based</div>
+                <div class="panel-heading">Messages - Time Based</div>
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-4">

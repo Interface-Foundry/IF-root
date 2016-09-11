@@ -1,5 +1,4 @@
 const getMonthStatsQuery = require('../queries/getMonthStats');
-// const getModeMonthStats = require('./getModeMonthStats');
 
 const parse = results => {
   const monthStats = {};
@@ -26,16 +25,6 @@ const getMonthStats = dbs =>
       const monthsObject = parse(results);
       resolve(Object.keys(monthsObject).map(month => monthsObject[month]));
     });
-    // const modePromises = new Promise((resolve, reject) => {
-    //   const promises = dbs.map(messages => getModeMonthStats(messages));
-    //   Promise.all(promises).then(results => {
-    //     resolve(parse(results));
-    //   });
-    // });
-    // Promise.all([bucketPromises, modePromises]).then(results => {
-    // Promise.all([bucketPromises]).then(results => {
-    //   outerResolve(parse(results));
-    // });
   });
 
 module.exports = getMonthStats;

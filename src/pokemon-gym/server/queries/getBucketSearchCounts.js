@@ -33,7 +33,7 @@ const getBucketSearchCounts = messages =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { console.log(err); reject(err); return;}
       const searchCounts = {};
       result.forEach(type => {
         searchCounts[type._id] = searchCounts[type._id] || {};

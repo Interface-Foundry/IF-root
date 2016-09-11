@@ -16,7 +16,7 @@ const getBanterCounts = messages =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const banterCounts = {};
       banterCounts.total = 0;
       result.forEach(source => {

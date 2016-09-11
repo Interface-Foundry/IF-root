@@ -26,7 +26,7 @@ const getSearchCounts = (messages) =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const months = result.map(month => {
         const sources = month.sources.filter(source => source.name);
         const total = month.sources.reduce((prevSource, source) =>

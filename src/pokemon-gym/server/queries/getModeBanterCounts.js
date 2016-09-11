@@ -25,7 +25,7 @@ const getModeBanterCounts = messages =>
         },
       },
     ], (err, result) => {
-      if (err) { reject(err); }
+      if (err) { reject(err); return; }
       const banterCounts = {};
       banterCounts.total = 0;
       result.filter(source => source._id)
