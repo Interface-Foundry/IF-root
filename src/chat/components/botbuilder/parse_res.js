@@ -44,7 +44,6 @@ function* results(message) {
         review_line += ` ${r.reviews.rating} stars - ${r.reviews.reviewCount} reviews`
         var final_description = (description.length > 200) ? (description.substring(0, 150) + '...') : description;
       }
-
       var image = r.picstitch_url ? r.picstitch_url : ((_.get(r, 'SmallImage[0].URL[0]') ? _.get(r, 'SmallImage[0].URL[0]') :  (_.get(r, 'MediumImage[0].URL[0]') ? _.get(r, 'MediumImage[0].URL[0]') :  'http://kipthis.com/images/header_partners.png')))
 
 

@@ -538,12 +538,12 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     builder.CardAction.postBack(session, `remove ${i+1}` , 'Remove Item')
                 ])
             if (el.image) {
-              // console.log('\n\nLE NONFIN IMAGE!!!!\n\n', el.image); 
+              // console.log('\n\nFUCKIN EL IS WHAT YOU PIECE OF SHIT FUCK YOU!!!!\n\n', el); 
                 if (el.image.indexOf('images-na.ssl-images-amazon.com') > -1) {
                   el.image = 'http://kipthis.com/images/kip_head.png';
                 }
-                el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
-              // console.log('\n\nLE FIN IMAGE!!!!\n\n', el.image);
+              el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
+            kip.debug('\n\n\n\n\n\n\n\n\nSEND CART SKYPE IMAGE IS: ', el.image, '\n\n\n\n\n\n\n\n\n\n\n\n')
               card.images([
                   builder.CardImage.create(session, el.image)
                       .tap(builder.CardAction.showImage(session, el.image))
