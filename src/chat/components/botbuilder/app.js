@@ -383,6 +383,10 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     try {
         var session = sessions[outgoing.data.thread_id];
 
+        if (session) {
+            return kip.debug('\n\n\n\n\n\n KIP SESSION NOT FOUND!!! \n\n\n\n\n\n\n', session);
+        }
+
         var message = outgoing.data;
         // console.log('skype outgoing message', message.mode, message.action);
         var return_data = {};
@@ -538,7 +542,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     builder.CardAction.postBack(session, `remove ${i+1}` , 'Remove Item')
                 ])
             if (el.image) {
-              // console.log('\n\nFUCKIN EL IS WHAT YOU PIECE OF SHIT FUCK YOU!!!!\n\n', el); 
                 if (el.image.indexOf('images-na.ssl-images-amazon.com') > -1) {
                   el.image = 'http://kipthis.com/images/kip_head.png';
                 }
