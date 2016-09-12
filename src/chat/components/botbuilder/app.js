@@ -549,7 +549,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
               el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
               kip.debug('\n\n\n\n\n\n\n\n\nSEND CART SKYPE IMAGE IS: ', el.image, '\n\n\n\n\n\n\n\n\n\n\n\n')
               card.images([
-                  builder.CardImage.create(session, el.image)
+                  builder.CardImage.create(session,  'http://kipthis.com/images/kip_head.png')
                       .tap(builder.CardAction.showImage(session, 'http://kipthis.com/images/kip_head.png'))
               ]); 
             };
