@@ -542,22 +542,19 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     builder.CardAction.postBack(session, `remove ${i+1}` , 'Remove Item')
                 ])
             if (el.image) {
+                // https://images-na.ssl-images-amazon.com/images/I/51Dgxd9NEiL._UL1500_.jpg
                 if (el.image.indexOf('images-na.ssl-images-amazon.com') > -1) {
                   el.image = 'http://kipthis.com/images/kip_head.png';
                 }
               el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
-            kip.debug('\n\n\n\n\n\n\n\n\nSEND CART SKYPE IMAGE IS: ', el.image, '\n\n\n\n\n\n\n\n\n\n\n\n')
+              kip.debug('\n\n\n\n\n\n\n\n\nSEND CART SKYPE IMAGE IS: ', el.image, '\n\n\n\n\n\n\n\n\n\n\n\n')
               card.images([
                   builder.CardImage.create(session, el.image)
-                      .tap(builder.CardAction.showImage(session, el.image))
+                      .tap(builder.CardAction.showImage(session, 'http://kipthis.com/images/kip_head.png'))
               ]); 
             };
-
             return card;
         })
-
-        debugger;
-
         //I HATE YOU SKYPE, no really, fuck off.
         var urlwhat = outgoing.data.data.link;
         urlwhat = urlwhat.replace('http://','https://');
