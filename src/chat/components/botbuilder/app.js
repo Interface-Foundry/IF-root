@@ -383,7 +383,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     try {
         var session = sessions[outgoing.data.thread_id];
 
-        if (session) {
+        if (!session) {
             return kip.debug('\n\n\n\n\n\n KIP SESSION NOT FOUND!!! \n\n\n\n\n\n\n', session);
         }
 
