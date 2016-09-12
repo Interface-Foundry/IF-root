@@ -46,10 +46,7 @@ else {
   options = {
       customer: 'kipthis', 
       password: 'e49d4ega1696', 
-      zone: 'gen', 
-      proxy_count: 3, 
-      max_requests: 20,
-      country: 'us'
+      zone: 'gen'
   };
   proxy = new Luminati(options);
   proxy.listen(24000, '127.0.0.1')
@@ -67,7 +64,7 @@ var request = function(url) {
         res = mesh_request(url, status.status)
       }
       
-      stopProxy(proxy, 1000);
+      stopProxy(proxy, 10000);
       return res;
 };
 
@@ -82,7 +79,7 @@ var ensured_request = function(url) {
           console.log('\n\n\nOops firing mesh instead...\n\n\n')
           res = mesh_request(url, status.status);
       }
-      stopProxy(proxy, 1000);
+      stopProxy(proxy, 10000);
       return res;
 };
 

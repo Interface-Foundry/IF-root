@@ -151,15 +151,19 @@ var set_menu = function(sender, fbtoken) {
         };
 
         request({
-            url: "https://graph.facebook.com/v2.7/me/thread_settings",
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
             qs: {
                 access_token: fbtoken
             },
             method: 'POST',
             json: set_menu
         }, function(err, body) {
-           if (err) return false
+           if (err) {
+            console.log('\n\n\n\nWARNING: FB SET MENU ERROR: ', err, body);
+
+           }
             else {
+                console.log('\n\n\n\n\n\nFB SET MENU : ',body)
                 return true
             }
         })
@@ -178,7 +182,7 @@ var set_menu = function(sender, fbtoken) {
            }
 
         request({
-            url: "https://graph.facebook.com/v2.7/me/thread_settings",
+            url: "https://graph.facebook.com/v2.6/me/thread_settings",
             qs: {
                 access_token: fbtoken
             },
