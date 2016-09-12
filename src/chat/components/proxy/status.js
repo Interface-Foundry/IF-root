@@ -44,7 +44,7 @@ async.whilst(
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config } }); 
           setTimeout(function () {
             callback()
-          }, 6000);
+          }, ping_interval);
         } 
         else if (res && res.statusCode == 200 && body.length > 0) {
           var $ = cheerio.load(body);
@@ -57,7 +57,7 @@ async.whilst(
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: true, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}});
           setTimeout(function () {
             callback()
-          }, 6000);
+          }, ping_interval);
         } else {
           var end= Date.now();
           status.latency=(end-begin)/10000;
@@ -67,7 +67,7 @@ async.whilst(
           db.Metrics.log('proxy', { proxy: 'luminati', check: true,request_url: url, delay_ms: status.latency, success: false, error: err, status: status, options: {id: module.exports.current_index ,config: sets[module.exports.current_index].config}}); 
           setTimeout(function () {
             callback()
-          }, 6000);
+          }, ping_interval);
         }
       });
     },
