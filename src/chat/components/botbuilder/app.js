@@ -406,21 +406,21 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                 // session.outgoing = outgoing;
                 // return session.beginDialog('/results');
                 // console.log('1💀')
-                return send_results(message.source.channel, message.text, return_data, outgoing);
+                return send_results(message.source.channel, message.text, return_data, outgoing, session);
             }
             else if (message.mode === 'cart' && message.action === 'save') {
                 // console.log('2💀')
-                return send_cart(message.source.channel, message.text, outgoing);
+                return send_cart(message.source.channel, message.text, outgoing, session);
             }
             else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
                 // console.log('focus message :', message);
                 return_data = yield focus(message);
                 // console.log('3💀')
-                return send_focus(message.source.channel, message.text, return_data, outgoing);
+                return send_focus(message.source.channel, message.text, return_data, outgoing, session);
             }
             else if (message.mode === 'cart' && message.action === 'view') {
                 // console.log('4💀')
-                return send_cart(message.source.channel, message.text, outgoing);
+                return send_cart(message.source.channel, message.text, outgoing, session);
             }
             // else if (message.text && message.text.indexOf('_debug nlp_') == -1) {
             //     return send_text(message.source.channel, message.text, outgoing)
@@ -448,7 +448,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         kip.err(e);
     }
 
-    function send_results(channel, text, results, outgoing) {
+    function send_results(channel, text, results, outgoing, session) {
         // console.log(channel, text, results, outgoing)
         co(function*(){
             var cards = results.map((result, i) => {
@@ -482,8 +482,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
 
             var giphy_gif = '';
 
-            request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
-                if (err) console.log(err);
+            // request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
+            //     if (err) console.log(err);
                 giphy_gif = 'http://kipthis.com/images/header_partners.png'
                 // JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_height :  'http://kipthis.com/images/header_partners.png';
                 cards.push(new builder.HeroCard(session)
@@ -503,11 +503,11 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     .attachmentLayout('carousel')
                     .attachments(cards);
                 session.send(msg);
-            })
+            // })
         })
     }
 
-    function send_focus(channel, text, focus_info, outgoing) {
+    function send_focus(channel, text, focus_info, outgoing, session) {
         console.log('FOCUS1 ',focus_info)
         console.log('FOCUS2 ',focus_info.description)
          // Send a greeting and start the menu.
@@ -528,7 +528,7 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
         session.send(msg);
     }
 
-    function send_cart(channel, text, outgoing) {
+    function send_cart(channel, text, outgoing, session) {
         var cart = outgoing.data.data;
         // console.log('\n\n\n\n\nCART OBJECT : ', cart, outgoing,'\n\n\n\n\n');
 
