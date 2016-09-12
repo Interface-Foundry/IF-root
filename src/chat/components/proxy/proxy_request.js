@@ -65,6 +65,7 @@ var request = function(url) {
       }
       
       // stopProxy(proxy, 10000);
+
       return res;
 };
 
@@ -79,7 +80,8 @@ var ensured_request = function(url) {
           console.log('\n\n\nOops firing mesh instead...\n\n\n')
           res = mesh_request(url, status.status);
       }
-      // stopProxy(proxy, 10000);
+
+      //stopProxy(proxy, 10000);
       return res;
 };
 
