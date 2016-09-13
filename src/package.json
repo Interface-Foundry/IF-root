@@ -47,7 +47,7 @@
     "koat": "^1.0.1",
     "linkifyjs": "^2.0.2",
     "lodash": "^4.13.1",
-    "luminati-proxy": "github:luminati-io/luminati-proxy",
+    "luminati-proxy": "^0.6.5",
     "memory-cache": "^0.1.5",
     "minimist": "^1.2.0",
     "mocha": "^3.0.2",

@@ -113,7 +113,9 @@ queue.topic('incoming').subscribe(incoming => {
         timer.stop()
         return
       } catch (e) {
-        send_text_reply(message, 'oops error')
+        yield send_text_reply(message, 'oops error, you might need to add that manually')
+        timer.stop()
+        incoming.ack()
         return
       }
     }
