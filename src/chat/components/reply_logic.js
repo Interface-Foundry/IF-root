@@ -119,7 +119,10 @@ queue.topic('incoming').subscribe(incoming => {
       try {
         yield kipcart.addToCart(cart_id, cart_id, results, cart_type)
         winston.debug('added to cart')
-        return send_text_reply(message, 'Okay :) added that item to cart')
+        send_text_reply(message, 'Okay :) added that item to cart')
+        incoming.ack();
+        timer.stop();
+        return;
       } catch (e) {
         send_text_reply(message, 'oops error')
         return;
