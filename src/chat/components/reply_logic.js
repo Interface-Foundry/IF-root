@@ -789,11 +789,11 @@ handlers['cart.save'] = function * (message, exec) {
     return yield handlers['cart.view'](message, exec)
   } catch (e) {
     // this is the start of how you can manually select item
-    try { // probably only do this for facebook since idk what will happen with slack stuff
+    if (_.get(message, 'origin') === 'facebook') {
       typing(message)
       yield amazon_variety.getVariations(results[exec.params.focus - 1].ASIN, message)
       return text_reply(message, 'One moment, we need to select some specifics :)')
-    } catch (err) {
+    } else {
       kip.err(e)
       return text_reply(message, "Sorry, it's my fault – I can't add this item to cart. Please click on item link above to add to cart, thanks! 😊")
     }
@@ -875,7 +875,7 @@ handlers['cart.empty'] = function * (message, exec) {
         |   | /     //_ _ |/|
           .  :     //|_ _ _||
          | /.    //  | _ _ |/| ASH
-          _ | / /     _ _ \              __/       _ _ |`
+          _ | / /     _ _               __/       _ _ |`
 
 //
 // Returns the amazon results as it is stored in the db (json string)
