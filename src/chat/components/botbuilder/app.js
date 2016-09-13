@@ -468,8 +468,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     .title(result.title)
                     .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
                     .images([
-                        builder.CardImage.create(session, image)
-                            .tap(builder.CardAction.showImage(session, image)),
+                        builder.CardImage.create(session, 'http://kipthis.com/images/kip_head.png')
+                            .tap(builder.CardAction.showImage(session, 'http://kipthis.com/images/kip_head.png')),
                     ])
                     .tap(builder.CardAction.openUrl(session, result.title_link))
                     .buttons([
