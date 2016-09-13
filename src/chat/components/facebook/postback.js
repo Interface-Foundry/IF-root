@@ -19,6 +19,9 @@ var fbtoken;
 var next = require("co-next")
 var fb_utility = require('./fb_utility');
 
+var item_add = require('./item_add')
+
+
 var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
 
 
@@ -80,6 +83,8 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
 
     console.log('POSTBACK!!!', postback)
+
+
 
     if (postback.action == 'help') {
             fb_utility.send_suggestions_card(sender, fbtoken);
