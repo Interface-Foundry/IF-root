@@ -468,8 +468,8 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                     .title(result.title)
                     .text("<a href="+result.title_link+">Read reviews on Amazon</a>")
                     .images([
-                        builder.CardImage.create(session, 'http://kipthis.com/images/kip_head.png')
-                            .tap(builder.CardAction.showImage(session, 'http://kipthis.com/images/kip_head.png')),
+                        builder.CardImage.create(session, image)
+                            .tap(builder.CardAction.showImage(session, image)),
                     ])
                     .tap(builder.CardAction.openUrl(session, result.title_link))
                     .buttons([
@@ -547,14 +547,17 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                   el.image = 'http://kipthis.com/images/kip_head.png';
                 }
               el.image = ((el.image.indexOf('https://') > -1) ? el.image.replace('https://','http://') : el.image);
-              kip.debug('\n\n\n\n\n\n\n\n\nSEND CART SKYPE IMAGE IS: ', el.image, '\n\n\n\n\n\n\n\n\n\n\n\n')
+            kip.debug('\n\n\n\n\n\n\n\n\nSEND CART SKYPE IMAGE IS: ', el.image, '\n\n\n\n\n\n\n\n\n\n\n\n')
               card.images([
-                  builder.CardImage.create(session,  'http://kipthis.com/images/kip_head.png')
-                      .tap(builder.CardAction.showImage(session, 'http://kipthis.com/images/kip_head.png'))
+                  builder.CardImage.create(session, el.image)
+                      .tap(builder.CardAction.showImage(session, el.image))
               ]); 
             };
+
             return card;
         })
+
+
         //I HATE YOU SKYPE, no really, fuck off.
         var urlwhat = outgoing.data.data.link;
         urlwhat = urlwhat.replace('http://','https://');
