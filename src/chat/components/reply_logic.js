@@ -1,3 +1,4 @@
+
 /*eslint-env es6*/
 var async = require('async');
 var request = require('request');
@@ -5,15 +6,13 @@ var co = require('co');
 var _ = require('lodash');
 var fs = require('fs');
 var banter = require("./banter.js");
-// var history = require("./history.js");
-// var search = require("./search.js");
 var amazon_search = require('./amazon_search.js');
+var amazon_variety = require('./amazon_variety.js');
+
 var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
-// var init_team = require("./init_team.js");
-// var conversation_botkit = require('./conversation_botkit');
-// var weekly_updates = require('./weekly_updates');
+
 var kipcart = require('./cart');
 var nlp = require('../../nlp2/api');
 //set env vars
@@ -36,7 +35,11 @@ var modes = {};
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
-winston.debug('debug ', modes);
+
+
+winston.debug('debug ', modes)
+
+
 // I'm sorry i couldn't understand that
 function default_reply(message) {
   return new db.Message({
@@ -80,6 +83,12 @@ function typing(message) {
 }
 
 
+
+//TODO: IF EXECUTE PROPERTY EXISTS, SKIP NLP PARSING
+
+
+
+
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
@@ -89,6 +98,33 @@ queue.topic('incoming').subscribe(incoming => {
     kip.debug('🔥', incoming);
 
     var timer = new kip.SavedTimer('message.timer', incoming.data);
+
+    // skipping histoy and stuff rn b/c i dont have time to do it
+    if (_.get(incoming, 'data.action') == 'item.add') {
+      var selected_data = incoming.data.postback.selected_data
+
+      var results = yield amazon_variety.pickItem(incoming.data.sender, selected_data)
+      var results = yield amazon_search.lookup(results, results.origin)
+
+      winston.debug('taking first item from results')
+      var results = results[0]
+      winston.debug('raw_results: ', results);
+
+      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20);
+      var message = history[0];
+      message.history = history.slice(1);
+
+      var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team;
+      var cart_type = 'personal';
+      try {
+        yield kipcart.addToCart(cart_id, cart_id, results, cart_type)
+        winston.debug('added to cart')
+        return send_text_reply(message, 'Okay :) added that item to cart')
+      } catch (e) {
+        send_text_reply(message, 'oops error')
+        return;
+      }
+    }
 
     timer.tic('getting history');
     // find the last 20 messages in this conversation, including this one
@@ -167,7 +203,16 @@ queue.topic('incoming').subscribe(incoming => {
           timer.tic('getting nlp response')
 
           winston.info('👽 passing to nlp: ', message.text);
-          replies = yield nlp_response(message);
+
+
+      if(message.execute && message.execute.length >= 1){
+     replies = yield execute(message);
+      }
+      else{
+    replies = yield nlp_response(message);
+    kip.debug('+++ NLPRESPONSE ' + replies);
+      }
+
           timer.tic('got nlp response')
           kip.debug('nlp replies'.cyan,
             replies.map(function*(r){
@@ -403,6 +448,14 @@ LIFE OF  NEKO
 //
 var handlers = {};
 
+handlers['item.picked'] = function*(message, item) {
+  typing(message);
+  message._timer.tic('starting amazon_lookup');
+  // var results = yield amazon_variety.pickItem
+
+  // return
+}
+
 handlers['shopping.initial'] = function*(message, exec) {
   typing(message);
   message._timer.tic('starting amazon_search');
@@ -416,6 +469,8 @@ handlers['shopping.initial'] = function*(message, exec) {
    }
    var exec = fake_exec ? fake_exec : exec;
   //end of patch
+
+
   var results = yield amazon_search.search(exec.params,message.origin);
   kip.debug('!1',exec)
 
@@ -433,6 +488,7 @@ handlers['shopping.initial'] = function*(message, exec) {
   }
 
   message._timer.tic('done with amazon_search');
+
 
   return new db.Message({
     incoming: false,
@@ -751,16 +807,23 @@ handlers['cart.save'] = function*(message, exec) {
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team; // TODO make this available for other platforms
   //Diverting team vs. personal cart based on source origin for now
   var cart_type= message.source.origin == 'slack' ? 'team' : 'personal';
-  winston.debug('INSIDE REPLY_LOGIC SAVEE   :   ', exec.params.focus - 1 )
-;  try {
+  winston.debug('INSIDE REPLY_LOGIC SAVE   :   ', exec.params.focus - 1 );
+  try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
+
+    // view the cart
+    return yield handlers['cart.view'](message, exec);
   } catch (e) {
+    // this is the start of how you can manually select item
+    try { // probably only do this for facebook since idk what will happen with slack stuff
+      typing(message)
+      yield amazon_variety.getVariations(results[exec.params.focus - 1].ASIN, message)
+      return text_reply(message, 'One moment, we need to select some specifics :)')
+    } catch (err) {
     kip.err(e);
     return text_reply(message, 'Sorry, it\'s my fault – I can\'t add this item to cart. Please click on item link above to add to cart, thanks! 😊')
+    }
   }
-
-  // view the cart
-  return yield handlers['cart.view'](message, exec);
 };
 
 handlers['cart.remove'] = function*(message, exec) {

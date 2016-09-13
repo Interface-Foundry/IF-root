@@ -11,7 +11,9 @@ var topics = {
   'outgoing.telegram': 6,
   'outgoing.facebook': 7,
   'outgoing.web': 8,
-  'outgoing.skype': 9
+  'outgoing.skype': 9,
+  'variation.facebook': 10,
+  'variation.slack': 11
 };
 
 //
