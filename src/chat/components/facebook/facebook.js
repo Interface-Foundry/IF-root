@@ -102,7 +102,8 @@ if (process.env.NODE_ENV === 'development_alyx'){
     fbtoken = 'EAAEkPTERbfgBACRwymE64dZCRxlQ035ZBvg2ZCATLkuZB8YF4wOQBfD2M4DvUwJ52ZBIEgo43hi4LrVu7bxA9pgpZCpTi8GtIhpMETuGrxhXFb1BYjJ0EXeWEgTd6ugHe7ZAIIgSKWfVHoETvKJNujMfFqGU8AK4sWVhQuJJjhEvgZDZD';
 }
 else if (process.env.NODE_ENV === 'development_mitsu') {
-    fbtoken = 'EAAas9IZAQHr8BAOQChNIFxz34dnEKmBe0uZB0xrYcYGazBdZAdCNptOMb7udylQ0UW6fxzcZAZCkAPfrlzaiZAciuLmZB3Pd4mZBjG2rIDUvWtZCvzZApTGIWdzseZBMzP5Vzdyz94qbtm7jW50t9ufqEHRFfrt3iwuZA9IZD'
+    fbtoken = 'EAAas9IZAQHr8BANn6pvRe0N1Dbw6kbs1N9cQke6jhKoYP5xFdU4kAOryfoZB3p07lO1yS3XZBJTN6IBA0wz54II3nwxYf0vb6ZC6RqukW00ndvmuoJXxXzwnJjcJrlvpdOonPmGKiPeko78MHl2UKiHEUjDWo2pj6twp5fLKTgZDZD'
+    // fbtoken = 'EAAas9IZAQHr8BACZCHfo63TPh5Wo6N8uJTSQnRcBBe0OTMPDzDzJZAYJ2ChhUpIJfLr913Bq94MMZC4dIMpjVeqc2x39OcBY7NNGwvO4ZCErrAY9y8QtFJdfYhS9OT1QMhZArpCQZA2pz8OZAeS0o6Wix1Iea6BHX4kZD'
 }
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
@@ -110,7 +111,7 @@ else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAMhCmQMAyQBAGEYDWOlZA9dSmL64h5vKqIjzZBdUbZBUjsLDXrdt17psccaZB7t1YwnBV78qyOMua3vZBDJwN1sV7mdbiWpxhfBZBGoEfOQPOk3QKmc3q8FSfsaH6QMYFArHIf7rlRSRcn1XYElHj0wuvYKiUH3mwvEqnOQWHrwZDZD';
 }
 else if (process.env.NODE_ENV === 'production') {
-    fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
+    fbtoken = 'EAAT6cw81jgoBAEb3NE2m3DNCc6ZAEs5ZBQcUxu3YzzprsBmkXayoZCJgz8orhGT4phLkz008gsH7sDzDej6Jj6mK6F9pFa7TPoHX6fAqWMpU1KTuIZAiUMMVgYzIh6bQsOotC7xD80a8GpLrFUTboZBADucyTs8Mq5aUlzdmuiwZDZD';
 }
 
 //temp. needs to be story in DB
@@ -138,7 +139,6 @@ httpsServer.listen(4343, function(e) {
 });
 
 app.get('/facebook', function(req, res) {
-
     if (req.query['hub.verify_token'] === fbtoken) {
         res.send(req.query['hub.challenge']);
     } else {
@@ -151,7 +151,6 @@ app.get('/facebook', function(req, res) {
 //   -Back button state cache- *currently not in use
 
 backCache = 0;
-
 
 app.post('/facebook', next(function*(req, res, next) {
     // filter out echo we don't want to process.
@@ -217,6 +216,7 @@ app.post('/facebook', next(function*(req, res, next) {
                 story_pointer: 0
             };
         }
+        kip.debug('\n\n\n🤖 fb_memory is : ', fb_memory[sender],'\n\n\n');
         //Process onboarding quiz
         if(event.message && event.message.text && _.get(fb_memory, '[sender].mode' == 'onboarding')) {
             //Exit quiz if user doesnt want to take it
@@ -248,6 +248,8 @@ app.post('/facebook', next(function*(req, res, next) {
         //REGULAR INCOMING TEXT MESSAGES
         else if (event.message && event.message.text) {
                 text = event.message.text;
+                //lel wtf
+                if (text == 'illii.illelli') return
                 //converting some emojis into more "product-y" results
                 process_emoji(text, function(res) {
                     text = res;
@@ -282,7 +284,8 @@ app.post('/facebook', next(function*(req, res, next) {
                     message.save().then(() => {
                         queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
                     });
-                } else {
+                } 
+                else {
                     console.log(JSON.stringify(req.body));
                     var message = new db.Message({
                         incoming: true,
@@ -358,10 +361,10 @@ app.post('/facebook', next(function*(req, res, next) {
                     "url": img_array[Math.floor(Math.random()*img_array.length)]
                   }
                 }
-              }
+              };
 
              request({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },

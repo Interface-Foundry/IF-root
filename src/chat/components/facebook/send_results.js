@@ -25,11 +25,11 @@ var send_results = function* (channel, text, results, outgoing, fbtoken) {
   var giphy_gif = ''
 
 request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query + '&api_key=dc6zaTOxFJmzC', function(err, res, body) {
-    if (err) console.log(err);
-
-    // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
-    giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
-
+    if (err) { console.log(err); }
+    else {
+        // console.log('GIFY RETURN DATA: ', JSON.parse(body).data[0])
+        giphy_gif = JSON.parse(body).data[0] ? JSON.parse(body).data[0].images.fixed_width_small.url :  'http://kipthis.com/images/header_partners.png';
+    }
     var cards = results.map((result, i) => {
         var n = i + 1 + '';
 
@@ -152,7 +152,7 @@ request('http://api.giphy.com/v1/gifs/search?q=' + outgoing.data.original_query 
         // }
 
         request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
+            url: 'https://graph.facebook.com/v2.7/me/messages',
             qs: {
                 access_token: fbtoken
             },

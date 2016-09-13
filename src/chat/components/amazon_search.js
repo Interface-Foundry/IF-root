@@ -9,11 +9,10 @@ var processData = require('./process');
 var picstitch = require('./picstitch');
 var amazon = require('../amazon-product-api_modified'); //npm amazon-product-api
 var parseAmazon = require('./search.js').parseAmazon;
-var amazonHTML = promisify(require('./amazonHTML'));
+var amazonHTML = require('./amazonHTML');
 var db = require('../../db');
 var async = require('async');
 var wait = require('co-wait');
-
 var winston = require('winston');
 winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 

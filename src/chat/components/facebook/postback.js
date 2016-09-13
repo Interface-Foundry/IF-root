@@ -31,25 +31,18 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
         console.log('POSTBACK PARSE ERR: ',err)
         var postback = event.postback.payload;
     }
-    // console.log('\n\n\npostback: ', postback,'\n\n\n');
-    //@ @ @ @ @ @ @ @ @ @ @ @
-    //@ @ @ @ @ ONBOARDING!!!!!!
-    //@ @ @ @ @ @ @ @ @ @ @ @ @
+    console.log('\n\n\npostback: ', postback,'\n\n\n');
+    //Onboarding:
     if ((postback.type && postback.type == 'GET_STARTED') || postback == 'GET_STARTED') {
-        //send welcome image here
-        //then one more text message intro
-        //then send story
         fb_memory[sender].mode = 'onboarding';
-        //res.send(200);
-        fb_utility.send_image('cart.png',sender,fbtoken, function(){
-            var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
-            //send image here
-            fb_utility.send_card(x,sender, fbtoken);
-            setTimeout(function() {
+        yield fb_utility.send_image('cart.png',sender,fbtoken, null)
+        var x = {text: "Thanks for adding Kip! Take an adventure with us by answering this short quiz, and see what Kip finds for you :)"}
+        //send image here
+        fb_utility.send_card(x,sender, fbtoken);
+        setTimeout(function() {
             var pointer = postback.story_pointer ? postback.story_pointer : 0;
             fb_utility.send_story(sender, pointer, fbtoken)
             }, 1500);
-        });
     }
     //@ @ @ @ @ @ @ @ hiiiiiiiiiii @@ @ @ @ @ @ @ //
     else if (postback.action === 'story.answer') {
@@ -58,7 +51,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (postback.action == 'take_quiz'){
         fb_memory[sender].mode = 'onboarding';
-        var pointer = 0;
+        var pointer = postback.story_pointer ? postback.story_pointer : 0;
         fb_utility.send_story(sender, pointer, fbtoken)
         return;
     }
@@ -229,7 +222,8 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                       var cart_id = (msg.source.origin === 'facebook') ? msg.source.org : msg.cart_reference_id || msg.source.team;
                       var cart = yield kipcart.getCart(cart_id);
                       var unique_items = _.uniqBy( cart.aggregate_items, 'ASIN');
-                      var item = unique_items[parseInt(postback.selected-1)];
+                      var item = unique_items[parseInt(parseInt(postback.selected) - 1)];
+                      //console.log('\n\n\n\n\n\n\n\n\n\nTEST THIS THEORY: ', item, postback.selected, unique_items,'\n\n\n\n\n\n\n')
                       yield kipcart.addExtraToCart(cart, cart_id, cart_id, item);
                       var new_message = new db.Message({
                         incoming: true,
@@ -415,7 +409,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
             };
 
           request({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },
@@ -433,5 +427,6 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
       }
   }
 }
+
 
 module.exports = handle_postback;

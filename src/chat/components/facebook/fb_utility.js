@@ -22,7 +22,7 @@ var send_cart = require('./send_cart');
  */
 var send_card = function(bd,sendTo, fbtoken){
     request({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
+        url: 'https://graph.facebook.com/v2.7/me/messages',
         qs: {
             access_token: fbtoken
         },
@@ -94,7 +94,7 @@ var send_suggestions_card = function(sender, fbtoken) {
             "notification_type": "NO_PUSH"
         };
         request.post({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
+            url: 'https://graph.facebook.com/v2.7/me/messages',
             qs: {
                 access_token: fbtoken
             },
@@ -105,7 +105,7 @@ var send_suggestions_card = function(sender, fbtoken) {
             },
             body: card
         }, function(err, res, body) {
-            if (err) {console.error('post err ', err); 
+            if (err) {console.error('post err ', err);
               return false;
             } else{
                 return true;
@@ -158,8 +158,12 @@ var set_menu = function(sender, fbtoken) {
             method: 'POST',
             json: set_menu
         }, function(err, body) {
-           if (err) return false
+           if (err) {
+            console.log('\n\n\n\nWARNING: FB SET MENU ERROR: ', err, body);
+
+           }
             else {
+                console.log('\n\n\n\n\n\nFB SET MENU : ',body)
                 return true
             }
         })
@@ -204,7 +208,7 @@ var send_typing_indicator = function(sender, fbtoken) {
         };
 
         request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
+            url: 'https://graph.facebook.com/v2.7/me/messages',
             qs: {
                 access_token: fbtoken
             },
@@ -246,7 +250,7 @@ var send_story = function (sender,pointer,fbtoken){
         };
     //send res to user
     request.post({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
+        url: 'https://graph.facebook.com/v2.7/me/messages',
         qs: {
             access_token: fbtoken
         },
@@ -293,37 +297,37 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
         var item;
         if(fb_memory[sender].quiz >= 0 && fb_memory[sender].quiz <= 3){
             item = 'Flying Sailboat'
-            send_image('sailboat.png',sender,fbtoken, function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+            console.log('but i ask again 1')
+            yield send_image('sailboat.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         else if(fb_memory[sender].quiz >= 4 && fb_memory[sender].quiz <= 7){
             item = 'Lucky Goldfish'
-            send_image('goldfish.png',sender,fbtoken, function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+                        console.log('but i ask again 2')
+            yield send_image('goldfish.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         else if(fb_memory[sender].quiz >= 8 && fb_memory[sender].quiz <= 9){
             item = 'Snowglobe Charm'
-            send_image('snowglobe.png',sender,fbtoken,function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+                        console.log('but i ask again 3')
+            yield send_image('snowglobe.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         else if(fb_memory[sender].quiz >= 10 && fb_memory[sender].quiz <= 12){
             item = 'Rainbow Pearl'
-            send_image('pearl.png',sender,function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+            console.log('but i ask again 4')
+            yield send_image('pearl.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }else {
             item = 'Lucky Goldfish'
-            send_image('goldfish.png',sender,function(){
-                var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
-                send_card(x,sender, fbtoken);
-            });
+            console.log('but i ask again 5')
+            yield send_image('goldfish.png',sender, fbtoken, null)
+            var x = {text: "You got a "+item+" as a souvenir! Thanks for taking the quiz"}
+            send_card(x,sender, fbtoken);
         }
         fb_memory[sender].quiz = 1;
         fb_memory[sender].mode = 'shopping';
@@ -416,7 +420,7 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -462,7 +466,7 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -508,7 +512,7 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
                                     })
                                   }
                                 ],
-                                "text": "Here are a some cool things you might like! :)"
+                                "text": "Here are some cool things you might like! :)"
                     },
                     "notification_type": "NO_PUSH"
                 };
@@ -516,7 +520,7 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
         }
         setTimeout(function() {
             request.post({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },
@@ -571,26 +575,30 @@ var process_story = function*(sender,pointer,select,fbtoken,fb_memory){
  * @param {string} fbtoken: facebook send api token
  * @param {object} callback: callback function
  */
-var send_image = function (img,sender,fbtoken,callback){
-    var r = request.post('https://graph.facebook.com/v2.6/me/messages?access_token='+fbtoken, function optionalCallback (err, httpResponse, body) {
-      if (err) {
-        callback();
-        return console.error('upload failed:', err);
-      }
-      console.log('Upload successful!');
-      callback();
-    })
+var send_image = function*(img,sender,fbtoken,callback){
+    if (!callback || callback == undefined || callback == null) {
+        callback = function(){}
+    }
+    console.log('\n\n\n i mean bro ', img, sender, fbtoken, callback, '\n\n\n');
+    var r = request.post({url: 'https://graph.facebook.com/v2.7/me/messages?access_token='+fbtoken, formData: form},function (err, httpResponse, body) {
+          if (err) {
+            kip.debug('upload failed:', err);
+          }
+          console.log('Upload successful!  Server responded with:', body);
+          callback();
+        });
     var form = r.form()
     form.append('recipient', '{"id":"'+sender.toString()+'"}')
     form.append('message', '{"attachment":{"type":"image", "payload":{}}}')
     form.append('filedata', fs.createReadStream(__dirname +'/assets/'+img))
+    // return this;
 }
 
 
-module.exports = { 
-  send_card: send_card, 
+module.exports = {
+  send_card: send_card,
   send_image: send_image,
-  send_typing_indicator: send_typing_indicator, 
+  send_typing_indicator: send_typing_indicator,
   get_last_message: get_last_message,
   set_menu: set_menu,
   send_suggestions_card: send_suggestions_card,
