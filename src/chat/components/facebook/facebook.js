@@ -94,6 +94,7 @@ var send_results = require('./send_results');
 var send_text = require('./send_text');
 var send_focus = require('./send_focus');
 var send_cart = require('./send_cart');
+var item_add = require('./item_add')
 
 
 
@@ -106,7 +107,7 @@ else if (process.env.NODE_ENV === 'development_mitsu') {
 else if (process.env.NODE_ENV === 'development') {
     fbtoken = 'EAAYxvFCWrC8BAGWxNWMD1YPi3e3Ps4ZCUOukkcFcbTBEfUwiciklUbfRZCsUPJFZCxnTHTQJZC9WrYQVAZCAJPrg0miP62NDOAImBpOLyr7gpw6EspvKfo0iVJuhwZBdxevA6VQBK2X1HfQemCLGyC4hMbrF4tmRvrluSApFuZAnwZDZD';
 } else if (process.env.NODE_ENV === 'development_nlp') {
-    fbtoken = 'EAAMhCmQMAyQBANJjQ2hSHnh1NBAGSAKYK2nxAyOExE24jeVzPBNeC3z3sZATMZB0USBNZBrtWktNXxqUyXZBAjT9B6oShyjhZC1CHMvcgA7xhdNhsYk7h2lkC7KfByAZAZBdpQw68iApcvYjTKZC3CRY6TtI2RpLkjJGVHn2zRJjoWr49IldyTpr';
+    fbtoken = 'EAAMhCmQMAyQBAGEYDWOlZA9dSmL64h5vKqIjzZBdUbZBUjsLDXrdt17psccaZB7t1YwnBV78qyOMua3vZBDJwN1sV7mdbiWpxhfBZBGoEfOQPOk3QKmc3q8FSfsaH6QMYFArHIf7rlRSRcn1XYElHj0wuvYKiUH3mwvEqnOQWHrwZDZD';
 }
 else if (process.env.NODE_ENV === 'production') {
     fbtoken = 'EAAT6cw81jgoBAEtZABCicbZCmjleToZBnaJtCN07SZCcFQF3nRVGzZB0NOGNPwZCVfwgsAE7ntZA2DRr2oAP2V8r2g4KMWUM5nWQQ4T7wFUZB60caIRedKhuDX4b81BP5RQZBL7JDHZBLENPk6ZCRlNQsas4R3ZAwm5H4ZAwNMWzs5vCTUwZDZD';
@@ -171,6 +172,44 @@ app.post('/facebook', next(function*(req, res, next) {
         fb_utility.set_menu(sender, fbtoken);
         var recipient = req.body.entry[0].messaging[i].recipient.id.toString();
 
+        // moving from postback temporarily
+        if (_.get(event, 'message.quick_reply.payload')) {
+            var postback = JSON.parse(event.message.quick_reply.payload)
+            if (postback.action === 'item.add') {
+                outgoing = {}
+                console.log('item_add in postback', postback)
+                if (Object.keys(postback.remaining_data).length > 0) { // i
+                    console.log('need to send variety again')
+                    return yield item_add.send_variety_again(postback, sender, outgoing, fbtoken)
+                }
+                else if (Object.keys(postback.remaining_data).length == 0) {
+                    console.log('done with option picking')
+                    var data = {
+                        action: 'item.add',
+                        postback: postback,
+                        sender: sender
+                    }
+                var message = new db.Message({
+                        incoming: true,
+                        thread_id: "facebook_" + sender.toString(),
+                        original_text: text.indexOf(' but ') == -1 ?  '1 but ' + text : text,
+                        user_id: "facebook_" + sender.toString(),
+                        origin: 'facebook',
+                        source: {
+                            'origin': 'facebook',
+                            'channel': sender.toString(),
+                            'org': "facebook_" + sender.toString(),
+                            'id': "facebook_" + sender.toString(),
+                            'user': sender.toString()
+                        },
+                        ts: Date.now()
+                    });
+                console.log('pushed to incoming')
+                queue.publish('incoming', data, ['facebook', sender.toString(), message.ts].join('.'))
+                }
+            }
+        }
+
         //gross, in-memory modes and story tracker
         if(!fb_memory[sender]){
             fb_memory[sender] = {
@@ -195,7 +234,7 @@ app.post('/facebook', next(function*(req, res, next) {
             fb_utility.send_card(x,sender,fbtoken);
             return;
             }
-            res.sendStatus(200);        
+            res.sendStatus(200);
         }
 
         if (event.message) {
@@ -340,9 +379,10 @@ app.post('/facebook', next(function*(req, res, next) {
         }
         //Handle postback responses here
         else if (event.postback) {
+            console.log('theres a postback__')
            yield handle_postback(event, sender, fb_memory, fbtoken, recipient)
         }
-      } //end of for loop    
+      } //end of for loop
 }));
 
 
@@ -358,6 +398,10 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
             if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
                 return_data = yield search_results(message);
                 return yield send_results(message.source.channel, message.text, return_data, outgoing, fbtoken);
+            }
+            else if (message.mode === 'item.add' ) { // cant remember what topic it is, add later
+                console.log('create variational menu')
+                return yield item_add.send_variety_picker_initial(message, message.source.source.channel, outgoing, fbtoken)
             }
             else if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
                 return_data = yield focus(message);
@@ -379,8 +423,6 @@ queue.topic('outgoing.facebook').subscribe(outgoing => {
     } catch ( e ) {
         kip.err(e);
     }
-
-
 
 })
 

@@ -19,6 +19,9 @@ var fbtoken;
 var next = require("co-next")
 var fb_utility = require('./fb_utility');
 
+var item_add = require('./item_add')
+
+
 var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
 
 
@@ -28,7 +31,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
         console.log('POSTBACK PARSE ERR: ',err)
         var postback = event.postback.payload;
     }
-    console.log('\n\n\npostback: ', postback,'\n\n\n');
+    // console.log('\n\n\npostback: ', postback,'\n\n\n');
     //@ @ @ @ @ @ @ @ @ @ @ @
     //@ @ @ @ @ ONBOARDING!!!!!!
     //@ @ @ @ @ @ @ @ @ @ @ @ @
@@ -88,6 +91,8 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
 
     console.log('POSTBACK!!!', postback)
 
+
+
     if (postback.action == 'help') {
             fb_utility.send_suggestions_card(sender, fbtoken);
     }
@@ -105,7 +110,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
                 origin: msg.origin,
                 text: text,
                 source: msg.source,
-                amazon: msg.amazon 
+                amazon: msg.amazon
             });
         // queue it up for processing
         var message = new db.Message(new_message);
@@ -245,7 +250,7 @@ var handle_postback = function* (event, sender, fb_memory, fbtoken, recipient) {
             }
             else if (postback.action === 'remove') {
                 fb_utility.send_typing_indicator(sender, fbtoken)
-                
+
                 var new_message = new db.Message({
                     incoming: true,
                     thread_id: msg.thread_id,
