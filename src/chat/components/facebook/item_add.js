@@ -1,13 +1,12 @@
-require('kip');
+require('kip')
 
-var co = require('co');
-var _ = require('lodash');
-var http = require('http');
-var request = require('request');
+var co = require('co')
+var _ = require('lodash')
+var http = require('http')
+var request = require('request')
 
-
-var queue = require('../queue-mongo');
-//set env vars
+var queue = require('../queue-mongo')
+// set env vars
 
 /**
  * This function sends FBButtons to user to select item
@@ -17,115 +16,112 @@ var queue = require('../queue-mongo');
  * @param {object} outgoing: the entire outgoing message object
  * @param {string} fbtoken: facebook send api token
  */
-function* send_variety_again(postback, channel, outgoing, fbtoken) {
+function * send_variety_again (postback, channel, outgoing, fbtoken) {
   var cur_variation_to_get = Object.keys(postback.remaining_data).pop()
   var cur_variation_opts = postback.remaining_data[cur_variation_to_get]
   var selected_data = postback.selected_data // selected data from postback thing
 
-  cur_variation_to_get = (cur_variation_to_get.length < 11) ? cur_variation_to_get : cur_variation_to_get.slice(0,10)
+  cur_variation_to_get = (cur_variation_to_get.length < 11) ? cur_variation_to_get : cur_variation_to_get.slice(0, 10)
 
   delete postback.remaining_data[cur_variation_to_get]
-  console.log('deleting cur_variation_to_get', postback)
+  logging.info('deleting cur_variation_to_get', postback)
   var QR_OPTS = createQR(cur_variation_to_get, cur_variation_opts, channel, selected_data, postback.remaining_data)
-  QR_OPTS = (QR_OPTS.length>10) ? QR_OPTS.slice(0,10) : QR_OPTS // probably add option to get more options via another button later
+  QR_OPTS = (QR_OPTS.length > 10) ? QR_OPTS.slice(0, 10) : QR_OPTS // probably add option to get more options via another button later
 
   var item_menu = {
-  "recipient": {
-    "id": channel.toString()
-  },
-  "message": {
-    "quick_replies": QR_OPTS,
-    "text": "pick " + getGoodName(cur_variation_to_get)
+    'recipient': {
+      'id': channel.toString()
+    },
+    'message': {
+      'quick_replies': QR_OPTS,
+      'text': 'pick ' + getGoodName(cur_variation_to_get)
     }
   }
-  console.log('item menu created:', JSON.stringify(item_menu))
-  console.log('fbtoken: ', fbtoken)
+  logging.debug('item menu created:', JSON.stringify(item_menu))
   request.post({
     url: 'https://graph.facebook.com/v2.6/me/messages',
     qs: {
-        access_token: fbtoken
+      access_token: fbtoken
     },
-    method: "POST",
+    method: 'POST',
     // headers: {
     //     "content-type": "application/json",
     // },
     json: {
       recipient: {
-        id: channel.toString(),
+        id: channel.toString()
       },
       message: {
-          quick_replies: QR_OPTS,
-          text: "pick " + getGoodName(cur_variation_to_get)
+        quick_replies: QR_OPTS,
+        text: 'pick ' + getGoodName(cur_variation_to_get)
       }
     }
-  }, function(err, res, body) {
-    if (err) console.error('post err ', err);
-    console.log('posting to fb')
-    console.log(body);
+  }, function (err, res, body) {
+    if (err) { logging.error('post err ', err)}
+    logging.debug('posting to fb')
   })
 }
 
 // create initial variety picker, from here add everything to payload and just create responses in postback
-function* send_variety_picker_initial(data, channel, outgoing, fbtoken) {
+function * send_variety_picker_initial (data, channel, outgoing, fbtoken) {
   var obj = data.variationValues
   // use this variation
-  console.log('channel: ', channel)
+  logging.info('channel sending varietyy picker too: ', channel)
   var cur_variation_to_get = Object.keys(obj).pop()
   var cur_variation_opts = obj[cur_variation_to_get]
   var selected_data = {}
   // 10 buttons max, ignore more atm
-  cur_variation_to_get = (cur_variation_to_get.length < 11) ? cur_variation_to_get : cur_variation_to_get.slice(0,10)
+  cur_variation_to_get = (cur_variation_to_get.length < 11) ? cur_variation_to_get : cur_variation_to_get.slice(0, 10)
 
   delete obj[cur_variation_to_get]
   var QR_OPTS = createQR(cur_variation_to_get, cur_variation_opts, channel, selected_data, obj)
-  QR_OPTS = (QR_OPTS.length>10) ? QR_OPTS.slice(0,10) : QR_OPTS // probably add option to get more options via another button later but literally who cares
+  QR_OPTS = (QR_OPTS.length > 10) ? QR_OPTS.slice(0, 10) : QR_OPTS // probably add option to get more options via another button later but literally who cares
   var item_menu = {
-    "recipient": {
-      "id": channel.toString()
+    'recipient': {
+      'id': channel.toString()
     },
-    "message": {
-      "quick_replies": QR_OPTS,
-      "text": "pick " + cur_variation_to_get
+    'message': {
+      'quick_replies': QR_OPTS,
+      'text': 'pick ' + cur_variation_to_get
     }
   }
-  console.log('item menu created:', JSON.stringify(item_menu))
-  console.log('fbtoken: ', fbtoken)
+  logging.info('item menu created:', JSON.stringify(item_menu))
+  logging.info('fbtoken: ', fbtoken)
   request.post({
     url: 'https://graph.facebook.com/v2.6/me/messages',
     qs: {
-        access_token: fbtoken
+      access_token: fbtoken
     },
-    method: "POST",
+    method: 'POST',
     // headers: {
     //     "content-type": "application/json",
     // },
     json: {
       recipient: {
-        id: channel.toString(),
+        id: channel.toString()
       },
       message: {
-          quick_replies: QR_OPTS,
-          text: "pick " + getGoodName(cur_variation_to_get)
+        quick_replies: QR_OPTS,
+        text: 'pick ' + getGoodName(cur_variation_to_get)
       }
     }
-  }, function(err, res, body) {
-    if (err) console.error('post err ', err);
-    console.log('posting to fb')
-    console.log(body);
+  }, function (err, res, body) {
+    if (err) console.error('post err ', err)
+    logging.info('posting to fb')
+    logging.info(body)
   })
 }
 
-function getGoodName(n) {
+function getGoodName (n) {
   if (_.includes(n, '_')) {
     return n.split('_')[0]
-  }
-  else {
+  }else {
     return n
   }
 }
 
-function processPostback(data) {
-  var data = JSON.parse(data.quick_reply)  // response in quick_reply object
+function processPostback (data) {
+  var data = JSON.parse(data.quick_reply) // response in quick_reply object
 
   // var prev_selected = { data['key_being_used'] : postback.text}
   return data
@@ -136,32 +132,32 @@ function processPostback(data) {
    [ '6 B(M) US',
      '7 B(M) US'] }
      */
-  /*"content_type": "text",
-            "title":data.option,
-            "payload": JSON.stringify({
-                    dataId: "facebook_" + sender.toString(),
-                    action: "button_search",
-                    text: data.option
-                })
-  */
+/*"content_type": "text",
+          "title":data.option,
+          "payload": JSON.stringify({
+                  dataId: "facebook_" + sender.toString(),
+                  action: "button_search",
+                  text: data.option
+              })
+*/
 
-function createQR(key, options, sender, selected_data, remaining_data) {
+function createQR (key, options, sender, selected_data, remaining_data) {
   var tmp = []
   options.forEach(function (value) {
     var sd = {}
     sd[key] = value
     tmp.push({
-      content_type: "text",
-      title: value.length > 10 ? value.slice(0,10) : value,
+      content_type: 'text',
+      title: value.length > 10 ? value.slice(0, 10) : value,
       // payload needs to include dataId, action, remaining and sle
       payload: JSON.stringify({
-        dataId: "facebook_" + sender.toString(),
-        action: "item.add",
+        dataId: 'facebook_' + sender.toString(),
+        action: 'item.add',
         // combo selected and value b/c limits and shit but probably will be cause of error in future
         selected_data: _.merge(selected_data, sd),
         remaining_data: remaining_data
-        // key_being_used: key,
-        // text: value
+      // key_being_used: key,
+      // text: value
       })
     })
   })
@@ -174,10 +170,10 @@ function createQR(key, options, sender, selected_data, remaining_data) {
   remaining_data: {},
   key_being_used: 'color_name',
   text: 'Black' }
-*///not sure what else I need to include
-function handleItemPostback(postback, sender) {
+*/ // not sure what else I need to include
+function handleItemPostback (postback, sender) {
   if (Object.keys(postback.remaining_data).length === 0) { // item done, pass back to reply_logic
-  var selectedData = combineKeyWithOpt(postback.key_being_used, postback.text, postback.selected_data)
+    var selectedData = combineKeyWithOpt(postback.key_being_used, postback.text, postback.selected_data)
   // send to reply_logic using item.add key
   } else { // create next keys and resend
 
@@ -190,12 +186,11 @@ function handleItemPostback(postback, sender) {
   }
 }
 
-
-function combineKeyWithOpt(key, opt, selected_data) {
+function combineKeyWithOpt (key, opt, selected_data) {
   var tmp_selected = {}
   if (selected_data.hasOwnProperty(key)) {
-    console.log('already in the selected data thing')
-    // some form of error
+    logging.info('already in the selected data thing')
+  // some form of error
   } else {
     tmp_selected[key] = opt
     return _.merge(selected_data, tmp_selected)
@@ -225,7 +220,7 @@ function combineKeyWithOpt(key, opt, selected_data) {
 //       },
 //       body: varietyMenu
 //   }, function(err, res, body) {
-//       if (err) console.error('post err ', err);
+//       if (err) console.error('post err ', err)
 //   })
 
 // }
