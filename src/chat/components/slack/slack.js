@@ -172,6 +172,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         icon_url:'http://kipthis.com/img/kip-icon.png',
         username:'Kip'
     };
+    
     co(function*() {
 
       if (message.action === 'typing') {

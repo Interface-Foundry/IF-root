@@ -162,7 +162,9 @@ app.post('/facebook', next(function * (req, res, next) {
     return logging.debug('facebook.js messaging events missing:  ', JSON.stringify(req.body.entry[0]))
   }
   for (i = 0; i < messaging_events.length; i++) {
-    event = req.body.entry[0].messaging[i]
+    event = req.body.entry[0].messaging[i];
+    console.log('\n\n\n\n\nLE EVENT : ',event,'\n\n\n\n\n');
+
     sender = event.sender.id
     // Set the persistent menu for user
     fb_utility.set_menu(sender, fbtoken)

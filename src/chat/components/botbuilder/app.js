@@ -531,7 +531,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
     function send_cart(channel, text, outgoing, session) {
         var cart = outgoing.data.data;
         // console.log('\n\n\n\n\nCART OBJECT : ', cart, outgoing,'\n\n\n\n\n');
-
         var cart_items = cart.aggregate_items.map((el, i) => {
             // console.log('\n\n\n\n\n  EL IS : ', el, '\n\n\n\n\n');
           var description = `<b>Price: ${el.price}\nQuantity: ${el.quantity}</b>`;
@@ -553,7 +552,6 @@ queue.topic('outgoing.skype').subscribe(outgoing => {
                       .tap(builder.CardAction.showImage(session, el.image))
               ]); 
             };
-
             return card;
         })
 

@@ -119,79 +119,74 @@ var send_suggestions_card = function(sender, fbtoken) {
  * @param {string} fbtoken: facebook send api token
  */
 var set_menu = function(sender, fbtoken) {
+     var set_menu = {
+      "setting_type" : "call_to_actions",
+      "thread_state" : "existing_thread",
+      "call_to_actions":[
+        {
+          "type":"postback",
+          "title":"Help",
+          "payload":JSON.stringify({
+                dataId: "facebook_" + sender.toString(),
+                action: "help"
+            })
+        },
+        {
+          "type":"postback",
+          "title":"Retake Quiz",
+          "payload":JSON.stringify({
+                action: "take_quiz"
+            })
+        },
+        {
+          "type":"postback",
+          "title":"View Cart",
+          "payload":JSON.stringify({
+                dataId: "facebook_" + sender.toString(),
+                action: "list"
+            })
+        }
+      ]
+    };
+    // request({
+    //     url: "https://graph.facebook.com/v2.6/me/thread_settings",
+    //     qs: {
+    //         access_token: fbtoken
+    //     },
+    //     method: 'POST',
+    //     json: set_menu
+    // }, function(err, body) {
+    //    if (err) {
+    //     console.log('\n\n\n\nWARNING: FB SET MENU ERROR: ', err, body);
 
-         var set_menu = {
-          "setting_type" : "call_to_actions",
-          "thread_state" : "existing_thread",
+    //    }
+    //     else {
+    //         console.log('\n\n\n\n\n\nFB SET MENU : ',body)
+    //         return true
+    //     }
+    // })
+    var set_get_started = {
+          "setting_type":"call_to_actions",
+          "thread_state":"new_thread",
           "call_to_actions":[
             {
-              "type":"postback",
-              "title":"Help",
-              "payload":JSON.stringify({
-                    dataId: "facebook_" + sender.toString(),
-                    action: "help"
-                })
-            },
-            {
-              "type":"postback",
-              "title":"Retake Quiz",
-              "payload":JSON.stringify({
-                    action: "take_quiz"
-                })
-            },
-            {
-              "type":"postback",
-              "title":"View Cart",
-              "payload":JSON.stringify({
-                    dataId: "facebook_" + sender.toString(),
-                    action: "list"
-                })
+              "payload": JSON.stringify({
+                   "type": "GET_STARTED",
+                   "dataId":"facebook_" + sender.toString()
+                 })
             }
           ]
-        };
-
-        request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: set_menu
-        }, function(err, body) {
-           if (err) {
-            console.log('\n\n\n\nWARNING: FB SET MENU ERROR: ', err, body);
-
-           }
-            else {
-                console.log('\n\n\n\n\n\nFB SET MENU : ',body)
-                return true
-            }
-        })
-
-        var set_get_started = {
-              "setting_type":"call_to_actions",
-              "thread_state":"new_thread",
-              "call_to_actions":[
-                {
-                  "payload": JSON.stringify({
-                       "type": "GET_STARTED",
-                       "dataId":"facebook_" + sender.toString()
-                     })
-                }
-              ]
-           }
-
-        request({
-            url: "https://graph.facebook.com/v2.6/me/thread_settings",
-            qs: {
-                access_token: fbtoken
-            },
-            method: 'POST',
-            json: set_get_started
-        }, function(err, body) {
-           if (err) console.log('\n\n\n\nWARNING: FB SET GET STARTED ERROR: ', err);
-        })
-
+       }
+    request({
+        url: "https://graph.facebook.com/v2.6/me/thread_settings",
+        qs: {
+            access_token: fbtoken
+        },
+        method: 'POST',
+        json: set_get_started
+    }, function(err, body) {
+       if (err) console.log('\n\n\n\nWARNING: FB SET GET STARTED ERROR: ', err);
+    })
 }
 
 /**
