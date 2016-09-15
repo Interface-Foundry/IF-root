@@ -118,6 +118,10 @@ describe('Display top food choices to participating members', () => {
     _.get(msg, 'attachments[2].actions[0].text', '').should.equal("More >")
     _.get(msg, 'attachments[2].actions[1].text', '').should.equal("Category")
   })
+
+  it('should display subchoices when you click Add to Cart', () => {
+    "yaaas".should.equal('yaaas'); // todo
+  })
 })
 
 
