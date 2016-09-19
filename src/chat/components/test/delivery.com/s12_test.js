@@ -1,124 +1,92 @@
-var should = require('should')
-var mock_slack = require('./mock_slack')
+require('co-mocha');
+var should = require('should');
+var mock_slack = require('./mock_slack');
+var _ = require('lodash');
 
+
+/*  
+   _____________________  
+ /   _____/_   \_____  \ 
+ \_____  \ |   |/  ____/ 
+ /        \|   /       \ 
+/_______  /|___\_______ \
+        \/             \/
+*/
 describe('admin confirms team order after all orders are finished or time is up', () => {
-  
+
   describe('kip pings admin with team order', () => {
-    it('should locate admin user and send a DM message wit hthe team order ', function * () {
-        // create a new user with no conversation history
-        var user = yield mock_slack.User();
-        // start the conversation with a text to kip
-        var reply = yield user.text("i'm hungry"); // TODO maybe add a button tap test too to trigger this mode
-        // "reply" is the formatted slack message, so exactly what we send to slack with attachments etc 
-        reply.should.be.instanceof(Array);
-        reply.length.should.equal(2);
-        // check for sticker
-        _.get(reply, '0.attachments.0.image_url').should.equal('kip_eats_sticker.png')
-        // check the text
-        _.get(reply, '1.text').should.equal("Great! Which address is this for?")
-        // check the buttons
-        _.get(reply, '1.attachments.1.actions.text').should.equal('')
-        reply.attachments[0].actions.should.have.length(2)
-        reply.attachments[0].actions[0].text.should.equal('Enter New Address +')
-        // etc
+    it('should send a DM message to admin with the team order ', function * () {
+
+        var admin = yield mock_slack.ExistingAdmin()
+        var msg = yield admin.receiveTeamOrder()
+
+        msg.should.be.instanceof(Object);
+        msg.attachments.should.be.instanceof(Array);
+        msg.attachments.length.should.equal(3);
+
+        // -- first item -- //
+        _.get(msg, 'attachments[0].title').should.equal("Burger A – $12.95");
+        _.get(msg, 'attachments[0].text').should.equal("8 oz. Burger, toasted bun, spicy chipotle mayo, spicy pickled jalapenos, lettuce, tomato, red onions, avocado. Served with home made sauce \n *Quantity: 1*");
+        _.get(msg, 'attachments[0].fallback').should.equal("You were unable to load the food item.");
+        _.get(msg, 'attachments[0].color').should.equal("#3AA3E3");
+        _.get(msg, 'attachments[0].attachment_type').should.equal("default");
+        _.get(msg, 'attachments[0].attachment_type').should.equal("http://comps.canstockphoto.com/can-stock-photo_csp21433030.jpg");
+        msg.attachments[0].actions.should.have.length(3);
+        msg.attachments[0].actions[0].text.should.equal('+');
+        msg.attachments[0].actions[1].text.should.equal('-');
+        msg.attachments[0].actions[2].text.should.equal('Remove All');
+
+
+        // -- second item -- //
+        _.get(msg, 'attachments[1].title').should.equal("Lunch Special B – $9.99");
+        _.get(msg, 'attachments[1].text').should.equal("8 oz. Burger, toasted bun, spicy chipotle mayo, spicy pickled jalapenos, lettuce, tomato, red onions, avocado. Served with home made sauce \n *Quantity: 1*");
+        _.get(msg, 'attachments[1].fallback').should.equal("You were unable to load the food item.");
+        _.get(msg, 'attachments[1].color').should.equal("#3AA3E3");
+        _.get(msg, 'attachments[1].attachment_type').should.equal("default");
+        _.get(msg, 'attachments[1].attachment_type').should.equal("https://www.emojibase.com/resources/img/emojis/hangouts/1f371.png");
+        msg.attachments[1].actions.should.have.length(2);
+        msg.attachments[1].actions[0].text.should.equal('+');
+        msg.attachments[1].actions[1].text.should.equal('-');
+
+
+        // -- cart summary -- //
+        _.get(msg, 'attachments[2].text').should.equal("Total: $22.94");
+        _.get(msg, 'attachments[2].fallback').should.equal("You were unable to load the cart.");
+        _.get(msg, 'attachments[2].color').should.equal("#3AA3E3");
+        _.get(msg, 'attachments[2].attachment_type').should.equal("default");
+        msg.attachments[2].actions.should.have.length(2);
+        msg.attachments[2].actions[0].text.should.equal('Confirm Order');
+        msg.attachments[2].actions[0].text.should.equal('< Back');
+
+        describe('admin taps + button on item 1', () => {
+          it('should be able to tap a button to increase quantity', function * () {
+            msg = yield admin.tap(msg, 0, 0); 
+            _.get(msg, 'attachments[1].text').should.equal("8 oz. Burger, toasted bun, spicy chipotle mayo, spicy pickled jalapenos, lettuce, tomato, red onions, avocado. Served with home made sauce \n *Quantity: 3*")
+          })
+        })
+
+        describe('admin taps - button on item 1', () => {
+          it('should be able to tap a button to decrease quantity', function * () {
+            msg = yield admin.tap(msg, 0, 1) ;
+            _.get(msg, 'attachments[1].text').should.equal("8 oz. Burger, toasted bun, spicy chipotle mayo, spicy pickled jalapenos, lettuce, tomato, red onions, avocado. Served with home made sauce \n *Quantity: 2*")
+          })
+        })
+
+        describe('admin taps - button on item 2', () => {
+          it('the item should disappear from the card if the quantity becomes zero.', function * () {
+            msg = yield admin.tap(msg, 1, 1) ;
+            msg.attachments.length.should.equal(2);              
+          })
+        })
+
+        describe('admin taps "Remove all" button', () => {
+          it('should remove all quantities of item 1 and cart should say empty', function * () {
+            yield admin.tap(msg, 0, 0); 
+            msg = yield admin.tap(msg, 1, 2) 
+            _.get(msg, 'attachments[1].text').should.equal("Your Cart is Empty.")
+          })
+        })
+
     })
   })
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-})
-
-describe('initializing the food search conversation for existing user', () => {
-  it('should pick up on some common phrases indicating that you want food', function * () {
-    // create a new user with no conversation history
-    var user = yield mock_slack.ExistingUser()
-
-    // start the conversation with a text to kip
-    var reply = yield user.text("i'm hungry") // TODO maybe add a button tap test too to trigger this mode
-
-    // "reply" is the formatted slack message, so exactly what we send to slack with attachments etc 
-    reply.should.be.instanceof(Array)
-    reply.length.should.equal(2)
-
-    // check for sticker
-    _.get(reply, '0.attachments.0.image_url').should.equal('kip_eats_sticker.png')
-    
-    // check the text
-    _.get(reply, '1.text').should.equal("Great! Which address is this for?")
-
-    // check the buttons
-    _.get(reply, '1.attachments.1.actions.0.text').should.equal('902 Broadway 6th floor')
-    _.get(reply, '1.attachments.1.actions.1.text').should.equal('43 Main st New York, NY')
-    _.get(reply, '1.attachments.1.actions.2.text').should.equal('New +')
-
-  })
-})
-
-describe('choosing an address for existing user', () => {
-  it('should be able to tap a button to choose a pre-saved address', function * () {
-    // create a new user with no conversation history
-    var user = yield mock_slack.ExistingUser()
-
-    // start the conversation with a text to kip
-    var reply = yield user.text("i'm hungry") // TODO maybe add a button tap test too to trigger this mode
-
-    // tap the broadway button, which is the first button aka action
-    var replies = yield user.tap(reply, 1, 0) // to tap reply.attachments[1].actions[0]
-
-    // make sure that the previous message has been replaced (aka the white arrow)
-    _.get(replies, 'replacementMessage.text').should.equal('902 Broadway 6th floor New York, NY 10010.\n Delivery or Pickup?')
-    
-    // test buttons like before
-    _.get()
-
-    // assert there was not a new message (aka black arrow)
-    should.not.exist(replies.newMessages)
-
-  })
-})
-
-
-describe('merchant search', () => {
-  it('should allow you to type a new address', function * () {
-    // create a new user with no conversation history
-    var user = yield mock_slack.User()
-
-    // start the conversation
-    yield user.text('food')
-
-    // kip would then reply "OK Let's Eat! What address should I use?" etc
-    var reply = yield user.text('902 Broadway 10010')
-    reply.text.should.equal('OK, here are some options near 902 Broadway 10010')
-
-  // etc
-  })
-
-  it('should allow you to select an old address with a button click', function * () {
-    // create a new user with no conversation history
-    var user = yield mock_slack.User()
-
-    // start the conversation
-    var message = yield user.text('food')
-
-    // kip would then reply "OK Let's Eat! What address should I use?" etc
-    var reply = yield user.click(message.attachments[0].actions[0])
-    reply.text.should.equal('OK, here are some options near 902 Broadway 10010')
-
-  // etc
-  })
-})
+});
