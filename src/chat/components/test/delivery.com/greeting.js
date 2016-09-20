@@ -4,9 +4,10 @@ require('co-mocha')
 
 describe('greeting', () => {
   it('should respond to "food"', function * () {
+    yield mock.setup()
     var user = yield mock.ExistingUser()
-    user.id.should.equal('bamf')
-    user.team_id.should.equal('yolo')
+    user.chatuser.id.should.equal('bamf_yolo')
+    user.chatuser.team_id.should.equal('yolo')
 
     var res = yield user.text("food")
     res.text.should.equal("yeah let's eat! what address should i use?")
