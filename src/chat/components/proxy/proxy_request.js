@@ -48,8 +48,12 @@ else {
       password: 'e49d4ega1696', 
       zone: 'gen'
   };
-  proxy = new Luminati(options);
-  proxy.listen(24000, '127.0.0.1')
+  try {
+    proxy = new Luminati(options);
+    proxy.listen(24000, '127.0.0.1')
+  } catch(err) {
+    console.log('\n\nUnable to start Luminati Proxy.. try a global npm install.. ', err,'\n\n');
+  }
 }
 
 var request = function(url) {
