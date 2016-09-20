@@ -41,7 +41,7 @@ SLACKSLACKSLACKSLACKSLACKSLdo.    ```    `-hNSLACKSLACKSLACKSLACKSLACKSLACKSLACK
 SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 */
 
-var slack = require('@slack/client');
+var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client');
 var co = require('co');
 var _ = require('lodash');
 
@@ -195,7 +195,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         msgData.attachments = yield cart(message, bot.slackbot, false);
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
-
 
       bot.rtm.sendMessage(message.text, message.source.channel, () => {
         outgoing.ack();
