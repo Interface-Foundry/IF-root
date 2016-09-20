@@ -18,7 +18,7 @@ team.slackbot = {
         "weekly_status_day" : "Friday",
         "weekly_status_enabled" : true,
         "office_assistants" : [ 
-            "U1JU56UG1"
+            "admin_yolo"
         ],
         "initialized" : true,
         "dateAdded" : ISODate("2016-06-24T20:29:22.265Z"),

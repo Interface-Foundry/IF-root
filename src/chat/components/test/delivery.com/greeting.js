@@ -3,8 +3,11 @@ var should = require('should')
 require('co-mocha')
 
 describe('greeting', () => {
-  it('should respond to "food"', function * () {
+  before(function * () {
+    this.timeout(5000)
     yield mock.setup()
+  })
+  it('should respond to "food"', function * () {
     var user = yield mock.ExistingUser()
     user.chatuser.id.should.equal('bamf_yolo')
     user.chatuser.team_id.should.equal('yolo')

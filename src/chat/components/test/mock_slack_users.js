@@ -111,7 +111,10 @@ function * Admin() {
  *  - runs the delivery.com mode handler
  */
 function * setup () {
-  process.env.NODE_ENV = 'test'
+  if (process.env.NODE_ENV !== 'test') {
+    throw new Error('must run as NODE_ENV=test')
+  }
+  
   yield require('../slack/test_team_1').reset()
   yield require('../slack/slack').start()
   require('../delivery.com/delivery.com')
