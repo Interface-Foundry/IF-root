@@ -1,6 +1,6 @@
 require('co-mocha')
 var should = require('should')
-var mock_slack = require('./mock_slack')
+var mock_slack = require('./mock_slack_users')
 var _ = require('lodash')
 
 // procedes up to S7
@@ -117,6 +117,10 @@ describe('Display top food choices to participating members', () => {
     // check the button menu
     _.get(msg, 'attachments[2].actions[0].text', '').should.equal("More >")
     _.get(msg, 'attachments[2].actions[1].text', '').should.equal("Category")
+  })
+
+  it('should display subchoices when you click Add to Cart', () => {
+    "yaaas".should.equal('yaaas'); // todo
   })
 })
 
