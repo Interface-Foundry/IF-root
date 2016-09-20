@@ -102,7 +102,6 @@ function topic (topic) {
 }
 
 function * getNextMessage (topic) {
-  debugger
   var message = yield db.Pubsub.findOne({
     topic: topic,
     dispatched: { $ne: true },
