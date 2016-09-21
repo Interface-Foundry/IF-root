@@ -12,7 +12,7 @@ var fs = require('fs');
 var yaml = require('js-yaml');
 var dsxsvc = require('./dsx_services');
 var dsxutils = require('./dsx_utils')
-
+var ui = require('../ui_controls');
 
 // get the command line arguments
 var argv = require('minimist')(process.argv.slice(2));
@@ -59,6 +59,20 @@ var dsxClient = new dsxsvc.DSXClient(loadedParams);
 
 console.log(dsxClient.getURI());
 
+
+class UserChannel {
+
+    constructor(queue) {
+
+        this.queue = queue;
+
+        this.sendReply = function(message, data) {
+            this.queue.publish('outgoing.' + message.origin, data, message._id + '.reply.results');
+        }
+
+        return this;
+    }
+}
 
 
 function default_reply(message) {
@@ -218,8 +232,14 @@ handlers['food.address'] = function* (message) {
     // **assuming that user who hits this endpoint is admin already
     var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',message.source.team, message.source.user);
     
-    kip.debug('deliveryContext created : ', deliveryContext);
+    // kip.debug('deliveryContext created : ', deliveryContext);
     
+    // var bot = slackConnections[message.source.team];
+    var card = ui.SlackCard('delivery context created!');
+
+    new UserChannel(queue).sendReply(message, card.render());
+
+
 
     /*
   var results = yield search.search({
@@ -228,18 +248,18 @@ handlers['food.address'] = function* (message) {
   */
 
 
-  var results_message = default_reply(message);
-  results_message.action = 'restaurant.list';
-  results_message.text = 'Here are some restaurants you might like nearby';
+  // var show_next_message = default_reply(message);
+  // results_message.action = 'restaurant.list';
+  // results_message.text = 'Here are some restaurants you might like nearby';
   
-  results_message.data = {
-    results: addressList,
-    params: {addr: results.address}
-  };
+  // results_message.data = {
+  //   results: addressList,
+  //   params: {addr: results.address}
+  // };
 
   
-  results_message.save();
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+  // results_message.save();
+  // queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
 }
 
 //

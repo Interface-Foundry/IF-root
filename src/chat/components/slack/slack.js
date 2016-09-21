@@ -157,6 +157,7 @@ co(function*() {
 //
 kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
+
   try {
     console.log('outgoing message');
     console.log(outgoing);
@@ -172,6 +173,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         icon_url:'http://kipthis.com/img/kip-icon.png',
         username:'Kip'
     };
+
     
     co(function*() {
 
@@ -180,21 +182,23 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack();
         })
       }
-
-      if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-        msgData.attachments = yield search_results(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      if (message.mode === 'food' && message.action === 'begin') {
+         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
+      // if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+      //   msgData.attachments = yield search_results(message);
+      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      // }
 
-      if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-        msgData.attachments = yield focus(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
+      // if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+      //   msgData.attachments = yield focus(message);
+      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      // }
 
-      if (message.mode === 'cart' && message.action === 'view') {
-        msgData.attachments = yield cart(message, bot.slackbot, false);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
+      // if (message.mode === 'cart' && message.action === 'view') {
+      //   msgData.attachments = yield cart(message, bot.slackbot, false);
+      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      // }
 
       bot.rtm.sendMessage(message.text, message.source.channel, () => {
         outgoing.ack();
