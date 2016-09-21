@@ -30,8 +30,8 @@ service_objects:
 
         DSXClient:
                 init_params:
-                          host:         localhost
-                          port:         5000
+                          host:         64639cb4.ngrok.io
+                          port:         80
 
 
 

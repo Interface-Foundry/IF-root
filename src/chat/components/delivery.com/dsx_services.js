@@ -22,7 +22,8 @@ class DSXClient{
 
 
             this.restaurantSearchEndpoint = 'restaurants';
-            
+            this.contextEndpoint = 'context';
+
 
             this.getNearbyRestaurants = function(address) {
 
@@ -34,6 +35,29 @@ class DSXClient{
                         method: 'GET',
                         uri: final_uri, 
                         qs: params
+                    },
+                   function(error, response, body){                                              
+                       if(!error && response.statusCode == 200) {
+                           resolve(response.body);
+                       }
+                       else{
+                           reject(error);
+                       }
+                       
+                   });
+                });
+            }
+
+            this.createDeliveryContext = function(address, fulfillment_type, team_id, team_admin_id) {
+
+                return new Promise((resolve, reject) => {
+                    var final_uri = this.getURI().concat('/').concat(this.contextEndpoint);                
+                    var body = {'address': address, 'fulfillment_type': fulfillment_type, 'team_id': team_id, 'team_admin_id': team_admin_id };
+                
+                    request({
+                        method: 'POST',
+                        uri: final_uri, 
+                        form: body
                     },
                    function(error, response, body){                                              
                        if(!error && response.statusCode == 200) {

@@ -182,12 +182,43 @@ handlers['food.address'] = function* (message) {
   message.state.addr = addr;
   //message.save();
 
+// { action: 'address',
+//   mode: 'food',
+//   state: { addr: '902 broadway, new york' },
+//   _id: 57e2b376060870f82699f9e8,
+//   text: '902 broadway, new york',
+//   incoming: true,
+//   thread_id: 'D0HLZLBDM',
+//   original_text: '902 broadway, new york',
+//   user_id: 'U0HLZP0A2',
+//   origin: 'slack',
+//   source:
+//    { type: 'message',
+//      channel: 'D0HLZLBDM',
+//      user: 'U0HLZP0A2',
+//      text: '902 broadway, new york',
+//      ts: '1474474870.000007',
+//      team: 'T0HLZP09L' },
+//   __v: 0,
+//   urlShorten: [],
+//   client_res: [],
+//   execute: [],
+//   tokens: [],
+//   resolved: false,
+//   ts: 2016-09-21T16:21:10.643Z }
+
+
+
   // search for food near that address
   //send_text_reply(message, 'thanks, searching your area for good stuff!');
 
-    var addressList = yield dsxClient.getNearbyRestaurants(addr);
+
+  //TODO DISPLAY DELIVERY OR PICKUP CARD HEAH
+
+    // **assuming that user who hits this endpoint is admin already
+    var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',message.source.team, message.source.user);
     
-    kip.debug(addressList);
+    kip.debug('deliveryContext created : ', deliveryContext);
     
 
     /*
