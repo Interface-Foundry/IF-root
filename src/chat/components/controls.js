@@ -17,6 +17,25 @@
 
 
 
+var queue = require('../queue-mongo');
+
+
+class UserChannel {
+
+    constructor(queue) {
+
+        this.queue = queue;
+
+        this.sendReply = function(message, data) {
+            this.queue.publish('outgoing.' + message.origin, data, message._id + '.reply.results');
+        }
+
+        return this;
+    }
+}
+
+
+
 
 class RequiredAttributeGroup{
 
