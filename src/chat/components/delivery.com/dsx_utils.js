@@ -11,12 +11,15 @@ module.exports = {
     
     ServiceObjectLoader: function(yamlDoc) {
 	this.yamlDoc = yamlDoc;	
+
 	this.loadServiceObjectParams = function(serviceObjectName) {
-	    soSegment = this.yamlDoc['service_objects'];
-	    initData = module.exports.verifyPresent(soSegment[serviceObjectName], serviceObjectName);
+	    var soSegment = this.yamlDoc['service_objects'];
+	    var initData = module.exports.verifyPresent(soSegment[serviceObjectName], serviceObjectName);
 	    if(initData['init_params'] === null || initData['init_params'] === undefined){
-		return {};
+		    return {};
 	    }
+
+        console.log(initData);
 	    return initData['init_params'];
 	};
 	

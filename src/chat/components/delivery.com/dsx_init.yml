@@ -30,7 +30,7 @@ service_objects:
 
         DSXClient:
                 init_params:
-                        - host:         localhost
+                          host:         localhost
                           port:         5000
 
 

@@ -47,15 +47,17 @@ var logger = new(winston.Logger)({
 
 
 
-
 var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient');
 
 logger.info(loadedParams);
+logger.info(typeof(loadedParams))
+console.log("### looking at loadedParams again");
+console.log(loadedParams)
 
-var dsxClient = new dsxsvc.DSXClient({'host': 'localhost', 'port': 5000});
-logger.info(dsxClient.getURI());
 
+var dsxClient = new dsxsvc.DSXClient(loadedParams);
 
+console.log(dsxClient.getURI());
 
 
 
@@ -178,21 +180,33 @@ handlers['food.address'] = function* (message) {
   // TODO
 
   message.state.addr = addr;
-  message.save();
+  //message.save();
 
   // search for food near that address
-  send_text_reply(message, 'thanks, searching your area for good stuff!');
+  //send_text_reply(message, 'thanks, searching your area for good stuff!');
 
+    var addressList = yield dsxClient.getNearbyRestaurants(addr);
+    
+    kip.debug(addressList);
+    
+
+    /*
   var results = yield search.search({
     addr: addr
   });
+  */
+
+
   var results_message = default_reply(message);
   results_message.action = 'restaurant.list';
   results_message.text = 'Here are some restaurants you might like nearby';
+  
   results_message.data = {
-    results: results.results,
+    results: addressList,
     params: {addr: results.address}
   };
+
+  
   results_message.save();
   queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
 }

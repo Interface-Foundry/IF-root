@@ -43,6 +43,7 @@ if (test_mode) {
 } 
 else {
   console.log('Running proxy normal mode..')
+/*
   options = {
       customer: 'kipthis', 
       password: 'e49d4ega1696', 
@@ -50,6 +51,7 @@ else {
   };
   proxy = new Luminati(options);
   proxy.listen(24000, '127.0.0.1')
+*/
 }
 
 var request = function(url) {
