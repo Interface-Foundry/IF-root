@@ -52,12 +52,11 @@ class DSXClient{
                 
                 return new Promise((resolve, reject) => {
                     var final_uri = this.getURI().concat('/').concat(endpoint);                
-                    var params = request_params;
                 
                     request({
                         method: 'POST',
                         uri: final_uri, 
-                        body: request_body
+                        form: request_body
                     },
                    function(error, response, body){                                              
                        if(!error && response.statusCode == 200) {

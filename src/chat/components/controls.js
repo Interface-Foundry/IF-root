@@ -175,7 +175,73 @@ searchAttrValue is the actual selection val, lowercased and with underscores ins
 */
 
 class SlackButton{
+ /** 
+     * @param {string} title the button's label
+     * @param {string} actionName the action attribute of the user event
+     * @param {string} instructionName the instruction attribute of the user event
+     * @param {Object} sender the FB sender object
+     * @param {String} searchAttrValue optional 
+     */
+    constructor(name, text, style, type, value) {
 
+    	this.data = {
+    		name: name,
+			text:text,
+			style: style,
+			type: type,
+			value: value
+	    };		
+	  
+
+		this.render = function() {
+	   
+	    	return this.data;
+		}
+
+		this.setConfirmation = function(title, text, okMsg, cancelMsg) {
+
+			this.data['confirm'] = {
+				title: title, 
+				text: text,
+				ok_text: okMsg,
+				dismiss_text: cancelMsg
+			};
+		}
+    
+    return this;
+    }
+}
+class SlackCard {
+	constructor(text) {
+
+		this.data = { text: text };
+
+		return this;
+	}
+}
+
+class SlackAttachment{
+ 
+    constructor(text, fallback, callbackId, color, attachmentType) {
+
+    	this.data = {
+    		text: text,
+			fallback: fallback,
+			callbackId: callbackId,
+			color: color,
+			attachmentType: attachmentType	    };		
+	  	
+	  	this.addButton = function(slackButton) {
+
+	  	}
+
+		this.render = function() {
+	   
+	    	return this.data;
+		}
+    
+    return this;
+    }
 }
 
 
