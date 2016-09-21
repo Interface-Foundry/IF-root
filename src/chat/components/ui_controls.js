@@ -169,7 +169,7 @@ class FBButtonSetBuilder {
 
 
 	return this;
-	
+
     }
 
 
@@ -228,8 +228,9 @@ class SlackCard {
 		this.data = { text: text };
 
 		this.render = function() {
-
-			return this.data;
+			// { text: 'text', action: 'delivery.whatever',  }
+			return {  text: ,data:  this.data} ;
+			}
 		}
 
 		return this;
@@ -336,6 +337,34 @@ class FBButton{
     return this;
     }
 };
+
+
+class UIComponent{
+	constructor(type, data) {
+		this.type = type;
+		this.data = data
+
+		this.asText = function() {
+			if (this.data.text)
+				return this.data.text;
+		}
+
+		this.render = function () {
+			return this.data;
+		}
+        // this.build = function(type, data){
+        // 	// { type: "notification", data: {whatever text}}
+        // 	// { type: "card", data: {<json needed for card display>}}
+        // 	this.data = data;
+
+        //     return this;
+        // }
+
+
+
+        return this;
+    }	
+}
 
 
 module.exports = {
