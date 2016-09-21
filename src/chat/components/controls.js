@@ -192,7 +192,6 @@ class SlackButton{
 			value: value
 	    };		
 	  
-
 		this.render = function() {
 	   
 	    	return this.data;
@@ -241,6 +240,42 @@ class SlackAttachment{
 		}
     
     return this;
+    }
+}
+
+
+class SlackDisplayBuilder {
+
+    constructor() {
+
+        // create an empty display object
+
+        this.setTopLevelMessage = function(text){
+            // simplest possible display -- should be immediately renderable
+            return this;
+        }
+
+        this.setAttachment = function(attachment) {
+            // add an attachment to the data we wil render
+            return this;
+        }
+
+        this.updateAttachment = function(name, value) {
+            // add a field to our existing attachment
+            return this;
+        }
+
+        this.addButton = function(button) {
+            // add this button object to our attachment
+            return this;
+        }
+
+        this.build = function(){
+            // return a valid SlackCard with whatever attachments & buttons we've added to it
+        }
+
+
+        return this;
     }
 }
 
