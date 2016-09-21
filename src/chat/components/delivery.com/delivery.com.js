@@ -235,9 +235,13 @@ handlers['food.address'] = function* (message) {
     // kip.debug('deliveryContext created : ', deliveryContext);
     
     // var bot = slackConnections[message.source.team];
-    var card = ui.SlackCard('delivery context created!');
+    // var card = ui.SlackCard('delivery context created!');
 
-    new UserChannel(queue).sendReply(message, card.render());
+    var replyData = {'type': 'notification', 'data': { 'text': 'delivery context created.' }};
+
+    // var replyData = {'type': 'option_group', 'data': { 'options': [ {'one': 'this thing'}, {'two' : 'that thing'} ]}}
+
+    new UserChannel(queue).sendReply(message, replyData);
 
 
 
