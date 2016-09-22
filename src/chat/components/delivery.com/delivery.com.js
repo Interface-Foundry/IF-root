@@ -142,10 +142,13 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20);
 
     var session = history[0];
-    if (!session.state && history[1]) {
+    if (history[1]) {
       session.mode = history[1].mode;
       session.action = history[1].action;
       session.route = session.mode + '.' + session.action;
+      session.prevMode = history[1].mode;
+      session.prevAction = history[1].action;
+      session.prevRoute = session.prevMode + '.' + session.prevAction;
       // session.state = history[1].state;
     }
     // session.state = session.state || {};
@@ -153,11 +156,10 @@ queue.topic('incoming').subscribe(incoming => {
     if (session._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct session not retrieved from db');
     }
-    if (history[1]) {
-      session.prevMode = history[1].mode;
-      session.prevAction = history[1].action;
-      session.prevRoute = session.prevMode + '.' + session.prevAction;
-    }
+
+
+
+      
 
     //var route = yield getRoute(session);
     //
@@ -226,23 +228,31 @@ handlers['food.begin'] = function* (session) {
     //session.save();  // hypothesis: the problem is we are saving the session object before setting its routing info (in replyChannel.send()
     
     var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
-    replyChannel.send(session, 'food.fulfillment_select', component.render());
+    replyChannel.send(session, 'food.store_context', component.render());
 
   // todo save addresses and show saved addresses
 }
 
 
-handlers['food.fulfillment_select'] = function* (session) {    
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    replyChannel.send(session, 'food.store_context', component.render());
-}
-
 
 handlers['food.store_context'] = function* (session) {
     var addr = session.text;
-    session.state.addr = addr;
-    var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',session.source.team, session.source.user);
-    var component = new UIComponentFactory(session.source.origin).buildTextMessage('delivery context created.');
+    
+    var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user);
+
+    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+    
+    replyChannel.send(session, 'food.context_update', component.render());
+}
+
+
+
+handlers['food.context_update'] = function* (session) {   
+ 
+    var fulfillmentMethod = session.text;
+    var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
+
+    var component = new ui.UIComponentFactory(session.origin).buildTextMessage("delivery context updated.")
     replyChannel.send(session, 'food.ready_to_poll', component.render());
 }
 

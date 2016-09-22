@@ -20,6 +20,7 @@ class DSXClient{
 
             this.restaurantSearchEndpoint = 'restaurants';
             this.contextEndpoint = 'context';
+            this.contextUpdateEndpoint = 'context/update';
 
             this._get = function(endpoint, request_params) {
                 
@@ -75,6 +76,12 @@ class DSXClient{
             this.createDeliveryContext = function(address, fulfillment_type, team_id, team_admin_id) {                
                 var request_body = {'address': address, 'fulfillment_type': fulfillment_type, 'team_id': team_id, 'team_admin_id': team_admin_id };
                 return this._post(this.contextEndpoint, request_body);
+            }
+
+            this.setFulfillmentMethodForContext = function(fulfillmentMethod, teamID, teamAdminID) {
+
+                var requestBody = {'fulfillment_type': fulfillmentMethod, 'team_id': teamID, 'team_admin_id': teamAdminID };
+                return this._post(this.contextUpdateEndpoint, requestBody)
             }
 
 	        return this;
