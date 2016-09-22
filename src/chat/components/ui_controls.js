@@ -93,6 +93,13 @@ class UIPrimitive {
 }
 */
 
+
+String.prototype.replaceAll = function(search, replacement) {
+   var target = this;
+   return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+
 class UIComponentFactory {
 
    ///text_message, button, button_group, card, image
@@ -110,11 +117,39 @@ class UIComponentFactory {
 
         this.componentFamily = componentFamily;  // either 'slack' or 'facebook' for now
 
-
+ 
         this.buildTextMessage = function(text){
 
             if(this.componentFamily == 'slack'){
                 return new SlackCard(text);
+            }
+        }
+
+        this._labelToValue = function(label){
+            return label.toLowerCase().replaceAll(' ', '_');
+        }
+
+        this._labelToButtonName = function(label){
+
+            return this._labelToValue(label) + '_btn';
+        }
+
+        this.buildButtonGroup = function(buttonGroupLabel, optionStrings, defaultOption){
+
+            if(this.componentFamily == 'slack'){
+
+                var component = new SlackAttachment(buttonGroupLabel, 'Fallback Text', null, '#3AA3E3', 'default');
+                
+                optionStrings.forEach(function(optionString){
+                    var b = new SlackButton(this._labelToButtonName(optionString), 
+                                            optionString, 
+                                            'primary', 
+                                            'button',
+                                            this._labelToValue(optionString));
+                    component.addButton(b);
+                });
+                
+                return component;
             }
         }
 

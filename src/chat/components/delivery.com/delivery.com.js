@@ -180,108 +180,48 @@ var handlers = {};
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function* (message) {
+handlers['food.begin'] = function* (session) {
     console.log('🍕 food order 🌮');
-    message.state = {};
-    message.save();
+    session.state = {};
+    session.save();
     
-    var component = new ui.UIComponentFactory(message.origin).buildTextMessage("yeah let's eat! what address should i use?");
-    replyChannel.send(message, component.render());
+    var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
+    replyChannel.send(session, component.render());
 
   // todo save addresses and show saved addresses
 }
 
+
+
 //
 // the user's intent is to specify an address for delivery/pickup
 //
-handlers['food.address'] = function* (message) {
-  var addr = message.text;
-  // check if it's a good address
-  // TODO
+handlers['food.address'] = function* (session) {
+    var addr = session.text;
+    session.state.addr = addr;
 
-  message.state.addr = addr;
-  //message.save();
+    var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',session.source.team, session.source.user);
+    var component = new UIComponentFactory(session.source.origin).buildTextMessage('delivery context created.');
 
-// { action: 'address',
-//   mode: 'food',
-//   state: { addr: '902 broadway, new york' },
-//   _id: 57e2b376060870f82699f9e8,
-//   text: '902 broadway, new york',
-//   incoming: true,
-//   thread_id: 'D0HLZLBDM',
-//   original_text: '902 broadway, new york',
-//   user_id: 'U0HLZP0A2',
-//   origin: 'slack',
-//   source:
-//    { type: 'message',
-//      channel: 'D0HLZLBDM',
-//      user: 'U0HLZP0A2',
-//      text: '902 broadway, new york',
-//      ts: '1474474870.000007',
-//      team: 'T0HLZP09L' },
-//   __v: 0,
-//   urlShorten: [],
-//   client_res: [],
-//   execute: [],
-//   tokens: [],
-//   resolved: false,
-//   ts: 2016-09-21T16:21:10.643Z }
-
-
-
-    // search for food near that address
-    /*
-    var component = new ui.UIComponentFactory(message.origin).buildTextMessage("thanks, searching your area for good stuff!");
-    replyChannel.send(message, component.render());
-    */
-
-    // TODO DISPLAY DELIVERY OR PICKUP CARD HEAH
-    var component = new ui.UIComponentFactory(message.origin).buildButtonGroup(['Delivery', 'Pickup'])
-
-    // **assuming that user who hits this endpoint is admin already
-    var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',message.source.team, message.source.user);
-    
-    // kip.debug('deliveryContext created : ', deliveryContext);
-    
-    // var bot = slackConnections[message.source.team];
-    // var card = ui.SlackCard('delivery context created!');
-
-    var replyData = {'type': 'notification', 'data': { 'text': 'delivery context created.' }};
-
-
-    var component = new UIComponentFactory(message.source.origin).buildTextMessage('delivery context created.');
-
-    kip.debug('++++++++');
-    kip.debug(component.render());
-    kip.debug('++++++++');
-
-    replyChannel.send(message, component.render());
-
-
-    // var component = new UIComponentFactory(message.source.origin).buildOptionGroup(['Delivery', 'Pickup']);
-
-
-
-    /*
-  var results = yield search.search({
-    addr: addr
-  });
-  */
-
-
-  // var show_next_message = default_reply(message);
-  // results_message.action = 'restaurant.list';
-  // results_message.text = 'Here are some restaurants you might like nearby';
-  
-  // results_message.data = {
-  //   results: addressList,
-  //   params: {addr: results.address}
-  // };
-
-  
-  // results_message.save();
-  // queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+    replyChannel.send(session, component.render());
 }
+
+
+handlers['food.fulfillment_select'] = function* (session) {    
+    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+    replyChannel.send(session, component.render());
+}
+
+
+handlers['food.fulfillment_selected'] = function* (session) {
+
+    var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Ready to poll team members.');
+    replyChannel.send(session, component.render());
+}
+
+
+
+
 
 //
 // the user's intent is to search for a specific type of food or a specific restaurant
