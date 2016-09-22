@@ -108,7 +108,7 @@ co(function*() {
         original_text: data.text,
         user_id: data.user,
         origin: 'slack',
-        source: data,
+        source: data
       });
 
       // don't talk to yourself

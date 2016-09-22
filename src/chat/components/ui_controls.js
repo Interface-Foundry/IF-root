@@ -105,6 +105,9 @@ class UIComponentFactory {
    ///text_message, button, button_group, card, image
 
     constructor(componentFamily) {
+
+        var self = this;
+
         var validFamilies = ['slack', 'facebook'];
 
         if(componentFamily === null || componentFamily === undefined){
@@ -134,21 +137,29 @@ class UIComponentFactory {
             return this._labelToValue(label) + '_btn';
         }
 
+
+
+   // { data: { text: 'yeah let\'s eat! what address should i use?' },
+   //   type: 'slack' },
+
+   // { attachmentType: 'default',
+   //   color: '#3AA3E3',
+   //   callbackId: null,
+   //   fallback: 'Fallback Text',
+   //   text: 'Select your order method.' }
+
         this.buildButtonGroup = function(buttonGroupLabel, optionStrings, defaultOption){
 
             if(this.componentFamily == 'slack'){
-
                 var component = new SlackAttachment(buttonGroupLabel, 'Fallback Text', null, '#3AA3E3', 'default');
-                
                 optionStrings.forEach(function(optionString){
-                    var b = new SlackButton(this._labelToButtonName(optionString), 
+                    var b = new SlackButton(self._labelToButtonName(optionString), 
                                             optionString, 
                                             'primary', 
                                             'button',
-                                            this._labelToValue(optionString));
+                                            self._labelToValue(optionString));
                     component.addButton(b);
                 });
-                
                 return component;
             }
         }
@@ -340,7 +351,8 @@ class SlackAttachment{
 			fallback: fallback,
 			callbackId: callbackId,
 			color: color,
-			attachmentType: attachmentType	    };		
+			attachmentType: attachmentType	    
+		};		
 	  	
 	  	this.addButton = function(slackButton) {
 

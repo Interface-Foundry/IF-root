@@ -63,31 +63,39 @@ console.log(dsxClient.getURI());
 class UserChannel {
 
     constructor(queue) {
-
         this.queue = queue;
-
+          // replyChannel.send(session, 'food.fulfillment_select', component.render());
         this.send = function(session, nextHandlerID, data) { 
-            session['reply'] = data;            
-
-            
-            session.mode = nextHandlerID.split('.')[0];
-            session.action = nextHandlerID.split('.')[1];
-
-            kip.debug('inside channel.send(). Session mode is ' + session.mode);
-            kip.debug('inside channel.send(). Session action is ' + session.action);
+            var newSession = new db.Message({
+              incoming: false,
+              thread_id: session.thread_id,
+              resolved: true,
+              user_id: 'kip',
+              origin: session.origin,
+              source: session.source,
+              mode: session.mode,
+              action: session.action,
+              state: session.state
+            })
+            newSession['reply'] = data;            
+            newSession.mode = nextHandlerID.split('.')[0];
+            newSession.action = nextHandlerID.split('.')[1];
+            kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
+            kip.debug('inside channel.send(). Session action is ' + newSession.action);
             var self = this;
-            session.save(function(err, saved){
-                self.queue.publish('outgoing.' + session.origin, session, session._id + '.reply.results');
-            });
-            
+            newSession.save(function(err, saved){
+              if (err) {
+                kip.debug('mongo save err: ',err);
+                throw Error(err);
+              } 
+              self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results');
+            });  
         }
-
-
         return this;
     }
 }
 
-var replyChannel = new UserChannel(queue);
+var replyChannel = new UserChannel(queue);0
 
 
 function default_reply(message) {
@@ -124,7 +132,7 @@ function send_text_reply(message, text) {
 queue.topic('incoming').subscribe(incoming => {
   co(function*() {
     console.log('>>>'.yellow, incoming.data.text.yellow);
-
+    kip.debug('\n\n\n\n\nINCOMING: ', incoming,'\n\n\n\n\n\n')
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -135,9 +143,12 @@ queue.topic('incoming').subscribe(incoming => {
 
     var session = history[0];
     if (!session.state && history[1]) {
-      session.state = history[1].state;
+      session.mode = history[1].mode;
+      session.action = history[1].action;
+      session.route = session.mode + '.' + session.action;
+      // session.state = history[1].state;
     }
-    session.state = session.state || {};
+    // session.state = session.state || {};
     session.history = history.slice(1);
     if (session._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct session not retrieved from db');
@@ -198,7 +209,7 @@ function getRoute(session) {
     }
     */
     else{
-        return session.mode + '.' + session.action;
+        return (session.mode + '.' + session.action);
     }
     
     //throw new Error("couldn't figure out the right mode/action to route to")
@@ -230,10 +241,8 @@ handlers['food.fulfillment_select'] = function* (session) {
 handlers['food.store_context'] = function* (session) {
     var addr = session.text;
     session.state.addr = addr;
-
     var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',session.source.team, session.source.user);
     var component = new UIComponentFactory(session.source.origin).buildTextMessage('delivery context created.');
-
     replyChannel.send(session, 'food.ready_to_poll', component.render());
 }
 
