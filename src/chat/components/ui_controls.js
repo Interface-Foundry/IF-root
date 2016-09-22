@@ -73,6 +73,58 @@
 // }
 
 
+/*
+class UIPrimitive {
+
+	constructor(type, data) {
+		this.type = type;
+		this.data = data
+
+		this.asText = function() {
+			if (this.data.text)
+				return this.data.text;
+		}
+
+		this.render = function () {
+			return this.data;
+		}
+        return this;
+    }	
+}
+*/
+
+class UIComponentFactory {
+
+   ///text_message, button, button_group, card, image
+
+    constructor(componentFamily) {
+        var validFamilies = ['slack', 'facebook'];
+
+        if(componentFamily === null || componentFamily === undefined){
+            throw new Error('Null or undefined componentFamily passed to UIComponentFactory constructor.');
+        }
+
+        if(validFamilies.indexOf(componentFamily) == -1){
+            throw new Error('Valid component families are: ' + validFamilies);
+        }
+
+        this.componentFamily = componentFamily;  // either 'slack' or 'facebook' for now
+
+
+        this.buildTextMessage = function(text){
+
+            if(this.componentFamily == 'slack'){
+                return new SlackCard(text);
+            }
+        }
+
+        return this;
+    }
+
+
+    
+}
+
 
 
 class ButtonGroupConfigBuilder{
@@ -222,20 +274,27 @@ class SlackButton{
     return this;
     }
 }
+
+
 class SlackCard {
 	constructor(text) {
 
+        this.type = 'slack';
+        this.label = text;
 		this.data = { text: text };
 
-		this.render = function() {
-			// { text: 'text', action: 'delivery.whatever',  }
-			return {  text: ,data:  this.data} ;
+		this.render = function() {			
+			return { type: this.type, 
+                     data: this.data 
+                   };
 			}
+
+        return this;
 		}
 
-		return this;
-	}
+		
 }
+
 
 class SlackAttachment{
  
@@ -339,38 +398,12 @@ class FBButton{
 };
 
 
-class UIComponent{
-	constructor(type, data) {
-		this.type = type;
-		this.data = data
-
-		this.asText = function() {
-			if (this.data.text)
-				return this.data.text;
-		}
-
-		this.render = function () {
-			return this.data;
-		}
-        // this.build = function(type, data){
-        // 	// { type: "notification", data: {whatever text}}
-        // 	// { type: "card", data: {<json needed for card display>}}
-        // 	this.data = data;
-
-        //     return this;
-        // }
-
-
-
-        return this;
-    }	
-}
-
 
 module.exports = {
     'FBButton': FBButton,
     'SlackCard': SlackCard,
     'SlackAttachment': SlackAttachment,
     'SlackButton': SlackButton,
-    'SlackDisplayBuilder': SlackDisplayBuilder
+    'SlackDisplayBuilder': SlackDisplayBuilder,
+    'UIComponentFactory': UIComponentFactory
 };

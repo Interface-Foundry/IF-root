@@ -66,13 +66,16 @@ class UserChannel {
 
         this.queue = queue;
 
-        this.sendReply = function(message, data) {
-            this.queue.publish('outgoing.' + message.origin, data, message._id + '.reply.results');
+        this.send = function(message, data) {
+            message['reply'] = data;
+            this.queue.publish('outgoing.' + message.origin, message, message._id + '.reply.results');
         }
 
         return this;
     }
 }
+
+var replyChannel = new UserChannel(queue);
 
 
 function default_reply(message) {
@@ -178,10 +181,13 @@ var handlers = {};
 // the user's intent is to initiate a food order
 //
 handlers['food.begin'] = function* (message) {
-  console.log('🍕 food order 🌮');
-  message.state = {};
-  message.save();
-  send_text_reply(message, "yeah let's eat! what address should i use?");
+    console.log('🍕 food order 🌮');
+    message.state = {};
+    message.save();
+    
+    var component = new ui.UIComponentFactory(message.origin).buildTextMessage("yeah let's eat! what address should i use?");
+    replyChannel.send(message, component.render());
+
   // todo save addresses and show saved addresses
 }
 
@@ -223,11 +229,14 @@ handlers['food.address'] = function* (message) {
 
 
 
-  // search for food near that address
-  //send_text_reply(message, 'thanks, searching your area for good stuff!');
+    // search for food near that address
+    /*
+    var component = new ui.UIComponentFactory(message.origin).buildTextMessage("thanks, searching your area for good stuff!");
+    replyChannel.send(message, component.render());
+    */
 
-
-  //TODO DISPLAY DELIVERY OR PICKUP CARD HEAH
+    // TODO DISPLAY DELIVERY OR PICKUP CARD HEAH
+    var component = new ui.UIComponentFactory(message.origin).buildButtonGroup(['Delivery', 'Pickup'])
 
     // **assuming that user who hits this endpoint is admin already
     var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',message.source.team, message.source.user);
@@ -239,9 +248,17 @@ handlers['food.address'] = function* (message) {
 
     var replyData = {'type': 'notification', 'data': { 'text': 'delivery context created.' }};
 
-    // var replyData = {'type': 'option_group', 'data': { 'options': [ {'one': 'this thing'}, {'two' : 'that thing'} ]}}
 
-    new UserChannel(queue).sendReply(message, replyData);
+    var component = new UIComponentFactory(message.source.origin).buildTextMessage('delivery context created.');
+
+    kip.debug('++++++++');
+    kip.debug(component.render());
+    kip.debug('++++++++');
+
+    replyChannel.send(message, component.render());
+
+
+    // var component = new UIComponentFactory(message.source.origin).buildOptionGroup(['Delivery', 'Pickup']);
 
 
 

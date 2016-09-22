@@ -182,7 +182,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack();
         })
       }
-      if (message.mode === 'food' && message.action === 'begin') {
+      if (message.mode === 'food') {
  
 
         // { type: "notification", data: {whatever text}}
@@ -190,10 +190,13 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
         // { type: "button", data: {<json for button display>}}
 
-         var uiComponent = new UIComponent(outgoing.type, outgoing.data);
-         kip.debug(uiComponent.type);
+         
+          kip.debug('+++++++++++');
+          kip.debug(message);
+          //kip.debug(message.data)
+          kip.debug('+++++++++++');
 
-         return bot.web.chat.postMessage(message.source.channel, uiComponent.asText(), uiComponent.render());
+         return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
       }
       // if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
       //   msgData.attachments = yield search_results(message);
