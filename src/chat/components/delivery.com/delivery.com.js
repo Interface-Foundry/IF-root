@@ -66,10 +66,22 @@ class UserChannel {
 
         this.queue = queue;
 
-        this.send = function(message, data) {
-            message['reply'] = data;
-            this.queue.publish('outgoing.' + message.origin, message, message._id + '.reply.results');
+        this.send = function(session, nextHandlerID, data) { 
+            session['reply'] = data;            
+
+            
+            session.mode = nextHandlerID.split('.')[0];
+            session.action = nextHandlerID.split('.')[1];
+
+            kip.debug('inside channel.send(). Session mode is ' + session.mode);
+            kip.debug('inside channel.send(). Session action is ' + session.action);
+            var self = this;
+            session.save(function(err, saved){
+                self.queue.publish('outgoing.' + session.origin, session, session._id + '.reply.results');
+            });
+            
         }
+
 
         return this;
     }
@@ -121,27 +133,35 @@ queue.topic('incoming').subscribe(incoming => {
       }
     }).sort('-ts').limit(20);
 
-    var message = history[0];
-    if (!message.state && history[1]) {
-      message.state = history[1].state;
+    var session = history[0];
+    if (!session.state && history[1]) {
+      session.state = history[1].state;
     }
-    message.state = message.state || {};
-    message.history = history.slice(1);
-    if (message._id.toString() !== incoming.data._id.toString()) {
-      throw new Error('correct message not retrieved from db');
+    session.state = session.state || {};
+    session.history = history.slice(1);
+    if (session._id.toString() !== incoming.data._id.toString()) {
+      throw new Error('correct session not retrieved from db');
     }
     if (history[1]) {
-      message.prevMode = history[1].mode;
-      message.prevAction = history[1].action;
-      message.prevRoute = message.prevMode + '.' + message.prevAction;
+      session.prevMode = history[1].mode;
+      session.prevAction = history[1].action;
+      session.prevRoute = session.prevMode + '.' + session.prevAction;
     }
 
-    var route = yield getRoute(message);
-    kip.debug('route', route);
-    message.mode = 'food';
-    message.action = route.replace(/^food./, '');
-    yield handlers[route](message);
-    message.save();
+    //var route = yield getRoute(session);
+    //
+
+      // NOTE: temporary hack until we figure out what's going on here. --DT
+
+      
+      kip.debug('### inside subscribe routine. Session object is: ' + session);
+      var route = yield getRoute(session);
+      kip.debug('### route: ', route);
+      
+    //session.mode = 'food';
+    //session.action = route.replace(/^food./, '');
+    yield handlers[route](session);
+    session.save();
     incoming.ack();
 
   }).catch(kip.err);
@@ -150,10 +170,16 @@ queue.topic('incoming').subscribe(incoming => {
 //
 // this is the worst part of building bots: intent recognition
 //
-function getRoute(message) {
-  kip.debug(`prevRoute ${message.prevRoute}`)
+function getRoute(session) {
+  kip.debug(`prevRoute ${session.prevRoute}`)
   return co(function*() {
-    if (message.text === 'food') return 'food.begin';
+      if (session.text === 'food') {
+
+          kip.debug('### User typed in :' + session.text);
+
+          return 'food.begin';
+      }
+     /*
     if (message.prevRoute === 'food.begin') return 'food.address';
     if ('123'.match(message.text)) {
       if (!message.state.merchant_id)
@@ -170,8 +196,12 @@ function getRoute(message) {
     if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
       return 'food.menu.search';
     }
-
-    throw new Error("couldn't figure out the right mode/action to route to")
+    */
+    else{
+        return session.mode + '.' + session.action;
+    }
+    
+    //throw new Error("couldn't figure out the right mode/action to route to")
   }).catch(kip.err);
 }
 
@@ -180,40 +210,35 @@ var handlers = {};
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function* (session) {
-    console.log('🍕 food order 🌮');
-    session.state = {};
-    session.save();
+handlers['food.begin'] = function* (session) {    
+    //session.state = {};
+    //session.save();  // hypothesis: the problem is we are saving the session object before setting its routing info (in replyChannel.send()
     
     var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
-    replyChannel.send(session, component.render());
+    replyChannel.send(session, 'food.fulfillment_select', component.render());
 
   // todo save addresses and show saved addresses
 }
 
 
+handlers['food.fulfillment_select'] = function* (session) {    
+    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+    replyChannel.send(session, 'food.store_context', component.render());
+}
 
-//
-// the user's intent is to specify an address for delivery/pickup
-//
-handlers['food.address'] = function* (session) {
+
+handlers['food.store_context'] = function* (session) {
     var addr = session.text;
     session.state.addr = addr;
 
     var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'delivery',session.source.team, session.source.user);
     var component = new UIComponentFactory(session.source.origin).buildTextMessage('delivery context created.');
 
-    replyChannel.send(session, component.render());
+    replyChannel.send(session, 'food.ready_to_poll', component.render());
 }
 
 
-handlers['food.fulfillment_select'] = function* (session) {    
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    replyChannel.send(session, component.render());
-}
-
-
-handlers['food.fulfillment_selected'] = function* (session) {
+handlers['food.ready_to_poll'] = function* (session) {
 
     var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Ready to poll team members.');
     replyChannel.send(session, component.render());
