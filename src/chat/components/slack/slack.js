@@ -113,7 +113,7 @@ co(function*() {
 
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
-        kip.debug("don't talk to yourself");
+        kip.debug("don't talk to yourself: ");
         return; // drop the message before saving.
       }
 

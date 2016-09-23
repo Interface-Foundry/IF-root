@@ -144,21 +144,10 @@ class UIComponentFactory {
             return this._labelToValue(label) + '_btn';
         }
 
-
-
-   // { data: { text: 'yeah let\'s eat! what address should i use?' },
-   //   type: 'slack' },
-
-   // { attachmentType: 'default',
-   //   color: '#3AA3E3',
-   //   callbackId: null,
-   //   fallback: 'Fallback Text',
-   //   text: 'Select your order method.' }
-
         this.buildButtonGroup = function(buttonGroupLabel, optionStrings, defaultOption){
 
             if(this.componentFamily == 'slack'){
-                var component = new SlackAttachment(buttonGroupLabel, 'Fallback Text', null, '#3AA3E3', 'default');
+                var component = new SlackAttachment(buttonGroupLabel, 'Fallback Text', '', '#3AA3E3', 'default');
                 optionStrings.forEach(function(optionString){
                     var b = new SlackButton(self._labelToButtonName(optionString), 
                                             optionString, 
@@ -301,7 +290,7 @@ class SlackButton{
      */
     constructor(name, text, style, type, value) {
 
-    	this.data = {
+    	this.control = {
     		name: name,
 			text:text,
 			style: style,
@@ -311,7 +300,10 @@ class SlackButton{
 	  
 		this.render = function() {
 	   
-	    	return this.data;
+	    	return {
+	    		data: this.control,
+	    		label: text
+	    	};
 		}
 
 		this.setConfirmation = function(title, text, okMsg, cancelMsg) {
@@ -353,21 +345,30 @@ class SlackAttachment{
  
     constructor(text, fallback, callbackId, color, attachmentType) {
 
-    	this.data = {
-    		text: text,
-			fallback: fallback,
-			callbackId: callbackId,
-			color: color,
-			attachmentType: attachmentType	    
-		};		
+    	this.control = { 
+    	label: text,
+	    data: {
+	    		"text": text,
+    			"attachments": [
+    				{
+		    			text: text,
+						fallback: fallback,
+						callbackId: callbackId,
+						color: color,
+						attachmentType: attachmentType,
+						actions: []	    
+					}
+				]
+			}
+		}		
 	  	
 	  	this.addButton = function(slackButton) {
-
+	  		this.control.data.attachments[0].actions.push(slackButton.control);
 	  	}
 
 		this.render = function() {
 	   
-	    	return this.data;
+	    	return this.control;
 		}
     
     return this;

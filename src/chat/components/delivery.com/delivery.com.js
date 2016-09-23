@@ -74,7 +74,8 @@ class UserChannel {
               source: session.source,
               mode: session.mode,
               action: session.action,
-              state: session.state
+              state: session.state,
+              user: session.source.user
             })
             newSession['reply'] = data;            
             newSession.mode = nextHandlerID.split('.')[0];
@@ -226,6 +227,13 @@ function getRoute(session) {
 
 var handlers = {};
 
+
+handlers['food.sys_error'] = function* (session){
+
+  kip.debug('chat session halted.')
+
+}
+
 //
 // the user's intent is to initiate a food order
 //
@@ -242,19 +250,59 @@ handlers['food.begin'] = function* (session) {
 
 
 handlers['food.store_context'] = function* (session) {
+    kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
+//     GETTING TO FOOD.STORE_CONTEXT:  {
+//   "action": "store_context",
+//   "mode": "food",
+//   "_id": "57e56cee20d29ea27d88402c",
+//   "text": "902 broadway, new york",
+//   "incoming": true,
+//   "thread_id": "D0HLZLBDM",
+//   "original_text": "902 broadway, new york",
+//   "user_id": "U0HLZP0A2",
+//   "origin": "slack",
+//   "source": {
+//     "type": "message",
+//     "channel": "D0HLZLBDM",
+//     "user": "U0HLZP0A2",
+//     "text": "902 broadway, new york",
+//     "ts": "1474653422.000012",
+//     "team": "T0HLZP09L"
+//   "__v": 0,
+//   "urlShorten": [],
+//   "client_res": [],
+//   "execute": [],
+//   "tokens": [],
+//   "resolved": false,
+//   "ts": "2016-09-23T17:57:02.159Z"
+// }
     var addr = session.text;
     
-    var deliveryContext = yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user);
+    try {
+        yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
+        var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+        replyChannel.send(session, 'food.context_update', component.render());
+    } catch (err) {
+      kip.debug('dsxClient.createDeliveryContext ERROR: ', err);
+      var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Error: ', JSON.stringify(err));
+      replyChannel.send(session, 'food.sys_error', component.render());
+    }
+    // yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
+    // .then(function(result){
+    //       console.log('\n\n\ndeliveryContext returned successful promise: ', result,'\n\n\n\n\n');
+    // }, function(err) {
+    //       console.log('\n\n\ndeliveryContext returned failed promise: ', err,'\n\n\n\n\n');
+    // });
 
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    
-    replyChannel.send(session, 'food.context_update', component.render());
+   
 }
 
 
 
 handlers['food.context_update'] = function* (session) {   
- 
+
+     kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session,'\n\n\n\n')
+
     var fulfillmentMethod = session.text;
     var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 

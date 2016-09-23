@@ -61,6 +61,7 @@ class DSXClient{
                            resolve(response.body);
                        }
                        else{
+                          // kip.debug('\n\n\nwhats going on: ', error, response, body,'\n\n\n');
                            reject(error);
                        }
                        

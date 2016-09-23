@@ -78,18 +78,26 @@ server.listen(8000, function(e) {
 var messageHistory = {}; //fake database, stores all users and their chat histories
 
 //load incoming chat clients
-ioKip.initSlackUsers(app.get('env'));
-ioKip.loadSocketIO(server);
+// ioKip.initSlackUsers(app.get('env'));
+// ioKip.loadSocketIO(server);
 
 //incoming new slack user
-app.get('/newslack', function(req, res) {
-    ioKip.newSlack();
-});
+// app.get('/newslack', function(req, res) {
+//     ioKip.newSlack();
+// });
 
 //incoming slack action
 app.post('/slackaction', function(req, res) {
-    // ioKip.newSlack();
-    console.log('incoming Slack action BODY: ',req.body);
+   
+  //  { token: 'rF1BCPsHSBpLyw80aQ7FCGhN',
+  // challenge: 'ifrjJPTjMtHSmaOzja0r6tjMlC2mWr72eEuD9toh2LnnOUXZQ97v',
+  // type: 'url_verification' }
+  console.log('\n\n\nheres the req: ', req,'\n\n\n')
+    if (req.body && req.body.challenge) {
+     return res.send(req.body.challenge);
+    }
+
+    console.log('incoming Slack action: ',req.body, req.params);
 
     if (req.body && req.body.payload){
       var parsedIn = JSON.parse(req.body.payload);
@@ -152,9 +160,9 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
 */
 
 //incoming kik message
-app.post('/kikincoming', function(req, res) {
-    console.log('incoming Kik BODY: ',req.body);
-    res.sendStatus(200);
-    ioKip.incomingMsgAction(req.body,'kik');
-    res.sendStatus(200);
-});
+// app.post('/kikincoming', function(req, res) {
+//     console.log('incoming Kik BODY: ',req.body);
+//     res.sendStatus(200);
+//     ioKip.incomingMsgAction(req.body,'kik');
+//     res.sendStatus(200);
+// });
