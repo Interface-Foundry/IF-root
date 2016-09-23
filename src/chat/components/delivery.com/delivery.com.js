@@ -63,8 +63,7 @@ console.log(dsxClient.getURI());
 class UserChannel {
 
     constructor(queue) {
-        this.queue = queue;
-          // replyChannel.send(session, 'food.fulfillment_select', component.render());
+        this.queue = queue;          
         this.send = function(session, nextHandlerID, data) { 
             var newSession = new db.Message({
               incoming: false,
@@ -95,7 +94,7 @@ class UserChannel {
     }
 }
 
-var replyChannel = new UserChannel(queue);0
+var replyChannel = new UserChannel(queue);
 
 
 function default_reply(message) {
@@ -142,15 +141,22 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20);
 
     var session = history[0];
-    if (history[1]) {
-      session.mode = history[1].mode;
-      session.action = history[1].action;
-      session.route = session.mode + '.' + session.action;
-      session.prevMode = history[1].mode;
-      session.prevAction = history[1].action;
-      session.prevRoute = session.prevMode + '.' + session.prevAction;
-      // session.state = history[1].state;
-    }
+      if (history[1]) {
+          kip.debug('### history[1] does exist. ###')
+          kip.debug(history)
+          session.mode = history[1].mode;
+          session.action = history[1].action;
+          session.route = session.mode + '.' + session.action;
+          session.prevMode = history[1].mode;
+          session.prevAction = history[1].action;
+          session.prevRoute = session.prevMode + '.' + session.prevAction;
+          // session.state = history[1].state;
+      }
+      else{
+          kip.debug('history[1] does NOT exist, logging the entire history...')
+          kip.debug(history)
+      }
+    
     // session.state = session.state || {};
     session.history = history.slice(1);
     if (session._id.toString() !== incoming.data._id.toString()) {

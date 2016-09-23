@@ -118,6 +118,13 @@ class UIComponentFactory {
             throw new Error('Valid component families are: ' + validFamilies);
         }
 
+        /*  TODO: avoid lengthy if/else statements by storing builder components in a table
+         * keyed by component family name 
+        var builders = {};
+        builders['slack'] = SlackComponentBuilder();
+        builers['facebook'] = FacebookBuilder();
+        */
+
         this.componentFamily = componentFamily;  // either 'slack' or 'facebook' for now
 
  

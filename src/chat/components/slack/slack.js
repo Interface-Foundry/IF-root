@@ -97,7 +97,7 @@ co(function*() {
     //
     // Handle incoming slack messages.  Slack-specific pre-processing
     //
-    rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
+      rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
       kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
       kip.debug(data);
@@ -163,6 +163,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     console.log(outgoing);
     var message = outgoing.data;
 
+
+      kip.debug('+++++++++++');
+      kip.debug('## Session object JSON:');
+      kip.debug(message)
+      kip.debug('+++++++++++');
+
     var bot = slackConnections[message.source.team];
 
     if (typeof bot === 'undefined') {
@@ -183,18 +189,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         })
       }
       if (message.mode === 'food') {
- 
-
-        // { type: "notification", data: {whatever text}}
-        // { type: "card", data: {<json needed for card display>}}
-
-        // { type: "button", data: {<json for button display>}}
-
-         
-          kip.debug('+++++++++++');
-          kip.debug(message);
-          //kip.debug(message.data)
-          kip.debug('+++++++++++');
+     
+          
 
          return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
       }
