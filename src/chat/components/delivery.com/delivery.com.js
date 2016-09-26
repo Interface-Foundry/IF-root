@@ -281,6 +281,8 @@ handlers['food.store_context'] = function* (session) {
     try {
         yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
         var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+                kip.debug('COMPONENT RENDER LOOKS LIKE: ', component.render());
+
         replyChannel.send(session, 'food.context_update', component.render());
     } catch (err) {
       kip.debug('dsxClient.createDeliveryContext ERROR: ', err);

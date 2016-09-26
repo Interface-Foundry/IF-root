@@ -147,7 +147,7 @@ class UIComponentFactory {
         this.buildButtonGroup = function(buttonGroupLabel, optionStrings, defaultOption){
 
             if(this.componentFamily == 'slack'){
-                var component = new SlackAttachment(buttonGroupLabel, 'Fallback Text', '', '#3AA3E3', 'default');
+                var component = new SlackAttachment(buttonGroupLabel, 'FallbackText', 'CallbackText', '#3AA3E3', 'default');
                 optionStrings.forEach(function(optionString){
                     var b = new SlackButton(self._labelToButtonName(optionString), 
                                             optionString, 

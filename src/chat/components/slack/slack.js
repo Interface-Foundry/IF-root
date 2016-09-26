@@ -67,7 +67,7 @@ co(function*() {
 
   // Just need the RTM client to listen for messages
   slackbots.map((slackbot) => {
-    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '');
+    var rtm = new slack.RtmClient( slackbot.bot.bot_access_token || '');
     rtm.start();
     var web = new slack.WebClient(slackbot.bot.bot_access_token || '');
 
@@ -97,7 +97,7 @@ co(function*() {
     //
     // Handle incoming slack messages.  Slack-specific pre-processing
     //
-      rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
+    rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
       kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
       kip.debug(data);
@@ -190,7 +190,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
       if (message.mode === 'food') {
      
-          
+                          kip.debug('COMPONENT RENDER LOOKS LIKE: ', message.reply.data);
+
 
          return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
       }
