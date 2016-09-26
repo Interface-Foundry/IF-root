@@ -238,8 +238,6 @@ handlers['food.sys_error'] = function* (session){
 // the user's intent is to initiate a food order
 //
 handlers['food.begin'] = function* (session) {    
-    //session.state = {};
-    //session.save();  // hypothesis: the problem is we are saving the session object before setting its routing info (in replyChannel.send()
     
     var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
     replyChannel.send(session, 'food.store_context', component.render());
@@ -251,52 +249,20 @@ handlers['food.begin'] = function* (session) {
 
 handlers['food.store_context'] = function* (session) {
     kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
-//     GETTING TO FOOD.STORE_CONTEXT:  {
-//   "action": "store_context",
-//   "mode": "food",
-//   "_id": "57e56cee20d29ea27d88402c",
-//   "text": "902 broadway, new york",
-//   "incoming": true,
-//   "thread_id": "D0HLZLBDM",
-//   "original_text": "902 broadway, new york",
-//   "user_id": "U0HLZP0A2",
-//   "origin": "slack",
-//   "source": {
-//     "type": "message",
-//     "channel": "D0HLZLBDM",
-//     "user": "U0HLZP0A2",
-//     "text": "902 broadway, new york",
-//     "ts": "1474653422.000012",
-//     "team": "T0HLZP09L"
-//   "__v": 0,
-//   "urlShorten": [],
-//   "client_res": [],
-//   "execute": [],
-//   "tokens": [],
-//   "resolved": false,
-//   "ts": "2016-09-23T17:57:02.159Z"
-// }
+
     var addr = session.text;
     
     try {
         yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
         var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-                kip.debug('COMPONENT RENDER LOOKS LIKE: ', component.render());
-
+        kip.debug('###  created new delivery context, will now update...');
         replyChannel.send(session, 'food.context_update', component.render());
+
     } catch (err) {
-      kip.debug('dsxClient.createDeliveryContext ERROR: ', err);
+        kip.debug(JSON.stringify(err));
       var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Error: ', JSON.stringify(err));
       replyChannel.send(session, 'food.sys_error', component.render());
     }
-    // yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
-    // .then(function(result){
-    //       console.log('\n\n\ndeliveryContext returned successful promise: ', result,'\n\n\n\n\n');
-    // }, function(err) {
-    //       console.log('\n\n\ndeliveryContext returned failed promise: ', err,'\n\n\n\n\n');
-    // });
-
-   
 }
 
 
