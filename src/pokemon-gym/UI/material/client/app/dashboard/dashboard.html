@@ -113,6 +113,39 @@
                     </div>
                 </div>
             </div>
+            <div class="panel panel-default panel-minimal">
+                <div class="divider divider-md"></div>
+                <div class="panel-heading">Products</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span>Product Group</span>
+                            <canvas
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.productGroups.data"
+                              chart-labels="dashboardCtrl.data.productGroups.labels"
+                              chart-click="dashboardCtrl.productGroupClick"
+                              chart-options="dashboardCtrl.productsOptions"
+                            ></canvas>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span>Products</span>
+                            <div class="box-stats" ng-show="!dashboardCtrl.data.products.data.length">
+                              <p class="box-num">Select Product Group ^</span></p>
+                            </div>
+                            <canvas
+                              id="products"
+                              class="chart chart-bar"
+                              chart-data="dashboardCtrl.data.products.data"
+                              chart-labels="dashboardCtrl.data.products.labels"
+                              chart-options="dashboardCtrl.productsOptions"
+                            ></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -26,6 +26,12 @@ db2.model('Slackbot', Slackbot);
 const db1Slackbots = db1.model('Slackbot');
 const db2Slackbots = db2.model('Slackbot');
 
+const Item = require('../../db/item_schema');
+db1.model('Item', Item);
+db2.model('Item', Item);
+const db1Items = db1.model('Item');
+const db2Items = db2.model('Item');
+
 const getSearchCounts = require('./queries/getSearchCounts');
 const getBanterCounts = require('./queries/getBanterCounts');
 const mapDayofWeekStats = require('./mapping/mapDayStats');
@@ -35,6 +41,7 @@ const mapDailyActiveUsers = require('./mapping/mapDailyActiveUsers');
 const mapMonthlyActiveUsers = require('./mapping/mapMonthlyActiveUsers');
 const mapMonthlySlackTeams = require('./mapping/mapMonthlySlackTeams');
 const mapSlackBotTokens = require('./mapping/mapSlackBotTokens');
+const mapItems = require('./mapping/mapItems');
 
 const results = {};
 results.searchCounts = {};
@@ -46,6 +53,7 @@ results.dailyActiveUsers = {};
 results.monthlyActiveUsers = {};
 results.monthlySlackTeams = {};
 results.averageSlackTeamSize = 0;
+results.items = [];
 const tempMonthlySlackTeams = { users: 0, teams: 0 };
 
 app.use(bodyParser.json());
@@ -170,12 +178,21 @@ const getSlackTeamSize = () => {
   });
 };
 
+const getProducts = () => {
+  mapItems([db1Items, db2Items]).then(items => {
+    results.items = items;
+  });
+};
+
+getProducts();
 getData();
 getSlackTeamSize();
 
 // update data every 30 minutes
 setInterval(() => {
   getData();
+  if (!results.averageSlackTeamSize) getSlackTeamSize();
+  if (!results.items.length) getProducts();
 }, 30 * 60 * 1000);
 
 // update slack team size every day
