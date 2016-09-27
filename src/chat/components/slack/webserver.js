@@ -181,7 +181,6 @@ app.post('/slackaction', function(req, res) {
 
 var cookieParser = require('cookie-parser');
 var uuid = require('uuid');
-var compression = require('compression');
 // var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist';
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
 var request = require('request');
@@ -198,7 +197,7 @@ app.get('/newslack', function(req, res) {
     console.log('new slack integration request');
     // TODO post in our slack #dev channel
     // TODO check that "state" property matches
-    res.redirect('/thanks')
+    res.redirect('/thanks.html')
 
     if (!req.query.code) {
         console.error(new Date())
@@ -208,7 +207,7 @@ app.get('/newslack', function(req, res) {
 
     var body = {
       code: req.query.code,
-      redirect_uri: '/thanks'
+      redirect_uri: 'https://canary.kipapp.co/newslack'
     }
 
     request({
