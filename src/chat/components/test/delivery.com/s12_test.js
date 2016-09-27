@@ -1,6 +1,6 @@
 require('co-mocha');
 var should = require('should');
-var mock_slack = require('./mock_slack');
+var mock_slack = require('./mock_slack_users');
 var _ = require('lodash');
 
 
