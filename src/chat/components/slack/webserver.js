@@ -1,3 +1,5 @@
+var fs = require('fs')
+
 //
 // "Actions" are what slack calls buttons
 //
@@ -9,6 +11,7 @@ var app = express()
 var bodyParser = require('body-parser')
 var cart = require('./cart')
 var kipcart = require('../cart')
+app.use(express.static('public'))
 app.use(bodyParser.urlencoded())
 
 
@@ -174,6 +177,88 @@ app.post('/slackaction', function(req, res) {
       res.sendStatus(200);
     }
 });
+
+
+var cookieParser = require('cookie-parser');
+var uuid = require('uuid');
+var compression = require('compression');
+// var base = process.env.NODE_ENV !== 'production' ? __dirname + '/static' : __dirname + '/dist';
+// var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
+var request = require('request');
+
+var canary = {
+  id: '2804113073.84166691729',
+  secret: '39126ac7842f6e3a010f94b9a79282f6',
+  verification_token: 'b2hLV2HnBtWBmU5NFgDBG8dL'
+};
+var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : canary.id;
+var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : canary.secret;
+
+app.get('/newslack', function(req, res) {
+    console.log('new slack integration request');
+    // TODO post in our slack #dev channel
+    // TODO check that "state" property matches
+    res.redirect('/thanks')
+
+    if (!req.query.code) {
+        console.error(new Date())
+        console.error('no code in the callback url, cannot proceed with new slack integration')
+        return;
+    }
+
+    var body = {
+      code: req.query.code,
+      redirect_uri: '/thanks'
+    }
+
+    request({
+      url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
+      method: 'POST',
+      form: body
+    }, function(e, r, b) {
+        if (e) {
+          console.log('error connecting to slack api');
+          console.log(e);
+        }
+        if (typeof b === 'string') {
+            b = JSON.parse(b);
+        }
+        if (!b.ok) {
+            console.error('error connecting with slack, ok = false')
+            console.error('body was', body)
+            console.error('response was', b)
+            return;
+        } else if (!b.access_token || !b.scope) {
+            console.error('error connecting with slack, missing prop')
+            console.error('body was', body)
+            console.error('response was', b)
+            return;
+        }
+
+        console.log('got positive response from slack')
+        console.log('body was', body)
+        console.log('response was', b)
+        var bot = new db.Slackbot(b)
+        db.Slackbots.find({team_id: b.team_id}, function(e, bots) {
+          if (e) { console.error(e) }
+
+          if (bots && bots.length > 0) {
+            console.log('already have a bot for this team')
+            return;  
+          } else {
+            bot.save(function(e) {
+                kip.err(e);
+            })
+          }
+        })
+    })
+
+})
+
+// app.get('/*', function(req, res, next) {
+//     res.sendfile(defaultPage);
+// });
+
 
 
 var listener;
