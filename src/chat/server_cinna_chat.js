@@ -97,9 +97,7 @@ app.get('/newslack', function(req, res) {
   kip.debug('new slack integration request');
   res.redirect('https://kipsearch.com/thanks');
   if (!req.query.code) {
-
-    kip.debug('dafuq scc 101')
-     //find all bots not added to our system yet
+    //find all bots not added to our system yet
     db.Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
         if(err){
             console.log('saved slack bot retrieval error');

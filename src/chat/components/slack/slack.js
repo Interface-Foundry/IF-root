@@ -56,7 +56,12 @@ var slackConnections = {};
 //
 // slackbots
 //
-co(function*() {
+function * start() {
+  if (process.env.NODE_ENV === 'test') {
+    console.log('starting mock slack server')
+    yield slack.run_chat_server()
+  }
+
   var slackbots = yield db.Slackbots.find({
     'meta.deleted': {
       $ne: true
@@ -148,9 +153,7 @@ co(function*() {
       });
     })
   });
-}).catch((e) => {
-  kip.error(e, 'error loading slackbots');
-})
+}
 
 //
 // Mechanism for responding to messages
@@ -159,8 +162,6 @@ kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   try {
-    console.log('outgoing message');
-    console.log(outgoing);
     var message = outgoing.data;
 
 
@@ -226,3 +227,14 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     kip.err(e);
   }
 })
+
+
+module.exports = {
+  start: start
+}
+
+if (!module.parent) {
+  co(start).catch((e) => {
+    kip.error(e, 'error loading slackbots');
+  })
+}

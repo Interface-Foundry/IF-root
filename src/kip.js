@@ -72,7 +72,7 @@ function log () {
  * Does not print in production unless DEBUG=verbose
  */
 function debug () {
-  if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'verbose') {
+  if ((process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') || process.env.DEBUG === 'verbose') {
     var e = new Error()
     var stack = e.stack.split('\n')[2]
     try {

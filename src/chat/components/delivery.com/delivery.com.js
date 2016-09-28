@@ -6,19 +6,15 @@ var _ = require('lodash');
 var api = require('./api-wrapper');
 
 var search = require('./search');
-
 var winston = require('winston');
+
 var fs = require('fs');
 var yaml = require('js-yaml');
 var dsxsvc = require('./dsx_services');
 var dsxutils = require('./dsx_utils')
 var ui = require('../ui_controls');
-
-// get the command line arguments
 var argv = require('minimist')(process.argv.slice(2));
 
-
-// process command-line args
 var initFilename = argv['config'];
 if(initFilename === null || initFilename === undefined){
     console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.');
@@ -34,17 +30,14 @@ catch(err){
     process.exit(-1);
 }
 
-// initialize logging
-//
 const loggingTransports = yamlDoc['globals']['log_transports'];
 var logger = new(winston.Logger)({
     transports: loggingTransports.map(
-	function(currentVal){
-	    return new (eval(currentVal['type']))(currentVal);
-	}
+  function(currentVal){
+      return new (eval(currentVal['type']))(currentVal);
+  }
     )
 });
-
 
 
 var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient');
@@ -132,7 +125,7 @@ function send_text_reply(message, text) {
 queue.topic('incoming').subscribe(incoming => {
   co(function*() {
     console.log('>>>'.yellow, incoming.data.text.yellow);
-    kip.debug('\n\n\n\n\nINCOMING: ', incoming,'\n\n\n\n\n\n')
+
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -142,86 +135,64 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20);
 
     var session = history[0];
-      if (history[1]) {
-          kip.debug('### history[1] does exist. ###')
-          kip.debug(history)
-          session.mode = history[1].mode;
-          session.action = history[1].action;
-          session.route = session.mode + '.' + session.action;
-          session.prevMode = history[1].mode;
-          session.prevAction = history[1].action;
-          session.prevRoute = session.prevMode + '.' + session.prevAction;
-          // session.state = history[1].state;
-      }
-      else{
-          kip.debug('history[1] does NOT exist, logging the entire history...')
-          kip.debug(history)
-      }
-    
-    // session.state = session.state || {};
+    if (!session.state && history[1]) {
+      session.state = history[1].state;
+    }
+    session.state = session.state || {};
     session.history = history.slice(1);
     if (session._id.toString() !== incoming.data._id.toString()) {
-      throw new Error('correct session not retrieved from db');
+      throw new Error('correct message not retrieved from db');
     }
-
-
-
-      
-
-    //var route = yield getRoute(session);
-    //
-
-      // NOTE: temporary hack until we figure out what's going on here. --DT
-
-      
-      kip.debug('### inside subscribe routine. Session object is: ' + session);
-      var route = yield getRoute(session);
-      kip.debug('### route: ', route);
-      
-    //session.mode = 'food';
-    //session.action = route.replace(/^food./, '');
+    if (history[1]) {
+       session.mode = history[1].mode;
+       session.action = history[1].action;
+       session.route = session.mode + '.' + session.action;
+       session.prevMode = history[1].mode;
+       session.prevAction = history[1].action;
+       session.prevRoute = session.prevMode + '.' + session.prevAction;
+    }
+    var route = yield getRoute(session);
+    kip.debug('route', route);
+    session.mode = 'food';
+    session.action = route.replace(/^food./, '');
     yield handlers[route](session);
     session.save();
     incoming.ack();
-
   }).catch(kip.err);
 });
-
+ 
 //
 // this is the worst part of building bots: intent recognition
 //
 function getRoute(session) {
   kip.debug(`prevRoute ${session.prevRoute}`)
   return co(function*() {
-      if (session.text === 'food') {
-
-          kip.debug('### User typed in :' + session.text);
-
-          return 'food.begin';
+     if (session.text === 'food') {
+        kip.debug('### User typed in :' + session.text);
+        return 'food.begin';
       }
-     /*
-    if (message.prevRoute === 'food.begin') return 'food.address';
-    if ('123'.match(message.text)) {
-      if (!message.state.merchant_id)
-        return 'food.restaurant.select';
-      else
-        return 'food.menu.select';
-    }
-    if (message.prevRoute === 'food.restaurant.list') {
-      return 'food.restaurant.search';
-    }
-    if (message.state.merchant_id && message.text === 'full menu') {
-      return 'food.menu.list';
-    }
-    if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
-      return 'food.menu.search';
-    }
-    */
     else{
         return (session.mode + '.' + session.action);
     }
-    
-    //throw new Error("couldn't figure out the right mode/action to route to")
+    // if (message.text === 'food') return 'food.begin';
+    // if (message.prevRoute === 'food.begin') return 'food.address';
+    // if ('123'.match(message.text)) {
+    //   if (!message.state.merchant_id)
+    //     return 'food.restaurant.select';
+    //   else
+    //     return 'food.menu.select';
+    // }
+    // if (message.prevRoute === 'food.restaurant.list') {
+    //   return 'food.restaurant.search';
+    // }
+    // if (message.state.merchant_id && message.text === 'full menu') {
+    //   return 'food.menu.list';
+    // }
+    // if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
+    //   return 'food.menu.search';
+    // }
+
+    throw new Error("couldn't figure out the right mode/action to route to")
   }).catch(kip.err);
 }
 
@@ -237,11 +208,13 @@ handlers['food.sys_error'] = function* (session){
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function* (session) {    
-    
-    var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
-    replyChannel.send(session, 'food.store_context', component.render());
-
+handlers['food.begin'] = function* (session) {
+  console.log('🍕 food order 🌮');
+  session.state = {};
+  var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
+  session.save();
+  replyChannel.send(session, 'food.store_context', component.render());
+  // send_text_reply(message, "yeah let's eat! what address should i use?");
   // todo save addresses and show saved addresses
 }
 
@@ -249,9 +222,7 @@ handlers['food.begin'] = function* (session) {
 
 handlers['food.store_context'] = function* (session) {
     kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
-
     var addr = session.text;
-    
     try {
         yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
         var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
@@ -262,6 +233,7 @@ handlers['food.store_context'] = function* (session) {
        
     }
 }
+
 
 
 
@@ -276,16 +248,33 @@ handlers['food.context_update'] = function* (session) {
     replyChannel.send(session, 'food.ready_to_poll', component.render());
 }
 
+//
+// the user's intent is to specify an address for delivery/pickup
+//
+handlers['food.address'] = function* (message) {
+  var addr = message.text;
+  // check if it's a good address
+  // TODO
 
-handlers['food.ready_to_poll'] = function* (session) {
+  message.state.addr = addr;
+  message.save();
 
-    var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Ready to poll team members.');
-    replyChannel.send(session, component.render());
+  // search for food near that address
+  send_text_reply(message, 'thanks, searching your area for good stuff!');
+
+  var results = yield search.search({
+    addr: addr
+  });
+  var results_message = default_reply(message);
+  results_message.action = 'restaurant.list';
+  results_message.text = 'Here are some restaurants you might like nearby';
+  results_message.data = {
+    results: results.results,
+    params: {addr: results.address}
+  };
+  results_message.save();
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
 }
-
-
-
-
 
 //
 // the user's intent is to search for a specific type of food or a specific restaurant
