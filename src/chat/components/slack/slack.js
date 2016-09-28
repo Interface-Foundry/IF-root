@@ -53,6 +53,8 @@ var focus = require('./focus');
 var cart = require('./cart');
 var slackConnections = {};
 
+var webserver = require('./webserver')
+
 //
 // slackbots
 //
