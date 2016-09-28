@@ -228,11 +228,10 @@ handlers['food.store_context'] = function* (session) {
         var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
         kip.debug('###  created new delivery context, will now update...');
         replyChannel.send(session, 'food.context_update', component.render());
-
     } catch (err) {
         kip.debug(JSON.stringify(err));
-      var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Error: ', JSON.stringify(err));
-      replyChannel.send(session, 'food.sys_error', component.render());
+        var component = new ui.UIComponentFactory(session.origin).buildTextMessage('Error: ', JSON.stringify(err));
+        replyChannel.send(session, 'food.sys_error', component.render());
     }
 }
 
