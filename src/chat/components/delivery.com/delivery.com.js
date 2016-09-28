@@ -6,6 +6,90 @@ var _ = require('lodash');
 var api = require('./api-wrapper');
 
 var search = require('./search');
+var winston = require('winston');
+
+var fs = require('fs');
+var yaml = require('js-yaml');
+var dsxsvc = require('./dsx_services');
+var dsxutils = require('./dsx_utils')
+var ui = require('../ui_controls');
+var argv = require('minimist')(process.argv.slice(2));
+
+var initFilename = argv['config'];
+if(initFilename === null || initFilename === undefined){
+    console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.');
+    process.exit(-1);
+}
+
+var yamlDoc;
+try {
+    yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'));
+}
+catch(err){
+    console.log(err);
+    process.exit(-1);
+}
+
+const loggingTransports = yamlDoc['globals']['log_transports'];
+var logger = new(winston.Logger)({
+    transports: loggingTransports.map(
+  function(currentVal){
+      return new (eval(currentVal['type']))(currentVal);
+  }
+    )
+});
+
+
+var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient');
+
+logger.info(loadedParams);
+logger.info(typeof(loadedParams))
+console.log("### looking at loadedParams again");
+console.log(loadedParams)
+
+
+var dsxClient = new dsxsvc.DSXClient(loadedParams);
+
+console.log(dsxClient.getURI());
+
+
+class UserChannel {
+
+    constructor(queue) {
+        this.queue = queue;          
+        this.send = function(session, nextHandlerID, data) { 
+            var newSession = new db.Message({
+              incoming: false,
+              thread_id: session.thread_id,
+              resolved: true,
+              user_id: 'kip',
+              origin: session.origin,
+              source: session.source,
+              mode: session.mode,
+              action: session.action,
+              state: session.state,
+              user: session.source.user
+            })
+            newSession['reply'] = data;            
+            newSession.mode = nextHandlerID.split('.')[0];
+            newSession.action = nextHandlerID.split('.')[1];
+            kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
+            kip.debug('inside channel.send(). Session action is ' + newSession.action);
+            var self = this;
+            newSession.save(function(err, saved){
+              if (err) {
+                kip.debug('mongo save err: ',err);
+                throw Error(err);
+              } 
+              self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results');
+            });  
+        }
+        return this;
+    }
+}
+
+var replyChannel = new UserChannel(queue);
+
 
 function default_reply(message) {
   return new db.Message({
@@ -50,55 +134,63 @@ queue.topic('incoming').subscribe(incoming => {
       }
     }).sort('-ts').limit(20);
 
-    var message = history[0];
-    if (!message.state && history[1]) {
-      message.state = history[1].state;
+    var session = history[0];
+    if (!session.state && history[1]) {
+      session.state = history[1].state;
     }
-    message.state = message.state || {};
-    message.history = history.slice(1);
-    if (message._id.toString() !== incoming.data._id.toString()) {
+    session.state = session.state || {};
+    session.history = history.slice(1);
+    if (session._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct message not retrieved from db');
     }
     if (history[1]) {
-      message.prevMode = history[1].mode;
-      message.prevAction = history[1].action;
-      message.prevRoute = message.prevMode + '.' + message.prevAction;
+       session.mode = history[1].mode;
+       session.action = history[1].action;
+       session.route = session.mode + '.' + session.action;
+       session.prevMode = history[1].mode;
+       session.prevAction = history[1].action;
+       session.prevRoute = session.prevMode + '.' + session.prevAction;
     }
-
-    var route = yield getRoute(message);
+    var route = yield getRoute(session);
     kip.debug('route', route);
-    message.mode = 'food';
-    message.action = route.replace(/^food./, '');
-    yield handlers[route](message);
-    message.save();
+    session.mode = 'food';
+    session.action = route.replace(/^food./, '');
+    yield handlers[route](session);
+    session.save();
     incoming.ack();
-
   }).catch(kip.err);
 });
-
+ 
 //
 // this is the worst part of building bots: intent recognition
 //
-function getRoute(message) {
-  kip.debug(`prevRoute ${message.prevRoute}`)
+function getRoute(session) {
+  kip.debug(`prevRoute ${session.prevRoute}`)
   return co(function*() {
-    if (message.text === 'food') return 'food.begin';
-    if (message.prevRoute === 'food.begin') return 'food.address';
-    if ('123'.match(message.text)) {
-      if (!message.state.merchant_id)
-        return 'food.restaurant.select';
-      else
-        return 'food.menu.select';
+     if (session.text === 'food') {
+        kip.debug('### User typed in :' + session.text);
+        return 'food.begin';
+      }
+    else{
+        return (session.mode + '.' + session.action);
     }
-    if (message.prevRoute === 'food.restaurant.list') {
-      return 'food.restaurant.search';
-    }
-    if (message.state.merchant_id && message.text === 'full menu') {
-      return 'food.menu.list';
-    }
-    if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
-      return 'food.menu.search';
-    }
+    // if (message.text === 'food') return 'food.begin';
+    // if (message.prevRoute === 'food.begin') return 'food.address';
+    // if ('123'.match(message.text)) {
+    //   if (!message.state.merchant_id)
+    //     return 'food.restaurant.select';
+    //   else
+    //     return 'food.menu.select';
+    // }
+    // if (message.prevRoute === 'food.restaurant.list') {
+    //   return 'food.restaurant.search';
+    // }
+    // if (message.state.merchant_id && message.text === 'full menu') {
+    //   return 'food.menu.list';
+    // }
+    // if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
+    //   return 'food.menu.search';
+    // }
 
     throw new Error("couldn't figure out the right mode/action to route to")
   }).catch(kip.err);
@@ -106,15 +198,53 @@ function getRoute(message) {
 
 var handlers = {};
 
+
+handlers['food.sys_error'] = function* (session){
+
+  kip.debug('chat session halted.')
+
+}
+
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function* (message) {
+handlers['food.begin'] = function* (session) {
   console.log('🍕 food order 🌮');
-  message.state = {};
-  message.save();
-  send_text_reply(message, "yeah let's eat! what address should i use?");
+  session.state = {};
+  var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
+  session.save();
+  replyChannel.send(session, 'food.store_context', component.render());
+  // send_text_reply(message, "yeah let's eat! what address should i use?");
   // todo save addresses and show saved addresses
+}
+
+
+
+handlers['food.store_context'] = function* (session) {
+    kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
+    var addr = session.text;
+    try {
+        yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
+        var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+        kip.debug('###  created new delivery context, will now update...');
+        replyChannel.send(session, 'food.context_update', component.render());
+    } catch (err) {
+
+    }
+}
+
+
+
+
+handlers['food.context_update'] = function* (session) {   
+
+     kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session,'\n\n\n\n')
+
+    var fulfillmentMethod = session.text;
+    var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
+
+    var component = new ui.UIComponentFactory(session.origin).buildTextMessage("delivery context updated.")
+    replyChannel.send(session, 'food.ready_to_poll', component.render());
 }
 
 //

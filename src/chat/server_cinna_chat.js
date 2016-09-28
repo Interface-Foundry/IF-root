@@ -43,6 +43,7 @@ var async = require('async');
 var bodyParser = require('body-parser');
 var busboy = require('connect-busboy'); // for multi-part data from sendgrid
 var email = require('./components/email');
+var db = require('db');
 
 //set env vars
 var config = require('../config');
@@ -78,18 +79,118 @@ server.listen(8000, function(e) {
 var messageHistory = {}; //fake database, stores all users and their chat histories
 
 //load incoming chat clients
-ioKip.initSlackUsers(app.get('env'));
-ioKip.loadSocketIO(server);
+// ioKip.initSlackUsers(app.get('env'));
+// ioKip.loadSocketIO(server);
 
 //incoming new slack user
+// app.get('/newslack', function(req, res) {
+//     ioKip.newSlack();
+// });
+
+
+//
+// Slack app registration
+// to test this, go to https://api.slack.com/docs/slack-button and deselect "incoming webhook" and select "bot"
+//
 app.get('/newslack', function(req, res) {
-    ioKip.newSlack();
+
+  kip.debug('new slack integration request');
+  res.redirect('https://kipsearch.com/thanks');
+  if (!req.query.code) {
+    //find all bots not added to our system yet
+    db.Slackbots.find({'meta.initialized': false}).exec(function(err, users) {
+        if(err){
+            console.log('saved slack bot retrieval error');
+        }
+        else {
+            loadSlackUsers(users);
+            console.log('DEBUG: new slack team added with this data: ',users);
+            res.send('slack user added');
+        }
+    });
+    return kip.err('no code in the request, cannot process team add to slack');
+  }
+
+  var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : '52946721872.53047577702';
+  var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : '7989b267194bfa98782340007c08d088';
+  var redirect_uri = process.env.NODE_ENV === 'production' ? 'https://kipsearch.com/newslack' : 'https://5947ceef.ngrok.io/newslack';
+
+  var body = {
+    code: req.query.code,
+    redirect_uri: redirect_uri
+  }
+
+  request({
+    url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
+    method: 'POST',
+    form: body
+  }, function(e, r, b) {
+    if (e) {
+      kip.debug('error connecting to slack api');
+      kip.debug(e);
+    }
+    if (typeof b === 'string') {
+      b = JSON.parse(b);
+    }
+    if (!b.ok) {
+      kip.error('error connecting with slack, ok = false')
+      kip.error('body was', body)
+      kip.error('response was', b)
+      return;
+    } else if (!b.access_token || !b.scope) {
+      kip.error('error connecting with slack, missing prop')
+      kip.error('body was', body)
+      kip.error('response was', b)
+      return;
+    }
+
+    kip.debug('got positive response from slack')
+    kip.debug('body was', body)
+    kip.debug('response was', b)
+    db.Metrics.log('slackbutton', b);
+    var bot = new db.Slackbot(b)
+    db.Slackbots.findOne({
+      team_id: b.team_id,
+      deleted: {
+        $ne: true
+      }
+    }, function(e, old_bot) {
+      if (e) {
+        kip.error(e)
+      }
+
+      if (old_bot) {
+        kip.debug('already have a bot for this team', b.team_id)
+        kip.debug('updating i guess')
+        _.merge(old_bot, b);
+        old_bot.save(e => {
+          kip.err(e);
+          ioKip.newSlack();
+        });
+      } else {
+        bot.save(function(e) {
+          kip.err(e);
+          ioKip.newSlack();
+        })
+      }
+    })
+  });
 });
+
 
 //incoming slack action
 app.post('/slackaction', function(req, res) {
-    // ioKip.newSlack();
-    console.log('incoming Slack action BODY: ',req.body);
+   
+  //  { token: 'rF1BCPsHSBpLyw80aQ7FCGhN',
+  // challenge: 'ifrjJPTjMtHSmaOzja0r6tjMlC2mWr72eEuD9toh2LnnOUXZQ97v',
+  // type: 'url_verification' }
+  // console.log('\n\n\nheres the req: ', req,'\n\n\n')
+    if (req.body && req.body.challenge) {
+      kip.debug('server cinna chat: hitting challenge area')
+     return res.send(req.body.challenge);
+    }
+
+    console.log('incoming Slack action: ',req.body, req.params);
 
     if (req.body && req.body.payload){
       var parsedIn = JSON.parse(req.body.payload);
@@ -112,7 +213,9 @@ app.post('/slackaction', function(req, res) {
       }
     }else {
       console.log('nah');
-      res.sendStatus(200);
+
+
+      res.sendStatus(200, { text: 'HEHEHEHEHEHEHWFOERGJSOIW$ETGIOE'});
     }
 
     // //SEND REQ.BODY: { payload: }
@@ -152,9 +255,9 @@ app.post('/emailincoming', busboy({immediate: true}), function(req, res) {
 */
 
 //incoming kik message
-app.post('/kikincoming', function(req, res) {
-    console.log('incoming Kik BODY: ',req.body);
-    res.sendStatus(200);
-    ioKip.incomingMsgAction(req.body,'kik');
-    res.sendStatus(200);
-});
+// app.post('/kikincoming', function(req, res) {
+//     console.log('incoming Kik BODY: ',req.body);
+//     res.sendStatus(200);
+//     ioKip.incomingMsgAction(req.body,'kik');
+//     res.sendStatus(200);
+// });

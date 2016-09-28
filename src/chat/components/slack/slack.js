@@ -74,7 +74,7 @@ function * start() {
 
   // Just need the RTM client to listen for messages
   slackbots.map((slackbot) => {
-    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '');
+    var rtm = new slack.RtmClient( slackbot.bot.bot_access_token || '');
     rtm.start();
     var web = new slack.WebClient(slackbot.bot.bot_access_token || '');
 
@@ -115,12 +115,12 @@ function * start() {
         original_text: data.text,
         user_id: data.user,
         origin: 'slack',
-        source: data,
+        source: data
       });
 
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
-        kip.debug("don't talk to yourself");
+        kip.debug("don't talk to yourself: ");
         return; // drop the message before saving.
       }
 
@@ -162,8 +162,15 @@ function * start() {
 //
 kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
+
   try {
     var message = outgoing.data;
+
+
+      kip.debug('+++++++++++');
+      kip.debug('## Session object JSON:');
+      kip.debug(message)
+      kip.debug('+++++++++++');
 
     var bot = slackConnections[message.source.team];
 
@@ -175,6 +182,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         icon_url:'http://kipthis.com/img/kip-icon.png',
         username:'Kip'
     };
+
     
     co(function*() {
 
@@ -183,21 +191,27 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack();
         })
       }
+      if (message.mode === 'food') {
+     
+                          kip.debug('COMPONENT RENDER LOOKS LIKE: ', message.reply.data);
 
-      if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-        msgData.attachments = yield search_results(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
 
-      if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-        msgData.attachments = yield focus(message);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+         return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
       }
+      // if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+      //   msgData.attachments = yield search_results(message);
+      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      // }
 
-      if (message.mode === 'cart' && message.action === 'view') {
-        msgData.attachments = yield cart(message, bot.slackbot, false);
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      }
+      // if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+      //   msgData.attachments = yield focus(message);
+      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      // }
+
+      // if (message.mode === 'cart' && message.action === 'view') {
+      //   msgData.attachments = yield cart(message, bot.slackbot, false);
+      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      // }
 
       bot.rtm.sendMessage(message.text, message.source.channel, () => {
         outgoing.ack();
