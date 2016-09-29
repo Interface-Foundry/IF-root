@@ -50,6 +50,11 @@ function simple_action_handler(action) {
     //
     case 'home':
       return 'exit'
+
+    case 'delivery_btn':
+      return 'delivery'
+    case 'pickup_btn':
+      return 'pickup'
   }
 }
 
