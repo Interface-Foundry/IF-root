@@ -231,7 +231,7 @@ handlers['food.sys_error'] = function* (session){
 // the user's intent is to initiate a food order
 //
 handlers['food.begin'] = function* (session) {
-  console.log('🍕 food order 🌮');
+  kip.debug('🍕 food order 🌮');
   session.state = {};
   var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
   session.save();
@@ -245,14 +245,10 @@ handlers['food.begin'] = function* (session) {
 handlers['food.store_context'] = function* (session) {
     kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
     var addr = session.text;
-    try {
-        yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
-        var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-        kip.debug('###  created new delivery context, will now update...');
-        replyChannel.send(session, 'food.context_update', component.render());
-    } catch (err) {
-
-    }
+    yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
+    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+    kip.debug('###  created new delivery context, will now update...');
+    replyChannel.send(session, 'food.context_update', component.render());
 }
 
 
@@ -263,6 +259,7 @@ handlers['food.context_update'] = function* (session) {
      kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session,'\n\n\n\n')
 
     var fulfillmentMethod = session.text;
+    kip.debug('set fulfillmentMethod', fulfillmentMethod)
     var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
     var component = new ui.UIComponentFactory(session.origin).buildTextMessage("delivery context updated.")

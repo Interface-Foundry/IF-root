@@ -119,7 +119,7 @@ function * start() {
       });
 
       // don't talk to yourself
-      if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
+      if (data.user === slackbot.bot.bot_user_id || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
         kip.debug("don't talk to yourself: ");
         return; // drop the message before saving.
       }

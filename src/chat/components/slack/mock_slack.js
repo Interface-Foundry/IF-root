@@ -21,7 +21,23 @@ function run_chat_server () {
      * Listen for mock taps
      */
     app.post('/tap/:access_token', (req, res) => {
-      throw (new Error('not implemented tap yet'))
+      // register listeners
+      ALL_THE_WEB_CLIENTS[req.params.access_token].on_next((message) => {
+        res.send(message)
+      })
+      ALL_THE_RTM_CLIENTS[req.params.access_token].on_next((message) => {
+        res.send(message)
+      })
+
+      var body = {payload: JSON.stringify(req.body) }
+      // send the mock tap
+      request({
+        method: 'POST',
+        uri: 'http://localhost:8000/slackaction',
+        body: body,
+        json: true
+      })
+
     })
 
     /**

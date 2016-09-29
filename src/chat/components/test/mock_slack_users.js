@@ -61,7 +61,7 @@ User.prototype.tap = function (message, attachment_index, action_index) {
         domain: user.team_name
       },
       channel: {
-        id: 'test_channel',
+        id: 'asdfadsf',
         name: 'test channel name'
       },
       user: {
@@ -75,85 +75,24 @@ User.prototype.tap = function (message, attachment_index, action_index) {
       original_message: JSON.stringify(message),
       response_url: 'http://localhost:8080/action_response/' + user.team_id + '/' + 'TODO' // TODO make delayed action responses work
     }
+
+    // register a listener with mock_slack.js
     var res = yield request({
       method: 'POST',
-      uri: 'http://localhost:8080/incomingAction/' + slackbot.bot.bot_access_token,
+      uri: 'http://localhost:8080/tap/' + slackbot.bot.bot_access_token,
       body: body,
       json: true
     })
+
+    console.log('got it')
     return res
   })
 }
 
 /**
- * programatically takes a user to a specific step
- * usually this just means we add the correct messages to the
- * database and return the most recent one. sometime you have
- * to add data to the slackbot settings or chatuser settings
- * or carts
+ * gets a fresh conversation for a user that we know about in the database 
  */
-User.prototype.goto = function (step) {
-  var user = this
-  var steps = {
-    S9: function * () {
-      // add the selected restaurant to the team cart
-      yield user.db.collection('carts').insert({
-        team: user.slackbot.team_id,
-        restaurant: {
-          name: 'Some Restaurant' // todo
-        }
-      })
-
-      // replicate the message that would be sent to the user after the admin confirms order.
-      // this way i don't have to simulate the admin's entire convo
-      var message = {
-        incoming: false,
-        thread_id: 'D1KARK0F6',
-        user_id: 'kip_yolo',
-        origin: 'slack',
-        source: _.merge({}, require('./menu_summary'), {
-          type: 'message',
-          user: 'kip_yolo',
-          team: 'yolo',
-          ts: (+new Date()).toString()
-        }),
-        mode: 'food',
-        action: 'menu.summary'
-      }
-      yield user.db.collection('messages').insert(message)
-      return message
-    },
-
-    S10: function * () {
-      var menu = yield steps.S9()
-      // choose some item
-      return user.text('burrito')
-    },
-
-    S11: function * () {
-      var options = yield steps.S10()
-
-      // just add it to cart via tapping whichever button says "Add to Cart"
-      var ind = {}
-      options.attachments.map((a, ai) => {
-        a.actions.map((x, xi) => {
-          if (x.text.indexOf('Add to Cart') === 0) {
-            ind.attachment = ai
-            ind.action = xi
-          }
-        })
-      })
-      return user.tap(options, ind.attachment, ind.action)
-    }
-  }
-
-  return steps[step]()
-}
-
-/**
- * gets a fresh conversation for a user that we know about in the database
- */
-function * ExistingUser () {
+function * ExistingUser() {
   var user = new User({
     id: 'bamf_yolo'
   })

@@ -30,8 +30,8 @@ service_objects:
 
         DSXClient:
                 init_params:
-                          host:         64639cb4.ngrok.io
-                          port:         80
+                          host:         dsx-test.kipapp.co
+                          port:         5000
 
 
 
