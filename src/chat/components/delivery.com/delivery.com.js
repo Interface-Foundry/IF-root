@@ -292,7 +292,7 @@ handlers['food.restaurant.search'] = function*(message) {
 }
 
 //
-// the user's intent is to choose a restaurant to order from
+// the admin's intent is to choose a restaurant to order from the list of options
 //
 handlers['food.restaurant.select'] = function*(message) {
   return yield handlers['food.restaurant.info'](message);
@@ -322,9 +322,10 @@ handlers['food.restaurant.info'] = function*(message) {
 }
 
 //
-// the user wants to see the full menu
+// the user wants to see the summarized menu for the chosen restaurant
+// this is the first screen of S8
 //
-handlers['food.menu.list'] = function*(message) {
+handlers['food.menu.summary'] = function*(message) {
   var info_message = default_reply(message);
   info_message.action = 'menu.list';
   info_message.data = message.history.filter(m => {

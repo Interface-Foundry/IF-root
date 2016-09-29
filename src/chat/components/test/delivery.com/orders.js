@@ -44,9 +44,7 @@ describe('Confirm restaurant choice', () => {
 describe('Confirm restaurant participation in the order', () => {
   it('should show the right restuarant and stuff', function * () {
     var user = yield mock_slack.ExistingUser()
-    var admin = yield mock_slack.ExistingAdmin()
-    automateRestaurantChoice(admin, "Dos Toros Taqueria")
-    var msg = yield user.awaitMessage()
+    var msg = yield user.goto('S8')
 
     // check the message format
     _.get(msg, "text", '').should.equal("<@U12345 chose Dos Toros Taqueria - Latin American, Mexican - est wait 40-55 min")
