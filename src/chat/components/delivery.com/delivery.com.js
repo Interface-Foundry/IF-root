@@ -1,11 +1,18 @@
-var queue = require('../queue-mongo');
-var kip = require('kip');
-var co = require('co');
-var db = require('db');
-var _ = require('lodash');
-var api = require('./api-wrapper');
+var queue = require('../queue-mongo')
+var kip = require('kip')
+var co = require('co')
+var fs = require('fs')
+var db = require('db')
+var uuid = require('uuid')
+var _ = require('lodash')
+var api = require('./api-wrapper')
+var search = require('./search')
+var utils = require('./utils')
+var picstitch = require('./image_processing_delivery.js')
+var path = require('path')
 
-var search = require('./search');
+// until cuisines is returned from s1-s3
+var cuisines = fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8')
 var winston = require('winston');
 
 var fs = require('fs');
@@ -91,7 +98,7 @@ class UserChannel {
 var replyChannel = new UserChannel(queue);
 
 
-function default_reply(message) {
+function default_reply (message) {
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -106,16 +113,16 @@ function default_reply(message) {
   })
 }
 
-function text_reply(message, text) {
-  var msg = default_reply(message);
-  msg.text = text;
+function text_reply (message, text) {
+  var msg = default_reply(message)
+  msg.text = text
   return msg
 }
 
-function send_text_reply(message, text) {
-  var msg = text_reply(message, text);
-  msg.save();
-  console.log('<<<'.yellow, text.yellow);
+function send_text_reply (message, text) {
+  var msg = text_reply(message, text)
+  msg.save()
+  console.log('<<<'.yellow, text.yellow)
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -123,8 +130,8 @@ function send_text_reply(message, text) {
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
 queue.topic('incoming').subscribe(incoming => {
-  co(function*() {
-    console.log('>>>'.yellow, incoming.data.text.yellow);
+  co(function * () {
+    console.log('>>>'.yellow, incoming.data.text.yellow)
 
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
@@ -132,7 +139,7 @@ queue.topic('incoming').subscribe(incoming => {
       ts: {
         $lte: incoming.data.ts
       }
-    }).sort('-ts').limit(20);
+    }).sort('-ts').limit(20)
 
     var session = history[0];
     if (!session.state && history[1]) {
@@ -174,29 +181,44 @@ function getRoute(session) {
     else{
         return (session.mode + '.' + session.action);
     }
-    // if (message.text === 'food') return 'food.begin';
-    // if (message.prevRoute === 'food.begin') return 'food.address';
-    // if ('123'.match(message.text)) {
-    //   if (!message.state.merchant_id)
-    //     return 'food.restaurant.select';
-    //   else
-    //     return 'food.menu.select';
-    // }
-    // if (message.prevRoute === 'food.restaurant.list') {
-    //   return 'food.restaurant.search';
-    // }
-    // if (message.state.merchant_id && message.text === 'full menu') {
-    //   return 'food.menu.list';
-    // }
-    // if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
-    //   return 'food.menu.search';
-    // }
+
+    if (message.prevRoute === 'food.admin.confirm') {
+      return 'food.user.poll'
+    }
+
+    if (message.prevRoute === 'food.user.poll') {
+      return 'food.admin.restaurant.pick'
+    }
+
+    if (message.prevRoute === 'food.admin.restaurant.pick') {
+      return 'food.admin.restaurant.confirm'
+    }
+
+    if (message.prevRoute === 'food.begin') {
+      return 'food.address'
+    }
+    if ('123'.match(message.text)) {
+      if (!message.state.merchant_id) {
+        return 'food.restaurant.select'
+      } else {
+        return 'food.menu.select'
+      }
+    }
+    if (message.prevRoute === 'food.restaurant.list') {
+      return 'food.restaurant.search'
+    }
+    if (message.state.merchant_id && message.text === 'full menu') {
+      return 'food.menu.list'
+    }
+    if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
+      return 'food.menu.search'
+    }
 
     throw new Error("couldn't figure out the right mode/action to route to")
-  }).catch(kip.err);
+  }).catch(kip.err)
 }
 
-var handlers = {};
+var handlers = {}
 
 
 handlers['food.sys_error'] = function* (session){
@@ -250,129 +272,199 @@ handlers['food.context_update'] = function* (session) {
 //
 // the user's intent is to specify an address for delivery/pickup
 //
-handlers['food.address'] = function* (message) {
-  var addr = message.text;
+handlers['food.address'] = function * (message) {
+  var addr = message.text
   // check if it's a good address
   // TODO
 
-  message.state.addr = addr;
-  message.save();
+  message.state.addr = addr
+  message.save()
 
   // search for food near that address
-  send_text_reply(message, 'thanks, searching your area for good stuff!');
+  send_text_reply(message, 'thanks, searching your area for good stuff!')
 
   var results = yield search.search({
     addr: addr
-  });
-  var results_message = default_reply(message);
-  results_message.action = 'restaurant.list';
-  results_message.text = 'Here are some restaurants you might like nearby';
+  })
+  var results_message = default_reply(message)
+  results_message.action = 'restaurant.list'
+  results_message.text = 'Here are some restaurants you might like nearby'
   results_message.data = {
     results: results.results,
     params: {addr: results.address}
-  };
-  results_message.save();
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+  }
+  results_message.save()
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results')
 }
 
 //
 // the user's intent is to search for a specific type of food or a specific restaurant
 //
-handlers['food.restaurant.search'] = function*(message) {
+handlers['food.restaurant.search'] = function * (message) {
   var results = yield search.search({
     addr: message.state.addr,
     q: message.text
   })
-  var results_message = default_reply(message);
-  results_message.action = 'restaurant.list';
-  results_message.text = `Here are some restaurants matching ${message.text} that you might like nearby`;
+  var results_message = default_reply(message)
+  results_message.action = 'restaurant.list'
+  results_message.text = `Here are some restaurants matching ${message.text} that you might like nearby`
   results_message.data = {
     results: results.results,
     params: {addr: results.address}
-  };
-  results_message.save();
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+  }
+  results_message.save()
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results')
 }
 
 //
 // the user's intent is to choose a restaurant to order from
 //
-handlers['food.restaurant.select'] = function*(message) {
-  return yield handlers['food.restaurant.info'](message);
+handlers['food.restaurant.select'] = function * (message) {
+  return yield handlers['food.restaurant.info'](message)
 }
 
 //
 // the user's intent is to obtian more information about a restaurant
 //
-handlers['food.restaurant.info'] = function*(message) {
+handlers['food.restaurant.info'] = function * (message) {
   var results_message = message.history.filter(m => {
-    return _.get(m, 'data.results.0');
-  })[0];
+    return _.get(m, 'data.results.0')
+  })[0]
 
-  var selection = parseInt(message.text) - 1;
-  var merchant = results_message.data.results[selection];
-  message.state.merchant_id = merchant.id;
-  var info_message = default_reply(message);
-  info_message.action = 'restaurant.info';
+  var selection = parseInt(message.text) - 1
+  var merchant = results_message.data.results[selection]
+  message.state.merchant_id = merchant.id
+  var info_message = default_reply(message)
+  info_message.action = 'restaurant.info'
   info_message.text = `Okay, here's the menu for ${merchant.summary.name}`
-  var menu = yield api.getMenu(merchant.id);
+  var menu = yield api.getMenu(merchant.id)
   info_message.data = {
     merchant: merchant,
     menu: menu
-  };
-  info_message.save();
-  queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu');
+  }
+  info_message.save()
+  queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu')
 }
 
 //
 // the user wants to see the full menu
 //
-handlers['food.menu.list'] = function*(message) {
-  var info_message = default_reply(message);
-  info_message.action = 'menu.list';
+handlers['food.menu.list'] = function * (message) {
+  var info_message = default_reply(message)
+  info_message.action = 'menu.list'
   info_message.data = message.history.filter(m => {
-    return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu');
-  })[0].data;
+    return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu')
+  })[0].data
   info_message.text = `Okay, here's the full menu for ${info_message.data.merchant.summary.name}`
-  info_message.save();
-  queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu');
-  
+  info_message.save()
+  queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu')
 }
 
 //
 // the user is looking at a menu and is searching for an item to add
 //
-handlers['food.menu.search'] = function*(message) {
-  var results_message = default_reply(message);
-  results_message.action = 'menu.search.results';
+handlers['food.menu.search'] = function * (message) {
+  var results_message = default_reply(message)
+  results_message.action = 'menu.search.results'
   var results = yield search.menuSearch({
     q: message.text,
     menu: message.history.filter(m => {
-      return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu');
+      return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu')
     })[0].data.menu
-  });
+  })
   results_message.data = {
     results: results
-  };
-  results_message.text = `Okay, here are the items matching "${message.text}"`;
-  results_message.save();
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+  }
+  results_message.text = `Okay, here are the items matching "${message.text}"`
+  results_message.save()
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results')
 }
 
 //
 // the user's intent is to obtain more information about a menu item
 //
-handlers['food.item.info'] = function*(message) {
-
-}
+handlers['food.item.info'] = function * (message) {}
 
 // the user's intent is to add a menu item to cart
-handlers['food.item.add'] = function*(message) {
-
-}
+handlers['food.item.add'] = function * (message) {}
 
 // the user's intent is to select an option for a menu item, like size or type of sauce
 // the item could already be in their cart or not. message.item should be what you modify
-handlers['food.item.option'] = function*(message) {
+handlers['food.item.option'] = function * (message) {}
 
+// check for user preferences/diet/etc, skipping for now
+handlers['food.user.preferences'] = function * (message) {
+  // body
+}
+
+// poll for cuisines
+handlers['food.user.poll'] = function * (message) {
+  // until cuisines is returned from s1-s3
+  var cuisines = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8'))
+  var teamId = message.source.team
+  var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+
+  // error with mock slack not being able to get all messages
+  teamMembers = [teamMembers[0]]
+  var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
+  var responses = teamMembers.map(function (member) {
+    var memberResp = {
+      mode: 'food',
+      action: 'user.poll',
+      thread_id: member.dm,
+      origin: message.origin,
+      source: message.source,
+      res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
+    }
+    memberResp.source.user = member.id
+    memberResp.source.channel = member.dm
+
+    var resultsMessage = default_reply(memberResp)
+    resultsMessage.data = memberResp.res
+    resultsMessage.save()
+    memberResp._id = resultsMessage._id
+    memberResp.text = JSON.stringify(memberResp.res)
+    memberResp.attachments = JSON.stringify(memberResp.res)
+    queue.publish('outgoing.' + memberResp.origin, memberResp, resultsMessage._id + '.reply.user.poll')
+  })
+}
+
+handlers['food.admin.restaurant.pick'] = function * (message) {
+  var results = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/results.json'), 'utf8'))
+  // var results = dsxClient._get('context', {team_id: message.source.team,  }
+  var v = yield db.messages.find({mode: 'food', action: 'user.poll', 'data.voteID': 'XYZXYZ'})
+  var votes = utils.getVotesFromMembers(v)
+  var viableRestaurants = utils.createSearchRanking(results, votes)
+  var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
+  var resp = {
+    mode: 'food',
+    action: 'admin.restaurant.pick',
+    thread_id: message.dm,
+    origin: message.origin,
+    source: message.source,
+    res: responseForAdmin
+  }
+  sendIt(resp)
+// var merchants = utils.createSearchRanking(results, votes)
+}
+
+handlers['food.admin.restaurant.confirm'] = function * (message) {
+  var choosenRestaurant = message.text // or whatever the button action.value is
+  var resp = {
+    mode: 'food',
+    action: 'admin.restaurant.confirm',
+    thread_id: message.dm,
+    origin: message.origin,
+    source: message.source,
+    res: utils.confirmRestaurant(choosenRestaurant)
+  }
+  sendIt(resp)
+}
+
+function sendIt (resp) {
+  var resultsMessage = default_reply(resp)
+  resultsMessage.data = resp.res
+  resultsMessage.save()
+  resp.text = JSON.stringify(resp.res)
+  queue.publish('outgoing.' + resp.origin, resp, resultsMessage._id + '.reply.' + resp.action)
 }

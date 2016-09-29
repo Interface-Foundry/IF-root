@@ -5,20 +5,20 @@ var mongodb = require('mongodb')
 /**
  * creates a mock user
  */
-var User = function(opts) {
+var User = function (opts) {
   if (!opts.id) {
     throw new Error('Must supply a user id so we know what team this is for')
   }
   if (!(this instanceof User)) {
     return new User(opts)
   }
-  this.id = opts.id;
+  this.id = opts.id
   var user = this
   return co(function * () {
     var db = yield mongodb.MongoClient.connect('mongodb://localhost/foundry')
     user.chatuser = yield db.collection('chatusers').findOne({id: user.id})
     user.slackbot = yield db.collection('slackbots').findOne({team_id: user.chatuser.team_id})
-  return user
+    return user
   })
 }
 
@@ -34,7 +34,7 @@ User.prototype.text = function * (text) {
       channel: 'asdfadsf',
       user: user.id,
       text: text,
-      ts: "" + (+new Date()) + ".00000",
+      ts: '' + (+new Date()) + '.00000',
       team: user.team_id
     }
     return request({
@@ -49,7 +49,7 @@ User.prototype.text = function * (text) {
 /**
  * mocks the user tapping on a button
  */
-User.prototype.tap = function(message, attachment_index, action_index) {
+User.prototype.tap = function (message, attachment_index, action_index) {
   var user = this.chatuser
   var slackbot = this.slackbot
   return co(function * () {
@@ -58,7 +58,7 @@ User.prototype.tap = function(message, attachment_index, action_index) {
       callback_id: message.attachments[attachment_index].callback_id,
       team: {
         id: user.team_id,
-        domain: user.team_name 
+        domain: user.team_name
       },
       channel: {
         id: 'test_channel',
@@ -68,7 +68,7 @@ User.prototype.tap = function(message, attachment_index, action_index) {
         id: user.id,
         name: user.id + ' name'
       },
-      action_ts: "" + (+new Date()) + ".000000",
+      action_ts: '' + (+new Date()) + '.000000',
       message_ts: message.ts,
       attachment_id: attachment_index.toString(),
       token: 'blorp',
@@ -77,31 +77,96 @@ User.prototype.tap = function(message, attachment_index, action_index) {
     }
     var res = yield request({
       method: 'POST',
-      uri: 'http://localhost:8080/incomingAction',
+      uri: 'http://localhost:8080/incomingAction/' + slackbot.bot.bot_access_token,
       body: body,
       json: true
     })
+    return res
   })
 }
 
 /**
- * gets a fresh conversation for a user that we know about in the database 
+ * programatically takes a user to a specific step
+ * usually this just means we add the correct messages to the
+ * database and return the most recent one. sometime you have
+ * to add data to the slackbot settings or chatuser settings
+ * or carts
  */
-function * ExistingUser() {
+User.prototype.goto = function (step) {
+  var user = this
+  var steps = {
+    S9: function * () {
+      // add the selected restaurant to the team cart
+      yield user.db.collection('carts').insert({
+        team: user.slackbot.team_id,
+        restaurant: {
+          name: 'Some Restaurant' // todo
+        }
+      })
+
+      // replicate the message that would be sent to the user after the admin confirms order.
+      // this way i don't have to simulate the admin's entire convo
+      var message = {
+        incoming: false,
+        thread_id: 'D1KARK0F6',
+        user_id: 'kip_yolo',
+        origin: 'slack',
+        source: _.merge({}, require('./menu_summary'), {
+          type: 'message',
+          user: 'kip_yolo',
+          team: 'yolo',
+          ts: (+new Date()).toString()
+        }),
+        mode: 'food',
+        action: 'menu.summary'
+      }
+      yield user.db.collection('messages').insert(message)
+      return message
+    },
+
+    S10: function * () {
+      var menu = yield steps.S9()
+      // choose some item
+      return user.text('burrito')
+    },
+
+    S11: function * () {
+      var options = yield steps.S10()
+
+      // just add it to cart via tapping whichever button says "Add to Cart"
+      var ind = {}
+      options.attachments.map((a, ai) => {
+        a.actions.map((x, xi) => {
+          if (x.text.indexOf('Add to Cart') === 0) {
+            ind.attachment = ai
+            ind.action = xi
+          }
+        })
+      })
+      return user.tap(options, ind.attachment, ind.action)
+    }
+  }
+
+  return steps[step]()
+}
+
+/**
+ * gets a fresh conversation for a user that we know about in the database
+ */
+function * ExistingUser () {
   var user = new User({
     id: 'bamf_yolo'
   })
-  
-  return user;
 
+  return user
 }
 
-function * Admin() {
+function * Admin () {
   var user = new User({
-    id: 'admin_yolo',
+    id: 'admin_yolo'
   })
-  
-  return user;
+
+  return user
 }
 
 /**
@@ -114,7 +179,7 @@ function * setup () {
   if (process.env.NODE_ENV !== 'test') {
     throw new Error('must run as NODE_ENV=test')
   }
-  
+
   yield require('../slack/test_team_1').reset()
   yield require('../slack/slack').start()
   require('../delivery.com/delivery.com')
