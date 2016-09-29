@@ -11,6 +11,7 @@ var app = express()
 var bodyParser = require('body-parser')
 var cart = require('./cart')
 var kipcart = require('../cart')
+var _ = require('lodash')
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded())
 
@@ -185,13 +186,10 @@ var uuid = require('uuid');
 // var defaultPage = process.env.NODE_ENV !== 'production' ? __dirname + '/simpleSearch.html' : __dirname + '/dist/simpleSearch.html';
 var request = require('request');
 
-var canary = {
-  id: '2804113073.84166691729',
-  secret: '39126ac7842f6e3a010f94b9a79282f6',
-  verification_token: 'b2hLV2HnBtWBmU5NFgDBG8dL'
-};
-var clientID = process.env.NODE_ENV === 'production' ? '2804113073.14708197459' : canary.id;
-var clientSecret = process.env.NODE_ENV === 'production' ? 'd4c324bf9caa887a66870abacb3d7cb5' : canary.secret;
+app.get('/authorize', function(req, res) {
+  console.log('button click')
+  res.redirect('https://slack.com/oauth/authorize?scope=commands+bot+users:read&client_id=' + kip.config.slack.client_id)
+})
 
 app.get('/newslack', function(req, res) {
     console.log('new slack integration request');
@@ -207,11 +205,11 @@ app.get('/newslack', function(req, res) {
 
     var body = {
       code: req.query.code,
-      redirect_uri: 'https://canary.kipapp.co/newslack'
+      redirect_uri: kip.config.slack.redirect_uri
     }
 
     request({
-      url: 'https://' + clientID + ':' + clientSecret + '@slack.com/api/oauth.access',
+      url: 'https://' + kip.config.slack.client_id + ':' + kip.config.slack.client_secret + '@slack.com/api/oauth.access',
       method: 'POST',
       form: body
     }, function(e, r, b) {
@@ -238,18 +236,31 @@ app.get('/newslack', function(req, res) {
         console.log('body was', body)
         console.log('response was', b)
         var bot = new db.Slackbot(b)
-        db.Slackbots.find({team_id: b.team_id}, function(e, bots) {
-          if (e) { console.error(e) }
-
-          if (bots && bots.length > 0) {
-            console.log('already have a bot for this team')
-            return;  
-          } else {
-            bot.save(function(e) {
-                kip.err(e);
-            })
+        db.Slackbots.findOne({
+          team_id: b.team_id,
+          deleted: {
+            $ne: true
           }
-        })
+        }, function(e, old_bot) {
+        if (e) {
+          kip.error(e)
+        }
+
+        if (old_bot) {
+          kip.debug('already have a bot for this team', b.team_id)
+          kip.debug('updating i guess')
+          _.merge(old_bot, b);
+          old_bot.save(e => {
+            kip.err(e);
+            // TODO reload slack users
+          });
+        } else {
+          bot.save(function(e) {
+            kip.err(e);
+            // TODO load slack user
+          })
+        }
+      })
     })
 
 })
@@ -270,6 +281,7 @@ app.listen(8000, function(e) {
     console.dir(e)
   } else {
     console.log('slack action server listening on port 8000')
+    console.log('running NODE_ENV=' + process.env.NODE_ENV)
   }
 })
 
