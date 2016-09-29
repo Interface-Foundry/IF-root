@@ -42,7 +42,8 @@ if (test_mode) {
   });
 } 
 else {
-  console.log('Running proxy normal mode..')
+  // console.log('Running proxy normal mode..')
+
   options = {
       customer: 'kipthis', 
       password: 'e49d4ega1696', 

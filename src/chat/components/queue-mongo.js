@@ -26,7 +26,7 @@ function publish (topic, data, key) {
     throw new Error('pub/sub topic must be a string, ex queue.publish("messages", {})')
   }
 
-  topic = topic.toLowerCase()
+  topic = topic.toLowerCase();
   if (!topics[topic]) {
     throw new Error(`pub/sub topic "${topic}" does not exist`)
   }

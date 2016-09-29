@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var amazonResult = mongoose.Schema;
 var modifyVal = mongoose.Schema;
 var messageSchema = mongoose.Schema({
-
+    
     thread_id: {
       type: String,
       index: true
@@ -85,7 +85,8 @@ var messageSchema = mongoose.Schema({
     slackData: {
         callback_id: String
     },
-    original_query: String
+    original_query: String,
+    reply: mongoose.Schema.Types.Mixed
 });
 
 module.exports = mongoose.model('Message', messageSchema);

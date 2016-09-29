@@ -14,5 +14,10 @@ describe('greeting', () => {
 
     var res = yield user.text("food")
     res.text.should.equal("yeah let's eat! what address should i use?")
+
+    res = yield user.text('21 Essex St 10002')
+    res.text.should.equal("Select your order method.")
+    res = yield user.tap(res, 0, 0)
+    res.text.should.equal('delivery context updated.')
   })
 })
