@@ -61,7 +61,7 @@ User.prototype.tap = function(message, attachment_index, action_index) {
         domain: user.team_name 
       },
       channel: {
-        id: 'test_channel',
+        id: 'asdfadsf',
         name: 'test channel name'
       },
       user: {
@@ -75,12 +75,17 @@ User.prototype.tap = function(message, attachment_index, action_index) {
       original_message: JSON.stringify(message),
       response_url: 'http://localhost:8080/action_response/' + user.team_id + '/' + 'TODO' // TODO make delayed action responses work
     }
+
+    // register a listener with mock_slack.js
     var res = yield request({
       method: 'POST',
-      uri: 'http://localhost:8080/incomingAction',
+      uri: 'http://localhost:8080/tap/' + slackbot.bot.bot_access_token,
       body: body,
       json: true
     })
+
+    console.log('got it')
+    return res
   })
 }
 

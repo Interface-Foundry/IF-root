@@ -14,6 +14,7 @@ var kipcart = require('../cart')
 var _ = require('lodash')
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded())
+app.use(bodyParser.json())
 
 
 /**
@@ -60,6 +61,7 @@ function simple_action_handler(action) {
 
 //incoming slack action
 app.post('/slackaction', function(req, res) {
+  
   kip.debug('incoming action')
     if (req.body && req.body.payload) {
       var parsedIn = JSON.parse(req.body.payload);
@@ -77,8 +79,12 @@ app.post('/slackaction', function(req, res) {
           text: simple_command,
           user_id: parsedIn.user.id,
           origin: 'slack',
-          source: parsedIn,
+          source: parsedIn 
         });
+        // inject source.team and source.user because fuck the fuck out of slack message formats
+        message.source.team = message.source.team.id
+        message.source.user = message.source.user.id
+        message.source.channel = message.source.channel.id
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
