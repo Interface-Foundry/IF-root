@@ -11,3 +11,41 @@ picstitch: http://localhost:5000
 nlp: http://104.196.51.184:8083
 nlp_rnn: http://104.196.1.204:8085
 
+globals:
+        port:                   5050
+        debug:                  True
+        service_module:         kip_services
+        log_transports:
+                  - type:         winston.transports.File
+                    filename:     kip.log
+                    level:        debug
+                    json:         false
+                  
+                  - type:         winston.transports.Console
+                    level:        info
+                    json:         false
+
+
+service_objects:
+        MongoDBClient:          
+                init_params:
+                        - username:     person
+                          password:     mypass
+                          host:         localhost
+                          port:         27050
+
+
+        DSXClient:
+                init_params:
+                          host:         64639cb4.ngrok.io
+                          port:         80
+
+
+
+#-----  experimental section, under development --
+segments:
+        snapclient:
+                port:   5050
+#-------------------------------------------------
+
+
