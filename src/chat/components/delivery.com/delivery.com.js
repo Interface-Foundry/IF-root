@@ -385,19 +385,19 @@ handlers['test.s8'] = function * (message) {
 				],
             "text": "Want to be in this order?",
             "fallback": "n/a",
-            "callback_id": "wopr_game",
+            "callback_id": "food.participate.confirmation",
             "color": "#3AA3E3",
             "attachment_type": "default",
             "actions": [
                 {
-                    "name": "902 Broadway 6th fl",
+                    "name": "yes_btn",
                     "text": "Yes",
                     "type": "button",
 					"style": "primary",
                     "value": "chess"
                 },
                 {
-                    "name": "war",
+                    "name": "no_btn",
                     "text": "No",
                     "type": "button",
                     "value": "war",

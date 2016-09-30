@@ -56,6 +56,10 @@ function simple_action_handler(action) {
       return 'delivery'
     case 'pickup_btn':
       return 'pickup'
+    case 'yes_btn':
+      return 'yes'
+    case 'no_btn':
+      return 'no'
   }
 }
 
