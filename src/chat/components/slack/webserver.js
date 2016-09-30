@@ -61,12 +61,11 @@ function simple_action_handler(action) {
 
 //incoming slack action
 app.post('/slackaction', function(req, res) {
-  
+
   kip.debug('incoming action')
     if (req.body && req.body.payload) {
       var parsedIn = JSON.parse(req.body.payload);
       var action = parsedIn.actions[0];
-      debugger;
       kip.debug(action.name.cyan, action.value.yellow)
       // for things that i'm just going to parse for
       var simple_command = simple_action_handler(action)
