@@ -426,7 +426,7 @@ handlers['food.participate.confirmation'] = function * (message) {
     // get the menu from DSX or something
 
 var msg_json = {
-	"text":"`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu> ",
+	"text":"`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>",
     "attachments": [
 		{
 			"mrkdwn_in":[
@@ -519,6 +519,10 @@ var msg_json = {
     var component = new ui.UIComponentFactory(message.origin).buildTextMessage("Okay Thanks")
     replyChannel.send(message, '.', component.render());
   }
+}
+
+handlers['food.menu.action'] = function * (message) {
+
 }
 
 

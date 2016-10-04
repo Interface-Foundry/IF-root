@@ -101,30 +101,9 @@ User.prototype.goto = function (step) {
   var user = this;
   var steps = {
     S9: function * () {
-      // add the selected restaurant to the team cart
-      yield user.db.collection('carts').insert({
-        team: user.slackbot.team_id,
-        restaurant: {}
-      })
-
-      // replicate the message that would be sent to the user after the admin confirms order.
-      // this way i don't have to simulate the admin's entire convo
-      var message = {
-        incoming: false,
-        thread_id: 'D1KARK0F6',
-        user_id: 'kip_yolo',
-        origin: 'slack',
-        source: _.merge({}, require('./menu_summary'), {
-          type: 'message',
-          user: 'kip_yolo',
-          team: 'yolo',
-          ts: (+new Date()).toString(),
-        }),
-        mode: 'food',
-        action: 'menu.summary'
-      }
-      yield user.db.collection('messages').insert(message)
-      return message
+      var msg = yield user.text('test.s8')
+      msg = yield user.tap(msg, 0, 0)
+      return msg
     },
 
     S10: function * () {

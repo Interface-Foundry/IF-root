@@ -60,6 +60,8 @@ function simple_action_handler(action) {
       return 'yes'
     case 'no_btn':
       return 'no'
+    case 'more_btn':
+      return 'more'
   }
 }
 
