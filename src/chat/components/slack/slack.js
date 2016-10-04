@@ -41,7 +41,7 @@ SLACKSLACKSLACKSLACKSLACKSLdo.    ```    `-hNSLACKSLACKSLACKSLACKSLACKSLACKSLACK
 SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 */
 
-var slack = require('@slack/client');
+var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client');
 var co = require('co');
 var _ = require('lodash');
 
@@ -51,13 +51,21 @@ var image_search = require('../image_search');
 var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
-var actions = require('./actions');
+// var actions = require('./actions'); --> this runs an extra service not sure what for
 var slackConnections = {};
+
+var webserver = require('./webserver');
+
 
 //
 // slackbots
 //
-co(function*() {
+function * start() {
+  if (process.env.NODE_ENV === 'test') {
+    console.log('starting mock slack server')
+    yield slack.run_chat_server()
+  }
+
   var slackbots = yield db.Slackbots.find({
     'meta.deleted': {
       $ne: true
@@ -68,10 +76,9 @@ co(function*() {
 
   // Just need the RTM client to listen for messages
   slackbots.map((slackbot) => {
-    var rtm = new slack.RtmClient(slackbot.bot.bot_access_token || '');
+    var rtm = new slack.RtmClient( slackbot.bot.bot_access_token || '');
     rtm.start();
     var web = new slack.WebClient(slackbot.bot.bot_access_token || '');
-
     slackConnections[slackbot.team_id] = {
       rtm: rtm,
       web: web,
@@ -101,7 +108,7 @@ co(function*() {
     rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
       kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
-      kip.debug(data);
+      // kip.debug(data);
 
       var message = new db.Message({
         incoming: true,
@@ -109,12 +116,12 @@ co(function*() {
         original_text: data.text,
         user_id: data.user,
         origin: 'slack',
-        source: data,
+        source: data
       });
 
       // don't talk to yourself
-      if (data.user === slackbot.bot.bot_user_id || data.username === 'Kip') {
-        kip.debug("don't talk to yourself");
+      if (data.user === slackbot.bot.bot_user_id || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
+        kip.debug("don't talk to yourself: ");
         return; // drop the message before saving.
       }
 
@@ -135,46 +142,44 @@ co(function*() {
           });
         });
       }
-
       // clean up the text
       message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
       if (message.text.charAt(0) == ':') {
         message.text = message.text.substr(1); //remove : from beginning of string
       }
       message.text = message.text.trim(); //remove extra spaces on edges of string
-
       // queue it up for processing
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
       });
     })
   });
-}).catch((e) => {
-  kip.error(e, 'error loading slackbots');
-})
+}
 
 //
 // Mechanism for responding to messages
 //
 kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
+
   try {
-    console.log('outgoing message');
     // console.log(outgoing);
     var message = outgoing.data;
-
     debugger;
-    var team = _.get(message, 'source.team.id') || _.get(message, 'source.team');
+    var team = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+    var team = _.get(message, 'source.team');
     var bot = slackConnections[team];
 
     if (typeof bot === 'undefined') {
-      throw new Error('rtm client not registered for slack team ' + message.source.team);
+      kip.debug('\n\nslack.js line 174, message: ', message,'\n\n')
+      throw new Error('rtm client not registered for slack team ',message.source.team, slackConnections);
     }
 
     var msgData = {
         icon_url:'http://kipthis.com/img/kip-icon.png',
         username:'Kip',
     };
+    
     co(function*() {
 
       if (message.action === 'typing') {
@@ -182,9 +187,14 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack();
         })
       }
+        console.log('outgoing message', message);
 
+      if (message.mode === 'food') {
+         return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
+      }
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         msgData.attachments = yield search_results(message);
+        kip.debug('\n\nslack.js line 197: message.mode = shopping, message.action = results, msgData: ', msgData,'\n\n')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
@@ -195,6 +205,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'cart' && message.action === 'view') {
         msgData.attachments = yield cart(message, bot.slackbot, false);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+      if (message.mode === 'home' && message.action === 'view') {
+        msgData.attachments = message.client_res[0];
+        kip.debug('\n\nslack.js line 212: message.mode = home, message.action = view, msgData: ',message,'\n\n');
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
@@ -215,3 +231,14 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     kip.err(e);
   }
 })
+
+
+module.exports = {
+  start: start
+}
+
+if (!module.parent) {
+  co(start).catch((e) => {
+    kip.error(e, 'error loading slackbots');
+  })
+}

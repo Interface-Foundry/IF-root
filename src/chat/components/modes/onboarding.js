@@ -29,6 +29,7 @@ handlers['start'] = function * (message) {
   var welcome = 'Well done! *Kip* has been enabled for your team 😊'
   var welcome_message = message_tools.text_reply(message, welcome)
   var next_message = yield handlers['get-admins.ask'](message);
+  kip.debug('\n\nwelcome_message and next_mesage: ',welcome_message, next_message,'\n\n');
   return [welcome_message, next_message]
 }
 
@@ -70,13 +71,17 @@ handlers['get-admins.response'] = function * (message) {
   // check for mentioned users
   // for a typed message like "that would be @dan"
   // the response.text would be like  "that would be <@U0R6H9BKN>"
-  var office_gremlins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
+  var office_admins = message.original_text.match(/(\<\@[^\s]+\>|\bme\b)/ig) || [];
   
   // replace "me" with the user's id, and <@U12345> with just U12345
-  office_gremlins = office_gremlins.map(g => {
+  office_admins = office_admins.map(g => {
     if (g === 'me') {
+      team.meta.office_assistants.push(message.user_id);
+      team.save();
       return message.user_id
     } else {
+      team.meta.office_assistants.push(g.replace(/(\<\@|\>)/g, ''));
+      team.save();
       return g.replace(/(\<\@|\>)/g, '')
     }
   })
@@ -87,21 +92,21 @@ handlers['get-admins.response'] = function * (message) {
     team_id: team.team_id,
     is_bot: {$ne: true},
     deleted: {$ne: true}
-  }).select('id name')
+  }).select('id name');
 
   users.map((u) => {
     var re = new RegExp('\\b' + u.name + '\\b', 'i')
     if (message.original_text.match(re)) {
-      office_gremlins.push(u.id);
+      office_admins.push(u.id);
     }
-  })
+  });
 
-  office_gremlins = _.uniq(office_gremlins)
+  office_admins = _.uniq(office_admins);
 
   // add the admin strings into the reply message
-  reply_success = reply_success.replace('$ADMINS', office_gremlins.map(g => {
+  reply_success = reply_success.replace('$ADMINS', office_admins.map(g => {
     return '<@' + g + '>'
-  }).join(', ').replace(/,([^,]*)$/, ' and $1'))
+  }).join(', ').replace(/,([^,]*)$/, ' and $1'));
 
   // TODO send special message to admins
 

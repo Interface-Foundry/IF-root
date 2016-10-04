@@ -54,6 +54,7 @@
     "kue-ui": "^0.1.0",
     "linkifyjs": "^2.0.0",
     "lodash": "^3.10.0",
+    "luminati-proxy": "github:luminati-io/luminati-proxy",
     "md5": "^2.0.0",
     "memoize": "^0.1.1",
     "memory-cache": "^0.1.4",

@@ -59,18 +59,27 @@ function* results(message) {
 
   results.push({
     fallback: 'Search Results',
+    callback_id: 'fwefjiwfj33',
     actions: [{
       name: "more",
-      text: "See More Results",
+      text: "See More Result",
       style: "default",
       type: "button",
       value: "more"
-    }, {
+    }, 
+    {
       name: "home",
-      text: "🐧",
+      text: "Settings",
       style: "default",
       type: "button",
-      value: "home"
+      value: "home",
+    },
+    {
+      name: "home",
+      text: "Team Members",
+      style: "default",
+      type: "button",
+      value: "team",
     }]
   })
 

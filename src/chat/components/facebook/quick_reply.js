@@ -18,7 +18,7 @@ var kipcart = require('../cart');
 var process_image = require('../process');
 var process_emoji = require('../process_emoji').search;
 var Chatuser = db.Chatuser;
-var next = require("co-next") 
+var next = require("co-next")
 var fb_utility = require('./fb_utility');
 var send_cart = require('./send_cart');
 
@@ -78,7 +78,8 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
     }
     else if (sub_menu.action && sub_menu.action == 'take_quiz'){
         fb_memory[sender].mode = 'onboarding';
-        fb_utility.send_story(sender, 0, fbtoken);
+        var pointer = sub_menu.story_pointer ? sub_menu.story_pointer : 0;
+        fb_utility.send_story(sender, pointer, fbtoken);
     }
     else if (sub_menu.action && sub_menu.action == 'cheaper') {
         console.log(event.message)
@@ -208,7 +209,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                             "text": "Going back..."
                         };
                         request({
-                            url: 'https://graph.facebook.com/v2.6/me/messages',
+                            url: 'https://graph.facebook.com/v2.7/me/messages',
                             qs: {
                                 access_token: fbtoken
                             },
@@ -228,7 +229,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
         } else if (sub_menu.action === 'emoji_modify') {
             if (!last_message) {
                     return console.log('No message found');
-            } 
+            }
             else if (last_message) {
                 // var emoji_query = (_.get(JSON.parse(msg.amazon)[0], 'ItemAttributes[0].ProductGroup[0]') && sub_menu.text) ?  (_.get(JSON.parse(msg.amazon)[0], 'ItemAttributes[0].ProductGroup[0]').toLowerCase()  + ' ' + sub_menu.text) : sub_menu.text;
                 // console.log('emoji_query: ', emoji_query)
@@ -250,7 +251,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 queue.publish('incoming', message, ['facebook', sender.toString(), message.ts].join('.'))
             });
           }
-        } 
+        }
 
         //
         //   --  Sub-menu switching --
@@ -343,7 +344,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
             };
 
             request.post({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },
@@ -449,7 +450,7 @@ var quick_reply = function* (event, sender, fb_memory, fbtoken, recipient) {
                 "notification_type": "NO_PUSH"
             };
             request.post({
-                url: 'https://graph.facebook.com/v2.6/me/messages',
+                url: 'https://graph.facebook.com/v2.7/me/messages',
                 qs: {
                     access_token: fbtoken
                 },

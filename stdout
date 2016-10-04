@@ -1,0 +1,12 @@
+MongoDB shell version: 3.2.3
+connecting to: test
+Server has startup warnings: 
+2016-08-23T11:20:41.657-0400 I CONTROL  [initandlisten] ** WARNING: You are running this process as the root user, which is not recommended.
+2016-08-23T11:20:41.658-0400 I CONTROL  [initandlisten] 
+2016-08-23T11:20:41.658-0400 I CONTROL  [initandlisten] 
+2016-08-23T11:20:41.658-0400 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+> [3G[Jdb.messages.remove({})[25Gdb.metrics.find({'metric':'proxy'}).pretty()[3G[Jdb.messages.remove({})db.metrics.find({'metric':'proxy'}).pretty()[69G
+2016-08-25T15:09:55.496-0400 E QUERY    [thread1] SyntaxError: missing ; before statement @(shell):1:22
+
+> [3G[J[3G^C
+bye

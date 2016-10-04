@@ -24,3 +24,8 @@ picstitch: http://picstitch:5000
 nlp: http://parser:8083
 nlp_rnn: http://rnn:8085
 doc2vec: http://localhost:8084
+slack:
+  client_id: "2804113073.14708197459"
+  client_secret: d4c324bf9caa887a66870abacb3d7cb5
+  verification_token: TODO_HELP_ME_ALYX
+  redirect_uri: https://slack.kipapp.co/newslack

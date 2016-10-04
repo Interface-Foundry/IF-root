@@ -1,0 +1,12 @@
+env: development
+elasticsearch:
+  url: http://localhost:9200
+picstitch: http://localhost:5000
+nlp: http://localhost:8083
+nlp_rnn: http://localhost:8085
+doc2vec: http://localhost:8084
+slack:
+  client_id: "52946721872.53047577702"
+  client_secret: 7989b267194bfa98782340007c08d088
+  verification_token: qHatSrSqnXj8ElOq5u5JGtMw
+  redirect_uri: https://sonux.asuscomm.com/newslack

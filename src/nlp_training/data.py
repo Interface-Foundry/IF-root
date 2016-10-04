@@ -32,12 +32,11 @@ def retrieve_from_prod_db(only_incoming=True,
                           not_null=True,
                           load_pickeled=False,
                           save=False,
-                          db_name='prod2'):
+                          db_name='foundry'):
     '''
     helper function to munge and explore with pandas
     '''
     pickled_location = path.join('pkls/too_big', 'messages.pkl')
-
     if load_pickeled and path.isfile(pickled_location):
         df = pd.read_pickle(pickled_location)
     else:

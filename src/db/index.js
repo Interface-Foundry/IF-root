@@ -40,7 +40,7 @@ files.map(function(f) {
 
     try {
     	var model = require('./' + f);
-    } catch(e) {
+    } catch(e) { 
       console.error('Error setting up schema ' + f);
       console.error(e);
       return;

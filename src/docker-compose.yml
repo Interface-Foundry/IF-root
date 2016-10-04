@@ -21,17 +21,17 @@ services:
       dockerfile: Dockerfiles/rnn.Dockerfile
     ports:
       - "8085:8085"
-  reply:
-    container_name: reply
-    build:
-      context: .
-      dockerfile: Dockerfiles/reply_logic_test.Dockerfile
-    expose:
-      - 27017
-  slack:
-    container_name: slack
-    build:
-      context: .
-      dockerfile: Dockerfiles/slack_test.Dockerfile
-    expose:
-      - 8000
+  # reply:
+  #   container_name: reply
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfiles/reply_logic_test.Dockerfile
+  #   expose:
+  #     - 27017
+  # slack:
+  #   container_name: slack
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfiles/slack_test.Dockerfile
+  #   expose:
+  #     - 8000
