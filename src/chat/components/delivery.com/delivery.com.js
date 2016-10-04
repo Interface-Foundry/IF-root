@@ -1,8 +1,8 @@
+require('kip')
+
 var queue = require('../queue-mongo')
-var kip = require('kip')
 var co = require('co')
 var fs = require('fs')
-var db = require('db')
 var uuid = require('uuid')
 var _ = require('lodash')
 var api = require('./api-wrapper')
@@ -13,90 +13,76 @@ var path = require('path')
 
 // until cuisines is returned from s1-s3
 var cuisines = fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8')
-var winston = require('winston');
 
-var fs = require('fs');
-var yaml = require('js-yaml');
-var dsxsvc = require('./dsx_services');
+var fs = require('fs')
+var yaml = require('js-yaml')
+var dsxsvc = require('./dsx_services')
 var dsxutils = require('./dsx_utils')
-var ui = require('../ui_controls');
-var argv = require('minimist')(process.argv.slice(2));
+var ui = require('../ui_controls')
+var argv = require('minimist')(process.argv.slice(2))
 
-var initFilename = argv['config'];
-if(initFilename === null || initFilename === undefined){
-    console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.');
-    process.exit(-1);
+var initFilename = argv['config']
+if (initFilename === null || initFilename === undefined) {
+  console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.')
+  // process.exit(-1)
+  initFilename = path.resolve(__dirname, 'dsx_init_peter.local.yml')
 }
 
-var yamlDoc;
+var yamlDoc
 try {
-    yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'));
+  yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'))
+} catch(err) {
+  console.log(err)
+  process.exit(-1)
 }
-catch(err){
-    console.log(err);
-    process.exit(-1);
-}
 
-const loggingTransports = yamlDoc['globals']['log_transports'];
-var logger = new(winston.Logger)({
-    transports: loggingTransports.map(
-  function(currentVal){
-      return new (eval(currentVal['type']))(currentVal);
-  }
-    )
-});
+var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient')
 
+logging.info(loadedParams)
+logging.info(typeof (loadedParams))
+logging.info('### looking at loadedParams again')
+logging.info(loadedParams)
 
-var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient');
+var dsxClient = new dsxsvc.DSXClient(loadedParams)
 
-logger.info(loadedParams);
-logger.info(typeof(loadedParams))
-console.log("### looking at loadedParams again");
-console.log(loadedParams)
-
-
-var dsxClient = new dsxsvc.DSXClient(loadedParams);
-
-console.log(dsxClient.getURI());
-
+console.log(dsxClient.getURI())
 
 class UserChannel {
 
-    constructor(queue) {
-        this.queue = queue;          
-        this.send = function(session, nextHandlerID, data) { 
-            var newSession = new db.Message({
-              incoming: false,
-              thread_id: session.thread_id,
-              resolved: true,
-              user_id: 'kip',
-              origin: session.origin,
-              source: session.source,
-              mode: session.mode,
-              action: session.action,
-              state: session.state,
-              user: session.source.user
-            })
-            newSession['reply'] = data;            
-            newSession.mode = nextHandlerID.split('.')[0];
-            newSession.action = nextHandlerID.split('.')[1];
-            kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
-            kip.debug('inside channel.send(). Session action is ' + newSession.action);
-            var self = this;
-            newSession.save(function(err, saved){
-              if (err) {
-                kip.debug('mongo save err: ',err);
-                throw Error(err);
-              } 
-              self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results');
-            });  
+  constructor (queue) {
+    this.queue = queue
+    this.send = function (session, nextHandlerID, data) {
+      var newSession = new db.Message({
+        incoming: false,
+        thread_id: session.thread_id,
+        resolved: true,
+        user_id: 'kip',
+        origin: session.origin,
+        source: session.source,
+        mode: session.mode,
+        action: session.action,
+        state: session.state,
+        user: session.source.user
+      })
+      newSession['reply'] = data
+      newSession.mode = nextHandlerID.split('.')[0]
+      newSession.action = nextHandlerID.split('.')[1]
+      kip.debug('inside channel.send(). Session mode is ' + newSession.mode)
+      kip.debug('inside channel.send(). Session action is ' + newSession.action)
+      var self = this
+      newSession.save(function (err, saved) {
+        if (err) {
+          kip.debug('mongo save err: ', err)
+          throw Error(err)
         }
-        return this;
+        self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+      })
     }
+    return this
+  }
 }
 
-var replyChannel = new UserChannel(queue);
-
+var replyChannel = new UserChannel(queue)
 
 function default_reply (message) {
   return new db.Message({
@@ -132,7 +118,6 @@ function send_text_reply (message, text) {
 queue.topic('incoming').subscribe(incoming => {
   co(function * () {
     console.log('>>>'.yellow, incoming.data.text.yellow)
-
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -141,157 +126,87 @@ queue.topic('incoming').subscribe(incoming => {
       }
     }).sort('-ts').limit(20)
 
-    var session = history[0];
+    var session = history[0]
     if (!session.state && history[1]) {
-      session.state = history[1].state;
+      session.state = history[1].state
     }
-    session.state = session.state || {};
-    session.history = history.slice(1);
+    session.state = session.state || {}
+    session.history = history.slice(1)
     if (session._id.toString() !== incoming.data._id.toString()) {
-      throw new Error('correct message not retrieved from db');
+      throw new Error('correct message not retrieved from db')
     }
     if (history[1]) {
-       session.mode = history[1].mode;
-       session.action = history[1].action;
-       session.route = session.mode + '.' + session.action;
-       session.prevMode = history[1].mode;
-       session.prevAction = history[1].action;
-       session.prevRoute = session.prevMode + '.' + session.prevAction;
+      session.mode = history[1].mode
+      session.action = history[1].action
+      session.route = session.mode + '.' + session.action
+      session.prevMode = history[1].mode
+      session.prevAction = history[1].action
+      session.prevRoute = session.prevMode + '.' + session.prevAction
     }
-    var route = yield getRoute(session);
-    kip.debug('route', route);
-    session.mode = 'food';
-    session.action = route.replace(/^food./, '');
-    yield handlers[route](session);
-    session.save();
-    incoming.ack();
-  }).catch(kip.err);
-});
- 
+    var route = yield getRoute(session)
+    kip.debug('route', route)
+    session.mode = 'food'
+    session.action = route.replace(/^food./, '')
+    yield handlers[route](session)
+    session.save()
+    incoming.ack()
+  }).catch(kip.err)
+})
+
 //
 // this is the worst part of building bots: intent recognition
 //
-function getRoute(session) {
+function getRoute (session) {
   kip.debug(`prevRoute ${session.prevRoute}`)
-  return co(function*() {
-     if (session.text === 'food') {
-        kip.debug('### User typed in :' + session.text);
-        return 'food.begin';
-      }
-    else{
-        return (session.mode + '.' + session.action);
+  return co(function * () {
+    if (session.text === 'food') {
+      kip.debug('### User typed in :' + session.text)
+      return 'food.begin'
+    } else if (handlers[session.text]) {
+      return session.text
+    } else {
+      return (session.mode + '.' + session.action)
     }
-
-    if (message.prevRoute === 'food.admin.confirm') {
-      return 'food.user.poll'
-    }
-
-    if (message.prevRoute === 'food.user.poll') {
-      return 'food.admin.restaurant.pick'
-    }
-
-    if (message.prevRoute === 'food.admin.restaurant.pick') {
-      return 'food.admin.restaurant.confirm'
-    }
-
-    if (message.prevRoute === 'food.begin') {
-      return 'food.address'
-    }
-    if ('123'.match(message.text)) {
-      if (!message.state.merchant_id) {
-        return 'food.restaurant.select'
-      } else {
-        return 'food.menu.select'
-      }
-    }
-    if (message.prevRoute === 'food.restaurant.list') {
-      return 'food.restaurant.search'
-    }
-    if (message.state.merchant_id && message.text === 'full menu') {
-      return 'food.menu.list'
-    }
-    if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
-      return 'food.menu.search'
-    }
-
+    // unreachable
     throw new Error("couldn't figure out the right mode/action to route to")
   }).catch(kip.err)
 }
-
 var handlers = {}
 
-
-handlers['food.sys_error'] = function* (session){
-
+handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
-
 }
 
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function* (session) {
-  kip.debug('🍕 food order 🌮');
-  session.state = {};
-  var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
-  session.save();
-  replyChannel.send(session, 'food.store_context', component.render());
-  // send_text_reply(message, "yeah let's eat! what address should i use?");
-  // todo save addresses and show saved addresses
+handlers['food.begin'] = function * (session) {
+  kip.debug('🍕 food order 🌮')
+  session.state = {}
+  var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?")
+  replyChannel.send(session, 'food.store_context', component.render())
+// send_text_reply(message, "yeah let's eat! what address should i use?")
+// todo save addresses and show saved addresses
 }
 
-
-
-handlers['food.store_context'] = function* (session) {
-    kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
-    var addr = session.text;
-    yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    kip.debug('###  created new delivery context, will now update...');
-    replyChannel.send(session, 'food.context_update', component.render());
+handlers['food.store_context'] = function * (session) {
+  kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session, '\n\n\n\n')
+  var addr = session.text
+  yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
+  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null)
+  kip.debug('###  created new delivery context, will now update...')
+  replyChannel.send(session, 'food.context_update', component.render())
 }
 
+handlers['food.context_update'] = function * (session) {
+  kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session, '\n\n\n\n')
 
+  var fulfillmentMethod = session.text
+  kip.debug('set fulfillmentMethod', fulfillmentMethod)
+  var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
-
-handlers['food.context_update'] = function* (session) {   
-
-     kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session,'\n\n\n\n')
-
-    var fulfillmentMethod = session.text;
-    kip.debug('set fulfillmentMethod', fulfillmentMethod)
-    var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
-
-    var component = new ui.UIComponentFactory(session.origin).buildTextMessage("delivery context updated.")
-    replyChannel.send(session, 'food.ready_to_poll', component.render());
-}
-
-//
-// the user's intent is to specify an address for delivery/pickup
-//
-handlers['food.address'] = function * (message) {
-  var addr = message.text
-  // check if it's a good address
-  // TODO
-
-  message.state.addr = addr
-  message.save()
-
-  // search for food near that address
-  send_text_reply(message, 'thanks, searching your area for good stuff!')
-
-  var results = yield search.search({
-    addr: addr
-  })
-  var results_message = default_reply(message)
-  results_message.action = 'restaurant.list'
-  results_message.text = 'Here are some restaurants you might like nearby'
-  results_message.data = {
-    results: results.results,
-    params: {addr: results.address}
-  }
-  results_message.save()
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results')
+  var component = new ui.UIComponentFactory(session.origin).buildTextMessage('delivery context updated.')
+  replyChannel.send(session, 'food.ready_to_poll', component.render())
 }
 
 //
@@ -390,13 +305,36 @@ handlers['food.item.add'] = function * (message) {}
 handlers['food.item.option'] = function * (message) {}
 
 // check for user preferences/diet/etc, skipping for now
-handlers['food.user.preferences'] = function * (message) {
-  // body
+handlers['food.user.preferences'] = function * (session) {
+  // var teamMembers = yield db.groups.find({team_id: sessag.source.team, is_bot: false})
+  var msgJson = {
+    text: 'Here we would ask user for preferences if they didnt have it',
+    fallback: 'You are unable to confirm preferences',
+    callback_id: 'confirm.user.preferences',
+    color: 'grey',
+    attachment_type: 'default',
+    attachments: [{
+      actions: [{
+        'name': 'Confirm',
+        'text': 'Confirm',
+        'type': 'button',
+        'value': 'confirmPreferences'
+      },
+        {
+          'name': 'Cancel',
+          'text': 'Cancel',
+          'type': 'button',
+          'value': 'cancelPreferences'
+        }]
+    }]
+  }
+  replyChannel.send(session, 'food.user.poll', {type: 'slack', data: msgJson})
 }
 
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // until cuisines is returned from s1-s3
+  console.log('got to s5')
   var cuisines = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8'))
   var teamId = message.source.team
   var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
@@ -404,8 +342,8 @@ handlers['food.user.poll'] = function * (message) {
   // error with mock slack not being able to get all messages
   teamMembers = [teamMembers[0]]
   var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
-  var responses = teamMembers.map(function (member) {
-    var memberResp = {
+  teamMembers.map(function (member) {
+    var userPolling = {
       mode: 'food',
       action: 'user.poll',
       thread_id: member.dm,
@@ -413,22 +351,17 @@ handlers['food.user.poll'] = function * (message) {
       source: message.source,
       res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
     }
-    memberResp.source.user = member.id
-    memberResp.source.channel = member.dm
-
-    var resultsMessage = default_reply(memberResp)
-    resultsMessage.data = memberResp.res
-    resultsMessage.save()
-    memberResp._id = resultsMessage._id
-    memberResp.text = JSON.stringify(memberResp.res)
-    memberResp.attachments = JSON.stringify(memberResp.res)
-    queue.publish('outgoing.' + memberResp.origin, memberResp, resultsMessage._id + '.reply.user.poll')
+    userPolling.source.user = member.id
+    userPolling.source.channel = member.dm
+    replyChannel.send(userPolling, 'food.admin.restaurant.pick', userPolling.res)
   })
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
-  var results = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/results.json'), 'utf8'))
-  // var results = dsxClient._get('context', {team_id: message.source.team,  }
+  // var results = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/results.json'), 'utf8'))
+  var results = dsxClient._get('context', {team_id: message.source.team, user_id: message.source.user_id})
+  console.log(results)
+  // var merchants = dsxClient.getNearbyRestaurants(results.address)
   var v = yield db.messages.find({mode: 'food', action: 'user.poll', 'data.voteID': 'XYZXYZ'})
   var votes = utils.getVotesFromMembers(v)
   var viableRestaurants = utils.createSearchRanking(results, votes)

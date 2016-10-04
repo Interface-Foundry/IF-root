@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Simple chat app",
   "main": "server.js",
+  "standard": {
+    "globals": ["kip", "logging", "db", "describe", "it", "before", "after"]
+  },
   "scripts": {
-    "test": "find ./chat/components/test -name '*.test.js' | xargs env NODE_ENV=test mocha --bail --reporter spec",
+    "test": "find . -name '*.test.js' | xargs env NODE_ENV=test mocha --bail --reporter spec",
     "start": "node chat/server_cinna_chat.js",
     "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db"
   },

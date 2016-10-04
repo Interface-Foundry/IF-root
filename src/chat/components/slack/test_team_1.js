@@ -1,4 +1,5 @@
 var mongodb = require('mongodb')
+var uuid = require('uuid')
 function ObjectId (id) { return new mongodb.ObjectId(id) }
 function ISODate (d) { return new Date(d) }
 var team = {}
@@ -29,6 +30,21 @@ team.slackbot = {
     'bot_access_token': 'xoxb-yolo'
   },
   '__v': 1
+}
+
+function chatusersToGroup () {
+  return {
+    'team_name': team.slackbot.team_name,
+    'team_id': team.slackbot.team_id,
+    'cart_id': uuid.v4(),
+    'members': team.chatusers.map((a) => {
+      return {
+        'member_id': a.id,
+        'admin': a.is_admin,
+        'bot': a.is_bot
+      }
+    })
+  }
 }
 
 team.chatusers = [{
@@ -137,6 +153,10 @@ team.reset = function * () {
   // chatusers
   yield db.collection('chatusers').remove({team_id: team.slackbot.team_id})
   yield db.collection('chatusers').insert(team.chatusers)
+
+  // group
+  yield db.collection('groups').remove({team_id: team.slackbot.team_id})
+  yield db.collection('groups').insert(chatusersToGroup())
 
   // remove all the random things
   yield db.collection('messages').remove({'source.team': team.slackbot.team_id})
