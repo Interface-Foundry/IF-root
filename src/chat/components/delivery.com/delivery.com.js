@@ -56,8 +56,8 @@ console.log(dsxClient.getURI());
 class UserChannel {
 
     constructor(queue) {
-        this.queue = queue;          
-        this.send = function(session, nextHandlerID, data) { 
+        this.queue = queue;
+        this.send = function(session, nextHandlerID, data) {
             var newSession = new db.Message({
               incoming: false,
               thread_id: session.thread_id,
@@ -70,7 +70,7 @@ class UserChannel {
               state: session.state,
               user: session.source.user
             })
-            newSession['reply'] = data;            
+            newSession['reply'] = data;
             newSession.mode = nextHandlerID.split('.')[0];
             newSession.action = nextHandlerID.split('.')[1];
             kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
@@ -80,9 +80,9 @@ class UserChannel {
               if (err) {
                 kip.debug('mongo save err: ',err);
                 throw Error(err);
-              } 
+              }
               self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results');
-            });  
+            });
         }
         return this;
     }
@@ -169,7 +169,9 @@ function getRoute(session) {
   return co(function*() {
      if (session.text === 'food') {
         kip.debug('### User typed in :' + session.text);
-        return 'food.begin';
+        return 'food.begin'
+      } else if (handlers[session.text]) {
+        return session.text
       }
     else{
         return (session.mode + '.' + session.action);
@@ -211,11 +213,42 @@ handlers['food.sys_error'] = function* (session){
 handlers['food.begin'] = function* (session) {
   kip.debug('🍕 food order 🌮');
   session.state = {};
-  var component = new ui.UIComponentFactory(session.origin).buildTextMessage("yeah let's eat! what address should i use?");
-  session.save();
-  replyChannel.send(session, 'food.store_context', component.render());
-  // send_text_reply(message, "yeah let's eat! what address should i use?");
-  // todo save addresses and show saved addresses
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  var address_buttons = _.get(team, 'meta.locations', []).map(a => {
+    return {
+      name: a.label,
+      text: a.label,
+      type: 'button',
+      value: JSON.stringify(a),
+
+    }
+  })
+
+  address_buttons.push({
+    name: "new_btn",
+    text: "New +",
+    type: 'button',
+    value: "new"
+  })
+
+  var msg_json = {
+    "attachments": [
+  		{
+  			"title": "",
+  			"image_url":"http://i.imgur.com/s3LZxBr.png"
+  		},
+      {
+          "text": "Great! Which address is this for?",
+          "fallback": "You are unable to choose an address",
+          "callback_id": "address",
+          "color": "#3AA3E3",
+          "attachment_type": "default",
+          "actions": address_buttons
+      }
+    ]
+  }
+
+  replyChannel.send(session, 'food.store_context', {type: session.origin, data: msg_json});
 }
 
 
@@ -232,7 +265,7 @@ handlers['food.store_context'] = function* (session) {
 
 
 
-handlers['food.context_update'] = function* (session) {   
+handlers['food.context_update'] = function* (session) {
 
      kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session,'\n\n\n\n')
 
@@ -333,7 +366,7 @@ handlers['food.menu.list'] = function*(message) {
   info_message.text = `Okay, here's the full menu for ${info_message.data.merchant.summary.name}`
   info_message.save();
   queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu');
-  
+
 }
 
 //

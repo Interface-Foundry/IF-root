@@ -62,7 +62,17 @@ var slackbotSchema = mongoose.Schema({
         deleted: {
           type: Boolean,
           default: false
-        }
+        },
+        locations: [{
+          label: String,
+          coordinates: [Number],
+          address_1: String,
+          address_2: String,
+          phone_number: String,
+          region: String,
+          timezone: String,
+          special_instructions: String
+        }]
     },
     // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
     conversaitons: {}
