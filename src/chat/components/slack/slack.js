@@ -125,7 +125,7 @@ function * start() {
       }
 
       // other random things
-      if (data.type !== 'message' || data.hidden === true || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
+      if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { //settings.name = kip's slack username
         kip.debug('will not handle this message');
         return;
       }
@@ -141,13 +141,12 @@ function * start() {
           });
         });
       }
-
-      // clean up the text
-      message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
-      if (message.text.charAt(0) == ':') {
-        message.text = message.text.substr(1); //remove : from beginning of string
-      }
-      message.text = message.text.trim(); //remove extra spaces on edges of string
+        // clean up the text
+        message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
+        if (message.text.charAt(0) == ':') {
+          message.text = message.text.substr(1); //remove : from beginning of string
+        }
+        message.text = message.text.trim(); //remove extra spaces on edges of string
 
       // queue it up for processing
       message.save().then(() => {
