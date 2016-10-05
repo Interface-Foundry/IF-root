@@ -216,8 +216,8 @@ handlers['food.begin'] = function* (session) {
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {
-      name: a.label,
-      text: a.label,
+      name: 'passthrough',
+      text: a.address_1,
       type: 'button',
       value: JSON.stringify(a),
 
@@ -225,7 +225,7 @@ handlers['food.begin'] = function* (session) {
   })
 
   address_buttons.push({
-    name: "new_btn",
+    name: "passthrough",
     text: "New +",
     type: 'button',
     value: "new"
@@ -235,7 +235,7 @@ handlers['food.begin'] = function* (session) {
     "attachments": [
   		{
   			"title": "",
-  			"image_url":"http://i.imgur.com/s3LZxBr.png"
+  			"image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
   		},
       {
           "text": "Great! Which address is this for?",
@@ -248,18 +248,37 @@ handlers['food.begin'] = function* (session) {
     ]
   }
 
-  replyChannel.send(session, 'food.store_context', {type: session.origin, data: msg_json});
+  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
 }
 
 
+//
+// User decides what address they are ordering for. could be that they need to make a new address
+//
+handlers['food.choose_address'] = function* (session) {
+  if (session.text === 'new') {
+    // new message yay
+    return handlers['address.new'](session)
+  }
 
-handlers['food.store_context'] = function* (session) {
-    kip.debug('\n\n\n GETTING TO FOOD.STORE_CONTEXT: ', session,'\n\n\n\n');
-    var addr = session.text;
-    yield dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user)
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    kip.debug('###  created new delivery context, will now update...');
-    replyChannel.send(session, 'food.context_update', component.render());
+  try {
+    var location = JSON.parse(session.text)
+  } catch (e) {
+    kip.error('Could not understand the address the user wanted to use')
+    // TODO handle the case where they type a new address without clicking the "new" button
+  }
+
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  team.meta.chosen_location = location
+  kip.debug('saving location', location.address_1)
+  yield team.save()
+  // yield dsxClient.createDeliveryContext(location.adderss_1, 'none', session.source.team, session.source.user)
+
+  //
+  // START OF S2
+  //
+  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+  replyChannel.send(session, 'food.context_update', component.render());
 }
 
 

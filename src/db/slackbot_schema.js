@@ -72,7 +72,8 @@ var slackbotSchema = mongoose.Schema({
           region: String,
           timezone: String,
           special_instructions: String
-        }]
+        }],
+        chosen_location: {}
     },
     // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
     conversaitons: {}

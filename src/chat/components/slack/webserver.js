@@ -56,6 +56,8 @@ function simple_action_handler(action) {
       return 'delivery'
     case 'pickup_btn':
       return 'pickup'
+    case 'passthrough':
+      return action.value
   }
 }
 
@@ -72,7 +74,6 @@ app.post('/slackaction', function(req, res) {
         return res.sendStatus(403)
       }
       var action = parsedIn.actions[0];
-      debugger;
       kip.debug(action.name.cyan, action.value.yellow)
       // for things that i'm just going to parse for
       var simple_command = simple_action_handler(action)
