@@ -272,28 +272,85 @@ handlers['food.choose_address'] = function* (session) {
   team.meta.chosen_location = location
   kip.debug('saving location', location.address_1)
   yield team.save()
-  // yield dsxClient.createDeliveryContext(location.adderss_1, 'none', session.source.team, session.source.user)
+  //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
 
   //
   // START OF S2
   //
-  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-  replyChannel.send(session, 'food.context_update', component.render());
+  var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null);
+  replyChannel.send(session, 'food.delivery_or_pickup', component.render());
 }
 
 
 
 
-handlers['food.context_update'] = function* (session) {
+handlers['food.delivery_or_pickup'] = function* (session) {
+  var fulfillmentMethod = session.text;
+  kip.debug('set fulfillmentMethod', fulfillmentMethod)
+  yield db.Slackbots.update({team_id: session.source.team}, {'meta.fulfillment_method': fulfillmentMethod}).exec()
+  //var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
-     kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session,'\n\n\n\n')
-
-    var fulfillmentMethod = session.text;
-    kip.debug('set fulfillmentMethod', fulfillmentMethod)
-    var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
-
-    var component = new ui.UIComponentFactory(session.origin).buildTextMessage("delivery context updated.")
-    replyChannel.send(session, 'food.ready_to_poll', component.render());
+  //
+  // START OF S2B
+  //
+  var mock_s2b = {
+    "attachments": [
+		    {
+			"title": "",
+			"image_url":"http://i.imgur.com/BVHZTaS.png"
+		    },
+        	{
+			"mrkdwn_in": [
+               "text"
+			],
+            "text": "You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again? ",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "Confirm",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+		{
+			"mrkdwn_in": [
+               "text"
+			],
+            "text": "",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "Poll",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "maze",
+                    "text": "Suggestions",
+                    "type": "button",
+                    "value": "maze"
+                },
+				{
+                    "name": "maze",
+                    "text": "< Change Address",
+                    "type": "button",
+                    "value": "maze"
+                }
+            ]
+        }
+    ]
+}
+  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b});
 }
 
 //

@@ -7,10 +7,10 @@
  * @example
  * // create a Facebook button and output its information as JSON data
  * // assume preexisting sender object
- * // This creates a facebook button labeled "Cheaper" whose action 
+ * // This creates a facebook button labeled "Cheaper" whose action
  * // is modify.one and whose instruction is cheaper
  * new FBButton('Cheaper', 'modify.one', 'cheaper', sender, 'cheaper').render();
- * 
+ *
  */
 
 "use strict";
@@ -25,7 +25,7 @@
 // 	this.requiredAttributeNames = Object.keys(variationValues);
 // 	this.numRequiredAttribsMissing = optionNames.length;
 // 	return this;
-    
+
 
 //     this.isComplete = function(){
 // 	if(this.numRequiredAttribsMissing == 0){
@@ -49,7 +49,7 @@
 // 	    return null;
 // 	}
 // 	result = null;
-	
+
 // 	for (var i=0; i < this.requiredAttributeNames.length; i++) {
 // 	    index = populatedAttributes.indexOf(this.requiredAttributeNames[i]);
 // 	    if (index == -1) {
@@ -89,7 +89,7 @@ class UIPrimitive {
 			return this.data;
 		}
         return this;
-    }	
+    }
 }
 */
 
@@ -119,7 +119,7 @@ class UIComponentFactory {
         }
 
         /*  TODO: avoid lengthy if/else statements by storing builder components in a table
-         * keyed by component family name 
+         * keyed by component family name
         var builders = {};
         builders['slack'] = SlackComponentBuilder();
         builers['facebook'] = FacebookBuilder();
@@ -127,7 +127,7 @@ class UIComponentFactory {
 
         this.componentFamily = componentFamily;  // either 'slack' or 'facebook' for now
 
- 
+
         this.buildTextMessage = function(text){
 
             if(this.componentFamily == 'slack'){
@@ -149,9 +149,9 @@ class UIComponentFactory {
             if(this.componentFamily == 'slack'){
                 var component = new SlackAttachment(buttonGroupLabel, buttonGroupLabel, optionStrings.join('/'), '#3AA3E3', 'default');
                 optionStrings.forEach(function(optionString){
-                    var b = new SlackButton(self._labelToButtonName(optionString), 
+                    var b = new SlackButton(self._labelToButtonName(optionString),
                                             optionString,
-                                            'primary', 
+                                            'primary',
                                             'button',
                                             self._labelToValue(optionString));
                     component.addButton(b);
@@ -164,7 +164,7 @@ class UIComponentFactory {
     }
 
 
-    
+
 }
 
 
@@ -174,7 +174,7 @@ class ButtonGroupConfigBuilder{
     constructor() {
 		this.config = { "attachment_type": "default" };
 		this.numRequiredFieldsMissing = 4;
-		
+
 
 		this.isComplete = function() {
 			return this.numRequiredFieldsMissing === 0;
@@ -208,42 +208,42 @@ class ButtonGroupConfigBuilder{
 			return this;
 	    }
 
-	    
+
 	    this.build= function(){
-		// TODO: return JSON object; verify the format 
+		// TODO: return JSON object; verify the format
 	    }
 
 
 			return this;
 	    }
 
-    
-    
+
+
 }
 
 
 /**
  * @param {Object} variationValues {key_1:[Val1,..,Val3],..,key_n: [Val1,.]}
- * 
+ *
  */
 class FBButtonSetBuilder {
 
-    constructor(variantMap, sender) {	
+    constructor(variantMap, sender) {
 	this.buttonSetMap = {}
 	Object.keys(variantMap).map(function(variantName){
-	    
+
 	    var variantValues = variantMap[variantName]
 	    var buttons = []
 	    for(v in variantValues) {
 		buttons.push(new FBButton(v, constants.ITEM_ADD, constants.BY_ATTRIBUTE, sender, this.normalizeName(v)));
 	    }
-	    this.buttonSetMap[variantName] = buttons	    
+	    this.buttonSetMap[variantName] = buttons
 	});
 
 
 	this.normalizeName = function(name) {
 		var re = /(\s+)/g;
-		return name.toLowerCase().replace(re, '_'); 
+		return name.toLowerCase().replace(re, '_');
     }
 
 
@@ -253,11 +253,11 @@ class FBButtonSetBuilder {
 		if(buttons === null || buttons === undefined){
 		    return response
 		}
-		
+
 		buttons.map(function(b){
 		    response.push(b.render())
 		})
-		
+
 		return response
     }
 
@@ -267,7 +267,7 @@ class FBButtonSetBuilder {
     }
 
 
-    
+
 }
 
 
@@ -275,18 +275,18 @@ class FBButtonSetBuilder {
 /*
 
 action for new buttons is "Add"
-instruction for new buttons is -- make one up  
+instruction for new buttons is -- make one up
 searchAttrValue is the actual selection val, lowercased and with underscores instead of whitespace
 
 */
 
 class SlackButton{
- /** 
+ /**
      * @param {string} title the button's label
      * @param {string} actionName the action attribute of the user event
      * @param {string} instructionName the instruction attribute of the user event
      * @param {Object} sender the FB sender object
-     * @param {String} searchAttrValue optional 
+     * @param {String} searchAttrValue optional
      */
     constructor(name, text, style, type, value) {
 
@@ -296,10 +296,10 @@ class SlackButton{
 			style: style,
 			type: type,
 			value: value
-	    };		
-	  
+	    };
+
 		this.render = function() {
-	   
+
 	    	return {
 	    		data: this.control,
 	    		label: text
@@ -309,13 +309,13 @@ class SlackButton{
 		this.setConfirmation = function(title, text, okMsg, cancelMsg) {
 
 			this.data['confirm'] = {
-				title: title, 
+				title: title,
 				text: text,
 				ok_text: okMsg,
 				dismiss_text: cancelMsg
 			};
 		}
-    
+
     return this;
     }
 }
@@ -326,51 +326,53 @@ class SlackCard {
 
         this.type = 'slack';
         this.label = text;
+        this.mrkdwn_in = ['text']
 		this.data = { text: text };
 
-		this.render = function() {			
-			return { type: this.type, 
-                     data: this.data 
+		this.render = function() {
+			return { type: this.type,
+                     data: this.data
                    };
 			}
 
         return this;
 		}
 
-		
+
 }
 
 
 class SlackAttachment{
- 
+
     constructor(text, fallback, callbackId, color, attachmentType) {
 
-    	this.control = { 
+    	this.control = {
     	label: text,
 	    data: {
-	    		"text": text,
+	    		"text": '',
     			"attachments": [
     				{
+              mrkdwn_in: ['text'],
 		    			text: text,
 						fallback: fallback,
 						callback_id: callbackId,
 						color: color,
 						attachmentType: attachmentType,
-						actions: []	    
+						actions: []
 					}
 				]
 			}
-		}		
-	  	
+		}
+
 	  	this.addButton = function(slackButton) {
 	  		this.control.data.attachments[0].actions.push(slackButton.control);
 	  	}
 
 		this.render = function() {
-	   
+
 	    	return this.control;
 		}
-    
+
     return this;
     }
 }
@@ -418,19 +420,19 @@ class SlackDisplayBuilder {
  *
  */
 class FBButton{
-    /** 
+    /**
      * @param {string} title the button's label
      * @param {string} actionName the action attribute of the user event
      * @param {string} instructionName the instruction attribute of the user event
      * @param {Object} sender the FB sender object
-     * @param {String} searchAttrValue optional 
+     * @param {String} searchAttrValue optional
      */
-    constructor(title, actionName, instructionName, sender, searchAttrValue) {		
-	  this.title = title;  
+    constructor(title, actionName, instructionName, sender, searchAttrValue) {
+	  this.title = title;
       	  this.dataID = 'facebook_' + sender.toString();
 	  this.action = actionName;
 	  this.instruction = instructionName;
-	  this.searchAttributeValue = searchAttrValue;	  
+	  this.searchAttributeValue = searchAttrValue;
 	  this.selector = 1;
 
 	this.render = function() {
@@ -442,12 +444,12 @@ class FBButton{
                     action: this.action,
                     instruction: this.instruction,
 		    focus: this.selector,
-		    search_attribute_value: this.searchAttributeValue		    
+		    search_attribute_value: this.searchAttributeValue
 		})
 	    };
 	    return data;
 	}
-    
+
     return this;
     }
 };
