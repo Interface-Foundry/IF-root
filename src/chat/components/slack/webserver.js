@@ -62,15 +62,15 @@ function simple_action_handler(action) {
 //incoming slack action
 app.post('/slackaction', function(req, res) {
 
-  // check the verification token in production
-  if (process.env.NODE_ENV === 'production' && req.token !== kip.config.slack.verification_token) {
-    kip.error('Invalid verification token')
-    return res.sendStatus(403)
-  }
-
   kip.debug('incoming action')
     if (req.body && req.body.payload) {
       var parsedIn = JSON.parse(req.body.payload);
+
+      // check the verification token in production
+      if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
+        kip.error('Invalid verification token')
+        return res.sendStatus(403)
+      }
       var action = parsedIn.actions[0];
       debugger;
       kip.debug(action.name.cyan, action.value.yellow)
