@@ -272,6 +272,7 @@ handlers['food.context_update'] = function * (session) {
   kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session, '\n\n\n\n')
 
   var fulfillmentMethod = session.text
+
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
   var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
@@ -280,33 +281,28 @@ handlers['food.context_update'] = function * (session) {
   //
   var mock_s2b = {
     "attachments": [
-		    {
-			"title": "",
-			"image_url":"http://i.imgur.com/BVHZTaS.png"
-		    },
-        	{
-			"mrkdwn_in": [
-               "text"
-			],
-            "text": "You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again? ",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
+            {
+            "title": "",
+            "image_url":"http://i.imgur.com/BVHZTaS.png",
+            "text": "You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again?",
             "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
+             "mrkdwn_in": [
+               "text"
+            ],
+             "actions": [
                 {
                     "name": "chess",
-                    "text": "Confirm",
+                    "text": "Choose Restaurant",
                     "type": "button",
                     "value": "chess"
                 }
-            ]
-        },
-		{
-			"mrkdwn_in": [
+                 ]
+            },
+            {
+            "mrkdwn_in": [
                "text"
-			],
-            "text": "",
+            ],
+            "text": "*Tip:* `✓ Start New Poll` polls your team on what type of food they want.",
             "fallback": "You are unable to choose a game",
             "callback_id": "wopr_game",
             "color": "#3AA3E3",
@@ -314,19 +310,20 @@ handlers['food.context_update'] = function * (session) {
             "actions": [
                 {
                     "name": "chess",
-                    "text": "Poll",
+                    "text": "✓ Start New Poll",
+                    "style":"primary",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "See More",
                     "type": "button",
                     "value": "chess"
                 },
                 {
                     "name": "maze",
-                    "text": "Suggestions",
-                    "type": "button",
-                    "value": "maze"
-                },
-				{
-                    "name": "maze",
-                    "text": "< Change Address",
+                    "text": "× Cancel",
                     "type": "button",
                     "value": "maze"
                 }

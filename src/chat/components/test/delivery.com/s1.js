@@ -24,10 +24,6 @@ describe('greeting', () => {
 
     // choose a saved address
     msg = yield user.tap(msg, 1, 0)
-    _.get(msg, 'attachments[0].text', '').should.equal("Cool! You selected `21 Essex St 10002`. Delivery or Pickup?")
-    _.get(msg, 'attachments[0].actions.length', 0).should.equal(2)
-    _.get(msg, 'attachments[0].actions[0].text', '').should.equal('Delivery')
-    _.get(msg, 'attachments[0].actions[1].text', '').should.equal('Pickup')
 
     // goes to s2
 
