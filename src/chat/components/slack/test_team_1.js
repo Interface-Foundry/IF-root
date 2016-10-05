@@ -10,19 +10,22 @@ team.slackbot = {
     "team_name" : "Yolo Testing Inc.",
     "team_id" : "yolo",
     "meta" : {
-        "cart_channels" : [ 
+        "cart_channels" : [
             "C1JTZAENT"
         ],
         "weekly_status_timezone" : "America/New_York",
         "weekly_status_time" : "4:00 PM",
         "weekly_status_day" : "Friday",
         "weekly_status_enabled" : true,
-        "office_assistants" : [ 
+        "office_assistants" : [
             "admin_yolo"
         ],
         "initialized" : true,
         "dateAdded" : ISODate("2016-06-24T20:29:22.265Z"),
-        "addedBy" : "U1JU56UG1"
+        "addedBy" : "U1JU56UG1",
+        locations: [{
+          address_1: '21 Essex St 10002'
+        }]
     },
     "bot" : {
         "bot_user_id" : "kip_yolo",
