@@ -19,8 +19,8 @@ app.use(bodyParser.json())
 
 /**
  * handle actions which can be simply translated into text commands, like "2 but cheaper"
- * TODO transform these into "execute" commands instead to avoid doing nlp 
- * 
+ * TODO transform these into "execute" commands instead to avoid doing nlp
+ *
  * @param {any} action
 
  */
@@ -41,7 +41,7 @@ function simple_action_handler(action) {
       return action.value
     case'more':
       return 'more'
-    
+
     //
     // Item info buttons
     //
@@ -61,7 +61,13 @@ function simple_action_handler(action) {
 
 //incoming slack action
 app.post('/slackaction', function(req, res) {
-  
+
+  // check the verification token in production
+  if (process.env.NODE_ENV === 'production' && req.token !== kip.config.slack.verification_token) {
+    kip.error('Invalid verification token')
+    return res.sendStatus(403)
+  }
+
   kip.debug('incoming action')
     if (req.body && req.body.payload) {
       var parsedIn = JSON.parse(req.body.payload);
@@ -79,7 +85,7 @@ app.post('/slackaction', function(req, res) {
           text: simple_command,
           user_id: parsedIn.user.id,
           origin: 'slack',
-          source: parsedIn 
+          source: parsedIn
         });
         // inject source.team and source.user because fuck the fuck out of slack message formats
         message.source.team = message.source.team.id
