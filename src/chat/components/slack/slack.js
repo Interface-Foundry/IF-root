@@ -44,7 +44,6 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client');
 var co = require('co');
 var _ = require('lodash');
-
 var kip = require('kip');
 var queue = require('../queue-mongo');
 var image_search = require('../image_search');
@@ -53,7 +52,6 @@ var focus = require('./focus');
 var cart = require('./cart');
 // var actions = require('./actions'); --> this runs an extra service not sure what for
 var slackConnections = {};
-
 var webserver = require('./webserver');
 
 
