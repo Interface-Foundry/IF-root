@@ -155,7 +155,12 @@ queue.topic('incoming').subscribe(incoming => {
     kip.debug('route', route);
     session.mode = 'food';
     session.action = route.replace(/^food./, '');
-    yield handlers[route](session);
+    if (handlers[route]) {
+      yield handlers[route](session);
+    } else {
+      kip.error('No route handler for ' + route)
+      incoming.ack();
+    }
     session.save();
     incoming.ack();
   }).catch(kip.err);
