@@ -297,7 +297,7 @@ handlers['address.confirm'] = function* (session) {
   kip.debug('🌆🏙 validate an address', session.text);
   var addr = session.text
   var location = yield validateAddress(addr)
-  var prompt = "Is " + location.address_1 + ' your address?'
+  var prompt = "Is `" + location.address_1 + '` your address?'
   var msg_json = {
     "text": prompt,
     "attachments": [
@@ -375,7 +375,7 @@ handlers['address.save'] = function* (session) {
 handlers['food.delivery_or_pickup'] = function* (session) {
   var fulfillmentMethod = session.text;
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
-  var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
+  //var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
   //
   // START OF S2B
