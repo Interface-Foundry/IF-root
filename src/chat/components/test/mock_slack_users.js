@@ -1,6 +1,7 @@
 var co = require('co')
 var request = require('request-promise')
 var mongodb = require('mongodb')
+var _ = require('lodash')
 
 /**
  * creates a mock user
@@ -53,12 +54,15 @@ User.prototype.tap = function(message, attachment_index, action_index) {
   var user = this.chatuser
   var slackbot = this.slackbot
   return co(function * () {
+    if (!_.get(message, `attachments[${attachment_index}].actions[${action_index}]`)) {
+      throw new Error(`No button for attachments[${attachment_index}].actions[${action_index}]`)
+    }
     var body = {
       actions: [message.attachments[attachment_index].actions[action_index]],
       callback_id: message.attachments[attachment_index].callback_id,
       team: {
         id: user.team_id,
-        domain: user.team_name 
+        domain: user.team_name
       },
       channel: {
         id: 'asdfadsf',
@@ -90,13 +94,13 @@ User.prototype.tap = function(message, attachment_index, action_index) {
 }
 
 /**
- * gets a fresh conversation for a user that we know about in the database 
+ * gets a fresh conversation for a user that we know about in the database
  */
 function * ExistingUser() {
   var user = new User({
     id: 'bamf_yolo'
   })
-  
+
   return user;
 
 }
@@ -105,7 +109,7 @@ function * Admin() {
   var user = new User({
     id: 'admin_yolo',
   })
-  
+
   return user;
 }
 
@@ -119,7 +123,7 @@ function * setup () {
   if (process.env.NODE_ENV !== 'test') {
     throw new Error('must run as NODE_ENV=test')
   }
-  
+
   yield require('../slack/test_team_1').reset()
   yield require('../slack/slack').start()
   require('../delivery.com/delivery.com')
