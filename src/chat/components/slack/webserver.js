@@ -294,11 +294,12 @@ function listen(callback) {
   listener = callback;
 }
 
-app.listen(8000, function(e) {
+var port = 8080
+app.listen(port, function(e) {
   if (e) {
     console.dir(e)
   } else {
-    console.log('slack action server listening on port 8000')
+    console.log('slack action server listening on port ' + port)
     console.log('running NODE_ENV=' + process.env.NODE_ENV)
   }
 })
