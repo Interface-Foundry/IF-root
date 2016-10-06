@@ -25,6 +25,7 @@ app.use(bodyParser.json())
 
  */
 function simple_action_handler(action) {
+  kip.debug('\n\n\nATLIENS: ', action,'\n\n\n');
   switch (action.name) {
     //
     // Search result buttons
@@ -51,8 +52,6 @@ function simple_action_handler(action) {
     //
     case 'home':
       return 'exit'
-    case 'address':
-      return action.value
     case 'delivery_btn':
       return 'delivery'
     case 'pickup_btn':
@@ -94,11 +93,17 @@ app.post('/slackaction', function(req, res) {
         message.source.user = message.source.user.id
         message.source.channel = message.source.channel.id
         //cant just passthru, lets manually set mode and action here, can refac laterz
-        if (simple_command.indexOf('address') > -1) { 
-          message.mode = 'address';
+        if (simple_command.indexOf('address.') > -1) { 
+          message.mode = simple_command.split('.')[0];
           message.action = simple_command.split('.')[1];
+          message.text = message.action;
+          // if (!message.action) {
+          // }
+          // message.action = message.action ? message.action  : 'confirm'
+          kip.debug('\n\n\nwebserver.js 97 : yep its splitting lel message.text:', message.text,' simple_command: ', simple_command, 'message.mode: ',message.mode, 'message.action:', message.action)
         }
         message.save().then(() => {
+          kip.debug('\n\n\n\n honestly, who does that: ', message,'parsedIn:',parsedIn,'\n\n\n\n')
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
 

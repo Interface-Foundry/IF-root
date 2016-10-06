@@ -153,8 +153,8 @@ queue.topic('incoming').subscribe(incoming => {
     }
     var route = yield getRoute(session);
     kip.debug('route', route);
-    session.mode = 'food';
-    session.action = route.replace(/^food./, '');
+    // session.mode = 'food';
+    // session.action = route.replace(/^food./, '');
     if (handlers[route]) {
       yield handlers[route](session);
     } else {
@@ -175,9 +175,10 @@ function getRoute(session) {
      if (session.text === 'food') {
         kip.debug('### User typed in :' + session.text);
         return 'food.begin'
-      } else if (handlers[session.text]) {
-        return session.text
-      }
+      } 
+      // else if (handlers[session.text]) {
+      //   return session.text
+      // }
     else{
         return (session.mode + '.' + session.action);
     }
@@ -230,7 +231,7 @@ handlers['food.begin'] = function* (session) {
   })
 
   address_buttons.push({
-    name: "address",
+    name: "passthrough",
     text: "New +",
     type: 'button',
     value: "address.new"
@@ -257,13 +258,53 @@ handlers['food.begin'] = function* (session) {
 }
 
 
+
+//
+// User decides what address they are ordering for. could be that they need to make a new address
+//
+handlers['food.choose_address'] = function* (session) {
+  if (session.text === 'address.new' || session.text === 'new' ) {
+    kip.debug('\n\nwhat is love, what is life, what is session.mode: ', session.mode, 'what is session.action: ', session.action, 'what is session.text: ', session.text)
+    // session.mode = 'address'
+    // session.action = 'new'
+    return handlers['address.new'](session)
+  } 
+    if (session.text === 'address.confirm' || session.text === 'confirm' ) {
+    // new message yay
+    return handlers['address.confirm'](session)
+  } 
+
+  try {
+    var location = JSON.parse(session.text)
+  } catch (e) {
+    kip.error('Could not understand the address the user wanted to use')
+    // TODO handle the case where they type a new address without clicking the "new" button
+  }
+
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  team.meta.chosen_location = location
+  kip.debug('saving location', location.address_1)
+  yield team.save()
+  //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
+
+  //
+  // START OF S2
+  //
+  var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null);
+  replyChannel.send(session, 'food.delivery_or_pickup', component.render());
+}
+
+
+
+
 //
 // the user's intent is to initiate a food order
 //
 handlers['address.new'] = function* (session) {
+
   kip.debug(' 🌆🏙 enter a new address');
-  session.state = {};
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  // session.state = {};
   var msg_json = {
     "text": "What's the delivery address?",
     "attachments": [
@@ -273,8 +314,49 @@ handlers['address.new'] = function* (session) {
       }
     ]
   }
+  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
+}
 
-  replyChannel.send(session, 'food.store_new_address', {type: session.origin, data: msg_json});
+
+//
+// the user's intent is to initiate a food order
+//
+handlers['address.confirm'] = function* (session) {
+  kip.debug('🌆🏙 validate an address', session.text);
+
+  var addr = JSON.parse(session.text);
+  session.state = {};
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec();
+  var prompt = "Is " + addr.address_1 + ' your address?'
+  var msg_json = {
+    "text": prompt,
+    "attachments": [
+      {
+        "mrkdwn_in": [
+                 "text"
+        ],
+        "fallback": "You are unable to confirm.",
+        "callback_id": "address_confirm",
+        "color": "#3AA3E3",
+        "attachment_type": "default",
+        "actions": [
+           {
+              name: "address",
+              text: "Confirm",
+              type: 'button',
+              value: "address.fuckyou"
+            },
+           {
+              name: "address",
+              text: "Edit",
+              type: 'button',
+              value: "address.yomama"
+           }
+        ]
+      },
+    ]
+  };
+  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
 }
 
 
@@ -293,16 +375,9 @@ function validateAddress(addr) {
   };
 }
 
-
-
-handlers['food.store_new_address'] = function* (session) {
+handlers['address.validate'] = function* (session) {
     var addr = session.text;
-    kip.debug('🌃🌉getting to food.store_new_address', addr);
-    //
-    //
-    //*Also store the address into mongo* 
-    //
-    //
+    kip.debug('\n\n\n\n\n\n\n🌃🌉getting to address.validate', addr, '\n\n\n\n\n\n\n\n');
     var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
     //validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
     if (validateAddress(addr)) {
@@ -329,40 +404,6 @@ handlers['food.store_new_address'] = function* (session) {
     kip.debug('###  created new delivery context, will now update...');
     replyChannel.send(session, 'food.context_update', component.render());
 }
-
-
-//
-// User decides what address they are ordering for. could be that they need to make a new address
-//
-handlers['food.choose_address'] = function* (session) {
-  if (session.text === 'new') {
-    // new message yay
-    return handlers['address.new'](session)
-  }
-
-  try {
-    var location = JSON.parse(session.text)
-  } catch (e) {
-    kip.error('Could not understand the address the user wanted to use')
-    // TODO handle the case where they type a new address without clicking the "new" button
-  }
-
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  team.meta.chosen_location = location
-  kip.debug('saving location', location.address_1)
-  yield team.save()
-  //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
-
-  //
-  // START OF S2
-  //
-  var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
-  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null);
-  replyChannel.send(session, 'food.delivery_or_pickup', component.render());
-}
-
-
-
 
 
 handlers['food.delivery_or_pickup'] = function* (session) {
