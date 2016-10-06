@@ -12,7 +12,7 @@ var picstitch = require('./image_processing_delivery.js')
 var path = require('path')
 
 // until cuisines is returned from s1-s3
-var cuisines = fs.readFileSync(path.resolve(__dirname, 'cuisines.js'), 'utf8')
+var cuisinesFile = require('./cuisines.js')
 
 var fs = require('fs')
 var yaml = require('js-yaml')
@@ -485,7 +485,7 @@ handlers['food.user.preferences'] = function * (session) {
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // until cuisines is returned from s1-s3
-  var cuisines = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8'))
+  var cuisines = cuisinesFile.cuisines
 
   var teamId = message.source.team
   var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
@@ -511,7 +511,6 @@ handlers['food.user.poll'] = function * (message) {
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
-  // var results = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/results.json'), 'utf8'))
   var teamId = message.source.team
   var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
   var numOfResponsesWaitingFor = teamMembers.length

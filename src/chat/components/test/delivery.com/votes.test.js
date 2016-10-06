@@ -56,7 +56,7 @@ describe('getting votes and selecting merchant', function () {
     yield mock.setup()
   })
   // S4
-  describe.skip('S4) If we DON’T already have diet of Team Member', function () {
+  describe('S4) If we DON’T already have diet of Team Member', function () {
     // setup
     before(function * () {
       this.timeout(5000)
@@ -71,7 +71,7 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // S5
-  describe.skip('S5) Once we ask user about their preferences', function () {
+  describe('S5) Once we ask user about their preferences', function () {
     it('should display buttons for cuisines available', function * () {
       admin = yield mock.Admin()
       res = yield admin.goto('S5')
@@ -139,13 +139,6 @@ describe('getting votes and selecting merchant', function () {
       var votes = utils.getVotesFromMembers(v)
       expect(votes).to.have.length.of.at.least(1)
     // expect(_.isEqual(_.sortBy(votes.sort()), _.sortBy(votedTest.sort()))).to.be.true
-    })
-
-    it('make sure util works for getting results only with specific cuisine types', function * () {
-      var extrasPath = path.resolve(__dirname, '../../delivery.com/extra/')
-      var merchants = JSON.parse(fs.readFileSync(path.join(extrasPath, 'results.json'), 'utf8'))
-      var merchantsFittingOpts = utils.createSearchRanking(merchants, votedTest)
-      expect(merchantsFittingOpts.length).to.equal(52)
     })
 
     it('should display slice of 3 choices to admin', function * () {
