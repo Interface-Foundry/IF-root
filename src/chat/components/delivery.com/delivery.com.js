@@ -147,7 +147,16 @@ queue.topic('incoming').subscribe(incoming => {
       session.prevAction = history[1].action
       session.prevRoute = session.prevMode + '.' + session.prevAction
     }
+    if (!session.mode) {
+      kip.debug('setting mode to prevmode', session.prevMode)
+      session.mode = session.prevMode
+    }
+    if (!session.action) {
+      kip.debug('setting mode to prevaction', session.prevAction)
+      session.action = session.prevAction
+    }
     var route = yield getRoute(session);
+    kip.debug('mode', session.mode, 'action', session.action)
     kip.debug('route'.cyan, route.cyan);
     // session.mode = 'food';
     // session.action = route.replace(/^food./, '');
@@ -230,7 +239,7 @@ handlers['food.begin'] = function* (session) {
     ]
   }
 
-  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json});
+  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
 }
 
 
