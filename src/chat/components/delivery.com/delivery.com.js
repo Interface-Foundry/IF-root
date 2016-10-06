@@ -52,7 +52,7 @@ class UserChannel {
 
   constructor (queue) {
     this.queue = queue
-    this.send = function (session, nextHandlerID, data, response_url) {
+    this.send = function (session, nextHandlerID, data, replace) {
       var newSession = new db.Message({
         incoming: false,
         thread_id: session.thread_id,
@@ -76,10 +76,10 @@ class UserChannel {
           kip.debug('mongo save err: ', err)
           throw Error(err)
         }
-        if (response_url) {
+        if (replace && _.get(session, 'source.response_url')) {
           request({
             method: 'POST',
-            uri: response_url,
+            uri: session.source.response_url,
             body: JSON.stringify(data.data),
           })
         } else {
@@ -88,7 +88,7 @@ class UserChannel {
       })
     }
 
-    this.sendReplace = this.send
+    this.sendReplace = function (session, nextHandlerID, data) { this.send(session, nextHandlerID, data, true) }
     return this
   }
 }
@@ -284,7 +284,7 @@ handlers['food.choose_address'] = function* (session) {
   			"image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
   		}].concat(component.data.attachments)
 
-    replyChannel.sendReplace(session, 'food.choose_address', component, session.source.response_url)
+    replyChannel.sendReplace(session, 'food.choose_address', component)
   } else {
     throw new Error('this route does not handle text input')
   }
