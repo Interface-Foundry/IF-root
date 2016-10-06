@@ -119,7 +119,7 @@ app.post('/slackaction', function (req, res) {
             kip.error('error parsing out location: webserver.js line 103')
           }
           message.source.location = location;
-          // message.source.location = 
+          // message.source.location =
           message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
           })
@@ -153,7 +153,7 @@ app.post('/slackaction', function (req, res) {
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
-      } 
+      }
       else {
         switch (action.name) {
           case 'additem':

@@ -298,22 +298,6 @@ handlers['food.begin'] = function* (session) {
 // User decides what address they are ordering for. could be that they need to make a new address
 //
 handlers['food.choose_address'] = function* (session) {
-  if (session.text === 'address.validate' || session.text === 'validate' ) {
-    kip.debug('delivery.com.js line 260, hitting address.validate catcher: ', session)
-    yield handlers['address.validate'](session)
-    return 
-  } 
-  else if (session.text === 'address.confirm' || session.text === 'confirm' ) {
-    kip.debug('delivery.com.js line 265, hitting address.confirm catcher: ', session)
-    yield handlers['address.confirm'](session)
-    return 
-  } 
-  else if (session.text === 'address.new' || session.text === 'new' ) {
-    kip.debug('delivery.com.js line 270, hitting address.new catcher: ', session)
-    yield handlers['address.new'](session)
-    return 
-  } 
-
   if (_.get(session, 'source.response_url')) {
     // slack action button tap
   try {
@@ -334,7 +318,11 @@ handlers['food.choose_address'] = function* (session) {
     //
     var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
     var msg_json = {
-        "attachments": [ 
+        "attachments": [
+            {
+              "title": "",
+              "image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
+            },
             {
                 "mrkdwn_in": [
                    "text"
@@ -346,13 +334,13 @@ handlers['food.choose_address'] = function* (session) {
                 "attachment_type": "default",
                 "actions": [
                     {
-                        "name": "delivery",
+                        "name": "passthrough",
                         "text": "Delivery",
                         "type": "button",
                         "value": "food.delivery_or_pickup"
                     },
                     {
-                        "name": "pickup",
+                        "name": "passthrough",
                         "text": "Pickup",
                         "type": "button",
                         "value": "food.delivery_or_pickup"
@@ -368,7 +356,7 @@ handlers['food.choose_address'] = function* (session) {
         ]
     };
 
-    replyChannel.sendReplace(session, 'food.choose_address', component)
+    replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: msg_json})
   } else {
     throw new Error('this route does not handle text input')
   }
@@ -440,7 +428,7 @@ handlers['address.validate'] = function* (session) {
     if (validateAddress(location)) {
       team.meta.locations.push(validateAddress(location.address_1))
       team.meta.chosen_location = location;
-    } 
+    }
     else {
       team.meta.chosen_location = location;
       team.meta.locations.push(validateAddress({
@@ -458,7 +446,7 @@ handlers['address.validate'] = function* (session) {
     kip.debug('###  saved new address in mongo...');
     var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
     var msg_json = {
-        "attachments": [ 
+        "attachments": [
             {
                 "mrkdwn_in": [
                    "text"
@@ -867,9 +855,9 @@ function sendIt (resp) {
 }
 
 
-//mock function for now until dexter implements 
+//mock function for now until dexter implements
 function validateAddress(addr) {
-  //validate addr via google places api and Parse out the fields from the addr string 
+  //validate addr via google places api and Parse out the fields from the addr string
   return {
     label: "NYC Office",
     coordinates: [-123.34, 34.32432423],
@@ -881,4 +869,3 @@ function validateAddress(addr) {
     special_instructions: "Please send a raven to herald your arrival"
   };
 }
-
