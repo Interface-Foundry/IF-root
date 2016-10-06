@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var amazonResult = mongoose.Schema;
 var modifyVal = mongoose.Schema;
 var messageSchema = mongoose.Schema({
-    
+
     thread_id: {
       type: String,
       index: true
@@ -23,7 +23,8 @@ var messageSchema = mongoose.Schema({
     source: {},
     incoming: Boolean, //if true, incoming message, if false, outgoing message
     original_text: String, //raw incoming message (if applicable)
-
+    tap: {}, // slack button tap stuff
+    
     //
     // Kip processing stuff
     //

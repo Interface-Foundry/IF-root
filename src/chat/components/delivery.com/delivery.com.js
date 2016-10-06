@@ -10,6 +10,7 @@ var search = require('./search')
 var utils = require('./utils')
 var picstitch = require('./image_processing_delivery.js')
 var path = require('path')
+var request = require('request-promise')
 
 // until cuisines is returned from s1-s3
 var cuisinesFile = require('./cuisines.js')
@@ -51,7 +52,7 @@ class UserChannel {
 
   constructor (queue) {
     this.queue = queue
-    this.send = function (session, nextHandlerID, data) {
+    this.send = function (session, nextHandlerID, data, response_url) {
       var newSession = new db.Message({
         incoming: false,
         thread_id: session.thread_id,
@@ -75,9 +76,19 @@ class UserChannel {
           kip.debug('mongo save err: ', err)
           throw Error(err)
         }
-        self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+        if (response_url) {
+          request({
+            method: 'POST',
+            uri: response_url,
+            body: JSON.stringify(data.data),
+          })
+        } else {
+          self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+        }
       })
     }
+
+    this.sendReplace = this.send
     return this
   }
 }
@@ -248,26 +259,35 @@ handlers['food.begin'] = function* (session) {
 // User decides what address they are ordering for. could be that they need to make a new address
 //
 handlers['food.choose_address'] = function* (session) {
-  console.log(session.text)
-  try {
-    var location = JSON.parse(session.text)
-  } catch (e) {
-    kip.error('Could not understand the address the user wanted to use')
-    // TODO handle the case where they type a new address without clicking the "new" button
+  if (_.get(session, 'source.response_url')) {
+    // slack action button tap
+    try {
+      var location = JSON.parse(session.text)
+    } catch (e) {
+      kip.error('Could not understand the address the user wanted to use')
+      // TODO handle the case where they type a new address without clicking the "new" button
+    }
+
+    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+    team.meta.chosen_location = location
+    kip.debug('saving location', location.address_1)
+    yield team.save()
+    //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
+
+    //
+    // START OF S2
+    //
+    var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null).render()
+    component.data.attachments = [{
+  			"title": "",
+  			"image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
+  		}].concat(component.data.attachments)
+
+    replyChannel.sendReplace(session, 'food.choose_address', component, session.source.response_url)
+  } else {
+    throw new Error('this route does not handle text input')
   }
-
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  team.meta.chosen_location = location
-  kip.debug('saving location', location.address_1)
-  yield team.save()
-  //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
-
-  //
-  // START OF S2
-  //
-  var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
-  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null);
-  replyChannel.send(session, 'food.delivery_or_pickup', component.render());
 }
 
 //
