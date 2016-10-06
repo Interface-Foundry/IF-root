@@ -1,97 +1,90 @@
-var queue = require('../queue-mongo');
-var kip = require('kip');
-var co = require('co');
-var db = require('db');
-var _ = require('lodash');
-var api = require('./api-wrapper');
+require('kip')
 
-var search = require('./search');
-var winston = require('winston');
+var queue = require('../queue-mongo')
+var co = require('co')
+var fs = require('fs')
+var uuid = require('uuid')
+var _ = require('lodash')
+var api = require('./api-wrapper')
+var search = require('./search')
+var utils = require('./utils')
+var picstitch = require('./image_processing_delivery.js')
+var path = require('path')
 
-var fs = require('fs');
-var yaml = require('js-yaml');
-var dsxsvc = require('./dsx_services');
+// until cuisines is returned from s1-s3
+var cuisines = fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8')
+
+var fs = require('fs')
+var yaml = require('js-yaml')
+var dsxsvc = require('./dsx_services')
 var dsxutils = require('./dsx_utils')
-var ui = require('../ui_controls');
-var argv = require('minimist')(process.argv.slice(2));
+var ui = require('../ui_controls')
+var argv = require('minimist')(process.argv.slice(2))
 
-var initFilename = argv['config'];
-if(initFilename === null || initFilename === undefined){
-    console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.');
-    process.exit(-1);
+var initFilename = argv['config']
+if (initFilename === null || initFilename === undefined) {
+  console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.')
+  // process.exit(-1)
+  initFilename = path.resolve(__dirname, 'dsx_init_peter.local.yml')
 }
 
-var yamlDoc;
+var yamlDoc
 try {
-    yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'));
+  yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'))
+} catch(err) {
+  console.log(err)
+  process.exit(-1)
 }
-catch(err){
-    console.log(err);
-    process.exit(-1);
-}
 
-const loggingTransports = yamlDoc['globals']['log_transports'];
-var logger = new(winston.Logger)({
-    transports: loggingTransports.map(
-  function(currentVal){
-      return new (eval(currentVal['type']))(currentVal);
-  }
-    )
-});
+var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient')
 
+logging.info(loadedParams)
+logging.info(typeof (loadedParams))
+logging.info('### looking at loadedParams again')
+logging.info(loadedParams)
 
-var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient');
+var dsxClient = new dsxsvc.DSXClient(loadedParams)
 
-logger.info(loadedParams);
-logger.info(typeof(loadedParams))
-console.log("### looking at loadedParams again");
-console.log(loadedParams)
-
-
-var dsxClient = new dsxsvc.DSXClient(loadedParams);
-
-console.log(dsxClient.getURI());
-
+console.log(dsxClient.getURI())
 
 class UserChannel {
 
-    constructor(queue) {
-        this.queue = queue;
-        this.send = function(session, nextHandlerID, data) {
-            var newSession = new db.Message({
-              incoming: false,
-              thread_id: session.thread_id,
-              resolved: true,
-              user_id: 'kip',
-              origin: session.origin,
-              source: session.source,
-              mode: session.mode,
-              action: session.action,
-              state: session.state,
-              user: session.source.user
-            })
-            newSession['reply'] = data;
-            newSession.mode = nextHandlerID.split('.')[0];
-            newSession.action = nextHandlerID.split('.')[1];
-            kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
-            kip.debug('inside channel.send(). Session action is ' + newSession.action);
-            var self = this;
-            newSession.save(function(err, saved){
-              if (err) {
-                kip.debug('mongo save err: ',err);
-                throw Error(err);
-              }
-              self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results');
-            });
+  constructor (queue) {
+    this.queue = queue
+    this.send = function (session, nextHandlerID, data) {
+      var newSession = new db.Message({
+        incoming: false,
+        thread_id: session.thread_id,
+        resolved: true,
+        user_id: 'kip',
+        origin: session.origin,
+        source: session.source,
+        mode: session.mode,
+        action: session.action,
+        state: session.state,
+        user: session.source.user
+      })
+      newSession['reply'] = data
+      newSession.mode = nextHandlerID.split('.')[0]
+      newSession.action = nextHandlerID.split('.')[1]
+      kip.debug('inside channel.send(). Session mode is ' + newSession.mode)
+      kip.debug('inside channel.send(). Session action is ' + newSession.action)
+      var self = this
+      newSession.save(function (err, saved) {
+        if (err) {
+          kip.debug('mongo save err: ', err)
+          throw Error(err)
         }
-        return this;
+        self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
+      })
     }
+    return this
+  }
 }
 
-var replyChannel = new UserChannel(queue);
+var replyChannel = new UserChannel(queue)
 
-
-function default_reply(message) {
+function default_reply (message) {
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -106,16 +99,16 @@ function default_reply(message) {
   })
 }
 
-function text_reply(message, text) {
-  var msg = default_reply(message);
-  msg.text = text;
+function text_reply (message, text) {
+  var msg = default_reply(message)
+  msg.text = text
   return msg
 }
 
-function send_text_reply(message, text) {
-  var msg = text_reply(message, text);
-  msg.save();
-  console.log('<<<'.yellow, text.yellow);
+function send_text_reply (message, text) {
+  var msg = text_reply(message, text)
+  msg.save()
+  console.log('<<<'.yellow, text.yellow)
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
@@ -123,33 +116,36 @@ function send_text_reply(message, text) {
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
 queue.topic('incoming').subscribe(incoming => {
-  co(function*() {
-    console.log('>>>'.yellow, incoming.data.text.yellow);
-
+  co(function * () {
+    if (incoming.data.text) {
+      console.log('>>>'.yellow, incoming.data.text.yellow)
+    } else {
+      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
+    }
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
       ts: {
         $lte: incoming.data.ts
       }
-    }).sort('-ts').limit(20);
+    }).sort('-ts').limit(20)
 
-    var session = history[0];
+    var session = history[0]
     if (!session.state && history[1]) {
-      session.state = history[1].state;
+      session.state = history[1].state
     }
-    session.state = session.state || {};
-    session.history = history.slice(1);
+    session.state = session.state || {}
+    session.history = history.slice(1)
     if (session._id.toString() !== incoming.data._id.toString()) {
-      throw new Error('correct message not retrieved from db');
+      throw new Error('correct message not retrieved from db')
     }
     if (history[1]) {
-       session.mode = history[1].mode;
-       session.action = history[1].action;
-       session.route = session.mode + '.' + session.action;
-       session.prevMode = history[1].mode;
-       session.prevAction = history[1].action;
-       session.prevRoute = session.prevMode + '.' + session.prevAction;
+      session.mode = history[0].mode
+      session.action = history[0].action
+      session.route = session.mode + '.' + session.action
+      session.prevMode = history[1].mode
+      session.prevAction = history[1].action
+      session.prevRoute = session.prevMode + '.' + session.prevAction
     }
     var route = yield getRoute(session);
     kip.debug('route', route);
@@ -169,48 +165,25 @@ queue.topic('incoming').subscribe(incoming => {
 //
 // this is the worst part of building bots: intent recognition
 //
-function getRoute(session) {
+function getRoute (session) {
   kip.debug(`prevRoute ${session.prevRoute}`)
-  return co(function*() {
-     if (session.text === 'food') {
-        kip.debug('### User typed in :' + session.text);
-        return 'food.begin'
-      } 
-      // else if (handlers[session.text]) {
-      //   return session.text
-      // }
-    else{
-        return (session.mode + '.' + session.action);
+  return co(function * () {
+    if (session.text === 'food') {
+      kip.debug('### User typed in :' + session.text)
+      return 'food.begin'
+    } else if (handlers[session.text]) {
+      return session.text
+    } else {
+      return (session.mode + '.' + session.action)
     }
-    // if (message.text === 'food') return 'food.begin';
-    // if (message.prevRoute === 'food.begin') return 'food.address';
-    // if ('123'.match(message.text)) {
-    //   if (!message.state.merchant_id)
-    //     return 'food.restaurant.select';
-    //   else
-    //     return 'food.menu.select';
-    // }
-    // if (message.prevRoute === 'food.restaurant.list') {
-    //   return 'food.restaurant.search';
-    // }
-    // if (message.state.merchant_id && message.text === 'full menu') {
-    //   return 'food.menu.list';
-    // }
-    // if (message.state.merchant_id && message.prevRoute !== 'food.menu.search') {
-    //   return 'food.menu.search';
-    // }
-
+    // unreachable
     throw new Error("couldn't figure out the right mode/action to route to")
-  }).catch(kip.err);
+  }).catch(kip.err)
 }
+var handlers = {}
 
-var handlers = {};
-
-
-handlers['food.sys_error'] = function* (session){
-
+handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
-
 }
 
 //
@@ -295,122 +268,12 @@ handlers['food.choose_address'] = function* (session) {
   replyChannel.send(session, 'food.delivery_or_pickup', component.render());
 }
 
+handlers['food.context_update'] = function * (session) {
+  kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session, '\n\n\n\n')
 
-
-
-//
-// the user's intent is to initiate a food order
-//
-handlers['address.new'] = function* (session) {
-
-  kip.debug(' 🌆🏙 enter a new address');
-  // session.state = {};
-  var msg_json = {
-    "text": "What's the delivery address?",
-    "attachments": [
-      {
-        "text": "Type your address below",
-        "color": "#3AA3E3",
-      }
-    ]
-  }
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
-}
-
-
-//
-// the user's intent is to initiate a food order
-//
-handlers['address.confirm'] = function* (session) {
-  kip.debug('🌆🏙 validate an address', session.text);
-
-  var addr = JSON.parse(session.text);
-  session.state = {};
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec();
-  var prompt = "Is " + addr.address_1 + ' your address?'
-  var msg_json = {
-    "text": prompt,
-    "attachments": [
-      {
-        "mrkdwn_in": [
-                 "text"
-        ],
-        "fallback": "You are unable to confirm.",
-        "callback_id": "address_confirm",
-        "color": "#3AA3E3",
-        "attachment_type": "default",
-        "actions": [
-           {
-              name: "address",
-              text: "Confirm",
-              type: 'button',
-              value: "address.fuckyou"
-            },
-           {
-              name: "address",
-              text: "Edit",
-              type: 'button',
-              value: "address.yomama"
-           }
-        ]
-      },
-    ]
-  };
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
-}
-
-
-//mock function for now until dexter implements 
-function validateAddress(addr) {
-  //validate addr via google places api and Parse out the fields from the addr string 
-  return {
-    label: "NYC Office",
-    coordinates: [-123.34, 34.32432423],
-    address_1: addr,
-    address_2: 'Apt. 6',
-    phone_number: "212-867-5309",
-    region: "US",
-    timezone: "ET",
-    special_instructions: "Please send a raven to herald your arrival"
-  };
-}
-
-handlers['address.validate'] = function* (session) {
-    var addr = session.text;
-    kip.debug('\n\n\n\n\n\n\n🌃🌉getting to address.validate', addr, '\n\n\n\n\n\n\n\n');
-    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-    //validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
-    if (validateAddress(addr)) {
-      team.meta.locations.push(validateAddress(addr))
-      team.meta.chosen_location = addr;
-    } 
-    else {
-      team.meta.chosen_location = addr;
-      team.meta.locations.push(validateAddress({
-        label: "NYC Office",
-        coordinates: [-123.34, 34.32432423],
-        address_1: addr,
-        address_2: 'Apt. 6',
-        phone_number: "212-867-5309",
-        region: "US",
-        timezone: "ET",
-        special_instructions: "Please send a raven to herald your arrival"
-      }))
-    }
-    yield team.save()
-    kip.debug('###  saved new address in mongo...');
-    dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user);
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    kip.debug('###  created new delivery context, will now update...');
-    replyChannel.send(session, 'food.context_update', component.render());
-}
-
-
-handlers['food.delivery_or_pickup'] = function* (session) {
-  var fulfillmentMethod = session.text;
+  var fulfillmentMethod = session.text
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
-  yield db.Slackbots.update({team_id: session.source.team}, {'meta.fulfillment_method': fulfillmentMethod}).exec()
-  //var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
+  var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
   //
   // START OF S2B
@@ -505,61 +368,61 @@ handlers['food.address'] = function* (message) {
 //
 // the user's intent is to search for a specific type of food or a specific restaurant
 //
-handlers['food.restaurant.search'] = function*(message) {
+handlers['food.restaurant.search'] = function * (message) {
   var results = yield search.search({
     addr: message.state.addr,
     q: message.text
   })
-  var results_message = default_reply(message);
-  results_message.action = 'restaurant.list';
-  results_message.text = `Here are some restaurants matching ${message.text} that you might like nearby`;
+  var results_message = default_reply(message)
+  results_message.action = 'restaurant.list'
+  results_message.text = `Here are some restaurants matching ${message.text} that you might like nearby`
   results_message.data = {
     results: results.results,
     params: {addr: results.address}
-  };
-  results_message.save();
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+  }
+  results_message.save()
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results')
 }
 
 //
 // the user's intent is to choose a restaurant to order from
 //
-handlers['food.restaurant.select'] = function*(message) {
-  return yield handlers['food.restaurant.info'](message);
+handlers['food.restaurant.select'] = function * (message) {
+  return yield handlers['food.restaurant.info'](message)
 }
 
 //
 // the user's intent is to obtian more information about a restaurant
 //
-handlers['food.restaurant.info'] = function*(message) {
+handlers['food.restaurant.info'] = function * (message) {
   var results_message = message.history.filter(m => {
-    return _.get(m, 'data.results.0');
-  })[0];
+    return _.get(m, 'data.results.0')
+  })[0]
 
-  var selection = parseInt(message.text) - 1;
-  var merchant = results_message.data.results[selection];
-  message.state.merchant_id = merchant.id;
-  var info_message = default_reply(message);
-  info_message.action = 'restaurant.info';
+  var selection = parseInt(message.text) - 1
+  var merchant = results_message.data.results[selection]
+  message.state.merchant_id = merchant.id
+  var info_message = default_reply(message)
+  info_message.action = 'restaurant.info'
   info_message.text = `Okay, here's the menu for ${merchant.summary.name}`
-  var menu = yield api.getMenu(merchant.id);
+  var menu = yield api.getMenu(merchant.id)
   info_message.data = {
     merchant: merchant,
     menu: menu
-  };
-  info_message.save();
-  queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu');
+  }
+  info_message.save()
+  queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu')
 }
 
 //
 // the user wants to see the full menu
 //
-handlers['food.menu.list'] = function*(message) {
-  var info_message = default_reply(message);
-  info_message.action = 'menu.list';
+handlers['food.menu.list'] = function * (message) {
+  var info_message = default_reply(message)
+  info_message.action = 'menu.list'
   info_message.data = message.history.filter(m => {
-    return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu');
-  })[0].data;
+    return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu')
+  })[0].data
   info_message.text = `Okay, here's the full menu for ${info_message.data.merchant.summary.name}`
   info_message.save();
   queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu');
@@ -569,37 +432,128 @@ handlers['food.menu.list'] = function*(message) {
 //
 // the user is looking at a menu and is searching for an item to add
 //
-handlers['food.menu.search'] = function*(message) {
-  var results_message = default_reply(message);
-  results_message.action = 'menu.search.results';
+handlers['food.menu.search'] = function * (message) {
+  var results_message = default_reply(message)
+  results_message.action = 'menu.search.results'
   var results = yield search.menuSearch({
     q: message.text,
     menu: message.history.filter(m => {
-      return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu');
+      return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu')
     })[0].data.menu
-  });
+  })
   results_message.data = {
     results: results
-  };
-  results_message.text = `Okay, here are the items matching "${message.text}"`;
-  results_message.save();
-  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results');
+  }
+  results_message.text = `Okay, here are the items matching "${message.text}"`
+  results_message.save()
+  queue.publish('outgoing.' + message.origin, results_message, message._id + '.reply.results')
 }
 
 //
 // the user's intent is to obtain more information about a menu item
 //
-handlers['food.item.info'] = function*(message) {
-
-}
+handlers['food.item.info'] = function * (message) {}
 
 // the user's intent is to add a menu item to cart
-handlers['food.item.add'] = function*(message) {
-
-}
+handlers['food.item.add'] = function * (message) {}
 
 // the user's intent is to select an option for a menu item, like size or type of sauce
 // the item could already be in their cart or not. message.item should be what you modify
-handlers['food.item.option'] = function*(message) {
+handlers['food.item.option'] = function * (message) {}
 
+// check for user preferences/diet/etc, skipping for now
+handlers['food.user.preferences'] = function * (session) {
+  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false})
+  if (process.env.NODE_ENV === 'test') {
+    teamMembers = [teamMembers[0]]
+  }
+  teamMembers.map(function (member) {
+    var userPreferences = {
+      mode: 'food',
+      action: 'user.poll',
+      thread_id: member.dm,
+      origin: session.origin,
+      source: session.source,
+      res: utils.userFoodPreferencesPlaceHolder
+    }
+    userPreferences.source.user = member.id
+    userPreferences.source.channel = member.dm
+    replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
+  })
+}
+
+// poll for cuisines
+handlers['food.user.poll'] = function * (message) {
+  // until cuisines is returned from s1-s3
+  var cuisines = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8'))
+
+  var teamId = message.source.team
+  var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+  if (process.env.NODE_ENV === 'test') {
+    teamMembers = [teamMembers[0]]
+  }
+
+  // error with mock slack not being able to get all messages
+  var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
+  teamMembers.map(function (member) {
+    var resp = {
+      mode: 'food',
+      action: 'user.poll',
+      thread_id: member.dm,
+      origin: message.origin,
+      source: message.source,
+      res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
+    }
+    resp.source.user = member.id
+    resp.source.channel = member.dm
+    replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
+  })
+}
+
+handlers['food.admin.restaurant.pick'] = function * (message) {
+  // var results = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/results.json'), 'utf8'))
+  var teamId = message.source.team
+  var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+  var numOfResponsesWaitingFor = teamMembers.length
+  var v = yield db.messages.find({mode: 'food', action: 'admin.restaurant.pick', 'data.voteID': 'XYZXYZ'})
+  var votes = utils.getVotesFromMembers(v)
+  if (votes.length < numOfResponsesWaitingFor) {
+    logging.error('waiting for more responses have, votes: ', votes.length)
+    logging.error('need', numOfResponsesWaitingFor)
+    return
+  }
+  var results = dsxClient._get('context', {team_id: message.source.team, user_id: message.source.user_id})
+  // var merchants = dsxClient.getNearbyRestaurants(results.address)
+  var viableRestaurants = utils.createSearchRanking(results, votes)
+  var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
+  var resp = {
+    mode: 'food',
+    action: 'admin.restaurant.pick',
+    thread_id: message.dm,
+    origin: message.origin,
+    source: message.source,
+    res: responseForAdmin
+  }
+  replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
+}
+
+handlers['food.admin.restaurant.confirm'] = function * (message) {
+  var choosenRestaurant = message.text // or whatever the button action.value is
+  var resp = {
+    mode: 'food',
+    action: 'admin.restaurant.confirm',
+    thread_id: message.dm,
+    origin: message.origin,
+    source: message.source,
+    res: utils.confirmRestaurant(choosenRestaurant)
+  }
+  sendIt(resp)
+}
+
+function sendIt (resp) {
+  var resultsMessage = default_reply(resp)
+  resultsMessage.data = resp.res
+  resultsMessage.save()
+  resp.text = JSON.stringify(resp.res)
+  queue.publish('outgoing.' + resp.origin, resp, resultsMessage._id + '.reply.' + resp.action)
 }

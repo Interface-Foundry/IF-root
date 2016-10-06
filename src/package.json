@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Simple chat app",
   "main": "server.js",
+  "standard": {
+    "globals": ["kip", "logging", "db", "describe", "it", "before", "after"]
+  },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --reporter spec",
+    "test": "find . -name '*.test.js' | xargs env NODE_ENV=test mocha --bail --reporter spec",
     "start": "node chat/server_cinna_chat.js",
     "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db"
   },
@@ -77,7 +80,7 @@
     "telegram-bot-api": "^1.0.0",
     "urlify": "^0.3.6",
     "uuid": "^2.0.2",
-    "validator": "^5.2.0",
+    "validator": "^5.7.0",
     "vow": "^0.4.12",
     "winston": "^2.2.0",
     "ws": "^1.0.1",
