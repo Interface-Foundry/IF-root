@@ -309,29 +309,69 @@ handlers['food.context_update'] = function * (session) {
             "attachment_type": "default",
             "actions": [
                 {
-                    "name": "chess",
+                    "name": "passthrough",
                     "text": "✓ Start New Poll",
                     "style":"primary",
                     "type": "button",
-                    "value": "chess"
+                    "value": "food.poll.confirm_send"
                 },
                 {
-                    "name": "chess",
+                    "name": "passthrough",
                     "text": "See More",
                     "type": "button",
-                    "value": "chess"
+                    "value": "food.restaurants.list"
                 },
                 {
-                    "name": "maze",
+                    "name": "exit_btn",
                     "text": "× Cancel",
                     "type": "button",
-                    "value": "maze"
+                    "value": "exit"
                 }
             ]
         }
     ]
 }
   replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b});
+}
+
+handlers['food.poll.confirm_send'] = function * (message) {
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  var addr = _.get(team, 'meta.chosen_location.address_1', '');
+  var msg_json = {
+    'attachments': [
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': `Send poll for lunch cuisine to the team members at ?`,
+        'fallback': 'Send poll for lunch cuisine to the team members at ',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'yes_btn',
+            'text': 'Confirm',
+            'style': 'primary',
+            'type': 'button',
+            'value': 'chess'
+          },
+          {
+            'name': 'passthrough',
+            'text': 'View Team Members',
+            'type': 'button',
+            'value': 'team.members'
+          },
+          {
+            'name': 'no_btn',
+            'text': 'Cancel',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      }
+    ]
+  }
 }
 
 //
