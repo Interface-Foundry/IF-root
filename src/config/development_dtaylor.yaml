@@ -9,6 +9,12 @@ picstitch: http://localhost:5000
 # nlp: http://localhost:8083
 # doc2vec: http://localhost:8084
 
+slack:
+  client_id: "3109470321.84171532406"
+  client_secret: 68e26b96b0183193545dc12fb26d3dc3
+  verification_token: I2GfyrS33Ej219tJjfsxE2m5
+  redirect_uri: https://c9fe9f44.ngrok.io/newslack
+
 # 
 # sample YAML init file for kip node.js scripts
 #
