@@ -12,7 +12,7 @@ var picstitch = require('./image_processing_delivery.js')
 var path = require('path')
 
 // until cuisines is returned from s1-s3
-var cuisines = fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8')
+var cuisines = fs.readFileSync(path.resolve(__dirname, 'cuisines.js'), 'utf8')
 
 var fs = require('fs')
 var yaml = require('js-yaml')
@@ -241,11 +241,11 @@ handlers['food.choose_address'] = function* (session) {
     // session.mode = 'address'
     // session.action = 'new'
     return handlers['address.new'](session)
-  } 
+  }
     if (session.text === 'address.confirm' || session.text === 'confirm' ) {
     // new message yay
     return handlers['address.confirm'](session)
-  } 
+  }
 
   try {
     var location = JSON.parse(session.text)
