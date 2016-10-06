@@ -92,7 +92,6 @@ describe('getting votes and selecting merchant', function () {
       this.timeout(5000)
       admin = yield mock.Admin()
       // create dsx context for address
-      // yield dsxClient.createDeliveryContext(testAddress, 'none', admin.chatuser.team_id, admin.id)
       var user2 = mock.ExistingUser()
       // going to simulate admin response in test
       var user1 = mock.Admin()

@@ -7,7 +7,24 @@ var fs = require('fs')
 var _ = require('lodash')
 var sm = require('slack-message-builder')
 var async = require('async')
+
+var weekly_updates = require('../weekly_updates.js')
 // var api = require('./api-wrapper.js')
+
+function * initiateDeliverySession (slackbot) {
+  return new db.Delivery({
+    teamMembers: weekly_updates.getTeam(slackbot),
+    chosen_location: {},
+    convoInitiater: String,
+    fulfillment_method: String,
+    time_started: {
+      type: Date,
+      default: Date.now
+    },
+    mode: String,
+    action: String
+  })
+}
 
 function * initiateFoodMessage (message) {
   return co(function * () {
@@ -66,16 +83,6 @@ function initiateFoodOrdering (admin) {
     }
     res.newMessage.push(locationMessage)
     return res
-  })
-}
-
-function newAdminAddress (admin) {
-  // create message that says 'cool whats your new address' or whatever
-  co(function * () {
-    var newAddress = yield gotNewAddress(admin)
-    var address = new db.Address({
-      admin: admin.id
-    })
   })
 }
 
@@ -385,15 +392,17 @@ var userFoodPreferencesPlaceHolder = {
 
 }
 
-module.exports.askUserForCuisineTypes = askUserForCuisineTypes
-module.exports.chooseRestaurant = chooseRestaurant
-module.exports.createSearchRanking = createSearchRanking
-module.exports.getVotesFromMembers = getVotesFromMembers
-module.exports.initiateFoodMessage = initiateFoodMessage
-module.exports.sortMerchantsByDistance = sortMerchantsByDistance
-module.exports.sortMerchantsByRating = sortMerchantsByRating
-module.exports.confirmRestaurant = confirmRestaurant
-module.exports.userFoodPreferencesPlaceHolder = userFoodPreferencesPlaceHolder
+module.exports = {
+  askUserForCuisineTypes,
+  chooseRestaurant,
+  createSearchRanking,
+  getVotesFromMembers,
+  initiateFoodMessage,
+  sortMerchantsByDistance,
+  sortMerchantsByRating,
+  confirmRestaurant,
+  userFoodPreferencesPlaceHolder,
+initiateDeliverySession}
 
 // former quick testing stuff
 if (!module.parent) {

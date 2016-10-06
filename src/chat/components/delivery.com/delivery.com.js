@@ -235,10 +235,10 @@ handlers['food.begin'] = function* (session) {
 
   var msg_json = {
     "attachments": [
-  		{
-  			"title": "",
-  			"image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
-  		},
+      {
+        "title": "",
+        "image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
+      },
       {
           "text": "Great! Which address is this for?",
           "fallback": "You are unable to choose an address",
