@@ -261,13 +261,6 @@ handlers['food.choose_address'] = function* (session) {
   replyChannel.send(session, 'food.delivery_or_pickup', component.render());
 }
 
-handlers['food.context_update'] = function * (session) {
-  kip.debug('\n\n\n GETTING TO FOOD.CONTEXT_UPDATE: ', session, '\n\n\n\n')
-
-  var fulfillmentMethod = session.text
-
-
-
 //
 // the user's intent is to create a new address
 //

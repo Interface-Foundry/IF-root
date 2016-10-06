@@ -4,12 +4,20 @@
   "description": "Simple chat app",
   "main": "server.js",
   "standard": {
-    "globals": ["kip", "logging", "db", "describe", "it", "before", "after"]
+    "globals": [
+      "kip",
+      "logging",
+      "db",
+      "describe",
+      "it",
+      "before",
+      "after"
+    ]
   },
   "scripts": {
     "test": "find . -name '*.test.js' | xargs env NODE_ENV=test mocha --bail --reporter spec",
     "start": "node chat/server_cinna_chat.js",
-    "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db"
+    "install": "ln -sf ../kip.js node_modules/kip.js && ln -sf ../db node_modules/db && ln -sf ../logging.js node_modules/logging.js"
   },
   "keywords": [
     "chat"
@@ -74,6 +82,7 @@
     "sendgrid": "^2.0.0",
     "shortid": "^2.2.4",
     "showdown": "^1.4.2",
+    "slack-message-builder": "0.0.2",
     "slackbots": "0.5.0",
     "socket.io": "^1.4.6",
     "static-kdtree": "^1.0.1",
