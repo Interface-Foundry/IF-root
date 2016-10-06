@@ -208,9 +208,7 @@ var handlers = {};
 
 
 handlers['food.sys_error'] = function* (session){
-
-  kip.debug('chat session halted.')
-
+  kip.debug('chat session halted.');
 }
 
 //
@@ -229,14 +227,12 @@ handlers['food.begin'] = function* (session) {
 
     }
   })
-
   address_buttons.push({
     name: "passthrough",
     text: "New +",
     type: 'button',
     value: "address.new"
   })
-
   var msg_json = {
     "attachments": [
   		{
@@ -253,81 +249,117 @@ handlers['food.begin'] = function* (session) {
       }
     ]
   }
-
   replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
 }
-
-
 
 //
 // User decides what address they are ordering for. could be that they need to make a new address
 //
 handlers['food.choose_address'] = function* (session) {
-  if (session.text === 'address.new' || session.text === 'new' ) {
-    kip.debug('\n\nwhat is love, what is life, what is session.mode: ', session.mode, 'what is session.action: ', session.action, 'what is session.text: ', session.text)
-    // session.mode = 'address'
-    // session.action = 'new'
-    return handlers['address.new'](session)
+  if (session.text === 'address.validate' || session.text === 'validate' ) {
+    kip.debug('delivery.com.js line 260, hitting address.validate catcher: ', session)
+    yield handlers['address.validate'](session)
+    return 
   } 
-    if (session.text === 'address.confirm' || session.text === 'confirm' ) {
-    // new message yay
-    return handlers['address.confirm'](session)
+  else if (session.text === 'address.confirm' || session.text === 'confirm' ) {
+    kip.debug('delivery.com.js line 265, hitting address.confirm catcher: ', session)
+    yield handlers['address.confirm'](session)
+    return 
   } 
+  else if (session.text === 'address.new' || session.text === 'new' ) {
+    kip.debug('delivery.com.js line 270, hitting address.new catcher: ', session)
+    yield handlers['address.new'](session)
+    return 
+  } 
+ 
+
 
   try {
-    var location = JSON.parse(session.text)
+    var location = JSON.parse(session.text);
   } catch (e) {
-    kip.error('Could not understand the address the user wanted to use')
+    var location = {address_1: session.text};
+    kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
     // TODO handle the case where they type a new address without clicking the "new" button
   }
 
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
   team.meta.chosen_location = location
-  kip.debug('saving location', location.address_1)
+  kip.debug('saving location', location)
   yield team.save()
-  //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
+  yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
 
   //
   // START OF S2
   //
   var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
-  var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null);
-  replyChannel.send(session, 'food.delivery_or_pickup', component.render());
+  var msg_json = {
+        "attachments": [ 
+            {
+                "mrkdwn_in": [
+                   "text"
+                ],
+                "text": text,
+                "fallback": "You did not choose a fulfillment method :/",
+                "callback_id": "wopr_game",
+                "color": "#3AA3E3",
+                "attachment_type": "default",
+                "actions": [
+                    {
+                        "name": "delivery",
+                        "text": "Delivery",
+                        "type": "button",
+                        "value": "food.delivery_or_pickup"
+                    },
+                    {
+                        "name": "pickup",
+                        "text": "Pickup",
+                        "type": "button",
+                        "value": "food.delivery_or_pickup"
+                    },
+                    {
+                        "name": "passthrough",
+                        "text": "< Change Address",
+                        "type": "button",
+                        "value": "address.change"
+                    }
+                ]
+            }
+        ]
+    };
+  replyChannel.send(session, 'food.delivery_or_pickup', msg_json);
 }
 
 
-
-
-//
-// the user's intent is to initiate a food order
-//
 handlers['address.new'] = function* (session) {
-
   kip.debug(' 🌆🏙 enter a new address');
   // session.state = {};
   var msg_json = {
     "text": "What's the delivery address?",
     "attachments": [
       {
-        "text": "Type your address below",
-        "color": "#3AA3E3",
-      }
+        "text": "Type your address below"      }
     ]
   }
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
+  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json});
+  // yield handlers['address.confirm'](session)
+  // session.mode = 'address';
+  // session.action = 'confirm';
+  // session.text = 'confirm';
+  // yield session.save();
 }
 
-
-//
-// the user's intent is to initiate a food order
-//
 handlers['address.confirm'] = function* (session) {
-  kip.debug('🌆🏙 validate an address', session.text);
-
-  var addr = JSON.parse(session.text);
+  kip.debug('🌆🏙 validate an address', session);
+ try {
+    var location = JSON.parse(session.text);
+  } catch (e) {
+    var location = {address_1: session.text};
+    kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
+    // TODO handle the case where they type a new address without clicking the "new" button
+  }
   session.state = {};
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec();
-  var prompt = "Is " + addr.address_1 + ' your address?'
+  var prompt = "Is " + location.address_1 + ' your address?'
   var msg_json = {
     "text": prompt,
     "attachments": [
@@ -341,55 +373,43 @@ handlers['address.confirm'] = function* (session) {
         "attachment_type": "default",
         "actions": [
            {
-              name: "address",
+              name: "address_confirm_btn",
               text: "Confirm",
               type: 'button',
-              value: "address.fuckyou"
+              value: JSON.stringify(location)
             },
            {
-              name: "address",
+              name: "passthrough",
               text: "Edit",
               type: 'button',
-              value: "address.yomama"
+              value: "address.new"
            }
         ]
       },
     ]
   };
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
-}
-
-
-//mock function for now until dexter implements 
-function validateAddress(addr) {
-  //validate addr via google places api and Parse out the fields from the addr string 
-  return {
-    label: "NYC Office",
-    coordinates: [-123.34, 34.32432423],
-    address_1: addr,
-    address_2: 'Apt. 6',
-    phone_number: "212-867-5309",
-    region: "US",
-    timezone: "ET",
-    special_instructions: "Please send a raven to herald your arrival"
-  };
+      //storing location in source since there is no other way to persist it thru handler exchanges,
+    //feel free to implement a better way. would not make sense to save it in slackbots before it is even validate nah meen
+  session.source.location = location;
+  yield session.save();
+  replyChannel.send(session, 'address.validate', {type: session.origin, data: msg_json});
 }
 
 handlers['address.validate'] = function* (session) {
-    var addr = session.text;
-    kip.debug('\n\n\n\n\n\n\n🌃🌉getting to address.validate', addr, '\n\n\n\n\n\n\n\n');
+    var location = session.source.location;
+    kip.debug('\n\n🌃🌉getting to address.validate', location, '\n\n');
     var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
     //validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
-    if (validateAddress(addr)) {
-      team.meta.locations.push(validateAddress(addr))
-      team.meta.chosen_location = addr;
+    if (validateAddress(location)) {
+      team.meta.locations.push(validateAddress(location))
+      team.meta.chosen_location = location;
     } 
     else {
-      team.meta.chosen_location = addr;
+      team.meta.chosen_location = location;
       team.meta.locations.push(validateAddress({
         label: "NYC Office",
         coordinates: [-123.34, 34.32432423],
-        address_1: addr,
+        address_1: location.address_1,
         address_2: 'Apt. 6',
         phone_number: "212-867-5309",
         region: "US",
@@ -397,16 +417,52 @@ handlers['address.validate'] = function* (session) {
         special_instructions: "Please send a raven to herald your arrival"
       }))
     }
-    yield team.save()
+
+    kip.debug('I AM THE ILL INTENT: ', team.meta)
+    yield team.save();
     kip.debug('###  saved new address in mongo...');
-    dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user);
-    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
-    kip.debug('###  created new delivery context, will now update...');
-    replyChannel.send(session, 'food.context_update', component.render());
+    var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+    var msg_json = {
+        "attachments": [ 
+            {
+                "mrkdwn_in": [
+                   "text"
+                ],
+                "text": text,
+                "fallback": "You did not choose a fulfillment method :/",
+                "callback_id": "wopr_game",
+                "color": "#3AA3E3",
+                "attachment_type": "default",
+                "actions": [
+                    {
+                        "name": "passthrough",
+                        "text": "Delivery",
+                        "type": "button",
+                        "value": "food.delivery_or_pickup"
+                    },
+                    {
+                        "name": "passthrough",
+                        "text": "Pickup",
+                        "type": "button",
+                        "value": "food.delivery_or_pickup"
+                    },
+                    {
+                        "name": "passthrough",
+                        "text": "< Change Address",
+                        "type": "button",
+                        "value": "address.change"
+                    }
+                ]
+            }
+        ]
+    };
+    replyChannel.send(session, 'food.ready_to_poll', msg_json);
 }
 
 
+
 handlers['food.delivery_or_pickup'] = function* (session) {
+  kip.debug('\n\n🍏 🍎 🍐 getting to food.delivery_or_pickup\n\n');
   var fulfillmentMethod = session.text;
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
   yield db.Slackbots.update({team_id: session.source.team}, {'meta.fulfillment_method': fulfillmentMethod}).exec()
@@ -417,14 +473,14 @@ handlers['food.delivery_or_pickup'] = function* (session) {
   //
   var mock_s2b = {
     "attachments": [
-		    {
-			"title": "",
-			"image_url":"http://i.imgur.com/BVHZTaS.png"
-		    },
-        	{
-			"mrkdwn_in": [
+        {
+      "title": "",
+      "image_url":"http://i.imgur.com/BVHZTaS.png"
+        },
+          {
+      "mrkdwn_in": [
                "text"
-			],
+      ],
             "text": "You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again? ",
             "fallback": "You are unable to choose a game",
             "callback_id": "wopr_game",
@@ -439,10 +495,10 @@ handlers['food.delivery_or_pickup'] = function* (session) {
                 }
             ]
         },
-		{
-			"mrkdwn_in": [
+    {
+      "mrkdwn_in": [
                "text"
-			],
+      ],
             "text": "",
             "fallback": "You are unable to choose a game",
             "callback_id": "wopr_game",
@@ -461,7 +517,7 @@ handlers['food.delivery_or_pickup'] = function* (session) {
                     "type": "button",
                     "value": "maze"
                 },
-				{
+        {
                     "name": "maze",
                     "text": "< Change Address",
                     "type": "button",
@@ -473,6 +529,7 @@ handlers['food.delivery_or_pickup'] = function* (session) {
 }
   replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b});
 }
+
 
 //
 // the user's intent is to specify an address for delivery/pickup
@@ -603,3 +660,20 @@ handlers['food.item.add'] = function*(message) {
 handlers['food.item.option'] = function*(message) {
 
 }
+
+
+//mock function for now until dexter implements 
+function validateAddress(addr) {
+  //validate addr via google places api and Parse out the fields from the addr string 
+  return {
+    label: "NYC Office",
+    coordinates: [-123.34, 34.32432423],
+    address_1: addr.address_1,
+    address_2: 'Apt. 6',
+    phone_number: "212-867-5309",
+    region: "US",
+    timezone: "ET",
+    special_instructions: "Please send a raven to herald your arrival"
+  };
+}
+

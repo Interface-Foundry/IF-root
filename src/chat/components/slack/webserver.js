@@ -25,7 +25,7 @@ app.use(bodyParser.json())
 
  */
 function simple_action_handler(action) {
-  kip.debug('\n\n\nATLIENS: ', action,'\n\n\n');
+  kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action,'\n\n\n');
   switch (action.name) {
     //
     // Search result buttons
@@ -56,6 +56,8 @@ function simple_action_handler(action) {
       return 'delivery'
     case 'pickup_btn':
       return 'pickup'
+    case 'address_confirm_btn':
+      return 'address_confirm_btn'
     case 'passthrough':
       return action.value
   }
@@ -92,18 +94,27 @@ app.post('/slackaction', function(req, res) {
         message.source.team = message.source.team.id
         message.source.user = message.source.user.id
         message.source.channel = message.source.channel.id
-        //cant just passthru, lets manually set mode and action here, can refac laterz
-        if (simple_command.indexOf('address.') > -1) { 
+        if(simple_command == 'address_confirm_btn') {
+          message.mode = 'address';
+          message.action = 'validate';
+          var location;
+          try {
+            location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
+          } catch(err) {
+            kip.error('error parsing out location: webserver.js line 103')
+          }
+          message.source.location = location;
+          // message.source.location = 
+          message.save().then(() => {
+          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
+        }
+        else if (simple_command.indexOf('address.') > -1) {
           message.mode = simple_command.split('.')[0];
           message.action = simple_command.split('.')[1];
-          message.text = message.action;
-          // if (!message.action) {
-          // }
-          // message.action = message.action ? message.action  : 'confirm'
-          kip.debug('\n\n\nwebserver.js 97 : yep its splitting lel message.text:', message.text,' simple_command: ', simple_command, 'message.mode: ',message.mode, 'message.action:', message.action)
+          kip.debug('\n\n\n\n webserver.js 100 : mode --> ', message.mode,' action -->', message.action,'\n\n\n\n')
         }
         message.save().then(() => {
-          kip.debug('\n\n\n\n honestly, who does that: ', message,'parsedIn:',parsedIn,'\n\n\n\n')
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
 

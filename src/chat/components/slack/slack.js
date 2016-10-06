@@ -191,12 +191,18 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         })
       }
       if (message.mode === 'food') {
-     
-                          kip.debug('COMPONENT RENDER LOOKS LIKE: ', message.reply.data);
-
-
-         return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
+        kip.debug('slack.js line 195 message: ', message);
+        //day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
+        var reply = message.reply.data ? message.reply.data : message.reply;
+         return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply);
       }
+      if (message.mode === 'address') {
+        kip.debug('slack.js line 200 message: ', message);
+        //day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
+        var reply = message.reply.data ? message.reply.data : message.reply;
+         return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply);
+      }
+
       // if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
       //   msgData.attachments = yield search_results(message);
       //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
