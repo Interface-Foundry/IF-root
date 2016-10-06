@@ -51,7 +51,8 @@ function simple_action_handler(action) {
     //
     case 'home':
       return 'exit'
-
+    case 'address':
+      return action.value
     case 'delivery_btn':
       return 'delivery'
     case 'pickup_btn':
@@ -78,7 +79,7 @@ app.post('/slackaction', function(req, res) {
       // for things that i'm just going to parse for
       var simple_command = simple_action_handler(action)
       if (simple_command) {
-        kip.debug('passing through button click as a regular text chat', simple_command.cyan)
+        kip.debug('passing through button click as a regular text chat', simple_command.cyan);
         var message = new db.Message({
           incoming: true,
           thread_id: parsedIn.channel.id,
@@ -92,6 +93,11 @@ app.post('/slackaction', function(req, res) {
         message.source.team = message.source.team.id
         message.source.user = message.source.user.id
         message.source.channel = message.source.channel.id
+        //cant just passthru, lets manually set mode and action here, can refac laterz
+        if (simple_command.indexOf('address') > -1) { 
+          message.mode = 'address';
+          message.action = simple_command.split('.')[1];
+        }
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })

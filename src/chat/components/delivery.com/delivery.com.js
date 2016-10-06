@@ -230,10 +230,10 @@ handlers['food.begin'] = function* (session) {
   })
 
   address_buttons.push({
-    name: "passthrough",
+    name: "address",
     text: "New +",
     type: 'button',
-    value: "new"
+    value: "address.new"
   })
 
   var msg_json = {
@@ -254,6 +254,80 @@ handlers['food.begin'] = function* (session) {
   }
 
   replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
+}
+
+
+//
+// the user's intent is to initiate a food order
+//
+handlers['address.new'] = function* (session) {
+  kip.debug(' 🌆🏙 enter a new address');
+  session.state = {};
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  var msg_json = {
+    "text": "What's the delivery address?",
+    "attachments": [
+      {
+        "text": "Type your address below",
+        "color": "#3AA3E3",
+      }
+    ]
+  }
+
+  replyChannel.send(session, 'food.store_new_address', {type: session.origin, data: msg_json});
+}
+
+
+//mock function for now until dexter implements 
+function validateAddress(addr) {
+  //validate addr via google places api and Parse out the fields from the addr string 
+  return {
+    label: "NYC Office",
+    coordinates: [-123.34, 34.32432423],
+    address_1: addr,
+    address_2: 'Apt. 6',
+    phone_number: "212-867-5309",
+    region: "US",
+    timezone: "ET",
+    special_instructions: "Please send a raven to herald your arrival"
+  };
+}
+
+
+
+handlers['food.store_new_address'] = function* (session) {
+    var addr = session.text;
+    kip.debug('🌃🌉getting to food.store_new_address', addr);
+    //
+    //
+    //*Also store the address into mongo* 
+    //
+    //
+    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+    //validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
+    if (validateAddress(addr)) {
+      team.meta.locations.push(validateAddress(addr))
+      team.meta.chosen_location = addr;
+    } 
+    else {
+      team.meta.chosen_location = addr;
+      team.meta.locations.push(validateAddress({
+        label: "NYC Office",
+        coordinates: [-123.34, 34.32432423],
+        address_1: addr,
+        address_2: 'Apt. 6',
+        phone_number: "212-867-5309",
+        region: "US",
+        timezone: "ET",
+        special_instructions: "Please send a raven to herald your arrival"
+      }))
+    }
+    yield team.save()
+    kip.debug('###  saved new address in mongo...');
+    dsxClient.createDeliveryContext(addr, 'none', session.source.team, session.source.user);
+    var component = new ui.UIComponentFactory(session.origin).buildButtonGroup('Select your order method.', ['Delivery', 'Pickup'], null);
+    kip.debug('###  created new delivery context, will now update...');
+    replyChannel.send(session, 'food.context_update', component.render());
 }
 
 
@@ -286,6 +360,7 @@ handlers['food.choose_address'] = function* (session) {
   var component = new ui.UIComponentFactory(session.origin).buildButtonGroup(text, ['Delivery', 'Pickup'], null);
   replyChannel.send(session, 'food.delivery_or_pickup', component.render());
 }
+
 
 
 
