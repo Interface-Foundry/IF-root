@@ -44,16 +44,16 @@ SLACKSLACKSLACKSLACKSLACKSLACdo/..   `--+hNSLACKSLACKSLACKSLACKSLACKSLACKSLACKSL
 var slack = process.env.NODE_ENV === 'test' ? require('./mock_slack') : require('@slack/client');
 var co = require('co');
 var _ = require('lodash');
-
 var kip = require('kip');
 var queue = require('../queue-mongo');
 var image_search = require('../image_search');
 var search_results = require('./search_results');
 var focus = require('./focus');
 var cart = require('./cart');
+// var actions = require('./actions'); --> this runs an extra service not sure what for
 var slackConnections = {};
+var webserver = require('./webserver');
 
-var webserver = require('./webserver')
 
 //
 // slackbots
@@ -77,7 +77,6 @@ function * start() {
     var rtm = new slack.RtmClient( slackbot.bot.bot_access_token || '');
     rtm.start();
     var web = new slack.WebClient(slackbot.bot.bot_access_token || '');
-
     slackConnections[slackbot.team_id] = {
       rtm: rtm,
       web: web,
@@ -107,7 +106,7 @@ function * start() {
     rtm.on(slack.RTM_EVENTS.MESSAGE, (data) => {
 
       kip.debug('got slack message sent from user', data.user, 'on channel', data.channel);
-      kip.debug(data);
+      // kip.debug(data);
 
       var message = new db.Message({
         incoming: true,
@@ -141,14 +140,12 @@ function * start() {
           });
         });
       }
-
       // clean up the text
       message.text = data.text.replace(/(<([^>]+)>)/ig, ''); //remove <user.id> tag
       if (message.text.charAt(0) == ':') {
         message.text = message.text.substr(1); //remove : from beginning of string
       }
       message.text = message.text.trim(); //remove extra spaces on edges of string
-
       // queue it up for processing
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', data.channel, data.ts].join('.'))
@@ -164,25 +161,22 @@ kip.debug('subscribing to outgoing.slack hopefully');
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   try {
+    // console.log(outgoing);
     var message = outgoing.data;
-
-
-      kip.debug('+++++++++++');
-      kip.debug('## Session object JSON:');
-      kip.debug(message)
-      kip.debug('+++++++++++');
-
-    var bot = slackConnections[message.source.team];
+    debugger;
+    var team = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+    var team = _.get(message, 'source.team');
+    var bot = slackConnections[team];
 
     if (typeof bot === 'undefined') {
-      throw new Error('rtm client not registered for slack team ' + message.source.team);
+      kip.debug('\n\nslack.js line 174, message: ', message,'\n\n')
+      throw new Error('rtm client not registered for slack team ',message.source.team, slackConnections);
     }
 
     var msgData = {
         icon_url:'http://kipthis.com/img/kip-icon.png',
-        username:'Kip'
+        username:'Kip',
     };
-
     
     co(function*() {
 
@@ -191,27 +185,33 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack();
         })
       }
+        console.log('outgoing message', message);
+
       if (message.mode === 'food') {
-     
-                          kip.debug('COMPONENT RENDER LOOKS LIKE: ', message.reply.data);
-
-
          return bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
       }
-      // if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-      //   msgData.attachments = yield search_results(message);
-      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      // }
+      if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
+        msgData.attachments = yield search_results(message);
+        kip.debug('\n\nslack.js line 197: message.mode = shopping, message.action = results, msgData: ', msgData,'\n\n')
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
 
-      // if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
-      //   msgData.attachments = yield focus(message);
-      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      // }
+      if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
+        msgData.attachments = yield focus(message);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
 
-      // if (message.mode === 'cart' && message.action === 'view') {
-      //   msgData.attachments = yield cart(message, bot.slackbot, false);
-      //   return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
-      // }
+      if (message.mode === 'cart' && message.action === 'view') {
+        msgData.attachments = yield cart(message, bot.slackbot, false);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+      if (message.mode === 'home' && message.action === 'view') {
+        msgData.attachments = message.client_res[0];
+        kip.debug('\n\nslack.js line 212: message.mode = home, message.action = view, msgData: ',message,'\n\n');
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
 
       bot.rtm.sendMessage(message.text, message.source.channel, () => {
         outgoing.ack();

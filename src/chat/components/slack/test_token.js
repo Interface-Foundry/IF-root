@@ -1,5 +1,5 @@
 var slack = require('@slack/client');
-var tokens_to_test = ['xoxb-53104853728-c8sIZh4ylRGtbgJQqaGTsEGw'];
+var tokens_to_test = ['xoxp-81388179574-81339176883-81402657543-16dadcbcad'];
 
 tokens_to_test.map(t => {
   var rtm = new slack.RtmClient(t);
@@ -11,32 +11,28 @@ tokens_to_test.map(t => {
 
 /*
 {
-	"_id" : ObjectId("5769edb2ab7618cb31d05bcc"),
-	"access_token" : "xoxp-3088385506-20015657733-53098946244-5335128913",
+	"access_token" : "xoxp-81388179574-81339176883-81402657543-16dadcbcad",
 	"scope" : "identify,bot,commands,users:read",
-	"team_name" : "Mothership",
-	"team_id" : "T032LBBEW",
+	"team_name" : "Kip Test Bot",
+	"team_id" : "T2DBE59GW",
 	"meta" : {
-		"cart_channels" : [
-			"C032LBBFG"
-		],
+		"cart_channels" : [],
 		"weekly_status_timezone" : "America/New_York",
 		"weekly_status_time" : "4:00 PM",
 		"weekly_status_day" : "Friday",
 		"weekly_status_enabled" : true,
 		"office_assistants" : [
-			"U0L0FKBMK"
+			"U2D9Z56RZ"
 		],
 		"initialized" : true,
 		"dateAdded" : ISODate("2016-06-22T01:45:22.809Z"),
-		"addedBy" : "U0L0FKBMK"
+		"addedBy" : "U2D9Z56RZ"
 	},
 	"bot" : {
-		"bot_user_id" : "U1K32R3ME",
-		"bot_access_token" : "xoxb-53104853728-PhmpYSk5KjybTphdOd5VlGPg"
-	},
-	"__v" : 2
-}
+		"bot_user_id" : "U2D9Z56RZ",
+		"bot_access_token" : "xoxb-53104853728-c8sIZh4ylRGtbgJQqaGTsEGw"
+	}
+	}
 
 {
 	"_id" : ObjectId("56fbf8938405cf2f098e1d5c"),

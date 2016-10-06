@@ -80,7 +80,7 @@
     "telegram-bot-api": "^1.0.0",
     "urlify": "^0.3.6",
     "uuid": "^2.0.2",
-    "validator": "^5.2.0",
+    "validator": "^5.7.0",
     "vow": "^0.4.12",
     "winston": "^2.2.0",
     "ws": "^1.0.1",

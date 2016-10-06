@@ -10,4 +10,48 @@ picstitch: http://localhost:5000
 # doc2vec: http://localhost:8084
 nlp: http://104.196.51.184:8083
 nlp_rnn: http://104.196.1.204:8085
+slack:
+  client_id: "17713782326.86779276642"
+   # "17713782326.83486971505"
+  client_secret: 74d42c3d72d9e86476734d859569a9b1
+  verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
+  redirect_uri: https://c7b03901.ngrok.io/newslack
+
+globals:
+        port:                   5050
+        debug:                  True
+        service_module:         kip_services
+        log_transports:
+                  - type:         winston.transports.File
+                    filename:     kip.log
+                    level:        debug
+                    json:         false
+                  
+                  - type:         winston.transports.Console
+                    level:        info
+                    json:         false
+
+
+service_objects:
+        MongoDBClient:          
+                init_params:
+                        - username:     person
+                          password:     mypass
+                          host:         localhost
+                          port:         27050
+
+
+        DSXClient:
+                init_params:
+                          host:         64639cb4.ngrok.io
+                          port:         80
+
+
+
+#-----  experimental section, under development --
+segments:
+        snapclient:
+                port:   5050
+#-------------------------------------------------
+
 
