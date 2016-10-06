@@ -356,9 +356,8 @@ class SlackAttachment{
 		    			text: text,
 						fallback: fallback,
 						callback_id: callbackId,
-						color: color,
-						attachmentType: attachmentType,
-						actions: []
+						attachment_type: attachmentType,
+						actions: []	    
 					}
 				]
 			}
