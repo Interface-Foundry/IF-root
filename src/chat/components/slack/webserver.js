@@ -80,7 +80,6 @@ app.post('/slackaction', function (req, res) {
     // for things that i'm just going to parse for
     var simple_command = simple_action_handler(action)
     var buttonData = buttonCommand(action)
-    console.log('buttonData', buttonData)
     if (simple_command) {
       kip.debug('passing through button click as a regular text chat', simple_command.cyan)
       message = new db.Message({
