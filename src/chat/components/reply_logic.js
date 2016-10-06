@@ -1,39 +1,46 @@
 /*eslint-env es6*/
-require('kip')
+var async = require('async');
+var request = require('request');
+var co = require('co');
+var _ = require('lodash');
+var fs = require('fs');
 
-var async = require('async')
-var request = require('request')
-var co = require('co')
-var _ = require('lodash')
-var fs = require('fs')
-var banter = require('./banter.js')
-var amazon_search = require('./amazon_search.js')
-var amazon_variety = require('./amazon_variety.js')
+var banter = require("./banter.js");
+// var history = require("./history.js");
+// var search = require("./search.js");
+var amazon_search = require('./amazon_search.js');
+var picstitch = require("./picstitch.js");
+var processData = require("./process.js");
+var purchase = require("./purchase.js");
+// var init_team = require("./init_team.js");
+// var conversation_botkit = require('./conversation_botkit');
+// var weekly_updates = require('./weekly_updates');
+var kipcart = require('./cart');
+var nlp = require('../../nlp2/api');
+//set env vars
+var config = require('../../config');
+var mailerTransport = require('../../mail/IF_mail.js');
 
-var picstitch = require('./picstitch.js')
-var processData = require('./process.js')
-var purchase = require('./purchase.js')
+//load mongoose models
+var mongoose = require('mongoose');
+require('kip');
+var Message = db.Message;
+var Chatuser = db.Chatuser;
+var Slackbots = db.Slackbots;
 
-var kipcart = require('./cart')
-var nlp = require('../../nlp2/api')
-// set env vars
-var config = require('../../config')
-var mailerTransport = require('../../mail/IF_mail.js')
-// load mongoose models
-var mongoose = require('mongoose')
-var db = require('../../db')
-var Message = db.Message
-var Chatuser = db.Chatuser
-var Slackbots = db.Slackbots
-var upload = require('./upload.js')
-var email = require('./email')
-// ///////// LOAD INCOMING ////////////////
-var queue = require('./queue-mongo')
-// temp in-memory mode tracker
-var modes = {}
-logging.debug('debug ', modes)
+// var supervisor = require('./supervisor');
+var upload = require('./upload.js');
+var email = require('./email');
+/////////// LOAD INCOMING ////////////////
+var queue = require('./queue-mongo');
+var onboarding = require('./modes/onboarding')
+var settings = require('./modes/settings')
+var shopping = require('./modes/shopping')
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
+var winston = require('winston');
+
+winston.level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 // I'm sorry i couldn't understand that
 function default_reply (message) {
@@ -77,12 +84,41 @@ function typing (message) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.typing.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-// TODO: IF EXECUTE PROPERTY EXISTS, SKIP NLP PARSING
+function isCancelIntent(message) {
+  var text = message.text.toLowerCase().replace(/^[a-z]/g, '')
+  var cancelPhrases = [
+    'stop',
+    'exit',
+    'cancel',
+    'start over',
+    'quit'
+  ]
+
+  return cancelPhrases.indexOf(text) >= 0
+
+}
+
+function printMode(message) {
+  switch (message.mode) {
+    case 'shopping':
+      winston.debug('In', 'SHOPPING'.rainbow, 'mode 👚👖👗👝👛👜🏬🏪💳🛍')
+      break
+    case 'onboarding':
+      winston.debug('In', 'ONBOARDING'.green, 'mode 👋')
+      break
+    default:
+      winston.debug('no mode known such mystery 🕵 ')
+      break
+  }
+}
+
+
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
 queue.topic('incoming').subscribe(incoming => {
+
   co(function * () {
     kip.debug('🔥', incoming)
 
@@ -106,21 +142,21 @@ queue.topic('incoming').subscribe(incoming => {
       var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
       var cart_type = 'personal'
       try {
-        yield kipcart.addToCart(cart_id, cart_id, results, cart_type)
+        yield kipcart.addToCart(cart_id, cart_id, results, cart_type);
         logging.debug('added to cart')
-        send_text_reply(message, 'Okay :) added that item to cart')
+        send_text_reply(message, 'Okay :) added that item to cart');
         incoming.ack()
         timer.stop()
         return
       } catch (e) {
-        yield send_text_reply(message, 'oops error, you might need to add that manually')
+        yield send_text_reply(message, 'oops error, you might need to add that manually');
         timer.stop()
         incoming.ack()
         return
       }
     }
 
-    timer.tic('getting history')
+    timer.tic('getting history');
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -135,53 +171,70 @@ queue.topic('incoming').subscribe(incoming => {
     if (message.text) {
       message.text = message.text.replace(/[^0-9a-zA-Z.]/g, ' ')
     }
-
     timer.tic('got history')
     message._timer = timer
-
-    // fail fast
+    // fail fast if the message was not in the database
     if (message._id.toString() !== incoming.data._id.toString()) {
       throw new Error('correct message not retrieved from db')
     }
 
-    // // MODES STUFF ////
-    var user = {
-      id: incoming.data.user_id
+    // mode guessing
+    if (isCancelIntent(message)) {
+      kip.debug('cancel intent triggered')
+      message.mode = 'shopping'
     }
 
-    if (incoming.data.action == 'mode.update') {
-      modes[user.id] = 'onboarding'
-      logging.debug('UPDATED MODE!!!!')
-      incoming.ack()
-      return
+    if (message.text.indexOf('onboard') >= 0) {
+      message.mode = 'onboarding'
     }
 
-    if (!modes[user.id]) {
-      modes[user.id] = 'shopping'
+    // if (message.text.indexOf('home') >= 0) {
+    //   message.mode = 'home'
+    // }
+
+    if (!message.mode) {
+      if (_.get(message, 'history[0].mode')) {
+        message.mode = _.get(message, 'history[0].mode')
+      } else if (_.get(message, 'history[1].mode')) {
+        message.mode = _.get(message, 'history[1].mode')
+      } else {
+        message.mode = 'shopping'
+      }
     }
 
-    // ///////////////////
-    // MODE SWITCHER
-    // ///////////////////
+    printMode(message)
 
-    switch (modes[user.id]) {
+    //MODE SWITCHER
+    switch(message.mode) {
       case 'onboarding':
-        logging.debug('ONBAORDING MODE')
+        if (message.origin === 'slack') {
+          var replies = yield onboarding.handle(message)
+        } else {
+          // facebook
+          //check for valid country
+          //turn this into a function
+          if (text == 'Singapore' || text == 'United States') {
+            winston.debug('SAVING TO DB')
+            replies = ['Saved country!'];
 
-        // check for valid country
-        // turn this into a function
-        if (text == 'Singapore' || text == 'United States') {
-          logging.debug('SAVING TO DB')
-          replies = ['Saved country!']
-
-          // access onboard template per source origin!!!!
-          modes[user.id] = 'shopping'
-        }else {
-          replies = ['Didnt understand, please choose a country thx']
-          logging.debug('Didnt understand, please choose a country thx')
+            //access onboard template per source origin!!!!
+            modes[user.id] = 'shopping';
+          } else {
+            replies = ['Didnt understand, please choose a country thx'];
+            winston.debug('Didnt understand, please choose a country thx')
+          }
         }
-        break
-      // default Kip Mode shopping
+      break;
+     case 'home':
+        // modes[user.id] = 'home';
+        var replies = yield settings.handle(message);
+        kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
+        break;
+     case 'team':
+        var replies = yield settings.handle(message);
+        kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
+        break;
+      //default Kip Mode shopping
       default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
@@ -193,6 +246,7 @@ queue.topic('incoming').subscribe(incoming => {
         // not a simple reply, do NLP
         if (!replies || replies.length === 0) {
           timer.tic('getting nlp response')
+
 
           logging.info('👽 passing to nlp: ', message.text)
 
@@ -220,9 +274,9 @@ queue.topic('incoming').subscribe(incoming => {
     }
 
     kip.debug('num replies', replies.length)
-    timer.tic('saving message')
+    timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)
-    timer.tic('done saving message')
+    timer.tic('done saving message', message)
     timer.tic('saving replies')
     yield replies.map(r => {
       if (r.save) {
@@ -234,7 +288,7 @@ queue.topic('incoming').subscribe(incoming => {
     timer.tic('done saving replies')
     timer.tic('sending replies')
     yield replies.map((r, i) => {
-      kip.debug('reply', r.mode, r.action)
+      kip.debug('\n\n\n🤖 🤖 🤖 reply  ', r, '\n\n\n')
       queue.publish('outgoing.' + r.origin, r, message._id + '.reply.' + i)
     })
     incoming.ack()
@@ -249,7 +303,6 @@ function * simple_response (message) {
 
   // check for canned responses/actions before routing to NLP
   // this adds mode and action to the message
-  // logging.debug('\n\n\n\n\n\nBEFORE BANTER: ', message)
   var reply = banter.checkForCanned(message)
 
   kip.debug('prefab reply from banter.js', reply)
@@ -300,6 +353,14 @@ function * simple_response (message) {
       message.execute.push({
         mode: 'shopping',
         action: 'more'
+      })
+      break
+     case 'search.home':
+      message.mode = 'home'
+      message.action = 'settings'
+      message.execute.push({
+        mode: 'home',
+        action: 'settings'
       })
       break
     case 'purchase.remove':
@@ -382,6 +443,8 @@ function * nlp_response (message) {
   }
 }
 
+var handlers = shopping.handlers;
+
 // do the things
 function execute (message) {
   kip.debug('exec', message.execute)
@@ -445,7 +508,7 @@ handlers['item.picked'] = function * (message, item) {
 
 handlers['shopping.initial'] = function * (message, exec) {
   typing(message)
-  message._timer.tic('starting amazon_search')
+  message._timer.tic('starting amazon_search');
   // NLP classified this query incorrectly - lets remove this after NLP sorts into shopping initial 100%
   if (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) {
     var fake_exec = {
@@ -454,14 +517,13 @@ handlers['shopping.initial'] = function * (message, exec) {
       params: { query: message.text.split(' but ')[1]}
     }
   }
-  var exec = fake_exec ? fake_exec : exec
+  var exec = fake_exec ? fake_exec : exec;
   // end of patch
 
-  var results = yield amazon_search.search(exec.params, message.origin)
-  kip.debug('!1', exec)
+  var results = yield amazon_search.search(exec.params, message.origin);
+  kip.debug('!1', exec);
 
   if (results == null || !results) {
-    logging.debug('-1')
     return new db.Message({
       incoming: false,
       thread_id: message.thread_id,
@@ -639,7 +701,6 @@ handlers['shopping.modify.all'] = function * (message, exec) {
   }
   exec.params.query = old_params.query
   if (!exec.params.query) {
-    logging.debug('-3.5')
 
     return new db.Message({
       incoming: false,
@@ -654,7 +715,6 @@ handlers['shopping.modify.all'] = function * (message, exec) {
 
   var results = yield amazon_search.search(exec.params, message.origin)
   if (results == null || !results) {
-    kip.debug('-4')
 
     return new db.Message({
       incoming: false,
@@ -702,7 +762,6 @@ handlers['shopping.modify.one'] = function * (message, exec) {
       }
     }
   }
-  kip.debug('!4', exec)
   // modify the params and then do another search.
   // kip.debug('itemAttributes_Title: ', old_results[exec.params.focus -1].ItemAttributes[0].Title)
   if (exec.params.type === 'price') {
@@ -710,7 +769,6 @@ handlers['shopping.modify.one'] = function * (message, exec) {
     if (exec.params.param === 'less') {
       exec.params.max_price = max_price * 0.8
     } else if (exec.params.param === 'more') {
-      kip.log('wow someone wanted something more expensive')
       exec.params.min_price = max_price * 1.1
     }
   }
@@ -728,7 +786,6 @@ handlers['shopping.modify.one'] = function * (message, exec) {
   // throw new Error('this type of modification not handled yet: ' + exec.params.type)
   }
   if ((results == null || !results) && exec.params.type !== 'price') {
-    logging.debug('-5')
 
     return new db.Message({
       incoming: false,
