@@ -1,5 +1,5 @@
 var fs = require('fs')
-var kip = require('kip')  
+var kip = require('kip')
 //
 // "Actions" are what slack calls buttons
 //
@@ -15,13 +15,10 @@ var _ = require('lodash')
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded())
 app.use(bodyParser.json())
-<<<<<<< HEAD
-=======
 // app.listen(3000, function(e) {
 //   if (e) { console.error(e) }
 //   console.log('chat app listening on port 8000 🌏 💬')
 // })
->>>>>>> 9d213ebaa87ddaba811fd14eaaf66344092d9180
 
 /**
  * handle actions which can be simply translated into text commands, like "2 but cheaper"
@@ -53,10 +50,10 @@ function simple_action_handler (action) {
       //
 
     //
-    // Other buttons
-    //
-    // case 'home':
-    //   return 'home'
+      // Other buttons
+      //
+      // case 'home':
+      //   return 'home'
 
     case 'delivery_btn':
       return 'delivery'
@@ -65,7 +62,6 @@ function simple_action_handler (action) {
   }
 }
 
-<<<<<<< HEAD
 function buttonCommand (action) {
   if (_.includes(action.name, '.')) {
     return {
@@ -142,76 +138,6 @@ app.post('/slackaction', function (req, res) {
               })
             }
           })
-=======
-//incoming slack action
-app.post('/slackaction', function(req, res) {
-  
-  kip.debug('incoming action')
-    if (req.body && req.body.payload) {
-      var parsedIn = JSON.parse(req.body.payload);
-      var action = parsedIn.actions[0];
-      debugger;
-      kip.debug(action.name.cyan, action.value.yellow)
-      // for things that i'm just going to parse for
-      var simple_command = simple_action_handler(action);
-      if (simple_command) {
-        kip.debug('passing through button click as a regular text chat', simple_command.cyan)
-        var message = new db.Message({
-          incoming: true,
-          thread_id: parsedIn.channel.id,
-          original_text: simple_command,
-          text: simple_command,
-          user_id: parsedIn.user.id,
-          origin: 'slack',
-          source: parsedIn 
-        });
-        // inject source.team and source.user because fuck the fuck out of slack message formats
-        message.source.team = message.source.team.id
-        message.source.user = message.source.user.id
-        message.source.channel = message.source.channel.id
-        message.save().then(() => {
-          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
-
-      } else {
-        switch (action.name) {
-         case 'home':
-          // kip.debug('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhit home button : webserver.js line 87\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\'');
-          var parsedIn = JSON.parse(req.body.payload);
-          var action = parsedIn.actions[0];
-          var message = new db.Message({
-            incoming: true,
-            thread_id: parsedIn.channel.id,
-            original_text: 'home',
-            text: 'home',
-            user_id: parsedIn.user.id,
-            origin: 'slack',
-            source: parsedIn,
-            mode:'home',
-            action:'view'
-          });
-          message.save().then(() => {
-            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-          })
-          break;
-
-        case 'additem':
-            // adds the item to the cart the right way, but for speed we return a hacked message right away
-            var updatedMessage = parsedIn.original_message;
-            var priceDifference = 0;
-            updatedMessage.attachments.map(a => {
-              if (a.callback_id === parsedIn.callback_id) {
-                priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-                a.text = a.text.replace(/\d+$/, replacement => {
-                  return parseInt(replacement) + 1;
-                })
-              } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-                a.text = a.text.replace(/\$[\d.]+/, function(total) {
-                  return '$' + (parseFloat(total.substr(1)) + priceDifference).toFixed(2);
-                })
-              }
-            })
->>>>>>> 9d213ebaa87ddaba811fd14eaaf66344092d9180
 
           co(function * () {
             var teamCart = yield kipcart.getCart(parsedIn.team.id)
