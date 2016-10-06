@@ -119,7 +119,7 @@ function chooseRestaurant (restaurants, orderBy) {
   var viable = restaurants.slice(0, 3)
   var attachments = [buildRestaurantAttachment(viable[0]), buildRestaurantAttachment(viable[1]), buildRestaurantAttachment(viable[2])]
   var res = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote',
+    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': attachments
   }
   res.attachments.push({
@@ -173,7 +173,7 @@ function buildRestaurantAttachment (restaurant) {
     'attachment_type': 'default',
     'actions': [
       {
-        'name': 'choose',
+        'name': 'choose.restaurant',
         'text': 'choose',
         'type': 'button',
         'value': restaurant.id
