@@ -159,7 +159,10 @@ queue.topic('incoming').subscribe(incoming => {
     }
     session.save();
     incoming.ack();
-  }).catch(kip.err);
+  }).catch(e => {
+    kip.err(e)
+    incoming.ack();
+  });
 });
  
 //
@@ -227,7 +230,7 @@ handlers['food.begin'] = function* (session) {
     ]
   }
 
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
+  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json});
 }
 
 
@@ -236,17 +239,7 @@ handlers['food.begin'] = function* (session) {
 // User decides what address they are ordering for. could be that they need to make a new address
 //
 handlers['food.choose_address'] = function* (session) {
-  if (session.text === 'address.new' || session.text === 'new' ) {
-    kip.debug('\n\nwhat is love, what is life, what is session.mode: ', session.mode, 'what is session.action: ', session.action, 'what is session.text: ', session.text)
-    // session.mode = 'address'
-    // session.action = 'new'
-    return yield handlers['address.new'](session)
-  }
-    if (session.text === 'address.confirm' || session.text === 'confirm' ) {
-    // new message yay
-    return handlers['address.confirm'](session)
-  }
-
+  console.log(session.text)
   try {
     var location = JSON.parse(session.text)
   } catch (e) {
@@ -273,6 +266,112 @@ handlers['food.context_update'] = function * (session) {
 
   var fulfillmentMethod = session.text
 
+
+
+//
+// the user's intent is to create a new address
+//
+handlers['address.new'] = function* (session) {
+
+  kip.debug(' 🌆🏙 enter a new address');
+  // session.state = {};
+  var msg_json = {
+    "text": "What's the delivery address?",
+    "attachments": [
+      {
+        "text": "Type your address below",
+        "color": "#3AA3E3",
+      }
+    ]
+  }
+  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json});
+}
+
+
+//
+// the user seeks to confirm their possibly updated/validated address
+//
+handlers['address.confirm'] = function* (session) {
+  kip.debug('🌆🏙 validate an address', session.text);
+  var addr = session.text
+  var location = yield validateAddress(addr)
+  var prompt = "Is " + location.address_1 + ' your address?'
+  var msg_json = {
+    "text": prompt,
+    "attachments": [
+      {
+        "mrkdwn_in": [
+                 "text"
+        ],
+        "fallback": "You are unable to confirm.",
+        "callback_id": "address_confirm",
+        "color": "#3AA3E3",
+        "attachment_type": "default",
+        "actions": [
+           {
+              name: "passthrough",
+              text: "Confirm",
+              type: 'button',
+              value: JSON.stringify(location)
+            },
+           {
+              name: "no_btn",
+              text: "Edit",
+              type: 'button',
+              value: 'no'
+           }
+        ]
+      },
+    ]
+  };
+  replyChannel.send(session, 'address.save', {type: session.origin, data: msg_json});
+}
+
+
+//mock function for now until dexter implements
+function * validateAddress(addr) {
+  //validate addr via google places api and Parse out the fields from the addr string
+  return {
+    label: "",
+    coordinates: [-123.34, 34.32432423],
+    address_1: addr,
+    address_2: 'Apt. 6',
+    phone_number: "212-867-5309",
+    region: "US",
+    timezone: "ET",
+    special_instructions: "Please send a raven to herald your arrival"
+  };
+}
+
+handlers['address.save'] = function* (session) {
+  if (session.text === 'no') {
+    return handlers['food.begin'](session)
+  }
+  var location = JSON.parse(session.text)
+    //
+    //
+    //*Also store the address into mongo*
+    //
+    //
+    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+
+    if (location) {
+      team.meta.locations.push(location)
+      team.meta.chosen_location = location;
+    }
+    else {
+
+      // todo error
+      throw new Error('womp bad address')
+    }
+    yield team.save()
+    session.text = JSON.stringify(location)
+    return yield handlers['food.choose_address'](session)
+}
+
+
+handlers['food.delivery_or_pickup'] = function* (session) {
+  var fulfillmentMethod = session.text;
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
   var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 

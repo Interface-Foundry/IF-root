@@ -210,9 +210,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      bot.rtm.sendMessage(message.text, message.source.channel, () => {
-        outgoing.ack()
-      })
+      bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data)
+      outgoing.ack()
     }).then(() => {
       outgoing.ack()
     }).catch(e => {
