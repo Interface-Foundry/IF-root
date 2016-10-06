@@ -199,9 +199,6 @@ function * ExistingUser () {
   var user = new User({
     id: 'bamf_yolo'
   })
-(??)  
-(??)  return user;
-
   return user
 }
 
@@ -209,7 +206,6 @@ function * Admin () {
   var user = new User({
     id: 'admin_yolo'
   })
-
   return user
 }
 
