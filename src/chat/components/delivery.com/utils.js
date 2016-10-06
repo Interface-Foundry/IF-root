@@ -322,9 +322,9 @@ function askUserForCuisineTypes (cuisines, user, adminName) {
     .color('#3AA3E3')
     .ts(Date.now())
   _.forEach(s, function (cuisineName) {
-    a.button().name(cuisineName).value(cuisineName).text(cuisineName).end()
+    a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
   })
-  a.button().name('Nothing').value('Nothing').text('Nothing').style('danger').end()
+  a.button().name('food.admin.restaurant.pick').value('nothingCuisine').text('Nothing').style('danger').end()
   return res.json()
 }
 
@@ -362,6 +362,29 @@ function confirmRestaurant (restaurantName) {
   return res
 }
 
+var userFoodPreferencesPlaceHolder = {
+  text: 'Here we would ask user for preferences if they didnt have it',
+  fallback: 'You are unable to confirm preferences',
+  callback_id: 'confirm.user.preferences',
+  color: 'grey',
+  attachment_type: 'default',
+  attachments: [{
+    actions: [{
+      'name': 'food.user.poll',
+      'value': 'food.user.poll',
+      'text': 'Confirm',
+      'type': 'button'
+    },
+      {
+        'name': 'food.user.preference.cancel',
+        'value': 'food.user.preference.cancel',
+        'text': 'Cancel',
+        'type': 'button'
+      }]
+  }]
+
+}
+
 module.exports.askUserForCuisineTypes = askUserForCuisineTypes
 module.exports.chooseRestaurant = chooseRestaurant
 module.exports.createSearchRanking = createSearchRanking
@@ -370,6 +393,7 @@ module.exports.initiateFoodMessage = initiateFoodMessage
 module.exports.sortMerchantsByDistance = sortMerchantsByDistance
 module.exports.sortMerchantsByRating = sortMerchantsByRating
 module.exports.confirmRestaurant = confirmRestaurant
+module.exports.userFoodPreferencesPlaceHolder = userFoodPreferencesPlaceHolder
 
 // former quick testing stuff
 if (!module.parent) {

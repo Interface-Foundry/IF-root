@@ -99,34 +99,36 @@ User.prototype.goto = function (step) {
   var steps = {
     // no clue how s4 should be
     S4: function * () {
-      // var msg = require('./confirm_user_poll')
-      // var message = {
-      //   incoming: false,
-      //   thread_id: user.dm,
-      //   user_id: user.id,
-      //   origin: 'slack',
-      //   source: _.merge({}, msg, {
-      //     type: 'message',
-      //     user: 'kip_yolo',
-      //     team: 'yolo',
-      //     ts: (+new Date()).toString()
-      //   }),
-      //   mode: 'food',
-      //   action: 'user.preferences'
-      // }
-      // yield user.db.collection('messages').insert(message)
+      var msg = require('./confirm_user_poll')
+      var message = {
+        incoming: false,
+        thread_id: user.dm,
+        user_id: user.id,
+        origin: 'slack',
+        source: _.merge({}, msg, {
+          type: 'message',
+          user: 'kip_yolo',
+          team: 'yolo',
+          ts: (+new Date()).toString()
+        }),
+        mode: 'food',
+        action: 'user.preferences'
+      }
+      yield user.db.collection('messages').insert(message)
       var res = yield user.text('food.user.preferences')
       return res
     },
 
     S5: function * () {
       var res = yield steps.S4()
-      res = yield user.tap(res, 0, 0)
-      return response
+      return res
     },
 
     S6: function * () {
       // setup multiple votes in before, so not sure what this will entail
+      var res = yield steps.S5()
+      res = yield user.tap(res, 0, 0)
+      return res
     },
 
     S7: function * () {

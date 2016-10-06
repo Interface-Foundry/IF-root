@@ -117,7 +117,11 @@ function send_text_reply (message, text) {
 //
 queue.topic('incoming').subscribe(incoming => {
   co(function * () {
-    console.log('>>>'.yellow, incoming.data.text.yellow)
+    if (incoming.data.text) {
+      console.log('>>>'.yellow, incoming.data.text.yellow)
+    } else {
+      console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
+    }
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -136,8 +140,8 @@ queue.topic('incoming').subscribe(incoming => {
       throw new Error('correct message not retrieved from db')
     }
     if (history[1]) {
-      session.mode = history[1].mode
-      session.action = history[1].action
+      session.mode = history[0].mode
+      session.action = history[0].action
       session.route = session.mode + '.' + session.action
       session.prevMode = history[1].mode
       session.prevAction = history[1].action
@@ -306,44 +310,40 @@ handlers['food.item.option'] = function * (message) {}
 
 // check for user preferences/diet/etc, skipping for now
 handlers['food.user.preferences'] = function * (session) {
-  // var teamMembers = yield db.groups.find({team_id: sessag.source.team, is_bot: false})
-  var msgJson = {
-    text: 'Here we would ask user for preferences if they didnt have it',
-    fallback: 'You are unable to confirm preferences',
-    callback_id: 'confirm.user.preferences',
-    color: 'grey',
-    attachment_type: 'default',
-    attachments: [{
-      actions: [{
-        'name': 'Confirm',
-        'text': 'Confirm',
-        'type': 'button',
-        'value': 'confirmPreferences'
-      },
-        {
-          'name': 'Cancel',
-          'text': 'Cancel',
-          'type': 'button',
-          'value': 'cancelPreferences'
-        }]
-    }]
+  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false})
+  if (process.env.NODE_ENV === 'test') {
+    teamMembers = [teamMembers[0]]
   }
-  replyChannel.send(session, 'food.user.poll', {type: 'slack', data: msgJson})
+  teamMembers.map(function (member) {
+    var userPreferences = {
+      mode: 'food',
+      action: 'user.poll',
+      thread_id: member.dm,
+      origin: session.origin,
+      source: session.source,
+      res: utils.userFoodPreferencesPlaceHolder
+    }
+    userPreferences.source.user = member.id
+    userPreferences.source.channel = member.dm
+    replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
+  })
 }
 
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // until cuisines is returned from s1-s3
-  console.log('got to s5')
   var cuisines = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/cuisinesAvailable.json'), 'utf8'))
+
   var teamId = message.source.team
   var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+  if (process.env.NODE_ENV === 'test') {
+    teamMembers = [teamMembers[0]]
+  }
 
   // error with mock slack not being able to get all messages
-  teamMembers = [teamMembers[0]]
   var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
   teamMembers.map(function (member) {
-    var userPolling = {
+    var resp = {
       mode: 'food',
       action: 'user.poll',
       thread_id: member.dm,
@@ -351,19 +351,26 @@ handlers['food.user.poll'] = function * (message) {
       source: message.source,
       res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
     }
-    userPolling.source.user = member.id
-    userPolling.source.channel = member.dm
-    replyChannel.send(userPolling, 'food.admin.restaurant.pick', userPolling.res)
+    resp.source.user = member.id
+    resp.source.channel = member.dm
+    replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   // var results = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'extra/results.json'), 'utf8'))
-  var results = dsxClient._get('context', {team_id: message.source.team, user_id: message.source.user_id})
-  console.log(results)
-  // var merchants = dsxClient.getNearbyRestaurants(results.address)
-  var v = yield db.messages.find({mode: 'food', action: 'user.poll', 'data.voteID': 'XYZXYZ'})
+  var teamId = message.source.team
+  var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+  var numOfResponsesWaitingFor = teamMembers.length
+  var v = yield db.messages.find({mode: 'food', action: 'admin.restaurant.pick', 'data.voteID': 'XYZXYZ'})
   var votes = utils.getVotesFromMembers(v)
+  if (votes.length < numOfResponsesWaitingFor) {
+    logging.error('waiting for more responses have, votes: ', votes.length)
+    logging.error('need', numOfResponsesWaitingFor)
+    return
+  }
+  var results = dsxClient._get('context', {team_id: message.source.team, user_id: message.source.user_id})
+  // var merchants = dsxClient.getNearbyRestaurants(results.address)
   var viableRestaurants = utils.createSearchRanking(results, votes)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
@@ -374,8 +381,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     source: message.source,
     res: responseForAdmin
   }
-  sendIt(resp)
-// var merchants = utils.createSearchRanking(results, votes)
+  replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
