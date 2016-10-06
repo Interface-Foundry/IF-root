@@ -148,7 +148,7 @@ queue.topic('incoming').subscribe(incoming => {
       session.prevRoute = session.prevMode + '.' + session.prevAction
     }
     var route = yield getRoute(session);
-    kip.debug('route', route);
+    kip.debug('route'.cyan, route.cyan);
     // session.mode = 'food';
     // session.action = route.replace(/^food./, '');
     if (handlers[route]) {
@@ -240,7 +240,7 @@ handlers['food.choose_address'] = function* (session) {
     kip.debug('\n\nwhat is love, what is life, what is session.mode: ', session.mode, 'what is session.action: ', session.action, 'what is session.text: ', session.text)
     // session.mode = 'address'
     // session.action = 'new'
-    return handlers['address.new'](session)
+    return yield handlers['address.new'](session)
   }
     if (session.text === 'address.confirm' || session.text === 'confirm' ) {
     // new message yay
