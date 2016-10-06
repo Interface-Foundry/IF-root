@@ -67,7 +67,7 @@ class UserChannel {
       })
       newSession['reply'] = data
       newSession.mode = nextHandlerID.split('.')[0]
-      newSession.action = nextHandlerID.split('.')[1]
+      newSession.action = nextHandlerID.split('.').slice(1).join('.')
       kip.debug('inside channel.send(). Session mode is ' + newSession.mode)
       kip.debug('inside channel.send(). Session action is ' + newSession.action)
       var self = this
@@ -209,6 +209,48 @@ var handlers = {}
 
 handlers['food.sys_error'] = function* (session){
   kip.debug('chat session halted.');
+}
+
+handlers['food.exit'] = function * (message) {
+  var msg_json = {
+    "text": 'Are you sure you don\'t want to order food?',
+    "attachments": [
+      {
+        "mrkdwn_in": [
+                 "text"
+        ],
+        "fallback": "Are you sure you don't want to order food?",
+        "callback_id": "leave_confirm",
+        "color": "#3AA3E3",
+        "attachment_type": "default",
+        "actions": [
+           {
+              name: "passthrough",
+              text: "Confirm",
+              type: 'button',
+              value: 'yes'
+            },
+           {
+              name: "no_btn",
+              text: "Edit",
+              type: 'button',
+              value: 'no'
+           }
+        ]
+      },
+    ]
+  };
+  replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
+}
+
+handlers['food.exit.confirm'] = function * (message) {
+  if (message.text === 'yes') {
+    replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
+  } else {
+    debugger;
+    // TODO get the last known route somehow and use it instead of shopping.initial
+    replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'uh oh my brain broke'}})
+  }
 }
 
 //
@@ -551,11 +593,11 @@ handlers['food.delivery_or_pickup'] = function* (session) {
                 },
 
                 {
-                    "name": "exit_btn",
+                    "name": "passthrough",
                     "text": "× Cancel",
 
                     "type": "button",
-                    "value": "exit"
+                    "value": "food.exit"
                 }
             ]
         }
@@ -593,10 +635,10 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'value': 'team.members'
           },
           {
-            'name': 'no_btn',
+            'name': 'passthrough',
             'text': 'Cancel',
             'type': 'button',
-            'value': 'chess'
+            'value': 'food.exit'
           }
         ]
       }
