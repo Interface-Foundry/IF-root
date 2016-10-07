@@ -53,6 +53,20 @@ class UserChannel {
   constructor (queue) {
     this.queue = queue
     this.send = function (session, nextHandlerID, data, replace) {
+      // make sure all attachments have a callback_id
+      if (_.get(data, 'attachments', []).length > 0) {
+        data.attachments.map(a => {
+          a.callback_id = a.callback_id || 'default'
+        })
+      }
+
+      // because javascript is not statically typed
+      if (_.get(data, 'data.attachments', []).length > 0) {
+        data.data.attachments.map(a => {
+          a.callback_id = a.callback_id || 'default'
+        })
+      }
+
       var newSession = new db.Message({
         incoming: false,
         thread_id: session.thread_id,
@@ -311,13 +325,13 @@ handlers['food.choose_address'] = function* (session) {
     var foodSession = new db.Delivery({
       // probably will want team_members to come from weekly_updates getTeam later
       // will need to update later
-      team_id: session.source.team_id,
+      team_id: session.source.team,
       team_members: teamMembers,
       chosen_location: {addr: location},
       convo_initiater: session.source.user
     })
 
-    foodSession.save()
+    yield foodSession.save()
     //
     // START OF S2
     //
