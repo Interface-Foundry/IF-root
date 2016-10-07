@@ -294,62 +294,72 @@ handlers['food.begin'] = function* (session) {
 handlers['food.choose_address'] = function* (session) {
   if (_.get(session, 'source.response_url')) {
     // slack action button tap
-  try {
-    var location = JSON.parse(session.text);
-  } catch (e) {
-    var location = {address_1: session.text};
-    kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
-    // TODO handle the case where they type a new address without clicking the "new" button
-  }
+    try {
+      var location = JSON.parse(session.text)
+    } catch (e) {
+      var location = {address_1: session.text}
+      kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
+      // TODO handle the case where they type a new address without clicking the "new" button
+    }
     var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
     team.meta.chosen_location = location
     kip.debug('saving location', location.address_1)
     yield team.save()
     //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
 
+    var teamMembers = yield db.Chatusers.find({team_id: session.source.team}).exec()
+    var foodSession = new db.Delivery({
+      // probably will want team_members to come from weekly_updates getTeam later
+      // will need to update later
+      team_id: session.source.team_id,
+      team_members: teamMembers,
+      chosen_location: {addr: location},
+      convo_initiater: session.source.user
+    })
+
+    foodSession.save()
     //
     // START OF S2
     //
-    var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+    var text = 'Cool! You selected \`${location.address_1}\`. Delivery or Pickup?'
     var msg_json = {
-        "attachments": [
+      'attachments': [
+        {
+          'title': '',
+          'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+        },
+        {
+          'mrkdwn_in': [
+            'text'
+          ],
+          'text': text,
+          'fallback': 'You did not choose a fulfillment method :/',
+          'callback_id': 'wopr_game',
+          'color': '#3AA3E3',
+          'attachment_type': 'default',
+          'actions': [
             {
-              "title": "",
-              "image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
+              'name': 'passthrough',
+              'text': 'Delivery',
+              'type': 'button',
+              'value': 'food.delivery_or_pickup'
             },
             {
-                "mrkdwn_in": [
-                   "text"
-                ],
-                "text": text,
-                "fallback": "You did not choose a fulfillment method :/",
-                "callback_id": "wopr_game",
-                "color": "#3AA3E3",
-                "attachment_type": "default",
-                "actions": [
-                    {
-                        "name": "passthrough",
-                        "text": "Delivery",
-                        "type": "button",
-                        "value": "food.delivery_or_pickup"
-                    },
-                    {
-                        "name": "passthrough",
-                        "text": "Pickup",
-                        "type": "button",
-                        "value": "food.delivery_or_pickup"
-                    },
-                    {
-                        "name": "passthrough",
-                        "text": "< Change Address",
-                        "type": "button",
-                        "value": "address.change"
-                    }
-                ]
+              'name': 'passthrough',
+              'text': 'Pickup',
+              'type': 'button',
+              'value': 'food.delivery_or_pickup'
+            },
+            {
+              'name': 'passthrough',
+              'text': '< Change Address',
+              'type': 'button',
+              'value': 'address.change'
             }
-        ]
-    };
-
+          ]
+        }
+      ]
+    }
     replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: msg_json})
   } else {
     throw new Error('this route does not handle text input')
@@ -696,7 +706,8 @@ handlers['food.user.poll'] = function * (message) {
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var teamId = message.source.team
-  var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+  var foodSession = yield db.Delivery.findOne({team_id: teamId})
+  var teamMembers = foodSession.team_members
   var numOfResponsesWaitingFor = teamMembers.length
   var v = yield db.messages.find({mode: 'food', action: 'admin.restaurant.pick', 'data.voteID': 'XYZXYZ'})
   var votes = utils.getVotesFromMembers(v)
@@ -705,9 +716,11 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     logging.error('need', numOfResponsesWaitingFor)
     return
   }
-  var results = dsxClient._get('context', {team_id: message.source.team, user_id: message.source.user_id})
+  // var results = api.searchNearby({addr: foodSession.addr})
+  var address_to_use = foodSession.addr
+  console.log('using this addres', address_to_use)
   // var merchants = dsxClient.getNearbyRestaurants(results.address)
-  var viableRestaurants = utils.createSearchRanking(results, votes)
+  var viableRestaurants = utils.createSearchRanking(address_to_use, votes)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',
@@ -740,7 +753,6 @@ function sendIt (resp) {
   resp.text = JSON.stringify(resp.res)
   queue.publish('outgoing.' + resp.origin, resp, resultsMessage._id + '.reply.' + resp.action)
 }
-
 
 //mock function for now until dexter implements
 function validateAddress(addr) {

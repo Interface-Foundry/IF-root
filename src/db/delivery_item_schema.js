@@ -1,38 +1,37 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 /**
  * Food item on order from Delivery.com
  */
 var deliveryItem = mongoose.Schema({
-    cart_id: mongoose.Schema.ObjectId,
+  cart_id: mongoose.Schema.ObjectId,
 
-    item_label: String,
+  item_label: String,
 
-    name: String,
+  name: String,
 
-    laundry_type: String,
+  laundry_type: String,
 
-    item_key: Number,
+  item_key: Number,
 
-    price: Number,
+  price: Number,
 
-    price_compare_item: Boolean,
+  price_compare_item: Boolean,
 
-    anonymous_id: String,
+  anonymous_id: String,
 
-    images: [String],
+  images: [String],
 
-    id: String,
+  id: String,
 
-    type: String,
+  type: String,
 
     // options: [deliveryItem],
 
-    quantity: Number
+  quantity: Number
 
-});
+})
 
+var DeliveryItem = mongoose.model('DeliveryItem', deliveryItem)
 
-var DeliveryItem = mongoose.model('DeliveryItem', deliveryItem);
-
-module.exports = DeliveryItem;
+module.exports = DeliveryItem

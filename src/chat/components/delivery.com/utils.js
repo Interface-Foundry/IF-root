@@ -9,9 +9,9 @@ var sm = require('slack-message-builder')
 var async = require('async')
 
 var weekly_updates = require('../weekly_updates.js')
-// var api = require('./api-wrapper.js')
+var api = require('./api-wrapper.js')
 
-function * initiateDeliverySession (slackbot) {
+function * initiateDeliverySession (session) {
   return new db.Delivery({
     teamMembers: weekly_updates.getTeam(slackbot),
     chosen_location: {},
@@ -273,8 +273,10 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function createSearchRanking (results, votes) {
+function createSearchRanking (address, votes) {
   // filter results based on what results want
+  var params = {addr: address}
+  var results = api.searchNearby(params)
   var merchants = (_.get(results, 'merchants')) ? results.merchants : merchants
   var eligible = []
   _.forEach(votes, function (v) {

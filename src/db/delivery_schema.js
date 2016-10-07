@@ -4,12 +4,14 @@ var mongoose = require('mongoose')
  * Save delivery sessions
  */
 var deliverySchema = mongoose.Schema({
-  teamMembers: [],
+  session_id: mongoose.Schema.ObjectId,
+  team_id: String,
+  team_members: [],
   chosen_location: {},
   possible_locations: [],
 
   // admin or whomever to use for picking restaurant and various other
-  convoInitiater: String,
+  convo_initiater: String,
   fulfillment_method: String,
   time_started: {
     type: Date,
@@ -18,6 +20,7 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {},
+  votes: [],
   conversations: {}
 })
 
