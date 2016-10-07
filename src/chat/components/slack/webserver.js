@@ -245,7 +245,9 @@ app.post('/slackaction', function (req, res) {
     // sends back original chat
     if (parsedIn.original_message) {
       var stringOrig = JSON.stringify(parsedIn.original_message)
-      res.send(parsedIn.original_message)
+      var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
+      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+      res.send(JSON.parse(stringOrig))
     } else {
       console.error('slack buttons broke, need a response_url')
       res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)

@@ -347,7 +347,7 @@ handlers['food.choose_address'] = function* (session) {
                     },
                     {
                         "name": "passthrough",
-                        "text": "Change Address",
+                        "text": "< Change Address",
                         "type": "button",
                         "value": "address.change"
                     }
