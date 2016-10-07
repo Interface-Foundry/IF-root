@@ -4,41 +4,21 @@ var buttons = function(num) {
   return [
     {
       "name": "addcart",
-      "text": "⭐ add to cart",
+      "text": "Add to Cart",
       "style": "primary",
       "type": "button",
       "value": num
-      // "confirm": {
-      //   "title": "Are you sure?",
-      //   "text": "This will approve the request.",
-      //   "ok_text": "Yes",
-      //   "dismiss_text": "No"
-      // }
     },
     {
       "name": "cheaper",
-      "text": "💎 cheaper",
-      "style": "default",
-      "type": "button",
-      "value": num
-    },
-    {
-      "name": "similar",
-      "text": "⚡ similar",
-      "style": "default",
-      "type": "button",
-      "value": num
-    },
-    {
-      "name": "modify",
-      "text": "🌀 modify",
+      "text": "Find Cheaper",
       "style": "default",
       "type": "button",
       "value": num
     },
     {
       "name": "moreinfo",
-      "text": "💬 info",
+      "text": "More Info",
       "style": "default",
       "type": "button",
       "value": num
@@ -63,8 +43,7 @@ var emojis = {
 // Generate the slack reponse for the search results
 //
 function* results(message) {
-  var amazon = JSON.parse(message.amazon);
-  console.log(amazon);
+  var amazon = JSON.parse(message.amazon)
 
   var results = amazon.map((r, i) => {
     return {
@@ -72,9 +51,37 @@ function* results(message) {
       color: '#45a5f4',
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
-      fallback: 'Search Results'
+      fallback: 'Search Results',
+      callback_id: message._id.toString() + '.' + i,
+      actions: buttons(i+1)
     }
   });
+
+  results.push({
+    fallback: 'Search Results',
+    callback_id: 'fwefjiwfj33',
+    actions: [{
+      name: "more",
+      text: "See More Result",
+      style: "default",
+      type: "button",
+      value: "more"
+    }, 
+    {
+      name: "home",
+      text: "Settings",
+      style: "default",
+      type: "button",
+      value: "home",
+    },
+    {
+      name: "home",
+      text: "Team Members",
+      style: "default",
+      type: "button",
+      value: "team",
+    }]
+  })
 
   return results;
 }
