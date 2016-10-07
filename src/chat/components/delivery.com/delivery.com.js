@@ -608,6 +608,137 @@ handlers['food.delivery_or_pickup'] = function* (session) {
   replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b});
 }
 
+handlers['food.restaurants.list'] = function * (message) {
+  // here's some mock stuff for now
+  var msg_json = {
+    "text": "Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?",
+    "attachments": [
+        {
+            "mrkdwn_in": [
+               "text"
+            ],
+            "text": "",
+            "image_url":"http://i.imgur.com/iqjT5iJ.png",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "passthrough",
+                    "text": "✓ Choose",
+                    "style": "primary",
+                    "type": "button",
+                    "value": "food.poll.confirm_send"
+                },
+                {
+                    "name": "chess",
+                    "text": "More Info",
+                    "type": "button",
+                    "value": "chess"
+                }
+                ]
+        },
+        {
+            "title": "",
+            "image_url":"http://i.imgur.com/8Huwjao.png",
+            "mrkdwn_in": [
+               "text"
+            ],
+            "text": "",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "passthrough",
+                    "text": "✓ Choose",
+                    "style": "primary",
+                    "type": "button",
+                    "value": "food.poll.confirm_send"
+                },
+                {
+                    "name": "chess",
+                    "text": "More Info",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "title": "",
+            "image_url":"http://i.imgur.com/fP6EcEm.png",
+            "mrkdwn_in": [
+               "text"
+            ],
+            "text": "",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "passthrough",
+                    "text": "✓  Choose",
+                    "style": "primary",
+                    "type": "button",
+                    "value": "food.poll.confirm_send"
+                },
+                {
+                    "name": "chess",
+                    "text": "More Info",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "mrkdwn_in": [
+               "text"
+            ],
+            "text": "",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "<",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "More Choices >",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "maze",
+                    "text": "Sort Price",
+                    "type": "button",
+                    "value": "maze"
+                },
+                {
+                    "name": "maze",
+                    "text": "Sort Rating",
+                    "type": "button",
+                    "value": "maze"
+                },
+                {
+                    "name": "maze",
+                    "text": "Sort Distance",
+                    "type": "button",
+                    "value": "maze"
+                }
+            ]
+        }
+    ]
+  }
+  replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json});
+}
+
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var addr = _.get(team, 'meta.chosen_location.address_1', '');
