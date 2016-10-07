@@ -599,7 +599,7 @@ handlers['food.delivery_or_pickup'] = function* (session) {
 }
 
 handlers['food.poll.confirm_send'] = function * (message) {
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
   var addr = _.get(team, 'meta.chosen_location.address_1', '');
   var msg_json = {
     'attachments': [
@@ -607,7 +607,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ],
-        'text': `Send poll for lunch cuisine to the team members at ?`,
+        'text': `Send poll for lunch cuisine to the team members at \`${addr}\`?`,
         'fallback': 'Send poll for lunch cuisine to the team members at ',
         'callback_id': 'wopr_game',
         'color': '#3AA3E3',
@@ -618,7 +618,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'text': 'Confirm',
             'style': 'primary',
             'type': 'button',
-            'value': 'chess'
+            'value': 'food.user.preferences'
           },
           {
             'name': 'passthrough',
@@ -636,6 +636,8 @@ handlers['food.poll.confirm_send'] = function * (message) {
       }
     ]
   }
+
+  replyChannel.sendReplace(message, 'food.user.preferences', {type: message.origin, data: msg_json})
 }
 
 //
