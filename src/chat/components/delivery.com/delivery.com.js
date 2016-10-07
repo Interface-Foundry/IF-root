@@ -837,21 +837,20 @@ handlers['food.user.poll'] = function * (message) {
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var teamId = message.source.team
-  var foodSession = yield db.Delivery.findOne({team_id: teamId})
-  var teamMembers = foodSession.team_members
-  var numOfResponsesWaitingFor = teamMembers.length
-  var v = yield db.messages.find({mode: 'food', action: 'admin.restaurant.pick', 'data.voteID': 'XYZXYZ'})
-  var votes = utils.getVotesFromMembers(v)
+  var foodSession = yield db.Delivery.findOne({team_id: teamId}).exec()
+  foodSession.votes.push(message.data.value)
+  foodSession.save()
+  var numOfResponsesWaitingFor = foodSession.team_members
+  // var votes = utils.getVotesFromMembers(v)
+  var votes = foodSession.votes
   if (votes.length < numOfResponsesWaitingFor) {
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
     return
   }
   // var results = api.searchNearby({addr: foodSession.addr})
-  var address_to_use = foodSession.addr
-  console.log('using this addres', address_to_use)
-  // var merchants = dsxClient.getNearbyRestaurants(results.address)
-  var viableRestaurants = utils.createSearchRanking(address_to_use, votes)
+  var address = foodSession.chosen_location.addr.address_1
+  var viableRestaurants = yield utils.createSearchRanking(address, votes)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',

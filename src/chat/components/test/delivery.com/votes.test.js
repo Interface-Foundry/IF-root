@@ -121,7 +121,7 @@ describe('getting votes and selecting merchant', function () {
       vote2.save()
     })
 
-    describe('make sure vote1 was saved', function () {
+    describe.skip('make sure vote1 was saved', function () {
       it('should have voteId with user1', function * () {
         var admin = mock.Admin()
         var message = yield db.message.find({
@@ -141,14 +141,14 @@ describe('getting votes and selecting merchant', function () {
     })
 
     it('should display slice of 3 choices to admin', function * () {
+      this.timeout(5000)
       admin = yield mock.Admin()
       res = yield admin.goto('S6')
-      logging.error('using food choice: '.blue, res.attachments[0].actions[0].value)
+      logging.info('using food choice: '.blue, res.attachments[0].actions[0].value)
       res = yield admin.tap(res, 0, 0)
-      logging.error(res)
       expect(res).to.exist
       // not sure how to get res in format that isnt in `text`
-      expect(_.get(res, 'text')).to.eql('Here are 3 restaurant suggestions based on your team vote')
+      expect(_.get(res, 'text')).to.eql('Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?')
       expect(res.attachments).to.have.lengthOf(4)
       // check first attachment
       expect(_.get(res, 'attachments[0].text')).to.exist

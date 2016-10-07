@@ -14,7 +14,7 @@ defaultParams.searchNearby = {
 }
 module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
-  console.log('searching delivery.com for restaurants with params', params)
+  logging.info('searching delivery.com for restaurants with params', params)
   var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
 
   // make sure we have all the merchants in the db

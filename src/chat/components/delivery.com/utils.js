@@ -273,10 +273,10 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function createSearchRanking (address, votes) {
+function * createSearchRanking (address, votes) {
   // filter results based on what results want
   var params = {addr: address}
-  var results = api.searchNearby(params)
+  var results = yield api.searchNearby(params)
   var merchants = (_.get(results, 'merchants')) ? results.merchants : merchants
   var eligible = []
   _.forEach(votes, function (v) {

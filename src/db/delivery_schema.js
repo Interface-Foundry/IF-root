@@ -8,7 +8,7 @@ var deliverySchema = mongoose.Schema({
   team_id: String,
   team_members: [],
   chosen_location: {},
-  possible_locations: [],
+  chosen_restaurant: String,
 
   // admin or whomever to use for picking restaurant and various other
   convo_initiater: String,
