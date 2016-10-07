@@ -614,11 +614,11 @@ handlers['food.poll.confirm_send'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'yes_btn',
+            'name': 'passthrough',
             'text': 'Confirm',
             'style': 'primary',
             'type': 'button',
-            'value': 'food.user.preferences'
+            'value': 'food.user.poll'
           },
           {
             'name': 'passthrough',
@@ -637,7 +637,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
     ]
   }
 
-  replyChannel.sendReplace(message, 'food.user.preferences', {type: message.origin, data: msg_json})
+  replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
 }
 
 //
@@ -796,16 +796,21 @@ handlers['food.user.poll'] = function * (message) {
   // error with mock slack not being able to get all messages
   var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
   teamMembers.map(function (member) {
+    source = {
+      type: 'message',
+      channel: member.dm,
+      user: member.id,
+      team: member.team_id
+    }
+
     var resp = {
       mode: 'food',
       action: 'user.poll',
       thread_id: member.dm,
       origin: message.origin,
-      source: message.source,
+      source: source,
       res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
     }
-    resp.source.user = member.id
-    resp.source.channel = member.dm
     replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
