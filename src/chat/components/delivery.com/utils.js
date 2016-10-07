@@ -124,7 +124,8 @@ function createButton (name, buttonType) {
 */
 function chooseRestaurant (restaurants, orderBy) {
   var viable = restaurants.slice(0, 3)
-  var attachments = [buildRestaurantAttachment(viable[0]), buildRestaurantAttachment(viable[1]), buildRestaurantAttachment(viable[2])]
+  var attachments = viable.map(buildRestaurantAttachment)
+  // var attachments = [buildRestaurantAttachment(viable[0]), buildRestaurantAttachment(viable[1]), buildRestaurantAttachment(viable[2])]
   var res = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': attachments
@@ -135,33 +136,33 @@ function chooseRestaurant (restaurants, orderBy) {
     ],
     'text': '',
     'fallback': 'You are unable to choose a game',
-    'callback_id': 'wopr_game',
+    'callback_id': 'food.admin.restaurant.pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
-        'name': 'chess',
+        'name': 'food.admin.restaurant.pick',
         'text': 'More',
         'type': 'button',
-        'value': 'chess'
+        'value': 'more'
       },
       {
-        'name': 'maze',
+        'name': 'food.admin.restaurant.pick',
         'text': 'Sort Price',
         'type': 'button',
-        'value': 'maze'
+        'value': 'sort_price'
       },
       {
-        'name': 'maze',
+        'name': 'food.admin.restaurant.pick',
         'text': 'Sort Rating',
         'type': 'button',
-        'value': 'maze'
+        'value': 'sort_rating'
       },
       {
-        'name': 'maze',
+        'name': 'food.admin.restaurant.pick',
         'text': 'Sort Distance',
         'type': 'button',
-        'value': 'maze'
+        'value': 'sort_distance'
       }
     ]
   })

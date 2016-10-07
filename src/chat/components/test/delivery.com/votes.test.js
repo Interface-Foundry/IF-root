@@ -141,7 +141,7 @@ describe('getting votes and selecting merchant', function () {
     })
 
     it('should display slice of 3 choices to admin', function * () {
-      this.timeout(5000)
+      this.timeout(10000)
       admin = yield mock.Admin()
       res = yield admin.goto('S6')
       logging.info('using food choice: '.blue, res.attachments[0].actions[0].value)
