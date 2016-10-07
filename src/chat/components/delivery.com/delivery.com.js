@@ -226,13 +226,13 @@ handlers['food.exit'] = function * (message) {
         "actions": [
            {
               name: "passthrough",
-              text: "Confirm",
+              text: "I don't want food",
               type: 'button',
               value: 'yes'
             },
            {
-              name: "no_btn",
-              text: "Edit",
+              name: "passthrough",
+              text: "Keep ordering food",
               type: 'button',
               value: 'no'
            }
@@ -244,13 +244,7 @@ handlers['food.exit'] = function * (message) {
 }
 
 handlers['food.exit.confirm'] = function * (message) {
-  if (message.text === 'yes') {
-    replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
-  } else {
-    debugger;
-    // TODO get the last known route somehow and use it instead of shopping.initial
-    replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'uh oh my brain broke'}})
-  }
+  replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
 }
 
 //
@@ -589,7 +583,13 @@ handlers['food.delivery_or_pickup'] = function* (session) {
                     "text": "× Cancel",
 
                     "type": "button",
-                    "value": "food.exit"
+                    "value": "food.exit.confirm",
+                    confirm: {
+                      title: 'Leave Order',
+                      text: 'Are you sure you want to stop ordering food?',
+                      ok_text: "Don't order food",
+                      dismiss_text: "Keep ordering food"
+                    }
                 }
             ]
         }
