@@ -347,7 +347,7 @@ handlers['food.choose_address'] = function* (session) {
                     },
                     {
                         "name": "passthrough",
-                        "text": "< Change Address",
+                        "text": "Change Address",
                         "type": "button",
                         "value": "address.change"
                     }
@@ -525,6 +525,10 @@ handlers['address.save'] = function* (session) {
     return yield handlers['food.choose_address'](session)
 }
 
+handlers['address.change'] = function* (session) {
+    return yield handlers['food.begin'](session)
+}
+
 
 
 handlers['food.delivery_or_pickup'] = function* (session) {
@@ -641,13 +645,10 @@ handlers['food.address'] = function* (message) {
   var addr = message.text;
   // check if it's a good address
   // TODO
-
   message.state.addr = addr;
   message.save();
-
   // search for food near that address
   send_text_reply(message, 'thanks, searching your area for good stuff!');
-
   var results = yield search.search({
     addr: addr
   });
