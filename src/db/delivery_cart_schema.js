@@ -3,7 +3,7 @@ var accounting = require('accounting');
 
 /**
  *  The data format we get back from Delivery.com when we inspect the cart
- * 
+ *
  */
 
 var deliveryCart = mongoose.Schema({
@@ -25,11 +25,11 @@ var deliveryCart = mongoose.Schema({
 
     delivery_points_multiplier: Number,
 
-    Xo_after tax charges: [Number],
+    // Xo_after tax charges: [Number],
 
     item_count: Number,
 
-    order_time: "2016-10-04T19:00:00+0000", // TODO: find out about Mongoose's date/time formatting 
+    // order_time: "2016-10-04T19:00:00+0000", // TODO: find out about Mongoose's date/time formatting
 
     asap: Boolean,
 
@@ -37,7 +37,7 @@ var deliveryCart = mongoose.Schema({
 
     delivery_points: Number,
 
-   
+
     cart: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DeliveryItem'

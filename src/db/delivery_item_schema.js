@@ -26,7 +26,7 @@ var deliveryItem = mongoose.Schema({
 
     type: String,
 
-    options: [deliveryItem],
+    // options: [deliveryItem],
 
     quantity: Number
 
