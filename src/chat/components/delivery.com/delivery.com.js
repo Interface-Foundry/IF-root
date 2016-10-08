@@ -137,6 +137,21 @@ function send_text_reply (message, text) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
+//mock function for now until dexter implements
+function validateAddress(addr) {
+  //validate addr via google places api and Parse out the fields from the addr string
+  return {
+    label: "NYC Office",
+    coordinates: [-123.34, 34.32432423],
+    address_1: addr,
+    address_2: 'Apt. 6',
+    phone_number: "212-867-5309",
+    region: "US",
+    timezone: "ET",
+    special_instructions: "Please send a raven to herald your arrival"
+  };
+}
+
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
@@ -499,22 +514,6 @@ handlers['address.validate'] = function* (session) {
     };
     replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: msg_json});
 
-}
-
-
-//mock function for now until dexter implements
-function * validateAddress(addr) {
-  //validate addr via google places api and Parse out the fields from the addr string
-  return {
-    label: "",
-    coordinates: [-123.34, 34.32432423],
-    address_1: addr,
-    address_2: 'Apt. 6',
-    phone_number: "212-867-5309",
-    region: "US",
-    timezone: "ET",
-    special_instructions: "Please send a raven to herald your arrival"
-  };
 }
 
 handlers['address.save'] = function* (session) {
@@ -904,19 +903,4 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 handlers['food.user.confirm_interest'] = function * (message) {
   //
   console.log('S8 at this point')
-}
-
-//mock function for now until dexter implements
-function validateAddress(addr) {
-  //validate addr via google places api and Parse out the fields from the addr string
-  return {
-    label: "NYC Office",
-    coordinates: [-123.34, 34.32432423],
-    address_1: addr,
-    address_2: 'Apt. 6',
-    phone_number: "212-867-5309",
-    region: "US",
-    timezone: "ET",
-    special_instructions: "Please send a raven to herald your arrival"
-  };
 }

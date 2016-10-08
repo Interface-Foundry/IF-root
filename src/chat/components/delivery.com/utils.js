@@ -323,7 +323,7 @@ function createPreferencesAttachments () {
 function askUserForCuisineTypes (cuisines, user, adminName) {
   // probably should check if user is on slack
   var s = _.sampleSize(cuisines, 4)
-  var res = sm().text('`' + adminName + '` is collecting lunch suggestions vote now!')
+  var res = sm().text('<@' + adminName + '> is collecting lunch suggestions vote now!')
   var a = res.attachment()
     .color('#3AA3E3')
   _.forEach(s, function (cuisineName) {
