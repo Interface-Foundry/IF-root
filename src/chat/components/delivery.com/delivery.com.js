@@ -156,7 +156,7 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20)
 
     var session = history[0]
-    if (!session.state && history[1]) {
+    if (!_.get(session, 'state') && _.get(history[1], 'state')) {
       session.state = history[1].state
     }
     session.state = session.state || {}
@@ -822,12 +822,11 @@ handlers['food.user.poll'] = function * (message) {
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
   var address = foodSession.chosen_location.addr.address_1
-  var results = api.searchNearby({addr: address})
-  foodSession.merchants = results.merchants
-  foodSession.cuisines = results.cuisines
-  foodSession.save
+  var results = yield api.searchNearby({addr: address})
+  foodSession.merchants = _.get(results, 'merchants')
+  foodSession.cuisines = _.get(results, 'cuisines')
+  foodSession.save()
   // ---------------------------------------------
-
   var teamMembers = foodSession.team_members
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
@@ -860,16 +859,16 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   foodSession.votes.push(message.data.value)
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members
-  // var votes = utils.getVotesFromMembers(v)
   var votes = foodSession.votes
   if (votes.length < numOfResponsesWaitingFor) {
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
     return
   }
-  // var results = api.searchNearby({addr: foodSession.addr})
-  var address = foodSession.chosen_location.addr.address_1
-  var viableRestaurants = yield utils.createSearchRanking(address, votes)
+
+  logging.data('# of restaurants: ', foodSession.merchants.length)
+  var viableRestaurants = yield utils.createSearchRanking(foodSession.merchants, votes)
+  logging.data('# of viable restaurants: ', viableRestaurants.length)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',
@@ -884,9 +883,12 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
+  var merchant = yield db.Merchants.findOne({id: String(message.data.value)})
   foodSession.chosen_restaurant = {
-    id: message.data.value
+    id: message.data.value,
+    name: merchant.data.summary.name
   }
+  foodSession.save()
 
   var resp = {
     mode: 'food',
@@ -894,9 +896,14 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     thread_id: message.dm,
     origin: message.origin,
     source: message.source,
-    res: utils.confirmRestaurant(foodSession.chosen_restaurant.id)
+    res: utils.confirmRestaurant(foodSession.chosen_restaurant.name)
   }
   replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
+}
+
+handlers['food.user.confirm_interest'] = function * (message) {
+  //
+  console.log('S8 at this point')
 }
 
 //mock function for now until dexter implements

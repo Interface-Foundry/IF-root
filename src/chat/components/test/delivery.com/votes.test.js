@@ -30,13 +30,14 @@ describe('getting votes and selecting merchant', function () {
     yield mock.setup()
   })
   // S4
-  describe('S4) If we DON’T already have diet of Team Member', function () {
+  describe.skip('S4) If we DON’T already have diet of Team Member', function () {
     // setup
     before(function * () {
       this.timeout(5000)
     })
     describe('presume admin pressed "confirm"', function () {
       it('admin press confirm on mock message', function * () {
+        this.timeout(5000)
         admin = yield mock.Admin()
         res = yield admin.goto('S4')
         expect(res.text).to.equal('Here we would ask user for preferences if they didnt have it')
@@ -45,97 +46,34 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // S5
-  describe('S5) Once we ask user about their preferences', function () {
+  describe.skip('S5) Once we ask user about their preferences', function () {
     it('should display buttons for cuisines available', function * () {
+      this.timeout(10000)
       admin = yield mock.Admin()
       res = yield admin.goto('S5')
-      res = yield admin.tap(res, 0, 0)
+      logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
       expect(res.attachments[0].actions).to.have.length(5)
       expect(res.attachments[0].actions[4].text.toLowerCase()).to.equal('nothing')
+    // res = yield admin.tap(res, 0, 0)
     })
   })
   // S6
   describe.skip('S6) Kip shows admin best choices for food based on what team wants', function () {
-    var prevMode = 'food'
-    var prevAction = 'admin.restaurant.pick'
-    var voteID = 'XYZXYZ'
     var votedTest = ['Asian', 'Sandwiches']
-    // initialize vars
     // setup
-    before(function * () {
-      this.timeout(5000)
-      admin = yield mock.Admin()
-      // create dsx context for address
-      var user2 = mock.ExistingUser()
-      // going to simulate admin response in test
-      var user1 = mock.Admin()
-      var vote1 = new db.Message({
-        incoming: true,
-        thread_id: user1.dm,
-        resolved: true,
-        user_id: user1.id,
-        origin: 'slack',
-        data: {mode: prevMode, action: prevAction, value: votedTest[0], voteID: voteID},
-        mode: prevMode,
-        action: prevAction
-      })
-      vote1.save()
-
-      // user2
-      var vote2 = new db.Message({
-        incoming: true,
-        thread_id: user2.dm,
-        resolved: true,
-        user_id: user2.id,
-        origin: 'slack',
-        data: {mode: prevMode, action: prevAction, value: votedTest[1], voteID: voteID},
-        mode: prevMode,
-        action: prevAction
-      })
-      vote2.save()
-    })
-
-    describe.skip('make sure vote1 was saved', function () {
-      it('should have voteId with user1', function * () {
-        var admin = mock.Admin()
-        var message = yield db.message.find({
-          user_id: admin.id,
-          incoming: true,
-          'data.voteID': voteID
-        })
-        expect(message[0].data.vote).to.equal('Asian')
-      })
-    })
-
-    it('make sure util works for getting votes into array format', function * () {
-      var v = yield db.messages.find({mode: 'food', action: 'admin.restaurant.pick', 'data.voteID': 'XYZXYZ'})
-      var votes = utils.getVotesFromMembers(v)
-      expect(votes).to.have.length.of.at.least(1)
-    // expect(_.isEqual(_.sortBy(votes.sort()), _.sortBy(votedTest.sort()))).to.be.true
-    })
-
     it('should display slice of 3 choices to admin', function * () {
       this.timeout(10000)
       admin = yield mock.Admin()
       res = yield admin.goto('S6')
-      logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
-      res = yield admin.tap(res, 0, 0)
+      expect(_.get(res, 'text')).to.eql('Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?')
       expect(res).to.exist
       // not sure how to get res in format that isnt in `text`
-      expect(_.get(res, 'text')).to.eql('Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?')
       expect(res.attachments).to.have.lengthOf(4)
       // check first attachment
       expect(_.get(res, 'attachments[0].text')).to.exist
       expect(helper.checkButtonAttachment(res.attachments[0], ['choose'])).to.be.true
       // check last attachment thing
       expect(helper.checkButtonAttachment(res.attachments[3], ['More', 'Sort Price', 'Sort Rating', 'Sort Distance'])).to.be.true
-    })
-    // change voteID for testing reasons
-    after(function * () {
-      yield db.Messages.update(
-        {'data.voteID': 'XYZXYZ'},
-        {$set: {'data.voteID': 'lmao-old.' + String(Date.now())}},
-        {multi: true})
     })
   })
   // from peters stuff
@@ -144,12 +82,12 @@ describe('getting votes and selecting merchant', function () {
       it('should display "collecting food now message" to the admin', function * () {
         this.timeout(10000)
         admin = yield mock.Admin()
-        admin = yield mock.Admin()
         res = yield admin.goto('S6')
-        logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
-        res = yield admin.tap(res, 0, 0)
         logging.data('using restaurant choice: '.blue, res.attachments[0].text)
         res = yield admin.tap(res, 0, 0)
+        logging.data('res-s7', res)
+        res = yield admin.tap(res, 0, 0)
+        logging.data('res-s8', res)
       })
     })
   })

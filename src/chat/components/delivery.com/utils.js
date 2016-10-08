@@ -273,11 +273,8 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function * createSearchRanking (address, votes) {
+function * createSearchRanking (merchants, votes) {
   // filter results based on what results want
-  var params = {addr: address}
-  var results = yield api.searchNearby(params)
-  var merchants = (_.get(results, 'merchants')) ? results.merchants : merchants
   var eligible = []
   _.forEach(votes, function (v) {
     // get all merchants who satisfy cuisine type being v
@@ -346,23 +343,23 @@ function confirmRestaurant (restaurantName) {
       color: '#3AA3E3',
       actions: [
         {
-          name: 'confirm',
+          name: 'food.user.confirm_interest',
           text: 'confirm',
           style: 'primary',
           type: 'button',
           value: 'confirm'
         },
         {
-          name: 'view team members',
+          name: 'food.admin.view_team_members',
           text: 'view team members',
           type: 'button',
-          value: 'view team members'
+          value: 'view_team_members'
         },
         {
-          name: 'Confirm',
-          text: 'Confirm',
+          name: 'food.admin.change_restaurant',
+          text: 'change restaurant',
           type: 'button',
-          value: 'buttons'
+          value: 'change_restaurant'
         }
       ]
     }

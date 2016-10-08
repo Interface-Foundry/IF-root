@@ -8,7 +8,6 @@ var testConfig = {
     warn: 1,
     data: 2,
     debug: 3,
-    log: 4,
     info: 5,
     verbose: 6,
     silly: 7
@@ -18,7 +17,6 @@ var testConfig = {
     warn: 'yellow',
     data: 'grey',
     debug: 'blue',
-    log: 'green',
     info: 'green',
     verbose: 'cyan',
     silly: 'magenta'
