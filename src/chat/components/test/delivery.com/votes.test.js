@@ -10,32 +10,6 @@ var uuid = require('uuid')
 var helper = require('../testHelper.js')
 var utils = require('../../delivery.com/utils.js')
 var mock = require('../mock_slack_users.js')
-
-// -----------------------------
-// dsx stuff so tests work
-var dsxsvc = require('../../delivery.com/dsx_services.js')
-var dsxutils = require('../../delivery.com/dsx_utils')
-var argv = require('minimist')(process.argv.slice(2))
-
-var yaml = require('js-yaml')
-var initFilename = argv['config']
-if (initFilename === null || initFilename === undefined) {
-  console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.')
-  // process.exit(-1)
-  initFilename = path.resolve(__dirname, '../../delivery.com/dsx_init_peter.local.yml')
-}
-
-var yamlDoc
-try {
-  yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'))
-} catch(err) {
-  console.log(err)
-  process.exit(-1)
-}
-
-var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient')
-
-var dsxClient = new dsxsvc.DSXClient(loadedParams)
 // -----------------------------
 
 describe('getting votes and selecting merchant', function () {
@@ -81,7 +55,7 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // S6
-  describe('S6) Kip shows admin best choices for food based on what team wants', function () {
+  describe.skip('S6) Kip shows admin best choices for food based on what team wants', function () {
     var prevMode = 'food'
     var prevAction = 'admin.restaurant.pick'
     var voteID = 'XYZXYZ'
@@ -144,7 +118,7 @@ describe('getting votes and selecting merchant', function () {
       this.timeout(10000)
       admin = yield mock.Admin()
       res = yield admin.goto('S6')
-      logging.info('using food choice: '.blue, res.attachments[0].actions[0].value)
+      logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
       res = yield admin.tap(res, 0, 0)
       expect(res).to.exist
       // not sure how to get res in format that isnt in `text`
@@ -165,23 +139,17 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // from peters stuff
-  describe.skip('S7) confirm restaurant choice', function () {
-    var prevMode = 'food'
-    var prevAction = 'admin.restaurant.pick'
-
-    it('should check to see if mode and action are correct', function () {
-      expect(process.env._PREV_MODE).to.equal(prevMode)
-      expect(process.env._PREV_ACTION).to.equal(prevAction)
-    })
-
+  describe('S7) confirm restaurant choice', function () {
     describe('participation prompt', function () {
       it('should display "collecting food now message" to the admin', function * () {
+        this.timeout(10000)
         admin = yield mock.Admin()
-
-        res = yield admin.text('continue')
-        expect(res).to.exist
-        res = JSON.parse(res.text)
-        console.log(res)
+        admin = yield mock.Admin()
+        res = yield admin.goto('S6')
+        logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
+        res = yield admin.tap(res, 0, 0)
+        logging.data('using restaurant choice: '.blue, res.attachments[0].text)
+        res = yield admin.tap(res, 0, 0)
       })
     })
   })

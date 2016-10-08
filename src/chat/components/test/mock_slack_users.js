@@ -136,7 +136,10 @@ User.prototype.goto = function (step) {
     },
 
     S7: function * () {
-      // setup selected restaurant
+      var res
+      res = yield steps.S6()
+      res = yield user.tap(res, 0, 0)
+      return res
     },
 
     S9: function * () {

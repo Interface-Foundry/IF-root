@@ -818,19 +818,25 @@ handlers['food.user.preferences'] = function * (session) {
 
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
-  // until cuisines is returned from s1-s3
-  var cuisines = cuisinesFile.cuisines
+  // going to want to move this to s3 probably
+  // ---------------------------------------------
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
+  var address = foodSession.chosen_location.addr.address_1
+  var results = api.searchNearby({addr: address})
+  foodSession.merchants = results.merchants
+  foodSession.cuisines = results.cuisines
+  foodSession.save
+  // ---------------------------------------------
 
-  var teamId = message.source.team
-  var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+  var teamMembers = foodSession.team_members
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
   }
 
   // error with mock slack not being able to get all messages
-  var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
+  var admin = yield db.chatusers.findOne({team_id: message.source.team, is_bot: false, is_admin: true})
   teamMembers.map(function (member) {
-    source = {
+    var source = {
       type: 'message',
       channel: member.dm,
       user: member.id,
@@ -843,15 +849,14 @@ handlers['food.user.poll'] = function * (message) {
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
+      res: utils.askUserForCuisineTypes(_.map(foodSession.cuisines, 'name'), member.dm, admin.real_name)
     }
     replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
-  var teamId = message.source.team
-  var foodSession = yield db.Delivery.findOne({team_id: teamId}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
   foodSession.votes.push(message.data.value)
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members
@@ -878,24 +883,20 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
-  var choosenRestaurant = message.text // or whatever the button action.value is
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
+  foodSession.chosen_restaurant = {
+    id: message.data.value
+  }
+
   var resp = {
     mode: 'food',
     action: 'admin.restaurant.confirm',
     thread_id: message.dm,
     origin: message.origin,
     source: message.source,
-    res: utils.confirmRestaurant(choosenRestaurant)
+    res: utils.confirmRestaurant(foodSession.chosen_restaurant.id)
   }
-  sendIt(resp)
-}
-
-function sendIt (resp) {
-  var resultsMessage = default_reply(resp)
-  resultsMessage.data = resp.res
-  resultsMessage.save()
-  resp.text = JSON.stringify(resp.res)
-  queue.publish('outgoing.' + resp.origin, resp, resultsMessage._id + '.reply.' + resp.action)
+  replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
 //mock function for now until dexter implements

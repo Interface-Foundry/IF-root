@@ -11,15 +11,15 @@ var testConfig = {
     log: 4,
     info: 5,
     verbose: 6,
-    silly: 9
+    silly: 7
   },
   colors: {
     error: 'red',
-    debug: 'blue',
     warn: 'yellow',
     data: 'grey',
-    info: 'green',
+    debug: 'blue',
     log: 'green',
+    info: 'green',
     verbose: 'cyan',
     silly: 'magenta'
   }
@@ -39,12 +39,12 @@ if (process.env.NODE_ENV !== 'test') {
   logging = new (winston.Logger)({
     transports: [
       new (winston.transports.Console)({
-        level: 'data',
-        levels: testConfig.levels,
-        colors: testConfig.colors,
+        level: 'debug',
         colorize: true,
         prettyPrint: true
-      })]
+      })],
+    colors: testConfig.colors,
+    levels: testConfig.levels
   })
 }
 
