@@ -326,7 +326,6 @@ function askUserForCuisineTypes (cuisines, user, adminName) {
   var res = sm().text('`' + adminName + '` is collecting lunch suggestions vote now!')
   var a = res.attachment()
     .color('#3AA3E3')
-    .ts(Date.now())
   _.forEach(s, function (cuisineName) {
     a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
   })
