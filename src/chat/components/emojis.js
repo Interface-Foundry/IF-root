@@ -1,9 +1,9 @@
-module.exports = function(type) {
+module.exports = function (type) {
   if (type === 'slack') {
-    return slack;
+    return slack
   }
   if (type === 'html') {
-    return html;
+    return html
   }
 }
 
@@ -27,17 +27,17 @@ var emoji = {
   17: { slack: '17.', html: '<div class="number">⑰</div>', email: '17. ' },
   18: { slack: '18.', html: '<div class="number">⑱</div>', email: '18. ' },
   19: { slack: '19.', html: '<div class="number">⑲</div>', email: '19. ' },
-  20: { slack: '20.', html: '<div class="number">⑳</div>', email: '20. ' },
+  20: { slack: '20.', html: '<div class="number">⑳</div>', email: '20. ' }
 }
 
-function slack(i) {
-  var e = emoji[i].slack;
+function slack (i) {
+  var e = emoji[i].slack
   if (e) { return e }
-  return i + '.';
+  return i + '.'
 }
 
-function html(i) {
-  var e = emoji[i].html;
+function html (i) {
+  var e = emoji[i].html
   if (e) { return e }
-  return `<div class="number">${i}</div>`;
+  return `<div class="number">${i}</div>`
 }

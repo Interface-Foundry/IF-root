@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 /**
  * pub sub stuff for Exactly Once message queue
@@ -23,50 +23,50 @@ here is a subway car.
 R-68, R-68a (1986-8, 1988-9)
  */
 var pubSubSchema = mongoose.Schema({
-    _id: String,  // 🚨 not ObjectId 🚨 this is so we have control over ids to implement only-once queue logic
+  _id: String, // 🚨 not ObjectId 🚨 this is so we have control over ids to implement only-once queue logic
 
-    topic: {
-      type: String,
-      required: true,
-      index: true
-    },
+  topic: {
+    type: String,
+    required: true,
+    index: true
+  },
 
-    data: {},
+  data: {},
 
-    //
-    // Meta data
-    //
+  //
+  // Meta data
+  //
 
-    // has the message been dispatched for processing?
-    dispatched: {
-      type: Boolean,
-      default: false,
-      index: true
-    },
+  // has the message been dispatched for processing?
+  dispatched: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
 
-    // When was it dispatched (need it to re-try if message not handled in 10 seconds or something)
-    dispatch_time: {
-      type: Date
-    },
+  // When was it dispatched (need it to re-try if message not handled in 10 seconds or something)
+  dispatch_time: {
+    type: Date
+  },
 
-    // Number of time to re-try dispatching
-    retries: {
-      type: Number,
-      default: 0
-    },
+  // Number of time to re-try dispatching
+  retries: {
+    type: Number,
+    default: 0
+  },
 
-    // the message has been processed.  This can be safely archived now.
-    done: {
-      type: Boolean,
-      default: false
-    }
-});
+  // the message has been processed.  This can be safely archived now.
+  done: {
+    type: Boolean,
+    default: false
+  }
+})
 
-pubSubSchema.methods.ack = function() {
-  this.done = true;
-  return this.save();
+pubSubSchema.methods.ack = function () {
+  this.done = true
+  return this.save()
 }
 
-var PubSub = mongoose.model('PubSub', pubSubSchema, 'pubsubs');
+var PubSub = mongoose.model('PubSub', pubSubSchema, 'pubsubs')
 
-module.exports = PubSub;
+module.exports = PubSub

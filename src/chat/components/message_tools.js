@@ -1,7 +1,7 @@
 require('kip')
 
 // I'm sorry i couldn't understand that
-function default_reply(message) {
+function default_reply (message) {
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -16,13 +16,13 @@ function default_reply(message) {
 }
 
 // get a simple text message
-function text_reply(message, text) {
-  var msg = default_reply(message);
-  msg.text = text;
-  msg.execute = msg.execute ? msg.execute : [];
+function text_reply (message, text) {
+  var msg = default_reply(message)
+  msg.text = text
+  msg.execute = msg.execute ? msg.execute : []
   msg.execute.push({
     mode: 'banter',
-    action: 'reply',
+    action: 'reply'
   })
   return msg
 }

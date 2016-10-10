@@ -186,15 +186,15 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       // console.log('outgoing message', message)
 
       if (message.mode === 'food') {
-        //day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
-        var reply = message.reply.data ? message.reply.data : message.reply;
-         return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply);
+        // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
+        var reply = message.reply.data ? message.reply.data : message.reply
+        return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply)
       }
       if (message.mode === 'address') {
-        kip.debug('slack.js line 200 message: ', message);
-        //day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
-        var reply = message.reply.data ? message.reply.data : message.reply;
-         return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply);
+        kip.debug('slack.js line 200 message: ', message)
+        // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
+        var reply = message.reply.data ? message.reply.data : message.reply
+        return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply)
       }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
@@ -220,7 +220,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       // bot.rtm.sendMessage(message.text, message.source.channel, () => {
-      //   outgoing.ack();
+      //   outgoing.ack()
       // })
 
       bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data)

@@ -1,9 +1,9 @@
 var co = require('co')
-require('kip');
+require('kip')
 
-co(function*() {
+co(function * () {
   if (yield kip.icanhazinternet()) {
-    console.log('wow such internet');
+    console.log('wow such internet')
   } else {
     console.log('too bad')
   }

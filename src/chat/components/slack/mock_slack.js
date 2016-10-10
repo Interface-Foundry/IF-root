@@ -37,7 +37,6 @@ function run_chat_server () {
         body: body,
         json: true
       })
-
     })
 
     /**

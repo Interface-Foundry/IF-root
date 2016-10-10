@@ -1,97 +1,81 @@
+'use strict'
 
+var request = require('request')
+var kip = require('kip')
 
+class DSXClient {
+  constructor (params) {
+    this.host = params['host']
+    this.port = params['port']
 
-"use strict";
+    this.getURI = function () {
+      return 'http://' + this.host + ':' + this.port
+    }
 
+    this.restaurantSearchEndpoint = 'restaurants'
+    this.contextEndpoint = 'context'
+    this.contextUpdateEndpoint = 'context/update'
 
-var request = require('request');
-var kip = require('kip');
+    this._get = function (endpoint, request_params) {
+      return new Promise((resolve, reject) => {
+        var final_uri = this.getURI().concat('/').concat(endpoint)
+        var params = request_params
 
-
-
-class DSXClient{
-        constructor(params) {           
-	        this.host = params['host'];
-	        this.port = params['port'];
-	    
-	        this.getURI = function(){
-                return 'http://' + this.host + ':' + this.port;
-	        }
-
-            this.restaurantSearchEndpoint = 'restaurants';
-            this.contextEndpoint = 'context';
-            this.contextUpdateEndpoint = 'context/update';
-
-            this._get = function(endpoint, request_params) {
-                
-                return new Promise((resolve, reject) => {
-                    var final_uri = this.getURI().concat('/').concat(endpoint);                
-                    var params = request_params;
-                
-                    request({
-                        method: 'GET',
-                        uri: final_uri, 
-                        qs: params
-                    },
-                   function(error, response, body){                                              
-                       if(!error && response.statusCode == 200) {
-                           resolve(response.body);
-                       }
-                       else{
-                           reject(error);
-                       }
-                       
-                   });
-                });
+        request({
+          method: 'GET',
+          uri: final_uri,
+          qs: params
+        },
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              resolve(response.body)
+            }else {
+              reject(error)
             }
+          })
+      })
+    }
 
+    this._post = function (endpoint, request_body) {
+      return new Promise((resolve, reject) => {
+        var final_uri = this.getURI().concat('/').concat(endpoint)
 
-            this._post = function(endpoint, request_body) {
-                
-                return new Promise((resolve, reject) => {
-                    var final_uri = this.getURI().concat('/').concat(endpoint);                
-                
-                    request({
-                        method: 'POST',
-                        uri: final_uri, 
-                        form: request_body
-                    },
-                   function(error, response, body){                                              
-                       if(!error && response.statusCode == 200) {
-                           resolve(response.body);
-                       }
-                       else{
-                          // kip.debug('\n\n\nwhats going on: ', error, response, body,'\n\n\n');
-                           reject(error);
-                       }
-                       
-                   });
-                });
+        request({
+          method: 'POST',
+          uri: final_uri,
+          form: request_body
+        },
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              resolve(response.body)
+            }else {
+              // kip.debug('\n\n\nwhats going on: ', error, response, body,'\n\n\n')
+              reject(error)
             }
-
-            
-            this.getNearbyRestaurants = function(address) {
-                return this._get(this.restaurantSearchEndpoint, {'address': address })               
-            }
-
-            this.createDeliveryContext = function(address, fulfillment_type, team_id, team_admin_id) {                
-                var request_body = {'address': address, 'fulfillment_type': fulfillment_type, 'team_id': team_id, 'team_admin_id': team_admin_id };
-                return this._post(this.contextEndpoint, request_body);
-            }
-
-            this.setFulfillmentMethodForContext = function(fulfillmentMethod, teamID, teamAdminID) {
-
-                var requestBody = {'fulfillment_type': fulfillmentMethod, 'team_id': teamID, 'team_admin_id': teamAdminID };
-                return this._post(this.contextUpdateEndpoint, requestBody)
-            }
-
-	        return this;
-        }
+          })
+      })
+    }
 
 
-};
+    this.getNearbyRestaurants = function (address) {
+      return this._get(this.restaurantSearchEndpoint, {'address': address })
+    }
 
+    this.createDeliveryContext = function (address, fulfillment_type, team_id, team_admin_id) {
+      var request_body = {'address': address, 'fulfillment_type': fulfillment_type, 'team_id': team_id, 'team_admin_id': team_admin_id }
+      return this._post(this.contextEndpoint, request_body)
+    }
+
+    this.setFulfillmentMethodForContext = function (fulfillmentMethod, teamID, teamAdminID) {
+      var requestBody = {'fulfillment_type': fulfillmentMethod, 'team_id': teamID, 'team_admin_id': teamAdminID }
+      return this._post(this.contextUpdateEndpoint, requestBody)
+    }
+
+    return this
+  }
+
+}
 
 module.exports = {
-    'DSXClient': DSXClient
-};
+  'DSXClient': DSXClient
+}

@@ -94,7 +94,7 @@ class UserChannel {
           request({
             method: 'POST',
             uri: session.source.response_url,
-            body: JSON.stringify(data.data),
+            body: JSON.stringify(data.data)
           })
         } else {
           self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
@@ -137,19 +137,19 @@ function send_text_reply (message, text) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-//mock function for now until dexter implements
-function validateAddress(addr) {
-  //validate addr via google places api and Parse out the fields from the addr string
+// mock function for now until dexter implements
+function validateAddress (addr) {
+  // validate addr via google places api and Parse out the fields from the addr string
   return {
-    label: "NYC Office",
+    label: 'NYC Office',
     coordinates: [-123.34, 34.32432423],
     address_1: addr,
     address_2: 'Apt. 6',
-    phone_number: "212-867-5309",
-    region: "US",
-    timezone: "ET",
-    special_instructions: "Please send a raven to herald your arrival"
-  };
+    phone_number: '212-867-5309',
+    region: 'US',
+    timezone: 'ET',
+    special_instructions: 'Please send a raven to herald your arrival'
+  }
 }
 
 //
@@ -195,25 +195,25 @@ queue.topic('incoming').subscribe(incoming => {
       kip.debug('setting mode to prevaction', session.prevAction)
       session.action = session.prevAction
     }
-    var route = yield getRoute(session);
+    var route = yield getRoute(session)
     kip.debug('mode', session.mode, 'action', session.action)
-    kip.debug('route'.cyan, route.cyan);
-    // session.mode = 'food';
-    // session.action = route.replace(/^food./, '');
+    kip.debug('route'.cyan, route.cyan)
+    // session.mode = 'food'
+    // session.action = route.replace(/^food./, '')
     if (handlers[route]) {
-      yield handlers[route](session);
+      yield handlers[route](session)
     } else {
       kip.error('No route handler for ' + route)
-      incoming.ack();
+      incoming.ack()
     }
-    session.save();
-    incoming.ack();
+    session.save()
+    incoming.ack()
   }).catch(e => {
     kip.err(e)
-    incoming.ack();
-  });
-});
- 
+    incoming.ack()
+  })
+})
+
 //
 // this is the worst part of building bots: intent recognition
 //
@@ -234,41 +234,39 @@ function getRoute (session) {
 }
 var handlers = {}
 
-
-
-handlers['food.sys_error'] = function* (session){
-  kip.debug('chat session halted.');
+handlers['food.sys_error'] = function * (session) {
+  kip.debug('chat session halted.')
 }
 
 handlers['food.exit'] = function * (message) {
   var msg_json = {
-    "text": 'Are you sure you don\'t want to order food?',
-    "attachments": [
+    'text': "Are you sure you don't want to order food?",
+    'attachments': [
       {
-        "mrkdwn_in": [
-                 "text"
+        'mrkdwn_in': [
+          'text'
         ],
-        "fallback": "Are you sure you don't want to order food?",
-        "callback_id": "leave_confirm",
-        "color": "#3AA3E3",
-        "attachment_type": "default",
-        "actions": [
-           {
-              name: "passthrough",
-              text: "I don't want food",
-              type: 'button',
-              value: 'yes'
-            },
-           {
-              name: "passthrough",
-              text: "Keep ordering food",
-              type: 'button',
-              value: 'no'
-           }
+        'fallback': "Are you sure you don't want to order food?",
+        'callback_id': 'leave_confirm',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            name: 'passthrough',
+            text: "I don't want food",
+            type: 'button',
+            value: 'yes'
+          },
+          {
+            name: 'passthrough',
+            text: 'Keep ordering food',
+            type: 'button',
+            value: 'no'
+          }
         ]
-      },
+      }
     ]
-  };
+  }
   replyChannel.send(message, 'food.exit.confirm', {type: message.origin, data: msg_json})
 }
 
@@ -279,48 +277,48 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 // the user's intent is to initiate a food order
 //
-handlers['food.begin'] = function* (session) {
-  kip.debug('🍕 food order 🌮');
-  session.state = {};
+handlers['food.begin'] = function * (session) {
+  kip.debug('🍕 food order 🌮')
+  session.state = {}
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
       text: a.address_1,
       type: 'button',
-      value: JSON.stringify(a),
+      value: JSON.stringify(a)
 
     }
   })
   address_buttons.push({
-    name: "passthrough",
-    text: "New +",
+    name: 'passthrough',
+    text: 'New +',
     type: 'button',
-    value: "address.new"
+    value: 'address.new'
   })
   var msg_json = {
-    "attachments": [
+    'attachments': [
       {
-        "title": "",
-        "image_url":"http://kipthis.com/kip_modes/mode_cafe.png"
+        'title': '',
+        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
       },
       {
-          "text": "Great! Which address is this for?",
-          "fallback": "You are unable to choose an address",
-          "callback_id": "address",
-          "color": "#3AA3E3",
-          "attachment_type": "default",
-          "actions": address_buttons
+        'text': 'Great! Which address is this for?',
+        'fallback': 'You are unable to choose an address',
+        'callback_id': 'address',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': address_buttons
       }
     ]
   }
-  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json});
+  replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json})
 }
 
 //
 // User decides what address they are ordering for. could be that they need to make a new address
 //
-handlers['food.choose_address'] = function* (session) {
+handlers['food.choose_address'] = function * (session) {
   if (_.get(session, 'source.response_url')) {
     // slack action button tap
     try {
@@ -328,13 +326,13 @@ handlers['food.choose_address'] = function* (session) {
     } catch (e) {
       var location = {address_1: session.text}
       kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
-      // TODO handle the case where they type a new address without clicking the "new" button
+    // TODO handle the case where they type a new address without clicking the "new" button
     }
     var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
     team.meta.chosen_location = location
     kip.debug('saving location', location.address_1)
     yield team.save()
-    //yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
+    // yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
 
     var teamMembers = yield db.Chatusers.find({team_id: session.source.team}).exec()
     var foodSession = new db.Delivery({
@@ -398,363 +396,358 @@ handlers['food.choose_address'] = function* (session) {
 //
 // the user's intent is to create a new address
 //
-handlers['address.new'] = function* (session) {
-  kip.debug(' 🌆🏙 enter a new address');
-  // session.state = {};
+handlers['address.new'] = function * (session) {
+  kip.debug(' 🌆🏙 enter a new address')
+  // session.state = {}
   var msg_json = {
-    "text": "What's the delivery address?",
-    "attachments": [
+    'text': "What's the delivery address?",
+    'attachments': [
       {
-        "text": "Type your address below"      }
+      'text': 'Type your address below'      }
     ]
   }
-  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json});
+  replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json})
 }
 
 //
 // the user seeks to confirm their possibly updated/validated address
 //
-handlers['address.confirm'] = function* (session) {
-  kip.debug('🌆🏙 validate an address', session.text);
+handlers['address.confirm'] = function * (session) {
+  kip.debug('🌆🏙 validate an address', session.text)
   var location = yield validateAddress(session.text)
-  var prompt = "Is `" + location.address_1 + '` your address?'
+  var prompt = 'Is `' + location.address_1 + '` your address?'
   var msg_json = {
-    "text": prompt,
-    "attachments": [
+    'text': prompt,
+    'attachments': [
       {
-        "mrkdwn_in": [
-                 "text"
+        'mrkdwn_in': [
+          'text'
         ],
-        "fallback": "You are unable to confirm.",
-        "callback_id": "address_confirm",
-        "color": "#3AA3E3",
-        "attachment_type": "default",
-        "actions": [
-           {
-              name: "address_confirm_btn",
-              text: "Confirm",
-              type: 'button',
-              value: JSON.stringify(location)
-            },
-           {
-              name: "passthrough",
-              text: "Edit",
-              type: 'button',
-              value: "address.new"
-           }
+        'fallback': 'You are unable to confirm.',
+        'callback_id': 'address_confirm',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            name: 'address_confirm_btn',
+            text: 'Confirm',
+            type: 'button',
+            value: JSON.stringify(location)
+          },
+          {
+            name: 'passthrough',
+            text: 'Edit',
+            type: 'button',
+            value: 'address.new'
+          }
         ]
-      },
+      }
     ]
-  };
-      //storing location in source since there is no other way to persist it thru handler exchanges,
-    //feel free to implement a better way. would not make sense to save it in slackbots before it is even validate nah meen
-  session.source.location = location;
-  yield session.save();
-  replyChannel.send(session, 'address.validate', {type: session.origin, data: msg_json});
+  }
+  // storing location in source since there is no other way to persist it thru handler exchanges,
+  // feel free to implement a better way. would not make sense to save it in slackbots before it is even validate nah meen
+  session.source.location = location
+  yield session.save()
+  replyChannel.send(session, 'address.validate', {type: session.origin, data: msg_json})
 }
 
-handlers['address.validate'] = function* (session) {
-    var location = session.source.location;
-    kip.debug('\n\n🌃🌉getting to address.validate', location, '\n\n');
-    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-    //validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
-    if (validateAddress(location)) {
-      team.meta.locations.push(validateAddress(location.address_1))
-      team.meta.chosen_location = location;
-    }
-    else {
-      team.meta.chosen_location = location;
-      team.meta.locations.push(validateAddress({
-        label: "NYC Office",
-        coordinates: [-123.34, 34.32432423],
-        address_1: location.address_1,
-        address_2: 'Apt. 6',
-        phone_number: "212-867-5309",
-        region: "US",
-        timezone: "ET",
-        special_instructions: "Please send a raven to herald your arrival"
-      }))
-    }
-    yield team.save();
-    kip.debug('###  saved new address in mongo...');
-    var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
-    var msg_json = {
-        "attachments": [
-            {
-                "mrkdwn_in": [
-                   "text"
-                ],
-                "text": text,
-                "fallback": "You did not choose a fulfillment method :/",
-                "callback_id": "wopr_game",
-                "color": "#3AA3E3",
-                "attachment_type": "default",
-                "actions": [
-                    {
-                        "name": "passthrough",
-                        "text": "Delivery",
-                        "type": "button",
-                        "value": "food.delivery_or_pickup"
-                    },
-                    {
-                        "name": "passthrough",
-                        "text": "Pickup",
-                        "type": "button",
-                        "value": "food.delivery_or_pickup"
-                    },
-                    {
-                        "name": "passthrough",
-                        "text": "< Change Address",
-                        "type": "button",
-                        "value": "address.change"
-                    }
-                ]
-            }
+handlers['address.validate'] = function * (session) {
+  var location = session.source.location
+  kip.debug('\n\n🌃🌉getting to address.validate', location, '\n\n')
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  // validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
+  if (validateAddress(location)) {
+    team.meta.locations.push(validateAddress(location.address_1))
+    team.meta.chosen_location = location
+  }else {
+    team.meta.chosen_location = location
+    team.meta.locations.push(validateAddress({
+      label: 'NYC Office',
+      coordinates: [-123.34, 34.32432423],
+      address_1: location.address_1,
+      address_2: 'Apt. 6',
+      phone_number: '212-867-5309',
+      region: 'US',
+      timezone: 'ET',
+      special_instructions: 'Please send a raven to herald your arrival'
+    }))
+  }
+  yield team.save()
+  kip.debug('###  saved new address in mongo...')
+  var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+  var msg_json = {
+    'attachments': [
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': text,
+        'fallback': 'You did not choose a fulfillment method :/',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'passthrough',
+            'text': 'Delivery',
+            'type': 'button',
+            'value': 'food.delivery_or_pickup'
+          },
+          {
+            'name': 'passthrough',
+            'text': 'Pickup',
+            'type': 'button',
+            'value': 'food.delivery_or_pickup'
+          },
+          {
+            'name': 'passthrough',
+            'text': '< Change Address',
+            'type': 'button',
+            'value': 'address.change'
+          }
         ]
-    };
-    replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: msg_json});
-
+      }
+    ]
+  }
+  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: msg_json})
 }
 
-handlers['address.save'] = function* (session) {
+handlers['address.save'] = function * (session) {
   if (session.text === 'no') {
     return handlers['food.begin'](session)
   }
   var location = JSON.parse(session.text)
-    //
-    //
-    //*Also store the address into mongo*
-    //
-    //
-    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  //
+  //
+  // *Also store the address into mongo*
+  //
+  //
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
 
-    if (location) {
-      team.meta.locations.push(location)
-      team.meta.chosen_location = location;
-    }
-    else {
+  if (location) {
+    team.meta.locations.push(location)
+    team.meta.chosen_location = location
+  }else {
 
-      // todo error
-      throw new Error('womp bad address')
-    }
-    yield team.save()
-    session.text = JSON.stringify(location)
-    return yield handlers['food.choose_address'](session)
+    // todo error
+    throw new Error('womp bad address')
+  }
+  yield team.save()
+  session.text = JSON.stringify(location)
+  return yield handlers['food.choose_address'](session)
 }
 
-handlers['address.change'] = function* (session) {
-    return yield handlers['food.begin'](session)
+handlers['address.change'] = function * (session) {
+  return yield handlers['food.begin'](session)
 }
 
-
-
-handlers['food.delivery_or_pickup'] = function* (session) {
-  kip.debug('\n\n🍏 🍎 🍐 getting to food.delivery_or_pickup\n\n');
-  var fulfillmentMethod = session.text;
+handlers['food.delivery_or_pickup'] = function * (session) {
+  kip.debug('\n\n🍏 🍎 🍐 getting to food.delivery_or_pickup\n\n')
+  var fulfillmentMethod = session.text
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
-  //var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
+  // var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
   //
   // START OF S2B
   //
   var mock_s2b = {
-    "attachments": [
-            {
-            "title": "",
-            "image_url":"http://i.imgur.com/BVHZTaS.png",
-            "text": "You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again?",
-            "color": "#3AA3E3",
-             "mrkdwn_in": [
-               "text"
-            ],
-             "actions": [
-                {
-                    "name": "chess",
-                    "text": "Choose Restaurant",
-                    "type": "button",
-                    "value": "chess"
-                }
+    'attachments': [
+      {
+        'title': '',
+        'image_url': 'http://i.imgur.com/BVHZTaS.png',
+        'text': 'You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again?',
+        'color': '#3AA3E3',
+        'mrkdwn_in': [
+          'text'
+        ],
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Choose Restaurant',
+            'type': 'button',
+            'value': 'chess'
+          }
 
-                 ]
-            },
-            {
-            "mrkdwn_in": [
-               "text"
-            ],
-            "text": "*Tip:* `✓ Start New Poll` polls your team on what type of food they want.",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "passthrough",
-                    "text": "✓ Start New Poll",
-                    "style":"primary",
-                    "type": "button",
-                    "value": "food.poll.confirm_send"
-                },
-                {
-                    "name": "passthrough",
-                    "text": "See More",
-                    "type": "button",
-                    "value": "food.restaurants.list"
-                },
+        ]
+      },
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'passthrough',
+            'text': '✓ Start New Poll',
+            'style': 'primary',
+            'type': 'button',
+            'value': 'food.poll.confirm_send'
+          },
+          {
+            'name': 'passthrough',
+            'text': 'See More',
+            'type': 'button',
+            'value': 'food.restaurants.list'
+          },
 
-                {
-                    "name": "passthrough",
-                    "text": "× Cancel",
+          {
+            'name': 'passthrough',
+            'text': '× Cancel',
 
-                    "type": "button",
-                    "value": "food.exit.confirm",
-                    confirm: {
-                      title: 'Leave Order',
-                      text: 'Are you sure you want to stop ordering food?',
-                      ok_text: "Don't order food",
-                      dismiss_text: "Keep ordering food"
-                    }
-                }
-            ]
-        }
+            'type': 'button',
+            'value': 'food.exit.confirm',
+            confirm: {
+              title: 'Leave Order',
+              text: 'Are you sure you want to stop ordering food?',
+              ok_text: "Don't order food",
+              dismiss_text: 'Keep ordering food'
+            }
+          }
+        ]
+      }
     ]
-}
-  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b});
+  }
+  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b})
 }
 
 handlers['food.restaurants.list'] = function * (message) {
   // here's some mock stuff for now
   var msg_json = {
-    "text": "Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?",
-    "attachments": [
-        {
-            "mrkdwn_in": [
-               "text"
-            ],
-            "text": "",
-            "image_url":"http://i.imgur.com/iqjT5iJ.png",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "passthrough",
-                    "text": "✓ Choose",
-                    "style": "primary",
-                    "type": "button",
-                    "value": "food.poll.confirm_send"
-                },
-                {
-                    "name": "chess",
-                    "text": "More Info",
-                    "type": "button",
-                    "value": "chess"
-                }
-                ]
-        },
-        {
-            "title": "",
-            "image_url":"http://i.imgur.com/8Huwjao.png",
-            "mrkdwn_in": [
-               "text"
-            ],
-            "text": "",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "passthrough",
-                    "text": "✓ Choose",
-                    "style": "primary",
-                    "type": "button",
-                    "value": "food.poll.confirm_send"
-                },
-                {
-                    "name": "chess",
-                    "text": "More Info",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "title": "",
-            "image_url":"http://i.imgur.com/fP6EcEm.png",
-            "mrkdwn_in": [
-               "text"
-            ],
-            "text": "",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "passthrough",
-                    "text": "✓  Choose",
-                    "style": "primary",
-                    "type": "button",
-                    "value": "food.poll.confirm_send"
-                },
-                {
-                    "name": "chess",
-                    "text": "More Info",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "mrkdwn_in": [
-               "text"
-            ],
-            "text": "",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "<",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "More Choices >",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "maze",
-                    "text": "Sort Price",
-                    "type": "button",
-                    "value": "maze"
-                },
-                {
-                    "name": "maze",
-                    "text": "Sort Rating",
-                    "type": "button",
-                    "value": "maze"
-                },
-                {
-                    "name": "maze",
-                    "text": "Sort Distance",
-                    "type": "button",
-                    "value": "maze"
-                }
-            ]
-        }
+    'text': 'Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?',
+    'attachments': [
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': '',
+        'image_url': 'http://i.imgur.com/iqjT5iJ.png',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'passthrough',
+            'text': '✓ Choose',
+            'style': 'primary',
+            'type': 'button',
+            'value': 'food.poll.confirm_send'
+          },
+          {
+            'name': 'chess',
+            'text': 'More Info',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': '',
+        'image_url': 'http://i.imgur.com/8Huwjao.png',
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': '',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'passthrough',
+            'text': '✓ Choose',
+            'style': 'primary',
+            'type': 'button',
+            'value': 'food.poll.confirm_send'
+          },
+          {
+            'name': 'chess',
+            'text': 'More Info',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': '',
+        'image_url': 'http://i.imgur.com/fP6EcEm.png',
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': '',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'passthrough',
+            'text': '✓  Choose',
+            'style': 'primary',
+            'type': 'button',
+            'value': 'food.poll.confirm_send'
+          },
+          {
+            'name': 'chess',
+            'text': 'More Info',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': '',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': '<',
+            'type': 'button',
+            'value': 'chess'
+          },
+          {
+            'name': 'chess',
+            'text': 'More Choices >',
+            'type': 'button',
+            'value': 'chess'
+          },
+          {
+            'name': 'maze',
+            'text': 'Sort Price',
+            'type': 'button',
+            'value': 'maze'
+          },
+          {
+            'name': 'maze',
+            'text': 'Sort Rating',
+            'type': 'button',
+            'value': 'maze'
+          },
+          {
+            'name': 'maze',
+            'text': 'Sort Distance',
+            'type': 'button',
+            'value': 'maze'
+          }
+        ]
+      }
     ]
   }
-  replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json});
+  replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
 
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var addr = _.get(team, 'meta.chosen_location.address_1', '');
+  var addr = _.get(team, 'meta.chosen_location.address_1', '')
   var msg_json = {
     'attachments': [
       {

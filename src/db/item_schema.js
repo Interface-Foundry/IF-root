@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 /**
  * Save an item in a cart
@@ -26,7 +26,7 @@ var item = mongoose.Schema({
 
   slack_id: String,
 
-  source_json: String,  // make sure to do JSON.stringify()
+  source_json: String, // make sure to do JSON.stringify()
 
   purchased: {
     type: Boolean,
@@ -47,9 +47,8 @@ var item = mongoose.Schema({
     default: Date.now
   }
 
-});
+})
 
+var Item = mongoose.model('Item', item)
 
-var Item = mongoose.model('Item', item);
-
-module.exports = Item;
+module.exports = Item
