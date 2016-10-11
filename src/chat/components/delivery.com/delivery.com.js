@@ -283,7 +283,7 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 handlers['food.begin'] = function * (session) {
   kip.debug('🍕 food order 🌮');
-  //loading chat users here for now lel, can remove later: 
+  //loading chat users here for now lel, can remove once init_team is fully implemented tocreate chat user objects: 
   team_utils.getChatUsers(session);
   session.state = {}
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
