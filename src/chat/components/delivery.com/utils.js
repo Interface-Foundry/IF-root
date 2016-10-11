@@ -11,19 +11,38 @@ var async = require('async')
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
 
-function * initiateDeliverySession (session) {
-  return new db.Delivery({
-    teamMembers: weekly_updates.getTeam(slackbot),
-    chosen_location: {},
-    convoInitiater: String,
-    fulfillment_method: String,
-    time_started: {
-      type: Date,
-      default: Date.now
-    },
-    mode: String,
-    action: String
+function * setOldDeliverySessionsFalse (team_id) {
+  var foodSessions = yield db.Delivery.find({team_id: team_id}).exec()
+  if (foodSessions) {
+    yield foodSessions.map(foodSession => {
+      foodSession.active = false
+      foodSession.save()
+    })
+  }
+}
+
+/*
+*
+*
+*
+*/
+function * initiateDeliverySession (session, teamMembers, location) {
+  var foodSessions = yield db.Delivery.find({team_id: session.source.team}).exec()
+  if (foodSessions) {
+    yield foodSessions.map(session => {
+      session.active = false
+      session.save()
+    })
+  }
+  var newSession = new db.Delivery({
+    active: true,
+    team_id: session.source.team,
+    // probably will want team_members to come from weekly_updates getTeam later
+    team_members: teamMembers,
+    chosen_location: {addr: location},
+    convo_initiater: session.source.user
   })
+  return newSession
 }
 
 function * initiateFoodMessage (message) {
@@ -320,10 +339,10 @@ function createPreferencesAttachments () {
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, user, adminName) {
+function askUserForCuisineTypes (cuisines, user, adminID) {
   // probably should check if user is on slack
   var s = _.sampleSize(cuisines, 4)
-  var res = sm().text('<@' + adminName + '> is collecting lunch suggestions vote now!')
+  var res = sm().text('<@' + adminID + '> is collecting lunch suggestions, vote now!')
   var a = res.attachment()
     .color('#3AA3E3')
     .ts(Date.now())
@@ -331,7 +350,7 @@ function askUserForCuisineTypes (cuisines, user, adminName) {
   _.forEach(s, function (cuisineName) {
     a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
   })
-  a.button().name('food.admin.restaurant.pick').value('nothingCuisine').text('Nothing').style('danger').end()
+  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('✕ No Lunch for Me').style('danger').end()
   return res.json()
 }
 
@@ -344,7 +363,7 @@ function confirmRestaurant (restaurantName) {
       color: '#3AA3E3',
       actions: [
         {
-          name: 'food.user.confirm_interest',
+          name: 'food.admin.restaurant.confirm',
           text: 'confirm',
           style: 'primary',
           type: 'button',
