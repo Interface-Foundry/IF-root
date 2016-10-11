@@ -5,8 +5,8 @@ var mongoose = require('mongoose')
  */
 var deliverySchema = mongoose.Schema({
   active: {
-    type: Boolean,
-    
+    type: Boolean
+
   },
   session_id: mongoose.Schema.ObjectId,
   team_id: String,
@@ -18,7 +18,11 @@ var deliverySchema = mongoose.Schema({
   cuisines: [], // don't confuse this with votes below
 
   // admin or whomever to use for picking restaurant and various other
-  convo_initiater: String,
+  convo_initiater: {
+    id: String,
+    name: String
+  },
+
   fulfillment_method: String,
   time_started: {
     type: Date,

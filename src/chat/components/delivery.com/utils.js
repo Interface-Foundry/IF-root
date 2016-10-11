@@ -34,13 +34,17 @@ function * initiateDeliverySession (session, teamMembers, location) {
       session.save()
     })
   }
+  var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
     active: true,
     team_id: session.source.team,
     // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
     chosen_location: {addr: location},
-    convo_initiater: session.source.user
+    convo_initiater: {
+      id: admin.id,
+      name: admin.name
+    }
   })
   return newSession
 }
@@ -335,14 +339,14 @@ function createPreferencesAttachments () {
 }
 
 /*
-* s5 on layout
+* S5
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, user, adminID) {
+function askUserForCuisineTypes (cuisines, user, admin) {
   // probably should check if user is on slack
   var s = _.sampleSize(cuisines, 4)
-  var res = sm().text('<@' + adminID + '> is collecting lunch suggestions, vote now!')
+  var res = sm().text('<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!')
   var a = res.attachment()
     .color('#3AA3E3')
     .ts(Date.now())
