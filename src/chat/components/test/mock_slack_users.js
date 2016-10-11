@@ -198,7 +198,7 @@ User.prototype.goto = function (step) {
 }
 
 /**
- * gets a fresh conversation for a user that we know about in the database
+ * gets a fresh conversation for a user that we know about in the database 
  */
 function * ExistingUser () {
   var user = new User({
