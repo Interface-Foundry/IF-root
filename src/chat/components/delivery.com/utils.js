@@ -328,6 +328,7 @@ function askUserForCuisineTypes (cuisines, user, adminName) {
   var a = res.attachment()
     .color('#3AA3E3')
     .ts(Date.now())
+    .callbackId('food.preferences')
   _.forEach(s, function (cuisineName) {
     a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
   })

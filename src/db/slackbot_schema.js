@@ -23,6 +23,7 @@ var slackbotSchema = mongoose.Schema({
         bot_user_id: String,
         bot_access_token: String
     },
+    all_channels: [{ id: String,name: String}],
     //
     // this is all kip-specific stuff
     //

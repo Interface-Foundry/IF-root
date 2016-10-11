@@ -3,6 +3,7 @@ require('kip')
 var queue = require('../queue-mongo')
 var co = require('co')
 var fs = require('fs')
+var db = require('db');
 var uuid = require('uuid')
 var _ = require('lodash')
 var api = require('./api-wrapper')
@@ -14,6 +15,9 @@ var request = require('request-promise')
 
 // until cuisines is returned from s1-s3
 var cuisinesFile = require('./cuisines.js')
+
+var team_utils = require('./team_utils.js');
+
 
 var fs = require('fs')
 var yaml = require('js-yaml')
@@ -718,7 +722,7 @@ handlers['food.restaurant.info'] = function * (message) {
 // the user wants to see the full menu
 //
 handlers['food.menu.list'] = function * (message) {
-  var info_message = default_reply(message)
+  var info_message = default_reply(message);
   info_message.action = 'menu.list'
   info_message.data = message.history.filter(m => {
     return m.action === 'restaurant.info' && _.get(m, 'data.merchant') && _.get(m, 'data.menu')
@@ -727,6 +731,27 @@ handlers['food.menu.list'] = function * (message) {
   info_message.save();
   queue.publish('outgoing.' + message.origin, info_message, message._id + '.reply.menu');
 
+}
+
+// check for user preferences/diet/etc, skipping for now
+handlers['food.user.preferences'] = function * (session) {
+  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false})
+  if (process.env.NODE_ENV === 'test') {
+    teamMembers = [teamMembers[0]]
+  }
+  teamMembers.map(function (member) {
+    var userPreferences = {
+      mode: 'food',
+      action: 'user.poll',
+      thread_id: member.dm,
+      origin: session.origin,
+      source: session.source,
+      res: utils.userFoodPreferencesPlaceHolder
+    }
+    userPreferences.source.user = member.id
+    userPreferences.source.channel = member.dm
+    replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
+  })
 }
 
 //
@@ -761,40 +786,26 @@ handlers['food.item.add'] = function * (message) {}
 // the item could already be in their cart or not. message.item should be what you modify
 handlers['food.item.option'] = function * (message) {}
 
-// check for user preferences/diet/etc, skipping for now
-handlers['food.user.preferences'] = function * (session) {
-  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false})
-  if (process.env.NODE_ENV === 'test') {
-    teamMembers = [teamMembers[0]]
-  }
-  teamMembers.map(function (member) {
-    var userPreferences = {
-      mode: 'food',
-      action: 'user.poll',
-      thread_id: member.dm,
-      origin: session.origin,
-      source: session.source,
-      res: utils.userFoodPreferencesPlaceHolder
-    }
-    userPreferences.source.user = member.id
-    userPreferences.source.channel = member.dm
-    replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
-  })
-}
+
 
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // until cuisines is returned from s1-s3
   var cuisines = cuisinesFile.cuisines
-
   var teamId = message.source.team
   var teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
-  if (process.env.NODE_ENV === 'test') {
-    teamMembers = [teamMembers[0]]
+  kip.debug('original team_members:  ', teamMembers)
+  if (teamMembers.length == 0) {
+   yield team_utils.getChatUsers(message)
   }
+  teamMembers = yield db.chatusers.find({team_id: teamId, is_bot: false})
+
+  // if (process.env.NODE_ENV === 'test') {
+  //   teamMembers = [teamMembers[0]]
+  // }
 
   // error with mock slack not being able to get all messages
-  var admin = yield db.chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
+  var admin = yield db.Chatusers.findOne({team_id: teamId, is_bot: false, is_admin: true})
   teamMembers.map(function (member) {
     source = {
       type: 'message',
@@ -809,11 +820,15 @@ handlers['food.user.poll'] = function * (message) {
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      res: utils.askUserForCuisineTypes(cuisines, member.dm, admin.real_name)
+      res: utils.askUserForCuisineTypes(cuisines, member.dm, (admin ? admin.real_name : 'Admin' ))
     }
     replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
+
+// { value: 'Indonesian',
+//      action: 'admin.restaurant.pick',
+//      mode: 'food' },
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var teamId = message.source.team

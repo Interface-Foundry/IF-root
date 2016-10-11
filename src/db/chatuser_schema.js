@@ -60,6 +60,16 @@ var chatuserSchema = mongoose.Schema({
         default: false
       }
     }
+    // ,
+    // interactions: [{
+    //     platform: String,
+    //     session_id: String,
+    //     handler: String,
+    //     input_type: String,
+    //     input: String,
+    //     output: String,
+    //     ts: Date.now
+    // }]
     // , email_stages: {
     //   stage_1: {
     //     type: Boolean,
