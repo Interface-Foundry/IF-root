@@ -358,9 +358,9 @@ function askUserForCuisineTypes (cuisines, user, admin) {
   return res.json()
 }
 
-function confirmRestaurant (restaurantName) {
+function confirmRestaurant (restaurant) {
   var res = {
-    text: "Okay I'll collect orders for `" + restaurantName + '`',
+    text: `Okay I'll collect orders for <${restaurant.url}|${restaurant.name}>`,
     attachments: [{
       fallback: 'You are unable to confirm',
       callback_id: 'confirmRestaurant',

@@ -13,11 +13,8 @@ var picstitch = require('./image_processing_delivery.js')
 var path = require('path')
 var request = require('request-promise')
 
-// until cuisines is returned from s1-s3
-var cuisinesFile = require('./cuisines.js')
 
 var team_utils = require('./team_utils.js');
-
 
 var fs = require('fs')
 var yaml = require('js-yaml')
@@ -50,7 +47,13 @@ logging.info(loadedParams)
 
 var dsxClient = new dsxsvc.DSXClient(loadedParams)
 
-console.log(dsxClient.getURI())
+var googl = require('goo.gl')
+
+if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
+  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
+} else {
+  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
+}
 
 class UserChannel {
 
@@ -178,6 +181,9 @@ queue.topic('incoming').subscribe(incoming => {
     if (!_.get(session, 'state') && _.get(history[1], 'state')) {
       session.state = history[1].state
     }
+    if (!session) {
+      logging.error('No Session!!!')
+    }
     session.state = session.state || {}
     session.history = history.slice(1)
     if (session._id.toString() !== incoming.data._id.toString()) {
@@ -283,7 +289,7 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 handlers['food.begin'] = function * (session) {
   kip.debug('🍕 food order 🌮');
-  //loading chat users here for now lel, can remove once init_team is fully implemented tocreate chat user objects: 
+  //loading chat users here for now lel, can remove once init_team is fully implemented tocreate chat user objects:
   team_utils.getChatUsers(session);
   session.state = {}
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
@@ -895,13 +901,11 @@ handlers['food.user.preferences'] = function * (session) {
   })
 }
 
-
 // poll for cuisines
 handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
-  var foodSessions = yield db.Delivery.find({team_id: message.source.team}).sort({'_id':-1}).exec()
-  var foodSession = foodSessions[0];
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var address = foodSession.chosen_location.addr.address_1
   var results = yield api.searchNearby({addr: address})
   foodSession.merchants = _.get(results, 'merchants')
@@ -949,7 +953,7 @@ handlers['food.user.choice_confirm'] = function * (message) {
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.votes.push(message.data.value)
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members
@@ -962,7 +966,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   var viableRestaurants = yield utils.createSearchRanking(foodSession.merchants, votes)
 
   logging.info('# of restaurants: ', foodSession.merchants.length)
-  logging.info('# of viable restaurants: ', viableRestaurants.length)
+  logging.data('# of viable restaurants: ', viableRestaurants.length)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',
@@ -972,15 +976,22 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     source: message.source,
     res: responseForAdmin
   }
+  logging.data('response', responseForAdmin)
   replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team}).exec()
-  var merchant = yield db.Merchants.findOne({id: String(message.data.value)})
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+
+  logging.data('using merchant for food service', merchant.id)
+  var shortenedUrl = yield googl.shorten(merchant.summary.url.complete)
+  logging.data('using url', shortenedUrl)
+  logging.data('using url', merchant.summary.url.complete)
   foodSession.chosen_restaurant = {
-    id: message.data.value,
-    name: merchant.data.summary.name
+    id: merchant.id,
+    name: merchant.summary.name,
+    url: shortenedUrl
   }
   foodSession.save()
 
