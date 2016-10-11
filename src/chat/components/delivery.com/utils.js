@@ -368,20 +368,20 @@ function confirmRestaurant (restaurantName) {
       actions: [
         {
           name: 'food.admin.restaurant.confirm',
-          text: 'confirm',
+          text: 'Confirm',
           style: 'primary',
           type: 'button',
           value: 'confirm'
         },
         {
           name: 'food.admin.view_team_members',
-          text: 'view team members',
+          text: 'View Team Members',
           type: 'button',
           value: 'view_team_members'
         },
         {
           name: 'food.admin.change_restaurant',
-          text: 'change restaurant',
+          text: '&lt; Change Restaurant',
           type: 'button',
           value: 'change_restaurant'
         }
