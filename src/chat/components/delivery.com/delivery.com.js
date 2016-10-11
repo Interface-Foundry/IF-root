@@ -826,14 +826,6 @@ handlers['food.user.poll'] = function * (message) {
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
   }
-  teamMembers = yield db.chatusers.find({team_id: foodSession.team_id, is_bot: false})
-
-  if (process.env.NODE_ENV === 'test') {
-    teamMembers = [teamMembers[0]]
-  }
-
-    kip.debug('\n\n\n\n\n\n\ngetting to food.user.poll! teamMembers:', teamMembers.length,'\n\n\n\n\n\n\n')
-
 
   // error with mock slack not being able to get all messages
   teamMembers.map(function (member) {
@@ -843,13 +835,19 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
+
     var resp = {
       mode: 'food',
       action: 'user.poll',
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      res: utils.askUserForCuisineTypes(_.map(foodSession.cuisines, 'name'), member.dm, foodSession.convo_initiater)
+      res: utils.askUserForCuisineTypes(
+        _.map(
+          _.filter(foodSession.cuisines, function(o) {
+            return o.count > 10
+          }), 'name'),
+        member.dm, foodSession.convo_initiater)
     }
 
     // need to sendreplace probably
