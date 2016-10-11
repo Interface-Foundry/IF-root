@@ -320,16 +320,16 @@ function createPreferencesAttachments () {
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, user, adminName) {
+function askUserForCuisineTypes (cuisines, user, adminID) {
   // probably should check if user is on slack
   var s = _.sampleSize(cuisines, 4)
-  var res = sm().text('<@' + adminName + '> is collecting lunch suggestions vote now!')
+  var res = sm().text('<@' + adminID + '> is collecting lunch suggestions, vote now!')
   var a = res.attachment()
     .color('#3AA3E3')
   _.forEach(s, function (cuisineName) {
     a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
   })
-  a.button().name('food.admin.restaurant.pick').value('nothingCuisine').text('Nothing').style('danger').end()
+  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('✕ No Lunch for Me').style('danger').end()
   return res.json()
 }
 

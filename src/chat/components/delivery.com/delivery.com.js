@@ -334,7 +334,7 @@ handlers['food.choose_address'] = function * (session) {
     yield team.save()
     // yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
 
-    var teamMembers = yield db.Chatusers.find({team_id: session.source.team}).exec()
+    var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false}).exec()
     var foodSession = new db.Delivery({
       // probably will want team_members to come from weekly_updates getTeam later
       // will need to update later
@@ -825,7 +825,6 @@ handlers['food.user.poll'] = function * (message) {
   }
 
   // error with mock slack not being able to get all messages
-  var admin = yield db.chatusers.findOne({team_id: message.source.team, is_bot: false, is_admin: true})
   teamMembers.map(function (member) {
     var source = {
       type: 'message',
@@ -840,10 +839,16 @@ handlers['food.user.poll'] = function * (message) {
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      res: utils.askUserForCuisineTypes(_.map(foodSession.cuisines, 'name'), member.dm, admin.real_name)
+      res: utils.askUserForCuisineTypes(_.map(foodSession.cuisines, 'name'), member.dm, foodSession.convo_initiater)
     }
+
+    // need to sendreplace probably
     replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
+}
+
+handlers['food.user.choice_confirm'] = function * (message) {
+  replyChannel.send(message, 'food.admin.restaurant.pick', {type: 'slack', data: message.example_res})
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
@@ -858,9 +863,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     return
   }
 
-  logging.data('# of restaurants: ', foodSession.merchants.length)
+  // logging.data('# of restaurants: ', foodSession.merchants.length)
   var viableRestaurants = yield utils.createSearchRanking(foodSession.merchants, votes)
-  logging.data('# of viable restaurants: ', viableRestaurants.length)
+  // logging.data('# of viable restaurants: ', viableRestaurants.length)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',
@@ -1045,10 +1050,10 @@ handlers['food.participate.confirmation'] = function * (message) {
 handlers['food.menu.action'] = function * (message) {}
 
 /**
- * helper to determine an affirmative or negative response 
- * 
+ * helper to determine an affirmative or negative response
+ *
  * 10-4 good buddy is not supported
- * 
+ *
  * @param {any} text
  * @returns {Boolean} yes
  */
