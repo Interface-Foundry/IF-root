@@ -929,7 +929,6 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-
     var resp = {
       mode: 'food',
       action: 'user.poll',
@@ -960,10 +959,10 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     logging.error('need', numOfResponsesWaitingFor)
     return
   }
-
-  // logging.data('# of restaurants: ', foodSession.merchants.length)
   var viableRestaurants = yield utils.createSearchRanking(foodSession.merchants, votes)
-  // logging.data('# of viable restaurants: ', viableRestaurants.length)
+
+  logging.info('# of restaurants: ', foodSession.merchants.length)
+  logging.info('# of viable restaurants: ', viableRestaurants.length)
   var responseForAdmin = utils.chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',

@@ -2,23 +2,23 @@ var winston = require('winston')
 
 var logging
 
-var testConfig = {
+var config = {
   levels: {
     error: 0,
     warn: 1,
     data: 2,
-    debug: 3,
-    info: 5,
-    verbose: 6,
+    verbose: 3,
+    info: 4,
+    debug: 5,
     silly: 7
   },
   colors: {
     error: 'red',
     warn: 'yellow',
     data: 'grey',
-    debug: 'blue',
-    info: 'green',
     verbose: 'cyan',
+    info: 'green',
+    debug: 'blue',
     silly: 'magenta'
   }
 }
@@ -30,8 +30,9 @@ if (process.env.NODE_ENV !== 'test') {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         colorize: true,
         prettyPrint: true
-      })
-    ]
+      })],
+    colors: config.colors,
+    levels: config.levels
   })
 } else {
   logging = new (winston.Logger)({
@@ -41,8 +42,8 @@ if (process.env.NODE_ENV !== 'test') {
         colorize: true,
         prettyPrint: true
       })],
-    colors: testConfig.colors,
-    levels: testConfig.levels
+    colors: config.colors,
+    levels: config.levels
   })
 }
 
