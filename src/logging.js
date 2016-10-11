@@ -38,7 +38,7 @@ if (process.env.NODE_ENV !== 'test') {
   logging = new (winston.Logger)({
     transports: [
       new (winston.transports.Console)({
-        level: 'debug',
+        level: 'verbose',
         colorize: true,
         prettyPrint: true
       })],
