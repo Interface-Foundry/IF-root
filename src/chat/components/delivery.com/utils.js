@@ -164,7 +164,7 @@ function chooseRestaurant (restaurants, orderBy) {
     'actions': [
       {
         'name': 'food.admin.restaurant.pick',
-        'text': 'More',
+        'text': 'More Choices &gt;',
         'type': 'button',
         'value': 'more'
       },
@@ -204,7 +204,14 @@ function buildRestaurantAttachment (restaurant) {
     'actions': [
       {
         'name': 'food.admin.restaurant.confirm',
-        'text': 'choose',
+        'text': '✓ Choose',
+        'type': 'button',
+        'style': 'primary',
+        'value': restaurant.id
+      },
+      {
+        'name': 'food.admin.restaurant.more_info',
+        'text': 'More Info',
         'type': 'button',
         'value': restaurant.id
       }]
