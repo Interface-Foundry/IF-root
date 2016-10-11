@@ -27,8 +27,8 @@ app.use(bodyParser.json())
  * @param {any} action
 
  */
-function simple_action_handler(action) {
-  kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action,'\n\n\n');
+function simple_action_handler (action) {
+  kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action, '\n\n\n')
   switch (action.name) {
     //
     // Search result buttons
@@ -51,10 +51,10 @@ function simple_action_handler(action) {
       //
 
     //
-      // Other buttons
-      //
-      // case 'home':
-      //   return 'home'
+    // Other buttons
+    //
+    // case 'home':
+    //   return 'home'
     case 'delivery_btn':
       return 'delivery'
     case 'pickup_btn':
@@ -79,100 +79,97 @@ function buttonCommand (action) {
 // incoming slack action
 app.post('/slackaction', function (req, res) {
   kip.debug('incoming action')
-    if (req.body && req.body.payload) {
-      var message
-      var parsedIn = JSON.parse(req.body.payload);
-      var action = parsedIn.actions[0]
-      kip.debug(action.name.cyan, action.value.yellow)
-      // // check the verification token in production
-      // if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
-      //   kip.error('Invalid verification token')
-      //   return res.sendStatus(403)
-      // }
-      var action = parsedIn.actions[0];
-      kip.debug(action.name.cyan, action.value.yellow)
-      // for things that i'm just going to parse for
-      var simple_command = simple_action_handler(action)
-      var buttonData = buttonCommand(action)
-      if (simple_command) {
-        kip.debug('passing through button click as a regular text chat', simple_command.cyan);
-        var message = new db.Message({
-          incoming: true,
-          thread_id: parsedIn.channel.id,
-          original_text: simple_command,
-          text: simple_command,
-          user_id: parsedIn.user.id,
-          origin: 'slack',
-          source: parsedIn
-        });
-        // inject source.team and source.user because fuck the fuck out of slack message formats
-        message.source.team = message.source.team.id
-        message.source.user = message.source.user.id
-        message.source.channel = message.source.channel.id
-        if(simple_command == 'address_confirm_btn') {
-          message.mode = 'address';
-          message.action = 'validate';
-          var location;
-          try {
-            location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
-          } catch(err) {
-            kip.error('error parsing out location: webserver.js line 103')
-          }
-          message.source.location = location;
-          // message.source.location =
-          message.save().then(() => {
+  if (req.body && req.body.payload) {
+    var message
+    var parsedIn = JSON.parse(req.body.payload)
+    var action = parsedIn.actions[0]
+    kip.debug(action.name.cyan, action.value.yellow)
+    // // check the verification token in production
+    // if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
+    //   kip.error('Invalid verification token')
+    //   return res.sendStatus(403)
+    // }
+    var action = parsedIn.actions[0]
+    kip.debug(action.name.cyan, action.value.yellow)
+    // for things that i'm just going to parse for
+    var simple_command = simple_action_handler(action)
+    var buttonData = buttonCommand(action)
+    if (simple_command) {
+      kip.debug('passing through button click as a regular text chat', simple_command.cyan)
+      var message = new db.Message({
+        incoming: true,
+        thread_id: parsedIn.channel.id,
+        original_text: simple_command,
+        text: simple_command,
+        user_id: parsedIn.user.id,
+        origin: 'slack',
+        source: parsedIn
+      })
+      // inject source.team and source.user because fuck the fuck out of slack message formats
+      message.source.team = message.source.team.id
+      message.source.user = message.source.user.id
+      message.source.channel = message.source.channel.id
+      if (simple_command == 'address_confirm_btn') {
+        message.mode = 'address'
+        message.action = 'validate'
+        var location
+        try {
+          location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
+        } catch(err) {
+          kip.error('error parsing out location: webserver.js line 103')
+        }
+        message.source.location = location
+        // message.source.location =
+        message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+        })
+      }
+      else if (simple_command.indexOf('address.') > -1) {
+        message.mode = simple_command.split('.')[0]
+        message.action = simple_command.split('.')[1]
+        kip.debug('\n\n\n\n webserver.js 100 : mode --> ', message.mode, ' action -->', message.action, '\n\n\n\n')
+      }
+
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+      })
+    }
+    else if (buttonData) {
+      message = new db.Message({
+        incoming: true,
+        thread_id: parsedIn.channel.id,
+        action: buttonData.action,
+        mode: buttonData.mode,
+        data: buttonData,
+        user_id: parsedIn.user.id,
+        origin: 'slack',
+        source: parsedIn
+      })
+      // inject source.team and source.user because fuck the fuck out of slack message formats
+      message.source.team = message.source.team.id
+      message.source.user = message.source.user.id
+      message.source.channel = message.source.channel.id
+      message.save().then(() => {
+        queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+      })
+    }else {
+      switch (action.name) {
+        case 'additem':
+          // adds the item to the cart the right way, but for speed we return a hacked message right away
+          var updatedMessage = parsedIn.original_message
+          var priceDifference = 0
+          updatedMessage.attachments.map(a => {
+            if (a.callback_id === parsedIn.callback_id) {
+              priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
+              a.text = a.text.replace(/\d+$/, replacement => {
+                return parseInt(replacement) + 1
+              })
+            } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
+              a.text = a.text.replace(/\$[\d.]+/, function (total) {
+                return '$' + (parseFloat(total.substr(1)) + priceDifference).toFixed(2)
+              })
+            }
           })
-        }
-        else if (simple_command.indexOf('address.') > -1) {
-          message.mode = simple_command.split('.')[0];
-          message.action = simple_command.split('.')[1];
-          kip.debug('\n\n\n\n webserver.js 100 : mode --> ', message.mode,' action -->', message.action,'\n\n\n\n')
-        }
-
-        message.save().then(() => {
-          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
-
-      }
-      else if (buttonData) {
-        message = new db.Message({
-          incoming: true,
-          thread_id: parsedIn.channel.id,
-          action: buttonData.action,
-          mode: buttonData.mode,
-          data: buttonData,
-          user_id: parsedIn.user.id,
-          origin: 'slack',
-          source: parsedIn
-        })
-        // inject source.team and source.user because fuck the fuck out of slack message formats
-        message.source.team = message.source.team.id
-        message.source.user = message.source.user.id
-        message.source.channel = message.source.channel.id
-        message.save().then(() => {
-          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-        })
-      }
-      else {
-        switch (action.name) {
-          case 'additem':
-            // adds the item to the cart the right way, but for speed we return a hacked message right away
-            var updatedMessage = parsedIn.original_message;
-            var priceDifference = 0;
-            updatedMessage.attachments.map(a => {
-              if (a.callback_id === parsedIn.callback_id) {
-                priceDifference = parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-                a.text = a.text.replace(/\d+$/, replacement => {
-                  return parseInt(replacement) + 1;
-                })
-              } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
-                a.text = a.text.replace(/\$[\d.]+/, function(total) {
-                  return '$' + (parseFloat(total.substr(1)) + priceDifference).toFixed(2);
-                })
-              }
-            })
-
 
           co(function * () {
             var teamCart = yield kipcart.getCart(parsedIn.team.id)
@@ -245,7 +242,9 @@ app.post('/slackaction', function (req, res) {
     // sends back original chat
     if (parsedIn.original_message) {
       var stringOrig = JSON.stringify(parsedIn.original_message)
-      res.send(parsedIn.original_message)
+      var map = {amp: '&', lt: '<', gt: '>', quot: '"', '#039': "'"}
+      stringOrig = stringOrig.replace(/&([^;]+);/g, (m, c) => map[c])
+      res.send(JSON.parse(stringOrig))
     } else {
       console.error('slack buttons broke, need a response_url')
       res.sendStatus(process.env.NODE_ENV === 'production' ? 200 : 500)
@@ -349,9 +348,8 @@ function listen (callback) {
   listener = callback
 }
 
-
 var port = 8000
-app.listen(port, function(e) {
+app.listen(port, function (e) {
   if (e) {
     console.dir(e)
   } else {

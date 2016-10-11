@@ -46,6 +46,26 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
+
+// inside getChatUsers.. u is:  {
+//   "id": "D2HKEQ9RV",
+//   "user": "U0HLZP0A2",
+//   "created": 1475164591,
+//   "is_im": true,
+//   "is_org_shared": false,
+//   "is_user_deleted": false
+// }
+
+// inside getChatUsers.. u is:  {
+//   "id": "D2HHN8283",
+//   "user": "USLACKBOT",
+//   "created": 1475164591,
+//   "is_im": true,
+//   "is_org_shared": false,
+//   "is_user_deleted": false
+// }
+
+
 //populate le chat users - you still have to manually set is_admin 
 var getChatUsers = co.wrap(function *(message) {
         //I don't know why but async isnt working properly, bandaid solution :/
@@ -56,18 +76,19 @@ var getChatUsers = co.wrap(function *(message) {
         var res = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token);
         res = JSON.parse(res);
         kip.debug('res: ',res)
-          var team_members_id_array = teamMembers.map(function(m){
+        var team_members_id_array = teamMembers.map(function(m){
             return m.dm;
-          })
+        })
           async.eachSeries(res.ims, function iterator(u, cb){
-                  if(team_members_id_array.indexOf(u.id) == -1) {
+                  kip.debug('\n\n\ninside getChatUsers.. u is: ', u,'message is: ',message,'\n\n\n');
+                  // if(team_members_id_array.indexOf(u.id) == -1 && u.user !== 'USLACKBOT') {
                     kip.debug('creating new chatusers.. ')
                     var new_user = new db.Chatuser();
                     new_user.team_id = team.team_id;
                     new_user.id = u.user;
                     new_user.dm = u.id;
                     new_user.is_bot = false;
-                    if (message.user_id == u.id) {
+                    if (u.user == message.source.user) {
                       new_user.is_admin = true;
                     }
                     new_user.save(function(err, saved) {
@@ -75,7 +96,7 @@ var getChatUsers = co.wrap(function *(message) {
                       kip.debug('calling callback...')
                       cb();
                     });
-                  }
+                  // }
           }, function done(err) {
             return Promise.resolve(result)
           })

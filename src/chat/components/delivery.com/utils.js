@@ -9,9 +9,9 @@ var sm = require('slack-message-builder')
 var async = require('async')
 
 var weekly_updates = require('../weekly_updates.js')
-// var api = require('./api-wrapper.js')
+var api = require('./api-wrapper.js')
 
-function * initiateDeliverySession (slackbot) {
+function * initiateDeliverySession (session) {
   return new db.Delivery({
     teamMembers: weekly_updates.getTeam(slackbot),
     chosen_location: {},
@@ -124,7 +124,7 @@ function createButton (name, buttonType) {
 */
 function chooseRestaurant (restaurants, orderBy) {
   var viable = restaurants.slice(0, 3)
-  var attachments = [buildRestaurantAttachment(viable[0]), buildRestaurantAttachment(viable[1]), buildRestaurantAttachment(viable[2])]
+  var attachments = viable.map(buildRestaurantAttachment)
   var res = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': attachments
@@ -135,33 +135,33 @@ function chooseRestaurant (restaurants, orderBy) {
     ],
     'text': '',
     'fallback': 'You are unable to choose a game',
-    'callback_id': 'wopr_game',
+    'callback_id': 'food.admin.restaurant.pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
     'actions': [
       {
-        'name': 'chess',
+        'name': 'food.admin.restaurant.pick',
         'text': 'More',
         'type': 'button',
-        'value': 'chess'
+        'value': 'more'
       },
       {
-        'name': 'maze',
+        'name': 'food.admin.restaurant.pick',
         'text': 'Sort Price',
         'type': 'button',
-        'value': 'maze'
+        'value': 'sort_price'
       },
       {
-        'name': 'maze',
+        'name': 'food.admin.restaurant.pick',
         'text': 'Sort Rating',
         'type': 'button',
-        'value': 'maze'
+        'value': 'sort_rating'
       },
       {
-        'name': 'maze',
+        'name': 'food.admin.restaurant.pick',
         'text': 'Sort Distance',
         'type': 'button',
-        'value': 'maze'
+        'value': 'sort_distance'
       }
     ]
   })
@@ -180,7 +180,7 @@ function buildRestaurantAttachment (restaurant) {
     'attachment_type': 'default',
     'actions': [
       {
-        'name': 'choose.restaurant',
+        'name': 'food.admin.restaurant.confirm',
         'text': 'choose',
         'type': 'button',
         'value': restaurant.id
@@ -273,9 +273,8 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function createSearchRanking (results, votes) {
+function * createSearchRanking (merchants, votes) {
   // filter results based on what results want
-  var merchants = (_.get(results, 'merchants')) ? results.merchants : merchants
   var eligible = []
   _.forEach(votes, function (v) {
     // get all merchants who satisfy cuisine type being v
@@ -324,7 +323,7 @@ function createPreferencesAttachments () {
 function askUserForCuisineTypes (cuisines, user, adminName) {
   // probably should check if user is on slack
   var s = _.sampleSize(cuisines, 4)
-  var res = sm().text('`' + adminName + '` is collecting lunch suggestions vote now!')
+  var res = sm().text('<@' + adminName + '> is collecting lunch suggestions vote now!')
   var a = res.attachment()
     .color('#3AA3E3')
     .ts(Date.now())
@@ -345,23 +344,23 @@ function confirmRestaurant (restaurantName) {
       color: '#3AA3E3',
       actions: [
         {
-          name: 'confirm',
+          name: 'food.user.confirm_interest',
           text: 'confirm',
           style: 'primary',
           type: 'button',
           value: 'confirm'
         },
         {
-          name: 'view team members',
+          name: 'food.admin.view_team_members',
           text: 'view team members',
           type: 'button',
-          value: 'view team members'
+          value: 'view_team_members'
         },
         {
-          name: 'Confirm',
-          text: 'Confirm',
+          name: 'food.admin.change_restaurant',
+          text: 'change restaurant',
           type: 'button',
-          value: 'buttons'
+          value: 'change_restaurant'
         }
       ]
     }

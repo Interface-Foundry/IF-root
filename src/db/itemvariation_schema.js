@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 /**
  * show items with multiple variations that cant be added directly
@@ -8,9 +8,9 @@ var itemvariationSchema = mongoose.Schema({
   cart_id: mongoose.Schema.ObjectId,
 
   ts: {
-      type: Date,
-      default: Date.now
-    },
+    type: Date,
+    default: Date.now
+  },
 
   ASIN: String,
 
@@ -24,6 +24,6 @@ var itemvariationSchema = mongoose.Schema({
 
   variationSelected: {}
 
-});
+})
 
-module.exports = mongoose.model('ItemVariations', itemvariationSchema);
+module.exports = mongoose.model('ItemVariations', itemvariationSchema)

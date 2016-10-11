@@ -125,18 +125,23 @@ User.prototype.goto = function (step) {
 
     S5: function * () {
       var res = yield steps.S4()
+      res = yield user.tap(res, 0, 0)
       return res
     },
 
     S6: function * () {
       // setup multiple votes in before, so not sure what this will entail
       var res = yield steps.S5()
+      logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
       res = yield user.tap(res, 0, 0)
       return res
     },
 
     S7: function * () {
-      // setup selected restaurant
+      var res
+      res = yield steps.S6()
+      res = yield user.tap(res, 0, 0)
+      return res
     },
 
     S9: function * () {
@@ -193,7 +198,7 @@ User.prototype.goto = function (step) {
 }
 
 /**
- * gets a fresh conversation for a user that we know about in the database
+ * gets a fresh conversation for a user that we know about in the database 
  */
 function * ExistingUser () {
   var user = new User({

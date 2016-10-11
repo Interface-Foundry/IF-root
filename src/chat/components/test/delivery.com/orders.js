@@ -1,6 +1,6 @@
 require('co-mocha')
 var should = require('should')
-var mock_slack = require('./mock_slack_users')
+var mock_slack = require('../mock_slack_users')
 var _ = require('lodash')
 
 // procedes up to S7
@@ -12,6 +12,7 @@ function * chooseRestaurantSomehow(admin, restaurantToPick) {
   return admin.tap(reply, 2, 0) // tap the third attachment's first button i guess
 }
 
+
 /*______   _______  
 .' ____ \ |  ___  | 
 | (___ \_||_/  / /  
@@ -19,7 +20,7 @@ function * chooseRestaurantSomehow(admin, restaurantToPick) {
 | \____) |   / /    
  \______.'  /_/     
 */
-describe('Confirm restaurant choice', () => {
+describe.skip('Confirm restaurant choice', () => {
   describe('participation prompt', () => {
     it('should display "collecting food now message" to the admin', function * () {
       var admin = yield mock_slack.ExistingUser()
@@ -44,12 +45,10 @@ describe('Confirm restaurant choice', () => {
 describe('Confirm restaurant participation in the order', () => {
   it('should show the right restuarant and stuff', function * () {
     var user = yield mock_slack.ExistingUser()
-    var admin = yield mock_slack.ExistingAdmin()
-    automateRestaurantChoice(admin, "Dos Toros Taqueria")
-    var msg = yield user.awaitMessage()
+    var msg = yield user.text('test.s8')
 
     // check the message format
-    _.get(msg, "text", '').should.equal("<@U12345 chose Dos Toros Taqueria - Latin American, Mexican - est wait 40-55 min")
+    _.get(msg, "text", '').should.equal("`Alyx` chose `Choza Taqueria` - Mexican, Southwestern - est. wait time 45-55 min")
     _.get(msg, "attachments[0].text", '').should.equal("Want to be in this order?")
     
     // check the buttons
@@ -57,10 +56,10 @@ describe('Confirm restaurant participation in the order', () => {
     _.get(msg, "attachments[0].actions[1].text", '').should.equal("No")
 
     // the "no" should have a confirmation
-    _.get(msg, "attachments[0].actions[1].confirm.text", '').should.equal("Are you sure you don't want to order food right now?")
+    _.get(msg, "attachments[0].actions[1].confirm.text", '').should.equal("Are you sure you don't want lunch?")
   })
 
-  it('should remove the message when user taps No', function * () {
+  it.skip('should remove the message when user taps No', function * () {
     var user = yield mock_slack.ExistingUser()
     var admin = yield mock_slack.ExistingAdmin()
     automateRestaurantChoice(admin, "Dos Toros Taqueria")
@@ -76,14 +75,12 @@ describe('Confirm restaurant participation in the order', () => {
 
   it('should move on when user taps Yes', function * () {
     var user = yield mock_slack.ExistingUser()
-    var admin = yield mock_slack.ExistingAdmin()
-    automateRestaurantChoice(admin, "Dos Toros Taqueria")
-    var msg = yield user.awaitMessage()
-    var res = yield user.tap(msg, 0, 0)
+    var msg = yield user.text('test.s8')
+    msg = yield user.tap(msg, 0, 0)
 
-    // new message received and old message modified
-    should.exist(res.newMessages)
-    res.replacementMessage.text.should.not.equal("<@U12345 chose Dos Toros Taqueria - Latin American, Mexican - est wait 40-55 min")
+    // new message received
+    msg.text.should.equal('`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>')
+    
   })
 })
 
@@ -98,30 +95,30 @@ describe('Display top food choices to participating members', () => {
   it('should display items according to their preferences', function * () {
     // grab an existing user
     var user = yield mock_slack.ExistingUser()
-    // wowie this one is really complicated
-    var msg = yield getMenuSomehow()
+    var msg = yield user.goto('S9')
 
     // check the top text
-    msg.text.should.equal("Dos Toros Taqueria - <View Full Menu|some url todo>")
+    msg.text.should.equal("`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>")
     
-    // check the first item in the Menu
-    _.get(msg, 'attachments[0].text', '').should.equal("AMAZING ASS BURRITO OF JOY")
-    _.get(msg, 'attachments[0].image_url', '').should.equal("https://amazingassburrito.com/selfie.png")
-    _.get(msg, 'attachments[0].actions[0].text', '').should.equal("Add to Cart")
-
-    // check the second item in the Menu
-    _.get(msg, 'attachments[1].text', '').should.equal("AMAZING ASS BURRITO OF JOY")
-    _.get(msg, 'attachments[1].image_url', '').should.equal("https://amazingassburrito.com/selfie.png")
+    // check the first item in the Menu (0th is empty)
+    _.get(msg, 'attachments[1].text', '').should.equal("Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.")
+    //_.get(msg, 'attachments[1].image_url', '').should.equal("https://amazingassburrito.com/selfie.png")
     _.get(msg, 'attachments[1].actions[0].text', '').should.equal("Add to Cart")
 
     // check the button menu
-    _.get(msg, 'attachments[2].actions[0].text', '').should.equal("More >")
-    _.get(msg, 'attachments[2].actions[1].text', '').should.equal("Category")
+    _.get(msg, 'attachments[4].actions[0].text', '').should.equal("More >")
+    _.get(msg, 'attachments[4].actions[1].text', '').should.equal("Category")
+
+    // try clicking the "more" button
+    msg = yield user.tap(msg, 4, 0)
+    msg.text.should.equal('`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>')
+
+    // try clicking the "category" button
+    msg = yield user.tap(msg, 4, 1)
+
   })
 
-  it('should display subchoices when you click Add to Cart', () => {
-    "yaaas".should.equal('yaaas'); // todo
-  })
+
 })
 
 
@@ -132,9 +129,14 @@ describe('Display top food choices to participating members', () => {
 | \____) | _| |_|  `--'  | 
  \______.'|_____|'.____.'
 */
-describe("Choose sub-options for item", () => {
-  it('should get designed eventually', () => {
-    "hella good tacos".should.equal("hella good tacos")
+describe.skip("Choose sub-options for item", () => {
+  it('should display subchoices when you click Add to Cart', function * () {
+    // grab an existing user
+    var user = yield mock_slack.ExistingUser()
+    var msg = yield user.goto('S9')
+    var submenu = yield user.tap(msg, 1, 0)
+
+    
   })
 })
 
@@ -145,7 +147,7 @@ describe("Choose sub-options for item", () => {
 | \____) | _| |_  _| |_  
  \______.'|_____||_____| 
 */
-descibe('Confirm personal order', () => {
+describe.skip('Confirm personal order', () => {
   it('should return the items you ordered in a single message', function * () {
     var msg = yield orderTwoItemsSomehow()
 

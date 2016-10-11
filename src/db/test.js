@@ -1,3 +1,3 @@
-var db = require('db');
+var db = require('db')
 
 console.log(Object.keys(db))
