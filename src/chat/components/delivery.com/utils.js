@@ -11,19 +11,38 @@ var async = require('async')
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
 
-function * initiateDeliverySession (session) {
-  return new db.Delivery({
-    teamMembers: weekly_updates.getTeam(slackbot),
-    chosen_location: {},
-    convoInitiater: String,
-    fulfillment_method: String,
-    time_started: {
-      type: Date,
-      default: Date.now
-    },
-    mode: String,
-    action: String
+function * setOldDeliverySessionsFalse (team_id) {
+  var foodSessions = yield db.Delivery.find({team_id: team_id}).exec()
+  if (foodSessions) {
+    yield foodSessions.map(foodSession => {
+      foodSession.active = false
+      foodSession.save()
+    })
+  }
+}
+
+/*
+*
+*
+*
+*/
+function * initiateDeliverySession (session, teamMembers, location) {
+  var foodSessions = yield db.Delivery.find({team_id: session.source.team}).exec()
+  if (foodSessions) {
+    yield foodSessions.map(session => {
+      session.active = false
+      session.save()
+    })
+  }
+  var newSession = new db.Delivery({
+    active: true,
+    team_id: session.source.team,
+    // probably will want team_members to come from weekly_updates getTeam later
+    team_members: teamMembers,
+    chosen_location: {addr: location},
+    convo_initiater: session.source.user
   })
+  return newSession
 }
 
 function * initiateFoodMessage (message) {
@@ -342,7 +361,7 @@ function confirmRestaurant (restaurantName) {
       color: '#3AA3E3',
       actions: [
         {
-          name: 'food.user.confirm_interest',
+          name: 'food.admin.restaurant.confirm',
           text: 'confirm',
           style: 'primary',
           type: 'button',

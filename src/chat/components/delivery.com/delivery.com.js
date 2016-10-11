@@ -328,21 +328,9 @@ handlers['food.choose_address'] = function * (session) {
       kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
     // TODO handle the case where they type a new address without clicking the "new" button
     }
-    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-    team.meta.chosen_location = location
-    kip.debug('saving location', location.address_1)
-    yield team.save()
-    // yield dsxClient.createDeliveryContext(location.address_1, 'none', session.source.team, session.source.user)
 
     var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false}).exec()
-    var foodSession = new db.Delivery({
-      // probably will want team_members to come from weekly_updates getTeam later
-      // will need to update later
-      team_id: session.source.team,
-      team_members: teamMembers,
-      chosen_location: {addr: location},
-      convo_initiater: session.source.user
-    })
+    var foodSession = yield utils.initiateDeliverySession(session, teamMembers, location)
 
     yield foodSession.save()
     //
@@ -527,10 +515,9 @@ handlers['address.save'] = function * (session) {
   if (location) {
     team.meta.locations.push(location)
     team.meta.chosen_location = location
-  }else {
-
-    // todo error
-    throw new Error('womp bad address')
+  } else {
+  // todo error
+  throw new Error('womp bad address')
   }
   yield team.save()
   session.text = JSON.stringify(location)
@@ -898,7 +885,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
-handlers['food.user.confirm_interest'] = function * (message) {
+handlers['food.participate.confirmation'] = function * (message) {
   //
   console.log('S8 at this point')
 }
