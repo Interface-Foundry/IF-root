@@ -26,7 +26,7 @@ describe('getting votes and selecting merchant', function () {
   var resSticker = 'https://storage.googleapis.com/kip-random/laCroix.gif'
 
   before(function * () {
-    this.timeout(1000)
+    this.timeout(5000)
     yield mock.setup()
   })
   // S4

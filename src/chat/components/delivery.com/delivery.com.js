@@ -985,13 +985,10 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
   logging.data('using merchant for food service', merchant.id)
-  var shortenedUrl = yield googl.shorten(merchant.summary.url.complete)
-  logging.data('using url', shortenedUrl)
-  logging.data('using url', merchant.summary.url.complete)
   foodSession.chosen_restaurant = {
     id: merchant.id,
     name: merchant.summary.name,
-    url: shortenedUrl
+    url: yield googl.shorten(merchant.summary.url.complete)
   }
   foodSession.save()
 
@@ -1001,7 +998,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     thread_id: message.dm,
     origin: message.origin,
     source: message.source,
-    res: utils.confirmRestaurant(foodSession.chosen_restaurant.name)
+    res: utils.confirmRestaurant(foodSession.chosen_restaurant)
   }
   replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
