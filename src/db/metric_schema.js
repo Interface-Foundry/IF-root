@@ -26,5 +26,7 @@ module.exports.log = function (metric, data) {
   var obj = {
     metric: metric,
     data: data
-  }(new module.exports(obj)).save()
+  };
+
+  (new module.exports(obj)).save()
 }
