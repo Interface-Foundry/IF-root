@@ -11,6 +11,39 @@ var async = require('async')
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
 
+
+/* S12A
+*
+*
+*/
+function * confirmTeamOrder(message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var response = {
+    text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
+    attachments: [
+    {
+        'title': '',
+        'image_url': 'https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png'
+    }]
+  }
+
+  // attachments with all the food
+
+
+  // final attachment
+  response.attachments.push({
+    text: `*Delivery Fee:* ${foodSession.order.deliveryFee}\n*Taxes:* ${foodSession.order.taxes}\n*Team Cart Total:* ${foodSession.order.taxes}`
+  })
+}
+
+/* S12B
+*
+*
+*/
+function * createContactConfirmation (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+}
+
 /*
 *
 *
