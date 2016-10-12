@@ -902,18 +902,75 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 
   var resp = {
     mode: 'food',
-    action: 'admin.restaurant.confirm',
+    action: 'admin.restaurant.collect_orders',
     thread_id: message.dm,
     origin: message.origin,
     source: message.source,
     res: utils.confirmRestaurant(foodSession.chosen_restaurant)
   }
-  replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
+
+  replyChannel.send(resp, 'food.admin.restaurant.collect_orders', {type: 'slack', data: resp.res})
 }
 
-handlers['food.participate.confirmation'] = function * (message) {
-  //
-  console.log('S8 at this point')
+handlers['food.admin.restaurant.collect_orders'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var msgJson = {
+    'text': `<@${foodSession.convo_initiater.id}|${foodSession.convo_initiater.name}> chose <delivery.com|${foodSession.chosen_restaurant.name}> - Mexican, Southwestern - est. wait time 45-55 min`,
+    'attachments': [
+      {
+        'mrkdwn_in': [
+          'text'
+        ],
+        'text': 'Want to be in this order?',
+        'fallback': 'n/a',
+        'callback_id': 'food.participate.confirmation',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'food.participate.confirmation',
+            'text': 'Yes',
+            'type': 'button',
+            'style': 'primary',
+            'value': 'food.participate.confirmation'
+          },
+          {
+            'name': 'food.exit.confirm',
+            'text': 'No',
+            'type': 'button',
+            'value': 'food.exit.confirm',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': "Are you sure you don't want to order food?",
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
+          }
+        ]
+      }
+    ]
+  }
+
+  foodSession.team_members.map(m => {
+    console.log(m)
+    var newMessage = {
+      incoming: false,
+      thread_id: m.dm,
+      resolved: true,
+      user_id: 'kip',
+      origin: 'slack',
+      source: {
+        team: m.team_id,
+        user: m.id,
+        channel: m.dm,
+        type: 'message'
+      },
+      state: {},
+      user: m.id
+    }
+
+    replyChannel.send(newMessage, 'food.participate.confirmation', {type: 'slack', data: msgJson})
+  })
 }
 
 handlers['test.s8'] = function * (message) {
@@ -931,20 +988,20 @@ handlers['test.s8'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'yes_btn',
+            'name': 'food.participate.confirmation',
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
-            'value': 'chess'
+            'value': 'food.participate.confirmation'
           },
           {
-            'name': 'no_btn',
+            'name': 'food.exit.confirm',
             'text': 'No',
             'type': 'button',
-            'value': 'war',
+            'value': 'food.exit.confirm',
             'confirm': {
               'title': 'Are you sure?',
-              'text': "Are you sure you don't want lunch?",
+              'text': "Are you sure you don't want to order food?",
               'ok_text': 'Yes',
               'dismiss_text': 'No'
             }
@@ -958,106 +1015,97 @@ handlers['test.s8'] = function * (message) {
 }
 
 handlers['food.participate.confirmation'] = function * (message) {
-  var yes = yield yesOrNo(message.text)
-  if (yes) {
-    // message the user with the menu
-    // S9A: Display top food choices to participating members
-    // get the menu from DSX or something
+  // message the user with the menu
+  // S9A: Display top food choices to participating members
+  // get the menu from DSX or something
 
-    var msg_json = {
-      'text': '`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>',
-      'attachments': [
-        {
-          'mrkdwn_in': [
-            'text'
-          ]
-        },
-        {
-          'title': 'Tacos – $8.04',
-          'text': 'Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.',
-          'fallback': 'You are unable to choose a game',
-          'callback_id': 'wopr_game',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'thumb_url': 'http://i.imgur.com/GImiWp2.jpg',
-          'actions': [
-            {
-              'name': 'chess',
-              'text': 'Add to Cart',
-              'type': 'button',
-              'style': 'primary',
-              'value': 'chess'
-            }
-          ]
-        },
-        {
-          'title': 'Tostada – $8.22',
-          'text': 'Crispy corn tortilla topped with black beans, lettuce, salsa, queso fresco and your choice of meat or vegetable.',
-          'fallback': 'You are unable to choose a game',
-          'callback_id': 'wopr_game',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'thumb_url': 'http://i.imgur.com/GImiWp2.jpg',
-          'actions': [
-            {
-              'name': 'chess',
-              'text': 'Add to Cart',
-              'type': 'button',
-              'style': 'primary',
-              'value': 'chess'
-            }
-          ]
-        },
-        {
-          'title': 'Jarritos – $2.75',
-          'text': 'Tamarind, lime, pineapple, mandarin, grapefruit, mango, sangria, sidral.',
-          'fallback': 'You are unable to choose a game',
-          'callback_id': 'wopr_game',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'thumb_url': 'http://i.imgur.com/RtHKdqA.jpg',
-          'actions': [
-            {
-              'name': 'chess',
-              'text': 'Add to Cart',
-              'type': 'button',
-              'style': 'primary',
-              'value': 'chess'
-            }
-          ]
-        },
-        {
-          'text': '',
-          'fallback': 'You are unable to choose a game',
-          'callback_id': 'wopr_game',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'actions': [
-            {
-              'name': 'chess',
-              'text': 'More >',
-              'type': 'button',
-              'value': 'chess'
-            },
-            {
-              'name': 'chess',
-              'text': 'Category',
-              'type': 'button',
-              'value': 'chess'
-            }
-          ]
-        }
-      ]
-    }
-
-    replyChannel.send(message, 'food.menu.action', {type: 'slack', data: msg_json})
-
-  // add this userid to the list of users actually participating in the slackbot schema
-  } else {
-    // okay byeeee
-    var component = new ui.UIComponentFactory(message.origin).buildTextMessage('Okay Thanks')
-    replyChannel.send(message, '.', component.render())
+  var msg_json = {
+    'text': '`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>',
+    'attachments': [
+      {
+        'mrkdwn_in': [
+          'text'
+        ]
+      },
+      {
+        'title': 'Tacos – $8.04',
+        'text': 'Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'thumb_url': 'http://i.imgur.com/GImiWp2.jpg',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Add to Cart',
+            'type': 'button',
+            'style': 'primary',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': 'Tostada – $8.22',
+        'text': 'Crispy corn tortilla topped with black beans, lettuce, salsa, queso fresco and your choice of meat or vegetable.',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'thumb_url': 'http://i.imgur.com/GImiWp2.jpg',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Add to Cart',
+            'type': 'button',
+            'style': 'primary',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': 'Jarritos – $2.75',
+        'text': 'Tamarind, lime, pineapple, mandarin, grapefruit, mango, sangria, sidral.',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'thumb_url': 'http://i.imgur.com/RtHKdqA.jpg',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Add to Cart',
+            'type': 'button',
+            'style': 'primary',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'text': '',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'More >',
+            'type': 'button',
+            'value': 'chess'
+          },
+          {
+            'name': 'chess',
+            'text': 'Category',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      }
+    ]
   }
+
+  replyChannel.send(message, 'food.menu.action', {type: 'slack', data: msg_json})
 }
 
 handlers['food.menu.action'] = function * (message) {}

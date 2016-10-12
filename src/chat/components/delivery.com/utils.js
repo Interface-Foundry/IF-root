@@ -374,7 +374,7 @@ function confirmRestaurant (restaurant) {
       color: '#3AA3E3',
       actions: [
         {
-          name: 'food.admin.restaurant.confirm',
+          name: 'food.admin.restaurant.collect_orders',
           text: 'Confirm',
           style: 'primary',
           type: 'button',
