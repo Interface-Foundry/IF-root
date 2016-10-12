@@ -16,38 +16,7 @@ var request = require('request-promise')
 var team_utils = require('./team_utils.js')
 var UserChannel = require('./UserChannel')
 
-var fs = require('fs')
-var yaml = require('js-yaml')
-var dsxsvc = require('./dsx_services')
-var dsxutils = require('./dsx_utils')
 var ui = require('../ui_controls')
-var argv = require('minimist')(process.argv.slice(2))
-
-
-var initFilename = argv['config']
-if (initFilename === null || initFilename === undefined) {
-  console.log('--config parameter not found. Please invoke this script using --config=<config_filename>.')
-  // process.exit(-1)
-  initFilename = path.resolve(__dirname, 'dsx_init_peter.local.yml')
-}
-
-var yamlDoc
-try {
-  yamlDoc = yaml.safeLoad(fs.readFileSync(initFilename, 'utf8'))
-} catch(err) {
-  console.log(err)
-  process.exit(-1)
-}
-
-var loadedParams = dsxutils.ServiceObjectLoader(yamlDoc).loadServiceObjectParams('DSXClient')
-
-logging.info(loadedParams)
-logging.info(typeof (loadedParams))
-logging.info('### looking at loadedParams again')
-logging.info(loadedParams)
-
-var dsxClient = new dsxsvc.DSXClient(loadedParams)
-
 var googl = require('goo.gl')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
@@ -490,7 +459,6 @@ handlers['address.change'] = function * (session) {
 handlers['food.delivery_or_pickup'] = function * (session) {
   var fulfillmentMethod = session.text
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
-  // var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
 
   //
   // START OF S2B
