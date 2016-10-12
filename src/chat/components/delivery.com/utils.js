@@ -11,16 +11,6 @@ var async = require('async')
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
 
-function * setOldDeliverySessionsFalse (team_id) {
-  var foodSessions = yield db.Delivery.find({team_id: team_id}).exec()
-  if (foodSessions) {
-    yield foodSessions.map(foodSession => {
-      foodSession.active = false
-      foodSession.save()
-    })
-  }
-}
-
 /*
 *
 *
@@ -353,7 +343,7 @@ function createPreferencesAttachments () {
 function askUserForCuisineTypes (cuisines, user, admin) {
   // probably should check if user is on slack
   var s = _.sampleSize(cuisines, 4)
-  var res = sm().text('<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!')
+  var res = sm().text(`<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`)
   var a = res.attachment()
     .color('#3AA3E3')
     .ts(Date.now())
@@ -432,23 +422,5 @@ module.exports = {
   sortMerchantsByRating,
   confirmRestaurant,
   userFoodPreferencesPlaceHolder,
-initiateDeliverySession}
-
-// former quick testing stuff
-if (!module.parent) {
-  co(function * () {
-    var testingParams = {
-      addr: '21 Essex St 10002',
-      votes: {
-        'Asian': 3,
-        'Sandwiches': 2
-      }
-    }
-    // fs.writeFile('./data.json', JSON.stringify(results) , 'utf-8')
-    // var c = yield getMerchatsWithCuisine(results, 'Asian')
-    // logging.info('cuisine types avail: ', c)
-    var cuisines = JSON.parse(fs.readFileSync('extra/cuisinesAvailable.json', 'utf8'))
-    var res = askUserForCuisineTypes(cuisines, 'userXXX', 'Alyx')
-    logging.debug(res)
-  })
+  initiateDeliverySession
 }

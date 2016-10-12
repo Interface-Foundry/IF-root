@@ -100,6 +100,15 @@ User.prototype.tap = function (message, attachment_index, action_index) {
  */
 User.prototype.goto = function (step) {
   var user = this
+  var res
+  var printData
+
+  if (process.env.PRINT_DATA) {
+    printData = true
+  } else {
+    logging.warn('not printing responses in goto, set PRINT_DATA env to do so'.toUpperCase())
+  }
+
   var steps = {
     // no clue how s4 should be
     S4: function * () {
@@ -119,27 +128,39 @@ User.prototype.goto = function (step) {
         action: 'user.preferences'
       }
       yield user.db.collection('messages').insert(message)
-      var res = yield user.text('food.user.preferences')
+      res = yield user.text('food.user.preferences')
+      if (printData) {
+        logging.data('res-s3', res)
+      }
       return res
     },
 
     S5: function * () {
       var res = yield steps.S4()
       res = yield user.tap(res, 0, 0)
+      if (printData) {
+        logging.data('res-s4', res)
+      }
       return res
     },
 
     S6: function * () {
       // setup multiple votes in before, so not sure what this will entail
-      var res = yield steps.S5()
+      res = yield steps.S5()
       logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
       res = yield user.tap(res, 0, 0)
+      if (printData) {
+        logging.data('res-s5', res)
+      }
       return res
     },
 
     S7: function * () {
-      var res
       res = yield steps.S6()
+
+      if (printData) {
+        logging.data('res-s6', res)
+      }
       res = yield user.tap(res, 0, 0)
       return res
     },
@@ -198,7 +219,7 @@ User.prototype.goto = function (step) {
 }
 
 /**
- * gets a fresh conversation for a user that we know about in the database 
+ * gets a fresh conversation for a user that we know about in the database
  */
 function * ExistingUser () {
   var user = new User({

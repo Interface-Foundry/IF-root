@@ -541,7 +541,6 @@ handlers['address.change'] = function * (session) {
 }
 
 handlers['food.delivery_or_pickup'] = function * (session) {
-  kip.debug('\n\n🍏 🍎 🍐 getting to food.delivery_or_pickup\n\n')
   var fulfillmentMethod = session.text
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
   // var updatedDeliveryContext = yield dsxClient.setFulfillmentMethodForContext(fulfillmentMethod, session.source.team, session.source.user)
@@ -884,7 +883,6 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     source: message.source,
     res: responseForAdmin
   }
-  logging.data('response', responseForAdmin)
   replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
