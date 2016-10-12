@@ -1,5 +1,6 @@
 'use strict'
 var _ = require('lodash')
+var Menu = require('./Menu')
 
 // injected dependencies
 var replyChannel
@@ -22,7 +23,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
           'text': 'Add to Cart',
           'type': 'button',
           'style': 'primary',
-          'value': i.id
+          'value': i.unique_id
         }
       ]
     }
@@ -62,8 +63,30 @@ handlers['food.menu.quick_picks'] = function * (message) {
 }
 
 handlers['food.item.submenu'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var menu = Menu(foodSession.menu)
+  var item = menu.getItemById(message.source.actions[0].value)
+
+  // [ { images: [],
+  //   children: [],
+  //   type: 'item',
+  //   laundry_type: null,
+  //   price_compare_item: false,
+  //   popular_rank: 6,
+  //   popular_flag: true,
+  //   increment: 1,
+  //   max_price: 9,
+  //   price: 9,
+  //   max_qty: 25,
+  //   min_qty: 1,
+  //   available: null,
+  //   unique_id: 638,
+  //   description: 'Vegetarian Samosa topped with chickpeas, yogurt and chutney.',
+  //   name: 'Chowpatty Samosa Chaat',
+  //   id: 'PE-68952-616-637-638' } ]
+
   var msgJson = {
-    'text': '*Tacos – $8.04* \n Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.',
+    'text': `*${item.name}* \n ${item.description}`,
     'attachments': [
       {
         'mrkdwn_in': [

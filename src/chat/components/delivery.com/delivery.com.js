@@ -264,7 +264,7 @@ handlers['food.choose_address'] = function * (session) {
     //
     // START OF S2
     //
-    var text = 'Cool! You selected \`${location.address_1}\`. Delivery or Pickup?'
+    var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
     var msg_json = {
       'attachments': [
         {
@@ -810,6 +810,13 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     name: merchant.summary.name,
     url: yield googl.shorten(merchant.summary.url.complete)
   }
+
+  var menu = yield request({
+    url: `https://api.delivery.com/merchant/${merchant.id}/menu?client_id=brewhacks2016`,
+    json: true
+  })
+  foodSession.menu = menu
+
   foodSession.save()
 
   var resp = {
