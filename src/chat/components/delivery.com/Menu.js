@@ -87,11 +87,11 @@ Menu.prototype.generateJsonForItem = function(cartItem) {
     ],
     'actions': [
       {
-        'name': 'chess',
+        'name': 'food.item.add_to_cart',
         'text': '✓ Add to Cart: $8.04',
         'type': 'button',
         'style': 'primary',
-        'value': 'chess'
+        'value': cartItem.item.item_id
       },
       {
         'name': 'chess',

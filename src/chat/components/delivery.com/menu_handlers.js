@@ -117,6 +117,22 @@ handlers['food.option.click'] = function * (message) {
   replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
+handlers['food.item.add_to_cart'] = function * (message) {
+    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    var menu = Menu(foodSession.menu)
+    var option = message.source.actions[0].value
+    var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
+
+    userItem.added_to_cart = true
+    foodSession.markModified('cart')
+    foodSession.save()
+
+    // check for errors
+    // if errors, highlight errors
+    // otherwise go to S11 confirm personal order
+    replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'neat-o, thanks'}})
+}
+
 module.exports = function($replyChannel) {
   replyChannel = $replyChannel
   return handlers
