@@ -14,6 +14,7 @@ var path = require('path')
 var request = require('request-promise')
 
 var team_utils = require('./team_utils.js')
+var UserChannel = require('./UserChannel')
 
 var fs = require('fs')
 var yaml = require('js-yaml')
@@ -21,6 +22,7 @@ var dsxsvc = require('./dsx_services')
 var dsxutils = require('./dsx_utils')
 var ui = require('../ui_controls')
 var argv = require('minimist')(process.argv.slice(2))
+
 
 var initFilename = argv['config']
 if (initFilename === null || initFilename === undefined) {
@@ -52,65 +54,6 @@ if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
 } else {
   googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
-}
-
-class UserChannel {
-
-  constructor (queue) {
-    this.queue = queue
-    this.send = function (session, nextHandlerID, data, replace) {
-      // make sure all attachments have a callback_id
-      if (_.get(data, 'attachments', []).length > 0) {
-        data.attachments.map(a => {
-          a.callback_id = a.callback_id || 'default'
-        })
-      }
-
-      // because javascript is not statically typed
-      if (_.get(data, 'data.attachments', []).length > 0) {
-        data.data.attachments.map(a => {
-          a.callback_id = a.callback_id || 'default'
-        })
-      }
-
-      var newSession = new db.Message({
-        incoming: false,
-        thread_id: session.thread_id,
-        resolved: true,
-        user_id: 'kip',
-        origin: session.origin,
-        source: session.source,
-        mode: session.mode,
-        action: session.action,
-        state: session.state,
-        user: session.source.user
-      })
-      newSession['reply'] = data
-      newSession.mode = nextHandlerID.split('.')[0]
-      newSession.action = nextHandlerID.split('.').slice(1).join('.')
-      kip.debug('inside channel.send(). Session mode is ' + newSession.mode)
-      kip.debug('inside channel.send(). Session action is ' + newSession.action)
-      var self = this
-      newSession.save(function (err, saved) {
-        if (err) {
-          kip.debug('mongo save err: ', err)
-          throw Error(err)
-        }
-        if (replace && _.get(session, 'source.response_url')) {
-          request({
-            method: 'POST',
-            uri: session.source.response_url,
-            body: JSON.stringify(data.data)
-          })
-        } else {
-          self.queue.publish('outgoing.' + newSession.origin, newSession, newSession._id + '.reply.results')
-        }
-      })
-    }
-
-    this.sendReplace = function (session, nextHandlerID, data) { this.send(session, nextHandlerID, data, true) }
-    return this
-  }
 }
 
 var replyChannel = new UserChannel(queue)
@@ -241,7 +184,12 @@ function getRoute (session) {
     throw new Error("couldn't figure out the right mode/action to route to")
   }).catch(kip.err)
 }
-var handlers = {}
+
+//
+// Set up route handlers
+//
+var menuHandlers = require('./menu_handlers')
+var handlers = _.merge({}, menuHandlers(replyChannel))
 
 handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
@@ -926,11 +874,11 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.participate.confirmation',
+            'name': 'food.menu.quick_picks',
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
-            'value': 'food.participate.confirmation'
+            'value': 'food.menu.quick_picks'
           },
           {
             'name': 'food.exit.confirm',
@@ -967,7 +915,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message) {
       user: m.id
     }
 
-    replyChannel.send(newMessage, 'food.participate.confirmation', {type: 'slack', data: msgJson})
+    replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
   })
 }
 
@@ -986,11 +934,11 @@ handlers['test.s8'] = function * (message) {
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.participate.confirmation',
+            'name': 'food.menu.quick_picks',
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
-            'value': 'food.participate.confirmation'
+            'value': 'food.menu.quick_picks'
           },
           {
             'name': 'food.exit.confirm',
@@ -1009,295 +957,7 @@ handlers['test.s8'] = function * (message) {
     ]
   }
 
-  replyChannel.send(message, 'food.participate.confirmation', {type: 'slack', data: msg_json})
-}
-
-handlers['food.participate.confirmation'] = function * (message) {
-  // message the user with the menu
-  // S9A: Display top food choices to participating members
-  // get the menu from DSX or something
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var recommendedItems = _.values(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {})).map(i => {
-    return {
-      title: i.name + ' – ' + (_.get(i, 'price') ? '$' + i.price : 'price varies'),
-      text: i.description,
-      fallback: 'i.name',
-      color: '#3AA3E3',
-      attachment_type: 'default',
-      'actions': [
-        {
-          'name': 'food.item.submenu',
-          'text': 'Add to Cart',
-          'type': 'button',
-          'style': 'primary',
-          'value': i.id
-        }
-      ]
-    }
-  })
-
-  var msg_json = {
-    'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ]
-      }].concat(recommendedItems).concat([{
-        'text': '',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': 'More >',
-            'type': 'button',
-            'value': 'chess'
-          },
-          {
-            'name': 'chess',
-            'text': 'Category',
-            'type': 'button',
-            'value': 'chess'
-          }
-        ]
-      }])
-  }
-
-  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
-}
-
-handlers['food.item.submenu'] = function * (message) {
-  var msgJson = {
-    "text": "*Tacos – $8.04* \n Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.",
-    "attachments": [
-        {
-            "mrkdwn_in": [
-                "text"
-            ],
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "grey",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "—",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "1",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "+",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "text": "*Choose Toppings* \n Required - Choose as many as you like.",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "☐ Lettuce",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Sour Cream",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Pico de Gallo",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Corn Salsa",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "☐ Rice",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Cilantro",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Queso Fresco",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Guacamole +$1.75",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "text": "*Choose Tortilla* \n Required - Choose 1.",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "￮ Plain",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "￮ Whole Wheat",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "text": "*Would you like a meal addition?* \n Optional - Choose as many as you like.",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "grey",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "☐ Tortilla Soup +$6.50",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Chips +$1.65",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Jarritos +$2.75",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Extra Salsa +$1.25",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "text": "*Would you prefer the salsa on the side?* \n Optional - Choose a maximum of 2.",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "grey",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "☐ Salsa on the Side",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ Salsa on top",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "☐ No Salsa",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        },
-        {
-            "text": "Special Instructions: _None_",
-            "fallback": "You are unable to choose a game",
-            "callback_id": "wopr_game",
-            "color": "#49d63a",
-            "attachment_type": "default",
-            "mrkdwn_in": [
-                "text"
-            ],
-            "actions": [
-                {
-                    "name": "chess",
-                    "text": "✓ Add to Cart: $8.04",
-                    "type": "button",
-                    "style": "primary",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "+ Special Instructions",
-                    "type": "button",
-                    "value": "chess"
-                },
-                {
-                    "name": "chess",
-                    "text": "< Back",
-                    "type": "button",
-                    "value": "chess"
-                }
-            ]
-        }
-    ]
-}
-  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msgJson})
-
+  replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
 }
 
 /**
