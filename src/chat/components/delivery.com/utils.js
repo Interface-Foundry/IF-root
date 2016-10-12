@@ -17,7 +17,7 @@ var api = require('./api-wrapper.js')
 *
 */
 function * initiateDeliverySession (session, teamMembers, location) {
-  var foodSessions = yield db.Delivery.find({team_id: session.source.team}).exec()
+  var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
   if (foodSessions) {
     yield foodSessions.map(session => {
       session.active = false
@@ -355,6 +355,18 @@ function askUserForCuisineTypes (cuisines, user, admin) {
   return res.json()
 }
 
+/*
+* general use for when you need to remove a user from a session for delivery session
+*
+*
+*/
+function * removeUserFromSession (team, user) {
+  var foodSession = yield db.Delivery.findOne({team_id: team, active: true}).exec()
+  logging.info(`removing: ${user} from team: ${team} on mongo._id: ${foodSession._id}`)
+  _.remove(foodSession.team_members, {id: user})
+  foodSession.save()
+}
+
 function confirmRestaurant (restaurant) {
   var res = {
     text: `Okay I'll collect orders for <${restaurant.url}|${restaurant.name}>`,
@@ -422,5 +434,6 @@ module.exports = {
   sortMerchantsByRating,
   confirmRestaurant,
   userFoodPreferencesPlaceHolder,
-  initiateDeliverySession
+  initiateDeliverySession,
+  removeUserFromSession
 }
