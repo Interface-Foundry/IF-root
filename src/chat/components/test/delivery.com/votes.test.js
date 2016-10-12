@@ -46,15 +46,15 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // S5
-  describe.skip('S5) Once we ask user about their preferences', function () {
+  describe('S5) Once we ask user about their preferences', function () {
     it('should display buttons for cuisines available', function * () {
       this.timeout(10000)
       admin = yield mock.Admin()
       res = yield admin.goto('S5')
       logging.data('using food choice: '.blue, res.attachments[0].actions[0].value)
       expect(res.attachments[0].actions).to.have.length(5)
-      expect(res.attachments[0].actions[4].text.toLowerCase()).to.equal('nothing')
-    // res = yield admin.tap(res, 0, 0)
+      expect(res.attachments[0].actions[4].text.toLowerCase()).to.equal('✕ no lunch for me')
+      res = yield admin.text('Mexican')
     })
   })
   // S6
@@ -77,7 +77,7 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // from peters stuff
-  describe('S7) confirm restaurant choice', function () {
+  describe.skip('S7) confirm restaurant choice', function () {
     describe('participation prompt', function () {
       it('should display "collecting food now message" to the admin', function * () {
         this.timeout(10000)
