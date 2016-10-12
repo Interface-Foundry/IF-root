@@ -3,7 +3,7 @@ require('kip')
 var queue = require('../queue-mongo')
 var co = require('co')
 var fs = require('fs')
-var db = require('db');
+var db = require('db')
 var uuid = require('uuid')
 var _ = require('lodash')
 var api = require('./api-wrapper')
@@ -13,8 +13,7 @@ var picstitch = require('./image_processing_delivery.js')
 var path = require('path')
 var request = require('request-promise')
 
-
-var team_utils = require('./team_utils.js');
+var team_utils = require('./team_utils.js')
 
 var fs = require('fs')
 var yaml = require('js-yaml')
@@ -288,9 +287,9 @@ handlers['food.exit.confirm'] = function * (message) {
 // the user's intent is to initiate a food order
 //
 handlers['food.begin'] = function * (session) {
-  kip.debug('🍕 food order 🌮');
-  //loading chat users here for now lel, can remove once init_team is fully implemented tocreate chat user objects:
-  team_utils.getChatUsers(session);
+  kip.debug('🍕 food order 🌮')
+  // loading chat users here for now lel, can remove once init_team is fully implemented tocreate chat user objects:
+  team_utils.getChatUsers(session)
   session.state = {}
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
@@ -473,8 +472,8 @@ handlers['address.validate'] = function * (session) {
     }))
   }
   yield team.save()
-  kip.debug('###  saved new address in mongo...')
-  var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
+  kip.debug(`###  saved new address in mongo...`)
+  var text = `Cool! You selected \`${location.address_1}\`. Delivery or pickup?`
   var msg_json = {
     'attachments': [
       {
@@ -528,8 +527,8 @@ handlers['address.save'] = function * (session) {
     team.meta.locations.push(location)
     team.meta.chosen_location = location
   } else {
-  // todo error
-  throw new Error('womp bad address')
+    // todo error
+    throw new Error('womp bad address')
   }
   yield team.save()
   session.text = JSON.stringify(location)
@@ -792,8 +791,8 @@ handlers['food.user.preferences'] = function * (session) {
     teamMembers = [teamMembers[0]]
   }
   if (teamMembers.length < 1) {
-    kip.debug('fetching team members...');
-    teamMembers = yield team_utils.getChatUsers(message);
+    kip.debug('fetching team members...')
+    teamMembers = yield team_utils.getChatUsers(message)
   }
   teamMembers.map(function (member) {
     var userPreferences = {
@@ -843,7 +842,7 @@ handlers['food.user.poll'] = function * (message) {
       source: source,
       res: utils.askUserForCuisineTypes(
         _.map(
-          _.filter(foodSession.cuisines, function(o) {
+          _.filter(foodSession.cuisines, function (o) {
             return o.count > 10
           }), 'name'),
         member.dm, foodSession.convo_initiater)
@@ -853,7 +852,6 @@ handlers['food.user.poll'] = function * (message) {
     replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
-
 
 handlers['food.user.choice_confirm'] = function * (message) {
   replyChannel.send(message, 'food.admin.restaurant.pick', {type: 'slack', data: message.example_res})
