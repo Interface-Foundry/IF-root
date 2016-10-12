@@ -28,27 +28,26 @@ Menu.prototype.allItems = function() {
 // the ID can either be a number like 36 (like the unique_id from the recommended_items array in a merchat doc)
 // of the id can be tha actual full id as referenced in the menu, like "PE-66030-8-220"
 Menu.prototype.getItemById = function(id) {
-  return this.flattenedMenu[id] || this.allItems().filter(i => i.id.split('-').pop() === id)[0]
+  return this.flattenedMenu[id]
 }
 
 // turns the menu into a single object with keys as item ids
 function flattenMenu(data) {
   var out = {}
   function flatten(node, out) {
-    out[node.id] = node
+    out[node.unique_id] = node
     _.get(node, 'children', []).map(c => flatten(c, out))
   }
   data.menu.map(m => flatten(m, out))
   return out
 }
 
-Menu.prototype.generateJsonForItem = function(id) {
-  var item = this.getItemById(id)
-  var quantity = 1
+Menu.prototype.generateJsonForItem = function(cartItem) {
+  var item = this.getItemById(cartItem.item.item_id)
   var json = {
     text: `*${item.name}* \n ${item.description}`,
     attachments: [{
-      fallback: 'Quantity: ' + quantity,
+      fallback: 'Quantity: ' + cartItem.item.item_qty,
       callback_id: 'quantity',
       color: 'grey',
       attachment_type: 'default',
@@ -61,7 +60,7 @@ Menu.prototype.generateJsonForItem = function(id) {
         },
         {
           name: 'food.item.quantity',
-          text: quantity,
+          text: cartItem.item.item_qty,
           type: 'button',
           value: 'food.item.quantity'
         },
@@ -75,12 +74,43 @@ Menu.prototype.generateJsonForItem = function(id) {
     }]
   }
 
-  var options = nodeOptions(item)
+  var options = nodeOptions(item, cartItem)
   json.attachments = json.attachments.concat(options)
+  json.attachments.push({
+    'text': 'Special Instructions: _None_',
+    'fallback': 'You are unable to choose a game',
+    'callback_id': 'wopr_game',
+    'color': '#49d63a',
+    'attachment_type': 'default',
+    'mrkdwn_in': [
+      'text'
+    ],
+    'actions': [
+      {
+        'name': 'food.item.add_to_cart',
+        'text': '✓ Add to Cart: $8.04',
+        'type': 'button',
+        'style': 'primary',
+        'value': cartItem.item.item_id
+      },
+      {
+        'name': 'chess',
+        'text': '+ Special Instructions',
+        'type': 'button',
+        'value': 'chess'
+      },
+      {
+        'name': 'chess',
+        'text': '< Back',
+        'type': 'button',
+        'value': 'chess'
+      }
+    ]
+  })
   return json
 }
 
-function nodeOptions(node) {
+function nodeOptions(node, cartItem) {
   var attachments = node.children.filter(c => c.type === 'option group').map(g => {
     var a = {
       fallback: 'Meal option',
@@ -91,6 +121,7 @@ function nodeOptions(node) {
     }
     if (g.name === 'Meal Additions') {
       a.text = '*Would you like a meal addition?*'
+      a.color = 'grey'
     } else {
       a.text = `*${g.name}*`
     }
@@ -114,11 +145,17 @@ function nodeOptions(node) {
     }
 
     a.actions = g.children.map(option => {
+      var checkbox
+      if (cartItem.item.option_qty[option.unique_id]) {
+        checkbox = 'x '
+      } else {
+        checkbox = allowMultiple ? '☐ ' : '￮ '
+      }
       return {
         name: 'food.option.click',
-        text: (allowMultiple ? '☐ ' : '￮ ') + option.name,
+        text: checkbox + option.name,
         type: 'button',
-        value: option.id
+        value: option.unique_id
       }
     })
     return a
@@ -137,6 +174,16 @@ if (!module.parent) {
   var json = fs.readFileSync('./merchant_66030_menu.json', 'utf8')
   var data = JSON.parse(json)
   var menu = Menu(data)
-  var json = menu.generateJsonForItem('PE-66030-495-3-30')
-  console.log(json)
+  var mock_item = {
+    user_id: '12345',
+    added_to_cart: false,
+    item: {
+      item_id: 193,
+      item_qty: 1,
+      option_qty: {'229': 1}
+    }
+  }
+  console.log(menu.flattenedMenu[228])
+  var json = menu.generateJsonForItem(mock_item)
+  console.log(JSON.stringify(json, null, 2))
 }
