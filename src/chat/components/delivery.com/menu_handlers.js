@@ -3,9 +3,10 @@ var _ = require('lodash')
 var Menu = require('./Menu')
 
 // injected dependencies
-var replyChannel
+var $replyChannel
+var $allHandlers // this is how you can access handlers from other methods
 
-// exported
+// exports
 var handlers = {}
 
 handlers['food.menu.quick_picks'] = function * (message) {
@@ -59,7 +60,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }])
   }
 
-  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
+  $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
 }
 
 //
@@ -91,7 +92,7 @@ handlers['food.item.submenu'] = function * (message) {
   }
 
   var json = menu.generateJsonForItem(userItem)
-  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
+  $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 //
@@ -114,7 +115,7 @@ handlers['food.option.click'] = function * (message) {
   foodSession.save()
 
   var json = menu.generateJsonForItem(userItem)
-  replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
@@ -130,10 +131,14 @@ handlers['food.item.add_to_cart'] = function * (message) {
     // check for errors
     // if errors, highlight errors
     // otherwise go to S11 confirm personal order
-    replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'neat-o, thanks'}})
+    // replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'neat-o, thanks'}})
+    return yield $allHandlers['food.cart.personal'](message)
 }
 
-module.exports = function($replyChannel) {
-  replyChannel = $replyChannel
-  return handlers
+module.exports = function(replyChannel, allHandlers) {
+  $replyChannel = replyChannel
+  $allHandlers = allHandlers
+
+  // merge in our own handlers
+  _.merge($allHandlers, handlers)
 }

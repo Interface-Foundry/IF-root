@@ -157,8 +157,9 @@ function getRoute (session) {
 //
 // Set up route handlers
 //
-var menuHandlers = require('./menu_handlers')
-var handlers = _.merge({}, menuHandlers(replyChannel))
+var handlers = {}
+require('./menu_handlers')(replyChannel, handlers)
+require('./cart_handlers')(replyChannel, handlers)
 
 handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
