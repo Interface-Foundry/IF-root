@@ -37,6 +37,11 @@ var deliverySchema = mongoose.Schema({
   data: {}, // \shrug
 })
 
+deliverySchema.virtual('chosen_restaurant_full').get(function () {
+  var doc = this
+  return doc.merchants.filter(m => m.id === doc.chosen_restaurant.id)[0]
+})
+
 var delivery = mongoose.model('delivery', deliverySchema, 'delivery')
 
 module.exports = delivery

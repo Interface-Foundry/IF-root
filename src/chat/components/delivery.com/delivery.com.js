@@ -910,8 +910,10 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
+  var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
   var msgJson = {
-    'text': `<@${foodSession.convo_initiater.id}|${foodSession.convo_initiater.name}> chose <delivery.com|${foodSession.chosen_restaurant.name}> - Mexican, Southwestern - est. wait time 45-55 min`,
+    'text': `<@${foodSession.convo_initiater.id}|${foodSession.convo_initiater.name}> chose <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - ${cuisines} - est. wait time ${waitTime} min`,
     'attachments': [
       {
         'mrkdwn_in': [
@@ -1014,70 +1016,34 @@ handlers['food.participate.confirmation'] = function * (message) {
   // message the user with the menu
   // S9A: Display top food choices to participating members
   // get the menu from DSX or something
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var recommendedItems = _.values(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {})).map(i => {
+    return {
+      title: i.name + ' – ' + (_.get(i, 'price') ? '$' + i.price : 'price varies'),
+      text: i.description,
+      fallback: 'i.name',
+      color: '#3AA3E3',
+      attachment_type: 'default',
+      'actions': [
+        {
+          'name': 'food.item.submenu',
+          'text': 'Add to Cart',
+          'type': 'button',
+          'style': 'primary',
+          'value': i.id
+        }
+      ]
+    }
+  })
 
   var msg_json = {
-    'text': '`Choza Taqueria` - <https://kipthis.com/menu/url/|View Full Menu>',
+    'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
     'attachments': [
       {
         'mrkdwn_in': [
           'text'
         ]
-      },
-      {
-        'title': 'Tacos – $8.04',
-        'text': 'Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'thumb_url': 'http://i.imgur.com/GImiWp2.jpg',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': 'Add to Cart',
-            'type': 'button',
-            'style': 'primary',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'title': 'Tostada – $8.22',
-        'text': 'Crispy corn tortilla topped with black beans, lettuce, salsa, queso fresco and your choice of meat or vegetable.',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'thumb_url': 'http://i.imgur.com/GImiWp2.jpg',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': 'Add to Cart',
-            'type': 'button',
-            'style': 'primary',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'title': 'Jarritos – $2.75',
-        'text': 'Tamarind, lime, pineapple, mandarin, grapefruit, mango, sangria, sidral.',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'thumb_url': 'http://i.imgur.com/RtHKdqA.jpg',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': 'Add to Cart',
-            'type': 'button',
-            'style': 'primary',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
+      }].concat(recommendedItems).concat([{
         'text': '',
         'fallback': 'You are unable to choose a game',
         'callback_id': 'wopr_game',
@@ -1097,14 +1063,242 @@ handlers['food.participate.confirmation'] = function * (message) {
             'value': 'chess'
           }
         ]
-      }
-    ]
+      }])
   }
 
-  replyChannel.send(message, 'food.menu.action', {type: 'slack', data: msg_json})
+  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
 }
 
-handlers['food.menu.action'] = function * (message) {}
+handlers['food.item.submenu'] = function * (message) {
+  var msgJson = {
+    "text": "*Tacos – $8.04* \n Double corn tortillas with your choice of meat or vegetable, topped with fresh cilantro.",
+    "attachments": [
+        {
+            "mrkdwn_in": [
+                "text"
+            ],
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "grey",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "—",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "1",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "+",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "text": "*Choose Toppings* \n Required - Choose as many as you like.",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "☐ Lettuce",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Sour Cream",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Pico de Gallo",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Corn Salsa",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "☐ Rice",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Cilantro",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Queso Fresco",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Guacamole +$1.75",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "text": "*Choose Tortilla* \n Required - Choose 1.",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "￮ Plain",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "￮ Whole Wheat",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "text": "*Would you like a meal addition?* \n Optional - Choose as many as you like.",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "grey",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "☐ Tortilla Soup +$6.50",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Chips +$1.65",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Jarritos +$2.75",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Extra Salsa +$1.25",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "text": "*Would you prefer the salsa on the side?* \n Optional - Choose a maximum of 2.",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "grey",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "☐ Salsa on the Side",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ Salsa on top",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "☐ No Salsa",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+        {
+            "text": "Special Instructions: _None_",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#49d63a",
+            "attachment_type": "default",
+            "mrkdwn_in": [
+                "text"
+            ],
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "✓ Add to Cart: $8.04",
+                    "type": "button",
+                    "style": "primary",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "+ Special Instructions",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "< Back",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        }
+    ]
+}
+  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msgJson})
+
+}
 
 /**
  * helper to determine an affirmative or negative response
