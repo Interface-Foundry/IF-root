@@ -17,6 +17,20 @@ var deliverySchema = mongoose.Schema({
   merchants: [], // all possible merchants (based on location)
   cuisines: [], // don't confuse this with votes below
 
+  // contains all the items that are in the cart and all the items that a user is working on
+  // each user can add multiple items to the cart
+  cart: [{
+    user_id: String,
+    added_to_cart: {type: Boolean, default: false},
+    item: {
+      item_id: String, // the item.unique_id
+      item_qty: Number,
+      option_qty: {}, // hash of {unique_id, quantity} pairs
+      item_label: {type: String, default: ''}, // leave blank? idk what this is
+      instructions: {type: String, default: ''}
+    }
+  }],
+
   // admin or whomever to use for picking restaurant and various other
   convo_initiater: {
     id: String,
