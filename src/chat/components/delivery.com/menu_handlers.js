@@ -67,6 +67,9 @@ handlers['food.item.submenu'] = function * (message) {
   var menu = Menu(foodSession.menu)
   var item = menu.getItemById(message.source.actions[0].value)
 
+  var json = menu.generateJsonForItem(message.source.actions[0].value)
+  debugger;
+
   // [ { images: [],
   //   children: [],
   //   type: 'item',
@@ -311,7 +314,7 @@ handlers['food.item.submenu'] = function * (message) {
       }
     ]
   }
-  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msgJson})
+  replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 module.exports = function($replyChannel) {

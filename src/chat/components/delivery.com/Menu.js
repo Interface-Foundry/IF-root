@@ -28,7 +28,6 @@ Menu.prototype.allItems = function() {
 // the ID can either be a number like 36 (like the unique_id from the recommended_items array in a merchat doc)
 // of the id can be tha actual full id as referenced in the menu, like "PE-66030-8-220"
 Menu.prototype.getItemById = function(id) {
-  debugger;
   return this.flattenedMenu[id] || this.allItems().filter(i => i.id.split('-').pop() === id)[0]
 }
 
@@ -43,44 +42,92 @@ function flattenMenu(data) {
   return out
 }
 
-/*
-Menu Parsing
-
-Parsers handle specific types of nodes in the menu
-for example,
-{
-    "id": "PE-66030-495",
-    "name": "Lunch Menu",
-    "description": "",
-    "unique_id": 495,
-    "schedule": [
-      1
-    ],
-    "type": "menu",
-    "children": [...]
-  },
-has type "menu", so it should be parsed with parsers['menu']
-*/
-function parse(node) {
-  if (typeof node === undefined) {
-    return
+Menu.prototype.generateJsonForItem = function(id) {
+  var item = this.getItemById(id)
+  var quantity = 1
+  var json = {
+    text: `*${item.name}* \n ${item.description}`,
+    attachments: [{
+      fallback: 'Quantity: ' + quantity,
+      callback_id: 'quantity',
+      color: 'grey',
+      attachment_type: 'default',
+      actions: [
+        {
+          name: 'food.item.quantity.subtract',
+          text: '—',
+          type: 'button',
+          value: 'food.item.quantity.subtract'
+        },
+        {
+          name: 'food.item.quantity',
+          text: quantity,
+          type: 'button',
+          value: 'food.item.quantity'
+        },
+        {
+          name: 'food.item.quantity.add',
+          text: '+',
+          type: 'button',
+          value: 'food.item.quantity.add'
+        }
+      ]
+    }]
   }
 
-  if (!parsers[node.type]) {
-    throw new Error('cannot parse node of type', node.type, node)
-  }
-
-  return parsers[node.type].bind()(node)
+  var options = nodeOptions(item)
+  json.attachments = json.attachments.concat(options)
+  return json
 }
 
-var parsers = {}
-parsers.menu = function (node) {
-  _.get(node, 'children', []).map(parse.bind({parent: node}))
+function nodeOptions(node) {
+  var attachments = node.children.filter(c => c.type === 'option group').map(g => {
+    var a = {
+      fallback: 'Meal option',
+      callback_id: g.id,
+      color: '#3AA3E3',
+      attachment_type: 'default',
+      mrkdwn_in: ['text']
+    }
+    if (g.name === 'Meal Additions') {
+      a.text = '*Would you like a meal addition?*'
+    } else {
+      a.text = `*${g.name}*`
+    }
+
+    var required = false
+    var allowMultiple = true
+    if (g.min_selection === 0) {
+      if (g.max_selection > 4) {
+        a.text += '\n Optional - Choose as many as you like.'
+      } else {
+        a.text += `\n Optional - Choose up to ${g.max_selection}.`
+      }
+    } else {
+      required = true
+      if (g.min_selection === g.max_selection) {
+        allowMultiple = false
+        a.text += `\n Required - Choose exactly ${g.min_selection}.`
+      } else {
+        a.text += `\n Required - Choose at least ${g.min_selection} and up to ${g.max_selection}.`
+      }
+    }
+
+    a.actions = g.children.map(option => {
+      return {
+        name: 'food.option.click',
+        text: (allowMultiple ? '☐ ' : '￮ ') + option.name,
+        type: 'button',
+        value: option.id
+      }
+    })
+    return a
+  })
+
+  return attachments
 }
 
-parsers.item = function (node) {
 
-}
 
 module.exports = Menu
 
@@ -90,6 +137,6 @@ if (!module.parent) {
   var json = fs.readFileSync('./merchant_66030_menu.json', 'utf8')
   var data = JSON.parse(json)
   var menu = Menu(data)
-  console.log(menu.allItems())
-  debugger;
+  var json = menu.generateJsonForItem('PE-66030-495-3-30')
+  console.log(json)
 }
