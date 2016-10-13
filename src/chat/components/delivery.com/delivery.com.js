@@ -165,6 +165,10 @@ handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
 }
 
+handlers['food.null'] = function * (session) {
+  // nothing to see here
+}
+
 handlers['food.exit'] = function * (message) {
   var msg_json = {
     'text': "Are you sure you don't want to order food?",

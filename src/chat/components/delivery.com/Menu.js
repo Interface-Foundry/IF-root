@@ -34,6 +34,7 @@ Menu.prototype.getItemById = function(id) {
 Menu.prototype.getCartItemPrice = function(cartItem) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
+  cartItem.item.option_qty = cartItem.item.option_qty || {}
 
   return item.price * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
     if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
@@ -65,6 +66,7 @@ function flattenMenu(data) {
 Menu.prototype.generateJsonForItem = function(cartItem) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
+  cartItem.item.option_qty = cartItem.item.option_qty || {}
 
   // Price for the Add To Cart button
   var fullPrice = menu.getCartItemPrice(cartItem)
@@ -81,19 +83,19 @@ Menu.prototype.generateJsonForItem = function(cartItem) {
           name: 'food.item.quantity.subtract',
           text: '—',
           type: 'button',
-          value: 'food.item.quantity.subtract'
+          value: cartItem.item.item_id
         },
         {
-          name: 'food.item.quantity',
+          name: 'food.null',
           text: cartItem.item.item_qty,
           type: 'button',
-          value: 'food.item.quantity'
+          value: 'food.null'
         },
         {
           name: 'food.item.quantity.add',
           text: '+',
           type: 'button',
-          value: 'food.item.quantity.add'
+          value: cartItem.item.item_id
         }
       ]
     }]

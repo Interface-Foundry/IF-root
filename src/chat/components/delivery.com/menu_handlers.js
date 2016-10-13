@@ -130,6 +130,37 @@ handlers['food.option.click'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
+// Handles only the current item the user is editing
+handlers['food.item.quantity.add'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var menu = Menu(foodSession.menu)
+  var itemId = message.source.actions[0].value
+  debugger;
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart && i.item.item_id === itemId)[0]
+  userItem.item.item_qty++
+  foodSession.markModified('cart')
+  foodSession.save()
+  var json = menu.generateJsonForItem(userItem)
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
+// Handles only the current item the user is editing
+handlers['food.item.quantity.subtract'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var menu = Menu(foodSession.menu)
+  var itemId = message.source.actions[0].value
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart && i.item.item_id === itemId)[0]
+  if (userItem.item.item_qty === 1) {
+    // don't let them go down to zero
+    return
+  }
+  userItem.item.item_qty--
+  foodSession.markModified('cart')
+  foodSession.save()
+  var json = menu.generateJsonForItem(userItem)
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
+}
+
 handlers['food.item.add_to_cart'] = function * (message) {
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     var menu = Menu(foodSession.menu)
@@ -144,7 +175,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
     // if errors, highlight errors
     // otherwise go to S11 confirm personal order
     // replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'neat-o, thanks'}})
-    return yield $allHandlers['food.cart.personal'](message)
+    return yield $allHandlers['food.cart.personal'](message, true)
 }
 
 module.exports = function(replyChannel, allHandlers) {

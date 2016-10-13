@@ -12,7 +12,7 @@ var handlers = {}
 //
 // Show the user their personal cart
 //
-handlers['food.cart.personal'] = function * (message) {
+handlers['food.cart.personal'] = function * (message, replace) {
   console.log('message.user_id', message.user_id)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
@@ -26,9 +26,9 @@ handlers['food.cart.personal'] = function * (message) {
     image_url: 'https://storage.googleapis.com/kip-random/kip-my-cafe-cart.png'
   }
 
-  var lineItems = myItems.map(i => {
+  var lineItems = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
-    return {
+    var quantityAttachment = {
       title: item.name + ' – $' + menu.getCartItemPrice(i).toFixed(2),
       text: item.description,
       callback_id: item.unique_id,
@@ -39,10 +39,10 @@ handlers['food.cart.personal'] = function * (message) {
           name: 'food.cart.personal.quantity.add',
           text: '+',
           type: 'button',
-          value: item.unique_id
+          value: index
         },
         {
-          name: 'food.cart.personal.quantity.add',
+          name: 'food.null',
           text: i.item.item_qty,
           type: 'button',
           value: item.unique_id
@@ -51,10 +51,21 @@ handlers['food.cart.personal'] = function * (message) {
           name: 'food.cart.personal.quantity.subtract',
           text: '—',
           type: 'button',
-          value: item.unique_id
+          value: index
         }
       ]
     }
+
+    if (i.item.item_qty === 1) {
+      quantityAttachment.actions[2].confirm = {
+        title: 'Remove Item',
+        text: `Are you sure you want to remove "${item.name}" from your personal cart?`,
+        ok_text: "Remove it",
+        dismiss_text: 'Keep it'
+      }
+    }
+
+    return quantityAttachment
   })
 
   var bottom = {
@@ -85,8 +96,43 @@ handlers['food.cart.personal'] = function * (message) {
     attachments: [banner].concat(lineItems).concat([bottom])
   }
 
-  $replyChannel.send(message, 'food.cart.personal.confirm', {type: 'slack', data: json})
+  if (replace) {
+    $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: json})
+  } else {
+    $replyChannel.send(message, 'food.cart.personal.confirm', {type: 'slack', data: json})
+  }
 }
+
+// Handles editing the quantity by using the supplied array index, the nth item in the user's personal cart
+handlers['food.cart.personal.quantity.add'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var menu = Menu(foodSession.menu)
+  var index = message.source.actions[0].value
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
+  userItem.item.item_qty++
+  foodSession.markModified('cart')
+  yield foodSession.save()
+  yield handlers['food.cart.personal'](message, true)
+}
+
+// Handles editing the quantity by using the supplied array index
+handlers['food.cart.personal.quantity.subtract'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var menu = Menu(foodSession.menu)
+  var index = message.source.actions[0].value
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
+  if (userItem.item.item_qty === 1) {
+    // don't let them go down to zero
+    userItem.deleteMe = true
+    foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
+  } else {
+    userItem.item.item_qty--
+  }
+  foodSession.markModified('cart')
+  yield foodSession.save()
+  yield handlers['food.cart.personal'](message, true)
+}
+
 
 //
 // The user has just clicked the confirm button on their personal cart
