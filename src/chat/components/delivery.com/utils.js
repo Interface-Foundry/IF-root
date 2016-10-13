@@ -32,7 +32,7 @@ function * confirmTeamOrder (message) {
     }]
   }
 
-  _.forEach(foodSession.)
+  // _.forEach(foodSession.)
   // attachments with all the food
 
 
