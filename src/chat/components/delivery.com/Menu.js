@@ -147,7 +147,7 @@ function nodeOptions(node, cartItem) {
     a.actions = g.children.map(option => {
       var checkbox
       if (cartItem.item.option_qty[option.unique_id]) {
-        checkbox = 'x '
+        checkbox = allowMultiple ? '✓ ' : '◉ '
       } else {
         checkbox = allowMultiple ? '☐ ' : '￮ '
       }
