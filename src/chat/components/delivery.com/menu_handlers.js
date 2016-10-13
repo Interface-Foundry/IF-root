@@ -138,7 +138,7 @@ handlers['food.item.add_to_cart'] = function * (message) {
 
     userItem.added_to_cart = true
     foodSession.markModified('cart')
-    foodSession.save()
+    yield foodSession.save()
 
     // check for errors
     // if errors, highlight errors

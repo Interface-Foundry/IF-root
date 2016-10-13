@@ -13,9 +13,13 @@ var handlers = {}
 // Show the user their personal cart
 //
 handlers['food.cart.personal'] = function * (message) {
+  console.log('message.user_id', message.user_id)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+  var totalPrice = myItems.reduce((sum, i) => {
+    return sum + menu.getCartItemPrice(i)
+  }, 0).toFixed(2)
 
   var banner = {
     title: '',
@@ -25,7 +29,7 @@ handlers['food.cart.personal'] = function * (message) {
   var lineItems = myItems.map(i => {
     var item = menu.flattenedMenu[i.item.item_id]
     return {
-      title: item.name + ' – $10.79',
+      title: item.name + ' – $' + menu.getCartItemPrice(i).toFixed(2),
       text: item.description,
       callback_id: item.unique_id,
       color: '#3AA3E3',
@@ -62,7 +66,7 @@ handlers['food.cart.personal'] = function * (message) {
     "actions": [
         {
             "name": "food.cart.personal.confirm",
-            "text": "✓ Confirm: $13.54",
+            "text": "✓ Confirm: $" + totalPrice,
             "type": "button",
             "value": "chess",
             "style": "primary"

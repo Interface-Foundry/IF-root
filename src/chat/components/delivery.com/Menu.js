@@ -35,7 +35,7 @@ Menu.prototype.getCartItemPrice = function(cartItem) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
 
-  return item.price + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
+  return item.price * cartItem.item.item_qty + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
     if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
       return sum
     }
