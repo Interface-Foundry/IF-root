@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+PULL_DIFF=`git diff --name-only | head -1`
+
+if [ -z "$PULL_DIFF" ]; then
+	git pull --rebase
+else
+	git stash >& /dev/null
+	git pull --rebase
+	git stash pop -q
+fi
