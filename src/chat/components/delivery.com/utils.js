@@ -12,11 +12,16 @@ var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
 
 
+function * groupItems (cart) {
+  _.forEach(cart)
+
+}
+
 /* S12A
 *
-*
+* TODO:
 */
-function * confirmTeamOrder(message) {
+function * confirmTeamOrder (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
@@ -27,6 +32,7 @@ function * confirmTeamOrder(message) {
     }]
   }
 
+  _.forEach(foodSession.)
   // attachments with all the food
 
 
@@ -107,6 +113,7 @@ function initiateFoodOrdering (admin) {
     var buttonAttachment
     var stickerUrl = 'https://storage.googleapis.com/kip-random/laCroix.gif'
     // -----
+
     res['id'] = admin.dm
     res['newMessage'] = [stickerUrl]
     var addresses = yield db.Address.find({id: admin.id})
@@ -301,7 +308,7 @@ function createCuisineOptionForUser (user, cuisines) {
     opts.push(_.sample(_.difference(cuisines, opts)))
   }
   // opts.push(_.sample(_.difference(cuisines, opts))) // random sample not already in users opts
-  opts.push('Suprise Me', 'Nothing')
+  opts.push('Surprise Me', 'Nothing')
   return opts
 }
 
@@ -384,7 +391,7 @@ function askUserForCuisineTypes (cuisines, user, admin) {
   _.forEach(s, function (cuisineName) {
     a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
   })
-  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('✕ No Lunch for Me').style('danger').end()
+  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('× No Lunch for Me').style('danger').end()
   return res.json()
 }
 
@@ -450,7 +457,7 @@ var userFoodPreferencesPlaceHolder = {
       {
         'name': 'food.user.preference.cancel',
         'value': 'food.user.preference.cancel',
-        'text': 'Cancel',
+        'text': '× Cancel',
         'type': 'button'
       }]
   }]

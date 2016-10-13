@@ -693,7 +693,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
           },
           {
             'name': 'passthrough',
-            'text': 'Cancel',
+            'text': '× Cancel',
             'type': 'button',
             'value': 'food.exit'
           }
