@@ -23,7 +23,6 @@ function * removeCartChannel(message, channel_name) {
   return
 }
 
-//add general channel to slackbot - just pass in any message object and the name of team you want to add e.g. 'general', 'random', etc.
 function * addCartChannel(message, channel_name) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var channels = yield request({url: 'https://slack.com/api/channels.list?token=' + team.bot.bot_access_token, json: true});
@@ -36,7 +35,6 @@ function * addCartChannel(message, channel_name) {
       else {
         kip.debug('channel already exists.', c,   team.meta.cart_channels);
       }
-      //add channel info to slackbot.all_channels array if it's not there already
       if (c.is_channel && !c.is_archived && c.num_members > 0 && team.all_channels.indexOf(c.id) == -1) {
         team.all_channels.push({id: c.id, name: c.name});
       }
@@ -46,29 +44,7 @@ function * addCartChannel(message, channel_name) {
   return
 }
 
-
-// inside getChatUsers.. u is:  {
-//   "id": "D2HKEQ9RV",
-//   "user": "U0HLZP0A2",
-//   "created": 1475164591,
-//   "is_im": true,
-//   "is_org_shared": false,
-//   "is_user_deleted": false
-// }
-
-// inside getChatUsers.. u is:  {
-//   "id": "D2HHN8283",
-//   "user": "USLACKBOT",
-//   "created": 1475164591,
-//   "is_im": true,
-//   "is_org_shared": false,
-//   "is_user_deleted": false
-// }
-
-
-//populate le chat users - you still have to manually set is_admin 
 var getChatUsers = co.wrap(function *(message) {
-        //I don't know why but async isnt working properly, bandaid solution :/
         var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
         var teamMembers = yield db.Chatusers.find({team_id: message.source.team, is_bot: false}).exec();
         var bots = yield db.Chatusers.find({team_id: message.source.team, is_bot: true}).exec();
@@ -80,8 +56,6 @@ var getChatUsers = co.wrap(function *(message) {
             return m.dm;
         })
           async.eachSeries(res.ims, function iterator(u, cb){
-                  kip.debug('\n\n\ninside getChatUsers.. u is: ', u,'message is: ',message,'\n\n\n');
-                  // if(team_members_id_array.indexOf(u.id) == -1 && u.user !== 'USLACKBOT') {
                     kip.debug('creating new chatusers.. ')
                     var new_user = new db.Chatuser();
                     new_user.team_id = team.team_id;
@@ -93,10 +67,8 @@ var getChatUsers = co.wrap(function *(message) {
                     }
                     new_user.save(function(err, saved) {
                       result.push(new_user)
-                      kip.debug('calling callback...')
                       cb();
                     });
-                  // }
           }, function done(err) {
             return Promise.resolve(result)
           })

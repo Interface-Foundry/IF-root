@@ -12,13 +12,13 @@ var utils = require('./utils')
 var picstitch = require('./image_processing_delivery.js')
 var path = require('path')
 var request = require('request-promise')
-
 var team_utils = require('./team_utils.js')
 var UserChannel = require('./UserChannel')
 
 var ui = require('../ui_controls')
 var googl = require('goo.gl')
-
+var Fuse = require('fuse.js')
+var all_cuisines = require('./cuisines2').cuisines
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
 } else {
@@ -739,7 +739,6 @@ handlers['food.user.poll'] = function * (message) {
   var results = yield api.searchNearby({addr: address})
   foodSession.merchants = _.get(results, 'merchants')
   foodSession.cuisines = _.get(results, 'cuisines')
-  foodSession.save()
   // ---------------------------------------------
   var teamMembers = foodSession.team_members
   if (process.env.NODE_ENV === 'test') {
@@ -754,7 +753,6 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-
     var resp = {
       mode: 'food',
       action: 'user.poll',
@@ -768,7 +766,9 @@ handlers['food.user.poll'] = function * (message) {
           }), 'name'),
         member.dm, foodSession.convo_initiater)
     }
-
+    foodSession.data = { response_history : []}
+    foodSession.data.response_history.push({"handler": 'food.user.poll', "response": resp.res});
+    foodSession.save()
     // need to sendreplace probably
     replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
@@ -780,6 +780,32 @@ handlers['food.user.choice_confirm'] = function * (message) {
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  if (!message.data) {  
+   var choices = _.get(foodSession,'data.response_history[0].response.attachments[0].actions') 
+   if (choices) choices.splice(-1,1);
+   var key = choices ? 'text' : 'name';
+   var set = choices ? choices : foodSession.cuisines;
+   var options = {
+      keys: [{ name: key, weight: 1}],
+      shouldSort: true,
+      threshold: 0.6
+    };
+    var fuse = new Fuse(set, options)
+    var res =  yield fuse.search(message.text)
+    if (res && res.length > 0) {
+       message.data = { 
+        "value": res[0][key], 
+        "action": "admin.restaurant.pick", 
+        "mode": "food" 
+      };
+    } else {
+      //TODO: Handle if user inputs nonsense here
+      kip.debug('User typed in an invalid response.')
+    }
+    kip.debug('\n\ninside food.admin.restaurant.pick 779 fuse returned: ', res, message.data,'\n\n');
+  } else {
+    kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data,'\n\n');
+  }
   foodSession.votes.push(message.data.value)
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members
