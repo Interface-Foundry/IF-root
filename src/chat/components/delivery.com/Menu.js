@@ -20,15 +20,35 @@ function Menu(data) {
 
 }
 
-
+// an array of all the items, aka top-level things you can add to your cart
 Menu.prototype.allItems = function() {
   return _.values(this.flattenedMenu).filter(i => i.type === 'item')
 }
 
-// the ID can either be a number like 36 (like the unique_id from the recommended_items array in a merchat doc)
-// of the id can be tha actual full id as referenced in the menu, like "PE-66030-8-220"
+// the ID needs to be a node's unique_id
 Menu.prototype.getItemById = function(id) {
   return this.flattenedMenu[id]
+}
+
+// gets the price for a cartItem, which is one of the objects in the delivery_schema cart array
+Menu.prototype.getCartItemPrice = function(cartItem) {
+  var menu = this
+  var item = this.getItemById(cartItem.item.item_id)
+
+  return item.price + Object.keys(cartItem.item.option_qty).reduce((sum, optionId) => {
+    if (!cartItem.item.option_qty.hasOwnProperty(optionId)) {
+      return sum
+    }
+
+    var optionPrice = menu.getItemById(optionId).price
+    var optionQuantity = cartItem.item.option_qty[optionId]
+
+    if (optionPrice && typeof optionQuantity === 'number') {
+      return sum + optionQuantity * optionPrice
+    }
+
+    return sum
+  }, 0)
 }
 
 // turns the menu into a single object with keys as item ids
@@ -43,7 +63,12 @@ function flattenMenu(data) {
 }
 
 Menu.prototype.generateJsonForItem = function(cartItem) {
+  var menu = this
   var item = this.getItemById(cartItem.item.item_id)
+
+  // Price for the Add To Cart button
+  var fullPrice = menu.getCartItemPrice(cartItem)
+
   var json = {
     text: `*${item.name}* \n ${item.description}`,
     attachments: [{
@@ -74,6 +99,7 @@ Menu.prototype.generateJsonForItem = function(cartItem) {
     }]
   }
 
+  // options, like radios and checkboxes
   var options = nodeOptions(item, cartItem)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
@@ -88,7 +114,7 @@ Menu.prototype.generateJsonForItem = function(cartItem) {
     'actions': [
       {
         'name': 'food.item.add_to_cart',
-        'text': '✓ Add to Cart: $8.04',
+        'text': '✓ Add to Cart: $' + fullPrice.toFixed(2),
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id
