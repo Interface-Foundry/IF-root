@@ -6,9 +6,6 @@ require('colors')
 
 var team = require('./test_team_1')
 
-// reset the team
-co(team.reset).catch(console.error.bind(console))
-
 function run_chat_server () {
   console.log('running mock slack server')
   return new Promise((resolve, reject) => {
