@@ -224,26 +224,6 @@ function createPreferencesAttachments () {
 }
 
 /*
-* S5
-* creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
-*
-*/
-function askUserForCuisineTypes (cuisines, user, admin) {
-  // probably should check if user is on slack
-  var s = _.sampleSize(cuisines, 4)
-  var res = sm().text(`<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`)
-  var a = res.attachment()
-    .color('#3AA3E3')
-    .ts(Date.now())
-    .callbackId('food.preferences')
-  _.forEach(s, function (cuisineName) {
-    a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
-  })
-  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('× No Lunch for Me').style('danger').end()
-  return res.json()
-}
-
-/*
 * general use for when you need to remove a user from a session for delivery session
 *
 *
@@ -255,67 +235,11 @@ function * removeUserFromSession (team, user) {
   foodSession.save()
 }
 
-function confirmRestaurant (restaurant) {
-  var res = {
-    text: `Okay I'll collect orders for <${restaurant.url}|${restaurant.name}>`,
-    attachments: [{
-      fallback: 'You are unable to confirm',
-      callback_id: 'confirmRestaurant',
-      color: '#3AA3E3',
-      actions: [
-        {
-          name: 'food.admin.restaurant.collect_orders',
-          text: 'Confirm',
-          style: 'primary',
-          type: 'button',
-          value: 'confirm'
-        },
-        {
-          name: 'food.admin.view_team_members',
-          text: 'View Team Members',
-          type: 'button',
-          value: 'view_team_members'
-        },
-        {
-          name: 'food.admin.change_restaurant',
-          text: '< Change Restaurant',
-          type: 'button',
-          value: 'change_restaurant'
-        }
-      ]
-    }
-    ]
-  }
-  return res
-}
-
-var userFoodPreferencesPlaceHolder = {
-  text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'You are unable to confirm preferences',
-  callback_id: 'confirm.user.preferences',
-  color: 'grey',
-  attachment_type: 'default',
-  attachments: [{
-    actions: [{
-      'name': 'food.user.poll',
-      'value': 'food.user.poll',
-      'text': 'Confirm',
-      'type': 'button'
-    },
-      {
-        'name': 'food.user.preference.cancel',
-        'value': 'food.user.preference.cancel',
-        'text': '× Cancel',
-        'type': 'button'
-      }]
-  }]
-
-}
-
 module.exports = {
   askUserForCuisineTypes,
+  createSearchRanking,
+  getVotesFromMembers,
   initiateFoodMessage,
   confirmRestaurant,
   initiateDeliverySession,
-  removeUserFromSession,
-}
+removeUserFromSession}

@@ -1,29 +1,22 @@
 require('kip')
 
-var queue = require('../queue-mongo')
 var co = require('co')
 var fs = require('fs')
-var db = require('db')
-var uuid = require('uuid')
 var _ = require('lodash')
+var path = require('path')
+
 var api = require('./api-wrapper')
+var queue = require('../queue-mongo')
 var search = require('./search')
 var utils = require('./utils')
-var picstitch = require('./image_processing_delivery.js')
-var path = require('path')
 var request = require('request-promise')
 var team_utils = require('./team_utils.js')
 var UserChannel = require('./UserChannel')
 
 var ui = require('../ui_controls')
-var googl = require('goo.gl')
 var Fuse = require('fuse.js')
 var all_cuisines = require('./cuisines2').cuisines
-if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
-  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
-} else {
-  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
-}
+
 
 require("nodejs-dashboard");
 
@@ -163,7 +156,7 @@ function getRoute (session) {
 var handlers = {}
 require('./menu_handlers')(replyChannel, handlers)
 require('./cart_handlers')(replyChannel, handlers)
-require('./votes_handlers')(replyChannel, handlers)
+require('./handlers_votes')(replyChannel, handlers)
 
 handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')

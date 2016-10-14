@@ -1,11 +1,18 @@
 'use strict'
 var _ = require('lodash')
+var googl = require('goo.gl')
 
 var team_utils = require('./team_utils.js')
 var utils = require('./utils')
 var googl = require('goo.gl')
 var request = require('request-promise')
 var Fuse = require('fuse.js')
+
+if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
+  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
+} else {
+  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
+}
 
 // injected dependencies
 var $replyChannel
@@ -14,6 +21,49 @@ var $allHandlers
 // exports
 var handlers = {}
 var api = require('./api-wrapper')
+/*
+* S5
+* creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
+*
+*/
+function askUserForCuisineTypes (cuisines, user, admin) {
+  // probably should check if user is on slack
+  var s = _.sampleSize(cuisines, 4)
+  var res = sm().text(`<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`)
+  var a = res.attachment()
+    .color('#3AA3E3')
+    .ts(Date.now())
+    .callbackId('food.preferences')
+  _.forEach(s, function (cuisineName) {
+    a.button().name('food.admin.restaurant.pick').value(cuisineName).text(cuisineName).end()
+  })
+  a.button().name('food.admin.restaurant.pick').value('remove_from_users').text('× No Lunch for Me').style('danger').end()
+  return res.json()
+}
+
+var userFoodPreferencesPlaceHolder = {
+  text: 'Here we would ask user for preferences if they didnt have it',
+  fallback: 'You are unable to confirm preferences',
+  callback_id: 'confirm.user.preferences',
+  color: 'grey',
+  attachment_type: 'default',
+  attachments: [{
+    actions: [{
+      'name': 'food.user.poll',
+      'value': 'food.user.poll',
+      'text': 'Confirm',
+      'type': 'button'
+    },
+      {
+        'name': 'food.user.preference.cancel',
+        'value': 'food.user.preference.cancel',
+        'text': '× Cancel',
+        'type': 'button'
+      }]
+  }]
+
+}
+
 /*
 * creates attachments to display to admin for merchant
 *
@@ -143,7 +193,7 @@ handlers['food.user.preferences'] = function * (session) {
       thread_id: member.dm,
       origin: session.origin,
       source: session.source,
-      res: utils.userFoodPreferencesPlaceHolder
+      res: userFoodPreferencesPlaceHolder
     }
     userPreferences.source.user = member.id
     userPreferences.source.channel = member.dm
@@ -180,7 +230,7 @@ handlers['food.user.poll'] = function * (message) {
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      res: utils.askUserForCuisineTypes(
+      res: askUserForCuisineTypes(
         _.map(
           _.filter(foodSession.cuisines, function (o) {
             return o.count > 10
