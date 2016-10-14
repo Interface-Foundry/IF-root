@@ -314,7 +314,6 @@ var userFoodPreferencesPlaceHolder = {
 
 module.exports = {
   askUserForCuisineTypes,
-  chooseRestaurant,
   createSearchRanking,
   getVotesFromMembers,
   initiateFoodMessage,
