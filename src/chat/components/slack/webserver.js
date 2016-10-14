@@ -5,6 +5,7 @@ var kip = require('kip')
 //
 var queue = require('../queue-mongo')
 require('kip')
+var refresh_team = require('../refresh_team')
 var express = require('express')
 var co = require('co')
 var app = express()
@@ -327,12 +328,12 @@ app.get('/newslack', function (req, res) {
         _.merge(old_bot, b)
         old_bot.save(e => {
           kip.err(e)
-        // TODO reload slack users
+          refresh_team(old_bot.team_id)
         })
       } else {
         bot.save(function (e) {
           kip.err(e)
-        // TODO load slack user
+          refresh_team(bot.team_id)
         })
       }
     })

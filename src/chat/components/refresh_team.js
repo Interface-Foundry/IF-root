@@ -44,7 +44,8 @@ module.exports = function(team_id) {
 }
 
 if (!module.parent) {
-  module.exports('T0R6J00JW').catch(function(e) {
+  var team_id = process.argv[2]
+  module.exports(team_id).catch(function(e) {
     console.log(e.stack);
   })
 }
