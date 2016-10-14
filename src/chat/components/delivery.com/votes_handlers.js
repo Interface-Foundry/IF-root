@@ -143,7 +143,7 @@ handlers['food.user.preferences'] = function * (session) {
     }
     userPreferences.source.user = member.id
     userPreferences.source.channel = member.dm
-    replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
+    $replyChannel.send(userPreferences, 'food.user.poll', {type: 'slack', data: userPreferences.res})
   })
 }
 
@@ -187,12 +187,12 @@ handlers['food.user.poll'] = function * (message) {
     foodSession.data.response_history.push({'handler': 'food.user.poll', 'response': resp.res})
     foodSession.save()
     // need to sendreplace probably
-    replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
+    $replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
 
 handlers['food.user.choice_confirm'] = function * (message) {
-  replyChannel.send(message, 'food.admin.restaurant.pick', {type: 'slack', data: message.example_res})
+  $replyChannel.send(message, 'food.admin.restaurant.pick', {type: 'slack', data: message.example_res})
 }
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
@@ -245,7 +245,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     source: message.source,
     res: responseForAdmin
   }
-  replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
+  $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
@@ -276,7 +276,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     res: utils.confirmRestaurant(foodSession.chosen_restaurant)
   }
 
-  replyChannel.send(resp, 'food.admin.restaurant.collect_orders', {type: 'slack', data: resp.res})
+  $replyChannel.send(resp, 'food.admin.restaurant.collect_orders', {type: 'slack', data: resp.res})
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message) {
@@ -338,7 +338,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message) {
       user: m.id
     }
 
-    replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
+    $replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
   })
 }
 

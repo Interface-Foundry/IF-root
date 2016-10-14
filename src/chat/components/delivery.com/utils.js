@@ -314,13 +314,8 @@ var userFoodPreferencesPlaceHolder = {
 
 module.exports = {
   askUserForCuisineTypes,
-  createSearchRanking,
-  getVotesFromMembers,
   initiateFoodMessage,
-  sortMerchantsByDistance,
-  sortMerchantsByRating,
   confirmRestaurant,
-  userFoodPreferencesPlaceHolder,
   initiateDeliverySession,
   removeUserFromSession,
-confirmTeamOrder}
+}
