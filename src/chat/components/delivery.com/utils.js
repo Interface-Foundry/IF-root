@@ -8,7 +8,6 @@ var async = require('async')
 
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
-var Menu = require('./Menu')
 
 /*
 *
@@ -131,84 +130,6 @@ function createButton (name, buttonType) {
 }
 
 /*
-* creates attachments to display to admin for merchant
-*
-*
-*/
-function chooseRestaurant (restaurants, orderBy) {
-  var viable = restaurants.slice(0, 3)
-  var attachments = viable.map(buildRestaurantAttachment)
-  var res = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': attachments
-  }
-  res.attachments.push({
-    'mrkdwn_in': [
-      'text'
-    ],
-    'text': '',
-    'fallback': 'You are unable to choose a game',
-    'callback_id': 'food.admin.restaurant.pick',
-    'color': '#3AA3E3',
-    'attachment_type': 'default',
-    'actions': [
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'More Choices >',
-        'type': 'button',
-        'value': 'more'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Price',
-        'type': 'button',
-        'value': 'sort_price'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Rating',
-        'type': 'button',
-        'value': 'sort_rating'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Distance',
-        'type': 'button',
-        'value': 'sort_distance'
-      }
-    ]
-  })
-  return res
-}
-
-function buildRestaurantAttachment (restaurant) {
-  // will need to use picstitch for placeholder image in future
-  var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-  var obj = {
-    'text': restaurant.summary.name,
-    'image_url': placeholderImage,
-    'color': '#3AA3E3',
-    'callback_id': restaurant.id,
-    'fallback': 'You are unable to choose a restaurant',
-    'attachment_type': 'default',
-    'actions': [
-      {
-        'name': 'food.admin.restaurant.confirm',
-        'text': '✓ Choose',
-        'type': 'button',
-        'style': 'primary',
-        'value': restaurant.id
-      },
-      {
-        'name': 'food.admin.restaurant.more_info',
-        'text': 'More Info',
-        'type': 'button',
-        'value': restaurant.id
-      }]
-  }
-  return obj
-}
-/*
 * returns options to show to users given available cuisines
 * @param {array} users
 * @param {Object} results for search location
@@ -282,39 +203,6 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
   return _.filter(merchants, function (m) {
     return _.includes(m.summary.cuisines, cuisineType)
   })
-}
-
-/*
-* create ranking from searches given votes
-*
-* @param {array} voteParam array with each object is same as searchNearby input
-*                params except additional param of total votes
-*                voteParams has two objects basically, vote count and params to search
-*
-* @returns {} object that is ranked listing of places or whatever
-*/
-function * createSearchRanking (merchants, votes) {
-  // filter results based on what results want
-  var eligible = []
-  _.forEach(votes, function (v) {
-    // get all merchants who satisfy cuisine type being v
-    eligible = _.union(eligible, _.filter(merchants, function (c) {
-      return _.includes(c.summary.cuisines, v)
-    }))
-  })
-  return eligible
-}
-
-function sortMerchantsByDistance (merchants) {
-  return _.orderBy(merchants, 'location.distance', ['asc'])
-}
-
-function sortMerchantsByRating (merchants) {
-  return _.orderBy(merchants, 'summary.overall_rating', ['desc'])
-}
-
-function getVotesFromMembers (messages) {
-  return _.map(messages, 'data.vote')
 }
 
 function askUserForPreferences (user) {
