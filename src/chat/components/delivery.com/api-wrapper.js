@@ -1,8 +1,8 @@
-var request = require('request-promise')
+require('kip')
 var _ = require('lodash')
 var co = require('co')
-require('kip')
 var fs = require('fs')
+var request = require('request-promise')
 
 var client_id = 'brewhacks2016'
 
@@ -12,6 +12,30 @@ defaultParams.searchNearby = {
   pickup: false,
   addr: ''
 }
+
+function * getGuestToken () {
+  var token = yield request({url: `https://api.delivery.com/customer/auth/guest?client_id=${client_id}`, json: true})
+  return token
+}
+
+module.exports.createCartWithItems = function * (session) {
+  // idk
+  var token = yield getGuestToken()
+
+  var opts = {
+    method: 'POST',
+    url: `https://api.delivery.com/customer/cart/{session.menu.id`,
+    body: {
+      'client_id': token['Guest-Token'],
+      'order_type': session.fulfillmentMethod,
+      'instructions': session.data.instructions || {},
+      'items': _.get(session.cart, 'item')
+    }
+  }
+  var response = yield request(opts)
+  return response
+}
+
 module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
   logging.info('searching delivery.com for restaurants with params', params)
