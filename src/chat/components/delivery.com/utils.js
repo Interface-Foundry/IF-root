@@ -1,5 +1,3 @@
-/* global db logging */
-
 require('kip')
 
 var co = require('co')
@@ -10,45 +8,7 @@ var async = require('async')
 
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
-
-
-function * groupItems (cart) {
-  _.forEach(cart)
-
-}
-
-/* S12A
-*
-* TODO:
-*/
-function * confirmTeamOrder (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var response = {
-    text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
-    attachments: [
-    {
-        'title': '',
-        'image_url': 'https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png'
-    }]
-  }
-
-  // _.forEach(foodSession.)
-  // attachments with all the food
-
-
-  // final attachment
-  response.attachments.push({
-    text: `*Delivery Fee:* ${foodSession.order.deliveryFee}\n*Taxes:* ${foodSession.order.taxes}\n*Team Cart Total:* ${foodSession.order.taxes}`
-  })
-}
-
-/* S12B
-*
-*
-*/
-function * createContactConfirmation (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-}
+var Menu = require('./Menu')
 
 /*
 *
@@ -194,7 +154,7 @@ function chooseRestaurant (restaurants, orderBy) {
     'actions': [
       {
         'name': 'food.admin.restaurant.pick',
-        'text': 'More Choices &gt;',
+        'text': 'More Choices >',
         'type': 'button',
         'value': 'more'
       },
@@ -430,7 +390,7 @@ function confirmRestaurant (restaurant) {
         },
         {
           name: 'food.admin.change_restaurant',
-          text: '&lt; Change Restaurant',
+          text: '< Change Restaurant',
           type: 'button',
           value: 'change_restaurant'
         }
@@ -475,5 +435,5 @@ module.exports = {
   confirmRestaurant,
   userFoodPreferencesPlaceHolder,
   initiateDeliverySession,
-  removeUserFromSession
-}
+  removeUserFromSession,
+confirmTeamOrder}
