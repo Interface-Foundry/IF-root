@@ -5,6 +5,7 @@ var team_utils = require('./team_utils.js')
 var utils = require('./utils')
 var googl = require('goo.gl')
 var request = require('request-promise')
+var Fuse = require('fuse.js')
 
 // injected dependencies
 var $replyChannel
