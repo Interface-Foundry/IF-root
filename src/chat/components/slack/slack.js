@@ -166,8 +166,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     var team = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
     var team = _.get(message, 'source.team')
     var bot = slackConnections[team]
-
     if (typeof bot === 'undefined') {
+      logging.error('error with the bot thing, message:', message)
       kip.debug('\n\nslack.js line 174, message: ', message, '\n\n')
       throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }

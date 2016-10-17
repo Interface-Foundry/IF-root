@@ -262,8 +262,186 @@ handlers['food.member.order.view'] = function * (message) {
 *
 *
 */
-handlers['food.admin.order.checkout'] = function * (message) {
+handlers['food.admin.order.checkout.address'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var response = {
+    text: `Whats your apartment or floor number at ${foodSession.addr.address_1}
+>Type your apartment or floor number below`,
+    fallback: 'Unable to get address',
+    callback_id: 'food.admin.order.checkout.address',
+    color: '#3AA3E3'
+  }
+  $replyChannel.send(message, 'food.admin.order.checkout.phone_number', {type: message.origin, data: response})
+}
+
+handlers['food.admin.order.checkout.phone_number'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.chosen_location['floor_or_apartment'] = message.text
+  foodSession.save()
+  var response = {
+    text: `Whats your phone number ${foodSession.convo_initiater.name}
+>Type your phone number below`,
+    fallback: 'Unable to get phone',
+    'callback_id': 'wopr_game',
+    color: '#3AA3E3'
+  }
+  $replyChannel.send(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: response})
+}
+
+handlers['food.admin.order.checkout.confirm'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.chosen_location['phone_number'] = message.text
+  foodSession.save()
+  var response = {
+    text: 'Great, please confirm your contact and delivery details:',
+    fallback: 'Unable to get address',
+    callback_id: 'food.admin.order.checkout.confirm',
+    attachments: [
+      {
+        'title': '',
+        'mrkdwn_in': [
+
+          'text'
+
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': [
+
+          'text'
+
+        ],
+        'text': '*Name:* \n ${foodSession.convo_initiater.name}',
+        'fallback': 'You are unable to confirm your order',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Edit',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': [
+
+          'text'
+
+        ],
+        'text': '*Address:* \n ${foodSession.chosen_location.addr.address_1}',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Edit',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': [
+
+          'text'
+
+        ],
+        'text': '*Apt/Floor#:* \n ${foodSession.chosen_location.floor_or_apartment}',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Edit',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': [
+
+          'text'
+
+        ],
+        'text': '*Phone Number:* \n ${foodSession.chosen_location.phone_number}',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': 'Edit',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': [
+
+          'text'
+
+        ],
+        'text': '*Delivery Instructions:* ${foodSession.data.instructions}',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#49d63a',
+        'attachment_type': 'default',
+        'actions': [
+          {
+            'name': 'chess',
+            'text': '✓ Confirm Address',
+            'type': 'button',
+            'style': 'primary',
+            'value': 'chess'
+          },
+          {
+            'name': 'chess',
+            'text': '+ Deliver Instructions',
+            'type': 'button',
+            'value': 'chess'
+          }
+        ]
+      }
+    ]
+  }
+  $replyChannel.send(message, 'food.admin.order.done', {type: message.origin, data: response})
+}
+
+handlers['food.admin.order.done'] = function * (message) {
+  var response = {
+    'text': "You're all set to check-out!",
+    'attachments': [
+      {
+        'title': '',
+        'mrkdwn_in': ['text']
+      },
+      {
+        'title': '',
+        'mrkdwn_in': ['text'],
+        'text': 'would be foodSession.checkout_url|➤ Click Here to Checkout>',
+        'fallback': 'You are unable to choose a game',
+        'callback_id': 'wopr_game',
+        'color': '#3AA3E3',
+        'attachment_type': 'default'
+      }
+    ]
+  }
+  $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
 }
 
 module.exports = function (replyChannel, allHandlers) {

@@ -101,5 +101,8 @@
     "env": {
       "es6": true
     }
+  },
+  "devDependencies": {
+    "nodejs-dashboard": "^0.1.1"
   }
 }

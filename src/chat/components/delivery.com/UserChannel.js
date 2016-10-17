@@ -55,7 +55,13 @@ class UserChannel {
       })
     }
 
-    this.sendReplace = function (session, nextHandlerID, data) { this.send(session, nextHandlerID, data, true) }
+    this.sendReplace = function (session, nextHandlerID, data) {
+      if (process.env.NODE_ENV === 'test') {
+        this.send(session, nextHandlerID, data, false)
+      } else {
+        this.send(session, nextHandlerID, data, true)
+      }
+    }
     return this
   }
 }

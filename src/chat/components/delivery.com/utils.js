@@ -236,10 +236,7 @@ function * removeUserFromSession (team, user) {
 }
 
 module.exports = {
-  askUserForCuisineTypes,
-  createSearchRanking,
-  getVotesFromMembers,
-  initiateFoodMessage,
-  confirmRestaurant,
-  initiateDeliverySession,
-removeUserFromSession}
+  initiateFoodMessage: initiateFoodMessage,
+  initiateDeliverySession: initiateDeliverySession,
+  removeUserFromSession: removeUserFromSession
+}
