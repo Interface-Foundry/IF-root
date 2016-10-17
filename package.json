@@ -136,6 +136,7 @@
     "chai": "^3.0.0",
     "karma": "^0.13.3",
     "mocha": "^2.2.5",
+    "nodejs-dashboard": "^0.1.0",
     "passport-http": "^0.2.2"
   },
   "scripts": {

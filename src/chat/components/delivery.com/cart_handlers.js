@@ -1,7 +1,7 @@
 'use strict'
 var _ = require('lodash')
 var Menu = require('./Menu')
-
+var async = require('async')
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
@@ -15,6 +15,7 @@ var handlers = {}
 handlers['food.cart.personal'] = function * (message, replace) {
   console.log('message.user_id', message.user_id)
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
   var totalPrice = myItems.reduce((sum, i) => {
@@ -140,47 +141,14 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-
-  myItems.map(cartItem => {
-    var deliveryItem = menu.getItemById(cartItem.item.item_id)
-  /** Mitsu add your code here
-  cartItem looks like this:
-  { added_to_cart: true,
-     item: { item_label: '', instructions: '', item_qty: 1, item_id: '265' },
-     _id: 57febae8aca1125d7e5435a9,
-     user_id: 'U1JU56UG1'
-   }
-
-   deliveryItem looks like this:
-   {  images: [],
-      children:
-       [ { unique_id: 288,
-           children: [Object],
-           type: 'option group',
-           sel_dep: 0,
-           max_selection: 14,
-           min_selection: 0,
-           description: '',
-           name: 'Meal Additions',
-           id: 'PE-68709-43-265-288' } ],
-      type: 'item',
-      laundry_type: null,
-      price_compare_item: false,
-      popular_rank: 4,
-      popular_flag: true,
-      increment: 1,
-      max_price: 15.95,
-      price: 15.95,
-      max_qty: 25,
-      min_qty: 1,
-      available: null,
-      unique_id: 265,
-      description: 'Grilled cottage cheese cooked with long grain basmati rice.',
-      name: '6. Paneer Tikka Biryani',
-      id: 'PE-68709-43-265'
-   }
-  */
+  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec();
+  user.history.orders = [];
+  yield myItems.map(function * (cartItem){
+    user.history.orders.push({user_id: user._id, session_id: foodSession._id, item: JSON.stringify(cartItem), ts: Date.now()});
   })
+  yield user.save(function(err, saved){
+    if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err,' \n\n\n\n\n')
+  });
   $replyChannel.send(message, 'food.cart.personal.confirm', {type: 'slack', data: {text: 'neat-o, thanks'}})
 }
 

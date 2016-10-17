@@ -55,23 +55,28 @@ var getChatUsers = co.wrap(function *(message) {
         var team_members_id_array = teamMembers.map(function(m){
             return m.dm;
         })
-          async.eachSeries(res.ims, function iterator(u, cb){
-                    kip.debug('creating new chatusers.. ')
-                    var new_user = new db.Chatuser();
-                    new_user.team_id = team.team_id;
-                    new_user.id = u.user;
-                    new_user.dm = u.id;
-                    new_user.is_bot = false;
-                    if (u.user == message.source.user) {
-                      new_user.is_admin = true;
-                    }
-                    new_user.save(function(err, saved) {
-                      result.push(new_user)
-                      cb();
-                    });
-          }, function done(err) {
-            return Promise.resolve(result)
-          })
+        async.eachSeries(res.ims, function iterator(u, cb){
+          if (team_members_id_array.indexOf(u.id == -1)){
+            kip.debug('creating new chatusers.. ')
+            var new_user = new db.Chatuser();
+            new_user.team_id = team.team_id;
+            new_user.id = u.user;
+            new_user.dm = u.id;
+            new_user.is_bot = false;
+            new_user.history.interactions = []
+            if (u.user == message.source.user) {
+              new_user.is_admin = true;
+            }
+            new_user.save(function(err, saved) {
+              result.push(new_user)
+              cb();
+            });
+          } else {
+            cb();
+          }
+        }, function done(err) {
+          return Promise.resolve(result)
+        })
     
 })
 

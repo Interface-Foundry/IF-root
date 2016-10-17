@@ -2,6 +2,9 @@
 var _ = require('lodash')
 
 var team_utils = require('./team_utils.js')
+var utils = require('./utils')
+var googl = require('goo.gl')
+var request = require('request-promise')
 
 // injected dependencies
 var $replyChannel
@@ -9,7 +12,7 @@ var $allHandlers
 
 // exports
 var handlers = {}
-
+var api = require('./api-wrapper')
 /*
 * creates attachments to display to admin for merchant
 *
