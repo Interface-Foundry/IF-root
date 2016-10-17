@@ -1,19 +1,12 @@
 'use strict'
 var _ = require('lodash')
+var Fuse = require('fuse.js')
 var googl = require('goo.gl')
+var request = require('request-promise')
 
 var api = require('./api-wrapper.js')
 var team_utils = require('./team_utils.js')
 var utils = require('./utils')
-var googl = require('goo.gl')
-var request = require('request-promise')
-var Fuse = require('fuse.js')
-
-if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
-  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
-} else {
-  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
-}
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -259,19 +252,18 @@ handlers['food.user.poll'] = function * (message) {
 
     var cuisineMessage = askUserForCuisineTypes(_.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name'), foodSession.convo_initiater, member.dm)
 
-    var resp = {
+    var response = {
       mode: 'food',
       action: 'user.poll',
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      res: cuisineMessage
+      data: cuisineMessage
     }
     foodSession.data = { response_history: []}
-    foodSession.data.response_history.push({'handler': 'food.user.poll', 'response': resp.res})
+    foodSession.data.response_history.push({'handler': 'food.user.poll', 'response': response.data})
     foodSession.save()
-    logging.data('resp', resp)
-    $replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
+    $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
   })
 }
 

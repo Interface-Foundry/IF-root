@@ -19,8 +19,6 @@ var Fuse = require('fuse.js')
 var all_cuisines = require('./cuisines2').cuisines
 
 
-
-
 var replyChannel = new UserChannel(queue)
 
 function default_reply (message) {
@@ -319,10 +317,7 @@ handlers['address.new'] = function * (session) {
   // session.state = {}
   var msg_json = {
     'text': "What's the delivery address?",
-    'attachments': [
-      {
-      'text': 'Type your address below'      }
-    ]
+    'attachments': [{'text': 'Type your address below'}]
   }
   replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json})
 }
