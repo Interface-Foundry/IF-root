@@ -1,17 +1,17 @@
 {
     "text": "Great, please confirm your contact and delivery details:",
     "attachments": [
-					{
-			"title": "",
-			"mrkdwn_in": [
+                    {
+            "title": "",
+            "mrkdwn_in": [
 
                 "text"
 
             ]
-			},
-       	 {
+            },
+         {
             "title": "",
-			"mrkdwn_in": [
+            "mrkdwn_in": [
 
                 "text"
 
@@ -30,9 +30,9 @@
                 }
             ]
         },
-		{
+        {
             "title": "",
-			"mrkdwn_in": [
+            "mrkdwn_in": [
 
                 "text"
 
@@ -51,9 +51,9 @@
                 }
             ]
         },
-		{
+        {
             "title": "",
-			"mrkdwn_in": [
+            "mrkdwn_in": [
 
                 "text"
 
@@ -72,9 +72,9 @@
                 }
             ]
         },
-		{
+        {
             "title": "",
-			"mrkdwn_in": [
+            "mrkdwn_in": [
 
                 "text"
 
@@ -93,14 +93,35 @@
                 }
             ]
         },
-				{
+		 {
             "title": "",
-			"mrkdwn_in": [
+            "mrkdwn_in": [
 
                 "text"
 
             ],
-            "text": "*Delivery Instructions:* _Please come up to the 6th floor_",
+            "text": "*Budget:* \n $15 per team member",
+            "fallback": "You are unable to choose a game",
+            "callback_id": "wopr_game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "Edit",
+                    "type": "button",
+                    "value": "chess"
+                }
+            ]
+        },
+                {
+            "title": "",
+            "mrkdwn_in": [
+
+                "text"
+
+            ],
+            "text": "*Delivery Instructions:* _None_",
             "fallback": "You are unable to choose a game",
             "callback_id": "wopr_game",
             "color": "#49d63a",
@@ -110,12 +131,12 @@
                     "name": "chess",
                     "text": "✓ Confirm Contact",
                     "type": "button",
-					"style": "primary",
+                    "style": "primary",
                     "value": "chess"
                 },
-				{
+                {
                     "name": "chess",
-                    "text": "Edit Instructions",
+                    "text": "+ Deliver Instructions",
                     "type": "button",
                     "value": "chess"
                 }
