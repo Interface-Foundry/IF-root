@@ -141,14 +141,14 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
-  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec();
-  user.history.orders = [];
-  yield myItems.map(function * (cartItem){
-    user.history.orders.push({user_id: user._id, session_id: foodSession._id, item: JSON.stringify(cartItem), ts: Date.now()});
+  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
+  user.history.orders = []
+  yield myItems.map(function * (cartItem) {
+    user.history.orders.push({user_id: user._id, session_id: foodSession._id, item: JSON.stringify(cartItem), ts: Date.now()})
   })
-  yield user.save(function(err, saved){
-    if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err,' \n\n\n\n\n')
-  });
+  yield user.save(function (err, saved) {
+    if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err, ' \n\n\n\n\n')
+  })
   $replyChannel.send(message, 'food.cart.personal.confirm', {type: 'slack', data: {text: 'neat-o, thanks'}})
 }
 
@@ -190,6 +190,9 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.order.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.guest_token = api.getGuestToken()
+  foodSession.order = api.createCartForSession(foodSession)
+  foodSession.save()
   var menu = Menu(foodSession.menu)
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
@@ -214,7 +217,7 @@ handlers['food.admin.order.confirm'] = function * (message) {
       mrkdwn_in: [ 'text' ],
       actions: [{
         'name': 'food.cart.decrease',
-        'text': 'Add to Cart',
+        'text': '-',
         'type': 'button',
         'value': item.item_id
       }, {
@@ -224,7 +227,7 @@ handlers['food.admin.order.confirm'] = function * (message) {
         'value': item.item_id
       }, {
         'name': 'food.cart.increase',
-        'text': String(item.item_qty),
+        'text': '+',
         'type': 'button',
         'value': item.item_id
       }]
@@ -236,9 +239,9 @@ handlers['food.admin.order.confirm'] = function * (message) {
   })
   // final attachment
   response.attachments.push({
-    text: `*Delivery Fee:* ${foodSession.order.deliveryFee}
-*Taxes:* ${foodSession.order.taxes}
-*Team Cart Total:* ${foodSession.order.taxes}`,
+    text: `*Delivery Fee:* ${foodSession.order.delivery_fee}
+*Taxes:* ${foodSession.order.tax}
+*Team Cart Total:* ${foodSession.order.total}`,
     fallback: 'Confirm Choice',
     callback_id: 'foodConfrimOrder_callbackID',
     color: '#3AA3E3',
@@ -246,7 +249,7 @@ handlers['food.admin.order.confirm'] = function * (message) {
     mrkdwn_in: [ 'text' ],
     actions: [{
       'name': 'food.admin.confirm_order',
-      'text': 'Some $ amnt',
+      'text': `Checkout $${foodSession.order.total}`,
       'type': 'button',
       'style': 'primary',
       'value': 'checkout'

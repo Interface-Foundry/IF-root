@@ -4,7 +4,7 @@ var co = require('co')
 var fs = require('fs')
 var request = require('request-promise')
 
-var client_id = 'brewhacks2016'
+var client_id = 'ZTM0ZmNjOWRhNGMyNzkyYmI5NWVhMmM1ZmU2Njg3M2E3'
 
 var defaultParams = {}
 
@@ -13,25 +13,24 @@ defaultParams.searchNearby = {
   addr: ''
 }
 
-function * getGuestToken () {
+module.exports.getGuestToken = function * () {
   var token = yield request({url: `https://api.delivery.com/customer/auth/guest?client_id=${client_id}`, json: true})
   return token
 }
 
-module.exports.createCartWithItems = function * (session) {
-  // idk
-  var token = yield getGuestToken()
-
+module.exports.createCartForSession = function * (session) {
   var opts = {
     method: 'POST',
-    url: `https://api.delivery.com/customer/cart/{session.menu.id`,
+    url: `https://api.delivery.com/customer/cart/${session.menu.id}`,
+    headers: {'Guest-Token': session.guest_token},
     body: {
-      'client_id': token['Guest-Token'],
-      'order_type': session.fulfillmentMethod,
-      'instructions': session.data.instructions || {},
-      'items': _.get(session.cart, 'item')
+      'client_id': client_id,
+      'order_type': session.fulfillmentMethod || 'delivery',
+      'instructions': session.data.instructions || '',
+      'items': _.map(session.cart, 'item')
     }
   }
+
   var response = yield request(opts)
   return response
 }
@@ -40,7 +39,7 @@ module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
   logging.info('searching delivery.com for restaurants with params', params)
   var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
-  kip.debug('allNearby: ', allNearby);
+  kip.debug('allNearby: ', allNearby)
   // make sure we have all the merchants in the db
   saveMerchants(allNearby.merchants)
 

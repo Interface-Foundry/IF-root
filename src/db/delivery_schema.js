@@ -49,6 +49,8 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {}, // \shrug
+  order: {}, // info after adding items to cart
+  guest_token: String, // related to creating a guest token per session
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {
