@@ -95,8 +95,7 @@ var userFoodPreferencesPlaceHolder = {
 *
 */
 function chooseRestaurant (restaurants, orderBy) {
-  var viable = restaurants.slice(0, 3)
-  var attachments = viable.map(buildRestaurantAttachment)
+  var attachments = restaurants.slice(0, 3).map(buildRestaurantAttachment)
   var res = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': attachments
@@ -140,11 +139,12 @@ function chooseRestaurant (restaurants, orderBy) {
   return res
 }
 
-function buildRestaurantAttachment (restaurant) {
+function * buildRestaurantAttachment (restaurant) {
   // will need to use picstitch for placeholder image in future
   var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
   var obj = {
-    'text': restaurant.summary.name,
+    'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
     'image_url': placeholderImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
@@ -177,12 +177,12 @@ function buildRestaurantAttachment (restaurant) {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function * createSearchRanking (merchants, votes) {
+function * createSearchRanking (foodSession) {
   // filter results based on what results want
   var eligible = []
-  _.forEach(votes, function (v) {
+  _.forEach(foodSession.votes, function (v) {
     // get all merchants who satisfy cuisine type being v
-    eligible = _.union(eligible, _.filter(merchants, function (c) {
+    eligible = _.union(eligible, _.filter(foodSession.merchants, function (c) {
       return _.includes(c.summary.cuisines, v)
     }))
   })
@@ -312,11 +312,53 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     logging.error('need', numOfResponsesWaitingFor)
     return
   }
-  var viableRestaurants = yield createSearchRanking(foodSession.merchants, votes)
+  var viableRestaurants = yield createSearchRanking(foodSession)
 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
-  var responseForAdmin = chooseRestaurant(viableRestaurants)
+  // var responseForAdmin = chooseRestaurant(viableRestaurants)
+
+  var res = {
+    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
+    'attachments': viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
+  }
+  res.attachments.push({
+    'mrkdwn_in': [
+      'text'
+    ],
+    'text': '',
+    'fallback': 'You are unable to choose a game',
+    'callback_id': 'food.admin.restaurant.pick',
+    'color': '#3AA3E3',
+    'attachment_type': 'default',
+    'actions': [
+      {
+        'name': 'food.admin.restaurant.pick',
+        'text': 'More Choices >',
+        'type': 'button',
+        'value': 'more'
+      },
+      {
+        'name': 'food.admin.restaurant.pick',
+        'text': 'Sort Price',
+        'type': 'button',
+        'value': 'sort_price'
+      },
+      {
+        'name': 'food.admin.restaurant.pick',
+        'text': 'Sort Rating',
+        'type': 'button',
+        'value': 'sort_rating'
+      },
+      {
+        'name': 'food.admin.restaurant.pick',
+        'text': 'Sort Distance',
+        'type': 'button',
+        'value': 'sort_distance'
+      }
+    ]
+  })
+
   var resp = {
     mode: 'food',
     action: 'admin.restaurant.pick',
