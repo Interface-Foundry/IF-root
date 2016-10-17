@@ -2,6 +2,7 @@
 var _ = require('lodash')
 var Menu = require('./Menu')
 var async = require('async')
+var api = require('./api-wrapper')
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
