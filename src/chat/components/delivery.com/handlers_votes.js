@@ -305,7 +305,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   var votes = foodSession.votes
 
   // replace after votes
-  // $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: `Thanks for your vote, waiting for the rest of the users to finish voting`})
+  $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: `Thanks for your vote, waiting for the rest of the users to finish voting`})
 
   if (votes.length < numOfResponsesWaitingFor) {
     logging.error('waiting for more responses have, votes: ', votes.length)
