@@ -38,8 +38,8 @@ handlers['food.cart.personal'] = function * (message, replace) {
       attachment_type: 'default',
       actions: [
         {
-          name: 'food.cart.personal.quantity.add',
-          text: '+',
+          name: 'food.cart.personal.quantity.subtract',
+          text: '—',
           type: 'button',
           value: index
         },
@@ -50,8 +50,8 @@ handlers['food.cart.personal'] = function * (message, replace) {
           value: item.unique_id
         },
         {
-          name: 'food.cart.personal.quantity.subtract',
-          text: '—',
+          name: 'food.cart.personal.quantity.add',
+          text: '+',
           type: 'button',
           value: index
         }
