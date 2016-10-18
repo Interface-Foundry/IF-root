@@ -142,66 +142,52 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
+
+  // save their items in their order history
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
-  user.history.orders = []
+  user.history.orders = user.history.orders || []
   yield myItems.map(function * (cartItem) {
     user.history.orders.push({user_id: user._id, session_id: foodSession._id, item: JSON.stringify(cartItem), ts: Date.now()})
   })
   yield user.save(function (err, saved) {
     if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err, ' \n\n\n\n\n')
   })
-  $replyChannel.send(message, 'food.admin.order.confirm', {type: 'slack', data: {text: 'neat-o, thanks'}})
-}
 
-//
-// After a user clicks on a menu item, this shows the options, like beef or tofu
-//
-// handlers['food.item.submenu'] = function * (message) {
-// var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-// var menu = Menu(foodSession.menu)
-// var item = menu.getItemById(message.source.actions[0].value)
-//
-//   // check to see if they already have one of these items "in progress"
-//   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
-//   debugger
-//
-//   if (!userItem) {
-//     userItem = {
-//       user_id: message.user_id,
-//       added_to_cart: false,
-//       item: {
-//         item_id: item.unique_id,
-//         item_qty: 1,
-//         option_qty: {}
-//       }
-//     }
-//
-//     foodSession.cart.push(userItem)
-//     foodSession.markModified('cart')
-//     foodSession.save()
-//   }
-//
-//   var json = menu.generateJsonForItem(userItem)
-//   replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
-// }
+  yield handlers['food.admin.order.confirm'](message, foodSession)
+}
 
 /* S12A
 *
 */
-handlers['food.admin.order.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+handlers['food.admin.order.confirm'] = function * (message, foodSession) {
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.markModified('confirmed_orders')
-  if (foodSessionLean.confirmed_orders.length < foodSessionLean.team_members.length) {
-    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSessionLean.team_members, 'id'), foodSessionLean.confirmed_orders))
+  $replyChannel.sendReplace(message, '.', {type: 'slack', data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+  if (foodSession.confirmed_orders.length < foodSession.team_members.length) {
+    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
     foodSession.save()
     return
   }
-  var order = yield api.createCartForSession(foodSessionLean)
+  var order = yield api.createCartForSession(foodSession)
+  var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
   foodSession.order = order
   foodSession.save()
 
   var menu = Menu(foodSession.menu)
+
+
+  var resp = {
+    mode: 'food',
+    action: 'admin.restaurant.pick',
+    thread_id: admin.dm,
+    origin: message.origin,
+    source: {
+      team: admin.team_id,
+      user: admin.id,
+      channel: admin.dm
+    }
+  }
 
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
@@ -265,7 +251,7 @@ handlers['food.admin.order.confirm'] = function * (message) {
     }]
   })
 
-  $replyChannel.send(message, 'food.admin.order.checkout.address', {type: message.origin, data: response})
+  $replyChannel.send(resp, 'food.admin.order.checkout.address', {type: message.origin, data: response})
 }
 
 handlers['food.member.order.view'] = function * (message) {
