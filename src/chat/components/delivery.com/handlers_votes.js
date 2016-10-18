@@ -29,8 +29,8 @@ var api = require('./api-wrapper')
 */
 function askUserForCuisineTypes (cuisines, admin, user) {
   // probably should check if user is on slack
-  // var cuisineToUse = _.sampleSize(cuisines, 4)
-    var cuisineToUse = cuisines.slice(0,2)
+  var cuisineToUse = _.sampleSize(cuisines, 4)
+    // var cuisineToUse = cuisines.slice(0,2) // use this for testing
 
   var sampleArray = _.map(cuisineToUse, function (cuisineName) {
     return {
