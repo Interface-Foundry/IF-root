@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import io
 import time
@@ -10,7 +11,6 @@ import numpy as np
 
 #from gcloud import storage
 from PIL import Image, ImageFont, ImageDraw
-import boto
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
