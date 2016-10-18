@@ -191,7 +191,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   }
 
   var response = {
-    text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
+    text: `*Confirm Team Order* for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
     attachments: [
       {
         'title': '',
@@ -210,7 +210,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       callback_id: foodInfo.id,
       color: '#3AA3E3',
       attachment_type: 'default',
-      mrkdwn_in: [ 'text' ],
+      mrkdwn_in: ['text'],
       actions: [{
         'name': 'food.cart.decrease',
         'text': '-',
@@ -230,9 +230,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     }
   }))
   // attachments with all the food
-  response.attachments.push({
-    'title': ''
-  })
+  response.attachments.push({'title': ''})
   // final attachment
   response.attachments.push({
     text: `*Delivery Fee:* ${foodSession.order.delivery_fee}
@@ -300,19 +298,11 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
     attachments: [
       {
         'title': '',
-        'mrkdwn_in': [
-
-          'text'
-
-        ]
+        'mrkdwn_in': ['text']
       },
       {
         'title': '',
-        'mrkdwn_in': [
-
-          'text'
-
-        ],
+        'mrkdwn_in': ['text'],
         'text': `*Name:*
  ${foodSession.convo_initiater.name}`,
         'fallback': `You are unable to change name`,
@@ -330,11 +320,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       },
       {
         'title': '',
-        'mrkdwn_in': [
-
-          'text'
-
-        ],
+        'mrkdwn_in': [`text`],
         'text': `*Address:*
  ${foodSession.chosen_location.addr.address_1}`,
         'fallback': `You are unable to change address`,
