@@ -20,24 +20,27 @@ function * getGuestToken () {
 
 module.exports.createCartForSession = function * (session) {
   session.guest_token = yield getGuestToken()
-
-  logging.data('using guest_token: ', session.guest_token)
   var opts = {
-    'method': 'POST',
-    'url': `https://api.delivery.com/customer/cart/${session.menu.id}?client_id=${client_id}`,
+    'method': `POST`,
+    'uri': `https://api.delivery.com/customer/cart/${session.chosen_restaurant.id}`,
     'headers': {
       'Guest-Token': session.guest_token
     },
     'json': true,
     'body': {
-      'order_type': 'delivery',
+      'client_id': client_id,
+      'order_type': `delivery`,
       'instructions': '',
       'items': _.map(session.cart, 'item')
     }
   }
 
-  var response = yield request(opts)
-  return response
+  try {
+    var response = yield request(opts)
+    return response
+  } catch (e) {
+    logging.error('error lol', e)
+  }
 }
 
 module.exports.searchNearby = function * (params) {

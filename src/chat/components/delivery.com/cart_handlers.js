@@ -189,15 +189,19 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 *
 */
 handlers['food.admin.order.confirm'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.confirmed_orders.push(message.source.user)
-  if (foodSession.confirmed_orders.length < foodSession.team_members.length) {
-    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
-    foodSession.save()
+  var foodSessionLean = yield db.Delivery.findOne({team_id: message.source.team, active: true}).lean().exec()
+  foodSessionLean.confirmed_orders.push(message.source.user)
+  if (foodSessionLean.confirmed_orders.length < foodSessionLean.team_members.length) {
+    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSessionLean.team_members, 'id'), foodSessionLean.confirmed_orders))
+    foodSessionLean.save()
     return
   }
+  var order = yield api.createCartForSession(foodSessionLean)
+  // idk what the deal is but not using lean in  foodSessionLean above fucks shit up
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.order = order
+  foodSession.save()
 
-  foodSession.order = yield api.createCartForSession(foodSession)
   var menu = Menu(foodSession.menu)
 
   var response = {
