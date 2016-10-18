@@ -335,6 +335,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
   var viableRestaurants = yield createSearchRanking(foodSession)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
@@ -384,16 +385,19 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var resp = {
     mode: 'food',
     action: 'admin.restaurant.pick',
-    thread_id: message.dm,
+    thread_id: admin.dm,
     origin: message.origin,
-    source: message.source,
+    source: {
+      team: admin.team_id,
+      user: admin.id,
+      channel: admin.dm
+    },
     data: responseForAdmin
   }
   $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
-  console.log('in this !!!')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
