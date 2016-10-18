@@ -258,7 +258,7 @@ handlers['food.choose_address'] = function * (session) {
     // TODO handle the case where they type a new address without clicking the "new" button
     }
 
-    var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false}).exec()
+    var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}}).exec()
     var foodSession = yield utils.initiateDeliverySession(session, teamMembers, location)
 
     yield foodSession.save()

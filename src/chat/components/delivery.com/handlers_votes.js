@@ -142,18 +142,23 @@ function chooseRestaurant (restaurants, orderBy) {
 function * buildRestaurantAttachment (restaurant) {
   // will need to use picstitch for placeholder image in future
   // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-  var realImage = yield request({
-    uri: kip.config.picstitchDelivery,
-    json: true,
-    body: {
-      origin: 'slack',
-      cuisines: restaurant.summary.cuisines,
-      location: restaurant.location,
-      ordering: restaurant.ordering,
-      summary: restaurant.summary,
-      url: restaurant.summary.merchant_logo
-    }
-  })
+  try {
+    var realImage = yield request({
+        uri: kip.config.picstitchDelivery,
+        json: true,
+        body: {
+          origin: 'slack',
+          cuisines: restaurant.summary.cuisines,
+          location: restaurant.location,
+          ordering: restaurant.ordering,
+          summary: restaurant.summary,
+          url: restaurant.summary.merchant_logo
+        }
+      })
+  } catch (e) {
+    kip.err(e)
+    realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  }
   var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
   var obj = {
     'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
@@ -215,7 +220,7 @@ function getVotesFromMembers (messages) {
 
 // check for user preferences/diet/etc, skipping for now
 handlers['food.user.preferences'] = function * (session) {
-  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false})
+  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}})
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
   }
@@ -312,14 +317,15 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data, '\n\n')
   }
   foodSession.votes.push(message.data.value)
+  foodSession.markModified('votes')
   foodSession.save()
-  var numOfResponsesWaitingFor = foodSession.team_members
+  var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
   var votes = foodSession.votes
 
   // replace after votes
-  $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: `Thanks for your vote, waiting for the rest of the users to finish voting`})
+  $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
 
-  if (votes.length >= numOfResponsesWaitingFor) {
+  if (numOfResponsesWaitingFor === 0) {
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
     logging.error('waiting for more responses have, votes: ', votes.length)
