@@ -371,6 +371,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
+  console.log('in this !!!')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 

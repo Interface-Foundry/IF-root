@@ -150,7 +150,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   yield user.save(function (err, saved) {
     if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err, ' \n\n\n\n\n')
   })
-  $replyChannel.send(message, 'food.cart.personal.confirm', {type: 'slack', data: {text: 'neat-o, thanks'}})
+  $replyChannel.send(message, 'food.admin.order.confirm', {type: 'slack', data: {text: 'neat-o, thanks'}})
 }
 
 //
@@ -187,14 +187,19 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 
 /* S12A
 *
-* TODO:
 */
 handlers['food.admin.order.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.guest_token = api.getGuestToken()
-  foodSession.order = api.createCartForSession(foodSession)
-  foodSession.save()
+  foodSession.confirmed_orders.push(message.source.user)
+  if (foodSession.confirmed_orders.length < foodSession.team_members.length) {
+    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
+    foodSession.save()
+    return
+  }
+
+  foodSession.order = yield api.createCartForSession(foodSession)
   var menu = Menu(foodSession.menu)
+
   var response = {
     text: `*Confirm Team Order* for <${foodSession.chosen_location.url}|${foodSession.chosen_location.name}>`,
     attachments: [
@@ -256,6 +261,8 @@ handlers['food.admin.order.confirm'] = function * (message) {
       'value': 'checkout'
     }]
   })
+
+  $replyChannel.send(message, 'food.admin.order.checkout.address', {type: message.origin, data: response})
 }
 
 handlers['food.member.order.view'] = function * (message) {

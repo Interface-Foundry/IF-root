@@ -13,20 +13,25 @@ defaultParams.searchNearby = {
   addr: ''
 }
 
-module.exports.getGuestToken = function * () {
+function * getGuestToken () {
   var token = yield request({url: `https://api.delivery.com/customer/auth/guest?client_id=${client_id}`, json: true})
-  return token
+  return token['Guest-Token']
 }
 
 module.exports.createCartForSession = function * (session) {
+  session.guest_token = yield getGuestToken()
+
+  logging.data('using guest_token: ', session.guest_token)
   var opts = {
-    method: 'POST',
-    url: `https://api.delivery.com/customer/cart/${session.menu.id}`,
-    headers: {'Guest-Token': session.guest_token},
-    body: {
-      'client_id': client_id,
-      'order_type': session.fulfillmentMethod || 'delivery',
-      'instructions': session.data.instructions || '',
+    'method': 'POST',
+    'url': `https://api.delivery.com/customer/cart/${session.menu.id}?client_id=${client_id}`,
+    'headers': {
+      'Guest-Token': session.guest_token
+    },
+    'json': true,
+    'body': {
+      'order_type': 'delivery',
+      'instructions': '',
       'items': _.map(session.cart, 'item')
     }
   }

@@ -83,11 +83,12 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20)
 
     var session = history[0]
-    if (!_.get(session, 'state') && _.get(history[1], 'state')) {
+    if (_.get(session, 'state') && _.get(history[1], 'state')) {
       session.state = history[1].state
     }
     if (!session) {
       logging.error('No Session!!!')
+      session.state = {}
     }
     session.state = session.state || {}
     session.history = history.slice(1)

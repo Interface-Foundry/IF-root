@@ -17,7 +17,7 @@ var api = require('./api-wrapper.js')
 function * initiateDeliverySession (session, teamMembers, location) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
   if (foodSessions) {
-    yield foodSessions.map(session => {
+    yield foodSessions.map((session) => {
       session.active = false
       session.save()
     })
@@ -29,6 +29,7 @@ function * initiateDeliverySession (session, teamMembers, location) {
     // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
     chosen_location: {addr: location},
+    confirmed_orders: [],
     convo_initiater: {
       id: admin.id,
       name: admin.name
