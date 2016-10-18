@@ -149,7 +149,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   user.history.orders = user.history.orders || []
   yield myItems.map(function * (cartItem) {
     var deliveryItem = menu.getItemById(cartItem.item.item_id)
-    user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem,cartItem: JSON.stringify(cartItem), ts: Date.now()});
+    user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem,cartItem: JSON.stringify(cartItem), ts: Date.now()})
   })
   yield user.save(function (err, saved) {
     if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err, ' \n\n\n\n\n')
@@ -177,7 +177,6 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   foodSession.save()
 
   var menu = Menu(foodSession.menu)
-
 
   var resp = {
     mode: 'food',
@@ -295,9 +294,9 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   foodSession.chosen_location['phone_number'] = message.text
   foodSession.save()
   var response = {
-    text: 'Great, please confirm your contact and delivery details:',
-    fallback: 'Unable to get address',
-    callback_id: 'food.admin.order.checkout.confirm',
+    text: `Great, please confirm your contact and delivery details:`,
+    fallback: `Unable to get address`,
+    callback_id: `food.admin.order.checkout.confirm`,
     attachments: [
       {
         'title': '',
@@ -314,17 +313,18 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
           'text'
 
         ],
-        'text': '*Name:* \n ${foodSession.convo_initiater.name}',
-        'fallback': 'You are unable to confirm your order',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
+        'text': `*Name:*
+ ${foodSession.convo_initiater.name}`,
+        'fallback': `You are unable to change name`,
+        'callback_id': `food.admin.order.checkout.confirm`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`,
         'actions': [
           {
-            'name': 'chess',
-            'text': 'Edit',
-            'type': 'button',
-            'value': 'chess'
+            'name': `food.admin.order.checkout.name`,
+            'text': `Edit`,
+            'type': `button`,
+            'value': `edit`
           }
         ]
       },
@@ -335,17 +335,54 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
           'text'
 
         ],
-        'text': '*Address:* \n ${foodSession.chosen_location.addr.address_1}',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
+        'text': `*Address:*
+ ${foodSession.chosen_location.addr.address_1}`,
+        'fallback': `You are unable to change address`,
+        'callback_id': `food.admin.order.checkout.confirm`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`,
+        'actions': [
+          {
+            'name': `food.admin.order.checkout.address`,
+            'text': `Edit`,
+            'type': `button`,
+            'value': `edit`
+          }
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': ['text'],
+        'text': `*Apt/Floor#:*
+ ${foodSession.chosen_location.floor_or_apartment}`,
+        'fallback': `You are unable to confirm this order`,
+        'callback_id': `food.admin.order.checkout.confirm`,
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'chess',
-            'text': 'Edit',
-            'type': 'button',
-            'value': 'chess'
+            'name': 'food.admin.order.checkout.floor_or_apartment',
+            'text': `Edit`,
+            'type': `button`,
+            'value': `edit`
+          }
+        ]
+      },
+      {
+        'title': '',
+        'mrkdwn_in': ['text'],
+        'text': `*Phone Number:*
+${foodSession.chosen_location.phone_number}`,
+        'fallback': `You are unable to choose a game`,
+        'callback_id': `food.admin.order.checkout.confirm`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`,
+        'actions': [
+          {
+            'name': `food.admin.order.checkout.phone_number`,
+            'text': `Edit`,
+            'type': `button`,
+            'value': `edit`
           }
         ]
       },
@@ -356,66 +393,25 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
           'text'
 
         ],
-        'text': '*Apt/Floor#:* \n ${foodSession.chosen_location.floor_or_apartment}',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
+        'text': `*Delivery Instructions:*
+${foodSession.data.instructions}`,
+        'fallback': `You are unable to edit instructions`,
+        'callback_id': `food.admin.order.checkout.confirm`,
+        'color': `#49d63a`,
+        'attachment_type': `default`,
         'actions': [
           {
-            'name': 'chess',
-            'text': 'Edit',
-            'type': 'button',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'title': '',
-        'mrkdwn_in': [
-
-          'text'
-
-        ],
-        'text': '*Phone Number:* \n ${foodSession.chosen_location.phone_number}',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': 'Edit',
-            'type': 'button',
-            'value': 'chess'
-          }
-        ]
-      },
-      {
-        'title': '',
-        'mrkdwn_in': [
-
-          'text'
-
-        ],
-        'text': '*Delivery Instructions:* ${foodSession.data.instructions}',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#49d63a',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'chess',
-            'text': '✓ Confirm Address',
-            'type': 'button',
-            'style': 'primary',
-            'value': 'chess'
+            'name': `food.admin.order.checkout.confirm`,
+            'text': `✓ Confirm Address`,
+            'type': `button`,
+            'style': `primary`,
+            'value': `confirm`
           },
           {
-            'name': 'chess',
-            'text': '+ Deliver Instructions',
-            'type': 'button',
-            'value': 'chess'
+            'name': `food.admin.order.checkout.deliver_instructions`,
+            'text': `+ Deliver Instructions`,
+            'type': `button`,
+            'value': `edit`
           }
         ]
       }
