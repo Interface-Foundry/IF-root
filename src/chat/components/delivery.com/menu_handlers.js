@@ -11,6 +11,31 @@ var handlers = {}
 
 handlers['food.menu.quick_picks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec();
+  var previouslyOrderedItems = [];
+  if (_.get(user,'history.orders') && _.get(user,'history.orders').length > 0) {
+    _.get(user,'history.orders').map((order) => {
+        if (order.chosen_restaurant.id == foodSession.chosen_restaurant.id) {
+          var item = {
+            title: order.deliveryItem.name + ' – ' + (_.get(order.deliveryItem, 'price') ? '$' + order.deliveryItem.price : 'price varies'),
+            text: order.deliveryItem.description,
+            fallback: 'i.name',
+            color: '#3AA3E3',
+            attachment_type: 'default',
+            actions: [
+              {
+                'name': 'food.item.submenu',
+                'text': 'Add to Cart',
+                'type': 'button',
+                'style': 'primary',
+                'value': order.deliveryItem.unique_id
+              }
+            ]
+          };
+          previouslyOrderedItems.push(item)
+        }
+    })
+  }
   var recommendedItems = _.values(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {})).map(i => {
     return {
       title: i.name + ' – ' + (_.get(i, 'price') ? '$' + i.price : 'price varies'),
@@ -29,6 +54,17 @@ handlers['food.menu.quick_picks'] = function * (message) {
       ]
     }
   })
+
+  if (previouslyOrderedItems.length > 0) {
+    previouslyOrderedItems.map((item) => {
+         _.remove(recommendedItems, function(i) {
+          kip.debug('\n\nmenu_handlers:96:splicing recommendedItems',  _.get(i, 'actions[0].value'),_.get(item, 'actions[0].value') ,'\n\n');
+
+          return _.get(i, 'actions[0].value')== _.get(item, 'actions[0].value');
+        });
+    })
+    recommendedItems = previouslyOrderedItems.concat(recommendedItems);
+  }
 
   var msg_json = {
     'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,

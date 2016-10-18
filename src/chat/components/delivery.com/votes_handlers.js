@@ -1,18 +1,11 @@
 'use strict'
 var _ = require('lodash')
-var Fuse = require('fuse.js')
-var googl = require('goo.gl')
-var request = require('request-promise')
 
-var api = require('./api-wrapper.js')
 var team_utils = require('./team_utils.js')
 var utils = require('./utils')
-
-if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
-  googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
-} else {
-  googl.setKey('AIzaSyATd2gHIY0IXcC_zjhfH1XOKdOmUTQQ7ho')
-}
+var googl = require('goo.gl')
+var request = require('request-promise')
+var Fuse = require('fuse.js')
 
 // injected dependencies
 var $replyChannel
@@ -21,83 +14,14 @@ var $allHandlers
 // exports
 var handlers = {}
 var api = require('./api-wrapper')
-
-/*
-* S5
-* creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
-*
-*/
-function askUserForCuisineTypes (cuisines, admin, user) {
-  // probably should check if user is on slack
-  // var cuisineToUse = _.sampleSize(cuisines, 4)
-    var cuisineToUse = cuisines.slice(0,2)
-
-  var sampleArray = _.map(cuisineToUse, function (cuisineName) {
-    return {
-      name: 'food.admin.restaurant.pick',
-      value: cuisineName,
-      text: cuisineName,
-      type: 'button'
-    }
-  })
-  // add cancel button
-  sampleArray.push({
-    name: 'food.admin.restaurant.pick',
-    value: 'user_remove',
-    text: '× No Lunch for Me',
-    type: 'button',
-    style: 'danger'
-  })
-
-  var res = {
-    text: `<@${admin.id}|${admin.name}> is collecting lunch suggestions, vote now!`,
-    fallback: 'You are unable to vote for lunch preferences',
-    callback_id: 'food.user.poll',
-    color: '#3AA3E3',
-    attachment_type: 'default',
-    attachments: [{
-      'title': 'Delivery Contact',
-      'text': 'Type what you want or tap a button',
-      'fallback': 'You are unable to tap a button',
-      'callback_id': 'food.user.poll',
-      'color': '#3AA3E3',
-      'attachment_type': 'default',
-      'actions': sampleArray
-    }]
-  }
-  return res
-}
-
-var userFoodPreferencesPlaceHolder = {
-  text: 'Here we would ask user for preferences if they didnt have it',
-  fallback: 'You are unable to confirm preferences',
-  callback_id: 'confirm.user.preferences',
-  color: 'grey',
-  attachment_type: 'default',
-  attachments: [{
-    actions: [{
-      'name': 'food.user.poll',
-      'value': 'food.user.poll',
-      'text': 'Confirm',
-      'type': 'button'
-    },
-      {
-        'name': 'food.user.preference.cancel',
-        'value': 'food.user.preference.cancel',
-        'text': '× Cancel',
-        'type': 'button'
-      }]
-  }]
-
-}
-
 /*
 * creates attachments to display to admin for merchant
 *
 *
 */
 function chooseRestaurant (restaurants, orderBy) {
-  var attachments = restaurants.slice(0, 3).map(buildRestaurantAttachment)
+  var viable = restaurants.slice(0, 3)
+  var attachments = viable.map(buildRestaurantAttachment)
   var res = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': attachments
@@ -141,30 +65,12 @@ function chooseRestaurant (restaurants, orderBy) {
   return res
 }
 
-function * buildRestaurantAttachment (restaurant) {
+function buildRestaurantAttachment (restaurant) {
   // will need to use picstitch for placeholder image in future
-  // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-  try {
-    var realImage = yield request({
-        uri: kip.config.picstitchDelivery,
-        json: true,
-        body: {
-          origin: 'slack',
-          cuisines: restaurant.summary.cuisines,
-          location: restaurant.location,
-          ordering: restaurant.ordering,
-          summary: restaurant.summary,
-          url: restaurant.summary.merchant_logo
-        }
-      })
-  } catch (e) {
-    kip.err(e)
-    realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-  }
-  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+  var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
   var obj = {
-    'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
-    'image_url': realImage,
+    'text': restaurant.summary.name,
+    'image_url': placeholderImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
     'fallback': 'You are unable to choose a restaurant',
@@ -196,12 +102,12 @@ function * buildRestaurantAttachment (restaurant) {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function * createSearchRanking (foodSession) {
+function * createSearchRanking (merchants, votes) {
   // filter results based on what results want
   var eligible = []
-  _.forEach(foodSession.votes, function (v) {
+  _.forEach(votes, function (v) {
     // get all merchants who satisfy cuisine type being v
-    eligible = _.union(eligible, _.filter(foodSession.merchants, function (c) {
+    eligible = _.union(eligible, _.filter(merchants, function (c) {
       return _.includes(c.summary.cuisines, v)
     }))
   })
@@ -222,7 +128,7 @@ function getVotesFromMembers (messages) {
 
 // check for user preferences/diet/etc, skipping for now
 handlers['food.user.preferences'] = function * (session) {
-  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}})
+  var teamMembers = yield db.chatusers.find({team_id: session.source.team, is_bot: false})
   if (process.env.NODE_ENV === 'test') {
     teamMembers = [teamMembers[0]]
   }
@@ -237,7 +143,7 @@ handlers['food.user.preferences'] = function * (session) {
       thread_id: member.dm,
       origin: session.origin,
       source: session.source,
-      res: userFoodPreferencesPlaceHolder
+      res: utils.userFoodPreferencesPlaceHolder
     }
     userPreferences.source.user = member.id
     userPreferences.source.channel = member.dm
@@ -268,21 +174,24 @@ handlers['food.user.poll'] = function * (message) {
       user: member.id,
       team: member.team_id
     }
-
-    var cuisineMessage = askUserForCuisineTypes(_.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name'), foodSession.convo_initiater, member.dm)
-
-    var response = {
+    var resp = {
       mode: 'food',
       action: 'user.poll',
       thread_id: member.dm,
       origin: message.origin,
       source: source,
-      data: cuisineMessage
+      res: utils.askUserForCuisineTypes(
+        _.map(
+          _.filter(foodSession.cuisines, function (o) {
+            return o.count > 10
+          }), 'name'),
+        member.dm, foodSession.convo_initiater)
     }
     foodSession.data = { response_history: []}
-    foodSession.data.response_history.push({'handler': 'food.user.poll', 'response': response.data})
+    foodSession.data.response_history.push({'handler': 'food.user.poll', 'response': resp.res})
     foodSession.save()
-    $replyChannel.send(response, 'food.admin.restaurant.pick', {type: 'slack', data: response.data})
+    // need to sendreplace probably
+    $replyChannel.send(resp, 'food.admin.restaurant.pick', {type: 'slack', data: resp.res})
   })
 }
 
@@ -314,89 +223,33 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       // TODO: Handle if user inputs nonsense here
       kip.debug('User typed in an invalid response.')
     }
-    kip.debug('\n\ninside food.admin.restaurant.pick 779 fuse returned: ', res, message.data, '\n\n')
+    // kip.debug('\n\ninside food.admin.restaurant.pick 779 fuse returned: ', res, message.data, '\n\n')
   } else {
-    kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data, '\n\n')
+    // kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data, '\n\n')
   }
   foodSession.votes.push(message.data.value)
-  foodSession.markModified('votes')
   foodSession.save()
-  var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
+  var numOfResponsesWaitingFor = foodSession.team_members
   var votes = foodSession.votes
-
-  // replace after votes
-  $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
-
-  if (numOfResponsesWaitingFor === 0) {
-    yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
-  } else {
+  if (votes.length < numOfResponsesWaitingFor) {
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
+    return
   }
-}
+  var viableRestaurants = yield createSearchRanking(foodSession.merchants, votes)
 
-handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
-  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
-  var viableRestaurants = yield createSearchRanking(foodSession)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
-
-  var responseForAdmin = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
-  }
-  logging.data('responseForAdmin', responseForAdmin)
-  responseForAdmin.attachments.push({
-    'mrkdwn_in': [
-      'text'
-    ],
-    'text': '',
-    'fallback': 'You are unable to choose a game',
-    'callback_id': 'food.admin.restaurant.pick',
-    'color': '#3AA3E3',
-    'attachment_type': 'default',
-    'actions': [
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'More Choices >',
-        'type': 'button',
-        'value': 'more'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Price',
-        'type': 'button',
-        'value': 'sort_price'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Rating',
-        'type': 'button',
-        'value': 'sort_rating'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Distance',
-        'type': 'button',
-        'value': 'sort_distance'
-      }
-    ]
-  })
-
+  var responseForAdmin = chooseRestaurant(viableRestaurants)
   var resp = {
     mode: 'food',
     action: 'admin.restaurant.pick',
-    thread_id: admin.dm,
+    thread_id: message.dm,
     origin: message.origin,
-    source: {
-      team: admin.team_id,
-      user: admin.id,
-      channel: admin.dm
-    },
-    data: responseForAdmin
+    source: message.source,
+    res: responseForAdmin
   }
-  $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
+  $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
@@ -418,45 +271,16 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 
   foodSession.save()
 
-  var response = {
+  var resp = {
     mode: 'food',
     action: 'admin.restaurant.collect_orders',
     thread_id: message.dm,
     origin: message.origin,
     source: message.source,
-    data: {
-      'text': `Okay I'll collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-      'attachments': [{
-        'fallback': 'You are unable to confirm',
-        'callback_id': 'confirmRestaurant',
-        'color': '#3AA3E3',
-        'actions': [
-          {
-            'name': 'food.admin.restaurant.collect_orders',
-            'text': 'Confirm',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'confirm'
-          },
-          {
-            'name': 'food.admin.view_team_members',
-            'text': 'View Team Members',
-            'type': 'button',
-            'value': 'view_team_members'
-          },
-          {
-            'name': 'food.admin.change_restaurant',
-            'text': '< Change Restaurant',
-            'type': 'button',
-            'value': 'change_restaurant'
-          }
-        ]
-      }
-      ]
-    }
+    res: utils.confirmRestaurant(foodSession.chosen_restaurant)
   }
 
-  $replyChannel.send(response, 'food.admin.restaurant.collect_orders', {type: 'slack', data: response.data})
+  $replyChannel.send(resp, 'food.admin.restaurant.collect_orders', {type: 'slack', data: resp.res})
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message) {

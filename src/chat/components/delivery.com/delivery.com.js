@@ -19,6 +19,9 @@ var Fuse = require('fuse.js')
 var all_cuisines = require('./cuisines2').cuisines
 
 
+require("nodejs-dashboard");
+
+
 var replyChannel = new UserChannel(queue)
 
 function default_reply (message) {
@@ -252,7 +255,7 @@ handlers['food.choose_address'] = function * (session) {
     // slack action button tap
     try {
       var location = JSON.parse(session.text)
-    } catch (e) {
+    } catch (e) { 
       var location = {address_1: session.text}
       kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
     // TODO handle the case where they type a new address without clicking the "new" button
@@ -697,7 +700,6 @@ handlers['food.poll.confirm_send'] = function * (message) {
 
   replyChannel.sendReplace(message, 'food.user.poll', {type: message.origin, data: msg_json})
 }
-
 
 handlers['test.s8'] = function * (message) {
   var msg_json = {

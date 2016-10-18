@@ -3,6 +3,7 @@ var _ = require('lodash')
 var Menu = require('./Menu')
 var async = require('async')
 var api = require('./api-wrapper')
+
 // injected dependencies
 var $replyChannel
 var $allHandlers // this is how you can access handlers from other methods
@@ -147,7 +148,8 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   user.history.orders = user.history.orders || []
   yield myItems.map(function * (cartItem) {
-    user.history.orders.push({user_id: user._id, session_id: foodSession._id, item: JSON.stringify(cartItem), ts: Date.now()})
+    var deliveryItem = menu.getItemById(cartItem.item.item_id)
+    user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem,cartItem: JSON.stringify(cartItem), ts: Date.now()});
   })
   yield user.save(function (err, saved) {
     if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err, ' \n\n\n\n\n')
