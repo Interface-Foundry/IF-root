@@ -233,9 +233,9 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
   response.attachments.push({'title': ''})
   // final attachment
   response.attachments.push({
-    text: `*Delivery Fee:* ${foodSession.order.delivery_fee}
-*Taxes:* ${foodSession.order.tax}
-*Team Cart Total:* ${foodSession.order.total}`,
+    text: `*Delivery Fee:* $${foodSession.order.delivery_fee}
+*Taxes:* $${foodSession.order.tax}
+*Team Cart Total: $${foodSession.order.total}`,
     fallback: 'Confirm Choice',
     callback_id: 'foodConfrimOrder_callbackID',
     color: '#3AA3E3',
