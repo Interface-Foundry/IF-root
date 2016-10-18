@@ -85,13 +85,13 @@ describe('getting votes and selecting merchant', function () {
     })
   })
   // S6
-  describe.skip('S6) Kip shows admin best choices for food based on what team wants', function () {
-    var votedTest = ['Asian', 'Sandwiches']
+  describe('S6) Kip shows admin best choices for food based on what team wants', function () {
     // setup
     it('should display slice of 3 choices to admin', function * () {
       this.timeout(10000)
       admin = yield mock.Admin()
       res = yield admin.goto('S6')
+      logging.data('res-s6', res)
       expect(_.get(res, 'text')).to.eql('Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?')
       expect(res).to.exist
       // not sure how to get res in format that isnt in `text`

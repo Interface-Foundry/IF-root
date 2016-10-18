@@ -313,16 +313,15 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     return
   }
   var viableRestaurants = yield createSearchRanking(foodSession)
-
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
-  // var responseForAdmin = chooseRestaurant(viableRestaurants)
 
-  var res = {
+  var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
   }
-  res.attachments.push({
+  logging.data('responseForAdmin', responseForAdmin)
+  responseForAdmin.attachments.push({
     'mrkdwn_in': [
       'text'
     ],
@@ -365,9 +364,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
     thread_id: message.dm,
     origin: message.origin,
     source: message.source,
-    res: responseForAdmin
+    data: responseForAdmin
   }
-  $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.res})
+  $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
 }
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
