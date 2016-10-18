@@ -18,9 +18,9 @@ logging.basicConfig(level=logging.INFO,
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="gcloud_key/KipStyles-8da42a8a7423.json"
 
-''' 
-# numbers each picstitch image with the number.png - we no longer do this, right? 
-# guessing this was the layout from before. 
+'''
+# numbers each picstitch image with the number.png - we no longer do this, right?
+# guessing this was the layout from before.
 def load_number_images():
     images = []
     # [1, 2, 3]
@@ -42,10 +42,10 @@ def load_fonts_reg():
 
     fontR = {}
     font_size = [x for x in range(12, 30)]
-    #defines possible font sizes 
+    #defines possible font sizes
     for s in font_size:
         fontR[s] = ImageFont.truetype(fonts_fileR, s)
-        # font[s] defines variable for font size font[15] = helvetic size 15 font 
+        # font[s] defines variable for font size font[15] = helvetic size 15 font
     return fontR
 
 def load_fonts_bold():
@@ -60,11 +60,11 @@ def load_fonts_bold():
 
     fontB = {}
     font_size = [x for x in range(12, 30)]
-    #defines possible font sizes 
+    #defines possible font sizes
 
     for s in font_size:
         fontB[s] = ImageFont.truetype(fonts_fileB, s)
-        # font[s] defines variable for font size font[15] = helvetic size 15 font 
+        # font[s] defines variable for font size font[15] = helvetic size 15 font
     return fontB
 
 
@@ -73,7 +73,7 @@ def load_review_stars():
     rs_dict = {}
     for i in star_images:
         f = THIS_FOLDER + '/review_stars/' + str(i) + '.png'
-        # f defines path for each of the star images  
+        # f defines path for each of the star images
         rs_dict[str(i)] = Image.open(f)
         # rs_dict[str(i)] opens star image and stores it in rs_dict
         # str(i) calls star from rs_dict
@@ -107,13 +107,13 @@ class PicStitch:
     '''
 
     '''
-    grace's delivery json for restaurant data 
+    grace's delivery json for restaurant data
     {
     data: {
         'location':{
             'distance':0.39104587028574
         },
-        'ordering':{ 
+        'ordering':{
             'availability':{
                     'delivery_estimate': 45,
                     },
@@ -125,7 +125,7 @@ class PicStitch:
             "merchant_logo_raw" : "https://static.delivery.com/merchant_logo.php?w=0&h=0&id=62236",
             "merchant_logo" : "https://static.delivery.com/merchant_logo.php?id=62236",
             "num_ratings":21,
-            "star_ratings": 4, 
+            "star_ratings": 4,
             "cuisines" : [
                 "American",
                 "Burgers",
@@ -240,11 +240,14 @@ class PicStitch:
             # img.paste(poly, poly_offset, mask=poly)
 
         # add price --> distance
-        if len(self.img_req['cuisines'][0]) + len(self.img_req['cuisines'][1])< 20:
+
+        # cuisines, like "Chinese, Japanese"
+        cuisines_text = ", ".join(self.img_req['cuisines'])
+        if len(cuisines_text) < 20:
+            # if word count for 2 cuisines is less than 20 characters/1 line, inlcude 2 cuisines
+            # else include 1 cuisine
             draw.text((x, last_y),
-        # if word count for 2 cuisines is less than 20 characters/1 line, inlcude 2 cuisines
-        # else include 1 cuisine
-                self.img_req['cuisines'][0] + ', ' + self.img_req['cuisines'][1],
+                cuisines_text,
                 font=self.config['font3'],
                 fill="#3b9ef1")
         else:
@@ -318,38 +321,38 @@ class PicStitch:
 
         #last_y = last_y + 5
 
-        if 'distance' in self.img_req['location'] and 'delivery_estimate' in self.img_req['ordering']['availability']: 
+        if 'distance' in self.img_req['location'] and 'delivery_estimate' in self.img_req['ordering']['availability']:
             dist = round(self.img_req['location']['distance'], 2)
             del_est = self.img_req['ordering']['availability']['delivery_estimate']
-            draw.text((x, last_y), 
+            draw.text((x, last_y),
                        str(dist) + ' miles' + '   •   ' + str(del_est) + ' mins',
-                       font=self.config['font2'], 
+                       font=self.config['font2'],
                        fill="#909497")
             last_y = last_y + 40
 
         if 'minimum' in self.img_req['ordering']:
-            draw.text((x, last_y), 
+            draw.text((x, last_y),
                        '$' + str(self.img_req['ordering']['minimum']),
                        font=self.config['font4'],
                        fill='#000000')
-            draw.text((x, last_y + 15), 
+            draw.text((x, last_y + 15),
                        'Minimum',
                        font=self.config['font2'],
                        fill='#909497')
 
         if 'delivery_charge' in self.img_req['ordering']:
             delivery_charge = self.img_req['ordering']['delivery_charge']
-            if delivery_charge == 0: 
-                draw.text((x + 90, last_y), 
+            if delivery_charge == 0:
+                draw.text((x + 90, last_y),
                            'Free',
                            font=self.config['font4'],
                            fill='#37a936')
-                draw.text((x + 89, last_y + 15), 
+                draw.text((x + 89, last_y + 15),
                            'Delivery',
                            font=self.config['font2'],
                            fill='#37a936')
-            else:         
-                draw.text((x + 89, last_y), 
+            else:
+                draw.text((x + 89, last_y),
                            '$' + delivery_charge,
                            font=self.config['font2'],
                            fill='#37a936')
