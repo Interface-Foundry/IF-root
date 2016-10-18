@@ -141,11 +141,23 @@ function chooseRestaurant (restaurants, orderBy) {
 
 function * buildRestaurantAttachment (restaurant) {
   // will need to use picstitch for placeholder image in future
-  var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  var realImage = yield request({
+    uri: kip.config.picstitchDelivery,
+    json: true,
+    body: {
+      origin: 'slack',
+      cuisines: restaurant.summary.cuisines,
+      location: restaurant.location,
+      ordering: restaurant.ordering,
+      summary: restaurant.summary,
+      url: restaurant.summary.merchant_logo
+    }
+  })
   var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
   var obj = {
     'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
-    'image_url': placeholderImage,
+    'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
     'fallback': 'You are unable to choose a restaurant',
@@ -307,11 +319,16 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   // replace after votes
   $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: `Thanks for your vote, waiting for the rest of the users to finish voting`})
 
-  if (votes.length < numOfResponsesWaitingFor) {
+  if (votes.length >= numOfResponsesWaitingFor) {
+    yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
+  } else {
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
-    return
   }
+}
+
+handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   var viableRestaurants = yield createSearchRanking(foodSession)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)

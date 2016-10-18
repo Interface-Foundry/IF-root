@@ -29,3 +29,4 @@ slack:
   client_secret: 39126ac7842f6e3a010f94b9a79282f6
   verification_token: b2hLV2HnBtWBmU5NFgDBG8dL
   redirect_uri: https://canary.kipapp.co/newslack
+picstitchDelivery: http://localhost:5000

@@ -10,3 +10,4 @@ slack:
   client_secret: 7989b267194bfa98782340007c08d088
   verification_token: qHatSrSqnXj8ElOq5u5JGtMw
   redirect_uri: https://sonux.asuscomm.com/newslack
+picstitchDelivery: http://localhost:5000
