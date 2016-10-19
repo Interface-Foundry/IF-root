@@ -1,0 +1,107 @@
+<!doctype html>
+
+<!--
+    Kip Pay module
+
+      =()=
+  ,/'\_||_
+  ( (___  `.
+  `\./  `=='
+         |||
+         |||
+         |||                    _ ___  _               _ ___  _
+       ,;'''''''';,           ,;;;;;;;;;;,           .oooooooooo.
+     ,'  _o_o_o_o  ',        |';;;;;;;;;;'|         |'oooooooooo'|
+    ,,,;'        ';,'        |            |         |            |
+       '.________.'           '.________.'           '.________.'
+
+           Tako                  Tobiko                  Ikura
+         (Octopus)          (Flying Fish Roe)         (Salmon Roe)
+-->
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Kip Café with Stripe</title>
+  <meta name="description" content="Kip Pay">
+  <meta name="author" content="Kip">
+</head>
+
+<body>
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+<button id="stripeButton">Click Here to Purchase</button>
+
+<script>
+
+var stripeKey = 'pk_test_8bnLnE2e1Ch7pu87SmQfP8p7'
+
+function getQueryStringValue (key) {  
+  return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
+}  
+//parsing query strings
+var inAmount = getQueryStringValue('a');
+var kipId = decodeURI(getQueryStringValue('k'));
+var descrip = decodeURI(getQueryStringValue('d'));
+
+//clear query strings in url param
+history.replaceState({}, 'Kip Café with Stripe', '/'); 
+
+//convert to int
+if (!isNaN(inAmount)){
+  inAmount = parseInt(inAmount)
+  process(inAmount,kipId,descrip)
+}else {
+  console.log('Not a number');
+}
+
+//do the thing
+function process(a,k,d){
+
+  //
+  var handler = StripeCheckout.configure({
+    key: stripeKey,
+    image: 'https://httpsimage.com/img/kip-icon.png',
+    locale: 'auto',
+    token: function(token) {
+      $.ajax({
+          url: '/process', 
+          type: 'POST', 
+          contentType: 'application/json', 
+          data: JSON.stringify({
+            token: token.id,
+            kipId: k
+          })
+      })
+    }
+  });
+
+  document.getElementById('stripeButton').addEventListener('click', function(e) {
+    if(a && d){
+      // Open Checkout with further options:
+      handler.open({
+        name: 'Kip Café Checkout',
+        description: 'Delivery from '+d,
+        amount: a,
+        zipCode: true,
+        email: 'asdf@asdff.com'
+      });
+      e.preventDefault();
+    }else {
+      console.log('error: missing amount or description')
+    }
+  });
+
+  // Close Checkout on page navigation:
+  window.addEventListener('popstate', function() {
+    handler.close();
+  });
+
+  $("#stripeButton").click(); 
+
+}
+</script>
+
+</body>
+</html>
