@@ -16,7 +16,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
   var recommendedItemIds = []
   
   // paging
-  var index = 0
+  var index = parseInt(_.get(message, 'data.value')) || 0
 
 
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
@@ -92,10 +92,10 @@ handlers['food.menu.quick_picks'] = function * (message) {
       'attachment_type': 'default',
       'actions': [
         {
-          'name': 'chess',
+          'name': 'food.menu.quick_picks',
           'text': 'More >',
           'type': 'button',
-          'value': 'chess'
+          'value': index + 3
         },
         {
           'name': 'chess',
