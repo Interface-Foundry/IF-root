@@ -4,42 +4,60 @@ var Menu = require('./Menu')
 
 // injected dependencies
 var $replyChannel
-var $allHandlers // this is how you can access handlers from other methods
+var $allHandlers // this is how you can access handlers from other files
 
 // exports
 var handlers = {}
 
 handlers['food.menu.quick_picks'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec();
-  var previouslyOrderedItems = [];
-  if (_.get(user,'history.orders') && _.get(user,'history.orders').length > 0) {
-    _.get(user,'history.orders').map((order) => {
-        if (order.chosen_restaurant.id == foodSession.chosen_restaurant.id) {
-          var item = {
-            title: order.deliveryItem.name + ' – ' + (_.get(order.deliveryItem, 'price') ? '$' + order.deliveryItem.price : 'price varies'),
-            text: order.deliveryItem.description,
-            fallback: 'i.name',
-            color: '#3AA3E3',
-            attachment_type: 'default',
-            actions: [
-              {
-                'name': 'food.item.submenu',
-                'text': 'Add to Cart',
-                'type': 'button',
-                'style': 'primary',
-                'value': order.deliveryItem.unique_id
-              }
-            ]
-          };
-          previouslyOrderedItems.push(item)
-        }
-    })
+  var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
+  var previouslyOrderedItemIds = []
+  var recommendedItemIds = []
+  
+  // paging
+  var index = 0
+
+
+  var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
+    .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))    
+    .reduce((allIds, order) => {
+      allIds.push(order.deliveryItem.unique_id)      
+      return allIds
+    }, [])
+
+  var recommendedItemIds = Object.keys(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {}))
+
+  //
+  // adding the thing where you show 3 at a time
+  // nned to show a few different kinds of itesm. 
+  // Items that you have ordered before appear first, and should say something like "Last ordered Oct 5"
+  // Items that are in the recommended items array should appear next, say "Recommended"
+  // THen the rest of the menu in any order i think
+  //
+  var sortOrder = {
+    orderedBefore: 1,
+    recommended: 2,
+    none: 3
   }
-  var recommendedItems = _.values(_.get(foodSession, 'chosen_restaurant_full.summary.recommended_items', {})).map(i => {
-    return {
+
+  var menu = Menu(foodSession.menu)
+  var sortedMenu = menu.allItems().map(i => {
+    // inject the sort order stuff
+    if (previouslyOrderedItemIds.includes(i.unique_id)) {
+      i.sortOrder = sortOrder.orderedBefore
+      i.infoLine = "You ordered this before"
+    } else if (recommendedItemIds.includes(i.unique_id)) {
+      i.sortOrder = sortOrder.recommended
+      i.infoLine = "Popular Item"
+    } else {
+      i.sortOrder = sortOrder.none
+    }
+
+    return i
+  }).sort((a, b) => a.sortOrder - b.sortOrder).slice(index, index + 3).map(i => {
+    var attachment = {
       title: i.name + ' – ' + (_.get(i, 'price') ? '$' + i.price : 'price varies'),
-      text: i.description,
       fallback: 'i.name',
       color: '#3AA3E3',
       attachment_type: 'default',
@@ -53,18 +71,11 @@ handlers['food.menu.quick_picks'] = function * (message) {
         }
       ]
     }
+
+    attachment.text = [i.description, i.infoLine].filter(Boolean).join('\n')
+
+    return attachment
   })
-
-  if (previouslyOrderedItems.length > 0) {
-    previouslyOrderedItems.map((item) => {
-         _.remove(recommendedItems, function(i) {
-          kip.debug('\n\nmenu_handlers:96:splicing recommendedItems',  _.get(i, 'actions[0].value'),_.get(item, 'actions[0].value') ,'\n\n');
-
-          return _.get(i, 'actions[0].value')== _.get(item, 'actions[0].value');
-        });
-    })
-    recommendedItems = previouslyOrderedItems.concat(recommendedItems);
-  }
 
   var msg_json = {
     'text': `<${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}> - <${foodSession.chosen_restaurant.url}|View Full Menu>`,
@@ -73,7 +84,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ]
-      }].concat(recommendedItems).concat([{
+      }].concat(sortedMenu).concat([{
       'text': '',
       'fallback': 'You are unable to choose a game',
       'callback_id': 'wopr_game',
@@ -171,7 +182,7 @@ handlers['food.item.quantity.add'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var itemId = message.source.actions[0].value
-  debugger;
+  debugger
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart && i.item.item_id === itemId)[0]
   userItem.item.item_qty++
   foodSession.markModified('cart')
@@ -198,23 +209,23 @@ handlers['food.item.quantity.subtract'] = function * (message) {
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
-    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-    var menu = Menu(foodSession.menu)
-    var option = message.source.actions[0].value
-    var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var menu = Menu(foodSession.menu)
+  var option = message.source.actions[0].value
+  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
 
-    userItem.added_to_cart = true
-    foodSession.markModified('cart')
-    yield foodSession.save()
+  userItem.added_to_cart = true
+  foodSession.markModified('cart')
+  yield foodSession.save()
 
-    // check for errors
-    // if errors, highlight errors
-    // otherwise go to S11 confirm personal order
-    // replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'neat-o, thanks'}})
-    return yield $allHandlers['food.cart.personal'](message, true)
+  // check for errors
+  // if errors, highlight errors
+  // otherwise go to S11 confirm personal order
+  // replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: {text: 'neat-o, thanks'}})
+  return yield $allHandlers['food.cart.personal'](message, true)
 }
 
-module.exports = function(replyChannel, allHandlers) {
+module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel
   $allHandlers = allHandlers
 
