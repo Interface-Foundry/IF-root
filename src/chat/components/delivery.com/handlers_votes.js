@@ -177,12 +177,13 @@ function * buildRestaurantAttachment (restaurant) {
         'style': 'primary',
         'value': restaurant.id
       },
-      {
-        'name': 'food.admin.restaurant.more_info',
-        'text': 'More Info',
-        'type': 'button',
-        'value': restaurant.id
-      }]
+      // {
+      //   'name': 'food.admin.restaurant.more_info',
+      //   'text': 'More Info',
+      //   'type': 'button',
+      //   'value': restaurant.id
+      // }
+    ]
   }
   return obj
 }
@@ -398,6 +399,15 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   }
   $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
 }
+
+handlers['food.admin.restaurant.more_info'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  var attachments = []
+
+  // TODO later
+}
+
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
