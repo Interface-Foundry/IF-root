@@ -95,6 +95,12 @@ module.exports.getMenu = function * (merchant_id) {
   return unfuck_menu(menu)
 }
 
+module.exports.getMerchant = function * (merchant_id) {
+  kip.debug('getting merchant info for merchant id', merchant_id)
+  var merchantInfo = yield request({url: `https://api.delivery.com/merchant/${merchant_id}/?client_id=${client_id}`, json: true})
+  return merchantInfo.merchant
+}
+
 /*
   okay so the menu format returned from delivery.com is suuuuuuper complicated.
   it has like a gazillion menus attached. like lunch menu, dinner menu, whatever.

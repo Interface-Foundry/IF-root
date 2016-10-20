@@ -402,6 +402,12 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  if (!merchant) {
+    merchant = yield api.getMerchant(message.data.value)
+    foodSession.merchants = [merchant]
+    foodSession.markModified('merchants')
+    foodSession.save()
+  }
 
   logging.data('using merchant for food service', merchant.id)
   foodSession.chosen_restaurant = {

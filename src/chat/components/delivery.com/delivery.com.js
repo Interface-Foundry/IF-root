@@ -18,9 +18,7 @@ var ui = require('../ui_controls')
 var Fuse = require('fuse.js')
 var all_cuisines = require('./cuisines2').cuisines
 
-
-require("nodejs-dashboard");
-
+require('nodejs-dashboard')
 
 var replyChannel = new UserChannel(queue)
 
@@ -255,7 +253,7 @@ handlers['food.choose_address'] = function * (session) {
     // slack action button tap
     try {
       var location = JSON.parse(session.text)
-    } catch (e) { 
+    } catch (e) {
       var location = {address_1: session.text}
       kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
     // TODO handle the case where they type a new address without clicking the "new" button
@@ -376,7 +374,7 @@ handlers['address.validate'] = function * (session) {
   if (validateAddress(location)) {
     team.meta.locations.push(validateAddress(location.address_1))
     team.meta.chosen_location = location
-  }else {
+  } else {
     team.meta.chosen_location = location
     team.meta.locations.push(validateAddress({
       label: 'NYC Office',
@@ -464,68 +462,95 @@ handlers['food.delivery_or_pickup'] = function * (session) {
   //
   // START OF S2B
   //
-  var mock_s2b = {
-    'attachments': [
-      {
-        'title': '',
-        'image_url': 'http://i.imgur.com/BVHZTaS.png',
-        'text': 'You ordered `Delivery` from `Lantern Thai Kitchen` last time, order again?',
-        'color': '#3AA3E3',
-        'mrkdwn_in': [
-          'text'
-        ],
-        'actions': [
-          {
-            'name': 'chess',
-            'text': 'Choose Restaurant',
-            'type': 'button',
-            'value': 'chess'
-          }
+  var lastOrdered = yield db.Deliveries.find({team_id: session.source.team, chosen_restaurant: {$exists: true}})
+    .sort({_id: -1})
+    .select('chosen_restaurant')
+    .exec()
+  var done = false
+  var i = 0
+  var merchant
+  while (!done) {
+    if (i >= lastOrdered.length) {
+      done = true
+    } else {
+      var merchant = yield api.getMerchant(lastOrdered[i].chosen_restaurant.id)
+      if (_.get(merchant, 'ordering.availability.delivery')) {
+        done = true
+      } else {
+        merchant = null
+      }
+    }
+  }
 
-        ]
+  var attachments = []
+
+  if (merchant) {
+    var picstitchUrl = yield request({
+      uri: kip.config.picstitchDelivery,
+      json: true,
+      body: {
+        origin: 'slack',
+        cuisines: merchant.summary.cuisines,
+        location: merchant.location,
+        ordering: merchant.ordering,
+        summary: merchant.summary,
+        url: merchant.summary.merchant_logo }})
+
+    attachments.push({
+      title: '',
+      image_url: picstitchUrl,
+      text: `You ordered \`Deivery\` from \`${merchant.summary.name}\` recently, order again?`,
+      color: '#3AA3E3',
+      mrkdwn_in: ['text'],
+      actions: [{name: 'food.admin.restaurant.confirm', text: 'Choose Restaurant', type: 'button', value: merchant.id}]
+    })
+  }
+
+  attachments.push({
+    'mrkdwn_in': [
+      'text'
+    ],
+    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
+    'fallback': 'You are unable to choose a game',
+    'callback_id': 'wopr_game',
+    'color': '#3AA3E3',
+    'attachment_type': 'default',
+    'actions': [
+      {
+        'name': 'passthrough',
+        'text': '✓ Start New Poll',
+        'style': 'primary',
+        'type': 'button',
+        'value': 'food.poll.confirm_send'
       },
       {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': '✓ Start New Poll',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'food.poll.confirm_send'
-          },
-          {
-            'name': 'passthrough',
-            'text': 'See More',
-            'type': 'button',
-            'value': 'food.restaurants.list'
-          },
+        'name': 'passthrough',
+        'text': 'See More',
+        'type': 'button',
+        'value': 'food.restaurants.list'
+      },
 
-          {
-            'name': 'passthrough',
-            'text': '× Cancel',
+      {
+        'name': 'passthrough',
+        'text': '× Cancel',
 
-            'type': 'button',
-            'value': 'food.exit.confirm',
-            confirm: {
-              title: 'Leave Order',
-              text: 'Are you sure you want to stop ordering food?',
-              ok_text: "Don't order food",
-              dismiss_text: 'Keep ordering food'
-            }
-          }
-        ]
+        'type': 'button',
+        'value': 'food.exit.confirm',
+        confirm: {
+          title: 'Leave Order',
+          text: 'Are you sure you want to stop ordering food?',
+          ok_text: "Don't order food",
+          dismiss_text: 'Keep ordering food'
+        }
       }
     ]
+  })
+
+  var res = {
+    attachments: attachments
   }
-  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: mock_s2b})
+
+  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: res})
 }
 
 handlers['food.restaurants.list'] = function * (message) {
