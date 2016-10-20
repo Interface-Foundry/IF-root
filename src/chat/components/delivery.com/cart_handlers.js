@@ -1,8 +1,9 @@
 'use strict'
 var _ = require('lodash')
+
 var Menu = require('./Menu')
-var async = require('async')
 var api = require('./api-wrapper')
+var pay = require('../../../payments/pay_utils.js')
 
 // injected dependencies
 var $replyChannel
@@ -195,7 +196,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     attachments: [
       {
         'title': '',
-        'image_url': 'https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png'
+        'image_url': `https://storage.googleapis.com/kip-random/kip-team-cafe-cart.png`
       }]
   }
 
@@ -206,25 +207,25 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       text: `*${foodInfo.name} - $${menu.getCartItemPrice(item)}*
 *Options:* ${descriptionString}
 *Added by:* <@${item.user_id}>`,
-      fallback: 'Meal Choice',
+      fallback: `Meal Choice`,
       callback_id: foodInfo.id,
       color: '#3AA3E3',
       attachment_type: 'default',
       mrkdwn_in: ['text'],
       actions: [{
-        'name': 'food.cart.decrease',
-        'text': '-',
-        'type': 'button',
+        'name': `food.cart.decrease`,
+        'text': `-`,
+        'type': `button`,
         'value': item.item_id
       }, {
-        'name': 'food.null',
+        'name': `food.null`,
         'text': String(item.item_qty),
-        'type': 'button',
+        'type': `button`,
         'value': item.item_id
       }, {
-        'name': 'food.cart.increase',
-        'text': '+',
-        'type': 'button',
+        'name': `food.cart.increase`,
+        'text': `+`,
+        'type': `button`,
         'value': item.item_id
       }]
     }
@@ -240,13 +241,13 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     callback_id: 'foodConfrimOrder_callbackID',
     color: '#3AA3E3',
     attachment_type: 'default',
-    mrkdwn_in: [ 'text' ],
+    mrkdwn_in: ['text'],
     actions: [{
-      'name': 'food.admin.confirm_order',
+      'name': `food.admin.confirm_order`,
       'text': `Checkout $${foodSession.order.total}`,
-      'type': 'button',
-      'style': 'primary',
-      'value': 'checkout'
+      'type': `button`,
+      'style': `primary`,
+      'value': `checkout`
     }]
   })
 
@@ -267,8 +268,8 @@ handlers['food.admin.order.checkout.address'] = function * (message) {
     text: `Whats your apartment or floor number at ${foodSession.addr.address_1}
 >Type your apartment or floor number below`,
     fallback: 'Unable to get address',
-    callback_id: 'food.admin.order.checkout.address',
-    color: '#3AA3E3'
+    callback_id: `food.admin.order.checkout.address`,
+    color: `#3AA3E3`
   }
   $replyChannel.send(message, 'food.admin.order.checkout.phone_number', {type: message.origin, data: response})
 }
@@ -407,21 +408,19 @@ ${foodSession.data.instructions}`,
 }
 
 handlers['food.admin.order.done'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.order['confirmed'] = yield pay.payForFoodSession(foodSession)
   var response = {
     'text': "You're all set to check-out!",
     'attachments': [
       {
         'title': '',
-        'mrkdwn_in': ['text']
-      },
-      {
-        'title': '',
         'mrkdwn_in': ['text'],
-        'text': 'would be foodSession.checkout_url|➤ Click Here to Checkout>',
-        'fallback': 'You are unable to choose a game',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default'
+        'text': `Thanks, <foodSession.order.confirmed.url|➤ Click Here to Checkout>`,
+        'fallback': `You are unable to follow this link to confirm order`,
+        'callback_id': `food.admin.order.done`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`
       }
     ]
   }
