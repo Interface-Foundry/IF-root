@@ -202,7 +202,7 @@ function * createSearchRanking (foodSession) {
   _.forEach(foodSession.votes, function (v) {
     // get all merchants who satisfy cuisine type being v
     eligible = _.union(eligible, _.filter(foodSession.merchants, function (c) {
-      return _.includes(c.summary.cuisines, v)
+      return _.includes(c.summary.cuisines, v) && c.deliverable
     }))
   })
   return eligible
