@@ -41,23 +41,34 @@ function getQueryStringValue (key) {
   return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
 }  
 //parsing query strings
-var inAmount = getQueryStringValue('a');
-var kipId = decodeURI(getQueryStringValue('k'));
-var descrip = decodeURI(getQueryStringValue('d'));
+var session_token = getQueryStringValue('k');
+
+
+//GET REQUEST HERE FOR ORDER DETAILS via session token
+//
+//get these:
+var order = {
+  kipId: 'slack_TEAMID_USERID',
+  description: 'Los Alamos Cantina~~~',
+  amount: '5000',
+  email: 'zzz@zzz.xyz'
+}
+//
+
 
 //clear query strings in url param
 history.replaceState({}, 'Kip Café with Stripe', '/'); 
 
 //convert to int
-if (!isNaN(inAmount)){
-  inAmount = parseInt(inAmount)
-  process(inAmount,kipId,descrip)
+if (!isNaN(order.amount)){
+  order.amount = parseInt(order.amount)
+  process(order,session_token)
 }else {
   console.log('Not a number');
 }
 
 //do the thing
-function process(a,k,d){
+function process(order,session_token){
 
   //
   var handler = StripeCheckout.configure({
@@ -71,21 +82,21 @@ function process(a,k,d){
           contentType: 'application/json', 
           data: JSON.stringify({
             token: token.id,
-            kipId: k
+            session_token: session_token
           })
       })
     }
   });
 
   document.getElementById('stripeButton').addEventListener('click', function(e) {
-    if(a && d){
+    if(order.amount && order.description){
       // Open Checkout with further options:
       handler.open({
-        name: 'Kip Café Checkout',
-        description: 'Delivery from '+d,
-        amount: a,
+        name: 'Kip Checkout',
+        description: 'Delivery from '+order.description + 'for <Team Name>',
+        amount: order.amount,
         zipCode: true,
-        email: 'asdf@asdff.com'
+        email: order.email
       });
       e.preventDefault();
     }else {

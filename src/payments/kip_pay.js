@@ -20,6 +20,7 @@
 // See keys here: https://dashboard.stripe.com/account/apikeys
 var stripe = require("stripe")("sk_test_3dsHoF4cErzMfawpvrqVa9Mc"); //NOTE: change to production key
 var path = require("path")
+var request = require("request")
 
 var bodyParser = require('body-parser')
 
@@ -46,8 +47,8 @@ app.post("/charge", jsonParser, function(req, res) {
 	//sample body
 	// req.body = {
 	// 	amount: 2000,
-	// 	stripeId: '12341234',
-	// 	cc: 'abc',
+	// 	accountId: 'ch_196ncTI2kQvuYJlVN9tBu4or',
+	// 	cardId: 'card_196ncPI2kQvuYJlVNuHXNqcZ',
 	//	kipId: 'slack_123123_213123' (origin + team + user id),
 	//  description: 'Los Alamos Cantina',
 	//	email: 'hello@kipthis.com'
@@ -64,24 +65,58 @@ app.post("/charge", jsonParser, function(req, res) {
 
 		console.log(req.body)
 
+		//SAVE ORDER + KEY
 		//update orderKey with charge value
 		orderKey[req.body.kipId] = {
 			amount: req.body.amount,
-			description: req.body.description
+			description: req.body.description,
+			email: req.body.email,
+			kipId: req.body.kipId,
+			session_token: '879231749127340912384091239zi0a9sdf0wf0d8f9d0sf8dsf8d9f8d9f8df8df98d9f8d9fd8fas0d9f8a0sd', //gen key inside object
+			customerId: '1212121212',
+			cardId: '12121212'
 		}
 
-		if(req.body.stripeId){
-			//check for cc val
-			var v = {
-				newAcct: false,
+		//Save order obj to DB (cassandra --> index session_token for lookups)
+
+
+		//ALREADY A STRIPE USER
+
+		if(req.body.customerId){
+
+			if(req.body.cardId){
+				charge(req.body.customerId,req.body.cardId,req.body.amount)
+			}else {
+				//NEED A CARD ID!
 			}
 
+			function charge(customerId,cardId,amount){
+				// STRIPE CHARGE BY ID 
+				// When it's time to charge the customer again, retrieve the customer ID!
+				stripe.charges.create({
+				  amount: amount, // Amount in cents
+				  currency: "usd",
+				  customer: customerId, // Previously stored, then retrieved
+				  card: cardId
+				});		
+				return 'success?'
+
+
+			}
+
+
+		//NEW STRIPE USER
 		}else {
+
 			//return checkout LINK
 			var v = {
 				newAcct: true,
-				url: baseURL+'?k='+encodeURI(req.body.kipId)+'&a='+req.body.amount+'&d='+encodeURI(req.body.description)+'&e='+encodeURI(req.body.email)
+				url: baseURL+'?k='+orderKey[req.body.kipId].session_token
+				//STORE TOKEN ON KIP PAY END
 			}
+
+			//change to generated token on kip pay end. store token
+			//user clicks link
 		}
 
 		//send charge res back 
@@ -97,30 +132,86 @@ app.post("/charge", jsonParser, function(req, res) {
 //get list of cards for user
 app.get("/list", function(req, res) {
 
+
 });
 
 //this is the call back from the new credit card to do the charge
 app.post("/process", jsonParser, function(req, res) { 
 
-	res.sendStatus(200)
-
-	if(req.body && req.body.token){
+	if(req.body && req.body.token && req.body.session_token){
 
 		//this is a stripe token for the user inputted credit card details
 		var token = req.body.token
 
-		//check if we have order for this kip id user
-		if (!orderKey[req.body.kipId]){
-			console.error('err: cant find order key')
-		}else {
-			chargeToken(token,orderKey[req.body.kipId],function(charge){
+		//LOOK UP USER BY HASH TOKEN 
+		var session_token = req.body.session_token
 
-				console.log(charge)
-			})
-		}
+		var k = 'slack_TEAMID_USERID'
+		var d = 'Los Alamos Cantina~~~'
+		var a = 5000
+		var e = 'zzz@zzz.xyz'
+		//
+		///
+
+		//check if we have order for this kip id user
+		// if (!orderKey[req.body.kipId]){
+		// 	console.error('err: cant find order key')
+		// }else {
+
+
+		//CO WRAP HERE:
+		//get data from DB yield
+		//create new stripe account + charge it
+
+
+		//create stripe customer 
+		stripe.customers.create({
+		  source: token,
+		  description: d
+		}).then(function(customer) {
+		  return stripe.charges.create({
+
+		    amount: a, // Amount in cents
+		    currency: "usd",
+		    customer: customer.id
+		  });
+
+		}).then(function(charge) {
+		  // YOUR CODE: Save the customer ID and other info in a database for later!
+
+		  console.log('STRIPE CUSTOER^#^$#&$^#$&#^$#&$^#$ ',charge)
+
+
+		  //SEND STRIPE ID CREDIT CARD TYPE + 4 DIGIT back to + expire? 
+
+
+		  var send = {
+		  	stripeId: 
+		  }
+
+		});
+
+
+			// chargeToken(token,orderKey[req.body.kipId],function(charge,err){
+			// 	console.log(charge)
+			// 	if(err){
+			// 		res.sendStatus(500)
+			// 		//POST BACK TO KIP PAY FRONT END
+			// 	}else {
+			// 		//success 
+			// 		res.sendStatus(200)
+			// 		//post success back to Kip Extensions (i.e. Kip Café)
+			// 	}
+			// })
+
+
+
+		//}
 
 	}
 });
+
+
 
 function chargeToken(token,order,callback){
 
@@ -132,41 +223,45 @@ function chargeToken(token,order,callback){
 	  description: order.description
 
 	}, function(err, charge) {
-		
-		if (err && err.type === 'StripeCardError') {
-			// The card has been declined
-			console.log('STRIPE CHARGE ',err)
 
-			// 	switch (err.type) {
-			// 	  case 'StripeCardError':
-			// 	    // A declined card error
-			// 	    //send msg back to user card exp.
-			// 	    break;
-			// 	  case 'RateLimitError':
-			// 	    // Too many requests made to the API too quickly
-			// 	    break;
-			// 	  case 'StripeInvalidRequestError':
-			// 	    // Invalid parameters were supplied to Stripe's API
-			// 	    break;
-			// 	  case 'StripeAPIError':
-			// 	    // An error occurred internally with Stripe's API
-			// 	    break;
-			// 	  case 'StripeConnectionError':
-			// 	    // Some kind of error occurred during the HTTPS communication
-			// 	    break;
-			// 	  case 'StripeAuthenticationError':
-			// 	    // You probably used an incorrect API key
-			// 	    break;
-			// 	  default:
-			// 	    // Handle any other types of unexpected errors
-			// 	    break;
-			// 	}
+		callback(charge,err)
 
-			//should return err back to /process so we can display to user
-		}
-		else {
-			callback(charge)
-		}
+		// if (err && err.type === 'StripeCardError') {
+		// 	// The card has been declined
+		// 	console.log('STRIPE CHARGE ',err)
+
+
+
+		// 	// 	switch (err.type) {
+		// 	// 	  case 'StripeCardError':
+		// 	// 	    // A declined card error
+		// 	// 	    //send msg back to user card exp.
+		// 	// 	    break;
+		// 	// 	  case 'RateLimitError':
+		// 	// 	    // Too many requests made to the API too quickly
+		// 	// 	    break;
+		// 	// 	  case 'StripeInvalidRequestError':
+		// 	// 	    // Invalid parameters were supplied to Stripe's API
+		// 	// 	    break;
+		// 	// 	  case 'StripeAPIError':
+		// 	// 	    // An error occurred internally with Stripe's API
+		// 	// 	    break;
+		// 	// 	  case 'StripeConnectionError':
+		// 	// 	    // Some kind of error occurred during the HTTPS communication
+		// 	// 	    break;
+		// 	// 	  case 'StripeAuthenticationError':
+		// 	// 	    // You probably used an incorrect API key
+		// 	// 	    break;
+		// 	// 	  default:
+		// 	// 	    // Handle any other types of unexpected errors
+		// 	// 	    break;
+		// 	// 	}
+
+		// 	//should return err back to /process so we can display to user
+		// }
+		// else {
+			
+		// }
 
 	});	
 }
