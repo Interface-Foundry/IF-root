@@ -200,7 +200,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       }]
   }
 
-  response.attachments.concat(foodSession.cart.map((item) => {
+  response.attachments = response.attachments.concat(foodSession.cart.map((item) => {
     var foodInfo = menu.getItemById(String(item.item.item_id))
     var descriptionString = _.reduce(_.keys(item.item.option_qty), function (curr, n) { return curr + ', ' + menu.getItemById(String(n)).name }, '')
     return {
@@ -243,7 +243,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     attachment_type: 'default',
     mrkdwn_in: ['text'],
     actions: [{
-      'name': `food.admin.confirm_order`,
+      'name': `food.admin.order.checkout.confirm`,
       'text': `Checkout $${foodSession.order.total}`,
       'type': `button`,
       'style': `primary`,
