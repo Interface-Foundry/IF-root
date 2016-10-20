@@ -29,6 +29,7 @@ function * initiateDeliverySession (session, teamMembers, location) {
     // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
     chosen_location: {addr: location},
+    fulfillment_method: 'delivery', // set by default and change to pickup if it changes (for now)
     confirmed_orders: [],
     convo_initiater: {
       id: admin.id,

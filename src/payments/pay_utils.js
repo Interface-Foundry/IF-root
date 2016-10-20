@@ -1,7 +1,7 @@
 require('kip')
 var request = require('request-promise')
 
-const payURL = `https://kipthis.com/`
+const payURL = `https://kipthis.com/charge`
 
 module.exports.payForFoodSession = function * (foodSession) {
   // var adminsEmail = db.Chatusers
