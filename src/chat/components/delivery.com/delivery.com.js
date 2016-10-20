@@ -492,7 +492,11 @@ handlers['food.delivery_or_pickup'] = function * (session) {
         origin: 'slack',
         cuisines: merchant.summary.cuisines,
         location: merchant.location,
-        ordering: merchant.ordering,
+        ordering: {
+          minimum: _.get(merchant, 'ordering.minimum.delivery.lowest', 0),
+          delivery_charge: _.get(merchant, 'ordering.fees.delivery_charge', 0),
+          availability: merchant.ordering.availability
+        },
         summary: merchant.summary,
         url: merchant.summary.merchant_logo }})
 
