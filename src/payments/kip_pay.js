@@ -21,9 +21,25 @@
 var stripe = require("stripe")("sk_test_3dsHoF4cErzMfawpvrqVa9Mc"); //NOTE: change to production key
 var path = require("path")
 var request = require("request")
+var crypto = require("crypto")
+var mongoose = require("mongoose")
+mongoose.connect('mongodb://localhost/pay')
+var db = mongoose.connection
+var Schema = mongoose.Schema
+
+var paySchema = new Schema({
+	amount: Number,
+	description: String,
+	email: String,
+	kipId: String,
+	session_token: { type: String, index: true }, //gen key inside object
+	customerId: String,
+	cardId: String,
+	ts : { type : Date, default: Date.now }
+});
+var Payment = mongoose.model('Payment', paySchema);
 
 var bodyParser = require('body-parser')
-
 var express = require("express");
 var app = express();
 var jsonParser = bodyParser.json()
@@ -66,44 +82,44 @@ app.post("/charge", jsonParser, function(req, res) {
 		console.log(req.body)
 
 		//SAVE ORDER + KEY
-		//update orderKey with charge value
-		orderKey[req.body.kipId] = {
+		// //update orderKey with charge value
+		// orderKey[req.body.kipId] = {
+		// 	amount: req.body.amount,
+		// 	description: req.body.description,
+		// 	email: req.body.email,
+		// 	kipId: req.body.kipId,
+		// 	session_token: crypto.randomBytes(256).toString('hex'), //gen key inside object
+		// 	customerId: '1212121212',
+		// 	cardId: '12121212'
+		// }
+
+		var p = new Payment({
 			amount: req.body.amount,
 			description: req.body.description,
 			email: req.body.email,
 			kipId: req.body.kipId,
-			session_token: '879231749127340912384091239zi0a9sdf0wf0d8f9d0sf8dsf8d9f8d9f8df8df98d9f8d9fd8fas0d9f8a0sd', //gen key inside object
-			customerId: '1212121212',
-			cardId: '12121212'
-		}
-
-		//Save order obj to DB (cassandra --> index session_token for lookups)
+			session_token: crypto.randomBytes(256).toString('hex'), //gen key inside object
+			customerId: req.body.customerId,
+			cardId: req.body.cardId
+		});
+		 
+		p.save(function (err, data) {
+			if (err) console.log(err);
+			else console.log('Saved : ', data );
+		});
 
 
 		//ALREADY A STRIPE USER
-
 		if(req.body.customerId){
 
 			if(req.body.cardId){
-				charge(req.body.customerId,req.body.cardId,req.body.amount)
+
+				chargebyId(req.body.customerId,req.body.cardId,req.body.amount)
+
 			}else {
 				//NEED A CARD ID!
+				console.log('NEED CARD ID!')
 			}
-
-			function charge(customerId,cardId,amount){
-				// STRIPE CHARGE BY ID 
-				// When it's time to charge the customer again, retrieve the customer ID!
-				stripe.charges.create({
-				  amount: amount, // Amount in cents
-				  currency: "usd",
-				  customer: customerId, // Previously stored, then retrieved
-				  card: cardId
-				});		
-				return 'success?'
-
-
-			}
-
 
 		//NEW STRIPE USER
 		}else {
@@ -111,7 +127,7 @@ app.post("/charge", jsonParser, function(req, res) {
 			//return checkout LINK
 			var v = {
 				newAcct: true,
-				url: baseURL+'?k='+orderKey[req.body.kipId].session_token
+				url: baseURL+'?k='+p.session_token
 				//STORE TOKEN ON KIP PAY END
 			}
 
@@ -128,12 +144,39 @@ app.post("/charge", jsonParser, function(req, res) {
 	}
 });
 
+function chargebyId(customerId,cardId,amount){
+	// STRIPE CHARGE BY ID 
+	// When it's time to charge the customer again, retrieve the customer ID!
+	stripe.charges.create({
+	  amount: amount, // Amount in cents
+	  currency: "usd",
+	  customer: customerId, // Previously stored, then retrieved
+	  card: cardId
+	}).then(function(z){
+		console.log('CHARGED?? ',z)
+	});		
+	return 'success?'
+}
+
 
 //get list of cards for user
 app.get("/list", function(req, res) {
 
 
-});
+})
+
+app.post("/session", jsonParser, function(req, res){
+
+	if(req.body && req.body.session_token){
+
+		var t = req.body.session_token.replace(/[^\w\s]/gi, '') //clean special char
+
+		Payment.findOne({session_token: t}, function(err,obj) { 
+			console.log('$$$$$$$$$$$ ',obj)
+			res.send(JSON.stringify(obj))
+		})
+	}
+})
 
 //this is the call back from the new credit card to do the charge
 app.post("/process", jsonParser, function(req, res) { 
@@ -141,72 +184,37 @@ app.post("/process", jsonParser, function(req, res) {
 	if(req.body && req.body.token && req.body.session_token){
 
 		//this is a stripe token for the user inputted credit card details
-		var token = req.body.token
+		var token = req.body.token.replace(/[^\w\s]/gi, '') //clean special char
 
 		//LOOK UP USER BY HASH TOKEN 
-		var session_token = req.body.session_token
+		var t = req.body.session_token.replace(/[^\w\s]/gi, '') //clean special char
 
-		var k = 'slack_TEAMID_USERID'
-		var d = 'Los Alamos Cantina~~~'
-		var a = 5000
-		var e = 'zzz@zzz.xyz'
-		//
-		///
+		Payment.findOne({session_token: t}, function(err,obj) { 
 
-		//check if we have order for this kip id user
-		// if (!orderKey[req.body.kipId]){
-		// 	console.error('err: cant find order key')
-		// }else {
+			if (err){
+				console.log(err)
+			}else {
+				//create stripe customer 
+				stripe.customers.create({
+				  source: token,
+				  description: obj.description
+				}).then(function(customer) {
+				  return stripe.charges.create({
+				    amount: obj.amount, // Amount in cents
+				    currency: "usd",
+				    customer: customer.id
+				  });
 
+				}).then(function(charge) {
+				  // YOUR CODE: Save the customer ID and other info in a database for later!
 
-		//CO WRAP HERE:
-		//get data from DB yield
-		//create new stripe account + charge it
+				  console.log('STRIPE CUSTOER^#^$#&$^#$&#^$#&$^#$ ',charge)
 
+				  //SENDING BACK TO KIP CAFE
+				});			
+			}
+		})
 
-		//create stripe customer 
-		stripe.customers.create({
-		  source: token,
-		  description: d
-		}).then(function(customer) {
-		  return stripe.charges.create({
-
-		    amount: a, // Amount in cents
-		    currency: "usd",
-		    customer: customer.id
-		  });
-
-		}).then(function(charge) {
-		  // YOUR CODE: Save the customer ID and other info in a database for later!
-
-		  console.log('STRIPE CUSTOER^#^$#&$^#$&#^$#&$^#$ ',charge)
-
-
-		  //SEND STRIPE ID CREDIT CARD TYPE + 4 DIGIT back to + expire? 
-
-
-		  var send = {
-		  	stripeId: 
-		  }
-
-		});
-
-
-			// chargeToken(token,orderKey[req.body.kipId],function(charge,err){
-			// 	console.log(charge)
-			// 	if(err){
-			// 		res.sendStatus(500)
-			// 		//POST BACK TO KIP PAY FRONT END
-			// 	}else {
-			// 		//success 
-			// 		res.sendStatus(200)
-			// 		//post success back to Kip Extensions (i.e. Kip Café)
-			// 	}
-			// })
-
-
-
-		//}
 
 	}
 });

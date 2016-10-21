@@ -41,36 +41,29 @@ function getQueryStringValue (key) {
   return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
 }  
 //parsing query strings
-var session_token = getQueryStringValue('k');
-
-
-//GET REQUEST HERE FOR ORDER DETAILS via session token
-//
-//get these:
-var order = {
-  kipId: 'slack_TEAMID_USERID',
-  description: 'Los Alamos Cantina~~~',
-  amount: '5000',
-  email: 'zzz@zzz.xyz'
-}
-//
-
+var session_token = getQueryStringValue('k')
+var baseURL = decodeURI(getQueryStringValue('b'))
 
 //clear query strings in url param
 history.replaceState({}, 'Kip Café with Stripe', '/'); 
 
-//convert to int
-if (!isNaN(order.amount)){
-  order.amount = parseInt(order.amount)
-  process(order,session_token)
-}else {
-  console.log('Not a number');
+if (session_token.length == 512){
+  $.ajax({
+      url: '/session', 
+      type: 'POST', 
+      contentType: 'application/json', 
+      data: JSON.stringify({
+        session_token: session_token
+      }),
+      success: process
+  })
 }
 
 //do the thing
-function process(order,session_token){
+function process(data){
 
-  //
+  data = JSON.parse(data)
+
   var handler = StripeCheckout.configure({
     key: stripeKey,
     image: 'https://httpsimage.com/img/kip-icon.png',
@@ -82,26 +75,22 @@ function process(order,session_token){
           contentType: 'application/json', 
           data: JSON.stringify({
             token: token.id,
-            session_token: session_token
+            session_token: data.session_token
           })
       })
     }
   });
 
   document.getElementById('stripeButton').addEventListener('click', function(e) {
-    if(order.amount && order.description){
       // Open Checkout with further options:
       handler.open({
         name: 'Kip Checkout',
-        description: 'Delivery from '+order.description + 'for <Team Name>',
-        amount: order.amount,
+        description: 'Delivery from '+data.description + 'for <Team Name>',
+        amount: parseInt(data.amount),
         zipCode: true,
-        email: order.email
+        email: data.email
       });
       e.preventDefault();
-    }else {
-      console.log('error: missing amount or description')
-    }
   });
 
   // Close Checkout on page navigation:
