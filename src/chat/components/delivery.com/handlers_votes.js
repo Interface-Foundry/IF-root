@@ -168,7 +168,7 @@ function * buildRestaurantAttachment (restaurant) {
   var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
 
   var obj = {
-    'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
+    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*>`,
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
