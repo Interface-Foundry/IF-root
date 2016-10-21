@@ -7,7 +7,6 @@ var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var team_utils = require('./team_utils.js')
 var utils = require('./utils')
-var address_utils = require('./address_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -252,17 +251,7 @@ handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var input = foodSession.data.input;
-  var res = yield api.searchNearby({addr: input})
-  var res_loc = res.search_address;
-  res_loc.input = input;
-  var location = yield address_utils.parseAddress(res_loc);
-  // kip.debug('\n\n\n\n\n final address is : ', location,'\n\n\n\n\n')
-  foodSession.location = location;
-  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  team.meta.chosen_location = location
-  team.meta.locations.push(location)
-  yield team.save();
+  var res = yield api.searchNearby({addr: foodSession.data.input})
   foodSession.merchants = _.get(res, 'merchants')
   foodSession.cuisines = _.get(res, 'cuisines')
   // ---------------------------------------------

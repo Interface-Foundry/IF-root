@@ -56,7 +56,6 @@ module.exports.payForItem = function * (session) {
       'phone_number': session.chosen_location.phone_number,
       'first_name': session.chosen_location.first_name,
       'last_name': session.chosen_location.last_name,
-
       // optional
       'order_time': new Date().toISOString(), // Must be ISO8601 format
       'street': session.chosen_location.street,
@@ -82,14 +81,25 @@ module.exports.searchNearby = function * (params) {
   try {
     var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
   } catch(err) {
+    if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
     params.addr = yield address_utils.cleanAddress(params.addr);
-    kip.debug('api-wrapper 53: cleaned: ', params.addr)
-    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+    kip.debug('api-wrapper 86: searchNearBy err: ', err,'cleaned string: ', params.addr)
+    try {
+      var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+    } catch(err) {
+      if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
+      return false
+    }
   }
    if ((allNearby.merchants == undefined)) {
     params.addr = yield utils.cleanAddress(params.addr);
-    kip.debug('api-wrapper 58: cleaned: ', params.addr)
-    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+    kip.debug('api-wrapper 95: searchNearBy err: ', err,'cleaned string: ', params.addr)
+     try {
+      var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+    } catch(err) {
+      if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
+      return false
+    }
   }
   // make sure we have all the merchants in the db
   saveMerchants(allNearby.merchants)
