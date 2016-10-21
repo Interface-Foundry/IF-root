@@ -184,17 +184,16 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         })
       }
       // console.log('outgoing message', message)
-
       if (message.mode === 'food') {
         // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
-        var reply = message.reply.data ? message.reply.data : message.reply
-        return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply)
+        var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
+        return bot.web.chat.postMessage(message.source.channel,(reply.label ? reply.label : message.text), reply)
       }
       if (message.mode === 'address') {
         kip.debug('slack.js line 200 message: ', message)
         // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
-        var reply = message.reply.data ? message.reply.data : message.reply
-        return bot.web.chat.postMessage(message.source.channel, message.reply.label, reply)
+        var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
+        return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {

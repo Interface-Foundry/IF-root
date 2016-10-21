@@ -10,6 +10,7 @@ var api = require('./api-wrapper')
 var queue = require('../queue-mongo')
 var search = require('./search')
 var utils = require('./utils')
+var address_utils = require('./address_utils')
 var request = require('request-promise')
 var team_utils = require('./team_utils.js')
 var UserChannel = require('./UserChannel')
@@ -310,8 +311,20 @@ handlers['address.new'] = function * (session) {
 // the user seeks to confirm their possibly updated/validated address
 //
 handlers['address.confirm'] = function * (session) {
+  var input = session.text;
   var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
-  var prompt = 'Is `' + session.text + '` your address?'
+  var res = yield api.searchNearby({addr: input})
+  if (!res) return send_text_reply(session, 'Sorry! We couldn\'t find that address!');
+  var res_loc = res.search_address;
+  res_loc.input = input;
+  var location = yield address_utils.parseAddress(res_loc);
+  foodSession.chosen_location = location;
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  team.meta.chosen_location = location
+  team.meta.locations.push(location)
+  yield team.save();
+  kip.debug('\n\n\n\n\n final address is : ', location,'\n\n\n\n\n')
+  var prompt = 'Is `' + location.address_1 + '` your address?'
   var msg_json = {
     'text': prompt,
     'attachments': [
