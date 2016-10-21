@@ -3,7 +3,8 @@ var _ = require('lodash')
 var co = require('co')
 var fs = require('fs')
 var request = require('request-promise')
-
+var utils = require('./utils')
+var address_utils = require('./address_utils')
 var client_id = 'ZTM0ZmNjOWRhNGMyNzkyYmI5NWVhMmM1ZmU2Njg3M2E3'
 
 var defaultParams = {}
@@ -78,8 +79,18 @@ module.exports.payForItem = function * (session) {
 module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
   logging.info('searching delivery.com for restaurants with params', params)
-  var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
-//  kip.debug('allNearby: ', allNearby)
+  try {
+    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+  } catch(err) {
+    params.addr = yield address_utils.cleanAddress(params.addr);
+    kip.debug('api-wrapper 53: cleaned: ', params.addr)
+    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+  }
+   if ((allNearby.merchants == undefined)) {
+    params.addr = yield utils.cleanAddress(params.addr);
+    kip.debug('api-wrapper 58: cleaned: ', params.addr)
+    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+  }
   // make sure we have all the merchants in the db
   saveMerchants(allNearby.merchants)
 
@@ -194,6 +205,34 @@ function get_options (item) {
     }
   })
 }
+
+
+// var definitelyExistingLocations = []
+// function saveLocations (locations) {
+//   co(function * () {
+//     for (var i = 0; i < locations.length; i++) {
+//       if (definitelyExistingLocations.indexOf(locations[i].id) >= 0) {
+//         continue
+//       }
+//       var m = yield db.Merchants.findOne({
+//         id: merchants[i].id
+//       }).select('id').exec()
+//       if (!m) {
+//         console.log('saving new merchant', merchants[i].summary.name)
+//         m = new db.Merchant({
+//           id: merchants[i].id,
+//           data: merchants[i]
+//         })
+//         yield m.save()
+//         console.log('saved')
+//         definitelyExistingMerchants.push(m.id)
+//       }
+//     }
+//   }).catch(kip.err)
+// }
+
+
+
 
 if (!module.parent) {
   // wow such test
