@@ -2,8 +2,6 @@ require('kip')
 var co = require('co')
 var _ = require('lodash')
 var parse_address = require('parse-address'); 
-var addressit = require('addressit');
-var ContactParser = require('contact-parser');
 var Fuse = require('fuse.js')
 
 function  * parseAddress (location) {
