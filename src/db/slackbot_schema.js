@@ -69,10 +69,19 @@ var slackbotSchema = mongoose.Schema({
       coordinates: [Number],
       address_1: String,
       address_2: String,
+      street: String,
+      unit_type: String,
+      unit_number: String,
+      city: String,
+      state: String,
+      zip_code: String,
       phone_number: String,
       region: String,
       timezone: String,
-      special_instructions: String
+      neighborhood: String,
+      sublocality: String,
+      special_instructions: String,
+      input: String
     }],
     chosen_location: {},
     fulfillment_method: String

@@ -15,7 +15,6 @@ var team_utils = require('./team_utils.js')
 var UserChannel = require('./UserChannel')
 
 var ui = require('../ui_controls')
-var Fuse = require('fuse.js')
 var all_cuisines = require('./cuisines2').cuisines
 
 require('nodejs-dashboard')
@@ -48,21 +47,6 @@ function send_text_reply (message, text) {
   msg.save()
   console.log('<<<'.yellow, text.yellow)
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
-}
-
-// mock function for now until dexter implements
-function validateAddress (addr) {
-  // validate addr via google places api and Parse out the fields from the addr string
-  return {
-    label: 'NYC Office',
-    coordinates: [-123.34, 34.32432423],
-    address_1: addr,
-    address_2: 'Apt. 6',
-    phone_number: '212-867-5309',
-    region: 'US',
-    timezone: 'ET',
-    special_instructions: 'Please send a raven to herald your arrival'
-  }
 }
 
 //
@@ -211,6 +195,9 @@ handlers['food.begin'] = function * (session) {
   team_utils.getChatUsers(session)
   session.state = {}
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}}).exec()
+  var foodSession = yield utils.initiateDeliverySession(session, teamMembers)
+  yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {
       name: 'passthrough',
@@ -258,11 +245,6 @@ handlers['food.choose_address'] = function * (session) {
       kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
     // TODO handle the case where they type a new address without clicking the "new" button
     }
-
-    var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}}).exec()
-    var foodSession = yield utils.initiateDeliverySession(session, teamMembers, location)
-
-    yield foodSession.save()
     //
     // START OF S2
     //
@@ -328,9 +310,8 @@ handlers['address.new'] = function * (session) {
 // the user seeks to confirm their possibly updated/validated address
 //
 handlers['address.confirm'] = function * (session) {
-  kip.debug('🌆🏙 validate an address', session.text)
-  var location = yield validateAddress(session.text)
-  var prompt = 'Is `' + location.address_1 + '` your address?'
+  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+  var prompt = 'Is `' + session.text + '` your address?'
   var msg_json = {
     'text': prompt,
     'attachments': [
@@ -347,7 +328,7 @@ handlers['address.confirm'] = function * (session) {
             name: 'address_confirm_btn',
             text: 'Confirm',
             type: 'button',
-            value: JSON.stringify(location)
+            value: session.text
           },
           {
             name: 'passthrough',
@@ -361,35 +342,15 @@ handlers['address.confirm'] = function * (session) {
   }
   // storing location in source since there is no other way to persist it thru handler exchanges,
   // feel free to implement a better way. would not make sense to save it in slackbots before it is even validate nah meen
-  session.source.location = location
+  foodSession.data = { input: session.text}
+  yield foodSession.save()
   yield session.save()
   replyChannel.send(session, 'address.validate', {type: session.origin, data: msg_json})
 }
 
 handlers['address.validate'] = function * (session) {
-  var location = session.source.location
-  kip.debug('\n\n🌃🌉getting to address.validate', location, '\n\n')
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  // validateAddress with either return false or return a json with the proper filled fields, we can change this later however u want to implement it
-  if (validateAddress(location)) {
-    team.meta.locations.push(validateAddress(location.address_1))
-    team.meta.chosen_location = location
-  } else {
-    team.meta.chosen_location = location
-    team.meta.locations.push(validateAddress({
-      label: 'NYC Office',
-      coordinates: [-123.34, 34.32432423],
-      address_1: location.address_1,
-      address_2: 'Apt. 6',
-      phone_number: '212-867-5309',
-      region: 'US',
-      timezone: 'ET',
-      special_instructions: 'Please send a raven to herald your arrival'
-    }))
-  }
-  yield team.save()
-  kip.debug(`###  saved new address in mongo...`)
-  var text = `Cool! You selected \`${location.address_1}\`. Delivery or pickup?`
+  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec();
+  var text = `Cool! You selected \`${foodSession.data.input}\`. Delivery or pickup?`
   var msg_json = {
     'attachments': [
       {
@@ -428,6 +389,7 @@ handlers['address.validate'] = function * (session) {
 }
 
 handlers['address.save'] = function * (session) {
+  kip.debug('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n🌃🌉getting to address.save\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
   if (session.text === 'no') {
     return handlers['food.begin'](session)
   }
@@ -690,7 +652,8 @@ handlers['food.restaurants.list'] = function * (message) {
 
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var addr = _.get(team, 'meta.chosen_location.address_1', '')
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var addr = _.get(foodSession, 'chosen_location.address_1', _.get(foodSession,'data.input',''))
   var msg_json = {
     'attachments': [
       {

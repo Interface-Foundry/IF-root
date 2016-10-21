@@ -7,6 +7,7 @@ var request = require('request-promise')
 var api = require('./api-wrapper.js')
 var team_utils = require('./team_utils.js')
 var utils = require('./utils')
+var address_utils = require('./address_utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
   googl.setKey('AIzaSyDQO2ltlzWuoAb8vS_RmrNuov40C4Gkwi0')
@@ -251,10 +252,19 @@ handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var address = foodSession.chosen_location.addr.address_1
-  var results = yield api.searchNearby({addr: address})
-  foodSession.merchants = _.get(results, 'merchants')
-  foodSession.cuisines = _.get(results, 'cuisines')
+  var input = foodSession.data.input;
+  var res = yield api.searchNearby({addr: input})
+  var res_loc = res.search_address;
+  res_loc.input = input;
+  var location = yield address_utils.parseAddress(res_loc);
+  // kip.debug('\n\n\n\n\n final address is : ', location,'\n\n\n\n\n')
+  foodSession.location = location;
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  team.meta.chosen_location = location
+  team.meta.locations.push(location)
+  yield team.save();
+  foodSession.merchants = _.get(res, 'merchants')
+  foodSession.cuisines = _.get(res, 'cuisines')
   // ---------------------------------------------
   var teamMembers = foodSession.team_members
   if (process.env.NODE_ENV === 'test') {
@@ -315,9 +325,9 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       // TODO: Handle if user inputs nonsense here
       kip.debug('User typed in an invalid response.')
     }
-    kip.debug('\n\ninside food.admin.restaurant.pick 779 fuse returned: ', res, message.data, '\n\n')
+    // kip.debug('\n\ninside food.admin.restaurant.pick 779 fuse returned: ', res, message.data, '\n\n')
   } else {
-    kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data, '\n\n')
+    // kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data, '\n\n')
   }
   foodSession.votes.push(message.data.value)
   foodSession.markModified('votes')
@@ -327,8 +337,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
   // replace after votes
   $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
-
-  if (numOfResponsesWaitingFor === 0) {
+  if (numOfResponsesWaitingFor <= 0) {
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
     logging.error('waiting for more responses have, votes: ', votes.length)
@@ -537,6 +546,8 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message) {
     $replyChannel.send(newMessage, 'food.menu.quick_picks', {type: 'slack', data: msgJson})
   })
 }
+
+
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel

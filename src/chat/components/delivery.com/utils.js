@@ -14,7 +14,7 @@ var api = require('./api-wrapper.js')
 *
 *
 */
-function * initiateDeliverySession (session, teamMembers, location) {
+function * initiateDeliverySession (session, teamMembers) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
   if (foodSessions) {
     yield foodSessions.map((session) => {
@@ -28,7 +28,6 @@ function * initiateDeliverySession (session, teamMembers, location) {
     team_id: session.source.team,
     // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
-    chosen_location: {addr: location},
     fulfillment_method: 'delivery', // set by default and change to pickup if it changes (for now)
     confirmed_orders: [],
     convo_initiater: {
@@ -240,5 +239,5 @@ function * removeUserFromSession (team, user) {
 module.exports = {
   initiateFoodMessage: initiateFoodMessage,
   initiateDeliverySession: initiateDeliverySession,
-  removeUserFromSession: removeUserFromSession
+  removeUserFromSession: removeUserFromSession,
 }
