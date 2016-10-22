@@ -18,7 +18,6 @@ var UserChannel = require('./UserChannel')
 var ui = require('../ui_controls')
 var all_cuisines = require('./cuisines2').cuisines
 
-require('nodejs-dashboard')
 
 var replyChannel = new UserChannel(queue)
 

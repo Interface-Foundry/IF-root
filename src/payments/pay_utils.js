@@ -1,35 +1,25 @@
 require('kip')
 var request = require('request-promise')
 
+var queue = require('../..chat/components/queue-mongo')
 const payURL = `https://kipthis.com/charge`
 const client_id = `ZTM0ZmNjOWRhNGMyNzkyYmI5NWVhMmM1ZmU2Njg3M2E3`
 
+/*
 
-
-module.exports.payForFoodSession = function * (foodSessionID) {
+*/
+function * sessionSuccesfullyPaid (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  // var adminsEmail = db.Chatusers
-  var adminsEmail = 'hello@.com' // not sure where this is
-  try {
-    var response = yield request({
-      uri: payURL,
-      method: `POST`,
-      json: true,
-      body: {
-        'amount': foodSession.order.total,
-        'kipId': `slack_${foodSession.team_id}_${foodSession.convo_initiater.id}`,
-        'description': `${foodSession.chosen_restaurant.id}`,
-        'email': `${adminsEmail}`
-      }
-    })
-    return response
-  } catch (e) {
-    logging.error('error doing kip pay lol', e)
-  }
+  foodSession.order['completed_payment'] = true
+  foodSession.save()
+  queue.publish('outgoing.' + message.origin, 'thanks you have successfully paid', message._id + '.reply.results')
 }
 
-
-module.exports.payForItem = function * (session) {
+/* this would be for kip to pay for an order once the user has successfully paid stripe
+*
+*
+*/
+module.exports.payForItemFromKip = function * (session) {
   var opts = {
     'method': `POST`,
     'uri': `https://api.delivery.com/api/guest/cart/${session.chosen_restaurant.id}/checkout`,
@@ -63,9 +53,12 @@ module.exports.payForItem = function * (session) {
   }
 }
 
-queue.topic('cafe.payments').subscribe(payment => {
-  logging.info('ack-ing payment', payment.data)
-  // if payment is successful create message for replyChannel or whatever
-  payment.ack()
-})
+
+
+// queue.topic('cafe.payments').subscribe(payment => {
+//   logging.info('ack-ing payment', payment.data)
+
+//   // if payment is successful create message for replyChannel or whatever
+//   payment.ack()
+// })
 

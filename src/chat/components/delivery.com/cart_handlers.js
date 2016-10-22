@@ -409,7 +409,25 @@ ${foodSession.data.instructions}`,
 
 handlers['food.admin.order.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.order['confirmed'] = yield pay.payForFoodSession(foodSession)
+  var adminsEmail = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).select('profile.email').exec()
+  var payURL = `somethingfromalyx.com`
+
+  try {
+    foodSession.order['confirmed'] = yield request({
+      uri: payURL,
+      method: `POST`,
+      json: true,
+      body: {
+        'amount': foodSession.order.total,
+        'kipId': `slack_${foodSession.team_id}_${foodSession.convo_initiater.id}`,
+        'description': `${foodSession.chosen_restaurant.id}`,
+        'email': `${adminsEmail}`
+      }
+    })
+  } catch (e) {
+    logging.error('error doing kip pay lol', e)
+  }
+
   var response = {
     'text': "You're all set to check-out!",
     'attachments': [
@@ -425,6 +443,10 @@ handlers['food.admin.order.done'] = function * (message) {
     ]
   }
   $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
+}
+
+handlers['food.done'] = function * {
+
 }
 
 module.exports = function (replyChannel, allHandlers) {
