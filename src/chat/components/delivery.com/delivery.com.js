@@ -245,6 +245,20 @@ handlers['food.choose_address'] = function * (session) {
       kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
     // TODO handle the case where they type a new address without clicking the "new" button
     }
+
+    //Add the chosen address via button to both foodSession and team.meta chosen_location
+    var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec();
+    var locations = _.get(team,'meta.locations');
+    if (locations && locations.length > 0) {
+      var index = _.findIndex(locations, function(l) { return l.address_1 == session.text });
+      foodSession.chosen_location = _.get(team,'meta.locations[',index,']')
+      team.meta.chosen_location = foodSession.chosen_location;
+    } else {
+      kip.debug('delivery.com line 257 no location of that button found in team.meta.locations')
+    }
+    yield foodSession.save()
+    yield team.save()
     //
     // START OF S2
     //
@@ -459,21 +473,22 @@ handlers['food.delivery_or_pickup'] = function * (session) {
   var attachments = []
 
   if (merchant) {
-    var picstitchUrl = yield request({
-      uri: kip.config.picstitchDelivery,
-      json: true,
-      body: {
-        origin: 'slack',
-        cuisines: merchant.summary.cuisines,
-        location: merchant.location,
-        ordering: {
-          minimum: _.get(merchant, 'ordering.minimum.delivery.lowest', 0),
-          delivery_charge: _.get(merchant, 'ordering.fees.delivery_charge', 0),
-          availability: merchant.ordering.availability
-        },
-        summary: merchant.summary,
-        url: merchant.summary.merchant_logo }})
 
+   var picstitchUrl = yield request({
+    uri: kip.config.picstitchDelivery,
+    json: true,
+    body: {
+      origin: 'slack',
+      cuisines: merchant.summary.cuisines,
+      location: merchant.location,
+      ordering: {
+        minimum: _.get(merchant, 'ordering.minimum.delivery.lowest', 0),
+        delivery_charge: _.get(merchant, 'ordering.fees.delivery_charge', 0),
+        availability: merchant.ordering.availability
+      },
+      summary: merchant.summary,
+      url: merchant.summary.merchant_logo }})
+ 
     attachments.push({
       title: '',
       image_url: picstitchUrl,
@@ -663,9 +678,10 @@ handlers['food.restaurants.list'] = function * (message) {
 }
 
 handlers['food.poll.confirm_send'] = function * (message) {
-  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
+  var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
+  var locationIndex = _.get(team,'meta.locations[0]') && _.get(team,'meta.locations[0]').length > 0 ? _.get(team,'meta.locations[0]').length - 1 : 0;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = _.get(foodSession, 'chosen_location.address_1', _.get(foodSession,'data.input',''))
+  var addr = _.get(foodSession, 'chosen_location.address_1') ? _.get(foodSession, 'chosen_location.address_1').address_1  : (_.get(team,'meta.locations[',locationIndex,']') ? _.get(team,'meta.locations[',locationIndex,']').address_1 : _.get(foodSession,'data.input',''));
   var msg_json = {
     'attachments': [
       {

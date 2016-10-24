@@ -146,7 +146,6 @@ function * buildRestaurantAttachment (restaurant) {
 
   // will need to use picstitch for placeholder image in future
   // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-  kip.debug('\n\n\n\n\n\n picstich url : ', kip.config.picstitchDelivery, '\n\n\n\n\n\n ')
 
   try {
     var realImage = yield request({
@@ -347,10 +346,15 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
+  kip.debug('\nyo\n')
+
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': yield viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
   }
+
+  kip.debug('\nlo\n')
+
 
   logging.data('responseForAdmin', responseForAdmin)
   responseForAdmin.attachments.push({
@@ -424,18 +428,27 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     foodSession.markModified('merchants')
     foodSession.save()
   }
-
+  try {
+    var url = yield googl.shorten(merchant.summary.url.complete)
+  } catch (err) {
+    kip.debug('\n\n\nline 434: ', err,'\n\n\n')
+    var url = merchant.summary.url.complete
+  }
   logging.data('using merchant for food service', merchant.id)
   foodSession.chosen_restaurant = {
     id: merchant.id,
     name: merchant.summary.name,
-    url: yield googl.shorten(merchant.summary.url.complete)
+    url: url
   }
-
-  var menu = yield request({
-    url: `https://api.delivery.com/merchant/${merchant.id}/menu?client_id=brewhacks2016`,
-    json: true
-  })
+  try {
+    var menu = yield request({
+      url: `https://api.delivery.com/merchant/${merchant.id}/menu?client_id=brewhacks2016`,
+      json: true
+    })
+  } catch (err) {
+    kip.debug('\n\n\nline 444: ', err,'\n\n\n')
+  }
+ 
   foodSession.menu = menu
 
   foodSession.save()

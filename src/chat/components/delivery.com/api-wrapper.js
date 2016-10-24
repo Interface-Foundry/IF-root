@@ -116,8 +116,10 @@ module.exports.getMenu = function * (merchant_id) {
 }
 
 module.exports.getMerchant = function * (merchant_id) {
-  kip.debug('getting merchant info for merchant id', merchant_id)
+  var url = `https://api.delivery.com/merchant/${merchant_id}/?client_id=${client_id}`
   var merchantInfo = yield request({url: `https://api.delivery.com/merchant/${merchant_id}/?client_id=${client_id}`, json: true})
+    kip.debug('getting merchant info for merchant id', merchant_id, url)
+
   return merchantInfo.merchant
 }
 

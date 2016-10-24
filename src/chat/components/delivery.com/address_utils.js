@@ -111,18 +111,20 @@ function * extractUnitFuzzy(input, set) {
   type_matches.sort(function(a, b) {
     return a.score - b.score;
   });
-  unit_type = (type_matches[0] && type_matches[0].type) ? type_matches[0].type.replace(',','').trim()  : '';
-  var type_orig = type_matches[0].item.name;
-  var index;
-  set.map((r, i) => {
-    if (r.name.indexOf(type_orig) > -1) {
-      index = i;
-    }
-  });
-
-  unit_number = set[index].name.replace(unit_type,'');
-  unit_number = (unit_number.length > 0 && unit_number.replace(',','').trim() != type_orig) ? unit_number.replace(',','').trim() : '';
-
+  
+  if (type_matches.length > 0) {
+    unit_type = (type_matches[0] && type_matches[0].type) ? type_matches[0].type.replace(',','').trim()  : '';
+    var type_orig = _.get(type_matches[0],'item.name') ? _.get(type_matches[0],'item.name') : '';
+    var index;
+    set.map((r, i) => {
+      if (r.name.indexOf(type_orig) > -1) {
+        index = i;
+      }
+    });
+    unit_number = set[index].name.replace(unit_type,'');
+    unit_number = (unit_number.length > 0 && unit_number.replace(',','').trim() != type_orig) ? unit_number.replace(',','').trim() : '';
+  }
+ 
   return { unit_type: unit_type, unit_number: unit_number }
 }
 
