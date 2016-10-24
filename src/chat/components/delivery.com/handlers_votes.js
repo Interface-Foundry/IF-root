@@ -316,10 +316,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       // TODO: Handle if user inputs nonsense here
       kip.debug('User typed in an invalid response.')
     }
-    // kip.debug('\n\ninside food.admin.restaurant.pick 779 fuse returned: ', res, message.data, '\n\n')
-  } else {
-    // kip.debug('\n\ninside food.admin.restaurant.pick 786', message.data, '\n\n')
-  }
+  } 
   foodSession.votes.push(message.data.value)
   foodSession.markModified('votes')
   foodSession.save()
@@ -332,6 +329,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (numOfResponsesWaitingFor <= 0) {
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
+
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
   }
