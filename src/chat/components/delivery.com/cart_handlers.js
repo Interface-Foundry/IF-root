@@ -435,11 +435,20 @@ ${foodSession.data.instructions}`,
   $replyChannel.send(message, 'food.admin.order.done', {type: message.origin, data: response})
 }
 
-
 handlers['food.admin.order.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var adminsEmail = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).select('profile.email').exec()
   var payURL = `somethingfromalyx.com`
+  var prunedPay = {
+    _id: foodSession._id,
+    active: foodSession.active,
+    team_id: foodSession.team_id,
+    chosen_location: foodSession.chosen_location,
+    time_started: foodSession.time_started,
+    convo_initiater: foodSession.convo_initiater,
+    guest_token: foodSession.guest_token,
+    order: foodSession.order
+  }
 
   try {
     foodSession.order['confirmed'] = yield request({
