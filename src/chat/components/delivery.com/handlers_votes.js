@@ -1,4 +1,5 @@
 'use strict'
+require('kip')
 var _ = require('lodash')
 var Fuse = require('fuse.js')
 var googl = require('goo.gl')
@@ -145,6 +146,8 @@ function * buildRestaurantAttachment (restaurant) {
 
   // will need to use picstitch for placeholder image in future
   // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  kip.debug('\n\n\n\n\n\n picstich url : ', kip.config.picstitchDelivery, '\n\n\n\n\n\n ')
+
   try {
     var realImage = yield request({
         uri: kip.config.picstitchDelivery,
@@ -343,13 +346,11 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var viableRestaurants = yield createSearchRanking(foodSession)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
-  kip.debug('\n\n\nhandlers_votes line 349 \n\n\n')
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': yield viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
   }
-  kip.debug('\n\n\nhandlers_votes line 399 : ', responseForAdmin, '\n\n\n')
 
   logging.data('responseForAdmin', responseForAdmin)
   responseForAdmin.attachments.push({
@@ -401,7 +402,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     },
     data: responseForAdmin
   }
-  kip.debug('\n\n\nhandlers_votes line 399 : ', resp, '\n\n\n')
   $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
 }
 
@@ -437,9 +437,6 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     json: true
   })
   foodSession.menu = menu
-
-  kip.debug('\n\n\n YEE 442 MENU IS : ', menu,'\n\n\n')
-
 
   foodSession.save()
 

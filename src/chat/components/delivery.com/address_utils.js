@@ -25,7 +25,7 @@ function  * parseAddress (location) {
     var parsed = parse_address.parseLocation(location.input);
     var reg_res = yield extractUnit(location.input)
     var fuz_res = yield extractUnitFuzzy(location.input)
-    address.unit_type = reg_res.unit_type ? reg_res.unit_type : (fuz_res.unit_type && (parsed.street && fuz_res.unit_type.indexOf(parsed.street) == -1) ? fuz_res.unit_type : '');
+    address.unit_type = reg_res.unit_type ? reg_res.unit_type : (fuz_res.unit_type && (_.get(parsed,'street') && fuz_res.unit_type.indexOf(_.get(parsed,'street')) == -1) ? fuz_res.unit_type : '');
     if (!reg_res.unit_number) {
       address.unit_number = fuz_res.unit_number ? fuz_res.unit_number : '';
     } 
@@ -51,8 +51,8 @@ function * cleanAddress(input) {
   }
   var reg_res = yield extractUnit(input)
   var fuz_res = yield extractUnitFuzzy(input, set)
-  var unit_type = reg_res.unit_type ? reg_res.unit_type : (fuz_res.unit_type && (parsed.street && fuz_res.unit_type.indexOf(parsed.street) == -1) ? fuz_res.unit_type : '');
-  var unit_number = reg_res.unit_number ? reg_res.unit_number : (fuz_res.unit_number && (parsed.street && parsed.number && fuz_res.unit_number.indexOf(parsed.street) == -1 && fuz_res.unit_number.indexOf(parsed.number) == -1) ? fuz_res.unit_type : '');
+  var unit_type = reg_res.unit_type ? reg_res.unit_type : (fuz_res.unit_type && (_.get(parsed,'street') && fuz_res.unit_type.indexOf(_.get(parsed,'street')) == -1) ? fuz_res.unit_type : '');
+  var unit_number = reg_res.unit_number ? reg_res.unit_number : (fuz_res.unit_number && (_.get(parsed,'street') && parsed.number && fuz_res.unit_number.indexOf(_.get(parsed,'street')) == -1 && fuz_res.unit_number.indexOf(_.get(parsed,'number')) == -1) ? fuz_res.unit_type : '');
   if (!unit_number) {
     var index;
     set.map((r, i) => {
@@ -73,8 +73,8 @@ function * cleanAddress(input) {
 
 function * extractUnit(input) {
   var parsed = parse_address.parseLocation(input);
-  var unit_type = parsed.sec_unit_type ? parsed.sec_unit_type.replace(',','').trim()  : '';
-  var unit_number = parsed.sec_unit_number ? parsed.sec_unit_number.replace(',','').trim()  : '';
+  var unit_type = _.get(parsed,'sec_unit_type') ? parsed.sec_unit_type.replace(',','').trim()  : '';
+  var unit_number = _.get(parsed, 'sec_unit_number ') ? parsed.sec_unit_number.replace(',','').trim()  : '';
   return { unit_type: unit_type, unit_number: unit_number }
 }
 
