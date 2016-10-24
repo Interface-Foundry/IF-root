@@ -25,10 +25,9 @@ function  * parseAddress (location) {
     var parsed = parse_address.parseLocation(location.input);
     var reg_res = yield extractUnit(location.input)
     var fuz_res = yield extractUnitFuzzy(location.input)
-    // kip.debug('reg_res: ', reg_res, 'fuz_res: ', fuz_res)
     address.unit_type = reg_res.unit_type ? reg_res.unit_type : (fuz_res.unit_type && (parsed.street && fuz_res.unit_type.indexOf(parsed.street) == -1) ? fuz_res.unit_type : '');
     if (!reg_res.unit_number) {
-      address.unit_number = fuz_res.unit_number
+      address.unit_number = fuz_res.unit_number ? fuz_res.unit_number : '';
     } 
   }
 
@@ -74,8 +73,8 @@ function * cleanAddress(input) {
 
 function * extractUnit(input) {
   var parsed = parse_address.parseLocation(input);
-  var unit_type = parsed.sec_unit_type ? parsed.sec_unit_type : '';
-  var unit_number = parsed.sec_unit_number ? parsed.sec_unit_number : '';
+  var unit_type = parsed.sec_unit_type ? parsed.sec_unit_type.replace(',','').trim()  : '';
+  var unit_number = parsed.sec_unit_number ? parsed.sec_unit_number.replace(',','').trim()  : '';
   return { unit_type: unit_type, unit_number: unit_number }
 }
 
@@ -112,15 +111,17 @@ function * extractUnitFuzzy(input, set) {
   type_matches.sort(function(a, b) {
     return a.score - b.score;
   });
-  unit_type = type_matches[0] ? type_matches[0].type : '';
+  unit_type = (type_matches[0] && type_matches[0].type) ? type_matches[0].type.replace(',','').trim()  : '';
   var type_orig = type_matches[0].item.name;
   var index;
   set.map((r, i) => {
     if (r.name.indexOf(type_orig) > -1) {
       index = i;
     }
-  })
+  });
+
   unit_number = set[index].name.replace(unit_type,'');
+  unit_number = (unit_number.length > 0 && unit_number.replace(',','').trim() != type_orig) ? unit_number.replace(',','').trim() : '';
 
   return { unit_type: unit_type, unit_number: unit_number }
 }

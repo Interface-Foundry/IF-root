@@ -60,8 +60,7 @@ module.exports.searchNearby = function * (params) {
     }
   }
    if ((allNearby.merchants == undefined)) {
-    params.addr = yield utils.cleanAddress(params.addr);
-    kip.debug('api-wrapper 95: searchNearBy err: ', err,'cleaned string: ', params.addr)
+    params.addr = yield address_utils.cleanAddress(params.addr);
      try {
       var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
     } catch(err) {
