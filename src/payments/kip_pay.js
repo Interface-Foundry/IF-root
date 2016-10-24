@@ -207,6 +207,32 @@ app.post("/process", jsonParser, function(req, res) {
 
 				}).then(function(charge) {
 				  // YOUR CODE: Save the customer ID and other info in a database for later!
+				  //PASS CARD AND last 4 digits
+
+				  	///SENDING BACK TO KIP CAFE
+					{   
+					    newAcct:false,
+					    processing:false,
+					    outcome:{ 
+					        network_status: 'approved_by_network',
+					        reason: null,
+					        seller_message: 'Payment complete.',
+					        type: 'authorized' 
+					    },
+					    order: {
+					        amount: 2000,
+					        accountId: 'ch_196ncTI2kQvuYJlVN9tBu4or',
+					        kipId: 'slack_123123_213123', //(origin + team + user id),
+					        description: 'Los Alamos Cantina',
+					        email: 'hello@kipthis.com'
+					        card :{
+					        	cardId: 'card_196ncPI2kQvuYJlVNuHXNqcZ',
+					        	brand: 'Visa',
+					        	last4: '1234',
+					        	exp: '05/2016'
+					        }
+					    }
+					}
 
 				  console.log('STRIPE CUSTOER^#^$#&$^#$&#^$#&$^#$ ',charge)
 
@@ -219,6 +245,23 @@ app.post("/process", jsonParser, function(req, res) {
 	}
 });
 
+
+function sendPayment(order){
+
+	switch(order.)
+
+	// {
+	// 	"amount":"888000",
+	// 	"kipId":"slack_TEAMID_USERID",
+	// 	"description":"Los Alamos Cantina",
+	// 	"email":"hello@kipthis.com",
+	// 	"order":{
+	// 		"service":"delivery.com",
+			
+	// 	}
+	// }
+
+}
 
 
 function chargeToken(token,order,callback){
