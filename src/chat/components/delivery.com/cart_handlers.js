@@ -162,7 +162,7 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 /* S12A
 *
 */
-handlers['food.admin.order.confirm'] = function * (message, foodSession) {
+handlers['food.admin.order.confirm'] = function * (message, foodSession, replace) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.markModified('confirmed_orders')
@@ -215,7 +215,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
       attachment_type: 'default',
       mrkdwn_in: ['text'],
       actions: [{
-        'name': `food.cart.decrease`,
+        'name': `food.cart.quantity.decrease`,
         'text': `-`,
         'type': `button`,
         'value': item._id
@@ -225,7 +225,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
         'type': `button`,
         'value': item.item.item_id
       }, {
-        'name': `food.cart.increase`,
+        'name': `food.cart.quantity.increase`,
         'text': `+`,
         'type': `button`,
         'value': item._id
@@ -253,11 +253,37 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
     }]
   })
 
-  $replyChannel.send(resp, 'food.admin.order.checkout.address', {type: message.origin, data: response})
+  if (replace) {
+    $replyChannel.sendReplace(resp, 'food.admin.order.confirm', {type: message.origin, data: response})
+  } else {
+    $replyChannel.send(resp, 'food.admin.order.confirm', {type: message.origin, data: response})
+  }
 }
 
 handlers['food.member.order.view'] = function * (message) {
   // would be S12 stuff for just member here
+}
+
+handlers['food.cart.quantity.increase'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var itemObjectID = message.source.actions[0].value
+  foodSession.cart.filter(i => i._id === itemObjectID).map(i => i.item.item_qty++)
+  foodSession.markModified('cart')
+  yield foodSession.save()
+  yield handlers['food.admin.order.confirm'](message, foodSession, true)
+}
+
+handlers['food.cart.quantity.decrease'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var itemObjectID = message.source.actions[0].value
+  if (foodSession.cart.filter(i => i._id === itemObjectID).map(i => i.item.item_qty)[0] <= 1) {
+    foodSession.cart = foodSession.cart.filter(i => i._id !== itemObjectID)
+  } else {
+    foodSession.cart.filter(i => i._id === itemObjectID).map(i => i.item.item_qty--)
+  }
+  foodSession.markModified('cart')
+  yield foodSession.save()
+  yield handlers['food.admin.order.confirm'](message, foodSession, true)
 }
 
 /* S12B
