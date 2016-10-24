@@ -4,3 +4,4 @@ venv-nlp/
 node_modules/*
 !node_modules/kip.js
 
+payments/secrets
