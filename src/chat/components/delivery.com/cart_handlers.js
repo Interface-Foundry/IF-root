@@ -202,7 +202,9 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
 
   response.attachments = response.attachments.concat(foodSession.cart.map((item) => {
     var foodInfo = menu.getItemById(String(item.item.item_id))
-    var descriptionString = _.reduce(_.keys(item.item.option_qty), function (curr, n) { return curr + ', ' + menu.getItemById(String(n)).name }, '')
+    var descriptionString = _.reduce(_.keys(item.item.option_qty), function (curr, n) {
+      return curr + ', ' + menu.getItemById(String(n)).name
+    }, '')
     return {
       text: `*${foodInfo.name} - $${menu.getCartItemPrice(item)}*
 *Options:* ${descriptionString}
@@ -216,17 +218,17 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession) {
         'name': `food.cart.decrease`,
         'text': `-`,
         'type': `button`,
-        'value': item.item_id
+        'value': item._id
       }, {
         'name': `food.null`,
-        'text': String(item.item_qty),
+        'text': String(item.item.item_qty),
         'type': `button`,
-        'value': item.item_id
+        'value': item.item.item_id
       }, {
         'name': `food.cart.increase`,
         'text': `+`,
         'type': `button`,
-        'value': item.item_id
+        'value': item._id
       }]
     }
   }))
@@ -406,6 +408,7 @@ ${foodSession.data.instructions}`,
   }
   $replyChannel.send(message, 'food.admin.order.done', {type: message.origin, data: response})
 }
+
 
 handlers['food.admin.order.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
