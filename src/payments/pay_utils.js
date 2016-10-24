@@ -1,7 +1,7 @@
 require('kip')
 var request = require('request-promise')
 
-var queue = require('../..chat/components/queue-mongo')
+var queue = require('../chat/components/queue-mongo')
 const payURL = `https://kipthis.com/charge`
 const client_id = `ZTM0ZmNjOWRhNGMyNzkyYmI5NWVhMmM1ZmU2Njg3M2E3`
 

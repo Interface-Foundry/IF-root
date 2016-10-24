@@ -3,7 +3,7 @@ var _ = require('lodash')
 var Fuse = require('fuse.js')
 var googl = require('goo.gl')
 var request = require('request-promise')
-
+var send_text_reply = require('./delivery.com').send_text_reply
 var api = require('./api-wrapper.js')
 var team_utils = require('./team_utils.js')
 var utils = require('./utils')
@@ -251,7 +251,10 @@ handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var res = yield api.searchNearby({addr: foodSession.data.input})
+  var addr = foodSession.data.input ? foodSession.data.input : '';
+  if (!addr) return 
+    // send_text_reply(message, 'Sorry! We couldn\'t find that address!');
+  var res = yield api.searchNearby({addr: addr})
   foodSession.merchants = _.get(res, 'merchants')
   foodSession.cuisines = _.get(res, 'cuisines')
   // ---------------------------------------------
@@ -323,6 +326,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
   var votes = foodSession.votes
+  kip.debug('numOfResponsesWaitingFor: ', numOfResponsesWaitingFor, ' votes: ', votes)
 
   // replace after votes
   $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})

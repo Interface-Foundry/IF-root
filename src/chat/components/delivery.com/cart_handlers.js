@@ -445,9 +445,9 @@ handlers['food.admin.order.done'] = function * (message) {
   $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
 }
 
-handlers['food.done'] = function * {
+// handlers['food.done'] = function * {
 
-}
+// }
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel

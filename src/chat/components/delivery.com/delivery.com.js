@@ -453,9 +453,9 @@ handlers['food.delivery_or_pickup'] = function * (session) {
       } else {
         merchant = null
       }
-    }
+   }
+   i++;
   }
-
   var attachments = []
 
   if (merchant) {
@@ -761,4 +761,8 @@ function * yesOrNo (text) {
   } else {
     return false
   }
+}
+
+module.exports = {
+  send_text_reply: send_text_reply
 }
