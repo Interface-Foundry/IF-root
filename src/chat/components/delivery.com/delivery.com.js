@@ -362,7 +362,7 @@ handlers['address.confirm'] = function * (session) {
 
 handlers['address.validate'] = function * (session) {
   var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec();
-  var text = `Cool! You selected \`${foodSession.data.input}\`. Delivery or pickup?`
+  var text = `Cool! You selected \`${foodSession.chosen_location.address_1}\`. Delivery or pickup?`
   var msg_json = {
     'attachments': [
       {

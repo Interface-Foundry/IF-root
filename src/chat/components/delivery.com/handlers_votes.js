@@ -142,6 +142,7 @@ function chooseRestaurant (restaurants, orderBy) {
 }
 
 function * buildRestaurantAttachment (restaurant) {
+
   // will need to use picstitch for placeholder image in future
   // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
   try {
@@ -161,7 +162,9 @@ function * buildRestaurantAttachment (restaurant) {
     kip.err(e)
     realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
   }
+
   var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+
   var obj = {
     'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
     'image_url': realImage,
@@ -251,8 +254,7 @@ handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = (foodSession.data && foodSession.data.input) ? foodSession.data.input : '';
-  if (!addr) return send_text_reply(message, 'Sorry! We couldn\'t find that address!');
+  var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input');
   var res = yield api.searchNearby({addr: addr})
   foodSession.merchants = _.get(res, 'merchants')
   foodSession.cuisines = _.get(res, 'cuisines')
@@ -341,11 +343,14 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var viableRestaurants = yield createSearchRanking(foodSession)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
+  kip.debug('\n\n\nhandlers_votes line 349 \n\n\n')
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
     'attachments': yield viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
   }
+  kip.debug('\n\n\nhandlers_votes line 399 : ', responseForAdmin, '\n\n\n')
+
   logging.data('responseForAdmin', responseForAdmin)
   responseForAdmin.attachments.push({
     'mrkdwn_in': [
@@ -396,6 +401,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     },
     data: responseForAdmin
   }
+  kip.debug('\n\n\nhandlers_votes line 399 : ', resp, '\n\n\n')
   $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
 }
 
@@ -409,6 +415,7 @@ handlers['food.admin.restaurant.more_info'] = function * (message) {
 
 
 handlers['food.admin.restaurant.confirm'] = function * (message) {
+
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
   if (!merchant) {
@@ -430,6 +437,9 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     json: true
   })
   foodSession.menu = menu
+
+  kip.debug('\n\n\n YEE 442 MENU IS : ', menu,'\n\n\n')
+
 
   foodSession.save()
 
