@@ -251,9 +251,8 @@ handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = foodSession.data.input ? foodSession.data.input : '';
-  if (!addr) return 
-    // send_text_reply(message, 'Sorry! We couldn\'t find that address!');
+  var addr = (foodSession.data && foodSession.data.input) ? foodSession.data.input : '';
+  if (!addr) return send_text_reply(message, 'Sorry! We couldn\'t find that address!');
   var res = yield api.searchNearby({addr: addr})
   foodSession.merchants = _.get(res, 'merchants')
   foodSession.cuisines = _.get(res, 'cuisines')
