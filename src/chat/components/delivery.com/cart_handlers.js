@@ -440,10 +440,9 @@ handlers['food.admin.order.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var adminsEmail = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).select('profile.email').exec()
 
-  var payURL = `https://pay.kipthis.com/charge`
   try {
-    foodSession.order['confirmed'] = yield request({
-      uri: payURL,
+    var payments_response = yield request({
+      uri: `https://pay.kipthis.com/charge`,
       method: `POST`,
       json: true,
       body: {
@@ -451,6 +450,7 @@ handlers['food.admin.order.done'] = function * (message) {
         'active': foodSession.active,
         'team_id': foodSession.team_id,
         'chosen_location': foodSession.chosen_location,
+        'chosen_restaurant': foodSession.chosen_restaurant,
         'time_started': foodSession.time_started,
         'convo_initiater': foodSession.convo_initiater,
         'guest_token': foodSession.guest_token,
@@ -466,21 +466,68 @@ handlers['food.admin.order.done'] = function * (message) {
     logging.error('error doing kip pay lol', e)
   }
 
-  var response = {
-    'text': "You're all set to check-out!",
-    'attachments': [
-      {
-        'title': '',
-        'mrkdwn_in': ['text'],
-        'text': `Thanks, <foodSession.order.confirmed.url|➤ Click Here to Checkout>`,
-        'fallback': `You are unable to follow this link to confirm order`,
-        'callback_id': `food.admin.order.done`,
-        'color': `#3AA3E3`,
-        'attachment_type': `default`
-      }
-    ]
+  // if they need to set up a new card
+  if (payments_response.url) {
+    foodSession.order.confirmed = payments_response
+    foodSession.save()
+    var response = {
+      'text': "You're all set to check-out!",
+      'attachments': [
+        {
+          'title': '',
+          'mrkdwn_in': ['text'],
+          'text': `Thanks, <foodSession.order.confirmed.url|➤ Click Here to Checkout>`,
+          'fallback': `You are unable to follow this link to confirm order`,
+          'callback_id': `food.admin.order.done`,
+          'color': `#3AA3E3`,
+          'attachment_type': `default`
+        }
+      ]
+    }
+    $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
   }
-  $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
+  // they have already entered card info
+  else {
+    var teamCards = yield db.Slackbots.findOne({team_id: foodSession.team_id}).select('meta.saved_cards').exec()
+    // create cards attachment
+    var cardImages = {
+      visa: `https://storage.googleapis.com/kip-random/visa.png`,
+      mastercard: `https://storage.googleapis.com/kip-random/mastercard.png`
+    }
+    var cardsAttachment = teamCards.map((card) => {
+      'title': `${card.card_type}`,
+      'text': `Ending in ${card.last_4}, exp ${card.exp_date}`,
+      'fallback': `You are unable to pick this card`,
+      'callback_id': `food.admin.order.select_card`,
+      'color': `#3AA3E3`,
+      'attachment_type': `default`,
+      'thumb_url': cardImages[card.card_type.toLowerCase()] || '',
+      'actions': [{
+        'name': `select_card`,
+        'text': `✓ Select Card`,
+        'type': `button`,
+        'style': `primary`,
+        'value': card.card_id
+      }]
+    })
+
+    cardsAttachment[0].pretext = "Payment Information"
+
+    var response = {
+      'text': `Checkout for ${foodSession.chosen_restaurant.name} - $${foodSession.order.total}`,
+      'attachments': [
+        {
+          'title': '',
+          'mrkdwn_in': ['text'],
+          'text': `Checkout for ${foodSession.chosen_restaurant.name} - $${foodSession.order.total}`,
+          'fallback': `You are pay for this order`,
+          'callback_id': `food.admin.order.done`,
+          'color': `#3AA3E3`,
+          'attachment_type': `default`
+        }
+      ]
+    }
+  }
 }
 
 // handlers['food.done'] = function * {

@@ -87,8 +87,9 @@ var slackbotSchema = mongoose.Schema({
     fulfillment_method: String,
 
     // stripe payments stuff
-    stripe_id: String,
+    stripe_customerId: String,
     saved_cards: [{
+      card_id: String,
       card_type: String,
       last_4: String,
       exp_date: String
