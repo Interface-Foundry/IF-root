@@ -246,19 +246,10 @@ handlers['food.choose_address'] = function * (session) {
     // TODO handle the case where they type a new address without clicking the "new" button
     }
 
-    //Add the chosen address via button to both foodSession and team.meta chosen_location
     var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
-    var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec();
-    var locations = _.get(team,'meta.locations');
-    if (locations && locations.length > 0) {
-      var index = _.findIndex(locations, function(l) { return l.address_1 == session.text });
-      foodSession.chosen_location = _.get(team,'meta.locations[',index,']')
-      team.meta.chosen_location = foodSession.chosen_location;
-    } else {
-      kip.debug('delivery.com line 257 no location of that button found in team.meta.locations')
-    }
+    foodSession.chosen_location = location
     yield foodSession.save()
-    yield team.save()
+    
     //
     // START OF S2
     //
@@ -488,7 +479,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
       },
       summary: merchant.summary,
       url: merchant.summary.merchant_logo }})
- 
+
     attachments.push({
       title: '',
       image_url: picstitchUrl,
