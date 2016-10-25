@@ -502,10 +502,10 @@ handlers['food.delivery_or_pickup'] = function * (session) {
         'value': 'food.poll.confirm_send'
       },
       {
-        'name': 'passthrough',
+        'name': 'food.restaurants.list.recent',
         'text': 'See More',
         'type': 'button',
-        'value': 'food.restaurants.list'
+        'value': 1
       },
 
       {
@@ -660,6 +660,75 @@ handlers['food.restaurants.list'] = function * (message) {
     ]
   }
   replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
+}
+
+//
+// Return some restaurants, button value is the index offset
+//
+handlers['food.restaurants.list.recent'] = function * (message) {
+  var index = parseInt(_.get(message, 'data.value')) || 0
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var availableMerchantIds = foodSession.merchants.map(m => m.id)
+  debugger
+  var recentDeliveries = yield db.Delivery.aggregate([
+    {
+      $match: {
+        team_id: message.source.team,
+        'chosen_restaurant.id': {$exists: true}
+      }
+    },
+    {
+      $group: {
+        _id: '$chosen_restaurant.id',
+        count: {$sum: 1}
+      }
+    }
+  ])
+
+  // show 3 restaurants that are in the foodSession available list
+  var choices = yield recentDeliveries
+    .filter(m => availableMerchantIds.includes(m._id))
+    .sort(m => m.count)
+    .slice(index, index + 3)
+    .map(m => {
+      var merchant = foodSession.merchants.filter(fm => fm.id === m._id)[0]
+      return co(function * () {
+        try {
+          var realImage = yield request({
+              uri: kip.config.picstitchDelivery,
+              json: true,
+              body: {
+                origin: 'slack',
+                cuisines: merchant.summary.cuisines,
+                location: merchant.location,
+                ordering: merchant.ordering,
+                summary: merchant.summary,
+                url: merchant.summary.merchant_logo
+              }
+            })
+        } catch (e) {
+          kip.err(e)
+          realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+        }
+        var shortenedRestaurantUrl = yield googl.shorten(merchant.summary.url.complete)
+
+        return {
+          title: '',
+          image_url: realImage,
+          text: `<${shortenedRestaurantUrl}|*${merchant.summary.name}*>`,
+          color: '#3AA3E3',
+          mrkdwn_in: ['text'],
+          actions: [{name: 'food.admin.restaurant.confirm', text: 'Choose Restaurant', type: 'button', value: merchant.id}]
+        }
+      })
+    })
+  var msg = {
+    'text': 'Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?',
+    attachments: choices
+  }
+
+  replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg})
+
 }
 
 handlers['food.poll.confirm_send'] = function * (message) {
