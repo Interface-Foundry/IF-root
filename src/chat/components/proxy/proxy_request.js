@@ -28,7 +28,7 @@ if (test_mode) {
     proxy.stop();
    }
     proxy_status.current_index = sets_index;
-    console.log('\n\n\n\n🤖starting #', sets_index,' proxy with options: ', set.config,' ...\nfor ',set.time_in_seconds,' seconds...\n\n\n\n');
+    // console.log('\n\n\n\n🤖starting #', sets_index,' proxy with options: ', set.config,' ...\nfor ',set.time_in_seconds,' seconds...\n\n\n\n');
     proxy = new Luminati(sets[sets_index].config);
     proxy.listen(24000, 'localhost');
     setTimeout(function() {
