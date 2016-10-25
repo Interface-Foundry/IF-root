@@ -1,5 +1,6 @@
 'use strict'
 var _ = require('lodash')
+var request = require('request-promise')
 
 var Menu = require('./Menu')
 var api = require('./api-wrapper')
@@ -438,26 +439,25 @@ ${foodSession.data.instructions}`,
 handlers['food.admin.order.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var adminsEmail = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).select('profile.email').exec()
-  var payURL = `somethingfromalyx.com`
-  var prunedPay = {
-    _id: foodSession._id,
-    active: foodSession.active,
-    team_id: foodSession.team_id,
-    chosen_location: foodSession.chosen_location,
-    time_started: foodSession.time_started,
-    convo_initiater: foodSession.convo_initiater,
-    guest_token: foodSession.guest_token,
-    order: foodSession.order
-  }
 
+  var payURL = `https://pay.kipthis.com/charge`
   try {
     foodSession.order['confirmed'] = yield request({
       uri: payURL,
       method: `POST`,
       json: true,
       body: {
+        '_id': foodSession._id,
+        'active': foodSession.active,
+        'team_id': foodSession.team_id,
+        'chosen_location': foodSession.chosen_location,
+        'time_started': foodSession.time_started,
+        'convo_initiater': foodSession.convo_initiater,
+        'guest_token': foodSession.guest_token,
+        'order': foodSession.order,
+        // stuff not directly from foodSession to make it easier for alyx
         'amount': foodSession.order.total,
-        'kipId': `slack_${foodSession.team_id}_${foodSession.convo_initiater.id}`,
+        'kipId': foodSession.team_id,
         'description': `${foodSession.chosen_restaurant.id}`,
         'email': `${adminsEmail}`
       }
