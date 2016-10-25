@@ -210,29 +210,29 @@ app.post("/process", jsonParser, function(req, res) {
 				  //PASS CARD AND last 4 digits
 
 				  	///SENDING BACK TO KIP CAFE
-					{   
-					    newAcct:false,
-					    processing:false,
-					    outcome:{ 
-					        network_status: 'approved_by_network',
-					        reason: null,
-					        seller_message: 'Payment complete.',
-					        type: 'authorized' 
-					    },
-					    order: {
-					        amount: 2000,
-					        accountId: 'ch_196ncTI2kQvuYJlVN9tBu4or',
-					        kipId: 'slack_123123_213123', //(origin + team + user id),
-					        description: 'Los Alamos Cantina',
-					        email: 'hello@kipthis.com'
-					        card :{
-					        	cardId: 'card_196ncPI2kQvuYJlVNuHXNqcZ',
-					        	brand: 'Visa',
-					        	last4: '1234',
-					        	exp: '05/2016'
-					        }
-					    }
-					}
+					// {   
+					//     newAcct:false,
+					//     processing:false,
+					//     outcome:{ 
+					//         network_status: 'approved_by_network',
+					//         reason: null,
+					//         seller_message: 'Payment complete.',
+					//         type: 'authorized' 
+					//     },
+					//     order: {
+					//         amount: 2000,
+					//         accountId: 'ch_196ncTI2kQvuYJlVN9tBu4or',
+					//         kipId: 'slack_123123_213123', //(origin + team + user id),
+					//         description: 'Los Alamos Cantina',
+					//         email: 'hello@kipthis.com'
+					//         card :{
+					//         	cardId: 'card_196ncPI2kQvuYJlVNuHXNqcZ',
+					//         	brand: 'Visa',
+					//         	last4: '1234',
+					//         	exp: '05/2016'
+					//         }
+					//     }
+					// }
 
 				  console.log('STRIPE CUSTOER^#^$#&$^#$&#^$#&$^#$ ',charge)
 
@@ -248,7 +248,44 @@ app.post("/process", jsonParser, function(req, res) {
 
 function sendPayment(order){
 
-	switch(order.)
+	switch(order.service){
+		case 'delivery.com':
+			//POST /api/guest/cart/{merchant_id}/checkout
+
+			// {
+			//    "order_type":"delivery",
+			//    "order_time":"ASAP",
+			//    "street":"199 Water St",
+			//    "city":"New York",
+			//    "state":"NY",
+			//    "zip_code":"10038",
+			//    "payments":[
+			//       {
+			//          "type":"credit_card",
+			//          "card":{
+			//             "cc_number":"4111111111111111",
+			//             "exp_year":"2024",
+			//             "exp_mon":"08",
+			//             "cvv":"123",
+			//             "billing_zip":"11223",
+			//             "save":false
+			//          }
+			//       }
+			//    ],
+			//    "instructions":"",
+			//    "sms_notify":false,
+			//    "isOptingIn" : true,
+			//    "phone_number":"2125551212",
+			//    "tip":"3.90",
+			//    "merchant_id":"69391",
+			//    "first_name":"sa",
+			//    "last_name":"yo",
+			//    "email":"sa@yo.com",
+			//    "client_id":"xxxxxxxxxxxxxxxx",
+			//    "uhau_id" : 12345
+			// }
+		break;
+	}
 
 	// {
 	// 	"amount":"888000",
