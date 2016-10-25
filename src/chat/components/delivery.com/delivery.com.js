@@ -249,7 +249,7 @@ handlers['food.choose_address'] = function * (session) {
     var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
     foodSession.chosen_location = location
     yield foodSession.save()
-    
+
     //
     // START OF S2
     //
@@ -316,18 +316,14 @@ handlers['address.new'] = function * (session) {
 //
 handlers['address.confirm'] = function * (session) {
   var input = session.text;
-  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   var res = yield api.searchNearby({addr: input})
   if (!res) return send_text_reply(session, 'Sorry! We couldn\'t find that address!');
   var res_loc = res.search_address;
   res_loc.input = input;
+
+  // format the address nicely
   var location = yield address_utils.parseAddress(res_loc);
-  foodSession.chosen_location = location;
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  team.meta.chosen_location = location
-  team.meta.locations.push(location)
-  yield team.save();
-  kip.debug('\n\n\n\n\n final address is : ', location,'\n\n\n\n\n')
+
   var prompt = 'Is `' + location.address_1 + '` your address?'
   var msg_json = {
     'text': prompt,
@@ -342,10 +338,10 @@ handlers['address.confirm'] = function * (session) {
         'attachment_type': 'default',
         'actions': [
           {
-            name: 'address_confirm_btn',
+            name: 'address.save',
             text: 'Confirm',
             type: 'button',
-            value: session.text
+            value: JSON.stringify(location)
           },
           {
             name: 'passthrough',
@@ -357,75 +353,32 @@ handlers['address.confirm'] = function * (session) {
       }
     ]
   }
-  // storing location in source since there is no other way to persist it thru handler exchanges,
-  // feel free to implement a better way. would not make sense to save it in slackbots before it is even validate nah meen
-  foodSession.data = { input: session.text}
-  yield foodSession.save()
-  yield session.save()
-  replyChannel.send(session, 'address.validate', {type: session.origin, data: msg_json})
+  replyChannel.send(session, 'address.save', {type: session.origin, data: msg_json})
 }
 
-handlers['address.validate'] = function * (session) {
-  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec();
-  var text = `Cool! You selected \`${foodSession.chosen_location.address_1}\`. Delivery or pickup?`
-  var msg_json = {
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': text,
-        'fallback': 'You did not choose a fulfillment method :/',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': 'Delivery',
-            'type': 'button',
-            'value': 'food.delivery_or_pickup'
-          },
-          {
-            'name': 'passthrough',
-            'text': 'Pickup',
-            'type': 'button',
-            'value': 'food.delivery_or_pickup'
-          },
-          {
-            'name': 'passthrough',
-            'text': '< Change Address',
-            'type': 'button',
-            'value': 'address.change'
-          }
-        ]
-      }
-    ]
-  }
-  replyChannel.send(session, 'food.user.poll', {type: session.origin, data: msg_json})
-}
-
+// Save the address to the db after the user confirms it
 handlers['address.save'] = function * (session) {
-  kip.debug('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n🌃🌉getting to address.save\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
-  if (session.text === 'no') {
-    return handlers['food.begin'](session)
-  }
-  var location = JSON.parse(session.text)
-  //
-  //
-  // *Also store the address into mongo*
-  //
-  //
+  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+
+  try {
+    // parse the button click info
+    var location = JSON.parse(session.data.value)
+  } catch (e) {
+    var location = false
+    kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
+  // TODO handle the case where they type a new address without clicking the "new" button
+  }
 
   if (location) {
     team.meta.locations.push(location)
-    team.meta.chosen_location = location
+    foodSession.chosen_location = location
   } else {
     // todo error
     throw new Error('womp bad address')
   }
-  yield team.save()
+  yield [team.save(), foodSession.save()]
+
   session.text = JSON.stringify(location)
   return yield handlers['food.choose_address'](session)
 }
@@ -672,7 +625,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var locationIndex = _.get(team,'meta.locations[0]') && _.get(team,'meta.locations[0]').length > 0 ? _.get(team,'meta.locations[0]').length - 1 : 0;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = _.get(foodSession, 'chosen_location.address_1') ? _.get(foodSession, 'chosen_location.address_1').address_1  : (_.get(team,'meta.locations[',locationIndex,']') ? _.get(team,'meta.locations[',locationIndex,']').address_1 : _.get(foodSession,'data.input',''));
+  var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   var msg_json = {
     'attachments': [
       {
