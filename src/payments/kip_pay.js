@@ -45,23 +45,24 @@ var express = require("express")
 var app = express()
 var jsonParser = bodyParser.json()
 
-
-
 //import kip cc
 var cc = require("./secrets/kip_cc.js")
 var pay_utils = require("./pay_utils.js")
 
 //this serves the checkout page for new credit card
-app.get("/", function(req, res) {
-	//GENERATE LINK that has amount
-	res.sendFile(path.join(__dirname, 'index.html'))
-});
+// app.get("/", function(req, res) {
+// 	//GENERATE LINK that has amount
+// 	res.sendFile(path.join(__dirname + '/web', 'index.html'))
+
+// });
+
+app.use('/', express.static('web'))
 
 //post a new charge for kip user
 app.post("/charge", jsonParser, function(req, res) { 
 
 	//include KEY with new POST req to /charge to verify authentic kip request
-	var secret_key = 'mooseLogicalthirteen$*optimumNimble!Cake' 
+	var kip_secret = 'mooseLogicalthirteen$*optimumNimble!Cake' 
 
 	//SAMPLE BODY:
 	var prunedPay = {
@@ -156,7 +157,7 @@ app.post("/charge", jsonParser, function(req, res) {
 
 	//NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM 
 
-	if(req.body && req.body.order && req.body.order.total){
+	if(req.body && req.body.kip_token == kip_secret && req.body.order && req.body.order.total){
 		var o = req.body
 		//new payment
 		var p = new Payment({
@@ -165,7 +166,6 @@ app.post("/charge", jsonParser, function(req, res) {
 		});
 		p.save(function (err, data) {
 			if (err) console.log(err);
-			else console.log('Saved: ', data );
 		});
 
 		//ALREADY A STRIPE USER
@@ -208,7 +208,7 @@ app.post("/charge", jsonParser, function(req, res) {
 		}		
 
 	}else {
-		res.status(500).send("Please send a valid number amount to charge user. And include Kip ID 😅. Also email and a description");
+		res.status(401).send("😅");
 	}
 });
 

@@ -21,17 +21,54 @@
 
 <html lang="en">
 <head>
+  <title>Kip Pay with Stripe</title>
+  
+  <link rel="apple-touch-icon" sizes="57x57" href="img/favicon/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="img/favicon/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="img/favicon/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/favicon/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="img/favicon/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="img/favicon/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="img/favicon/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="img/favicon/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-194x194.png" sizes="194x194">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="img/favicon/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="img/favicon/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="img/favicon/manifest.json">
+  <link rel="mask-icon" href="img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="img/favicon/mstile-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
   <meta charset="utf-8">
-  <title>Kip Café with Stripe</title>
+
   <meta name="description" content="Kip Pay">
   <meta name="author" content="Kip">
 </head>
+
+
+<style>
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#58dddd+0,0c347a+74 */
+  body {
+    background: #58dddd; /* Old browsers */
+    background: -moz-linear-gradient(45deg,  #58dddd 0%, #0c347a 74%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg,  #58dddd 0%,#0c347a 74%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg,  #58dddd 0%,#0c347a 74%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#58dddd', endColorstr='#0c347a',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  }
+
+</style>
 
 <body>
 <script src="https://checkout.stripe.com/checkout.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 
-<button id="stripeButton">Click Here to Purchase</button>
+<div id="kipPay" style="display:none; width:200px; height:100px; background-color:grey;">
+  <button id="stripeButton">Click Here to Purchase</button>
+</div>
 
 <script>
 
@@ -64,8 +101,6 @@ function process(data){
 
   data = JSON.parse(data)
 
-  console.log(data)
-
   var handler = StripeCheckout.configure({
     key: stripeKey,
     image: 'https://httpsimage.com/img/kip-icon.png',
@@ -86,13 +121,19 @@ function process(data){
   document.getElementById('stripeButton').addEventListener('click', function(e) {
       // Open Checkout with further options:
       handler.open({
-        name: 'Kip Checkout',
+        name: 'Kip Café',
         description: 'Delivery from ' + data.order.chosen_restaurant.name,
         amount: data.order.order.total,
         zipCode: true,
         email: data.order.convo_initiater.email
       });
       e.preventDefault();
+
+      //show underneath button
+       
+      setTimeout(function(){ 
+        $("#kipPay").show();
+      }, 2000);
   });
 
   // Close Checkout on page navigation:
