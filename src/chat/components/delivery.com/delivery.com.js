@@ -60,6 +60,7 @@ queue.topic('incoming').subscribe(incoming => {
     } else {
       console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
     }
+
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -69,9 +70,16 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20)
 
     var session = history[0]
+    debugger;
     if (_.get(session, 'state') && _.get(history[1], 'state')) {
       session.state = history[1].state
     }
+
+    // parse the action value objects if they exist
+    try {
+      session.data.value = JSON.parse(session.data.value)
+    } catch (e) {}
+
     if (!session) {
       logging.error('No Session!!!')
       session.state = {}
@@ -142,6 +150,7 @@ var handlers = {}
 require('./menu_handlers')(replyChannel, handlers)
 require('./cart_handlers')(replyChannel, handlers)
 require('./handlers_votes')(replyChannel, handlers)
+require('./team_handlers')(replyChannel, handlers)
 
 handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
@@ -748,7 +757,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'value': 'food.user.poll'
           },
           {
-            'name': 'passthrough',
+            'name': 'food.admin.team.members',
             'text': 'View Team Members',
             'type': 'button',
             'value': 'team.members'
@@ -757,7 +766,13 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'name': 'passthrough',
             'text': '× Cancel',
             'type': 'button',
-            'value': 'food.exit'
+            'value': 'food.exit.confirm',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': "Are you sure you don't want to order food?",
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
           }
         ]
       }
