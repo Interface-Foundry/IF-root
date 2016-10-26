@@ -64,6 +64,8 @@ function process(data){
 
   data = JSON.parse(data)
 
+  console.log(data)
+
   var handler = StripeCheckout.configure({
     key: stripeKey,
     image: 'https://httpsimage.com/img/kip-icon.png',
@@ -85,10 +87,10 @@ function process(data){
       // Open Checkout with further options:
       handler.open({
         name: 'Kip Checkout',
-        description: 'Delivery from '+data.description + 'for <Team Name>',
-        amount: parseInt(data.amount),
+        description: 'Delivery from ' + data.order.chosen_restaurant.name,
+        amount: data.order.order.total,
         zipCode: true,
-        email: data.email
+        email: data.order.convo_initiater.email
       });
       e.preventDefault();
   });

@@ -84,7 +84,20 @@ var slackbotSchema = mongoose.Schema({
       input: String
     }],
     chosen_location: {},
-    fulfillment_method: String
+    fulfillment_method: String,
+    payments: [{
+      vendor: String,
+      customer_id: String,
+      card:{
+        card_id: String,
+        brand: String, //visa, mastercard, etc
+        exp_month: String, //expiration date
+        exp_year: String,
+        last4: String,
+        email: String,
+        address_zip: String
+      }
+    }]
   },
   // hash of channel:type conversations, for instance { D340852K: 'onboarding' }
   conversaitons: {}

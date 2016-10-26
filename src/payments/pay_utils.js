@@ -42,7 +42,7 @@ module.exports.payForItemFromKip = function * (session) {
       'zip_code': session.chosen_location.zip_code,
       'instructions': session.data.instructions,
       'sms_notify': true, // Whether to send the customer an SMS when their order is confirmed by the merchant
-      // 'uhau_id': int , // User Hear About Us ID. Please use this to associate the order to your account.
+      'uhau_id': 'kipthis-dot-com', // User Hear About Us ID. Please use this to associate the order to your account.
       'isOptingIn': false // Whether to allow delivery.com to send customer promotion and marketing emails
     }
   }
