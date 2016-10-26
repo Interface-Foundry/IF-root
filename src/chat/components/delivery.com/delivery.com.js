@@ -388,7 +388,7 @@ handlers['address.save'] = function * (session) {
   var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
   var location = session.data.value
-  
+
   if (location) {
     team.meta.locations.push(location)
     foodSession.chosen_location = location
@@ -458,7 +458,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     // but them modify it with some text to indicate you've ordered here before
     var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
     var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
-    listing.text = `You ordered \`Deivery\` from \`${mostRecentMerchant.summary.name}\` recently, order again?`
+    listing.text = `You ordered \`Delivery\` from \`${mostRecentMerchant.summary.name}\` recently, order again?`
     listing.mrkdwn_in = ['text']
     attachments.push(listing)
   }
