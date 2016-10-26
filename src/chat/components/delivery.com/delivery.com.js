@@ -210,9 +210,7 @@ handlers['food.begin'] = function * (session) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   team_utils.getChatUsers(session)
   session.state = {}
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}}).exec()
-  var foodSession = yield utils.initiateDeliverySession(session, teamMembers)
+  var foodSession = yield utils.initiateDeliverySession(session)
   yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {

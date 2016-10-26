@@ -7,7 +7,6 @@ var sm = require('slack-message-builder')
 var googl = require('goo.gl')
 var request = require('request-promise')
 
-var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
 
 /*
@@ -15,21 +14,29 @@ var api = require('./api-wrapper.js')
 *
 *
 */
-function * initiateDeliverySession (session, teamMembers) {
+function * initiateDeliverySession (session) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
+
+
   if (foodSessions) {
     yield foodSessions.map((session) => {
       session.active = false
       session.save()
     })
   }
+
+  var teamMembers = yield db.Chatusers.findOne({
+    team_id: session.source.team,
+    is_bot: {$ne: true},
+    deleted: {$ne: true},
+    id: {$ne: 'USLACKBOT'}}).exec()
+
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
     active: true,
     team_id: session.source.team,
-    // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
-    fulfillment_method: 'delivery', // set by default and change to pickup if it changes (for now)
+    fulfillment_method: 'delivery', // set by default and change to pickup if it changes
     confirmed_orders: [],
     convo_initiater: {
       id: admin.id,
