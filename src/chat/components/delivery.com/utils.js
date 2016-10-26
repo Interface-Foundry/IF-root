@@ -270,6 +270,7 @@ function * buildRestaurantAttachment (restaurant) {
     'callback_id': restaurant.id,
     'fallback': 'You are unable to choose a restaurant',
     'attachment_type': 'default',
+    'mrkdwn_in': ['text'],
     'actions': [
       {
         'name': 'food.admin.restaurant.confirm',
