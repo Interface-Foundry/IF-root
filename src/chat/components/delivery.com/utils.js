@@ -36,6 +36,10 @@ function * initiateDeliverySession (session, teamMembers) {
       name: admin.name
     }
   })
+  // check if user has entered phone number before
+  if (_.get(admin, 'phone_number')) {
+    newSession.convo_initiater.phone_number = admin.phone_number
+  }
   return newSession
 }
 

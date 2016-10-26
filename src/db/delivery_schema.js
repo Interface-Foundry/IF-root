@@ -34,7 +34,8 @@ var deliverySchema = mongoose.Schema({
   // admin or whomever to use for picking restaurant and various other
   convo_initiater: {
     id: String,
-    name: String
+    name: String,
+    phone_number: String
   },
 
   fulfillment_method: String,

@@ -207,9 +207,9 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
       return curr + ', ' + menu.getItemById(String(n)).name
     }, '')
     return {
-      text: `*${foodInfo.name} - $${menu.getCartItemPrice(item)}*
-*Options:* ${descriptionString}
-*Added by:* <@${item.user_id}>`,
+      text: `*${foodInfo.name} - $${menu.getCartItemPrice(item)}*\n` +
+            `*Options:* ${descriptionString}\n` +
+            `*Added by:* <@${item.user_id}>`,
       fallback: `Meal Choice`,
       callback_id: foodInfo.id,
       color: '#3AA3E3',
@@ -237,9 +237,9 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
   response.attachments.push({'title': ''})
   // final attachment
   response.attachments.push({
-    text: `*Delivery Fee:* $${foodSession.order.delivery_fee}
-*Taxes:* $${foodSession.order.tax}
-*Team Cart Total: $${foodSession.order.total}`,
+    text: `*Delivery Fee:* $${foodSession.order.delivery_fee}\n` +
+          `*Taxes:* $${foodSession.order.tax}\n` +
+          `*Team Cart Total: $${foodSession.order.total}`,
     fallback: 'Confirm Choice',
     callback_id: 'foodConfrimOrder_callbackID',
     color: '#3AA3E3',
@@ -294,8 +294,8 @@ handlers['food.cart.quantity.decrease'] = function * (message) {
 handlers['food.admin.order.checkout.address'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
-    text: `Whats your apartment or floor number at ${foodSession.addr.address_1}
->Type your apartment or floor number below`,
+    text: `Whats your apartment or floor number at ${foodSession.addr.address_1}\n` +
+          `>Type your apartment or floor number below`,
     fallback: 'Unable to get address',
     callback_id: `food.admin.order.checkout.address`,
     color: `#3AA3E3`
@@ -307,13 +307,46 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.chosen_location['floor_or_apartment'] = message.text
   foodSession.save()
+
   var response = {
-    text: `Whats your phone number ${foodSession.convo_initiater.name}
->Type your phone number below`,
-    fallback: 'Unable to get phone',
-    'callback_id': 'wopr_game',
-    color: '#3AA3E3'
+      text: `Whats your phone number ${foodSession.convo_initiater.name}\n` + `
+            >Type your phone number below`,
+      fallback: 'Unable to get phone',
+      'callback_id': 'wopr_game',
+      color: '#3AA3E3'
+    }
+
+  // can check to see if we already have phone number
+  if (foodSession.convo_initiater.phone_number) {
+    // retrieve users phone number
+    response = {
+      text: `Should we use a phone number from your previous order? ${foodSession.convo_initiater.phone_number}`,
+      fallback: `unable to confirm phone number`,
+      callback_id: `food.admin.order.checkout.phone_number`,
+      color: `#3AA3E3`,
+      attachments: [{
+        'title': '',
+        'text': ``,
+        'fallback': `You are pay for this order`,
+        'callback_id': `food.admin.order.checkout.phone_number`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`,
+        'actions': [{
+          'name': `food.admin.order.checkout.phone_number`,
+          'text': `Confirm`,
+          'style': `primary`,
+          'type': `button`,
+          'value': `edit`
+        }, {
+          'name': `food.admin.order.checkout.phone_number`,
+          'text': `Edit`,
+          'type': `button`,
+          'value': `edit`
+        }]
+      }]
+    }
   }
+  // get users phone number
   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: response})
 }
 
@@ -333,8 +366,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       {
         'title': '',
         'mrkdwn_in': ['text'],
-        'text': `*Name:*
- ${foodSession.convo_initiater.name}`,
+        'text': `*Name:*\n` +
+                `${foodSession.convo_initiater.name}`,
         'fallback': `You are unable to change name`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -351,8 +384,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       {
         'title': '',
         'mrkdwn_in': [`text`],
-        'text': `*Address:*
- ${foodSession.chosen_location.addr.address_1}`,
+        'text': `*Address:*\n` +
+                `${foodSession.chosen_location.addr.address_1}`,
         'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -369,8 +402,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       {
         'title': '',
         'mrkdwn_in': ['text'],
-        'text': `*Apt/Floor#:*
- ${foodSession.chosen_location.floor_or_apartment}`,
+        'text': `*Apt/Floor#:*\n` +
+                `${foodSession.chosen_location.floor_or_apartment}`,
         'fallback': `You are unable to confirm this order`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': '#3AA3E3',
@@ -387,8 +420,8 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       {
         'title': '',
         'mrkdwn_in': ['text'],
-        'text': `*Phone Number:*
-${foodSession.chosen_location.phone_number}`,
+        'text': `*Phone Number:*\n` +
+                `${foodSession.chosen_location.phone_number}`,
         'fallback': `You are unable to choose a game`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -409,8 +442,8 @@ ${foodSession.chosen_location.phone_number}`,
           'text'
 
         ],
-        'text': `*Delivery Instructions:*
-${foodSession.data.instructions}`,
+        'text': `*Delivery Instructions:*\n` +
+                `${foodSession.data.instructions}`,
         'fallback': `You are unable to edit instructions`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#49d63a`,
@@ -512,8 +545,7 @@ handlers['food.admin.order.done'] = function * (message) {
         }]
       }
     })
-
-    cardsAttachment[0].pretext = "Payment Information"
+    cardsAttachment[0].pretext = `Payment Information`
 
     var response = {
       'text': `Checkout for ${foodSession.chosen_restaurant.name} - $${foodSession.order.total}`,
@@ -532,9 +564,12 @@ handlers['food.admin.order.done'] = function * (message) {
   }
 }
 
-// handlers['food.done'] = function * {
-
-// }
+handlers['food.done'] = function * (message) {
+  // final area to save and reset stuff
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var slackbot = db.Salckbots.findOne({team_id: message.source.team}).exec()
+  // retrieve users phone number
+}
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel

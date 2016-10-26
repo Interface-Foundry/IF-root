@@ -69,7 +69,8 @@ var chatuserSchema = mongoose.Schema({
   history: {
     orders: [],
     interactions: []
-  }
+  },
+  phone_number: String
 // , email_stages: {
 //   stage_1: {
 //     type: Boolean,
