@@ -370,14 +370,14 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
             'type': 'button',
             'value': 'confirm'
           },
+          // {
+          //   'name': 'food.admin.view_team_members',
+          //   'text': 'View Team Members',
+          //   'type': 'button',
+          //   'value': 'view_team_members'
+          // },
           {
-            'name': 'food.admin.view_team_members',
-            'text': 'View Team Members',
-            'type': 'button',
-            'value': 'view_team_members'
-          },
-          {
-            'name': 'food.admin.change_restaurant',
+            'name': 'food.admin.restaurant.pick.list',
             'text': '< Change Restaurant',
             'type': 'button',
             'value': 'change_restaurant'
