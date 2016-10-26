@@ -21,7 +21,7 @@ handlers['food.admin.team.members'] = function * (message) {
   }
 
   if (foodSession.team_members.length === 0) {
-    $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: {text: "Well you hecked that up pretty well. How about you try again?"}})
+    $replyChannel.sendReplace(message, 'food.begin', {type: message.origin, data: {text: "Oops I had a brain freeze, please try again"}})
     return yield $allHandlers['food.begin'](message)
   }
 
