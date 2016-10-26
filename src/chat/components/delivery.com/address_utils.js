@@ -1,7 +1,7 @@
 require('kip')
 var co = require('co')
 var _ = require('lodash')
-var parse_address = require('parse-address'); 
+var parse_address = require('parse-address');
 var Fuse = require('fuse.js')
 
 function  * parseAddress (location) {
@@ -28,9 +28,10 @@ function  * parseAddress (location) {
     address.unit_type = reg_res.unit_type ? reg_res.unit_type : (fuz_res.unit_type && (_.get(parsed,'street') && fuz_res.unit_type.indexOf(_.get(parsed,'street')) == -1) ? fuz_res.unit_type : '');
     if (!reg_res.unit_number) {
       address.unit_number = fuz_res.unit_number ? fuz_res.unit_number : '';
-    } 
+    }
   }
 
+  address.address_2 = address.unit_number
   return address;
 
 }
@@ -62,7 +63,7 @@ function * cleanAddress(input) {
     })
     set.splice(index,1)
     set.forEach( function(r) {  if (r && r.name) final = final + (' ' + r.name) } )
-  } 
+  }
   else {
     final = input.replace(unit_type,'').replace(unit_number,'')
   }
@@ -102,7 +103,7 @@ function * extractUnitFuzzy(input, set) {
   var type_matches = []
   yield types.map(function * (type) {
     var res = yield fuse.search(type);
-    res = res.map((e) => { 
+    res = res.map((e) => {
       e.type = type;
       return e;
        });
@@ -111,7 +112,7 @@ function * extractUnitFuzzy(input, set) {
   type_matches.sort(function(a, b) {
     return a.score - b.score;
   });
-  
+
   if (type_matches.length > 0) {
     unit_type = (type_matches[0] && type_matches[0].type) ? type_matches[0].type.replace(',','').trim()  : '';
     var type_orig = _.get(type_matches[0],'item.name') ? _.get(type_matches[0],'item.name') : '';
@@ -124,7 +125,7 @@ function * extractUnitFuzzy(input, set) {
     unit_number = set[index].name.replace(unit_type,'');
     unit_number = (unit_number.length > 0 && unit_number.replace(',','').trim() != type_orig) ? unit_number.replace(',','').trim() : '';
   }
- 
+
   return { unit_type: unit_type, unit_number: unit_number }
 }
 
