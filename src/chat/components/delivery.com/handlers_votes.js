@@ -111,7 +111,7 @@ function * createSearchRanking (foodSession) {
       m.score = foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length
       return m
     })
-    .sort((a, b) => a.score - b.score)
+    .sort((a, b) => b.score - a.score)
 
   return merchants
 }
