@@ -416,7 +416,10 @@ handlers['food.delivery_or_pickup'] = function * (session) {
   // delivery.com is so slow
   var time = +new Date()
   while (_.get(foodSession, 'merchants.length', 0) <= 0 && (+new Date() - time < 3000)) {
-    replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
+    if (!alreadyWaiting)
+      replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
+    else
+      var alreadyWaiting = true
     yield sleep(500)
     foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   }
