@@ -643,6 +643,8 @@ handlers['food.restaurants.list'] = function * (message) {
 //
 handlers['food.restaurants.list.recent'] = function * (message) {
   var index = parseInt(_.get(message, 'data.value')) || 0
+  var msg_json = { text: 'Looking up your order history for this location...' }
+  replyChannel.sendReplace(message, 'food.waiting', {type: message.origin, data: msg_json})
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var availableMerchantIds = foodSession.merchants.map(m => m.id)
   var recentDeliveries = yield db.Delivery.aggregate([
@@ -713,7 +715,7 @@ handlers['food.restaurants.list.recent'] = function * (message) {
     attachments: attachments
   }
 
-  replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg})
+  replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg})
 
 }
 
