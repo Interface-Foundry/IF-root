@@ -305,16 +305,16 @@ handlers['food.admin.order.checkout.address'] = function * (message) {
 
 handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.chosen_location['floor_or_apartment'] = message.text
+  foodSession.chosen_location.address_2 = message.text
   foodSession.save()
 
   var response = {
-      text: `Whats your phone number ${foodSession.convo_initiater.name}\n` + `
-            >Type your phone number below`,
-      fallback: 'Unable to get phone',
-      'callback_id': 'wopr_game',
-      color: '#3AA3E3'
-    }
+    text: `Whats your phone number ${foodSession.convo_initiater.name}\n` + `
+          >Type your phone number below`,
+    fallback: 'Unable to get phone',
+    'callback_id': 'wopr_game',
+    color: '#3AA3E3'
+  }
 
   // can check to see if we already have phone number
   if (foodSession.convo_initiater.phone_number) {
@@ -403,14 +403,14 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Apt/Floor#:*\n` +
-                `${foodSession.chosen_location.floor_or_apartment}`,
+                `${foodSession.chosen_location.addr.address_2}`,
         'fallback': `You are unable to confirm this order`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': '#3AA3E3',
         'attachment_type': 'default',
         'actions': [
           {
-            'name': 'food.admin.order.checkout.floor_or_apartment',
+            'name': 'food.admin.order.checkout.address_2',
             'text': `Edit`,
             'type': `button`,
             'value': `edit`
