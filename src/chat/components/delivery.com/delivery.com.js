@@ -248,7 +248,6 @@ handlers['food.choose_address'] = function * (session) {
 
     var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
     foodSession.chosen_location = location
-    yield foodSession.save()
 
     //
     // START OF S2
@@ -293,6 +292,16 @@ handlers['food.choose_address'] = function * (session) {
       ]
     }
     replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: msg_json})
+
+
+    // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
+    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input');
+    var res = yield api.searchNearby({addr: addr})
+    foodSession.merchants = _.get(res, 'merchants')
+    foodSession.cuisines = _.get(res, 'cuisines')
+    foodSession.markModified('merchants')
+    foodSession.markModified('cuisines')
+    yield foodSession.save()
   } else {
     throw new Error('this route does not handle text input')
   }
@@ -388,59 +397,43 @@ handlers['address.change'] = function * (session) {
 }
 
 handlers['food.delivery_or_pickup'] = function * (session) {
+  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   var fulfillmentMethod = session.text
+  foodSession.fulfillment_method = fulfillmentMethod
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
+
+  if (fulfillmentMethod === 'pickup') {
+    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input')
+    var res = yield api.searchNearby({addr: addr, pickup: true})
+    foodSession.merchants = _.get(res, 'merchants')
+    foodSession.cuisines = _.get(res, 'cuisines')
+    foodSession.markModified('merchants')
+    foodSession.markModified('cuisines')
+  }
 
   //
   // START OF S2B
   //
+
+  // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
+  var merchantIds = foodSession.merchants.map(m => m.id)
   var lastOrdered = yield db.Deliveries.find({team_id: session.source.team, chosen_restaurant: {$exists: true}})
     .sort({_id: -1})
     .select('chosen_restaurant')
     .exec()
-  var done = false
-  var i = 0
-  var merchant
-  while (!done) {
-    if (i >= lastOrdered.length) {
-      done = true
-    } else {
-      var merchant = yield api.getMerchant(lastOrdered[i].chosen_restaurant.id)
-      if (_.get(merchant, 'ordering.availability.delivery')) {
-        done = true
-      } else {
-        merchant = null
-      }
-   }
-   i++;
-  }
+
+  var mostRecentSession = lastOrdered.filter(session => merchantIds.includes(session.chosen_restaurant.id))[0]
+
+  // create attachments, only including most recent merchant if one exists
   var attachments = []
 
-  if (merchant) {
-
-   var picstitchUrl = yield request({
-    uri: kip.config.picstitchDelivery,
-    json: true,
-    body: {
-      origin: 'slack',
-      cuisines: merchant.summary.cuisines,
-      location: merchant.location,
-      ordering: {
-        minimum: _.get(merchant, 'ordering.minimum.delivery.lowest', 0),
-        delivery_charge: _.get(merchant, 'ordering.fees.delivery_charge', 0),
-        availability: merchant.ordering.availability
-      },
-      summary: merchant.summary,
-      url: merchant.summary.merchant_logo }})
-
-    attachments.push({
-      title: '',
-      image_url: picstitchUrl,
-      text: `You ordered \`Deivery\` from \`${merchant.summary.name}\` recently, order again?`,
-      color: '#3AA3E3',
-      mrkdwn_in: ['text'],
-      actions: [{name: 'food.admin.restaurant.confirm', text: 'Choose Restaurant', type: 'button', value: merchant.id}]
-    })
+  if (mostRecentSession) {
+    // build the regular listing as if it were a choice presented to the admin in the later steps,
+    // but them modify it with some text to indicate you've ordered here before
+    var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
+    var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
+    listing.text = `You ordered \`Deivery\` from \`${mostRecentMerchant.summary.name}\` recently, order again?`
+    attachments.push(listing)
   }
 
   attachments.push({
@@ -461,16 +454,15 @@ handlers['food.delivery_or_pickup'] = function * (session) {
         'value': 'food.poll.confirm_send'
       },
       {
-        'name': 'passthrough',
+        'name': 'food.restaurants.list.recent',
         'text': 'See More',
         'type': 'button',
-        'value': 'food.restaurants.list'
+        'value': 1
       },
 
       {
         'name': 'passthrough',
         'text': '× Cancel',
-
         'type': 'button',
         'value': 'food.exit.confirm',
         confirm: {
@@ -488,6 +480,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
   }
 
   replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: res})
+  foodSession.save()
 }
 
 handlers['food.restaurants.list'] = function * (message) {
@@ -620,6 +613,78 @@ handlers['food.restaurants.list'] = function * (message) {
   }
   replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
+
+
+//
+// Return some restaurants, button value is the index offset
+//
+handlers['food.restaurants.list.recent'] = function * (message) {
+  var index = parseInt(_.get(message, 'data.value')) || 0
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  // need the merchants to be filled in at this point
+  debugger;
+  var availableMerchantIds = foodSession.merchants.map(m => m.id)
+  var recentDeliveries = yield db.Delivery.aggregate([
+    {
+      $match: {
+        team_id: message.source.team,
+        'chosen_restaurant.id': {$exists: true}
+      }
+    },
+    {
+      $group: {
+        _id: '$chosen_restaurant.id',
+        count: {$sum: 1}
+      }
+    }
+  ])
+
+  // show 3 restaurants that are in the foodSession available list
+  var choices = yield recentDeliveries
+    .filter(m => availableMerchantIds.includes(m._id))
+    .sort(m => m.count)
+    .slice(index, index + 3)
+    .map(m => {
+      var merchant = foodSession.merchants.filter(fm => fm.id === m._id)[0]
+      return co(function * () {
+        try {
+          var realImage = yield request({
+              uri: kip.config.picstitchDelivery,
+              json: true,
+              body: {
+                origin: 'slack',
+                cuisines: merchant.summary.cuisines,
+                location: merchant.location,
+                ordering: merchant.ordering,
+                summary: merchant.summary,
+                url: merchant.summary.merchant_logo
+              }
+            })
+        } catch (e) {
+          kip.err(e)
+          realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+        }
+        var shortenedRestaurantUrl = yield googl.shorten(merchant.summary.url.complete)
+
+        return {
+          title: '',
+          image_url: realImage,
+          text: `<${shortenedRestaurantUrl}|*${merchant.summary.name}*>`,
+          color: '#3AA3E3',
+          mrkdwn_in: ['text'],
+          actions: [{name: 'food.admin.restaurant.confirm', text: 'Choose Restaurant', type: 'button', value: merchant.id}]
+        }
+      })
+    })
+  var msg = {
+    'text': 'Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?',
+    attachments: choices
+  }
+
+  replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg})
+
+}
+
 
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();

@@ -93,57 +93,6 @@ var userFoodPreferencesPlaceHolder = {
 }
 
 
-function * buildRestaurantAttachment (restaurant) {
-
-  // will need to use picstitch for placeholder image in future
-  // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-
-  try {
-    var realImage = yield request({
-        uri: kip.config.picstitchDelivery,
-        json: true,
-        body: {
-          origin: 'slack',
-          cuisines: restaurant.summary.cuisines,
-          location: restaurant.location,
-          ordering: restaurant.ordering,
-          summary: restaurant.summary,
-          url: restaurant.summary.merchant_logo
-        }
-      })
-  } catch (e) {
-    kip.err(e)
-    realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
-  }
-
-  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
-
-  var obj = {
-    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*>`,
-    'image_url': realImage,
-    'color': '#3AA3E3',
-    'callback_id': restaurant.id,
-    'fallback': 'You are unable to choose a restaurant',
-    'attachment_type': 'default',
-    'actions': [
-      {
-        'name': 'food.admin.restaurant.confirm',
-        'text': '✓ Choose',
-        'type': 'button',
-        'style': 'primary',
-        'value': restaurant.id
-      },
-      // {
-      //   'name': 'food.admin.restaurant.more_info',
-      //   'text': 'More Info',
-      //   'type': 'button',
-      //   'value': restaurant.id
-      // }
-    ]
-  }
-  return obj
-}
-
 /*
 * create ranking from searches given votes
 *
@@ -209,10 +158,7 @@ handlers['food.user.poll'] = function * (message) {
   // going to want to move this to s3 probably
   // ---------------------------------------------
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input');
-  var res = yield api.searchNearby({addr: addr})
-  foodSession.merchants = _.get(res, 'merchants')
-  foodSession.cuisines = _.get(res, 'cuisines')
+
   // ---------------------------------------------
   var teamMembers = foodSession.team_members
   if (process.env.NODE_ENV === 'test') {
@@ -302,7 +248,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(0, 3).map(buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(0, 3).map(utils.buildRestaurantAttachment)
   }
 
 
