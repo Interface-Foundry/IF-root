@@ -387,16 +387,8 @@ handlers['address.confirm'] = function * (session) {
 handlers['address.save'] = function * (session) {
   var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-
-  try {
-    // parse the button click info
-    var location = JSON.parse(session.data.value)
-  } catch (e) {
-    var location = false
-    kip.debug('Could not understand the address the user wanted to use, session.text: ', session.text)
-  // TODO handle the case where they type a new address without clicking the "new" button
-  }
-
+  var location = session.data.value
+  
   if (location) {
     team.meta.locations.push(location)
     foodSession.chosen_location = location
