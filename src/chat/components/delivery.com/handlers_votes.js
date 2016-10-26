@@ -220,6 +220,13 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       kip.debug('User typed in an invalid response.')
     }
   }
+
+  // No Lunch For Me
+  if (message.data.value === 'user_remove') {
+    foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
+    foodSession.markModified('team_members')
+  }
+
   foodSession.votes.push(message.data.value)
   foodSession.markModified('votes')
   foodSession.save()
