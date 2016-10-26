@@ -2,24 +2,16 @@ require('kip')
 require('nodejs-dashboard')
 
 var co = require('co')
-var fs = require('fs')
 var _ = require('lodash')
-var path = require('path')
+var sleep = require('co-sleep')
 
 var api = require('./api-wrapper')
 var queue = require('../queue-mongo')
-var search = require('./search')
 var utils = require('./utils')
 var address_utils = require('./address_utils')
-var request = require('request-promise')
 var team_utils = require('./team_utils.js')
+
 var UserChannel = require('./UserChannel')
-var sleep = require('co-sleep')
-
-var ui = require('../ui_controls')
-var all_cuisines = require('./cuisines2').cuisines
-
-
 var replyChannel = new UserChannel(queue)
 
 function default_reply (message) {
