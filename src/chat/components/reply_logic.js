@@ -85,7 +85,7 @@ function typing (message) {
 }
 
 function isCancelIntent(message) {
-  var text = message.text.toLowerCase().replace(/^[a-z]/g, '')
+  var text = message.text.toLowerCase()
   var cancelPhrases = [
     'stop',
     'exit',
@@ -115,7 +115,7 @@ function printMode(message) {
 
 
 //
-// Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
+// Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
 queue.topic('incoming').subscribe(incoming => {
 
@@ -180,8 +180,11 @@ queue.topic('incoming').subscribe(incoming => {
 
     // mode guessing
     if (isCancelIntent(message)) {
-      kip.debug('cancel intent triggered')
-      message.mode = 'shopping'
+      message.mode = 'shopping';
+      yield message.save();
+      incoming.ack();
+      timer.stop();
+      return
     }
 
     if (message.text.indexOf('onboard') >= 0) {
@@ -226,9 +229,9 @@ queue.topic('incoming').subscribe(incoming => {
         }
       break;
      case 'home':
+             kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
         // modes[user.id] = 'home';
         var replies = yield settings.handle(message);
-        kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
         break;
      case 'team':
         var replies = yield settings.handle(message);
@@ -424,16 +427,16 @@ function * simple_response (message) {
 
 // use nlp to deterine the intent of the user
 function * nlp_response (message) {
-  kip.debug('nlp_response begin'.cyan)
+  kip.debug('nlp_response begin'.cyan);
   // the nlp api adds the processing data to the message
-
   try {
-    yield nlp.parse(message)
+    yield nlp.parse(message);
     if (process.env.NODE_ENV !== 'production') {
       var debug_message = text_reply(message, '_debug nlp_ `' + JSON.stringify(message.execute) + '`')
     }
     var messages = yield execute(message)
-  } catch(err) {
+  } 
+  catch(err) {
     kip.err(err)
   }
   if (process.env.NODE_ENV !== 'production') {
@@ -750,8 +753,8 @@ handlers['shopping.modify.one'] = function * (message, exec) {
   }
   var old_params = yield getLatestAmazonQuery(message)
   var old_results = yield getLatestAmazonResults(message)
-  kip.debug('old params', old_params)
-  kip.debug('new params', exec.params)
+  kip.debug('old params', old_params);
+  kip.debug('new params', exec.params);
   if (exec.params && exec.params.val && exec.params.val.length == 1 && message.text && (message.text.indexOf('1 but') > -1 || message.text.indexOf('2 but') > -1 || message.text.indexOf('3 but') > -1) && message.text.split(' but ')[1] && message.text.split(' but ')[1].split(' ').length > 1) {
     var all_modifiers = message.text.split(' but ')[1].split(' ')
     if (all_modifiers.length >= 2) {
@@ -778,7 +781,7 @@ handlers['shopping.modify.one'] = function * (message, exec) {
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode
     exec.params.color = exec.params.val[0]
   // logging.debug('exec for color search: ', JSON.stringify(exec))
-  }else {
+  } else {
     var results = yield getLatestAmazonResults(message)
     exec.params.productGroup = results[0].ItemAttributes[0].ProductGroup[0]
     exec.params.browseNodes = results[0].BrowseNodes[0].BrowseNode
@@ -812,7 +815,7 @@ handlers['shopping.modify.one'] = function * (message, exec) {
     })
   }
 
-  var results = yield amazon_search.search(exec.params, message.origin)
+  var results = yield amazon_search.search(exec.params, message.origin);
   return new db.Message({
     incoming: false,
     thread_id: message.thread_id,
@@ -836,16 +839,14 @@ handlers['cart.save'] = function * (message, exec) {
   var raw_results = (message.flags && message.flags.old_search) ? JSON.parse(message.amazon) : yield getLatestAmazonResults(message)
   logging.debug('raw_results: ', typeof raw_results, raw_results)
   var results = (typeof raw_results == 'array' || typeof raw_results == 'object') ? raw_results : JSON.parse(raw_results)
-
   var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team // TODO make this available for other platforms
   // Diverting team vs. personal cart based on source origin for now
   var cart_type = message.source.origin == 'slack' ? 'team' : 'personal'
-  logging.debug('INSIDE REPLY_LOGIC SAVE   :   ', exec.params.focus - 1)
+  // logging.debug('INSIDE REPLY_LOGIC SAVE   :   ', exec.params.focus - 1)
   try {
     yield kipcart.addToCart(cart_id, message.user_id, results[exec.params.focus - 1], cart_type)
-
     // view the cart
-    return yield handlers['cart.view'](message, exec)
+    return yield handlers['cart.view'](message, exec);
   } catch (e) {
     // this is the start of how you can manually select item
     if (_.get(message, 'origin') === 'facebook') {

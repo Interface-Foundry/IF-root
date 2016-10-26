@@ -19,7 +19,7 @@ module.exports.handle = handle;
  * Show the user all the settings they have access to
  */
 handlers['start'] = function * (message) {
-  kip.debug('\n\ninside settings.js handler view..\n\n', message)
+  // kip.debug('\n\ninside settings.js handler view..\n\n', message)
  
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
@@ -36,7 +36,6 @@ handlers['start'] = function * (message) {
   console.log('chatuser: ', chatuser, message.user);
   // kip.debug('\n\ninside settings.js handler view GOT correct team..', slackbot,'\n\n')
 
-
   var attachments = [];
 
   //adding settings mode sticker
@@ -52,9 +51,7 @@ handlers['start'] = function * (message) {
     // Last call alerts personal settings
     //
     if (chatuser && chatuser.settings.last_call_alerts) {
-      attachments.push({
-        text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'
-      })
+      attachments.push({ text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
     } else {
       attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
     }
@@ -127,6 +124,13 @@ handlers['start'] = function * (message) {
                 "style": "default",
                 "type": "button",
                 "value": "help"
+              },              
+              {
+                "name": "team",
+                "text": "Team",
+                "style": "default",
+                "type": "button",
+                "value": "team"
               },
               {
                 "name": "home",
@@ -158,6 +162,7 @@ handlers['start'] = function * (message) {
      msg.source.team = team_id;
      msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
      msg.client_res.push(attachments)
+     msg.reply = attachments;
      return [msg];
     // return [json]
 

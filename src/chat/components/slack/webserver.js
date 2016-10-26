@@ -13,6 +13,8 @@ var bodyParser = require('body-parser')
 var cart = require('./cart')
 var kipcart = require('../cart')
 var _ = require('lodash')
+var slackConnections = require('./slack').slackConnections
+
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded())
 app.use(bodyParser.json())
@@ -29,7 +31,7 @@ app.use(bodyParser.json())
 
  */
 function simple_action_handler (action) {
-  kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action, '\n\n\n')
+  // kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action, '\n\n\n')
   switch (action.name) {
     //
     // Search result buttons
@@ -46,7 +48,6 @@ function simple_action_handler (action) {
       return action.value
     case 'more':
       return 'more'
-
     //
       // Item info buttons
       //
@@ -54,8 +55,10 @@ function simple_action_handler (action) {
     //
     // Other buttons
     //
-    // case 'home':
-    //   return 'home'
+    case 'home':
+      return 'home';
+    case 'exit':
+      return 'exit';
     case 'delivery_btn':
       return 'delivery'
     case 'pickup_btn':
@@ -68,6 +71,7 @@ function simple_action_handler (action) {
 }
 
 function buttonCommand (action) {
+  // kip.debug('\n\n firing buttonCommand: ', action,' \n\n')
   if (_.includes(action.name, '.')) {
     return {
       mode: _.split(action.name, '.', 1)[0],
@@ -79,24 +83,25 @@ function buttonCommand (action) {
 
 // incoming slack action
 app.post('/slackaction', function (req, res) {
-  kip.debug('incoming action')
   if (req.body && req.body.payload) {
-    var message
-    var parsedIn = JSON.parse(req.body.payload)
-    var action = parsedIn.actions[0]
-    kip.debug(action.name.cyan, action.value.yellow)
+    var message;
+    var parsedIn = JSON.parse(req.body.payload);
+    var action = parsedIn.actions[0];
+    kip.debug('incoming action', action);
+    kip.debug(action.name.cyan, action.value.yellow);
     // // check the verification token in production
     // if (process.env.NODE_ENV === 'production' && parsedIn.token !== kip.config.slack.verification_token) {
     //   kip.error('Invalid verification token')
     //   return res.sendStatus(403)
     // }
-    var action = parsedIn.actions[0]
-    kip.debug(action.name.cyan, action.value.yellow)
+    var action = parsedIn.actions[0];
+    kip.debug(action.name.cyan, action.value.yellow);
     // for things that i'm just going to parse for
-    var simple_command = simple_action_handler(action)
-    var buttonData = buttonCommand(action)
+    var simple_command = simple_action_handler(action);
+    var buttonData = buttonCommand(action);
+    kip.debug('\n\n\nsimple_command: ', simple_command,'\n\n\n');
     if (simple_command) {
-      kip.debug('passing through button click as a regular text chat', simple_command.cyan)
+      kip.debug('passing through button click as a regular text chat', simple_command.cyan);
       var message = new db.Message({
         incoming: true,
         thread_id: parsedIn.channel.id,
@@ -106,23 +111,21 @@ app.post('/slackaction', function (req, res) {
         origin: 'slack',
         source: parsedIn
       })
+
       // inject source.team and source.user because fuck the fuck out of slack message formats
-      message.source.team = message.source.team.id
-      message.source.user = message.source.user.id
-      message.source.channel = message.source.channel.id
+      message.source.team = message.source.team.id;
+      message.source.user = message.source.user.id;
+      message.source.channel = message.source.channel.id;
       if (simple_command == 'address_confirm_btn') {
         message.mode = 'address'
         message.action = 'validate'
         var location
         try {
-          // kip.debug('\n\n\n\n\ninside webserver.js line 118', message.source, ' : ',message.source.original_message.attachments[0].actions[0].value, '\n\n\n\n\n')
           location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
         } catch(err) {
-          kip.debug('\n\n\nwebserver line 121: err: ', err,'\n\n\n')
           location = _.get(message, 'message.source.original_message.attachments[0].actions[0].value');
         }
         message.source.location = location
-        // message.source.location =
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })
@@ -130,7 +133,43 @@ app.post('/slackaction', function (req, res) {
       else if (simple_command.indexOf('address.') > -1) {
         message.mode = simple_command.split('.')[0]
         message.action = simple_command.split('.')[1]
-        kip.debug('\n\n\n\n webserver.js 100 : mode --> ', message.mode, ' action -->', message.action, '\n\n\n\n')
+      }
+      else if (simple_command == 'home') {
+        message.mode = 'home';
+        message.action = 'home';
+      }
+      else if (simple_command == 'exit') {
+        message.mode = 'exit';
+        message.action = 'exit';
+        var attachments = [
+            {
+              "pretext": "Ok thanks! Done with Cart Members. Type `collect` to send a cart closing message to all Cart Members 😊",
+              "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+              "text":"",
+              "mrkdwn_in": [
+                  "text",
+                  "pretext"
+              ],
+              "color":"#45a5f4"
+            },
+            {
+                "text": "Tell me what you're looking for, or use `help` for more options",
+                "mrkdwn_in": [
+                    "text",
+                    "pretext"
+                ],
+                "color":"#49d63a"
+            }
+         ];
+       var reply = {
+          username: 'Kip',
+          text: "",
+          attachments: attachments,
+          fallback: 'Shopping'
+        };
+        var team = message.source.team
+        var slackBot = slackConnections[team]
+        slackBot.web.chat.postMessage(message.source.channel, '', reply)
       }
 
       message.save().then(() => {
@@ -138,7 +177,7 @@ app.post('/slackaction', function (req, res) {
       })
     }
     else if (buttonData) {
-      message = new db.Message({
+      var message = new db.Message({
         incoming: true,
         thread_id: parsedIn.channel.id,
         action: buttonData.action,
@@ -155,7 +194,8 @@ app.post('/slackaction', function (req, res) {
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       })
-    }else {
+    } else {
+      //actions that do not require processing in reply_logic, skill all dat
       switch (action.name) {
         case 'additem':
           // adds the item to the cart the right way, but for speed we return a hacked message right away

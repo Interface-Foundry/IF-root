@@ -51,7 +51,7 @@ var search_results = require('./search_results')
 var focus = require('./focus')
 var cart = require('./cart')
 // var actions = require('./actions'); --> this runs an extra service not sure what for
-var slackConnections = {}
+module.exports.slackConnections = slackConnections = {}
 var webserver = require('./webserver')
 
 //
@@ -114,7 +114,7 @@ function * start () {
         origin: 'slack',
         source: data
       })
-      // kip.debug('\n\n\n\n\nYOLO : '.)
+
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
         kip.debug("don't talk to yourself: ")
@@ -160,10 +160,8 @@ kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   try {
-    // console.log(outgoing)
     var message = outgoing.data
     debugger
-    var team = typeof message.source.team === 'string' ? message.source.team : (_.get(message, 'source.team.id') ? _.get(message, 'source.team.id') : null)
     var team = _.get(message, 'source.team')
     var bot = slackConnections[team]
     if (typeof bot === 'undefined') {
@@ -183,7 +181,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
           outgoing.ack()
         })
       }
-      // console.log('outgoing message', message)
+      kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
         // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
@@ -198,7 +196,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
         msgData.attachments = yield search_results(message)
-        kip.debug('\n\nslack.js line 197: message.mode = shopping, message.action = results, msgData: ', msgData, '\n\n')
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
@@ -213,15 +210,16 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
 
       if (message.mode === 'home' && message.action === 'view') {
-        msgData.attachments = message.client_res[0]
-        kip.debug('\n\nslack.js line 212: message.mode = home, message.action = view, msgData: ', message, '\n\n')
+        msgData.attachments = message.reply
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      // bot.rtm.sendMessage(message.text, message.source.channel, () => {
-      //   outgoing.ack()
-      // })
+      if (message.mode === 'exit' && message.action === 'exit') {
+        msgData.attachments = message.reply
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+      }
 
+      // kip.debug('\n\n\nslack-233-what is message: ', message, 'outgoing is : ', outgoing, '\n\n\n');
       bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data)
       outgoing.ack()
     }).then(() => {
