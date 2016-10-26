@@ -92,55 +92,6 @@ var userFoodPreferencesPlaceHolder = {
 
 }
 
-/*
-* creates attachments to display to admin for merchant
-*
-*
-*/
-function chooseRestaurant (restaurants, orderBy) {
-  var attachments = restaurants.slice(0, 3).map(buildRestaurantAttachment)
-  var res = {
-    'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': attachments
-  }
-  res.attachments.push({
-    'mrkdwn_in': [
-      'text'
-    ],
-    'text': '',
-    'fallback': 'You are unable to choose a game',
-    'callback_id': 'food.admin.restaurant.pick',
-    'color': '#3AA3E3',
-    'attachment_type': 'default',
-    'actions': [
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'More Choices >',
-        'type': 'button',
-        'value': 'more'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Price',
-        'type': 'button',
-        'value': 'sort_price'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Rating',
-        'type': 'button',
-        'value': 'sort_rating'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Distance',
-        'type': 'button',
-        'value': 'sort_distance'
-      }
-    ]
-  })
-  return res
-}
 
 function * buildRestaurantAttachment (restaurant) {
 
@@ -168,7 +119,7 @@ function * buildRestaurantAttachment (restaurant) {
   var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
 
   var obj = {
-    'text': `<${shortenedRestaurantUrl}|${restaurant.summary.name}>`,
+    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*>`,
     'image_url': realImage,
     'color': '#3AA3E3',
     'callback_id': restaurant.id,
@@ -203,15 +154,17 @@ function * buildRestaurantAttachment (restaurant) {
 * @returns {} object that is ranked listing of places or whatever
 */
 function * createSearchRanking (foodSession) {
-  // filter results based on what results want
   var eligible = []
-  _.forEach(foodSession.votes, function (v) {
-    // get all merchants who satisfy cuisine type being v
-    eligible = _.union(eligible, _.filter(foodSession.merchants, function (c) {
-      return _.includes(c.summary.cuisines, v) && c.deliverable
-    }))
-  })
-  return eligible
+  var merchants = foodSession.merchants
+    .filter(m => m.deliverable) // filter based on eligible
+    .map(m => {
+      // compute the ranking score, which is just the intersection of votes and cuisines
+      m.score = foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length
+      return m
+    })
+    .sort((a, b) => a.score - b.score)
+
+  return merchants
 }
 
 function sortMerchantsByDistance (merchants) {
@@ -320,7 +273,7 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       // TODO: Handle if user inputs nonsense here
       kip.debug('User typed in an invalid response.')
     }
-  } 
+  }
   foodSession.votes.push(message.data.value)
   foodSession.markModified('votes')
   foodSession.save()
@@ -427,7 +380,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     foodSession.save()
   }
   var url = yield googl.shorten(merchant.summary.url.complete)
- 
+
   logging.data('using merchant for food service', merchant.id)
   foodSession.chosen_restaurant = {
     id: merchant.id,
@@ -439,7 +392,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
     url: `https://api.delivery.com/merchant/${merchant.id}/menu?client_id=brewhacks2016`,
     json: true
   })
-  
+
   foodSession.menu = menu
 
   foodSession.save()
