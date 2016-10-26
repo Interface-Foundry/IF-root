@@ -219,8 +219,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      // kip.debug('\n\n\nslack-233-what is message: ', message, 'outgoing is : ', outgoing, '\n\n\n');
-      bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data)
+      bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
+
       outgoing.ack()
     }).then(() => {
       outgoing.ack()

@@ -33,9 +33,10 @@ var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
-var onboarding = require('./modes/onboarding')
-var settings = require('./modes/settings')
-var shopping = require('./modes/shopping')
+var onboarding = require('./modes/onboarding');
+var settings = require('./modes/settings');
+var team = require('./modes/team');
+var shopping = require('./modes/shopping');
 // For container stuff, this file needs to be totally stateless.
 // all state should be in the db, not in any cache here.
 var winston = require('winston');
@@ -229,13 +230,12 @@ queue.topic('incoming').subscribe(incoming => {
         }
       break;
      case 'home':
-             kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
         // modes[user.id] = 'home';
         var replies = yield settings.handle(message);
         break;
      case 'team':
-        var replies = yield settings.handle(message);
-        kip.debug('\n\nreply_logic 231: switch case "home"', replies,'\n\n');
+        kip.debug('\n\nreply_logic 237: switch case "team"', replies,'\n\n');
+        var replies = yield team.handle(message);
         break;
       //default Kip Mode shopping
       default:
@@ -630,11 +630,9 @@ handlers['shopping.similar'] = function * (message, exec) {
     kip.debug(old_results)
     exec.params.asin = old_results[exec.params.focus - 1].ASIN[0]
   }
-  logging.debug('!2', exec)
 
   var results = yield amazon_search.similar(exec.params, message.origin)
   if (results == null || !results) {
-    logging.debug('-3')
 
     return new db.Message({
       incoming: false,

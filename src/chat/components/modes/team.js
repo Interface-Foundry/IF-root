@@ -1,5 +1,5 @@
-var message_tools = require('../message_tools')
-var handlers = module.exports = {}
+var message_tools = require('../message_tools');
+var handlers = module.exports = {};
 var _ = require('lodash');
 var validator = require('validator');
 

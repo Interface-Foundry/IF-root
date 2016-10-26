@@ -5,7 +5,6 @@ var _ = require('lodash');
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action')
   if (!last_action || last_action.indexOf('home') == -1) {
-    kip.debug('\n\ninside settings.js firing handle..\n\n')
     return yield handlers['start'](message)
   } else if (last_action === 'home.set_last_call') {
     return yield handlers['set_last_call'](message)
@@ -14,13 +13,10 @@ function * handle(message) {
 
 module.exports.handle = handle;
 
-
 /**
  * Show the user all the settings they have access to
  */
-handlers['start'] = function * (message) {
-  // kip.debug('\n\ninside settings.js handler view..\n\n', message)
- 
+handlers['start'] = function * (message) { 
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -123,11 +119,20 @@ handlers['start'] = function * (message) {
                 "text": "Help",
                 "style": "default",
                 "type": "button",
+
+
                 "value": "help"
               },              
               {
                 "name": "team",
-                "text": "Team",
+                "text": "Team Members",
+                "style": "default",
+                "type": "button",
+                "value": "team"
+              },
+              {
+                "name": "",
+                "text": "View Cart",
                 "style": "default",
                 "type": "button",
                 "value": "team"
@@ -165,7 +170,6 @@ handlers['start'] = function * (message) {
      msg.reply = attachments;
      return [msg];
     // return [json]
-
     // if(flag !== 'noAsk'){
     //   convo.ask({
     //     username: 'Kip',

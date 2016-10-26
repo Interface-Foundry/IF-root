@@ -75,11 +75,11 @@ function* results(message) {
       value: "home",
     },
     {
-      name: "home",
+      name: "team",
       text: "Team Members",
       style: "default",
       type: "button",
-      value: "team",
+      value: "view",
     }]
   })
 

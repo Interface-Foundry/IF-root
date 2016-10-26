@@ -33,9 +33,6 @@ app.use(bodyParser.json())
 function simple_action_handler (action) {
   // kip.debug('\nwebserver.js line 28 simple_action_handler action: ', action, '\n\n\n')
   switch (action.name) {
-    //
-    // Search result buttons
-    //
     case 'addcart':
       return 'save ' + action.value
     case 'cheaper':
@@ -49,12 +46,13 @@ function simple_action_handler (action) {
     case 'more':
       return 'more'
     //
-      // Item info buttons
-      //
-
+    // Item info buttons
+    //
     //
     // Other buttons
     //
+    case 'team':
+      return 'team';
     case 'home':
       return 'home';
     case 'exit':
@@ -71,7 +69,6 @@ function simple_action_handler (action) {
 }
 
 function buttonCommand (action) {
-  // kip.debug('\n\n firing buttonCommand: ', action,' \n\n')
   if (_.includes(action.name, '.')) {
     return {
       mode: _.split(action.name, '.', 1)[0],
@@ -138,7 +135,12 @@ app.post('/slackaction', function (req, res) {
         message.mode = 'home';
         message.action = 'home';
       }
+      else if (simple_command == 'team') {
+        message.mode = 'team';
+        message.action = 'home';
+      }
       else if (simple_command == 'exit') {
+
         message.mode = 'exit';
         message.action = 'exit';
         var attachments = [
@@ -161,20 +163,22 @@ app.post('/slackaction', function (req, res) {
                 "color":"#49d63a"
             }
          ];
-       var reply = {
+        var reply = {
           username: 'Kip',
           text: "",
           attachments: attachments,
           fallback: 'Shopping'
         };
-        var team = message.source.team
-        var slackBot = slackConnections[team]
-        slackBot.web.chat.postMessage(message.source.channel, '', reply)
+        var team = message.source.team;
+        var slackBot = slackConnections[team];
+        slackBot.web.chat.postMessage(message.source.channel, '', reply);
+        
       }
 
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-      })
+      });
+
     }
     else if (buttonData) {
       var message = new db.Message({
@@ -257,14 +261,14 @@ app.post('/slackaction', function (req, res) {
 
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
-          var index
-          var priceDifference = 0
-          var updatedMessage = parsedIn.original_message
+          var index;
+          var priceDifference = 0;
+          var updatedMessage = parsedIn.original_message;
           updatedMessage.attachments = updatedMessage.attachments.reduce((all, a, i) => {
-            if (a.callback_id === parsedIn.callback_id) {
+            if (a.callback_id === parsedIn.callback_id) {;
               var quantity = parseInt(a.text.match(/\d+$/)[0])
-              priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1))
-              index = i
+              priceDifference = quantity * parseFloat(a.text.match(/\$[\d.]+/)[0].substr(1));
+              index = i;
             } else if (a.text && a.text.indexOf('Team Cart Summary') >= 0) {
               a.text = a.text.replace(/\$[\d.]+/, function (total) {
                 return '$' + (parseFloat(total.substr(1)) - priceDifference).toFixed(2)
