@@ -495,20 +495,22 @@ handlers['food.admin.order.done'] = function * (message) {
       mastercard: `https://storage.googleapis.com/kip-random/mastercard.png`
     }
     var cardsAttachment = teamCards.map((card) => {
-      'title': `${card.card_type}`,
-      'text': `Ending in ${card.last_4}, exp ${card.exp_date}`,
-      'fallback': `You are unable to pick this card`,
-      'callback_id': `food.admin.order.select_card`,
-      'color': `#3AA3E3`,
-      'attachment_type': `default`,
-      'thumb_url': cardImages[card.card_type.toLowerCase()] || '',
-      'actions': [{
-        'name': `select_card`,
-        'text': `✓ Select Card`,
-        'type': `button`,
-        'style': `primary`,
-        'value': card.card_id
-      }]
+      return {
+        'title': `${card.card_type}`,
+        'text': `Ending in ${card.last_4}, exp ${card.exp_date}`,
+        'fallback': `You are unable to pick this card`,
+        'callback_id': `food.admin.order.select_card`,
+        'color': `#3AA3E3`,
+        'attachment_type': `default`,
+        'thumb_url': cardImages[card.card_type.toLowerCase()] || '',
+        'actions': [{
+          'name': `select_card`,
+          'text': `✓ Select Card`,
+          'type': `button`,
+          'style': `primary`,
+          'value': card.card_id
+        }]
+      }
     })
 
     cardsAttachment[0].pretext = "Payment Information"

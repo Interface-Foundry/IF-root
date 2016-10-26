@@ -4,7 +4,8 @@ var co = require('co')
 var fs = require('fs')
 var _ = require('lodash')
 var sm = require('slack-message-builder')
-var async = require('async')
+var googl = require('goo.gl')
+var request = require('request-promise')
 
 var weekly_updates = require('../weekly_updates.js')
 var api = require('./api-wrapper.js')
@@ -236,8 +237,62 @@ function * removeUserFromSession (team, user) {
   foodSession.save()
 }
 
+
+function * buildRestaurantAttachment (restaurant) {
+
+  // will need to use picstitch for placeholder image in future
+  // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+
+  try {
+    var realImage = yield request({
+        uri: kip.config.picstitchDelivery,
+        json: true,
+        body: {
+          origin: 'slack',
+          cuisines: restaurant.summary.cuisines,
+          location: restaurant.location,
+          ordering: restaurant.ordering,
+          summary: restaurant.summary,
+          url: restaurant.summary.merchant_logo
+        }
+      })
+  } catch (e) {
+    kip.err(e)
+    realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  }
+
+  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+
+  var obj = {
+    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*>`,
+    'image_url': realImage,
+    'color': '#3AA3E3',
+    'callback_id': restaurant.id,
+    'fallback': 'You are unable to choose a restaurant',
+    'attachment_type': 'default',
+    'actions': [
+      {
+        'name': 'food.admin.restaurant.confirm',
+        'text': '✓ Choose',
+        'type': 'button',
+        'style': 'primary',
+        'value': restaurant.id
+      },
+      // {
+      //   'name': 'food.admin.restaurant.more_info',
+      //   'text': 'More Info',
+      //   'type': 'button',
+      //   'value': restaurant.id
+      // }
+    ]
+  }
+  return obj
+}
+
+
 module.exports = {
   initiateFoodMessage: initiateFoodMessage,
   initiateDeliverySession: initiateDeliverySession,
   removeUserFromSession: removeUserFromSession,
+  buildRestaurantAttachment: buildRestaurantAttachment
 }
