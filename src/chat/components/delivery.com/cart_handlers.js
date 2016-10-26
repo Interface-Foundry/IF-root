@@ -62,7 +62,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     }
 
     if (i.item.item_qty === 1) {
-      quantityAttachment.actions[2].confirm = {
+      quantityAttachment.actions[0].confirm = {
         title: 'Remove Item',
         text: `Are you sure you want to remove "${item.name}" from your personal cart?`,
         ok_text: 'Remove it',
