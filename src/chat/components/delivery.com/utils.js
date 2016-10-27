@@ -17,7 +17,6 @@ var api = require('./api-wrapper.js')
 function * initiateDeliverySession (session) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
 
-
   if (foodSessions) {
     yield foodSessions.map((session) => {
       session.active = false
@@ -40,7 +39,8 @@ function * initiateDeliverySession (session) {
     confirmed_orders: [],
     convo_initiater: {
       id: admin.id,
-      name: admin.name
+      name: admin.name,
+      email: admin.profile.email
     }
   })
   // check if user has entered phone number before

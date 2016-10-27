@@ -35,7 +35,8 @@ var deliverySchema = mongoose.Schema({
   convo_initiater: {
     id: String,
     name: String,
-    phone_number: String
+    phone_number: String,
+    email: String
   },
 
   fulfillment_method: String,
