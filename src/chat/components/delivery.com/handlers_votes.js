@@ -89,9 +89,21 @@ var userFoodPreferencesPlaceHolder = {
         'type': 'button'
       }]
   }]
-
 }
 
+//
+// enum for sort orders
+//
+var SORT = {
+  bestMatch: 'best match',
+  price: 'price',
+  rating: 'rating',
+  distance: 'distance',
+  random: 'random',
+
+  descending: 'descending',
+  ascending: 'ascending'
+}
 
 /*
 * create ranking from searches given votes
@@ -102,16 +114,39 @@ var userFoodPreferencesPlaceHolder = {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function * createSearchRanking (foodSession) {
-  var eligible = []
-  var merchants = foodSession.merchants
-    .filter(m => m.deliverable) // filter based on eligible
+function * createSearchRanking (foodSession, sortOrder, direction) {
+  // Set a default sort order
+  sortOrder = sortOrder || SORT.bestMatch
+
+  // will multiply by -1 depending on ascending or decscending
+  var directionMultiplier = direction === SORT.ascending ? 1 : -1
+
+  //
+  // Different ways to compute the score for a merchant. Higher scores show up first.
+  //
+  var scoreAlgorithms = {
+    [SORT.bestMatch] : (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length || 0,
+    [SORT.distance] : (m) => _.get(m, 'location.distance', 10000),
+    [SORT.rating] : (m) => {
+      return _.get(m, 'summary.overall_rating', 0) },
+    [SORT.price] : (m) => _.get(m, 'summary.price_rating', 10),
+    [SORT.random] : (m) => Math.random()
+  }
+
+  // First filter out the ones that are not available for delivery or pickup
+  var merchants = foodSession.merchants.filter(m => {
+    if (foodSession.fulfillment_method === 'delivery') {
+      return m.deliverable
+    }
+  })
+
+  // now order the restaurants in terms of descending score
+  merchants = merchants
     .map(m => {
-      // compute the ranking score, which is just the intersection of votes and cuisines
-      m.score = foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length
+      m.score = scoreAlgorithms[sortOrder](m)
       return m
     })
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => directionMultiplier * (a.score - b.score))
 
   return merchants
 }
@@ -245,23 +280,64 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   }
 }
 
+
+
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
+  var index = _.get(message, 'data.value.index', 0)
+  var sort = _.get(message, 'data.value.sort', SORT.bestMatch)
+  var direction = _.get(message, 'data.value.direction', SORT.descending)
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
-  var viableRestaurants = yield createSearchRanking(foodSession)
+  var viableRestaurants = yield createSearchRanking(foodSession, sort, direction)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
-
   var responseForAdmin = {
     'text': 'Here are 3 restaurant suggestions based on your team vote. \n Which do you want today?',
-    'attachments': yield viableRestaurants.slice(0, 3).map(utils.buildRestaurantAttachment)
+    'attachments': yield viableRestaurants.slice(index, index+3).map(utils.buildRestaurantAttachment)
   }
 
+  var moreButton = {
+    'name': 'food.admin.restaurant.pick.list',
+    'text': 'More Choices >',
+    'type': 'button',
+    'value': {index: index + 3, sort: sort, direction: direction}
+  }
 
+  var backButton = {
+    'name': 'food.admin.restaurant.pick.list',
+    'text': '<',
+    'type': 'button',
+    'value': {index: index - 3, sort: sort, direction: direction}
+  }
 
-  logging.data('responseForAdmin', responseForAdmin)
-  responseForAdmin.attachments.push({
+  var arrow = direction === SORT.descending ? '▾ ' : '▴ '
+
+  // default price sort direction is ascending
+  var sortPriceButton = {
+    'name': 'food.admin.restaurant.pick.list',
+    'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
+    'type': 'button',
+    'value': {index: 0, sort: SORT.price, direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
+  }
+
+  // default rating sort direction is descending
+  var sortRatingButton = {
+    'name': 'food.admin.restaurant.pick.list',
+    'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
+    'type': 'button',
+    'value': {index: 0, sort: SORT.rating, direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending }
+  }
+
+  // default distance sort direction is ascending
+  var sortDistanceButton = {
+    'name': 'food.admin.restaurant.pick.list',
+    'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
+    'type': 'button',
+    'value': {index: 0, sort: SORT.distance, direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
+  }
+
+  var buttons = {
     'mrkdwn_in': [
       'text'
     ],
@@ -270,33 +346,20 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'callback_id': 'food.admin.restaurant.pick',
     'color': '#3AA3E3',
     'attachment_type': 'default',
-    'actions': [
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'More Choices >',
-        'type': 'button',
-        'value': 'more'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Price',
-        'type': 'button',
-        'value': 'sort_price'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Rating',
-        'type': 'button',
-        'value': 'sort_rating'
-      },
-      {
-        'name': 'food.admin.restaurant.pick',
-        'text': 'Sort Distance',
-        'type': 'button',
-        'value': 'sort_distance'
-      }
-    ]
-  })
+    'actions': []
+  }
+
+  if (index > 0) {
+    buttons.actions.push(backButton)
+  }
+
+  if (index + 3 < viableRestaurants.length) {
+    buttons.actions.push(moreButton)
+  }
+
+  buttons.actions = buttons.actions.concat([sortPriceButton, sortRatingButton, sortDistanceButton])
+
+  responseForAdmin.attachments.push(buttons)
 
   var resp = {
     mode: 'food',
