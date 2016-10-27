@@ -448,7 +448,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     // but them modify it with some text to indicate you've ordered here before
     var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
     var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
-    listing.text = `You ordered \`Delivery\` from \`${mostRecentMerchant.summary.name}\` recently, order again?`
+    listing.text = `You ordered \`Delivery\` from ${listing.text} recently, order again?`
     listing.mrkdwn_in = ['text']
     attachments.push(listing)
   }
