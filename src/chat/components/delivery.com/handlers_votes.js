@@ -412,49 +412,12 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
 
   foodSession.save()
 
-  var response = {
-    mode: 'food',
-    action: 'admin.restaurant.collect_orders',
-    thread_id: message.dm,
-    origin: message.origin,
-    source: message.source,
-    data: {
-      'text': `Okay I'll collect orders for <${foodSession.chosen_restaurant.url}|${foodSession.chosen_restaurant.name}>`,
-      'attachments': [{
-        'fallback': 'You are unable to confirm',
-        'callback_id': 'confirmRestaurant',
-        'color': '#3AA3E3',
-        'actions': [
-          {
-            'name': 'food.admin.restaurant.collect_orders',
-            'text': 'Confirm',
-            'style': 'primary',
-            'type': 'button',
-            'value': 'confirm'
-          },
-          // {
-          //   'name': 'food.admin.view_team_members',
-          //   'text': 'View Team Members',
-          //   'type': 'button',
-          //   'value': 'view_team_members'
-          // },
-          {
-            'name': 'food.admin.restaurant.pick.list',
-            'text': '< Change Restaurant',
-            'type': 'button',
-            'value': 'change_restaurant'
-          }
-        ]
-      }
-      ]
-    }
-  }
+  return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
 
-  $replyChannel.send(response, 'food.admin.restaurant.collect_orders', {type: 'slack', data: response.data})
 }
 
-handlers['food.admin.restaurant.collect_orders'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
+  foodSession = typeof foodSession !== 'undefined' ? foodSession : yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var waitTime = _.get(foodSession, 'chosen_restaurant_full.ordering.availability.delivery_estimate', '45')
   var cuisines = _.get(foodSession, 'chosen_restaurant_full.summary.cuisines', []).join(', ')
   var msgJson = {
