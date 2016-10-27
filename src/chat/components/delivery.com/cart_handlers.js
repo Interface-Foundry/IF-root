@@ -399,7 +399,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': [`text`],
         'text': `*Address:*\n` +
-                `${foodSession.chosen_location.addr.address_1}`,
+                `${foodSession.chosen_location.address_1}`,
         'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -417,7 +417,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Apt/Floor#:*\n` +
-                `${foodSession.chosen_location.addr.address_2}`,
+                `${foodSession.chosen_location.address_2}`,
         'fallback': `You are unable to confirm this order`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': '#3AA3E3',
@@ -457,7 +457,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 
         ],
         'text': `*Delivery Instructions:*\n` +
-                `${foodSession.data.instructions}`,
+                `${foodSession.instructions}`,
         'fallback': `You are unable to edit instructions`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#49d63a`,
