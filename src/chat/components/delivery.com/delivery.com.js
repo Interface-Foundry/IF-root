@@ -185,6 +185,11 @@ handlers['food.exit'] = function * (message) {
 
 handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
+  // make sure to remove this user from the food session if they are in it
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
+  foodSession.markModified('team_members')
+  foodSession.save()
 }
 
 //
