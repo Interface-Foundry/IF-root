@@ -24,7 +24,7 @@ function * initiateDeliverySession (session) {
     })
   }
 
-  var teamMembers = yield db.Chatusers.findOne({
+  var teamMembers = yield db.Chatusers.find({
     team_id: session.source.team,
     is_bot: {$ne: true},
     deleted: {$ne: true},
