@@ -599,33 +599,41 @@ handlers['food.admin.add_new_card'] = function * (message) {
 handlers['food.admin.order.select_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-  var cardID = message.
-  foodSession.payment = yield request({
-  uri: `https://pay.kipthis.com/charge`,
-  method: `POST`,
-  json: true,
-  body: {
-    '_id': foodSession._id,
-    'active': foodSession.active,
-    'team_id': foodSession.team_id,
-    'chosen_location': foodSession.chosen_location,
-    'chosen_location.addr': foodSession.chosen_location,
-    'chosen_restaurant': foodSession.chosen_restaurant,
-    'time_started': foodSession.time_started,
-    'convo_initiater': foodSession.convo_initiater,
-    'guest_token': foodSession.guest_token,
-    'order': foodSession.order,
-    // stuff not directly from foodSession to make it easier for alyx
-    'amount': foodSession.order.total,
-    'kipId': foodSession.team_id,
-    'description': `${foodSession.chosen_restaurant.id}`,
-    'email': `${foodSession.convo_initiater.email}`,
 
+  // not entirely sure if this will select the right card
+  var card = _.find(slackbot.meta.payments, {
+    'card': {'card_id': message.source.actions[0].value}
+  })
+
+  foodSession.payment = yield request({
+    uri: `https://pay.kipthis.com/charge`,
+    method: `POST`,
+    json: true,
+    body: {
+      '_id': foodSession._id,
+      'active': foodSession.active,
+      'team_id': foodSession.team_id,
+      'chosen_location': foodSession.chosen_location,
+      'chosen_location.addr': foodSession.chosen_location,
+      'chosen_restaurant': foodSession.chosen_restaurant,
+      'time_started': foodSession.time_started,
+      'convo_initiater': foodSession.convo_initiater,
+      'guest_token': foodSession.guest_token,
+      'order': foodSession.order,
+      // stuff not directly from foodSession to make it easier for alyx
+      'amount': foodSession.order.total,
+      'kipId': foodSession.team_id,
+      'description': `${foodSession.chosen_restaurant.id}`,
+      'email': `${foodSession.convo_initiater.email}`,
+      'saved_card': {
+        'vendor': card.vendor,
+        'customer_id': card.customer_id,
+        'card_id': card.card.card_id
+      }
     }
   })
-foodSession.save()
+  foodSession.save()
 }
-
 
   // }
   // try {
