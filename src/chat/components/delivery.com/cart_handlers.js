@@ -167,7 +167,20 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.markModified('confirmed_orders')
-  $replyChannel.sendReplace(message, '.', {type: 'slack', data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+
+  // tell admin who is still left to order
+  if (message.source.user === foodSession.convo_initiater.id) {
+    // lmfao, make string of users whove voted
+    var votedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
+      var theirName = _.filter(foodSession.team_members, {id: user})[0].name
+      return all + ', ' + theirName
+    }, '').slice(2)
+
+    $replyChannel.sendReplace(message, '.', {type: 'slack', data: {text: `Thanks for your order, these users have submitted orders so far: ${votedUsersString}, waiting for the rest`}})
+  } else {
+    $replyChannel.sendReplace(message, '.', {type: 'slack', data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+  }
+
   if (foodSession.confirmed_orders.length < foodSession.team_members.length) {
     logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
     foodSession.save()
@@ -471,7 +484,6 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
 
 handlers['food.admin.order.done'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var adminsEmail = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).select('profile.email').exec()
 
   try {
     var payments_response = yield request({
@@ -492,7 +504,7 @@ handlers['food.admin.order.done'] = function * (message) {
         'amount': foodSession.order.total,
         'kipId': foodSession.team_id,
         'description': `${foodSession.chosen_restaurant.id}`,
-        'email': `${adminsEmail}`
+        'email': `${foodSession.convo_initiater.email}`
       }
     })
   } catch (e) {
