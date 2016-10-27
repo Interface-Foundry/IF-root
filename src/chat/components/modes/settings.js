@@ -1,6 +1,9 @@
 var message_tools = require('../message_tools')
 var handlers = module.exports = {}
 var _ = require('lodash');
+var co = require('co');
+var utils = require('../slack/utils');
+// var async_co = require('async-co');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action')
@@ -21,75 +24,64 @@ handlers['start'] = function * (message) {
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var slackbots = yield db.Slackbots.find({
-    'team_id': team_id
-  }).exec();
-  var slackbot = slackbots[0];
-  console.log('slackbot: ', slackbot);
-
-  var isAdmin = slackbot.meta.office_assistants.indexOf(message.user) >= 0;
-  var chatuser = yield db.Chatusers.findOne({id: message.user});
-  console.log('chatuser: ', chatuser, message.user);
-  // kip.debug('\n\ninside settings.js handler view GOT correct team..', slackbot,'\n\n')
-
+  var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
+  var members = yield yield utils.getTeamMembers(team);
+  console.log('\n\n\nmembers: ', members,'\n\n\n');
+  var isAdmin = team.meta.office_assistants.indexOf(message.user) >= 0;
+  var user = yield db.Chatusers.findOne({id: message.user});
+  console.log('current user: ', user);
   var attachments = [];
-
   //adding settings mode sticker
   attachments.push({
     image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
     text: ''
   })
+  //
+  // Last call alerts personal settings
+  //
+  if (user && user.settings.last_call_alerts) {
+    attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
+  } else {
+    attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
+  }
+  //
+  // Admins
+  //
+  var office_admins = team.meta.office_assistants.map(function(user_id) {
+    return '<@' + user_id + '>';
+  })
+  if (office_admins.length > 1) {
+    var last = office_admins.pop();
+    office_admins[office_admins.length-1] += ' and ' + last;
+  }
+  console.log(office_admins);
 
-    //
-    //http://i.imgur.com/wxoZYmI.png
+  if(office_admins.length < 1){
+    var adminText = 'I\'m not managed by anyone right now.';
+  }else {
+    // var admins = office_admins.map( function * (s) { return yield db.Chatusers.findOne({ '' }) } )
+    var adminText = 'I\'m managed by ' + office_admins.join(', ') + '.';
+  }
 
-    //
-    // Last call alerts personal settings
-    //
-    if (chatuser && chatuser.settings.last_call_alerts) {
-      attachments.push({ text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
-    } else {
-      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
-    }
-
-    //
-    // Admins
-    //
-    var office_admins = slackbot.meta.office_assistants.map(function(user_id) {
-      return '<@' + user_id + '>';
-    })
-    if (office_admins.length > 1) {
-      var last = office_admins.pop();
-      office_admins[office_admins.length-1] += ' and ' + last;
-    }
-    console.log(office_admins);
-
-    //no gremlins found! p2p mode
-    if(office_admins.length < 1){
-      var adminText = 'I\'m not managed by anyone right now.';
-    }else {
-      var adminText = 'I\'m managed by ' + office_admins.join(', ') + '.';
-    }
-
-    if (isAdmin) {
-      adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
-    }else if (slackbot.meta.office_assistants.length < 1){
-      adminText += '  You can *add admins* with `add @user`.'
-    }
-    attachments.push({text: adminText})
+  if (isAdmin) {
+    adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
+  } else if (team.meta.office_assistants.length < 1) {
+    adminText += '  You can *add admins* with `add @user`.'
+  }
+  attachments.push({text: adminText})
 
     //
     // Admin-only settings
     //
     if (isAdmin) {
-      if (slackbot.meta.weekly_status_enabled) {
+      if (team.meta.weekly_status_enabled) {
         // TODO convert time to the correct timezone for this user.
         // 1. Date.parse() returns something in eastern, not the job's timezone
         // 2. momenttz.tz('2016-04-01 HH:mm', meta.weekly_status_timezone) is the correct date for the job
         // 3. .tz(chatuser.tz) will convert the above to the user's timezone. whew
-        var date = Date.parse(slackbot.meta.weekly_status_day + ' ' + slackbot.meta.weekly_status_time);
+        var date = Date.parse(team.meta.weekly_status_day + ' ' + team.meta.weekly_status_time);
         var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
-        var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), slackbot.meta.weekly_status_timezone);
+        var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), team.meta.weekly_status_timezone);
         // var job_time_user_tz = job_time_bot_tz.tz(chatuser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())

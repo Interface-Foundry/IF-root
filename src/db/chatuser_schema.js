@@ -9,6 +9,7 @@ var chatuserSchema = mongoose.Schema({
     unique: true,
     index: true
   },
+  platform: String,
   persona: {
     sessions: [String],
     items: [String]

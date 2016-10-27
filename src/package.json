@@ -29,6 +29,7 @@
     "WNdb": "^3.1.1",
     "accounting": "^0.4.1",
     "async": "^2.0.0-rc.6",
+    "async-co": "^1.4.0",
     "aws-sdk": "^2.3.12",
     "body-parser": "^1.15.2",
     "botbuilder": "^3.2.3",

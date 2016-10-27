@@ -22,59 +22,38 @@ module.exports.handle = handle;
  */
 handlers['start'] = function * (message) {
   kip.debug('\n\ninside team.js handler view..\n\n', message)
- 
-   if (!slackbot.meta.cart_channels){
-      slackbot.meta.cart_channels = [];
-    }
-
-    var cartChannels = slackbot.meta.cart_channels;
-
-    //get email users on team
-    // var emailUsers = yield Chatuser.find({
-    //   'team_id': convo.slackbot.team_id,
-    //   'type': 'email',
-    //   'settings.emailNotification': true
-    // }).exec();
-
-
-
- //old shiet
-  var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
+  var team_id = message.source.team;
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
-  var slackbots = yield db.Slackbots.find({
+  var slackbot = yield db.Slackbots.findOne({
     'team_id': team_id
   }).exec();
-  var slackbot = slackbots[0];
+
+  if (!slackbot.meta.cart_channels){
+      slackbot.meta.cart_channels = [];
+  }
+  var cartChannels = slackbot.meta.cart_channels;
   console.log('slackbot: ', slackbot);
-
   var isAdmin = slackbot.meta.office_assistants.indexOf(message.user) >= 0;
-
-  // kip.debug('\n\ninside settings.js handler view GOT correct team..', slackbot,'\n\n')
-
-
+  kip.debug('\n\ninside team.js handler view GOT correct team..', slackbot,'\n\n')
   var attachments = [];
-
   //adding settings mode sticker
   attachments.push({
     image_url: 'http://kipthis.com/kip_modes/mode_settings.png',
     text: ''
   })
-
-    //
-    //http://i.imgur.com/wxoZYmI.png
-
-    //
-    // Last call alerts personal settings
-    //
-    if (chatuser && chatuser.settings.last_call_alerts) {
-      attachments.push({
-        text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'
-      })
-    } else {
-      attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
-    }
+  var chatuser = yield db.Chatusers.findOne({id: message.user});
+  //
+  // Last call alerts personal settings
+  //
+  if (chatuser && chatuser.settings.last_call_alerts) {
+    attachments.push({
+      text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'
+    })
+  } else {
+    attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
+  }
 
     //
     // Admins
@@ -88,7 +67,7 @@ handlers['start'] = function * (message) {
     }
     console.log(office_admins);
 
-    //no gremlins found! p2p mode
+    //no admin found! p2p mode
     if(office_admins.length < 1){
       var adminText = 'I\'m not managed by anyone right now.';
     }else {
