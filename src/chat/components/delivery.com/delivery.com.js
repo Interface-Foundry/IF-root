@@ -62,7 +62,6 @@ queue.topic('incoming').subscribe(incoming => {
     }).sort('-ts').limit(20)
 
     var session = history[0]
-    debugger;
     if (_.get(session, 'state') && _.get(history[1], 'state')) {
       session.state = history[1].state
     }
@@ -210,6 +209,7 @@ handlers['food.begin'] = function * (session) {
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   team_utils.getChatUsers(session)
   session.state = {}
+  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
   var foodSession = yield utils.initiateDeliverySession(session)
   yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
@@ -278,19 +278,19 @@ handlers['food.choose_address'] = function * (session) {
           'attachment_type': 'default',
           'actions': [
             {
-              'name': 'passthrough',
+              'name': 'food.delivery_or_pickup',
               'text': 'Delivery',
               'type': 'button',
-              'value': 'food.delivery_or_pickup'
+              'value': 'delivery'
             },
             {
-              'name': 'passthrough',
+              'name': 'food.delivery_or_pickup',
               'text': 'Pickup',
               'type': 'button',
-              'value': 'food.delivery_or_pickup'
+              'value': 'pickup'
             },
             {
-              'name': 'passthrough',
+              'name': 'address.change',
               'text': '< Change Address',
               'type': 'button',
               'value': 'address.change'
@@ -414,7 +414,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     yield sleep(500)
     foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   }
-  var fulfillmentMethod = session.text
+  var fulfillmentMethod = session.data.value
   foodSession.fulfillment_method = fulfillmentMethod
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
 
