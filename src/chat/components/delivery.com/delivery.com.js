@@ -204,7 +204,7 @@ handlers['food.begin'] = function * (session) {
     ]
   }
   replyChannel.send(session, 'food.banner', {type: session.origin, data: msg_json})
-  yield sleep(500)
+  yield sleep(1000)
 
   // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   team_utils.getChatUsers(session)
