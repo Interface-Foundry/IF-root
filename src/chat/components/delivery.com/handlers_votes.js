@@ -57,7 +57,6 @@ function askUserForCuisineTypes (cuisines, admin, user) {
     color: '#3AA3E3',
     attachment_type: 'default',
     attachments: [{
-      'title': 'Delivery Contact',
       'text': 'Type what you want or tap a button',
       'fallback': 'You are unable to tap a button',
       'callback_id': 'food.user.poll',
