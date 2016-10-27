@@ -6,24 +6,55 @@ var kip = require('kip');
 var async = require('async');
 var eachSeries = require('async-co/eachSeries');
 
-function * findAdmin(team) {
-  var admin = yield db.Chatusers.findOne({team_id: team.team_id, is_admin: true}).exec();
-  return admin
+/*
+*
+* Team Member Management 
+*
+*/
+
+/*
+* returns admins of a team or false if there are none. will appropriately update chatusers based on latest slackbot.meta.office_assistants field
+* @param {Object} slackbot object
+* @returns {array} returns chatuser admin objects
+*                   
+*/
+function * findAdmins(team) {
+  var admins = [];
+  var adminIds = team.meta.office_assistants;
+  var members = yield db.Chatusers.find({team_id: team.team_id}).exec();
+  return co(function * (){
+    yield eachSeries(members, function * (user) {
+      if ( adminIds.indexOf(user.id) > -1) {
+        admins.push(user);
+        if (!user.is_admin ) {
+           user.is_admin = true;
+           yield user.save();
+        }
+      }
+      else if ( adminIds.indexOf(user.id) == -1 && user.is_admin ) {
+        user.is_admin = false;
+        yield user.save();
+      } 
+    });
+  }).then( function() { return members });
+  if (admins != null) {
+    return admins  
+  } else {
+    return false
+  }
 }
 
 /*
-* returns only active members of a team given a slackbot object, creates chat user objects if they do not exist
-* @param {Object} team
-* @returns {array} returns chatuser objects belonging to a slack team
+* returns only active members of a team given a slackbot object, creates chatuser objects if they do not exist in db
+* @param {Object} slackbot object
+* @returns {array} returns chatuser objects 
 *                   
 */
 function * getTeamMembers(team) {
     var members = [];
     var teamMembers = yield db.Chatusers.find({team_id: team.team_id, is_bot: false}).exec();
-    // api returns json with dm 
-    var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token);
-    // api returns json with profile info
-    var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token);
+    var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token); // has direct message id
+    var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // has all the profile info such as name, email, etc
     res_dm = JSON.parse(res_dm);
     res_prof = JSON.parse(res_prof);
     var teamIds = teamMembers.map(function(u){
@@ -52,8 +83,12 @@ function * getTeamMembers(team) {
     }).then( function() { return members });
 }
 
-// -- old stuff -- //
 
+/*
+*
+* Cart Channel Management
+*
+*/
 function * removeCartChannel(message, channel_name) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var channels = yield request({url: 'https://slack.com/api/channels.list?token=' + team.bot.bot_access_token, json: true});
@@ -97,7 +132,7 @@ function * addCartChannel(message, channel_name) {
 
 
 module.exports = {
-  findAdmin: findAdmin,
+  findAdmins: findAdmins,
   getTeamMembers: getTeamMembers,
   addCartChannel: addCartChannel,
   removeCartChannel: removeCartChannel

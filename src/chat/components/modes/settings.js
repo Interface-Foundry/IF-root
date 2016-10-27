@@ -3,7 +3,7 @@ var handlers = module.exports = {}
 var _ = require('lodash');
 var co = require('co');
 var utils = require('../slack/utils');
-// var async_co = require('async-co');
+var momenttz = require('moment-timezone');
 
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action')
@@ -27,9 +27,15 @@ handlers['start'] = function * (message) {
   var team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
   var members = yield yield utils.getTeamMembers(team);
   console.log('\n\n\nmembers: ', members,'\n\n\n');
-  var isAdmin = team.meta.office_assistants.indexOf(message.user) >= 0;
-  var user = yield db.Chatusers.findOne({id: message.user});
-  console.log('current user: ', user);
+  var admins = yield utils.findAdmins(team);
+  kip.debug('\n\n\n admins : ', admins,' \n\n\n');
+  var currentUser = yield db.Chatusers.findOne({id: message.source.user});
+  console.log('current user: ', currentUser, message);
+  var isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
+  kip.debug('\n\n\n isAdmin : ', isAdmin,' \n\n\n');
+
+
+
   var attachments = [];
   //adding settings mode sticker
   attachments.push({
@@ -39,7 +45,7 @@ handlers['start'] = function * (message) {
   //
   // Last call alerts personal settings
   //
-  if (user && user.settings.last_call_alerts) {
+  if (currentUser && currentUser.settings.last_call_alerts) {
     attachments.push({text: 'You are *receiving last-call alerts* for company orders.  Say `no last call` to stop this.'})
   } else {
     attachments.push({text: 'You are *not receiving last-call alerts* before the company order closes. Say `yes last call` to receive them.'})
@@ -47,23 +53,22 @@ handlers['start'] = function * (message) {
   //
   // Admins
   //
-  var office_admins = team.meta.office_assistants.map(function(user_id) {
+  var adminNames = team.meta.office_assistants.map(function(user_id) {
     return '<@' + user_id + '>';
   })
-  if (office_admins.length > 1) {
-    var last = office_admins.pop();
-    office_admins[office_admins.length-1] += ' and ' + last;
+  if (adminNames.length > 1) {
+    var last = adminNames.pop();
+    adminNames[adminNames.length-1] += ' and ' + last;
   }
-  console.log(office_admins);
 
-  if(office_admins.length < 1){
+  if(adminNames.length < 1){
     var adminText = 'I\'m not managed by anyone right now.';
   }else {
     // var admins = office_admins.map( function * (s) { return yield db.Chatusers.findOne({ '' }) } )
-    var adminText = 'I\'m managed by ' + office_admins.join(', ') + '.';
+    var adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
   }
 
-  if (isAdmin) {
+  if (admins) {
     adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
   } else if (team.meta.office_assistants.length < 1) {
     adminText += '  You can *add admins* with `add @user`.'
@@ -73,7 +78,7 @@ handlers['start'] = function * (message) {
     //
     // Admin-only settings
     //
-    if (isAdmin) {
+    if (admins) {
       if (team.meta.weekly_status_enabled) {
         // TODO convert time to the correct timezone for this user.
         // 1. Date.parse() returns something in eastern, not the job's timezone
@@ -82,7 +87,7 @@ handlers['start'] = function * (message) {
         var date = Date.parse(team.meta.weekly_status_day + ' ' + team.meta.weekly_status_time);
         var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
         var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), team.meta.weekly_status_timezone);
-        // var job_time_user_tz = job_time_bot_tz.tz(chatuser.tz);
+        var job_time_user_tz = job_time_bot_tz.tz(currentUser.tz);
         console.log('job time in bot timezone', job_time_bot_tz.format())
         console.log('job time in user timzone', job_time_user_tz.format())
         attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + '*'
