@@ -1,6 +1,7 @@
 'use strict'
 var _ = require('lodash')
 var Menu = require('./Menu')
+var Cart = require('./Cart')
 
 // injected dependencies
 var $replyChannel
@@ -14,15 +15,15 @@ handlers['food.menu.quick_picks'] = function * (message) {
   var user = yield db.Chatusers.findOne({id: message.user_id, is_bot: false}).exec()
   var previouslyOrderedItemIds = []
   var recommendedItemIds = []
-  
+
   // paging
   var index = parseInt(_.get(message, 'data.value')) || 0
 
 
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
-    .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))    
+    .filter(order => _.get(order, 'chosen_restaurant.id') === _.get(foodSession, 'chosen_restaurant.id', 'not undefined'))
     .reduce((allIds, order) => {
-      allIds.push(order.deliveryItem.unique_id)      
+      allIds.push(order.deliveryItem.unique_id)
       return allIds
     }, [])
 
@@ -30,7 +31,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
 
   //
   // adding the thing where you show 3 at a time
-  // nned to show a few different kinds of itesm. 
+  // nned to show a few different kinds of itesm.
   // Items that you have ordered before appear first, and should say something like "Last ordered Oct 5"
   // Items that are in the recommended items array should appear next, say "Recommended"
   // THen the rest of the menu in any order i think
@@ -107,51 +108,32 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }])
   }
 
-  $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
 }
 
 //
 // After a user clicks on a menu item, this shows the options, like beef or tofu
 //
 handlers['food.item.submenu'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var item = menu.getItemById(message.source.actions[0].value)
-
-  // check to see if they already have one of these items "in progress"
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
-  debugger
-
-  if (!userItem) {
-    userItem = {
-      user_id: message.user_id,
-      added_to_cart: false,
-      item: {
-        item_id: item.unique_id,
-        item_qty: 1,
-        option_qty: {}
-      }
-    }
-
-    foodSession.cart.push(userItem)
-    foodSession.markModified('cart')
-    foodSession.save()
-  }
-
-  var json = menu.generateJsonForItem(userItem)
-  $replyChannel.send(message, 'food.menu.submenu', {type: 'slack', data: json})
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  var json = cart.menu.generateJsonForItem(userItem)
+  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 //
 // This handles actions
 //
 handlers['food.option.click'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var option = message.source.actions[0].value
-  var optionNode = menu.getItemById(option)
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var option_id = message.data.value.option_id
+  var item_id = message.data.value.item_id
+  var userItem = yield cart.getItemInProgress(item_id, message.source.user)
+  var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
+  debugger;
 
   var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
   var optionGroup = menu.getItemById(optionGroupId)
@@ -182,10 +164,11 @@ handlers['food.item.quantity.add'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var menu = Menu(foodSession.menu)
   var itemId = message.source.actions[0].value
-  debugger
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart && i.item.item_id === itemId)[0]
   userItem.item.item_qty++
   foodSession.markModified('cart')
+
+  debugger;
   foodSession.save()
   var json = menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
@@ -201,6 +184,7 @@ handlers['food.item.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     return
   }
+  debugger;
   userItem.item.item_qty--
   foodSession.markModified('cart')
   foodSession.save()
@@ -214,9 +198,16 @@ handlers['food.item.add_to_cart'] = function * (message) {
   var option = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
 
-  userItem.added_to_cart = true
-  foodSession.markModified('cart')
+  debugger;
+
+  if (!userItem) {
+    kip.error('trying to add item to cart that may already be added to cart')
+  } else {
+    userItem.added_to_cart = true
+    foodSession.markModified('cart')
+  }
   yield foodSession.save()
+
 
   // check for errors
   // if errors, highlight errors
