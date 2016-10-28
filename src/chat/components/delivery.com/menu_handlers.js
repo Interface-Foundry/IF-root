@@ -136,7 +136,7 @@ handlers['food.option.click'] = function * (message) {
   debugger;
 
   var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
-  var optionGroup = menu.getItemById(optionGroupId)
+  var optionGroup = cart.menu.getItemById(optionGroupId)
 
   // Radio buttons, can only toggle one at a time
   // so delete any other selected radio before the next step will select it
@@ -146,16 +146,17 @@ handlers['food.option.click'] = function * (message) {
     })
   }
 
-  // toggle behavior
-  if (userItem.item.option_qty[option]) {
-    delete userItem.item.option_qty[option]
+  // toggle behavior for checkboxes and radio
+  if (userItem.item.option_qty[option_id]) {
+    delete userItem.item.option_qty[option_id]
   } else {
-    userItem.item.option_qty[option] = 1
+    userItem.item.option_qty[option_id] = 1
   }
-  foodSession.markModified('cart')
-  foodSession.save()
 
-  var json = menu.generateJsonForItem(userItem)
+  // save the changes to the subdocument in mongodb
+  db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.item.option_qty': userItem.item.option_qty}}).exec()
+
+  var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
