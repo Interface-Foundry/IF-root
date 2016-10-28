@@ -115,8 +115,7 @@ handlers['food.cart.personal.quantity.add'] = function * (message) {
   var index = message.source.actions[0].value
   var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)[index]
   userItem.item.item_qty++
-  foodSession.markModified('cart')
-  yield foodSession.save()
+  yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
   yield handlers['food.cart.personal'](message, true)
 }
 
@@ -130,11 +129,12 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
+    yield db.Delivery.update({_id: cart.foodSession._id}, {$pull: { cart: {_id: userItem._id }}}).exec()
   } else {
     userItem.item.item_qty--
+    yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
   }
-  foodSession.markModified('cart')
-  yield foodSession.save()
+
   yield handlers['food.cart.personal'](message, true)
 }
 
