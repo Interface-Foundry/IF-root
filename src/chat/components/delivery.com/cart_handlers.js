@@ -399,7 +399,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': [`text`],
         'text': `*Address:*\n` +
-                `${foodSession.chosen_location.address_1}`,
+                `${foodSession.chosen_location.addr.address_1}`,
         'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -417,7 +417,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Apt/Floor#:*\n` +
-                `${foodSession.chosen_location.address_2}`,
+                `${foodSession.chosen_location.addr.address_2}`,
         'fallback': `You are unable to confirm this order`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': '#3AA3E3',
@@ -451,13 +451,9 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
       },
       {
         'title': '',
-        'mrkdwn_in': [
-
-          'text'
-
-        ],
+        'mrkdwn_in': ['text'],
         'text': `*Delivery Instructions:*\n` +
-                `${foodSession.instructions}`,
+                `${foodSession.data.instructions}`,
         'fallback': `You are unable to edit instructions`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#49d63a`,
@@ -578,7 +574,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
   }
 
   var response = {
-    'text': "You're all set to add a new card and check-out!",
+    'text': `You're all set to add a new card and check-out!`,
     'fallback': `You are unable to complete payment`,
     'callback_id': `food.admin.add_new_card`,
     'color': `#3AA3E3`,
@@ -586,7 +582,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'attachments': [{
       'title': '',
       'mrkdwn_in': ['text'],
-      'text': `Cool, <${foodSession.payment.url}|➤ Click Here to Checkout>`,
+      'text': `Cool, <${foodSession.payment.url}|➤ Click Here to add cart and pay>`,
       'fallback': `You are unable to follow this link to confirm order`,
       'callback_id': `food.admin.add_new_card`,
       'color': `#3AA3E3`,
@@ -599,7 +595,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
 handlers['food.admin.order.select_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var slackbot = yield db.Slackbots.findOne({team_id: message.source.team}).exec()
-
+  var card = _.find(slackbot.meta.payments, {'card': {'card_id': message.source.actions[0].value}})
   // not entirely sure if this will select the right card
   var card = _.find(slackbot.meta.payments, {
     'card': {'card_id': message.source.actions[0].value}
@@ -633,6 +629,26 @@ handlers['food.admin.order.select_card'] = function * (message) {
     }
   })
   foodSession.save()
+  var response = {
+    'text': ``,
+    'fallback': `You are unable to complete payment`,
+    'callback_id': `food.admin.select_card`,
+    'color': `#3AA3E3`,
+    'attachment_type': `default`,
+    'attachments': [{
+      'title': '',
+      'mrkdwn_in': ['text'],
+      'text': `Cool, <${foodSession.payment.url}|➤ Click Here to Checkout>`,
+      'fallback': `You are unable to follow this link to confirm order`,
+      'callback_id': `food.admin.add_new_card`,
+      'color': `#3AA3E3`,
+      'attachment_type': `default`
+    }]
+  }
+  $replyChannel.sendReplace(message, 'food.done', {type: message.origin, data: response})
+}
+handlers['food.admin.order.pay.confirm'] = function * () {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 }
 
   // }
@@ -727,6 +743,10 @@ handlers['food.admin.order.select_card'] = function * (message) {
   //   }
   // }
 
+handlers['food.admin.order.pay.confirm'] = function * () {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+}
+
 handlers['food.done'] = function * (message) {
   // final area to save and reset stuff
   logging.error('do cleanup and stuff here in the future')
@@ -734,6 +754,8 @@ handlers['food.done'] = function * (message) {
   // var slackbot = db.Salckbots.findOne({team_id: message.source.team}).exec()
   // retrieve users phone number
 }
+
+
 
 module.exports = function (replyChannel, allHandlers) {
   $replyChannel = replyChannel
