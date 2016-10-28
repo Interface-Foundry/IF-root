@@ -230,7 +230,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
       mrkdwn_in: ['text'],
       actions: [{
         'name': `food.cart.quantity.decrease`,
-        'text': `-`,
+        'text': `–`,
         'type': `button`,
         'value': item._id
       }, {
