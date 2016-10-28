@@ -219,7 +219,7 @@ class PicStitch:
                    self.config['PIC_COORDS']['y']))
 
         # post text
-        last_y = 0
+        last_y = 5
         # change from: 5
 
         print (self.config['TEXTBOX_COORDS'])
@@ -298,11 +298,11 @@ class PicStitch:
 
             # make number count in blue to right of stars
             if 'num_ratings' in self.img_req['summary']:
-                draw.text((x + 80, last_y - 1),
+                draw.text((x + 80, last_y - 2),
                           ' - ' + str(self.img_req['summary']['num_ratings']),
                           font=self.config['review_count_font'],
                           fill="#2d70c1")
-            last_y = last_y + 20
+            last_y = last_y + 18
 
         # #fake reviews for skype!! lmao <--- uhhh
         if self.origin is 'skype':
@@ -328,31 +328,31 @@ class PicStitch:
                        str(dist) + ' miles' + '   •   ' + str(del_est) + ' mins',
                        font=self.config['font2'],
                        fill="#909497")
-            last_y = last_y + 40
+            last_y = last_y + 25
 
         if 'minimum' in self.img_req['ordering']:
-            draw.text((x, last_y),
-                       '$' + str(self.img_req['ordering']['minimum']),
+            draw.text((x, last_y +4), 
+                       '$ ' + str(self.img_req['ordering']['minimum']),
                        font=self.config['font4'],
-                       fill='#000000')
-            draw.text((x, last_y + 15),
+                       fill='#909497')
+            draw.text((x, last_y + 20), 
                        'Minimum',
                        font=self.config['font2'],
                        fill='#909497')
 
         if 'delivery_charge' in self.img_req['ordering']:
             delivery_charge = self.img_req['ordering']['delivery_charge']
-            if delivery_charge == 0:
-                draw.text((x + 90, last_y),
+            if delivery_charge == 0: 
+                draw.text((x + 90, last_y + 4), 
                            'Free',
                            font=self.config['font4'],
                            fill='#37a936')
-                draw.text((x + 89, last_y + 15),
+                draw.text((x + 89, last_y + 20), 
                            'Delivery',
                            font=self.config['font2'],
                            fill='#37a936')
-            else:
-                draw.text((x + 89, last_y),
+            else:         
+                draw.text((x + 89, last_y + 4), 
                            '$' + delivery_charge,
                            font=self.config['font2'],
                            fill='#37a936')
@@ -387,28 +387,28 @@ class PicStitch:
         config = {}
         config['CHAT_WIDTH'] = 345
         config['CHAT_HEIGHT'] = 120
-        config['PADDING'] = 0
+        config['PADDING'] = 5
         config['BGCOLOR'] = 'white'
         config['length'] = 3
         config['biggest_width'] = 0
         config['biggest_height'] = 0
         config['thumbnails'] = []
-        config['PIC_SIZE'] = 120, 120
+        config['PIC_SIZE'] = 100, 100
         # amazon pic size
-        config['PIC_COORDS'] = {'x': 0, 'y': 0}
+        config['PIC_COORDS'] = {'x': 9, 'y': 9}
         #former {'x':14, 'y':5}
         #                       {'x': 24, 'y': 174},
         #                       {'x': 24, 'y': 336}]
         # where to draw choice numbers
-        config['TEXTBOX_COORDS'] = {'x': 142, 'y': 13}
+        config['TEXTBOX_COORDS'] = {'x': 150, 'y': 7}
         #                           {'x': 190, 'y': 174},
         #                           {'x': 190, 'y': 336}]
 
         config['BOX_WIDTH'] = 30
-        config['font1'] = self.font_dict_R[17]
-        config['font2'] = self.font_dict_R[15]
-        config['font3'] = self.font_dict_B[17]
-        config['font4'] = self.font_dict_B[15]
+        config['font1'] = self.font_dict_R[15]
+        config['font2'] = self.font_dict_R[14]
+        config['font3'] = self.font_dict_B[15]
+        config['font4'] = self.font_dict_B[14]
         config['review_count_font'] = self.font_dict_R[13]
 
         if self.origin in ['facebook']:
