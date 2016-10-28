@@ -58,7 +58,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
     return i
   }).sort((a, b) => a.sortOrder - b.sortOrder).slice(index, index + 3).map(i => {
     var attachment = {
-      title: i.name + ' – ' + (_.get(i, 'price') ? '$' + i.price : 'price varies'),
+      title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: 'i.name',
       color: '#3AA3E3',
       attachment_type: 'default',

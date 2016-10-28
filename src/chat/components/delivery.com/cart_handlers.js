@@ -24,7 +24,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
   var myItems = foodSession.cart.filter(i => i.user_id === message.user_id && i.added_to_cart)
   var totalPrice = myItems.reduce((sum, i) => {
     return sum + menu.getCartItemPrice(i)
-  }, 0).toFixed(2)
+  }, 0)
 
   var banner = {
     title: '',
@@ -34,7 +34,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
   var lineItems = myItems.map((i, index) => {
     var item = menu.flattenedMenu[i.item.item_id]
     var quantityAttachment = {
-      title: item.name + ' – $' + menu.getCartItemPrice(i).toFixed(2),
+      title: item.name + ' – ' + menu.getCartItemPrice(i).$,
       text: item.description,
       callback_id: item.unique_id,
       color: '#3AA3E3',
@@ -82,7 +82,7 @@ handlers['food.cart.personal'] = function * (message, replace) {
     'actions': [
       {
         'name': 'food.cart.personal.confirm',
-        'text': '✓ Confirm: $' + totalPrice,
+        'text': '✓ Confirm: ' + totalPrice.$,
         'type': 'button',
         'value': 'chess',
         'style': 'primary'
@@ -220,7 +220,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
       return curr + ', ' + menu.getItemById(String(n)).name
     }, '')
     return {
-      text: `*${foodInfo.name} - $${menu.getCartItemPrice(item)}*\n` +
+      text: `*${foodInfo.name} - ${menu.getCartItemPrice(item).$}*\n` +
             `*Options:* ${descriptionString}\n` +
             `*Added by:* <@${item.user_id}>`,
       fallback: `Meal Choice`,
@@ -250,9 +250,9 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
   response.attachments.push({'title': ''})
   // final attachment
   response.attachments.push({
-    text: `*Delivery Fee:* $${foodSession.order.delivery_fee}\n` +
-          `*Taxes:* $${foodSession.order.tax}\n` +
-          `*Team Cart Total: $${foodSession.order.total}`,
+    text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
+          `*Taxes:* ${foodSession.order.tax.$}\n` +
+          `*Team Cart Total:* ${foodSession.order.total.$}`,
     fallback: 'Confirm Choice',
     callback_id: 'foodConfrimOrder_callbackID',
     color: '#3AA3E3',
@@ -260,7 +260,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
     mrkdwn_in: ['text'],
     actions: [{
       'name': `food.admin.order.checkout.confirm`,
-      'text': `Checkout $${foodSession.order.total}`,
+      'text': `Checkout ${foodSession.order.total.$}`,
       'type': `button`,
       'style': `primary`,
       'value': `checkout`

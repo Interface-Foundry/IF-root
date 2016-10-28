@@ -116,7 +116,7 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
     'actions': [
       {
         'name': 'food.item.add_to_cart',
-        'text': '✓ Add to Cart: $' + fullPrice.toFixed(2),
+        'text': '✓ Add to Cart: ' + fullPrice.$,
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id
