@@ -23,7 +23,7 @@ var deliverySchema = mongoose.Schema({
     user_id: String,
     added_to_cart: {type: Boolean, default: false},
     item: {
-      item_id: String, // the item.unique_id
+      item_id: Number, // the item.unique_id
       item_qty: Number,
       option_qty: {}, // hash of {unique_id, quantity} pairs
       item_label: {type: String, default: ''}, // leave blank? idk what this is
