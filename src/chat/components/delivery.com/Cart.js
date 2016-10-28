@@ -1,5 +1,5 @@
 var _ = require('lodash')
-var Menu = require('./menu')
+var Menu = require('./Menu')
 
 function Cart(team_id) {
   if (!(this instanceof Cart)) {
