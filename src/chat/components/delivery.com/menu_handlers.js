@@ -142,19 +142,21 @@ handlers['food.option.click'] = function * (message) {
   // so delete any other selected radio before the next step will select it
   if (optionGroup.min_selection === optionGroup.max_selection && optionGroup.min_selection === 1) {
     optionGroup.children.map(radio => {
-      delete userItem.item.option_qty[radio.unique_id]
+      if (userItem.item.option_qty[radio.unique_id]) {
+        delete userItem.item.option_qty[radio.unique_id]
+        db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + radio.unique_id]: ''}}).exec()
+      }
     })
   }
 
   // toggle behavior for checkboxes and radio
   if (userItem.item.option_qty[option_id]) {
     delete userItem.item.option_qty[option_id]
+    db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$unset: {['cart.$.item.option_qty.' + option_id]: ''}}).exec()
   } else {
     userItem.item.option_qty[option_id] = 1
+    db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {['cart.$.item.option_qty.' + option_id]: 1}}).exec()
   }
-
-  // save the changes to the subdocument in mongodb
-  db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.item.option_qty': userItem.item.option_qty}}).exec()
 
   var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
@@ -162,53 +164,36 @@ handlers['food.option.click'] = function * (message) {
 
 // Handles only the current item the user is editing
 handlers['food.item.quantity.add'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var itemId = message.source.actions[0].value
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart && i.item.item_id === itemId)[0]
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   userItem.item.item_qty++
-  foodSession.markModified('cart')
-
-  debugger;
-  foodSession.save()
-  var json = menu.generateJsonForItem(userItem)
+  db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': 1}}).exec()
+  var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 // Handles only the current item the user is editing
 handlers['food.item.quantity.subtract'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var itemId = message.source.actions[0].value
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart && i.item.item_id === itemId)[0]
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   if (userItem.item.item_qty === 1) {
     // don't let them go down to zero
     return
   }
-  debugger;
   userItem.item.item_qty--
-  foodSession.markModified('cart')
-  foodSession.save()
-  var json = menu.generateJsonForItem(userItem)
+  db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
+  var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
 
 handlers['food.item.add_to_cart'] = function * (message) {
-  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var menu = Menu(foodSession.menu)
-  var option = message.source.actions[0].value
-  var userItem = foodSession.cart.filter(i => i.user_id === message.user_id && !i.added_to_cart)[0]
-
-  debugger;
-
-  if (!userItem) {
-    kip.error('trying to add item to cart that may already be added to cart')
-  } else {
-    userItem.added_to_cart = true
-    foodSession.markModified('cart')
-  }
-  yield foodSession.save()
-
+  var cart = Cart(message.source.team)
+  yield cart.pullFromDB()
+  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  userItem.added_to_cart = true
+  yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 
   // check for errors
   // if errors, highlight errors
