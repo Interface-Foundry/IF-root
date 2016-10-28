@@ -551,6 +551,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
       method: `POST`,
       json: true,
       body: {
+        'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
         '_id': foodSession._id,
         'active': foodSession.active,
         'team_id': foodSession.team_id,
@@ -606,6 +607,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
       method: `POST`,
       json: true,
       body: {
+        'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
         '_id': foodSession._id,
         'active': foodSession.active,
         'team_id': foodSession.team_id,
