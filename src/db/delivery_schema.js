@@ -52,6 +52,7 @@ var deliverySchema = mongoose.Schema({
   action: String,
   data: {}, // \shrug
   order: {}, // info after adding items to cart
+  payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
   guest_token: String // related to creating a guest token per session
 })
