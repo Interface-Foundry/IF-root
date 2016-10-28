@@ -13,7 +13,8 @@ var topics = {
   'outgoing.web': 8,
   'outgoing.skype': 9,
   'variation.facebook': 10,
-  'variation.slack': 11
+  'variation.slack': 11,
+  // 'cafe.payment': 12
 }
 
 //

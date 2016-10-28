@@ -143,7 +143,7 @@ var cuisines = [
 
 async.eachSeries(cuisines, function iterator(cuisine, callback) {
 	console.log('processing cuisine: ', cuisine);
- fs.appendFile('./cuisines2.js', JSON.stringify({name: cuisine}) + ',\n', function(err) {
+ fs.appendFile('./cuisines2.js', JSON.stringify({text: cuisine}) + ',\n', function(err) {
         if (err) console.log(err)
         callback()   
    })

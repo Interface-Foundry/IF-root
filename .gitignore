@@ -16,6 +16,10 @@ node_modules/
 
 node-v*/
 
+# python #
+__pycache__/
+*.pyc
+
 # Compiled source #
 ###################
 *.class

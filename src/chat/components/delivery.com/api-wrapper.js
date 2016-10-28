@@ -3,8 +3,9 @@ var _ = require('lodash')
 var co = require('co')
 var fs = require('fs')
 var request = require('request-promise')
-
-var client_id = 'brewhacks2016'
+var utils = require('./utils')
+var address_utils = require('./address_utils')
+var client_id = 'ZTM0ZmNjOWRhNGMyNzkyYmI5NWVhMmM1ZmU2Njg3M2E3'
 
 var defaultParams = {}
 
@@ -15,32 +16,58 @@ defaultParams.searchNearby = {
 
 function * getGuestToken () {
   var token = yield request({url: `https://api.delivery.com/customer/auth/guest?client_id=${client_id}`, json: true})
-  return token
+  return token['Guest-Token']
 }
 
-module.exports.createCartWithItems = function * (session) {
-  // idk
-  var token = yield getGuestToken()
-
+module.exports.createCartForSession = function * (session) {
+  session.guest_token = yield getGuestToken()
   var opts = {
-    method: 'POST',
-    url: `https://api.delivery.com/customer/cart/{session.menu.id`,
-    body: {
-      'client_id': token['Guest-Token'],
-      'order_type': session.fulfillmentMethod,
-      'instructions': session.data.instructions || {},
-      'items': _.get(session.cart, 'item')
+    'method': `POST`,
+    'uri': `https://api.delivery.com/customer/cart/${session.chosen_restaurant.id}`,
+    'headers': {'Guest-Token': session.guest_token},
+    'json': true,
+    'body': {
+      'client_id': client_id,
+      'order_type': `delivery`,
+      'instructions': '',
+      'items': _.map(session.cart, 'item')
     }
   }
-  var response = yield request(opts)
-  return response
+
+  try {
+    var response = yield request(opts)
+    return response
+  } catch (e) {
+    logging.error('error lol', e)
+  }
 }
+
 
 module.exports.searchNearby = function * (params) {
   params = _.merge({}, defaultParams.searchNearby, params)
   logging.info('searching delivery.com for restaurants with params', params)
-  var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
-
+  try {
+    var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+  } catch(err) {
+    if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
+    params.addr = yield address_utils.cleanAddress(params.addr);
+    kip.debug('api-wrapper 86: searchNearBy err: ', err,'cleaned string: ', params.addr)
+    try {
+      var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+    } catch(err) {
+      if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
+      return false
+    }
+  }
+   if ((allNearby.merchants == undefined)) {
+    params.addr = yield address_utils.cleanAddress(params.addr);
+     try {
+      var allNearby = yield request({url: `https://api.delivery.com/merchant/search/delivery?client_id=${client_id}&address=${params.addr}&merchant_type=R`, json: true})
+    } catch(err) {
+      if (_.get(err,'error.code') == 'ENOTFOUND') kip.debug('delivery.com api is down, or returned no results for specified address...')
+      return false
+    }
+  }
   // make sure we have all the merchants in the db
   saveMerchants(allNearby.merchants)
 
@@ -86,6 +113,14 @@ module.exports.getMenu = function * (merchant_id) {
   var data = yield request({url: `https://api.delivery.com/merchant/${merchant_id}/menu?client_id=${client_id}`, json: true})
   var menu = data.menu; // should i return this or a better data model?
   return unfuck_menu(menu)
+}
+
+module.exports.getMerchant = function * (merchant_id) {
+  var url = `https://api.delivery.com/merchant/${merchant_id}/?client_id=${client_id}`
+  var merchantInfo = yield request({url: `https://api.delivery.com/merchant/${merchant_id}/?client_id=${client_id}`, json: true})
+    kip.debug('getting merchant info for merchant id', merchant_id, url)
+
+  return merchantInfo.merchant
 }
 
 /*
@@ -149,6 +184,34 @@ function get_options (item) {
     }
   })
 }
+
+
+// var definitelyExistingLocations = []
+// function saveLocations (locations) {
+//   co(function * () {
+//     for (var i = 0; i < locations.length; i++) {
+//       if (definitelyExistingLocations.indexOf(locations[i].id) >= 0) {
+//         continue
+//       }
+//       var m = yield db.Merchants.findOne({
+//         id: merchants[i].id
+//       }).select('id').exec()
+//       if (!m) {
+//         console.log('saving new merchant', merchants[i].summary.name)
+//         m = new db.Merchant({
+//           id: merchants[i].id,
+//           data: merchants[i]
+//         })
+//         yield m.save()
+//         console.log('saved')
+//         definitelyExistingMerchants.push(m.id)
+//       }
+//     }
+//   }).catch(kip.err)
+// }
+
+
+
 
 if (!module.parent) {
   // wow such test

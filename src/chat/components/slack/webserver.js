@@ -115,9 +115,11 @@ app.post('/slackaction', function (req, res) {
         message.action = 'validate'
         var location
         try {
+          // kip.debug('\n\n\n\n\ninside webserver.js line 118', message.source, ' : ',message.source.original_message.attachments[0].actions[0].value, '\n\n\n\n\n')
           location = JSON.parse(message.source.original_message.attachments[0].actions[0].value)
         } catch(err) {
-          kip.error('error parsing out location: webserver.js line 103')
+          kip.debug('\n\n\nwebserver line 121: err: ', err,'\n\n\n')
+          location = _.get(message, 'message.source.original_message.attachments[0].actions[0].value');
         }
         message.source.location = location
         // message.source.location =

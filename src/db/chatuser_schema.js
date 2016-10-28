@@ -59,23 +59,18 @@ var chatuserSchema = mongoose.Schema({
       type: Boolean,
       default: false
     }
-    // ,
-    // interactions: [{
-    //     platform: String,
-    //     session_id: String,
-    //     handler: String,
-    //     input_type: String,
-    //     input: String,
-    //     output: String,
-    //     ts: Date.now
-    // }]
     // , email_stages: {
     //   stage_1: {
     //     type: Boolean,
     //     default: false
     //   }
     // }
-  }
+  },
+  history: {
+    orders: [],
+    interactions: []
+  },
+  phone_number: String
 // , email_stages: {
 //   stage_1: {
 //     type: Boolean,

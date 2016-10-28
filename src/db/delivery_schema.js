@@ -23,7 +23,7 @@ var deliverySchema = mongoose.Schema({
     user_id: String,
     added_to_cart: {type: Boolean, default: false},
     item: {
-      item_id: String, // the item.unique_id
+      item_id: Number, // the item.unique_id
       item_qty: Number,
       option_qty: {}, // hash of {unique_id, quantity} pairs
       item_label: {type: String, default: ''}, // leave blank? idk what this is
@@ -34,7 +34,9 @@ var deliverySchema = mongoose.Schema({
   // admin or whomever to use for picking restaurant and various other
   convo_initiater: {
     id: String,
-    name: String
+    name: String,
+    phone_number: String,
+    email: String
   },
 
   fulfillment_method: String,
@@ -49,6 +51,10 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {}, // \shrug
+  order: {}, // info after adding items to cart
+  payment: {}, // object with payment details
+  confirmed_orders: [], // possibly add time counter thing later
+  guest_token: String // related to creating a guest token per session
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {

@@ -211,18 +211,12 @@ function getItem(url) {
 
 function getInventory(newItem) {
     return new Promise(function(resolve, reject) {
-
         //query for inventory: 
         //URL > pid val 676126002
         //
         // http://bananarepublic.gap.com/resources/storeLocations/v1/us/10001/?searchRadius=100&skuid=6761260320002&locale=en_US&clientid=gid
-
         // http://bananarepublic.gap.com/resources/storeLocations/v1/us/10001/?searchRadius=100&skuid=6761260020000&locale=en_US&clientid=gid
-
         // http://bananarepublic.gap.com/resources/storeLocations/v1/us/10001/?searchRadius=100&skuid=6761260220002&locale=en_US&clientid=gid
-
-
-
         var postalcode = '10002'; //iterate through all zipcodes
         var radius = '100'; //max is 100 miles
         var physicalStores = [];

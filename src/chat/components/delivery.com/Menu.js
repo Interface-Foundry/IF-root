@@ -116,7 +116,7 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
     'actions': [
       {
         'name': 'food.item.add_to_cart',
-        'text': '✓ Add to Cart: $' + fullPrice.toFixed(2),
+        'text': '✓ Add to Cart: ' + fullPrice.$,
         'type': 'button',
         'style': 'primary',
         'value': cartItem.item.item_id
@@ -128,10 +128,10 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
         'value': 'chess'
       },
       {
-        'name': 'chess',
+        'name': 'food.menu.quick_picks',
         'text': '< Back',
         'type': 'button',
-        'value': 'chess'
+        'value': 0
       }
     ]
   })
@@ -187,7 +187,10 @@ function nodeOptions (node, cartItem) {
         name: 'food.option.click',
         text: checkbox + option.name + price,
         type: 'button',
-        value: option.unique_id
+        value: {
+          item_id: cartItem.item.item_id,
+          option_id: option.unique_id
+        }
       }
     })
     return a

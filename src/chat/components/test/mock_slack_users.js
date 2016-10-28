@@ -1,8 +1,8 @@
+require('db')
 var co = require('co')
 var _ = require('lodash')
 var request = require('request-promise')
 var mongodb = require('mongodb')
-var _ = require('lodash')
 
 /**
  * creates a mock user
@@ -212,6 +212,36 @@ User.prototype.goto = function (step) {
         })
       })
       return user.tap(options, ind.attachment, ind.action)
+    },
+    S12: function * () {
+      var foodSessions = yield db.Delivery.find({team_id: user.chatuser.team_id, active: true}).exec()
+      if (foodSessions) {
+        yield foodSessions.map((session) => {
+          session.active = false
+          session.save()
+        })
+      }
+      var foodSession = require('../slack/test_team_1_delivery.js')
+      var newSession = new db.Delivery({
+        active: foodSession.active,
+        team_id: foodSession.team_id,
+        chosen_location: foodSession.chosen_location,
+        votes: foodSession.votes,
+        time_started: foodSession.time_started,
+        convo_initiater: foodSession.convo_initiater,
+        confirmed_orders: _.map(foodSession.team_members, 'id'),
+        cart: foodSession.cart,
+        cuisines: foodSession.cuisines,
+        merchants: foodSession.merchants,
+        team_members: foodSession.team_members,
+        chosen_restaurant: foodSession.chosen_restaurant,
+        menu: foodSession.menu,
+        data: {}
+      })
+
+      newSession.save()
+      var res = yield user.text('food.admin.order.confirm')
+      return res
     }
   }
 

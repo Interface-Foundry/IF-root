@@ -6,7 +6,6 @@ from picstitch_delivery import load_review_stars, load_fonts_reg, load_fonts_bol
     PicStitch
 
 from gcloud import storage
-import boto
 import io
 import time
 import os
