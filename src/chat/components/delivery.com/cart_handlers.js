@@ -259,7 +259,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
     attachment_type: 'default',
     mrkdwn_in: ['text'],
     actions: [{
-      'name': `food.admin.order.checkout.confirm`,
+      'name': `food.admin.order.checkout.address`,
       'text': `Checkout ${foodSession.order.total.$}`,
       'type': `button`,
       'style': `primary`,
