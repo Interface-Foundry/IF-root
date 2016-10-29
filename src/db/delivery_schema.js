@@ -51,6 +51,7 @@ var deliverySchema = mongoose.Schema({
   mode: String,
   action: String,
   data: {}, // \shrug
+  tracking: {}, // possibly combine w/ data, cant remember what data is in explicitly
   order: {}, // info after adding items to cart
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later

@@ -168,17 +168,34 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
   foodSession.confirmed_orders.push(message.source.user)
   foodSession.markModified('confirmed_orders')
 
-  // tell admin who is still left to order
-  if (message.source.user === foodSession.convo_initiater.id) {
-    // lmfao, make string of users whove voted
-    var votedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
-      var theirName = _.filter(foodSession.team_members, {id: user})[0].name
-      return all + ', ' + theirName
-    }, '').slice(2)
+  // lmfao, make string of users whove voted
+  var confirmedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
+    var theirName = _.filter(foodSession.team_members, {id: user})[0].name
+    return all + ', ' + theirName
+  }, '').slice(2)
 
-    $replyChannel.sendReplace(message, '.', {type: 'slack', data: {text: `Thanks for your order, these users have submitted orders so far: ${votedUsersString}, waiting for the rest`}})
+  if (message.source.user === foodSession.convo_initiater.id) {
+    // tell admin who is still left to order once admin has confirmed, but not before
+    $replyChannel.sendReplace(message, '.', {
+      type: message.origin,
+      data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
+    })
+    foodSession.tracking.confirmed_orders_msg = message._id
   } else {
-    $replyChannel.sendReplace(message, '.', {type: 'slack', data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+    // send message to user saying thanks they confirmed
+    $replyChannel.sendReplace(message, '.', {
+      type: message.origin,
+      data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}
+    })
+
+    if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+      // if admin has already confirmed order and waiting on other team members.  update each time team member has voted
+      var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+      $replyChannel.sendReplace(msgToReplace, '.', {
+        type: msgToReplace.origin,
+        data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
+      })
+    }
   }
 
   if (foodSession.confirmed_orders.length < foodSession.team_members.length) {
