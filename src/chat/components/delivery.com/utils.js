@@ -1,13 +1,60 @@
 require('kip')
 
 var co = require('co')
-var fs = require('fs')
 var _ = require('lodash')
-var sm = require('slack-message-builder')
+
 var googl = require('goo.gl')
 var request = require('request-promise')
 
 var api = require('./api-wrapper.js')
+
+
+function defaultReply (message) {
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    text: "I'm sorry I couldn't quite understand that",
+    source: message.source,
+    mode: message.mode,
+    action: message.action,
+    state: message.state
+  })
+}
+
+function textReply (message, text) {
+  var msg = defaultReply(message)
+  msg.text = text
+  return msg
+}
+
+function sendTextReply (message, text) {
+  var msg = textReply(message, text)
+  msg.save()
+  logging.info('<<<'.yellow, text.yellow)
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+}
+
+
+/**
+ * helper to determine an affirmative or negative response
+ *
+ * 10-4 good buddy is not supported
+ *
+ * @param {any} text
+ * @returns {Boolean} yes
+ */
+function * yesOrNo (text) {
+  text = (text || '').toLowerCase().trim()
+  if (text === 'yes') {
+    return true
+  } else {
+    return false
+  }
+}
+
 
 /*
 *
@@ -19,6 +66,9 @@ function * initiateDeliverySession (session) {
 
   if (foodSessions) {
     yield foodSessions.map((session) => {
+      if (session.active = true) {
+
+      }
       session.active = false
       session.save()
     })
@@ -308,5 +358,8 @@ module.exports = {
   initiateFoodMessage: initiateFoodMessage,
   initiateDeliverySession: initiateDeliverySession,
   removeUserFromSession: removeUserFromSession,
-  buildRestaurantAttachment: buildRestaurantAttachment
+  buildRestaurantAttachment: buildRestaurantAttachment,
+  default_reply: defaultReply,
+  text_reply: textReply,
+  send_text_reply: sendTextReply
 }

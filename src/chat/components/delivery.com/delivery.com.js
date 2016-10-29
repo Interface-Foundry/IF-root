@@ -14,33 +14,6 @@ var team_utils = require('./team_utils.js')
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 
-function default_reply (message) {
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    text: "I'm sorry I couldn't quite understand that",
-    source: message.source,
-    mode: message.mode,
-    action: message.action,
-    state: message.state
-  })
-}
-
-function text_reply (message, text) {
-  var msg = default_reply(message)
-  msg.text = text
-  return msg
-}
-
-function send_text_reply (message, text) {
-  var msg = text_reply(message, text)
-  msg.save()
-  console.log('<<<'.yellow, text.yellow)
-  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
-}
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
@@ -339,7 +312,7 @@ handlers['address.new'] = function * (session) {
 handlers['address.confirm'] = function * (session) {
   var input = session.text;
   var res = yield api.searchNearby({addr: input})
-  if (!res) return send_text_reply(session, 'Sorry! We couldn\'t find that address!');
+  if (!res) return utils.send_text_reply(session, 'Sorry! We couldn\'t find that address!');
   var res_loc = res.search_address;
   res_loc.input = input;
 
@@ -808,25 +781,4 @@ handlers['test.s8'] = function * (message) {
   }
 
   replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
-}
-
-/**
- * helper to determine an affirmative or negative response
- *
- * 10-4 good buddy is not supported
- *
- * @param {any} text
- * @returns {Boolean} yes
- */
-function * yesOrNo (text) {
-  text = (text || '').toLowerCase().trim()
-  if (text === 'yes') {
-    return true
-  } else {
-    return false
-  }
-}
-
-module.exports = {
-  send_text_reply: send_text_reply
 }
