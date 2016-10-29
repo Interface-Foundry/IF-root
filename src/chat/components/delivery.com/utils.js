@@ -2,12 +2,10 @@ require('kip')
 
 var co = require('co')
 var _ = require('lodash')
-
 var googl = require('goo.gl')
 var request = require('request-promise')
 
-var api = require('./api-wrapper.js')
-
+var queue = require('../queue-mongo')
 
 function defaultReply (message) {
   return new db.Message({
@@ -37,7 +35,6 @@ function sendTextReply (message, text) {
   queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
 }
 
-
 /**
  * helper to determine an affirmative or negative response
  *
@@ -55,7 +52,6 @@ function * yesOrNo (text) {
   }
 }
 
-
 /*
 *
 *
@@ -67,7 +63,7 @@ function * initiateDeliverySession (session) {
   if (foodSessions) {
     yield foodSessions.map((session) => {
       if (session.active = true) {
-
+        console.log('send message to old admin')
       }
       session.active = false
       session.save()
@@ -244,7 +240,7 @@ function createCuisineOptionForUser (user, cuisines) {
   var randomsToUse = 1
   var users_top = _.countBy(user.history)
 
-  historySorted = Object.keys(users_top).sort(function (a, b) {
+  var historySorted = Object.keys(users_top).sort(function (a, b) {
     return users_top[b] - users_top[a]
   })
 
@@ -268,10 +264,6 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
   return _.filter(merchants, function (m) {
     return _.includes(m.summary.cuisines, cuisineType)
   })
-}
-
-function askUserForPreferences (user) {
-  var buttons = createPreferencesAttachments()
 }
 
 function createPreferencesAttachments () {
@@ -300,25 +292,23 @@ function * removeUserFromSession (team, user) {
   foodSession.save()
 }
 
-
 function * buildRestaurantAttachment (restaurant) {
-
   // will need to use picstitch for placeholder image in future
   // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
 
   try {
     var realImage = yield request({
-        uri: kip.config.picstitchDelivery,
-        json: true,
-        body: {
-          origin: 'slack',
-          cuisines: restaurant.summary.cuisines,
-          location: restaurant.location,
-          ordering: restaurant.ordering,
-          summary: restaurant.summary,
-          url: restaurant.summary.merchant_logo
-        }
-      })
+      uri: kip.config.picstitchDelivery,
+      json: true,
+      body: {
+        origin: 'slack',
+        cuisines: restaurant.summary.cuisines,
+        location: restaurant.location,
+        ordering: restaurant.ordering,
+        summary: restaurant.summary,
+        url: restaurant.summary.merchant_logo
+      }
+    })
   } catch (e) {
     kip.err(e)
     realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
@@ -341,18 +331,11 @@ function * buildRestaurantAttachment (restaurant) {
         'type': 'button',
         'style': 'primary',
         'value': restaurant.id
-      },
-      // {
-      //   'name': 'food.admin.restaurant.more_info',
-      //   'text': 'More Info',
-      //   'type': 'button',
-      //   'value': restaurant.id
-      // }
+      }
     ]
   }
   return obj
 }
-
 
 module.exports = {
   initiateFoodMessage: initiateFoodMessage,
@@ -361,5 +344,6 @@ module.exports = {
   buildRestaurantAttachment: buildRestaurantAttachment,
   default_reply: defaultReply,
   text_reply: textReply,
-  send_text_reply: sendTextReply
+  send_text_reply: sendTextReply,
+  yesOrNo: yesOrNo
 }
