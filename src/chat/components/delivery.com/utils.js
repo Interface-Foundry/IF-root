@@ -62,9 +62,9 @@ function * initiateDeliverySession (session) {
 
   if (foodSessions) {
     yield foodSessions.map((session) => {
-      if (session.active = true) {
-        console.log('send message to old admin')
-      }
+      logging.info('send message to old admin that their order is being canceled')
+      // var oldMessage = yield db.Message.findOne({incoming: true, mode: 'food', })
+      // replyChannel.sendReplace(oldMessage, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
       session.active = false
       session.save()
     })
