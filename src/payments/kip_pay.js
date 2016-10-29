@@ -56,13 +56,14 @@ var pay_utils = require("./pay_utils.js")
 
 // });
 
-app.use('/', express.static('web'))
+app.use('/', express.static(path.join(__dirname, 'web')))
+console.log('heheh', __dirname)
 
 //post a new charge for kip user
-app.post("/charge", jsonParser, function(req, res) { 
+app.post("/charge", jsonParser, function(req, res) {
 
 	//include KEY with new POST req to /charge to verify authentic kip request
-	var kip_secret = 'mooseLogicalthirteen$*optimumNimble!Cake' 
+	var kip_secret = 'mooseLogicalthirteen$*optimumNimble!Cake'
 
 	//SAMPLE BODY:
 	var prunedPay = {
@@ -150,12 +151,12 @@ app.post("/charge", jsonParser, function(req, res) {
  //    	"card_id": "card_198j4tI2kQvuYJlV9jt11NLz"
  //    }
 
-	//params: 
-	//stripe ID 
+	//params:
+	//stripe ID
 	//if stripe ID + CC card select, return confirmed payment
 	//else return URL to checkout: click here to add credit card (you only need to do this once)
 
-	//NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM 
+	//NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM
 
 	if(req.body && req.body.kip_token == kip_secret && req.body.order && req.body.order.total){
 		var o = req.body
@@ -205,7 +206,7 @@ app.post("/charge", jsonParser, function(req, res) {
 			}
 
 			res.status(200).send(JSON.stringify(v))
-		}		
+		}
 
 	}else {
 		res.status(401).send("😅");
@@ -216,14 +217,14 @@ app.post("/charge", jsonParser, function(req, res) {
 app.post("/session", jsonParser, function(req, res){
 	if(req.body && req.body.session_token){
 		var t = req.body.session_token.replace(/[^\w\s]/gi, '') //clean special char
-		Payment.findOne({session_token: t}, function(err,obj) { 
+		Payment.findOne({session_token: t}, function(err,obj) {
 			res.send(JSON.stringify(obj))
 		})
 	}
 })
 
 //this is the call back from the new credit card to do the charge
-app.post("/process", jsonParser, function(req, res) { 
+app.post("/process", jsonParser, function(req, res) {
 
 	if(req.body && req.body.token && req.body.session_token){
 
@@ -231,16 +232,16 @@ app.post("/process", jsonParser, function(req, res) {
 
 		//this is a stripe token for the user inputted credit card details
 		var token = req.body.token.replace(/[^\w\s]/gi, '') //clean special char
-		//LOOK UP USER BY HASH TOKEN 
+		//LOOK UP USER BY HASH TOKEN
 		var t = req.body.session_token.replace(/[^\w\s]/gi, '') //clean special char
 
-		Payment.findOne({session_token: t}, function(err,pay) { 
+		Payment.findOne({session_token: t}, function(err,pay) {
 
 			if (err){
 				console.log(err)
 			}else {
 				var customer_id;
-				//create stripe customer 
+				//create stripe customer
 				stripe.customers.create({
 				  source: token,
 				  description: 'Delivery.com & Kip: ' + pay.order.chosen_restaurant.name
@@ -262,14 +263,14 @@ app.post("/process", jsonParser, function(req, res) {
 					        }
 					    });
 					}
-					
+
 					if (charge.status == 'succeeded'){
 
-						//pay delivery.com							
+						//pay delivery.com
 						pay_delivery_com(pay)
 
 						//save stripe info to slack team
-						Slackbot.findOne({team_id: pay.order.team_id}, function(err,obj) { 
+						Slackbot.findOne({team_id: pay.order.team_id}, function(err,obj) {
 
 							//update stripe / push cards into array
 							if(err){
@@ -285,9 +286,9 @@ app.post("/process", jsonParser, function(req, res) {
 									card:{
 										card_id: charge.source.id,
 										brand: charge.source.brand, //visa, mastercard, etc
-										exp_month: charge.source.exp_month, 
+										exp_month: charge.source.exp_month,
 										exp_year: charge.source.exp_year,
-										last4: charge.source.last4, 
+										last4: charge.source.last4,
 										address_zip: charge.source.address_zip,
 										email: charge.source.name //this should work...
 									}
@@ -298,15 +299,15 @@ app.post("/process", jsonParser, function(req, res) {
 							        }
 							    });
 							}
-								
-						})	
+
+						})
 					}
 					else {
 						console.log('DIDNT PROCESS STRIPE CHARGE: ',charge.status)
 						console.log('OUTCOME: ',charge.outcome)
 					}
 
-				});			
+				});
 			}
 		})
 	}else {
@@ -314,10 +315,10 @@ app.post("/process", jsonParser, function(req, res) {
 	}
 });
 
-//make a charge 
+//make a charge
 function charge_by_id(p){
 
-	// STRIPE CHARGE BY ID 
+	// STRIPE CHARGE BY ID
 	// When it's time to charge the customer again, retrieve the customer ID!
 	stripe.charges.create({
 	  amount: p.order.order.total, // Amount in cents
@@ -334,7 +335,7 @@ function charge_by_id(p){
 		        }
 		    });
 		}
-		
+
 		if (charge.status == 'succeeded'){
 			//POST TO MONGO QUEUE SUCCESS PAYMENT
 			pay_delivery_com(p)
@@ -344,14 +345,14 @@ function charge_by_id(p){
 			console.log('OUTCOME: ',charge.outcome)
 		}
 
-	});		
-	
+	});
+
 }
 
 //pay delivery.com
 function pay_delivery_com(pay,callback){
 
-	var err = null //lol idk 
+	var err = null //lol idk
 
 	//payment amounts should match
 	//NOTE: THIS MUST BE THE TOTAL PAYMENT + TOP TO COMPARE TO CHARGE VAL
@@ -362,7 +363,7 @@ function pay_delivery_com(pay,callback){
 		}
 
 		//build guest checkout obj
-		var guestCheckout = {	
+		var guestCheckout = {
 			"client_id": pay_const.delivery_com_client_id,
 			"order_type": pay.order.order.order_type,
 			"order_time": new Date().toISOString(),
@@ -399,7 +400,7 @@ function pay_delivery_com(pay,callback){
 			var si = pay.order.chosen_location.special_instructions
 			if(si.length > 100){
 				si = si.substring(0,100);
-			} 
+			}
 			guestCheckout.instructions = si
 		}else {
 			guestCheckout.instructions = ""
@@ -416,17 +417,17 @@ function pay_delivery_com(pay,callback){
 		//pos to delivery
 		co(function *(){
 		  yield pay_utils.payForItemFromKip(guestCheckout,pay.order.guest_token)
-		  
+
 		}).catch(function(err){
 			console.error(err.stack);
-		});	
+		});
 
 	}
 	else {
 		err = 'ERROR: Charge amounts dont match D:'
 		callback(err)
 	}
-	
+
 
 }
 

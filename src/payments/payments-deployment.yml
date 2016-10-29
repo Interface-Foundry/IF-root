@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: payments
+  labels:
+    run: payments
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: payments
+  template:
+    metadata:
+      labels:
+        run: payments
+    spec:
+      containers:
+      - name: payments
+        image: gcr.io/kip-styles/payments:fc51925
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        securityContext: {}
