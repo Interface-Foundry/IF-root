@@ -32,4 +32,4 @@ RUN mkdir -p /etc/nginx/ssl/pay_kipthis_com && \
     cp /kip/payments/nginx.conf /etc/nginx/nginx.conf && \
     cp /kip/payments/secrets/* /etc/nginx/ssl/pay_kipthis_com/
 EXPOSE 80 443
-CMD node /kip/payments/kip_pay.js
+CMD service nginx restart && node /kip/payments/kip_pay.js
