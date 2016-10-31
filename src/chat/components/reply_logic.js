@@ -230,8 +230,8 @@ queue.topic('incoming').subscribe(incoming => {
         }
       break;
      case 'home':
-        // modes[user.id] = 'home';
         var replies = yield settings.handle(message);
+        kip.debug('\n\n\n\n\n reply_logic 234 replies: ', replies,' \n\n\n\n\n');
         break;
      case 'team':
         kip.debug('\n\nreply_logic 237: switch case "team"', replies,'\n\n');
@@ -249,7 +249,6 @@ queue.topic('incoming').subscribe(incoming => {
         // not a simple reply, do NLP
         if (!replies || replies.length === 0) {
           timer.tic('getting nlp response')
-
 
           logging.info('👽 passing to nlp: ', message.text)
 
@@ -275,7 +274,6 @@ queue.topic('incoming').subscribe(incoming => {
           replies = [default_reply(message)]
         }
     }
-
     kip.debug('num replies', replies.length)
     timer.tic('saving message', message)
     yield message.save(); // the incoming message has had some stuff added to it :)

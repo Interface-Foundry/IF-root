@@ -43,12 +43,14 @@ var emojis = {
 // Generate the slack reponse for the search results
 //
 function* results(message) {
-  var amazon = JSON.parse(message.amazon)
+
+  var amazon = JSON.parse(message.amazon);
 
   var results = amazon.map((r, i) => {
     return {
       title: emojis[i+1] + ' ' + truncate(_.get(r, 'ItemAttributes[0].Title[0]')),
       color: '#45a5f4',
+      text: '',
       image_url: r.picstitch_url,
       title_link: r.shortened_url,
       fallback: 'Search Results',
@@ -56,7 +58,7 @@ function* results(message) {
       actions: buttons(i+1)
     }
   });
-
+  debugger;
   results.push({
     fallback: 'Search Results',
     callback_id: 'fwefjiwfj33',
@@ -84,6 +86,7 @@ function* results(message) {
   })
 
   return results;
+
 }
 
 module.exports = results;

@@ -11,7 +11,9 @@ class UserChannel {
         data.attachments.map(a => {
           a.callback_id = a.callback_id || 'default'
         })
-      }
+      } 
+
+      // kip.debug('\n\n\n\n UserChannel: ', data,'\n\n\n\n');
 
       // because javascript is not statically typed
       if (_.get(data, 'data.attachments', []).length > 0) {
@@ -32,11 +34,11 @@ class UserChannel {
         state: session.state,
         user: session.source.user
       })
-      newSession['reply'] = data
-      newSession.mode = nextHandlerID.split('.')[0]
-      newSession.action = nextHandlerID.split('.').slice(1).join('.')
-      kip.debug('inside channel.send(). Session mode is ' + newSession.mode)
-      kip.debug('inside channel.send(). Session action is ' + newSession.action)
+      newSession['reply'] = data;
+      newSession.mode = nextHandlerID.split('.')[0];
+      newSession.action = nextHandlerID.split('.').slice(1).join('.');
+      kip.debug('inside channel.send(). Session mode is ' + newSession.mode);
+      kip.debug('inside channel.send(). Session action is ' + newSession.action);
       var self = this
       newSession.save(function (err, saved) {
         if (err) {

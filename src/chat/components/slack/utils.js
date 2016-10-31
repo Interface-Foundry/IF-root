@@ -45,6 +45,54 @@ function * findAdmins(team) {
 }
 
 /*
+* returns only active members of a channel given a slackbot object, and updates chatusers based on active list
+* @param {Object} slackbot object
+* @returns {array} returns chatuser objects 
+*                   
+*/
+function * getChannelMembers(team) {
+    var members = [];
+    var teamMembers = yield db.Chatusers.find({team_id: team.team_id, is_bot: false}).exec();
+    var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token); // has direct message id
+    var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // has all the profile info such as name, email, etc
+    var res_chan = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // lists all members in a channel
+    res_dm = JSON.parse(res_dm);
+    res_prof = JSON.parse(res_prof);
+    res_chan = JSON.parse(res_chan);
+    var teamIds = teamMembers.map(function(u){
+        return u.id;
+    });
+    return co(function * (){
+      yield eachSeries(res_dm.ims, function * (u) {
+        if ( teamIds.indexOf(u.user) == -1 && u.user != 'USLACKBOT' ) {
+          var user = new db.Chatuser();
+          user.team_id = team.team_id;
+          user.id = u.user;
+          user.platform = 'slack';
+          user.dm = u.id;
+          user.is_bot = false;
+          var profile = res_prof.members.find((m) => { return (m.id == user.id) });
+          user = _.merge(user, profile);
+          yield user.save();
+          members.push(user);
+        } else if (teamIds.indexOf(u.user) > -1 ) {
+          var user = yield db.Chatusers.findOne({ id: u.user}).exec();
+          if (user != null) {
+            members.push(user)
+          }
+        }
+      });
+      members = members.filter((m) => {
+        return res_chan.members.indexOf(m.id) > -1
+      });
+    }).then( function() { return members });
+}
+
+
+
+
+
+/*
 * returns only active members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object
 * @returns {array} returns chatuser objects 

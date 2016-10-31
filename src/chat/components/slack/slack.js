@@ -117,13 +117,13 @@ function * start () {
 
       // don't talk to yourself
       if (data.user === slackbot.bot.bot_user_id || data.subtype === 'bot_message' || _.get(data, 'username', '').toLowerCase().indexOf('kip') === 0) {
-        kip.debug("don't talk to yourself: ")
+        kip.debug("don't talk to yourself: ");
         return; // drop the message before saving.
       }
 
       // other random things
       if (data.type !== 'message' || (data.hidden === true) || data.subtype === 'channel_join' || data.subtype === 'channel_leave') { // settings.name = kip's slack username
-        kip.debug('will not handle this message')
+        kip.debug('\n\n\n will not handle this message, message: ', message, ' \n\n\n')
         return
       }
 
@@ -184,7 +184,7 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
         // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
-        var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
+        var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
         return bot.web.chat.postMessage(message.source.channel,(reply.label ? reply.label : message.text), reply)
       }
       if (message.mode === 'address') {
@@ -209,9 +209,14 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      if (message.mode === 'home' && message.action === 'view') {
+      if (message.mode === 'home' && message.action === 'home') {
         msgData.attachments = message.reply
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        try {
+          bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        } catch(err) {
+          kip.debug('slack.js line 217 bot.web.cht.postMessage err: ', err);
+        }
+        return 
       }
 
       if (message.mode === 'exit' && message.action === 'exit') {
@@ -219,8 +224,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
-
+      try {
+        bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
+      } catch (err) {
+        kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');
+      }
+      
       outgoing.ack()
     }).then(() => {
       outgoing.ack()
