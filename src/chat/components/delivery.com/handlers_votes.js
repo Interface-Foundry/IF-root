@@ -365,15 +365,22 @@ handlers['food.admin.restaurant.more_info'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
   var attachments = []
-
   // TODO later
 }
 
-
 handlers['food.admin.restaurant.confirm'] = function * (message) {
-
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  if (message.allow_text_matching) {
+    // search for merchant from text input
+    var res = yield utils.matchText(message.data.text, foodSession.merchants, ['summary.name'])
+    if (res !== null) {
+      var merchant = res[0]
+    }
+  } else {
+    // use button to select merchant
+    merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
+  }
+
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
     foodSession.merchants = [merchant]
