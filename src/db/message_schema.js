@@ -28,6 +28,8 @@ var messageSchema = mongoose.Schema({
   // Kip processing stuff
   //
   text: String, // incoming message (if applicable), pre-processed
+  allow_text_matching: Boolean, // allow text to match for fuzzy matching
+  text_matching: {}, // if we use allow_text_matching, store matched in here
   tokens: [String], // broken up incoming message (if applicable)
   execute: [{
     mode: String,

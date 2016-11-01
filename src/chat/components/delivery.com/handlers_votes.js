@@ -28,7 +28,7 @@ var api = require('./api-wrapper')
 * creates message to send to each user with random assortment of suggestions, will probably want to create a better schema
 *
 */
-function askUserForCuisineTypes (cuisines, admin, user) {
+function askUserForCuisineTypes (cuisines, admin, user) { // move this into the functiopn later
   // probably should check if user is on slack
   var cuisineToUse = _.sampleSize(cuisines, 4)
     // var cuisineToUse = cuisines.slice(0,2) // use this for testing
@@ -208,7 +208,8 @@ handlers['food.user.poll'] = function * (message) {
       team: member.team_id
     }
 
-    var cuisineMessage = askUserForCuisineTypes(_.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name'), foodSession.convo_initiater, member.dm)
+    var cuisinesAvailForUser = _.map(_.filter(foodSession.cuisines, function (o) { return o.count > 10 }), 'name')
+    var cuisineMessage = askUserForCuisineTypes(cuisinesAvailForUser, foodSession.convo_initiater, member.dm)
 
     var response = {
       mode: 'food',
@@ -231,37 +232,24 @@ handlers['food.user.choice_confirm'] = function * (message) {
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  if (!message.data) {
-    var choices = _.get(foodSession, 'data.response_history[0].response.attachments[0].actions')
-    if (choices) choices.splice(-1, 1)
-    var key = choices ? 'text' : 'name'
-    var set = choices ? choices : foodSession.cuisines
-    var options = {
-      keys: [{ name: key, weight: 1}],
-      shouldSort: true,
-      threshold: 0.6
-    }
-    var fuse = new Fuse(set, options)
-    var res = yield fuse.search(message.text)
-    if (res && res.length > 0) {
-      message.data = {
-        'value': res[0][key],
-        'action': 'admin.restaurant.pick',
-        'mode': 'food'
-      }
-    } else {
-      // TODO: Handle if user inputs nonsense here
-      kip.debug('User typed in an invalid response.')
-    }
-  }
-
   // No Lunch For Me
   if (message.data.value === 'user_remove') {
     foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
     foodSession.markModified('team_members')
   }
 
-  foodSession.votes.push(message.data.value)
+  if (message.allow_text_matching) {
+    // user typed something
+    logging.info('using text matching for cuisine choice')
+    var allCuisines = _.map(foodSession.cuisines, 'name')
+    var res = yield utils.matchText(message.data.text, allCuisines)
+    if (res !== null) {
+      foodSession.votes.push(res[0].name)
+    }
+  } else {
+    // just use button click
+    foodSession.votes.push(message.data.value)
+  }
   foodSession.markModified('votes')
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
@@ -273,12 +261,10 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (numOfResponsesWaitingFor <= 0) {
     yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
   } else {
-
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
   }
 }
-
 
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {

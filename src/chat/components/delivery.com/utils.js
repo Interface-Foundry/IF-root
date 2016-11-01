@@ -7,6 +7,30 @@ var request = require('request-promise')
 
 var queue = require('../queue-mongo')
 
+
+/*
+* use this to match on terms where key_choices are
+* text is what user entered,
+* allChoices is array of all the options to search thru
+* keyChoices is array like ['name'] or ['title', 'children.name']
+*/
+function * matchText(text, allChoices, keyChoices) {
+  // might want to use id, but dont for now
+  var fuse = new Fuse(allChoices, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: keyChoices,
+  })
+  var res = yield fuse.search(text, choices)
+  //
+  if (res.length > 0) {
+    return res
+  } else {
+    // no matches
+    return null
+  }
+}
+
 function defaultReply (message) {
   return new db.Message({
     incoming: false,
@@ -347,4 +371,5 @@ module.exports = {
   text_reply: textReply,
   send_text_reply: sendTextReply,
   yesOrNo: yesOrNo
+  matchText: matchText
 }
