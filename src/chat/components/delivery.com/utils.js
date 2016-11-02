@@ -137,7 +137,7 @@ function * initiateDeliverySession (session) {
       email: admin.profile.email
     },
     data: {
-      instructions: ''
+      instructions: ' '
     },
     tracking: {
     // last_sent_message to replace, and specific id's to

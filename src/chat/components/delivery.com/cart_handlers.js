@@ -336,6 +336,7 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   logging.info('saving apartment number: ', message.text)
   foodSession.chosen_location.address_2 = message.text
+  foodSession.markModified('chosen_location')
   foodSession.save()
 
   var response = {
@@ -384,6 +385,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   logging.info('saving phone number: ', message.text)
   foodSession.chosen_location.phone_number = message.text
+  foodSession.markModified('chosen_location')
   foodSession.save()
 
   var response = {
@@ -486,7 +488,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
           },
           {
             'name': `food.admin.order.checkout.deliver_instructions`,
-            'text': `+ Deliver Instructions`,
+            'text': `+ Delivery Instructions`,
             'type': `button`,
             'value': `edit`
           }

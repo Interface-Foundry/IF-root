@@ -236,10 +236,11 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
-    var allCuisines = _.map(foodSession.cuisines, 'name')
-    var res = yield utils.matchText(message.text, allCuisines)
+    var res = yield utils.matchText(message.text, foodSession.cuisines, ['name'])
     if (res !== null) {
+      logging.info('using vote', res)
       foodSession.votes.push(res[0].name)
+      foodSession.markModified('votes')
     }
   } else {
     // user used button click
@@ -249,8 +250,8 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
       foodSession.markModified('team_members')
     }
     foodSession.votes.push(message.data.value)
+    foodSession.markModified('votes')
   }
-  foodSession.markModified('votes')
   foodSession.save()
   var numOfResponsesWaitingFor = foodSession.team_members.length - foodSession.votes.length
   var votes = foodSession.votes
