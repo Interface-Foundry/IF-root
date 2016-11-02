@@ -4,9 +4,9 @@ var co = require('co')
 var _ = require('lodash')
 var googl = require('goo.gl')
 var request = require('request-promise')
+var Fuse = require('fuse.js')
 
 var queue = require('../queue-mongo')
-
 
 /*
 * use this to match on terms where key_choices are
@@ -14,15 +14,37 @@ var queue = require('../queue-mongo')
 * allChoices is array of all the options to search thru
 * keyChoices is array like ['name'] or ['title', 'children.name']
 */
-function * matchText(text, allChoices, keyChoices) {
+function * matchText (text, allChoices, keyChoices) {
   // might want to use id, but dont for now
   var fuse = new Fuse(allChoices, {
     shouldSort: true,
     threshold: 0.4,
-    keys: keyChoices,
+    keys: keyChoices
   })
-  var res = yield fuse.search(text, choices)
+  var res = yield fuse.search(text)
   //
+  if (res.length > 0) {
+    return res
+  } else {
+    // no matches
+    return null
+  }
+}
+
+function * matchTextToButton (message) {
+  // find previous buttons displayed to user
+
+  // need to grab last message we sent to user that contained attachments
+  var prevMessage = yield db.Message.findOne({id: message.source.id, incoming: false}).exec()
+  // combine all the previous attachments actions
+  var prevButtons = _.map(_.flatten(prevMessage.reply.data.attachments), 'actions')
+  var fuse = new Fuse(prevButtons, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: ['text']
+  })
+  var res = yield fuse.search(message.data.text)
+
   if (res.length > 0) {
     return res
   } else {
@@ -370,6 +392,7 @@ module.exports = {
   default_reply: defaultReply,
   text_reply: textReply,
   send_text_reply: sendTextReply,
-  yesOrNo: yesOrNo
-  matchText: matchText
+  yesOrNo: yesOrNo,
+  matchText: matchText,
+  matchTextToButton: matchTextToButton
 }
