@@ -246,6 +246,16 @@ Bot.prototype.postTyping = function(id) {
     }.bind(this));
 };
 
+//delete slack messages ~zzz 
+Bot.prototype.deleteMessage = function(ts,id) {
+    params = extend({
+        channel:id,
+        ts: ts,
+        as_user:true
+    }, params || {});
+
+    return this._api('chat.delete', params);
+};
 
 /**
  * Posts a message to user by name

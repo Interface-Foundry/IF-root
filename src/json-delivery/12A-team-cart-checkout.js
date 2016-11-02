@@ -125,12 +125,46 @@
                 }
             ]
         },
-       {
+        {
            "title":"",
            "mrkdwn_in": [
-
                 "text"
-
+            ],
+            "text": "*Tip:* $7.00",
+            "fallback": "Tip",
+            "callback_id": "wopr_game",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "chess",
+                    "text": "◉ 15%",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "￮ 20%",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "￮ 25%",
+                    "type": "button",
+                    "value": "chess"
+                },
+                {
+                    "name": "chess",
+                    "text": "￮ None",
+                    "type": "button",
+                    "value": "chess"
+                }
+             ]
+        },
+        {
+           "title":"",
+           "mrkdwn_in": [
+                "text"
             ],
             "text": "*Delivery Fee:* $7.00 \n *Taxes:* $4.52 \n *Team Cart Total:* $49.72 \n",
             "fallback": "You are unable to choose a game",

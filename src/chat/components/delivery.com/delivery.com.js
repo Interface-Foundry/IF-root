@@ -10,10 +10,14 @@ var queue = require('../queue-mongo')
 var utils = require('./utils')
 var address_utils = require('./address_utils')
 var team_utils = require('./team_utils.js')
+var mailer_transport = require('../../../mail/IF_mail.js')
 
 var UserChannel = require('./UserChannel')
 var replyChannel = new UserChannel(queue)
 
+//turn feedback buttons on/off
+var feedbackOn = true
+var feedbackTracker = {}
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
@@ -213,6 +217,7 @@ handlers['food.begin'] = function * (session) {
     type: 'button',
     value: 'address.new'
   })
+
   var msg_json = {
     'attachments': [
       {
@@ -308,8 +313,13 @@ handlers['address.new'] = function * (session) {
   kip.debug(' 🌆🏙 enter a new address')
   // session.state = {}
   var msg_json = {
-    'text': "What's the delivery address?",
-    'attachments': [{'text': 'Type your address below'}]
+    'text': "What's the address for the order?",
+    'attachments': [{
+      'text': '✎ Type your address below (Example: _902 Broadway 10010_)',        
+      'mrkdwn_in': [
+          'text'
+      ]
+    }]
   }
   replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json})
 }
@@ -319,15 +329,19 @@ handlers['address.new'] = function * (session) {
 //
 handlers['address.confirm'] = function * (session) {
   var input = session.text;
+
+  //✐✐✐
+  //this process is slow, we need to send a "Processing..." text message here
+
   var res = yield api.searchNearby({addr: input})
-  if (!res) return utils.send_text_reply(session, 'Sorry! We couldn\'t find that address!');
+  if (!res) return utils.send_text_reply(session, 'Sorry, I can\'t find that address! Try typing something like: "902 Broadway New York, NY 10010"');
   var res_loc = res.search_address;
   res_loc.input = input;
 
   // format the address nicely
   var location = yield address_utils.parseAddress(res_loc);
 
-  var prompt = 'Is `' + location.address_1 + '` your address?'
+  var prompt = 'Is `' + location.address_1 + ' ' + location.city + ', ' + location.state + ' ' + location.zip_code +'` your address?'
   var msg_json = {
     'text': prompt,
     'attachments': [
@@ -342,13 +356,14 @@ handlers['address.confirm'] = function * (session) {
         'actions': [
           {
             name: 'address.save',
-            text: 'Confirm',
+            text: '✓ Confirm Address',
             type: 'button',
+            style: 'primary',
             value: JSON.stringify(location)
           },
           {
             name: 'passthrough',
-            text: 'Edit',
+            text: 'Edit Address',
             type: 'button',
             value: 'address.new'
           }
@@ -356,6 +371,17 @@ handlers['address.confirm'] = function * (session) {
       }
     ]
   }
+
+  //collect feedback on this feature
+  if(feedbackOn && msg_json){
+    msg_json.attachments[0].actions.push({
+      name: 'feedback.new',
+      text: '⇲ Send feedback',
+      type: 'button',
+      value: 'feedback.new'
+    })   
+  }
+
   replyChannel.send(session, 'address.save', {type: session.origin, data: msg_json})
 }
 
@@ -380,6 +406,60 @@ handlers['address.save'] = function * (session) {
 
 handlers['address.change'] = function * (session) {
   return yield handlers['food.begin'](session)
+}
+
+
+//send feedback to Kip 😀😐🙁
+handlers['feedback.new'] = function * (session) {
+
+   feedbackTracker[session.source.team + session.source.user + session.source.channel] = {
+    source: session.source
+   }
+
+  var msg_json = {
+    'text': 'Can you share a bit of info about this? I\'ll pass it on so that we can do better next time',
+    'attachments': [
+      {
+        'text': '✎ Type your feedback',
+        'mrkdwn_in': [
+          'text'
+        ],
+        'fallback': 'What can we improve?',
+        'callback_id': JSON.stringify(session),
+        'attachment_type': 'default'
+      }
+    ]
+  }
+  replyChannel.send(session, 'feedback.save', {type: session.origin, data: msg_json})
+}
+
+handlers['feedback.save'] = function * (session) {
+
+  //check for entry in feedback tracker
+  if (feedbackTracker[session.source.team + session.source.user + session.source.channel]){
+    var source = feedbackTracker[session.source.team + session.source.user + session.source.channel].source
+  }else {
+    var source = 'undefined'
+  }
+
+  var mailOptions = {
+    to: 'Kip Server <hello@kipthis.com>',
+    from: 'Kip Café <server@kipthis.com>',
+    subject: '['+source.callback_id+'] Kip Café Feedback',
+    text: '- Feedback: '+session.text + ' \r\n - Context:'+JSON.stringify(source)
+  }
+  mailer_transport.sendMail(mailOptions, function (err) {
+    if (err) console.log(err)
+  })
+
+  var msg_json = {
+    'text': 'Thanks for explaining the issue'
+  }
+
+  //switch back to original context
+  if(source.callback_id){
+    replyChannel.send(session, source.callback_id.replace(/_/g, '.'), {type: session.origin, data: msg_json})
+  }
 }
 
 //
