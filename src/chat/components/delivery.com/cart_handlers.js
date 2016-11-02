@@ -334,6 +334,7 @@ handlers['food.admin.order.checkout.address'] = function * (message) {
 
 handlers['food.admin.order.checkout.phone_number'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  logging.info('saving apartment number: ', message.text)
   foodSession.chosen_location.address_2 = message.text
   foodSession.save()
 
@@ -381,7 +382,8 @@ handlers['food.admin.order.checkout.phone_number'] = function * (message) {
 
 handlers['food.admin.order.checkout.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  foodSession.chosen_location['phone_number'] = message.text
+  logging.info('saving phone number: ', message.text)
+  foodSession.chosen_location.phone_number = message.text
   foodSession.save()
 
   var response = {
