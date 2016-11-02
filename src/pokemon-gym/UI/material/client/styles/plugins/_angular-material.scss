@@ -1,0 +1,43 @@
+md-backdrop.md-dialog-backdrop{
+    z-index: $zindex-modal-background;
+}
+.md-dialog-container {
+    z-index: $zindex-modal-background + 1; // higher than the backdrop
+}
+
+
+.ui-material-list {
+    md-checkbox {
+        margin-bottom: 0;
+    }
+    md-icon,
+    .md-icon-button {
+        line-height: 20px;
+        margin-right:5px;
+    }
+}
+
+// Datepicker
+.md-datepicker-calendar-pane .md-datepicker-input-mask {
+    width: auto;
+}
+
+// Material Toast
+md-toast {
+    z-index: 999999 !important;
+    position: fixed !important;
+}
+
+// Tab
+.md-primary {
+    md-tabs-wrapper {
+        md-prev-button,
+        md-next-button {
+            md-icon {
+                color: $gray-lighter;
+            }
+        }
+    }
+}
+
+
