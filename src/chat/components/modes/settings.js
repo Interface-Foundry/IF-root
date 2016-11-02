@@ -32,8 +32,6 @@ module.exports.handle = handle;
  * Show the user all the settings they have access to
  */
 handlers['start'] = function * (message) { 
-      kip.debug('\n\n\n\n\n\n\n\n\n\n\n\nsettings.js [start]\n\n\n\n\n\n\n\n\n\n\n\n');
-
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
@@ -63,7 +61,6 @@ handlers['start'] = function * (message) {
   var adminNames = team.meta.office_assistants.map(function(user_id) {
     return '<@' + user_id + '>';
   });
-
   if (adminNames.length > 1) {
     var last = adminNames.pop();
     adminNames[adminNames.length-1] += ' and ' + last;
@@ -72,7 +69,6 @@ handlers['start'] = function * (message) {
   if(adminNames.length < 1){
     var adminText = 'I\'m not managed by anyone right now.';
   } else {
-    // var admins = office_admins.map( function * (s) { return yield db.Chatusers.findOne({ '' }) } )
     var adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
   }
 
@@ -169,27 +165,44 @@ handlers['start'] = function * (message) {
      msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
      msg.client_res.push(attachments)
      msg.reply = attachments;
-     kip.debug('\n\n\n\n settings.js msg : ', msg , '\n\n\n\n')
-
      return [msg];
 
 }
 
 handlers['status_on'] = function * (message) {
-
-  kip.debug('\n\n\n\n\n\nHitting home.status_on : \n\n\n\n\n\n\n\n\n');
-
-     return [message];
-
+  team.meta.weekly_status_enabled = true;
+  yield team.save();
+  var msg = message;
+  msg.mode = 'home';
+  msg.action = 'home';
+  msg.text = 'Ok I turned on weekly status updates!';
+  msg.execute = [ { 
+    "mode": "home",
+    "action": "home",
+    "_id": message._id
+  } ]; 
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  return [msg];
 
 }
 
 
 handlers['status_off'] = function * (message) {
-
-  kip.debug('\n\n\n\n\n\nHitting home.status_off : \n\n\n\n\n\n\n\n\n');
-
-     return [message];
+  team.meta.weekly_status_enabled = false;
+  yield team.save();
+  var msg = message;
+  msg.mode = 'home';
+  msg.action = 'home';
+  msg.text = 'Ok I turned off weekly status updates!';
+  msg.execute = [ { 
+    "mode": "home",
+    "action": "home",
+    "_id": message._id
+  } ]; 
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  return [msg];
 
 
 }
@@ -197,25 +210,17 @@ handlers['status_off'] = function * (message) {
 handlers['change_status'] = function * (message) {
   kip.debug('\n\n\n\n\n\nHitting home.change_status text: ', message.text,' \n\n\n\n\n\n\n\n\n');
   var text = message.text.replace(/^(change|update) weekly (status|update)/, '').trim();
-  // kip.debug('text0 is :', text);
   text = text.replace('days', 'day');
-  // kip.debug('text1 is :', text);
   text = text.replace(/(to|every|\bat\b)/g, '');
-  // kip.debug('text2 is :', text);
   text = text.toLowerCase().trim();
-  kip.debug('text3 is :', text);
-
   // this date library cannot understand Tuesday at 2
   // but it does understand Tuesday at 2:00
-
   if (text.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)) {
     var dayOfWeek = _.get(text.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/),'[0]');
-    kip.debug('day is :', dayOfWeek);
     if (text.indexOf(':') < 0) {
       var hour = _.get(text.match(/([\d]+)/), '[0]');
       var minutes = text.slice(_.indexOf(text, hour)+1, text.length).replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
       // var minutes = _.get(text.split(hour), '[1]').replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
-      kip.debug('\n\n settings.js:217:  text.split(hour): ', hour, ' minutes: ', minutes);
       minutes = minutes ? minutes : '00';
       hour = parseInt(hour.replace(dayOfWeek,''));
       kip.debug('hour is :', hour, 'minutes is: ', minutes);
@@ -252,22 +257,15 @@ handlers['change_status'] = function * (message) {
 }
 
 handlers['add_or_remove'] = function * (message) {
-
- kip.debug('\n\n\n\n\n\nHitting home.add_or_remove: \n\n\n\n\n\n\n\n\n');
  var replies = [];
-   //
-  // Add/remove admins (only admins can do this)
-  //
-  var tokens = message.text.toLowerCase().trim().split(' ');
+  var tokens = message.original_text.toLowerCase().trim().split(' ');
   if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
-
     // look for users mentioned with the @ symbol
     var userIds = tokens.filter((t) => {
       return t.indexOf('<@') === 0;
     }).map((u) => {
       return u.replace(/(\<\@|\>)/g, '').toUpperCase();
-    })
-
+    });
     // also look for users mentioned by name without the @ symbol
     var users = yield db.Chatusers.find({
       team_id: team.team_id,
@@ -280,37 +278,73 @@ handlers['add_or_remove'] = function * (message) {
     }).select('id name').exec();
     users.map((u) => {
       var re = new RegExp('\\b' + u.name + '\\b', 'i')
-      if (response.text.match(re)) {
+      if (message.text.match(re)) {
         userIds.push(u.id);
       }
     });
-    kip.debug(userIds);
     if (userIds.length === 0) {
-      var attachments = [
-        {
-          text: "I'm sorry, I couldn't understand that.  Do you have any Settings changes? Type `exit` to quit Settings",
-          "mrkdwn_in": [
-            "text",
-            "pretext"
-          ]
-        }
-      ];
-      var resStatus = {
-        username: 'Kip',
-        text: "",
-        attachments: attachments,
-        fallback: 'Settings'
-      };
+      var attachments = [];
+       attachments.push({
+          text: 'Don’t have any changes? Type `exit` to quit settings',
+          color: '#49d63a',
+          mrkdwn_in: ['text'],
+          fallback:'Settings',
+          actions: [
+              {
+                "name": "exit",
+                "text": "Exit Settings",
+                "style": "primary",
+                "type": "button",
+                "value": "exit"
+              },              
+              {
+                "name": "help",
+                "text": "Help",
+                "style": "default",
+                "type": "button",
+
+
+                "value": "help"
+              },              
+              {
+                "name": "team",
+                "text": "Team Members",
+                "style": "default",
+                "type": "button",
+                "value": "team"
+              },
+              {
+                "name": "",
+                "text": "View Cart",
+                "style": "default",
+                "type": "button",
+                "value": "team"
+              },
+              {
+                "name": "home",
+                "text": "🐧",
+                "style": "default",
+                "type": "button",
+                "value": "home"
+              }
+          ],
+          callback_id: 'none'
+        });
+      attachments.map(function(a) {
+        a.mrkdwn_in =  ['text'];
+        a.color = '#45a5f4';
+      })
+      message.reply = attachments;
       var msg = message;
       msg.mode = 'home'
       msg.action = 'home'
-      msg.text = '';
+      msg.text = "We couldn't find that user!";
       msg.execute = [ { 
         "mode": "home",
         "action": "home",
         "_id": message._id
       } ]; 
-      msg.reply = resStatus;
+      msg.reply = attachments;
       msg.source.team = team.team_id;
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
       return [msg]
@@ -351,39 +385,95 @@ handlers['add_or_remove'] = function * (message) {
 }
 
 handlers['last_call_off'] = function * (message) {
-
-  kip.debug('\n\n\n\n\n\nHitting home.last_call_off : \n\n\n\n\n\n\n\n\n')
-
-   return [message];
+  currentUser.settings.last_call_alerts = false;
+  yield currentUser.save();
+  var msg = message;
+  message.mode = 'home';
+  message.action = 'home';
+  msg.text = 'Ok I turned off last call!';
+  msg.execute = [ { 
+    "mode": "home",
+    "action": "home",
+    "_id": message._id
+  } ]; 
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+  return [msg];
 }
 
 handlers['last_call_on'] = function * (message) {
-
-  kip.debug('\n\n\n\n\n\nHitting home.last_call_on : \n\n\n\n\n\n\n\n\n')
-
-  return [message];
+  currentUser.settings.last_call_alerts = true;
+  yield currentUser.save();
+  var msg = message;
+  message.mode = 'home';
+  message.action = 'home';
+  msg.text = 'Ok I updated last call! 😊';
+  msg.execute = [ { 
+    "mode": "home",
+    "action": "home",
+    "_id": message._id
+  } ]; 
+  msg.source.team = team.team_id;
+  msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+   return [msg];
 }
 
 handlers['sorry'] = function * (message) {
+   message.text = "We're sorry, we couldn't understand that!"
+   message.mode = 'home';
+   message.action = 'home';
+   var attachments = [];
+   attachments.push({
+      text: 'Don’t have any changes? Type `exit` to quit settings',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Settings',
+      actions: [
+          {
+            "name": "exit",
+            "text": "Exit Settings",
+            "style": "primary",
+            "type": "button",
+            "value": "exit"
+          },              
+          {
+            "name": "help",
+            "text": "Help",
+            "style": "default",
+            "type": "button",
 
-  kip.debug('\n\n\n\n\n\nHitting home.sorry : \n\n\n\n\n\n\n\n\n');
 
-     // var msg = message_tools.text_reply(message, '');
-     // msg.mode = 'home'
-     // msg.text = 'yolo'
-     // msg.execute = [ {
-     //  "mode": "home",
-     //  "action": "home",
-     //  "_id": message._id
-     //  }]
-     // msg.source.team = team_id;
-     // msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-     // msg.client_res.push(attachments)
-     // msg.reply = attachments;
-     kip.debug('\n\n\n\n settings.js msg : ', message , '\n\n\n\n');
-     message.text = "We're sorry, we couldn't understand that!"
-     message.mode = 'home';
-     message.action = 'home';
+            "value": "help"
+          },              
+          {
+            "name": "team",
+            "text": "Team Members",
+            "style": "default",
+            "type": "button",
+            "value": "team"
+          },
+          {
+            "name": "",
+            "text": "View Cart",
+            "style": "default",
+            "type": "button",
+            "value": "team"
+          },
+          {
+            "name": "home",
+            "text": "🐧",
+            "style": "default",
+            "type": "button",
+            "value": "home"
+          }
+      ],
+      callback_id: 'none'
+    });
+    attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    })
+   message.reply = attachments;
      return [message];
 
 }
@@ -391,6 +481,8 @@ handlers['sorry'] = function * (message) {
 function getAction (text) {
   var action;
   if (isStatusOff(text)) {
+      action = 'status_off';
+    } else if (isStatusOff(text)){
       action = 'status_off';
     } else if (isStatusOn(text)){
       action = 'status_on';
@@ -427,7 +519,7 @@ function isStatusOff(input) {
 }
 
 function isStatusOn(input) {
-    var regex = /^(?=yes)(?=(weekly|status))/;
+    var regex = /^(weekly|status)/;
     if (input.toLowerCase().trim().match(regex)) {
       return true;
     } else {
@@ -436,7 +528,7 @@ function isStatusOn(input) {
 }
 
 function isAddOrRemove(input) {
-    var regex = /^(add |remove )/;
+    var regex = /^(add|remove|add @|remove @)/;
     if (input.toLowerCase().trim().match(regex)) {
       return true;
     } else {
