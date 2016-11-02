@@ -62,7 +62,7 @@ function flattenMenu (data) {
   return out
 }
 
-Menu.prototype.generateJsonForItem = function (cartItem) {
+Menu.prototype.generateJsonForItem = function (cartItem, validate) {
   var menu = this
   var item = this.getItemById(cartItem.item.item_id)
   cartItem.item.option_qty = cartItem.item.option_qty || {}
@@ -102,7 +102,7 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
   }
 
   // options, like radios and checkboxes
-  var options = nodeOptions(item, cartItem)
+  var options = nodeOptions(item, cartItem, validate)
   json.attachments = json.attachments.concat(options)
   json.attachments.push({
     'text': 'Special Instructions: _None_',
@@ -138,7 +138,7 @@ Menu.prototype.generateJsonForItem = function (cartItem) {
   return json
 }
 
-function nodeOptions (node, cartItem) {
+function nodeOptions (node, cartItem, validate) {
   var attachments = node.children.filter(c => c.type === 'option group').map(g => {
     var a = {
       fallback: 'Meal option',
@@ -156,12 +156,17 @@ function nodeOptions (node, cartItem) {
 
     var required = false
     var allowMultiple = true
+    var numSelected = g.children.filter(option => Object.keys(cartItem.item.option_qty).includes(option.unique_id.toString())).length
     if (g.min_selection === 0) {
       if (g.max_selection > 4) {
         a.text += '\n Optional - Choose as many as you like.'
       } else {
         a.text += `
  Optional - Choose up to ${g.max_selection}.`
+        if (validate && numSelected > g.max_selection) {
+          a.text += '\n`Maximum number of options exceeded`'
+          a.color = '#fa951b'
+        }
       }
     } else {
       required = true
@@ -169,9 +174,20 @@ function nodeOptions (node, cartItem) {
         allowMultiple = false
         a.text += `
  Required - Choose exactly ${g.min_selection}.`
+        if (validate && numSelected === 0) {
+          a.text += '\n`Option Requred`'
+          a.color = '#fa951b'
+        }
       } else {
         a.text += `
  Required - Choose at least ${g.min_selection} and up to ${g.max_selection}.`
+        if (validate && numSelected > g.max_selection) {
+          a.text += '\n`Maximum number of options exceeded`'
+          a.color = '#fa951b'
+        } else if (validate && numSelected < g.min_selection) {
+          a.text += '\n`Minimum number of options not met`'
+          a.color = '#fa951b'
+        }
       }
     }
 
@@ -197,6 +213,19 @@ function nodeOptions (node, cartItem) {
   })
 
   return attachments
+}
+
+// Check a cartItem for errors
+// (a cartItem is one thing from the foodSession.cart array)
+Menu.prototype.errors = function (cartItem) {
+  // the way we'll do this is to build the options with the validation flag
+  // and then check the outputted json for errors.
+  var submenu = this.generateJsonForItem(cartItem, true)
+  var ok = !JSON.stringify(submenu).includes('fa951b')
+
+  if (!ok) {
+    return submenu
+  }
 }
 
 module.exports = Menu

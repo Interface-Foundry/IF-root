@@ -148,7 +148,6 @@ handlers['food.option.click'] = function * (message) {
   var userItem = yield cart.getItemInProgress(item_id, message.source.user)
   var optionNode = cart.menu.getItemById(option_id)
   userItem.item.option_qty = userItem.item.option_qty || {}
-  debugger;
 
   var optionGroupId = optionNode.id.split('-').slice(-2, -1) // get the parent id, which is the second to last number in the id string. (id strings are dash-delimited ids of the nesting order)
   var optionGroup = cart.menu.getItemById(optionGroupId)
@@ -207,6 +206,12 @@ handlers['food.item.add_to_cart'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
   var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  var errJson = cart.menu.errors(userItem)
+  if (errJson) {
+    kip.debug('validation errors, user must fix some things')
+    kip.error('validation messages not implemented')
+    return $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: errJson})
+  }
   userItem.added_to_cart = true
   yield db.Delivery.update({_id: cart.foodSession._id, 'cart._id': userItem._id}, {$set: {'cart.$.added_to_cart': true}}).exec()
 
