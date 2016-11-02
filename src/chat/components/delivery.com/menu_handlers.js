@@ -209,7 +209,6 @@ handlers['food.item.add_to_cart'] = function * (message) {
   var errJson = cart.menu.errors(userItem)
   if (errJson) {
     kip.debug('validation errors, user must fix some things')
-    kip.error('validation messages not implemented')
     return $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: errJson})
   }
   userItem.added_to_cart = true
