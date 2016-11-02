@@ -232,22 +232,22 @@ handlers['food.user.choice_confirm'] = function * (message) {
 
 handlers['food.admin.restaurant.pick'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  // No Lunch For Me
-  if (message.data.value === 'user_remove') {
-    foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
-    foodSession.markModified('team_members')
-  }
 
   if (message.allow_text_matching) {
     // user typed something
     logging.info('using text matching for cuisine choice')
     var allCuisines = _.map(foodSession.cuisines, 'name')
-    var res = yield utils.matchText(message.data.text, allCuisines)
+    var res = yield utils.matchText(message.text, allCuisines)
     if (res !== null) {
       foodSession.votes.push(res[0].name)
     }
   } else {
-    // just use button click
+    // user used button click
+    // No Lunch For Me
+    if (message.data.value === 'user_remove') {
+      foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
+      foodSession.markModified('team_members')
+    }
     foodSession.votes.push(message.data.value)
   }
   foodSession.markModified('votes')
@@ -372,7 +372,7 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   if (message.allow_text_matching) {
     // search for merchant from text input
-    var res = yield utils.matchText(message.data.text, foodSession.merchants, ['summary.name'])
+    var res = yield utils.matchText(message.text, foodSession.merchants, ['summary.name'])
     if (res !== null) {
       var merchant = res[0]
     }

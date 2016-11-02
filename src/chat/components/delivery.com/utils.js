@@ -136,7 +136,10 @@ function * initiateDeliverySession (session) {
       last_name: _.get(admin, 'profile.last_name') ? admin.profile.last_name : '',
       email: admin.profile.email
     },
-    tracking: {} // last_sent_message to replace, and specific id's to
+    tracking: {
+    // last_sent_message to replace, and specific id's to
+      confirmed_orders_msg: null
+    }
   })
   // check if user has entered phone number before
   if (_.get(admin, 'phone_number')) {
