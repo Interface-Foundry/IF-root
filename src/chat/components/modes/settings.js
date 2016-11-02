@@ -1,5 +1,6 @@
 var message_tools = require('../message_tools')
-var handlers = module.exports = {}
+var handlers = module.exports = {};
+var db = require('db');
 var _ = require('lodash');
 var co = require('co');
 var utils = require('../slack/utils');
@@ -8,22 +9,19 @@ var UserChannel = require('../delivery.com/UserChannel')
 var queue = require('../queue-mongo');
 var replyChannel = new UserChannel(queue);
 var team;
-var members;
+var teamMembers;
 var admins;
 var currentUser;
 var isAdmin;
 var cron = require('cron');
 //maybe can make this persistent later?
 var cronJobs = {};
-
-
 function * handle(message) {
   var last_action = _.get(message, 'history[0].action');
   if (!last_action || last_action.indexOf('home') == -1) {
     return yield handlers['start'](message)
   } else {
     var action = getAction(message.text);
-    kip.debug('\n\n\n\n\n\n\n\n\n\n\n\nsettings.js line 17 - action is - ', action,'\n\n\n\n\n\n\n\n\n\n\n\n')
     return yield handlers[action](message)
   }
 }
@@ -34,12 +32,14 @@ module.exports.handle = handle;
  * Show the user all the settings they have access to
  */
 handlers['start'] = function * (message) { 
+      kip.debug('\n\n\n\n\n\n\n\n\n\n\n\nsettings.js [start]\n\n\n\n\n\n\n\n\n\n\n\n');
+
   var team_id = typeof message.source.team === 'string' ? message.source.team : (_.get(message,'source.team.id') ? _.get(message,'source.team.id') : null )
   if (team_id == null) {
     return kip.debug('incorrect team id : ', message);
   }
   team = yield db.Slackbots.findOne({'team_id': team_id}).exec();
-  members = yield yield utils.getTeamMembers(team);
+  teamMembers = yield yield utils.getTeamMembers(team);
   admins = yield utils.findAdmins(team);
   currentUser = yield db.Chatusers.findOne({id: message.source.user});
   isAdmin = team.meta.office_assistants.indexOf(currentUser.id) >= 0;
@@ -197,11 +197,11 @@ handlers['status_off'] = function * (message) {
 handlers['change_status'] = function * (message) {
   kip.debug('\n\n\n\n\n\nHitting home.change_status text: ', message.text,' \n\n\n\n\n\n\n\n\n');
   var text = message.text.replace(/^(change|update) weekly (status|update)/, '').trim();
-  kip.debug('text0 is :', text);
+  // kip.debug('text0 is :', text);
   text = text.replace('days', 'day');
-  kip.debug('text1 is :', text);
+  // kip.debug('text1 is :', text);
   text = text.replace(/(to|every|\bat\b)/g, '');
-  kip.debug('text2 is :', text);
+  // kip.debug('text2 is :', text);
   text = text.toLowerCase().trim();
   kip.debug('text3 is :', text);
 
@@ -213,27 +213,30 @@ handlers['change_status'] = function * (message) {
     kip.debug('day is :', dayOfWeek);
     if (text.indexOf(':') < 0) {
       var hour = _.get(text.match(/([\d]+)/), '[0]');
-      var minutes = _.get(text.split(hour), '[1]').replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
-      minues = minutes ? minutes.replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '') : '00';
+      var minutes = text.slice(_.indexOf(text, hour)+1, text.length).replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
+      // var minutes = _.get(text.split(hour), '[1]').replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
+      kip.debug('\n\n settings.js:217:  text.split(hour): ', hour, ' minutes: ', minutes);
+      minutes = minutes ? minutes : '00';
       hour = parseInt(hour.replace(dayOfWeek,''));
       kip.debug('hour is :', hour, 'minutes is: ', minutes);
     }
   }
-  if (hour > 0 && hour < 7 && !text.match(/(\bam\b|\bpm\b)/i)) {
-    hour = hour + 12;
-  } else if (hour > 18 && !text.match(/(\bam\b|\bpm\b)/i)) {
+  var am_pm = _.get(text.match(/(am|a.m.|a m|pm|p.m.|p m)/i), '[0]');
+  if (hour > 0 && hour < 7 && !am_pm) {
+    kip.debug('\n\nsettings.js:223: adjusting for lack of am_pm\n\n');
+    am_pm = 'PM'
+    // hour = hour + 12;
+  } else if (hour > 12 && !am_pm) {
+    kip.debug('\n\nsettings.js:223: adjusting for lack of am_pm2 \n\n');
     hour = hour - 12;
-  }
-  var am_pm = 'AM';
-  if (hour > 12) {
-    hour = hour - 12; // bc americans don't do 24 hour times.
     am_pm = 'PM';
   }
+  am_pm = am_pm.toUpperCase();
   team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
   team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-3) + ' ' + am_pm;
   team.meta.weekly_status_timezone = currentUser.tz;
   yield team.save();
-  updateCronJob(team);
+  updateCronJob(team, message);
   var msg = message;
   msg.mode = 'home'
   msg.action = 'home'
@@ -253,98 +256,98 @@ handlers['add_or_remove'] = function * (message) {
  kip.debug('\n\n\n\n\n\nHitting home.add_or_remove: \n\n\n\n\n\n\n\n\n');
  var replies = [];
    //
-    // Add/remove admins (only admins can do this)
-    //
-    var tokens = message.text.toLowerCase().trim().split(' ');
-    if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
+  // Add/remove admins (only admins can do this)
+  //
+  var tokens = message.text.toLowerCase().trim().split(' ');
+  if (isAdmin && ['add', 'remove'].indexOf(tokens[0]) >= 0) {
 
-      // look for users mentioned with the @ symbol
-      var userIds = tokens.filter((t) => {
-        return t.indexOf('<@') === 0;
-      }).map((u) => {
-        return u.replace(/(\<\@|\>)/g, '').toUpperCase();
-      })
+    // look for users mentioned with the @ symbol
+    var userIds = tokens.filter((t) => {
+      return t.indexOf('<@') === 0;
+    }).map((u) => {
+      return u.replace(/(\<\@|\>)/g, '').toUpperCase();
+    })
 
-      // also look for users mentioned by name without the @ symbol
-      var users = yield db.Chatusers.find({
-        team_id: team.team_id,
-        is_bot: {
-          $ne: true
-        },
-        deleted: {
-          $ne: true
+    // also look for users mentioned by name without the @ symbol
+    var users = yield db.Chatusers.find({
+      team_id: team.team_id,
+      is_bot: {
+        $ne: true
+      },
+      deleted: {
+        $ne: true
+      }
+    }).select('id name').exec();
+    users.map((u) => {
+      var re = new RegExp('\\b' + u.name + '\\b', 'i')
+      if (response.text.match(re)) {
+        userIds.push(u.id);
+      }
+    });
+    kip.debug(userIds);
+    if (userIds.length === 0) {
+      var attachments = [
+        {
+          text: "I'm sorry, I couldn't understand that.  Do you have any Settings changes? Type `exit` to quit Settings",
+          "mrkdwn_in": [
+            "text",
+            "pretext"
+          ]
         }
-      }).select('id name').exec();
-      users.map((u) => {
-        var re = new RegExp('\\b' + u.name + '\\b', 'i')
-        if (response.text.match(re)) {
-          userIds.push(u.id);
-        }
-      });
-      kip.debug(userIds);
-      if (userIds.length === 0) {
-        var attachments = [
-          {
-            text: "I'm sorry, I couldn't understand that.  Do you have any Settings changes? Type `exit` to quit Settings",
-            "mrkdwn_in": [
-              "text",
-              "pretext"
-            ]
-          }
-        ];
-        var resStatus = {
-          username: 'Kip',
-          text: "",
-          attachments: attachments,
-          fallback: 'Settings'
-        };
-        var msg = message;
-        msg.mode = 'home'
-        msg.action = 'home'
-        msg.text = '';
-        msg.execute = [ { 
-          "mode": "home",
-          "action": "home",
-          "_id": message._id
-        } ]; 
-        msg.reply = resStatus;
-        msg.source.team = team.team_id;
-        msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-        return [msg]
-      }
-      var shouldReturn = false;
-      if (tokens[0] === 'add') {
-        userIds.map((id) => {
-          if (team.meta.office_assistants.indexOf(id) < 0) {
-            team.meta.office_assistants.push(id);
-          }
-        })
-      } else if (tokens[0] === 'remove') {
-        userIds.map((id) => {
-          if (team.meta.office_assistants.indexOf(id) >= 0) {
-            var index = team.meta.office_assistants.indexOf(id);
-            team.meta.office_assistants.splice(index, 1);
-          }
-        })
-      }
-      if (shouldReturn) {
-        return;
-      }
-      yield team.save();
+      ];
+      var resStatus = {
+        username: 'Kip',
+        text: "",
+        attachments: attachments,
+        fallback: 'Settings'
+      };
       var msg = message;
       msg.mode = 'home'
       msg.action = 'home'
-      msg.text = 'Ok I have updated your settings 😊';
+      msg.text = '';
       msg.execute = [ { 
         "mode": "home",
         "action": "home",
         "_id": message._id
       } ]; 
+      msg.reply = resStatus;
       msg.source.team = team.team_id;
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-      replies.push(msg)      
+      return [msg]
     }
-   return replies;
+    var shouldReturn = false;
+    if (tokens[0] === 'add') {
+      userIds.map((id) => {
+        if (team.meta.office_assistants.indexOf(id) < 0) {
+          team.meta.office_assistants.push(id);
+        }
+      })
+    } else if (tokens[0] === 'remove') {
+      userIds.map((id) => {
+        if (team.meta.office_assistants.indexOf(id) >= 0) {
+          var index = team.meta.office_assistants.indexOf(id);
+          team.meta.office_assistants.splice(index, 1);
+        }
+      })
+    }
+    if (shouldReturn) {
+      return;
+    }
+    yield team.save();
+    var msg = message;
+    msg.mode = 'home'
+    msg.action = 'home'
+    msg.text = 'Ok I have updated your settings 😊';
+    msg.execute = [ { 
+      "mode": "home",
+      "action": "home",
+      "_id": message._id
+    } ]; 
+    msg.source.team = team.team_id;
+    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+    replies.push(msg)      
+  }
+ return replies;
 }
 
 handlers['last_call_off'] = function * (message) {
@@ -377,7 +380,10 @@ handlers['sorry'] = function * (message) {
      // msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
      // msg.client_res.push(attachments)
      // msg.reply = attachments;
-     kip.debug('\n\n\n\n settings.js msg : ', message , '\n\n\n\n')
+     kip.debug('\n\n\n\n settings.js msg : ', message , '\n\n\n\n');
+     message.text = "We're sorry, we couldn't understand that!"
+     message.mode = 'home';
+     message.action = 'home';
      return [message];
 
 }
@@ -457,19 +463,54 @@ function isLastCallOn(input) {
 }
 
 
-function updateCronJob(team) {
-    kip.debug('\n\n\nfiring cron job day: ', team.meta.weekly_status_day, ' time: ', team.meta.weekly_status_time,'\n\n\n')
+function  updateCronJob(team, message) {
+    kip.debug('\n\n\nsetting cron job day: ', team.meta.weekly_status_day, ' time: ', team.meta.weekly_status_time,'\n\n\n')
    var date = Date.parse(team.meta.weekly_status_day + ' ' + team.meta.weekly_status_time);
    var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
-   var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), team.meta.weekly_status_timezone);
-   console.log('setting weekly job for team ' + team.team_id + ' ' + team.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + team.meta.weekly_status_timezone);
+   var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'),  'America/New_York'); //team.meta.weekly_status_timezone
+   console.log('setting weekly job for team ' + team.team_id + ' ' + team.team_name + ' at ' + job_time_bot_tz.format('00 mm HH * * d') + ' ' + team.meta.weekly_status_timezone); 
     if (cronJobs[team.team_id]) {
       cronJobs[team.team_id].stop();
     }
-    cronJobs[team.team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function() {
-    console.log('starting weekly update for team ' + team.team_id + ' ' + team.team_name);
+    cronJobs[team.team_id] = new cron.CronJob(job_time_bot_tz.format('00 mm HH * * d'), function  () {  
+       team.meta.office_assistants.map(function  (a) {
+       var assistant = teamMembers.find(function(m, i){ return m.id == a });
+       var attachments = [
+        {
+          "pretext": "Hi, this is your weekly update",
+          "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+          "text":"",
+          "mrkdwn_in": [
+              "text",
+              "pretext"
+          ],
+          "color":"#45a5f4"
+        }
+       ];
+       var newMessage = new db.Message({
+          incoming: false,
+          thread_id: message.thread_id,
+          user_id: assistant.id,
+          origin: 'slack',
+          source: message.source,
+          mode: 'home',
+          action: 'home',
+          user: message.source.user,
+          reply: attachments
+        })
+        newMessage.save()
+        queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+          
+          // slackBot.web.chat.postMessage(assistant.dm, '', reply);
+          //   // SHOW CART STICKER
+          //  //* * * * * * * * * * * * * * * * * //
+          //  //CHECKING HERE IF NO EMAILS users or channels. If none, Show User Cart Members, prompt to add people, defaults to <#general>
+          //  //* * * * * * * * * * * * * * * * * //
+          //   //* * * *  SHOW TEAM CART USERS  ** * * * //
+          //   convo.ask('Would you like me to send an last call message to *SHOW TEAM LIST*', lastCall)
+        });
     }, function() {
-      console.log('just finished the weekly update thing for team ' + team_id + ' ' + slackbot.team_name);
+      console.log('just finished the weekly update thing for team ' + team.team_id + ' ' + team.team_name);
     },
     true,
     team.meta.weekly_status_timezone);

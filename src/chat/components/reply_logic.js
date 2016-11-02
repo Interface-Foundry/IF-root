@@ -13,8 +13,6 @@ var picstitch = require("./picstitch.js");
 var processData = require("./process.js");
 var purchase = require("./purchase.js");
 // var init_team = require("./init_team.js");
-// var conversation_botkit = require('./conversation_botkit');
-// var weekly_updates = require('./weekly_updates');
 var kipcart = require('./cart');
 var nlp = require('../../nlp2/api');
 //set env vars

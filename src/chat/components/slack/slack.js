@@ -51,13 +51,15 @@ var search_results = require('./search_results')
 var focus = require('./focus')
 var cart = require('./cart')
 // var actions = require('./actions'); --> this runs an extra service not sure what for
+// var slackConnections  = {};
 module.exports.slackConnections = slackConnections = {}
+
 var webserver = require('./webserver')
 
 //
 // slackbots
 //
-function * start () {
+function * start() {
   if (process.env.NODE_ENV === 'test') {
     console.log('starting mock slack server')
     yield slack.run_chat_server()
@@ -80,7 +82,7 @@ function * start () {
       rtm: rtm,
       web: web,
       slackbot: slackbot
-    }
+    };
 
     // TODO figure out how to tell when auth is invalid
     // right now the library just console.log's a message and I can't figure out
@@ -161,13 +163,13 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
 
   try {
     var message = outgoing.data
-    debugger
     var team = _.get(message, 'source.team')
-    var bot = slackConnections[team]
+    var thread_id = _.get(message, 'thread_id')
+
+    var bot = slackConnections[team] ? slackConnections[team] : slackConnections[thread_id];
     if (typeof bot === 'undefined') {
-      logging.error('error with the bot thing, message:', message)
-      kip.debug('\n\nslack.js line 174, message: ', message, '\n\n')
-      throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
+      // logging.error('error with the bot thing, message:', message)
+      // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
 
     var msgData = {
@@ -243,6 +245,8 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     kip.err(e)
   }
 })
+
+
 
 module.exports = {
   start: start
