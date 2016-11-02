@@ -88,10 +88,10 @@ handlers['food.cart.personal'] = function * (message, replace) {
         'style': 'primary'
       },
       {
-        'name': 'chess',
+        'name': 'food.menu.quick_picks',
         'text': '< Back',
         'type': 'button',
-        'value': 'chess'
+        'value': ''
       }
     ]
   }
