@@ -71,11 +71,12 @@ queue.topic('incoming').subscribe(incoming => {
     }
     var route = yield getRoute(session)
 
-    if (session.text) {
+    if (session.text && session.mode === 'food') {
       // if user types something allow the text_matching flag which we can use
       // in some handlers: cuisine picking, restaurant picking, item picking
       session.allow_text_matching = true
     }
+
     kip.debug('mode', session.mode, 'action', session.action)
     kip.debug('route'.cyan, route.cyan)
     // session.mode = 'food'

@@ -2,6 +2,7 @@
 var _ = require('lodash')
 var Menu = require('./Menu')
 var Cart = require('./Cart')
+var utils = require('./utils.js')
 
 // injected dependencies
 var $replyChannel
@@ -117,7 +118,21 @@ handlers['food.menu.quick_picks'] = function * (message) {
 handlers['food.item.submenu'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
-  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+
+  if (message.allow_text_matching) {
+    // search for item if not presented but they type somethin
+    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+    var menu = Menu(foodSession.menu)
+    var sortedMenu = menu.allItems()
+    var res = yield utils.matchText(message.data.text, sortedMenu, ['name'])
+    if (res !== null) {
+      logging.info('we possibly found a food match, hmm')
+      var userItem = yield cart.getItemInProgress(res[0].unique_id, message.source.user)
+    }
+  } else {
+    // user clicked button
+    userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
+  }
   var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
