@@ -38,7 +38,6 @@ module.exports.payForItemFromKip = function * (session,guest_token) {
 }
 
 
-
 // queue.topic('cafe.payments').subscribe(payment => {
 //   logging.info('ack-ing payment', payment.data)
 
