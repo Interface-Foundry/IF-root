@@ -315,7 +315,7 @@ handlers['address.new'] = function * (session) {
   var msg_json = {
     'text': "What's the address for the order?",
     'attachments': [{
-      'text': '✎ Type your address below (Example: _902 Broadway 10010_)',        
+      'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
       'mrkdwn_in': [
           'text'
       ]
@@ -379,7 +379,7 @@ handlers['address.confirm'] = function * (session) {
       text: '⇲ Send feedback',
       type: 'button',
       value: 'feedback.new'
-    })   
+    })
   }
 
   replyChannel.send(session, 'address.save', {type: session.origin, data: msg_json})
@@ -504,7 +504,9 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     .select('chosen_restaurant')
     .exec()
 
-  var mostRecentSession = lastOrdered.filter(session => merchantIds.includes(session.chosen_restaurant.id))[0]
+  lastOrdered = lastOrdered.filter(session => merchantIds.includes(session.chosen_restaurant.id))
+  var mostRecentSession = lastOrdered[0]
+  lastOrdered = _.uniq(lastOrdered.map(session => session.chosen_restaurant.id)) // list of unique restaurants
 
   // create attachments, only including most recent merchant if one exists
   var attachments = []
@@ -516,6 +518,14 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
     listing.text = `You ordered \`Delivery\` from ${listing.text} recently, order again?`
     listing.mrkdwn_in = ['text']
+    if (lastOrdered.length > 1) {
+      listing.actions.push({
+        'name': 'food.restaurants.list.recent',
+        'text': 'See More',
+        'type': 'button',
+        'value': 0
+      })
+    }
     attachments.push(listing)
   }
 
@@ -536,13 +546,6 @@ handlers['food.delivery_or_pickup'] = function * (session) {
         'type': 'button',
         'value': 'food.poll.confirm_send'
       },
-      {
-        'name': 'food.restaurants.list.recent',
-        'text': 'See More',
-        'type': 'button',
-        'value': 1
-      },
-
       {
         'name': 'passthrough',
         'text': '× Cancel',
