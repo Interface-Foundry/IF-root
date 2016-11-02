@@ -109,7 +109,7 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }])
   }
 
-  $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: msg_json})
+  $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: msg_json})
 }
 
 //
@@ -124,7 +124,7 @@ handlers['food.item.submenu'] = function * (message) {
     var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
     var menu = Menu(foodSession.menu)
     var sortedMenu = menu.allItems()
-    var res = yield utils.matchText(message.data.text, sortedMenu, ['name'])
+    var res = yield utils.matchText(message.text, sortedMenu, ['name'])
     if (res !== null) {
       logging.info('we possibly found a food match, hmm')
       var userItem = yield cart.getItemInProgress(res[0].unique_id, message.source.user)

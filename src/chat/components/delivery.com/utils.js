@@ -132,9 +132,12 @@ function * initiateDeliverySession (session) {
     convo_initiater: {
       id: admin.id,
       name: admin.name,
-      first_name: _.get(admin, 'profile.first_name') ? admin.profile.first_name : admin.name,
-      last_name: _.get(admin, 'profile.last_name') ? admin.profile.last_name : '',
+      first_name: _.get(admin.profile, 'first_name') ? admin.profile.first_name : admin.profile.real_name,
+      last_name: _.get(admin.profile, 'last_name') ? admin.profile.last_name : '',
       email: admin.profile.email
+    },
+    data: {
+      instructions: ''
     },
     tracking: {
     // last_sent_message to replace, and specific id's to

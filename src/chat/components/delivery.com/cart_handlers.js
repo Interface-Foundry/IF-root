@@ -203,9 +203,8 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
     foodSession.save()
     return
   }
-  var order = yield api.createCartForSession(foodSession)
+  foodSession.order = yield api.createCartForSession(foodSession)
   var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
-  foodSession.order = order
   foodSession.save()
 
   var menu = Menu(foodSession.menu)
@@ -324,7 +323,7 @@ handlers['food.cart.quantity.decrease'] = function * (message) {
 handlers['food.admin.order.checkout.address'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var response = {
-    text: `Whats your apartment or floor number at ${foodSession.addr.address_1}\n` +
+    text: `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}\n` +
           `>Type your apartment or floor number below`,
     fallback: 'Unable to get address',
     callback_id: `food.admin.order.checkout.address`,
@@ -416,7 +415,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': [`text`],
         'text': `*Address:*\n` +
-                `${foodSession.chosen_location.addr.address_1}`,
+                `${foodSession.chosen_location.address_1}`,
         'fallback': `You are unable to change address`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -434,7 +433,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Apt/Floor#:*\n` +
-                `${foodSession.chosen_location.addr.address_2}`,
+                `${foodSession.chosen_location.address_2}`,
         'fallback': `You are unable to confirm this order`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': '#3AA3E3',
@@ -553,7 +552,7 @@ handlers['food.admin.order.pay'] = function * (message) {
         }]
       }
     })
-    cardsAttachment[0].pretext = `Payment Information`
+    // cardsAttachment[0].pretext = `Payment Information`
     response.attachments = response.attachments.concat(cardsAttachment)
   }
   $replyChannel.sendReplace(message, 'food.admin.order.select_card', {type: message.origin, data: response})
@@ -562,29 +561,40 @@ handlers['food.admin.order.pay'] = function * (message) {
 handlers['food.admin.add_new_card'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
 
+  // add various shit to the foodSession
+  var postBody = {
+    '_id': foodSession._id,
+    'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
+    'active': foodSession.active,
+    'team_id': foodSession.team_id,
+    'chosen_location': {
+      'addr': {
+        'address_1': foodSession.chosen_location.address_1,
+        'address_2': foodSession.chosen_location.address_2,
+        'city': foodSession.chosen_location.city,
+        'state': foodSession.chosen_location.state,
+        'zip_code': foodSession.chosen_location.zip_code,
+        'coordinates': []
+      },
+      'special_instructions': foodSession.data.special_instructions || ''
+    },
+    'time_started': foodSession.time_started,
+    'convo_initiater': foodSession.convo_initiater,
+    'chosen_restaurant': foodSession.chosen_restaurant,
+    'guest_token': foodSession.guest_token,
+    'order': {
+      'total': foodSession.order.total * 100,
+      'tip': 0,
+      'order_type': foodSession.fulfillment_method
+    }
+  }
+
   try {
     foodSession.payment = yield request({
       uri: `https://pay.kipthis.com/charge`,
       method: `POST`,
       json: true,
-      body: {
-        'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
-        '_id': foodSession._id,
-        'active': foodSession.active,
-        'team_id': foodSession.team_id,
-        'chosen_location': foodSession.chosen_location,
-        'chosen_location.addr': foodSession.chosen_location,
-        'chosen_restaurant': foodSession.chosen_restaurant,
-        'time_started': foodSession.time_started,
-        'convo_initiater': foodSession.convo_initiater,
-        'guest_token': foodSession.guest_token,
-        'order': foodSession.order,
-        // stuff not directly from foodSession to make it easier for alyx
-        'amount': foodSession.order.total,
-        'kipId': foodSession.team_id,
-        'description': `${foodSession.chosen_restaurant.id}`,
-        'email': `${foodSession.convo_initiater.email}`
-      }
+      body: postBody
     })
     foodSession.save()
   } catch (e) {
