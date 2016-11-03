@@ -544,7 +544,7 @@ handlers['food.admin.order.pay'] = function * (message) {
         'callback_id': `food.admin.order.select_card`,
         'color': `#3AA3E3`,
         'attachment_type': `default`,
-        'thumb_url': cardImages[c.card.card_type.toLowerCase()] || '',
+        'thumb_url': _.get(c, 'card.card_type') ? cardImages[c.card.card_type.toLowerCase()] : '',
         'actions': [{
           'name': `food.admin.order.select_card`,
           'text': `✓ Select Card`,
