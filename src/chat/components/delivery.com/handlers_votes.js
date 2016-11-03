@@ -260,7 +260,19 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
   // replace after votes
   $replyChannel.sendReplace(message, 'food.admin.restaurant.pick', {type: 'slack', data: {text: `Thanks for your vote, waiting for the rest of the users to finish voting`}})
   if (numOfResponsesWaitingFor <= 0) {
-    yield handlers['food.admin.restaurant.pick.list'](message, foodSession)
+    var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
+    var resp = {
+      mode: 'food',
+      action: 'admin.restaurant.pick',
+      thread_id: admin.dm,
+      origin: message.origin,
+      source: {
+        team: admin.team_id,
+        user: admin.id,
+        channel: admin.dm
+      }
+    }
+    yield handlers['food.admin.restaurant.pick.list'](resp, foodSession)
   } else {
     logging.error('waiting for more responses have, votes: ', votes.length)
     logging.error('need', numOfResponsesWaitingFor)
@@ -273,7 +285,6 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
   var sort = _.get(message, 'data.value.sort', SORT.bestMatch)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
   var viableRestaurants = yield createSearchRanking(foodSession, sort, direction)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
@@ -347,19 +358,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   responseForAdmin.attachments.push(buttons)
 
-  var resp = {
-    mode: 'food',
-    action: 'admin.restaurant.pick',
-    thread_id: admin.dm,
-    origin: message.origin,
-    source: {
-      team: admin.team_id,
-      user: admin.id,
-      channel: admin.dm
-    },
-    data: responseForAdmin
-  }
-  $replyChannel.send(resp, 'food.admin.restaurant.confirm', {type: 'slack', data: resp.data})
+  $replyChannel.sendReplace(message, 'food.admin.restaurant.confirm', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
