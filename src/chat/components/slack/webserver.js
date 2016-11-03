@@ -63,6 +63,8 @@ function simple_action_handler (action) {
       return 'pickup'
     case 'address_confirm_btn':
       return 'address_confirm_btn'
+    case 'send_last_call_btn':
+      return 'send_last_call_btn'
     case 'passthrough':
       return action.value
   }
@@ -123,6 +125,13 @@ app.post('/slackaction', function (req, res) {
           location = _.get(message, 'message.source.original_message.attachments[0].actions[0].value');
         }
         message.source.location = location
+        message.save().then(() => {
+          queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+        })
+      }
+      else if (simple_command == 'send_last_call_btn') {
+        message.mode = 'home';
+        message.action = 'send_last_call';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
         })

@@ -45,47 +45,46 @@ function * findAdmins(team) {
 }
 
 /*
-* returns only active members of a channel given a slackbot object, and updates chatusers based on active list
+* returns members of a channel given a slackbot(team) and channelId, creates in chatUsers(mongo) if it does not exist
 * @param {Object} slackbot object
+* @param {string} channel ID
 * @returns {array} returns chatuser objects 
 *                   
 */
-function * getChannelMembers(team) {
-    var members = [];
+function * getChannelMembers(team, channelId) {
+    var channelMembers = [];
     var teamMembers = yield db.Chatusers.find({team_id: team.team_id, is_bot: false}).exec();
+    teamMemberIds = teamMembers.map( (t) => { return t.id })
+    var res_chan = yield request('https://slack.com/api/channels.list?token=' + team.bot.bot_access_token); // lists all members in a channel
+    res_chan = JSON.parse(res_chan);
+    var channel = res_chan.channels.find( (c) => { return c.id == channelId });
     var res_dm = yield request('https://slack.com/api/im.list?token=' + team.bot.bot_access_token); // has direct message id
     var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // has all the profile info such as name, email, etc
-    var res_chan = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // lists all members in a channel
     res_dm = JSON.parse(res_dm);
     res_prof = JSON.parse(res_prof);
-    res_chan = JSON.parse(res_chan);
-    var teamIds = teamMembers.map(function(u){
-        return u.id;
-    });
     return co(function * (){
-      yield eachSeries(res_dm.ims, function * (u) {
-        if ( teamIds.indexOf(u.user) == -1 && u.user != 'USLACKBOT' ) {
+      yield eachSeries(channel.members, function * (uId) {
+        var bots = res_prof.members.filter( (e) => { return e.is_bot }).map((e) => { return e.id });
+        if ( teamMemberIds.indexOf(uId) == -1 && uId != 'USLACKBOT' && bots.indexOf(uId) == -1) {
+          var userInfo = res_dm.ims.find( (e) => { return e.user == uId } );
           var user = new db.Chatuser();
           user.team_id = team.team_id;
-          user.id = u.user;
+          user.id = userInfo.user;
           user.platform = 'slack';
           user.dm = u.id;
           user.is_bot = false;
-          var profile = res_prof.members.find((m) => { return (m.id == user.id) });
+          var profile = res_prof.members.find((e) => { return (e.id == uId) });
           user = _.merge(user, profile);
           yield user.save();
-          members.push(user);
-        } else if (teamIds.indexOf(u.user) > -1 ) {
-          var user = yield db.Chatusers.findOne({ id: u.user}).exec();
+          channelMembers.push(user);
+        } else if (teamMemberIds.indexOf(uId) > -1 && bots.indexOf(uId) == -1) {
+          var user = teamMembers.find((e) => { return (e.id == uId) });
           if (user != null) {
-            members.push(user)
+            channelMembers.push(user)
           }
         }
       });
-      members = members.filter((m) => {
-        return res_chan.members.indexOf(m.id) > -1
-      });
-    }).then( function() { return members });
+    }).then( function() { return channelMembers });
 }
 
 
@@ -93,7 +92,7 @@ function * getChannelMembers(team) {
 
 
 /*
-* returns only active members of a team given a slackbot object, creates chatuser objects if they do not exist in db
+* returns members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object
 * @returns {array} returns chatuser objects 
 *                   
@@ -105,12 +104,11 @@ function * getTeamMembers(team) {
     var res_prof = yield request('https://slack.com/api/users.list?token=' + team.bot.bot_access_token); // has all the profile info such as name, email, etc
     res_dm = JSON.parse(res_dm);
     res_prof = JSON.parse(res_prof);
-    var teamIds = teamMembers.map(function(u){
-        return u.id;
-    });
+    var teamIds = teamMembers.map(function(u){ return u.id });
     return co(function * (){
       yield eachSeries(res_dm.ims, function * (u) {
-        if ( teamIds.indexOf(u.user) == -1 && u.user != 'USLACKBOT' ) {
+        var bots = res_prof.members.filter( (e) => { return e.is_bot }).map((e) => { return e.id });
+        if ( teamIds.indexOf(u.user) == -1 && u.user != 'USLACKBOT'  && bots.indexOf(u.user) == -1) {
           var user = new db.Chatuser();
           user.team_id = team.team_id;
           user.id = u.user;
@@ -121,7 +119,7 @@ function * getTeamMembers(team) {
           user = _.merge(user, profile);
           yield user.save();
           members.push(user);
-        } else if (teamIds.indexOf(u.user) > -1 ) {
+        } else if (teamIds.indexOf(u.user) > -1  && bots.indexOf(u.user) == -1 ) {
           var user = yield db.Chatusers.findOne({ id: u.user}).exec();
           if (user != null) {
             members.push(user)
@@ -181,6 +179,7 @@ function * addCartChannel(message, channel_name) {
 
 module.exports = {
   findAdmins: findAdmins,
+  getChannelMembers: getChannelMembers,
   getTeamMembers: getTeamMembers,
   addCartChannel: addCartChannel,
   removeCartChannel: removeCartChannel

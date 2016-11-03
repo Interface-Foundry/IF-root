@@ -22,6 +22,7 @@ function * handle(message) {
     return yield handlers['start'](message)
   } else {
     var action = getAction(message.text);
+    kip.debug('\n\n\n🤖 action : ',action,' 🤖\n\n\n');
     return yield handlers[action](message)
   }
 }
@@ -187,7 +188,6 @@ handlers['status_on'] = function * (message) {
 
 }
 
-
 handlers['status_off'] = function * (message) {
   team.meta.weekly_status_enabled = false;
   yield team.save();
@@ -203,8 +203,6 @@ handlers['status_off'] = function * (message) {
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
-
-
 }
 
 handlers['change_status'] = function * (message) {
@@ -221,24 +219,21 @@ handlers['change_status'] = function * (message) {
       var hour = _.get(text.match(/([\d]+)/), '[0]');
       var minutes = text.slice(_.indexOf(text, hour)+1, text.length).replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
       // var minutes = _.get(text.split(hour), '[1]').replace(/(am|a.m.|a m)/i, '').replace(/(pm|p.m.|p m)/i, '');
-      minutes = minutes ? minutes : '00';
+      minutes = minutes ? minutes.trim() : '00';
       hour = parseInt(hour.replace(dayOfWeek,''));
       kip.debug('hour is :', hour, 'minutes is: ', minutes);
     }
   }
   var am_pm = _.get(text.match(/(am|a.m.|a m|pm|p.m.|p m)/i), '[0]');
   if (hour > 0 && hour < 7 && !am_pm) {
-    kip.debug('\n\nsettings.js:223: adjusting for lack of am_pm\n\n');
     am_pm = 'PM'
-    // hour = hour + 12;
   } else if (hour > 12 && !am_pm) {
-    kip.debug('\n\nsettings.js:223: adjusting for lack of am_pm2 \n\n');
     hour = hour - 12;
     am_pm = 'PM';
   }
-  am_pm = am_pm.toUpperCase();
+  am_pm = am_pm.toUpperCase().trim();
   team.meta.weekly_status_day = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
-  team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-3) + ' ' + am_pm;
+  team.meta.weekly_status_time = hour + ':' + ('00' + minutes).substr(-2) + ' ' + am_pm;
   team.meta.weekly_status_timezone = currentUser.tz;
   yield team.save();
   updateCronJob(team, message);
@@ -369,8 +364,8 @@ handlers['add_or_remove'] = function * (message) {
     }
     yield team.save();
     var msg = message;
-    msg.mode = 'home'
-    msg.action = 'home'
+    msg.mode = 'home';
+    msg.action = 'home';
     msg.text = 'Ok I have updated your settings 😊';
     msg.execute = [ { 
       "mode": "home",
@@ -415,10 +410,48 @@ handlers['last_call_on'] = function * (message) {
   } ]; 
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-   return [msg];
+  return [msg];
+}
+
+handlers['send_last_call'] = function * (message) {
+  var replies = []
+  yield team.meta.cart_channels.map( function * (c) {
+    var channelMembers = yield utils.getChannelMembers(team, c);
+    yield channelMembers.map( (m) => {      
+      var attachment = [{
+            "fallback": "Last Call",
+            "text":'',
+            "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
+            "color": "#45a5f4",
+            "mrkdwn_in": ["text"]        
+        },{
+            "fallback": "Last Call",
+            "text":'Hi! ' + currentUser.name + ' wanted to let you know that they will be placing their order soon.\n So if you’ve got some last minute shopping to do, it’s now or never! You have *60* minutes left',
+            "color": "#45a5f4",
+            "mrkdwn_in": ["text"]
+        }];
+        var msg = message;
+        msg.mode = 'home';
+        msg.text = '';
+        msg.action = 'home';
+        // msg.text = 'Ok I updated last call! 😊';
+        msg.execute = [ { 
+          "mode": "home",
+          "action": "home",
+          "_id": message._id
+        }]; 
+        msg.reply = attachment;
+        msg.source.team = team.team_id;
+        msg.source.channel = m.dm; //not sure if this will work
+        replies.push(msg);
+    })
+  });
+  kip.debug('\n\n\n\n\n settings.js:448: ', replies,' \n\n\n\n\n')
+  return replies;
 }
 
 handlers['sorry'] = function * (message) {
+   kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
    message.text = "We're sorry, we couldn't understand that!"
    message.mode = 'home';
    message.action = 'home';
@@ -482,8 +515,6 @@ function getAction (text) {
   var action;
   if (isStatusOff(text)) {
       action = 'status_off';
-    } else if (isStatusOff(text)){
-      action = 'status_off';
     } else if (isStatusOn(text)){
       action = 'status_on';
     } else if (isStatusChange(text)){
@@ -494,6 +525,8 @@ function getAction (text) {
       action = 'last_call_off';
     } else if (isLastCallOn(text)){
       action = 'last_call_on';
+    } else if (isSendLastCall(text)){
+      action = 'send_last_call';
     } else {
       action = 'sorry'
     }
@@ -554,6 +587,16 @@ function isLastCallOn(input) {
     }
 }
 
+function isSendLastCall(input) {
+    var regex = /^(send last call btn)/;
+    if (input.toLowerCase().trim().match(regex)) {
+      return true;
+    } else {
+      return false;
+    }
+}
+
+
 
 function  updateCronJob(team, message) {
     kip.debug('\n\n\nsetting cron job day: ', team.meta.weekly_status_day, ' time: ', team.meta.weekly_status_time,'\n\n\n')
@@ -569,8 +612,8 @@ function  updateCronJob(team, message) {
        var assistant = teamMembers.find(function(m, i){ return m.id == a });
        var attachments = [
         {
-          "pretext": "Hi, this is your weekly update",
-          "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
+          // "pretext": "Hi, this is your weekly reminder.  Would you like to send out a last call?",
+          "image_url":"http://kipthis.com/kip_modes/mode_teamcart_collect.png",
           "text":"",
           "mrkdwn_in": [
               "text",
@@ -579,19 +622,60 @@ function  updateCronJob(team, message) {
           "color":"#45a5f4"
         }
        ];
-       var newMessage = new db.Message({
-          incoming: false,
-          thread_id: message.thread_id,
-          user_id: assistant.id,
-          origin: 'slack',
-          source: message.source,
-          mode: 'home',
-          action: 'home',
-          user: message.source.user,
-          reply: attachments
-        })
-        newMessage.save()
-        queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
+      attachments.push({
+        text: 'Hi, this is your weekly reminder.  Would you like to send out a last call?',
+        color: '#49d63a',
+        mrkdwn_in: ['text'],
+        fallback:'Settings',
+        actions: [
+            {
+              "name": "exit",
+              "text": "Exit Settings",
+              "style": "primary",
+              "type": "button",
+              "value": "exit"
+            },              
+            {
+              "name": "send_last_call_btn",
+              "text": "Yes",
+              "style": "default",
+              "type": "button",
+              "value": "send_last_call_btn"
+            }, 
+            {
+              "name": "no",
+              "text": "No",
+              "style": "default",
+              "type": "button",
+              "value": "no"
+            },             
+            {
+              "name": "team",
+              "text": "Team Members",
+              "style": "default",
+              "type": "button",
+              "value": "team"
+            }
+        ],
+        callback_id: 'none'
+      });
+    attachments.map(function(a) {
+      a.mrkdwn_in =  ['text'];
+      a.color = '#45a5f4';
+    })
+     var newMessage = new db.Message({
+        incoming: false,
+        thread_id: message.thread_id,
+        user_id: assistant.id,
+        origin: 'slack',
+        source: message.source,
+        mode: 'home',
+        action: 'home',
+        user: message.source.user,
+        reply: attachments
+      })
+      newMessage.save()
+      queue.publish('outgoing.' + newMessage.origin, newMessage, newMessage._id + '.reply.update');
           
           // slackBot.web.chat.postMessage(assistant.dm, '', reply);
           //   // SHOW CART STICKER
@@ -606,21 +690,4 @@ function  updateCronJob(team, message) {
     },
     true,
     team.meta.weekly_status_timezone);
-};
-
-Date.prototype.setDay = function(text) { 
-  if (text.indexOf(':') < 0) {
-    text = text.replace(/([\d]+)/, '')
-  }
-  let dayString = text.toLowerCase().trim();
-  let day = ( {
-    monday: () => { return 1 },
-    tuesday: () => { return 2 },
-    wednesday: () => { return 3 },
-    thursday: () => { return 4 },
-    friday: () => { return 5 },
-    saturday: () => { return 6 },
-    sunday: () => { return 7 },
-  } )[ dayString ] || 1;
-  this.setDate(this.getDate() - this.getDay() + day);
 };
