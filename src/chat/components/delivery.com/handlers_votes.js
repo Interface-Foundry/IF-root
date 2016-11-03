@@ -134,9 +134,7 @@ function * createSearchRanking (foodSession, sortOrder, direction) {
 
   // First filter out the ones that are not available for delivery or pickup
   var merchants = foodSession.merchants.filter(m => {
-    if (foodSession.fulfillment_method === 'delivery') {
-      return m.deliverable
-    }
+    return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
 
   // now order the restaurants in terms of descending score
