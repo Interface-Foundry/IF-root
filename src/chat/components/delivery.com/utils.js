@@ -9,6 +9,22 @@ var Fuse = require('fuse.js')
 var queue = require('../queue-mongo')
 
 /*
+*
+*
+*/
+function processName (text) {
+  if (text.split(' ').length > 1) {
+    return {
+      first_name: text.split(' ')[0],
+      last_name: text.split(' ')[1]
+    }
+  } else {
+    return null
+  }
+}
+
+
+/*
 * use this to match on terms where key_choices are
 * text is what user entered,
 * allChoices is array of all the options to search thru
@@ -400,5 +416,6 @@ module.exports = {
   send_text_reply: sendTextReply,
   yesOrNo: yesOrNo,
   matchText: matchText,
-  matchTextToButton: matchTextToButton
+  matchTextToButton: matchTextToButton,
+  processName: processName
 }
