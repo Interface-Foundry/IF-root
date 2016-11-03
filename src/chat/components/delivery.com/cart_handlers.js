@@ -102,9 +102,9 @@ handlers['food.cart.personal'] = function * (message, replace) {
   }
 
   if (replace) {
-    $replyChannel.sendReplace(message, 'food.cart.personal.confirm', {type: 'slack', data: json})
+    $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: json})
   } else {
-    $replyChannel.send(message, 'food.cart.personal.confirm', {type: 'slack', data: json})
+    $replyChannel.send(message, 'food.item.submenu', {type: 'slack', data: json})
   }
 }
 
