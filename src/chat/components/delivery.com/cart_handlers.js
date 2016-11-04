@@ -4,7 +4,7 @@ var request = require('request-promise')
 
 var Menu = require('./Menu')
 var api = require('./api-wrapper')
-var pay = require('../../../payments/pay_utils.js')
+var utils = require('./utils.js')
 
 // injected dependencies
 var $replyChannel
@@ -12,6 +12,24 @@ var $allHandlers // this is how you can access handlers from other methods
 
 // exports
 var handlers = {}
+
+
+function * processCheckout (message, foodSession) {
+  var prevAction = yield db.Message.findOne({id: message.source.id, incoming: false}).select('action').exec()
+  if (prevAction === 'admin.order.checkout.phone_number') {
+    logging.info('saving phone number: ', message.text)
+  }
+  if (prevAction === 'admin.order.checkout.address') {
+    logging.info('saving address: ', message.text)
+    foodSession.chosen_location.address_2 = message.text
+    foodSession.markModified('chosen_location')
+  }
+  if (prevAction === 'admin.order.checkout.name') {
+    logging.info('saving name: ', message.text)
+  }
+
+  foodSession.save()
+}
 
 //
 // Show the user their personal cart
@@ -151,13 +169,62 @@ handlers['food.cart.personal.confirm'] = function * (message) {
   user.history.orders = user.history.orders || []
   yield myItems.map(function * (cartItem) {
     var deliveryItem = menu.getItemById(cartItem.item.item_id)
-    user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem,cartItem: JSON.stringify(cartItem), ts: Date.now()})
+    user.history.orders.push({user_id: user._id, session_id: foodSession._id, chosen_restaurant: foodSession.chosen_restaurant, deliveryItem: deliveryItem, cartItem: JSON.stringify(cartItem), ts: Date.now()})
   })
   yield user.save(function (err, saved) {
     if (err) kip.debug('\n\n\n\n\ncart_handlers.js line 152, err:', err, ' \n\n\n\n\n')
   })
 
-  yield handlers['food.admin.order.confirm'](message, foodSession)
+  yield handlers['food.admin.waiting_for_orders'](message, foodSession)
+}
+
+handlers['food.admin.waiting_for_orders'] = function * (message, foodSession) {
+  foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
+  foodSession.confirmed_orders.push(message.source.user)
+  foodSession.markModified('confirmed_orders')
+
+  if (message.source.user !== foodSession.convo_initiater.id && !_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+    // user has confirmed but admin has not
+
+    $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+  } else {
+    // admin has already confirmed or admin is confirming their vote rn
+
+    var confirmedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
+      return all + ', ' + _.filter(foodSession.team_members, {id: user})[0].name
+    }, '').slice(2)
+
+    if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
+      // user has confirmed and admin has already confirmed as well
+
+      // users response
+      $replyChannel.sendReplace(message, '.', {type: message.origin, data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}})
+
+      // replace admins message
+      var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
+      $replyChannel.sendReplace(msgToReplace, '.', {
+        type: msgToReplace.origin,
+        data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
+      })
+    } else {
+      // admin is confirming, replace their message
+      $replyChannel.sendReplace(message, '.', {
+        type: message.origin,
+        data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
+      })
+      foodSession.tracking.confirmed_orders_msg = message._id
+      foodSession.markModified('tracking')
+    }
+  }
+
+  foodSession.save()
+
+  if (foodSession.team_members.length <= foodSession.confirmed_orders.length) {
+    yield handlers['food.admin.order.confirm'](message, foodSession, true)
+  } else {
+    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
+    return
+  }
 }
 
 /*
@@ -165,44 +232,6 @@ handlers['food.cart.personal.confirm'] = function * (message) {
 */
 handlers['food.admin.order.confirm'] = function * (message, foodSession, replace) {
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  foodSession.confirmed_orders.push(message.source.user)
-  foodSession.markModified('confirmed_orders')
-
-  // lmfao, make string of users whove voted
-  var confirmedUsersString = _.reduce(foodSession.confirmed_orders, function (all, user) {
-    var theirName = _.filter(foodSession.team_members, {id: user})[0].name
-    return all + ', ' + theirName
-  }, '').slice(2)
-
-  if (message.source.user === foodSession.convo_initiater.id) {
-    // tell admin who is still left to order once admin has confirmed, but not before
-    $replyChannel.sendReplace(message, '.', {
-      type: message.origin,
-      data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
-    })
-    foodSession.tracking.confirmed_orders_msg = message._id
-  } else {
-    // send message to user saying thanks they confirmed
-    $replyChannel.sendReplace(message, '.', {
-      type: message.origin,
-      data: {text: `Thanks for your order, waiting for the rest of the users to finish their orders`}
-    })
-
-    if (_.get(foodSession.tracking, 'confirmed_orders_msg')) {
-      // if admin has already confirmed order and waiting on other team members.  update each time team member has voted
-      var msgToReplace = yield db.Messages.findOne({_id: foodSession.tracking.confirmed_orders_msg})
-      $replyChannel.sendReplace(msgToReplace, '.', {
-        type: msgToReplace.origin,
-        data: {text: `Thanks for your order, these users have submitted orders so far: ${confirmedUsersString}, waiting for the rest`}
-      })
-    }
-  }
-
-  if (foodSession.confirmed_orders.length < foodSession.team_members.length) {
-    logging.warn('Not everyone has confirmed their food orders yet still need: ', _.difference(_.map(foodSession.team_members, 'id'), foodSession.confirmed_orders))
-    foodSession.save()
-    return
-  }
   foodSession.order = yield api.createCartForSession(foodSession)
   var admin = yield db.Chatusers.findOne({id: foodSession.convo_initiater.id}).exec()
   foodSession.save()
@@ -243,7 +272,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
       attachment_type: 'default',
       mrkdwn_in: ['text'],
       actions: [{
-        'name': `food.cart.quantity.decrease`,
+        'name': `food.admin.cart.quantity.subtract`,
         'text': `—`,
         'type': `button`,
         'value': item._id
@@ -253,7 +282,7 @@ handlers['food.admin.order.confirm'] = function * (message, foodSession, replace
         'type': `button`,
         'value': item.item.item_id
       }, {
-        'name': `food.cart.quantity.increase`,
+        'name': `food.admin.cart.quantity.add`,
         'text': `+`,
         'type': `button`,
         'value': item._id
@@ -292,7 +321,8 @@ handlers['food.member.order.view'] = function * (message) {
   // would be S12 stuff for just member here
 }
 
-handlers['food.cart.quantity.increase'] = function * (message) {
+handlers['food.admin.cart.quantity.add'] = function * (message) {
+  logging.info('attempting to increase quantity of item')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var itemObjectID = message.source.actions[0].value
   foodSession.cart.filter(i => i._id === itemObjectID).map(i => i.item.item_qty++)
@@ -301,7 +331,8 @@ handlers['food.cart.quantity.increase'] = function * (message) {
   yield handlers['food.admin.order.confirm'](message, foodSession, true)
 }
 
-handlers['food.cart.quantity.decrease'] = function * (message) {
+handlers['food.admin.cart.quantity.subtract'] = function * (message) {
+  logging.info('attempting to decrease quantity of item')
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   var itemObjectID = message.source.actions[0].value
   if (foodSession.cart.filter(i => i._id === itemObjectID).map(i => i.item.item_qty)[0] <= 1) {
@@ -323,25 +354,54 @@ handlers['food.admin.order.checkout.address'] = function * (message) {
   var response = {
     text: `Whats your apartment or floor number at ${foodSession.chosen_location.address_1}\n` +
           `>Type your apartment or floor number below`,
+    mrkdwn_in: ['text'],
     fallback: 'Unable to get address',
     callback_id: `food.admin.order.checkout.address`,
     color: `#3AA3E3`
   }
-  $replyChannel.send(message, 'food.admin.order.checkout.phone_number', {type: message.origin, data: response})
+  $replyChannel.send(message, 'food.admin.order.checkout.name', {type: message.origin, data: response})
 }
 
-handlers['food.admin.order.checkout.phone_number'] = function * (message) {
+handlers['food.admin.order.checkout.name'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   logging.info('saving apartment number: ', message.text)
   foodSession.chosen_location.address_2 = message.text
   foodSession.markModified('chosen_location')
   foodSession.save()
 
+  // if (_.get(foodSession, 'convo_initiater.first_name')) {
+  //   // we already  have gotten their name and phone number
+  //   $replyChannel.send(message, 'food.admin.order.checkout.confirm', {type: message.origin, data: response})
+  // }
+  var response = {
+    text: `Hey ${foodSession.convo_initiater.name} what's the full name of the person who will be receiving this order\n` + `
+          >Type their name below`,
+    mrkdwn_in: ['text'],
+    fallback: 'Unable to get name',
+    callback_id: 'food.admin.order.checkout.name',
+    color: '#3AA3E3'
+  }
+  $replyChannel.send(message, 'food.admin.order.checkout.phone_number', {type: message.origin, data: response})
+}
+
+handlers['food.admin.order.checkout.phone_number'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+
+  // process user name from previous message
+  var processedName = utils.processName(message.text)
+  if (processedName !== null) {
+    logging.info('saving name: ', message.text)
+    foodSession.convo_initiater.first_name = processedName.first_name
+    foodSession.convo_initiater.last_name = processedName.last_name
+    foodSession.save()
+  }
+
   var response = {
     text: `Whats your phone number ${foodSession.convo_initiater.name}\n` + `
           >Type your phone number below`,
+    mrkdwn_in: ['text'],
     fallback: 'Unable to get phone',
-    'callback_id': 'wopr_game',
+    callback_id: 'food.admin.order.checkout.phone_number',
     color: '#3AA3E3'
   }
 
@@ -399,7 +459,7 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
         'title': '',
         'mrkdwn_in': ['text'],
         'text': `*Name:*\n` +
-                `${foodSession.convo_initiater.name}`,
+                `${foodSession.convo_initiater.first_name} ${foodSession.convo_initiater.last_name}`,
         'fallback': `You are unable to change name`,
         'callback_id': `food.admin.order.checkout.confirm`,
         'color': `#3AA3E3`,
@@ -723,7 +783,6 @@ handlers['food.done'] = function * (message) {
   // var slackbot = db.Salckbots.findOne({team_id: message.source.team}).exec()
   // retrieve users phone number
 }
-
 
 
 module.exports = function (replyChannel, allHandlers) {
