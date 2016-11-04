@@ -129,7 +129,7 @@ handlers['food.cart.personal.quantity.subtract'] = function * (message) {
     // don't let them go down to zero
     userItem.deleteMe = true
     foodSession.cart = foodSession.cart.filter(i => !i.deleteMe)
-    yield db.Delivery.update({_id: cart.foodSession._id}, {$pull: { cart: {_id: userItem._id }}}).exec()
+    yield db.Delivery.update({_id: foodSession._id}, {$pull: { cart: {_id: userItem._id }}}).exec()
   } else {
     userItem.item.item_qty--
     yield db.Delivery.update({_id: foodSession._id, 'cart._id': userItem._id}, {$inc: {'cart.$.item.item_qty': -1}}).exec()
