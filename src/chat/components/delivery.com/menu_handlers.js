@@ -166,11 +166,8 @@ handlers['food.item.submenu'] = function * (message) {
   var cart = Cart(message.source.team)
   yield cart.pullFromDB()
 
-  if (message.allow_text_matching) {
-  } else {
-    // user clicked button
-    userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
-  }
+  // user clicked button
+  var userItem = yield cart.getItemInProgress(message.data.value, message.source.user)
   var json = cart.menu.generateJsonForItem(userItem)
   $replyChannel.sendReplace(message, 'food.menu.submenu', {type: 'slack', data: json})
 }
