@@ -94,7 +94,8 @@ var userFoodPreferencesPlaceHolder = {
 // enum for sort orders
 //
 var SORT = {
-  bestMatch: 'best match',
+  cuisine: 'cuisine',
+  keyword: 'keyword',
   price: 'price',
   rating: 'rating',
   distance: 'distance',
@@ -113,9 +114,9 @@ var SORT = {
 *
 * @returns {} object that is ranked listing of places or whatever
 */
-function * createSearchRanking (foodSession, sortOrder, direction) {
+function * createSearchRanking (foodSession, sortOrder, direction, keyword) {
   // Set a default sort order
-  sortOrder = sortOrder || SORT.bestMatch
+  sortOrder = sortOrder || SORT.cuisine
 
   // will multiply by -1 depending on ascending or decscending
   var directionMultiplier = direction === SORT.ascending ? 1 : -1
@@ -124,7 +125,13 @@ function * createSearchRanking (foodSession, sortOrder, direction) {
   // Different ways to compute the score for a merchant. Higher scores show up first.
   //
   var scoreAlgorithms = {
-    [SORT.bestMatch] : (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length || 0,
+    [SORT.cuisine] : (m) => foodSession.votes.filter(v => m.summary.cuisines.includes(v)).length || 0,
+    [SORT.keyword] : (m) => {
+      if (!keyword) {
+        throw new Error('Cannot sort based on keyword without a keyword')
+      }
+      return (matchingRestaurants.length - matchingRestaurants.indexOf(m.id))/matchingRestaurants.length
+    },
     [SORT.distance] : (m) => _.get(m, 'location.distance', 10000),
     [SORT.rating] : (m) => {
       return _.get(m, 'summary.overall_rating', 0) },
@@ -136,6 +143,13 @@ function * createSearchRanking (foodSession, sortOrder, direction) {
   var merchants = foodSession.merchants.filter(m => {
     return _.get(m, 'ordering.availability.' + foodSession.fulfillment_method)
   })
+
+  // next filter out restaurants that don't match the keyword if provided
+  if (keyword) {
+    var matchingRestaurants = yield utils.matchText(keyword, foodSession.merchants, ['summary.name'])
+    matchingRestaurants = matchingRestaurants.map(r => r.id)
+    merchants = merchants.filter(m => matchingRestaurants.includes(m.id))
+  }
 
   // now order the restaurants in terms of descending score
   merchants = merchants
@@ -280,10 +294,11 @@ handlers['food.admin.restaurant.pick'] = function * (message) {
 
 handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) {
   var index = _.get(message, 'data.value.index', 0)
-  var sort = _.get(message, 'data.value.sort', SORT.bestMatch)
+  var sort = _.get(message, 'data.value.sort', SORT.cuisine)
   var direction = _.get(message, 'data.value.direction', SORT.descending)
+  var keyword = _.get(message, 'data.value.keyword')
   foodSession = typeof foodSession === 'undefined' ? yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec() : foodSession
-  var viableRestaurants = yield createSearchRanking(foodSession, sort, direction)
+  var viableRestaurants = yield createSearchRanking(foodSession, sort, direction, keyword)
   logging.info('# of restaurants: ', foodSession.merchants.length)
   logging.data('# of viable restaurants: ', viableRestaurants.length)
 
@@ -296,14 +311,14 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': 'More Choices >',
     'type': 'button',
-    'value': {index: index + 3, sort: sort, direction: direction}
+    'value': {index: index + 3, sort: sort, direction: direction, keyword: keyword}
   }
 
   var backButton = {
     'name': 'food.admin.restaurant.pick.list',
     'text': '<',
     'type': 'button',
-    'value': {index: index - 3, sort: sort, direction: direction}
+    'value': {index: index - 3, sort: sort, direction: direction, keyword: keyword}
   }
 
   var arrow = direction === SORT.descending ? '▾ ' : '▴ '
@@ -313,7 +328,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': (sort === SORT.price ? arrow : '') + 'Sort Price',
     'type': 'button',
-    'value': {index: 0, sort: SORT.price, direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
+    'value': {index: 0, sort: SORT.price, keyword: keyword, direction: (sort === SORT.price && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
   }
 
   // default rating sort direction is descending
@@ -321,7 +336,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': (sort === SORT.rating ? arrow : '') + 'Sort Rating',
     'type': 'button',
-    'value': {index: 0, sort: SORT.rating, direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending }
+    'value': {index: 0, sort: SORT.rating, keyword: keyword, direction: (sort === SORT.rating && direction === SORT.descending) ? SORT.ascending : SORT.descending }
   }
 
   // default distance sort direction is ascending
@@ -329,7 +344,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
     'name': 'food.admin.restaurant.pick.list',
     'text': (sort === SORT.distance ? arrow : '') + 'Sort Distance',
     'type': 'button',
-    'value': {index: 0, sort: SORT.distance, direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
+    'value': {index: 0, sort: SORT.distance, keyword: keyword, direction: (sort === SORT.distance && direction === SORT.ascending) ? SORT.descending : SORT.ascending }
   }
 
   var buttons = {
@@ -356,7 +371,7 @@ handlers['food.admin.restaurant.pick.list'] = function * (message, foodSession) 
 
   responseForAdmin.attachments.push(buttons)
 
-  $replyChannel.sendReplace(message, 'food.admin.restaurant.confirm', {type: 'slack', data: responseForAdmin})
+  $replyChannel.sendReplace(message, 'food.admin.restaurant.search', {type: 'slack', data: responseForAdmin})
 }
 
 handlers['food.admin.restaurant.more_info'] = function * (message) {
@@ -366,18 +381,21 @@ handlers['food.admin.restaurant.more_info'] = function * (message) {
   // TODO later
 }
 
+handlers['food.admin.restaurant.search'] = function * (message) {
+  message.data = {
+    value: {
+      index: 0,
+      keyword: message.text,
+      sort: SORT.keyword
+    }
+  }
+
+  return yield handlers['food.admin.restaurant.pick.list'](message)
+}
+
 handlers['food.admin.restaurant.confirm'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  if (message.allow_text_matching) {
-    // search for merchant from text input
-    var res = yield utils.matchText(message.text, foodSession.merchants, ['summary.name'])
-    if (res !== null) {
-      var merchant = res[0]
-    }
-  } else {
-    // use button to select merchant
-    merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
-  }
+  var merchant = _.find(foodSession.merchants, {id: String(message.data.value)})
 
   if (!merchant) {
     merchant = yield api.getMerchant(message.data.value)
@@ -429,7 +447,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
-            'value': 'food.menu.quick_picks'
+            'value': {}
           },
           {
             'name': 'food.exit.confirm',
