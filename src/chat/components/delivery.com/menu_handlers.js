@@ -18,7 +18,26 @@ handlers['food.menu.quick_picks'] = function * (message) {
   var recommendedItemIds = []
 
   // paging
-  var index = parseInt(_.get(message, 'data.value')) || 0
+  var index = parseInt(_.get(message, 'data.value.index')) || 0
+  var keyword = _.get(message, 'data.value.keyword')
+
+  // the keyword match bumps stuff up in the sort order
+  if (keyword) {
+    // search for item if not presented but they type somethin
+    logging.info('searching for', keyword.cyan)
+    var menu = Menu(foodSession.menu)
+    var sortedMenu = menu.allItems()
+    var matchingItems = yield utils.matchText(keyword, sortedMenu, ['name'])
+    if (matchingItems !== null) {
+      logging.info('we possibly found a food match, hmm')
+    } else {
+      logging.info('todo send "couldnot find anything matching text" message to user')
+      matchingItems = []
+    }
+  } else {
+    matchingItems = []
+  }
+  matchingItems = matchingItems.map(i => i.unique_id)
 
 
   var previouslyOrderedItemIds = _.get(user, 'history.orders', [])
@@ -38,9 +57,9 @@ handlers['food.menu.quick_picks'] = function * (message) {
   // THen the rest of the menu in any order i think
   //
   var sortOrder = {
-    orderedBefore: 1,
+    orderedBefore: 3,
     recommended: 2,
-    none: 3
+    none: 1
   }
 
   var menu = Menu(foodSession.menu)
@@ -56,8 +75,12 @@ handlers['food.menu.quick_picks'] = function * (message) {
       i.sortOrder = sortOrder.none
     }
 
+    if (matchingItems.includes(i.unique_id)) {
+      i.sortOrder += 10 + (matchingItems.length - matchingItems.indexOf(i.unique_id))/matchingItems.length
+    }
+
     return i
-  }).sort((a, b) => a.sortOrder - b.sortOrder).slice(index, index + 3).map(i => {
+  }).sort((a, b) => b.sortOrder - a.sortOrder).slice(index, index + 3).map(i => {
     var attachment = {
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: 'i.name',
@@ -97,7 +120,10 @@ handlers['food.menu.quick_picks'] = function * (message) {
           'name': 'food.menu.quick_picks',
           'text': 'More >',
           'type': 'button',
-          'value': index + 3
+          'value': {
+            index: index + 3,
+            keyword: keyword
+          }
         },
         {
           'name': 'chess',
@@ -109,7 +135,19 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }])
   }
 
-  $replyChannel.sendReplace(message, 'food.item.submenu', {type: 'slack', data: msg_json})
+  $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
+}
+
+// just like pressing a category button
+handlers['food.menu.search'] = function * (message) {
+  message.data = {
+    value: {
+      index: 0,
+      keyword: message.text
+    }
+  }
+
+  return yield handlers['food.menu.quick_picks'](message)
 }
 
 //
@@ -120,15 +158,6 @@ handlers['food.item.submenu'] = function * (message) {
   yield cart.pullFromDB()
 
   if (message.allow_text_matching) {
-    // search for item if not presented but they type somethin
-    var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-    var menu = Menu(foodSession.menu)
-    var sortedMenu = menu.allItems()
-    var res = yield utils.matchText(message.text, sortedMenu, ['name'])
-    if (res !== null) {
-      logging.info('we possibly found a food match, hmm')
-      var userItem = yield cart.getItemInProgress(res[0].unique_id, message.source.user)
-    }
   } else {
     // user clicked button
     userItem = yield cart.getItemInProgress(message.data.value, message.source.user)

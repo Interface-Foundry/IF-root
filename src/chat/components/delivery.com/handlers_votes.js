@@ -429,7 +429,7 @@ handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSess
             'text': 'Yes',
             'type': 'button',
             'style': 'primary',
-            'value': 'food.menu.quick_picks'
+            'value': {}
           },
           {
             'name': 'food.exit.confirm',
