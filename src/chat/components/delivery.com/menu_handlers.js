@@ -118,21 +118,30 @@ handlers['food.menu.quick_picks'] = function * (message) {
       'actions': [
         {
           'name': 'food.menu.quick_picks',
-          'text': 'More >',
+          'text': keyword ? `More "${keyword}" >` : 'More >',
           'type': 'button',
           'value': {
             index: index + 3,
             keyword: keyword
           }
         },
-        {
-          'name': 'chess',
-          'text': 'Category',
-          'type': 'button',
-          'value': 'chess'
-        }
+        // {
+        //   'name': 'chess',
+        //   'text': 'Category',
+        //   'type': 'button',
+        //   'value': 'chess'
+        // }
       ]
     }])
+  }
+
+  // add the Back button to clear the keyword
+  if (keyword) {
+    msg_json.attachments[msg_json.attachments.length - 1].actions.push({
+      name: 'food.menu.quick_picks',
+      type: 'button',
+      text: '× Clear'
+    })
   }
 
   $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
