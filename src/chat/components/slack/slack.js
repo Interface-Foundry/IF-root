@@ -139,10 +139,10 @@ function * start () {
         })
       }
       // clean up the text
-      message.text = data.text.replace(/(<([^>]+)>)/ig, ''); // remove <user.id> tag
-      if (message.text.charAt(0) == ':') {
-        message.text = message.text.substr(1); // remove : from beginning of string
-      }
+      message.text = data.text // .replace(/(<([^>]+)>)/ig, ''); // remove <user.id> tag
+      // if (message.text.charAt(0) == ':') {
+      //   message.text = message.text.substr(1); // remove : from beginning of string
+      // }
       message.text = message.text.trim() // remove extra spaces on edges of string
 
       // queue it up for processing
