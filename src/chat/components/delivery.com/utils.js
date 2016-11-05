@@ -8,20 +8,6 @@ var Fuse = require('fuse.js')
 
 var queue = require('../queue-mongo')
 
-/*
-*
-*
-*/
-function processName (text) {
-  if (text.split(' ').length > 1) {
-    return {
-      first_name: text.split(' ')[0],
-      last_name: text.split(' ')[1]
-    }
-  } else {
-    return null
-  }
-}
 
 
 /*
@@ -416,6 +402,5 @@ module.exports = {
   send_text_reply: sendTextReply,
   yesOrNo: yesOrNo,
   matchText: matchText,
-  matchTextToButton: matchTextToButton,
-  processName: processName
+  matchTextToButton: matchTextToButton
 }
