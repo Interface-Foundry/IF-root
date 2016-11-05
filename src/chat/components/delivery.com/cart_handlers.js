@@ -423,8 +423,9 @@ handlers['food.admin.order.checkout.confirm'] = function * (message) {
   }
 
   editInfo['admin.order.checkout.phone_number'] = function * (message) {
-    logging.info('saving phone number: ', message.text)
-    foodSession.chosen_location.phone_number = message.text
+    var num = message.text.replace(/<tel:([^|]*)\|.*/, '$1')
+    logging.info('saving phone number: ', num, 'from', message.text)
+    foodSession.chosen_location.phone_number = num
     foodSession.markModified('chosen_location')
     yield foodSession.save()
   }
