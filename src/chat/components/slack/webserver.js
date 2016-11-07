@@ -1,9 +1,6 @@
-var fs = require('fs');
-var kip = require('kip');
 //
 // "Actions" are what slack calls buttons
 //
-<<<<<<< HEAD
 var queue = require('../queue-mongo');
 var db = require('db');
 require('kip');
@@ -18,24 +15,10 @@ var kipcart = require('../cart');
 var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
-=======
-var queue = require('../queue-mongo')
-require('kip')
-var refresh_team = require('../refresh_team')
-var express = require('express')
-var co = require('co')
-var app = express()
-var bodyParser = require('body-parser')
-var cart = require('./cart')
-var kipcart = require('../cart')
-var _ = require('lodash')
-app.use(express.static(__dirname + '/public'))
-app.use(bodyParser.urlencoded())
-app.use(bodyParser.json())
->>>>>>> a4f42ca5ba14c29032e3b43f44792ecac3625ce4
+
 // app.listen(3000, function(e) {
 //   if (e) { console.error(e) }
 //   console.log('chat app listening on port 8000 🌏 💬')
@@ -69,10 +52,12 @@ function simple_action_handler (action) {
     //
     // Other buttons
     //
+    case 'home_btn':
+      return 'home_btn';
     case 'team':
       return 'team';
-    case 'home':
-      return 'home';
+    case 'settings':
+      return 'settings';
     case 'exit':
       return 'exit';
     case 'delivery_btn':
@@ -133,7 +118,50 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id;
       message.source.user = message.source.user.id;
       message.source.channel = message.source.channel.id;
-      if (simple_command == 'address_confirm_btn') {
+
+      if (simple_command == 'home_btn') {
+        var json = message.source.original_message;
+        json.attachments[json.attachments.length-1] = {
+            fallback: 'Search Results',
+            callback_id: 'search_results',
+            actions: [{
+              name: "more",
+              text: "See More Result",
+              style: "default",
+              type: "button",
+              value: "more"
+            },
+            {
+              name: "settings",
+              text: "Settings",
+              style: "default",
+              type: "button",
+              value: "home",
+            },
+            {
+              name: "team",
+              text: "Team Members",
+              style: "default",
+              type: "button",
+              value: "home",
+            }, 
+            {
+              name: "viewcart",
+              text: "View Cart",
+              style: "default",
+              type: "button",
+              value: "viewcart"
+              }
+            ]
+        }
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: JSON.stringify(json)
+        })
+        return res.sendStatus(200)
+      }
+      else if (simple_command == 'address_confirm_btn') {
         message.mode = 'address'
         message.action = 'validate'
         var location
@@ -148,7 +176,7 @@ app.post('/slackaction', next(function * (req, res) {
         })
       }
       else if (simple_command == 'send_last_call_btn') {
-        message.mode = 'home';
+        message.mode = 'settings';
         message.action = 'send_last_call';
         message.save().then(() => {
           queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
@@ -158,8 +186,8 @@ app.post('/slackaction', next(function * (req, res) {
         message.mode = simple_command.split('.')[0]
         message.action = simple_command.split('.')[1]
       }
-      else if (simple_command == 'home') {
-        message.mode = 'home';
+      else if (simple_command == 'settings') {
+        message.mode = 'settings';
         message.action = 'home';
       }
       else if (simple_command == 'team') {
@@ -200,11 +228,9 @@ app.post('/slackaction', next(function * (req, res) {
         slackBot.web.chat.postMessage(message.source.channel, '', reply);
         
       }
-
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       });
-
     }
     else if (buttonData) {
       var message = new db.Message({
@@ -221,12 +247,33 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id
       message.source.user = message.source.user.id
       message.source.channel = message.source.channel.id
+      kip.debug(' \n\n\n\n webserver:205:buttonData: message: ', message, ' \n\n\n\n ')
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
       switch (action.name) {
+        case 'viewcart':
+          var message = new db.Message({
+              incoming: true,
+              thread_id: parsedIn.channel.id,
+              action: 'cart.view',
+              mode: 'shopping',
+              text: 'view cart',
+              user_id: parsedIn.user.id,
+              origin: 'slack',
+              source: parsedIn
+            })
+            // inject source.team and source.user because fuck the fuck out of slack message formats
+            message.source.team = message.source.team.id
+            message.source.user = message.source.user.id
+            message.source.channel = message.source.channel.id
+            kip.debug(' \n\n\n\n webserver:273:viewcartbutton: message: ', message, ' \n\n\n\n ')
+            message.save().then(() => {
+              queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+            })
+         break
         case 'additem':
           // adds the item to the cart the right way, but for speed we return a hacked message right away
           var updatedMessage = parsedIn.original_message
@@ -243,7 +290,6 @@ app.post('/slackaction', next(function * (req, res) {
               })
             }
           })
-
           co(function * () {
             var teamCart = yield kipcart.getCart(parsedIn.team.id)
             var item = yield db.Items.findById(parsedIn.callback_id).exec()
@@ -310,7 +356,6 @@ app.post('/slackaction', next(function * (req, res) {
           break
       }
     }
-
     // sends back original chat
     if (parsedIn.original_message) {
       var stringOrig = JSON.stringify(parsedIn.original_message)

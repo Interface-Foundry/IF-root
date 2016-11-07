@@ -19,6 +19,7 @@ var nlp = require('../../nlp2/api');
 var config = require('../../config');
 var mailerTransport = require('../../mail/IF_mail.js');
 
+
 //load mongoose models
 var mongoose = require('mongoose');
 require('kip');
@@ -31,6 +32,8 @@ var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
+var UserChannel = require('./UserChannel');
+var replyChannel = new UserChannel(queue)
 var onboarding = require('./modes/onboarding');
 var settings = require('./modes/settings');
 var team = require('./modes/team');
@@ -134,8 +137,8 @@ queue.topic('incoming').subscribe(incoming => {
       var results = results[0]
       logging.debug('raw_results: ', results)
 
-      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20)
-      var message = history[0]
+      var history = yield db.Messages.find({thread_id: incoming.data.postback.dataId}).sort('-ts').limit(20);
+      var message = history[0];
       message.history = history.slice(1)
 
       var cart_id = (message.source.origin == 'facebook') ? message.source.org : message.cart_reference_id || message.source.team
@@ -227,7 +230,7 @@ queue.topic('incoming').subscribe(incoming => {
           }
         }
       break;
-     case 'home':
+     case 'settings':
         var replies = yield settings.handle(message);
         break;
      case 'team':
@@ -547,6 +550,7 @@ handlers['shopping.initial'] = function * (message, exec) {
     action: 'results',
     original_query: results.original_query
   })
+
 }
 
 handlers['shopping.focus'] = function * (message, exec) {

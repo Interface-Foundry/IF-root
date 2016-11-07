@@ -147,13 +147,8 @@ handlers['start'] = function * (message) {
     })
 
    var msg = message;
-   msg.mode = 'home'
+   msg.mode = 'settings'
    msg.text = ''
-   msg.execute = [ {
-    "mode": "home",
-    "action": "home",
-    "_id": message._id
-    }]
    msg.source.team = team_id;
    msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
    msg.client_res.push(attachments)
@@ -166,14 +161,9 @@ handlers['status_on'] = function * (message) {
   team.meta.weekly_status_enabled = true;
   yield team.save();
   var msg = message;
-  msg.mode = 'home';
+  msg.mode = 'settings';
   msg.action = 'home';
   msg.text = 'Ok I turned on weekly status updates!';
-  msg.execute = [ { 
-    "mode": "home",
-    "action": "home",
-    "_id": message._id
-  } ]; 
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -184,14 +174,9 @@ handlers['status_off'] = function * (message) {
   team.meta.weekly_status_enabled = false;
   yield team.save();
   var msg = message;
-  msg.mode = 'home';
+  msg.mode = 'settings';
   msg.action = 'home';
   msg.text = 'Ok I turned off weekly status updates!';
-  msg.execute = [ { 
-    "mode": "home",
-    "action": "home",
-    "_id": message._id
-  } ]; 
   msg.source.team = team.team_id;
   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
   return [msg];
@@ -230,7 +215,7 @@ handlers['change_status'] = function * (message) {
   yield team.save();
   updateCronJob(team, message);
   var msg = message;
-  msg.mode = 'home'
+  msg.mode = 'settings'
   msg.action = 'home'
   msg.text = 'Ok I have updated your settings 😊';
   msg.execute = [ { 
@@ -285,15 +270,13 @@ handlers['add_or_remove'] = function * (message) {
                 "type": "button",
                 "value": "exit"
               },              
-              {
-                "name": "help",
-                "text": "Help",
-                "style": "default",
-                "type": "button",
-
-
-                "value": "help"
-              },              
+              // {
+              //   "name": "help",
+              //   "text": "Help",
+              //   "style": "default",
+              //   "type": "button",
+              //   "value": "help"
+              // },              
               {
                 "name": "team",
                 "text": "Team Members",
@@ -302,19 +285,19 @@ handlers['add_or_remove'] = function * (message) {
                 "value": "team"
               },
               {
-                "name": "",
+                "name": "viewcart",
                 "text": "View Cart",
                 "style": "default",
                 "type": "button",
-                "value": "team"
+                "value": "viewcart"
               },
-              {
-                "name": "home",
-                "text": "🐧",
-                "style": "default",
-                "type": "button",
-                "value": "home"
-              }
+              // {
+              //   "name": "home",
+              //   "text": "🐧",
+              //   "style": "default",
+              //   "type": "button",
+              //   "value": "home"
+              // }
           ],
           callback_id: 'none'
         });
@@ -323,7 +306,7 @@ handlers['add_or_remove'] = function * (message) {
         a.color = '#45a5f4';
       })
       var msg = message;
-      msg.mode = 'home'
+      msg.mode = 'settings'
       msg.action = 'home'
       msg.text = "We couldn't find that user!";
       // msg.execute = [ { 
@@ -357,7 +340,7 @@ handlers['add_or_remove'] = function * (message) {
     }
     yield team.save();
     var msg = message;
-    msg.mode = 'home';
+    msg.mode = 'settings';
     msg.action = 'home';
     msg.text = 'Ok I have updated your settings 😊';
     msg.execute = [ { 
@@ -376,7 +359,7 @@ handlers['last_call_off'] = function * (message) {
   currentUser.settings.last_call_alerts = false;
   yield currentUser.save();
   var msg = message;
-  message.mode = 'home';
+  message.mode = 'settings';
   message.action = 'home';
   msg.text = 'Ok I turned off last call!';
   msg.execute = [ { 
@@ -393,7 +376,7 @@ handlers['last_call_on'] = function * (message) {
   currentUser.settings.last_call_alerts = true;
   yield currentUser.save();
   var msg = message;
-  message.mode = 'home';
+  message.mode = 'settings';
   message.action = 'home';
   msg.text = 'Ok I updated last call! 😊';
   msg.execute = [ { 
@@ -424,7 +407,7 @@ handlers['send_last_call'] = function * (message) {
             "mrkdwn_in": ["text"]
         }];
         var msg = message;
-        msg.mode = 'home';
+        msg.mode = 'settings';
         msg.text = '';
         msg.action = 'home';
         // msg.text = 'Ok I updated last call! 😊';
@@ -446,7 +429,7 @@ handlers['send_last_call'] = function * (message) {
 handlers['sorry'] = function * (message) {
    // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
    message.text = "Sorry, my brain froze!"
-   message.mode = 'home';
+   message.mode = 'settings';
    message.action = 'home';
    var attachments = [];
    attachments.push({
@@ -545,7 +528,7 @@ function isStatusOff(input) {
 }
 
 function isStatusOn(input) {
-    var regex = /^(weekly|status)/;
+    var regex = /^(weekly status|yes weekly status)/;
     if (input.toLowerCase().trim().match(regex)) {
       return true;
     } else {

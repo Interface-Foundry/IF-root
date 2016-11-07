@@ -162,21 +162,18 @@ kip.debug('subscribing to outgoing.slack hopefully')
 queue.topic('outgoing.slack').subscribe(outgoing => {
 
   try {
-    var message = outgoing.data
-    var team = _.get(message, 'source.team')
-    var thread_id = _.get(message, 'thread_id')
-
+    var message = outgoing.data;
+    var team = _.get(message, 'source.team');
+    var thread_id = _.get(message, 'thread_id');
     var bot = slackConnections[team] ? slackConnections[team] : slackConnections[thread_id];
     if (typeof bot === 'undefined') {
       // logging.error('error with the bot thing, message:', message)
       // throw new Error('rtm client not registered for slack team ', message.source.team, slackConnections)
     }
-
     var msgData = {
       icon_url: 'http://kipthis.com/img/kip-icon.png',
       username: 'Kip'
     }
-
     co(function * () {
       if (message.action === 'typing') {
         return bot.rtm.sendMessage('typing...', message.source.channel, () => {
@@ -185,20 +182,17 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
       }
       kip.debug('message.mode: ', message.mode, ' message.action: ', message.action);
       if (message.mode === 'food') {
-        // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : { reply: message.text }
         return bot.web.chat.postMessage(message.source.channel,(reply.label ? reply.label : message.text), reply)
       }
       if (message.mode === 'address') {
-        kip.debug('slack.js line 200 message: ', message)
-        // day 24: discovered strange nesting bug.. was formerly message.reply.data or message.reply.. o_0
         var reply = message.reply && message.reply.data ? message.reply.data : message.reply ? message.reply : message.text
         return bot.web.chat.postMessage(message.source.channel, (reply.label ? reply.label : message.text), reply)
       }
 
       if (message.mode === 'shopping' && message.action === 'results' && message.amazon.length > 0) {
-        msgData.attachments = yield search_results(message)
-        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        msgData.attachments = yield search_results(message);
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
       if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
@@ -211,24 +205,14 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
-      if (message.mode === 'home' && message.action === 'home') {
-        msgData.attachments = message.reply
-        try {
-          bot.web.chat.postMessage(message.source.channel, message.text, msgData)
-        } catch(err) {
-          kip.debug('slack.js line 217 bot.web.cht.postMessage err: ', err);
-        }
-        return 
+      if (message.mode === 'settings' && message.action === 'home') {
+        msgData.attachments = message.reply;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
       if (message.mode === 'team' && message.action === 'home') {
         msgData.attachments = message.reply
-        try {
-          bot.web.chat.postMessage(message.source.channel, message.text, msgData)
-        } catch(err) {
-          kip.debug('slack.js line 217 bot.web.cht.postMessage err: ', err);
-        }
-        return 
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
 
       if (message.mode === 'exit' && message.action === 'exit') {

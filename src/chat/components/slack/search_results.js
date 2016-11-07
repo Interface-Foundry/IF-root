@@ -58,7 +58,7 @@ function* results(message) {
       actions: buttons(i+1)
     }
   });
-  debugger;
+  // debugger;
   results.push({
     fallback: 'Search Results',
     callback_id: 'search_results',
@@ -68,21 +68,15 @@ function* results(message) {
       style: "default",
       type: "button",
       value: "more"
-    }, 
-    {
-      name: "home",
-      text: "Settings",
-      style: "default",
-      type: "button",
-      value: "home",
     },
     {
-      name: "team",
-      text: "Team Members",
+      name: "home_btn",
+      text: "🐧",
       style: "default",
       type: "button",
-      value: "home",
-    }]
+      value: "home"
+    }
+    ]
   })
 
   return results;

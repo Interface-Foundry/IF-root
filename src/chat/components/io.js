@@ -1756,7 +1756,7 @@ var sendResponse = function (data, flag) {
     // check if slackuser exists
     if (slackUsers[data.source.org]) {
       if (data.action == 'initial' || data.action == 'modify' || data.action == 'similar' || data.action == 'more') {
-        var message
+        var message;
         // checking for search msg and updating it
         if (messageHistory[data.source.id] && messageHistory[data.source.id].typing) {
           var msgData = {}
