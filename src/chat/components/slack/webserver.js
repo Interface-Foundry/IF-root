@@ -1,23 +1,25 @@
-var fs = require('fs')
-var kip = require('kip')
+var fs = require('fs');
+var kip = require('kip');
 //
 // "Actions" are what slack calls buttons
 //
-var queue = require('../queue-mongo')
-require('kip')
-var refresh_team = require('../refresh_team')
-var express = require('express')
-var co = require('co')
-var app = express()
-var bodyParser = require('body-parser')
-var cart = require('./cart')
-var kipcart = require('../cart')
-var _ = require('lodash')
+var queue = require('../queue-mongo');
+var db = require('db');
+require('kip');
+var refresh_team = require('../refresh_team');
+var express = require('express');
+var co = require('co');
+var next = require("co-next")
+var app = express();
+var bodyParser = require('body-parser');
+var cart = require('./cart');
+var kipcart = require('../cart');
+var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
 
-app.use(express.static('public'))
-app.use(bodyParser.urlencoded())
-app.use(bodyParser.json())
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded());
+app.use(bodyParser.json());
 // app.listen(3000, function(e) {
 //   if (e) { console.error(e) }
 //   console.log('chat app listening on port 8000 🌏 💬')
@@ -81,7 +83,7 @@ function buttonCommand (action) {
 }
 
 // incoming slack action
-app.post('/slackaction', function (req, res) {
+app.post('/slackaction', next(function * (req, res) {
   if (req.body && req.body.payload) {
     var message;
     var parsedIn = JSON.parse(req.body.payload);
@@ -109,7 +111,7 @@ app.post('/slackaction', function (req, res) {
         user_id: parsedIn.user.id,
         origin: 'slack',
         source: parsedIn
-      })
+      });
 
       // inject source.team and source.user because fuck the fuck out of slack message formats
       message.source.team = message.source.team.id;
@@ -149,12 +151,11 @@ app.post('/slackaction', function (req, res) {
         message.action = 'home';
       }
       else if (simple_command == 'exit') {
-
         message.mode = 'exit';
         message.action = 'exit';
         var attachments = [
             {
-              "pretext": "Ok thanks! Done with Cart Members. Type `collect` to send a cart closing message to all Cart Members 😊",
+              "pretext": "Ok thanks! Going back to Shopping Mode ☺️",
               "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
               "text":"",
               "mrkdwn_in": [
@@ -267,7 +268,6 @@ app.post('/slackaction', function (req, res) {
             yield kipcart.removeFromCart(parsedIn.team.id, parsedIn.user.id, index)
           }).catch(console.log.bind(console))
           break
-
         case 'removeall':
           // reduces the quantity right way, but for speed we return a hacked message right away
           var index;
@@ -309,7 +309,7 @@ app.post('/slackaction', function (req, res) {
   } else {
     res.sendStatus(200)
   }
-})
+}))
 
 var cookieParser = require('cookie-parser')
 var uuid = require('uuid')
