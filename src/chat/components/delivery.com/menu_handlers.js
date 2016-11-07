@@ -80,7 +80,9 @@ handlers['food.menu.quick_picks'] = function * (message) {
     }
 
     return i
-  }).sort((a, b) => b.sortOrder - a.sortOrder).slice(index, index + 3).map(i => {
+  }).sort((a, b) => b.sortOrder - a.sortOrder)
+
+  var menuItems = sortedMenu.slice(index, index + 3).map(i => {
     var attachment = {
       title: i.name + ' – ' + (_.get(i, 'price') ? i.price.$ : 'price varies'),
       fallback: 'i.name',
@@ -109,22 +111,13 @@ handlers['food.menu.quick_picks'] = function * (message) {
         'mrkdwn_in': [
           'text'
         ]
-      }].concat(sortedMenu).concat([{
+      }].concat(menuItems).concat([{
       'text': '',
       'fallback': 'You are unable to choose a game',
       'callback_id': 'wopr_game',
       'color': '#3AA3E3',
       'attachment_type': 'default',
       'actions': [
-        {
-          'name': 'food.menu.quick_picks',
-          'text': keyword ? `More "${keyword}" >` : 'More >',
-          'type': 'button',
-          'value': {
-            index: index + 3,
-            keyword: keyword
-          }
-        },
         // {
         //   'name': 'chess',
         //   'text': 'Category',
@@ -133,6 +126,18 @@ handlers['food.menu.quick_picks'] = function * (message) {
         // }
       ]
     }])
+  }
+
+  if (sortedMenu.length >= index + 4) {
+    msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
+      'name': 'food.menu.quick_picks',
+      'text': keyword ? `More "${keyword}" >` : 'More >',
+      'type': 'button',
+      'value': {
+        index: index + 3,
+        keyword: keyword
+      }
+    })
   }
 
   // add the Back button to clear the keyword
