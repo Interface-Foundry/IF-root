@@ -221,6 +221,16 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return 
       }
 
+      if (message.mode === 'team' && message.action === 'home') {
+        msgData.attachments = message.reply
+        try {
+          bot.web.chat.postMessage(message.source.channel, message.text, msgData)
+        } catch(err) {
+          kip.debug('slack.js line 217 bot.web.cht.postMessage err: ', err);
+        }
+        return 
+      }
+
       if (message.mode === 'exit' && message.action === 'exit') {
         msgData.attachments = message.reply
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)

@@ -61,7 +61,7 @@ function* results(message) {
   debugger;
   results.push({
     fallback: 'Search Results',
-    callback_id: 'fwefjiwfj33',
+    callback_id: 'search_results',
     actions: [{
       name: "more",
       text: "See More Result",
@@ -81,7 +81,7 @@ function* results(message) {
       text: "Team Members",
       style: "default",
       type: "button",
-      value: "view",
+      value: "home",
     }]
   })
 

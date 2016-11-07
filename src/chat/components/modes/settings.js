@@ -5,9 +5,7 @@ var _ = require('lodash');
 var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
-var UserChannel = require('../delivery.com/UserChannel')
 var queue = require('../queue-mongo');
-var replyChannel = new UserChannel(queue);
 var team;
 var teamMembers;
 var admins;
@@ -73,16 +71,18 @@ handlers['start'] = function * (message) {
     var adminText = 'I\'m managed by ' + adminNames.join(', ') + '.';
   }
 
-  if (admins) {
+  if (isAdmin && admins && admins.length >= 1) {
     adminText += '  You can *add and remove admins* with `add @user` and `remove @user`.'
-  } else if (team.meta.office_assistants.length < 1) {
+  } else if (isAdmin) {
     adminText += '  You can *add admins* with `add @user`.'
   }
+
   attachments.push({text: adminText});
+
   //
   // Admin-only settings
   //
-  if (admins) {
+  if (admins && isAdmin) {
     if (team.meta.weekly_status_enabled) {
       // TODO convert time to the correct timezone for this user.
       // 1. Date.parse() returns something in eastern, not the job's timezone
@@ -92,61 +92,53 @@ handlers['start'] = function * (message) {
       var job_time_no_tz = momenttz.tz(date, 'America/New_York'); // because it's not really eastern, only the server is
       var job_time_bot_tz = momenttz.tz(job_time_no_tz.format('YYYY-MM-DD HH:mm'), team.meta.weekly_status_timezone);
       var job_time_user_tz = job_time_bot_tz.tz(currentUser.tz);
-      console.log('job time in bot timezone', job_time_bot_tz.format())
-      console.log('job time in user timzone', job_time_user_tz.format())
-      attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + ' (' + '*'
-        + ')\nYou can turn this off by saying `no weekly status`'
-        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'})
-    } else {
-      attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'})
+      console.log('job time in bot timezone', job_time_bot_tz.format());
+      console.log('job time in user timzone', job_time_user_tz.format());
+      attachments.push({text: 'You are receiving weekly cart status updates every *' + job_time_user_tz.format('dddd[ at] h:mm a') + '\nYou can turn this off by saying `no weekly status`'
+        + '\nYou can change the day and time by saying `change weekly status to Monday 8:00 am`'});
+    } 
+    else {
+      attachments.push({text: 'You are *not receiving weekly cart* updates.  Say `yes weekly status` to receive them.'});
     }
-  }
+  };
+
   attachments.push({
-        text: 'Don’t have any changes? Type `exit` to quit settings',
-        color: '#49d63a',
-        mrkdwn_in: ['text'],
-        fallback:'Settings',
-        actions: [
-            {
-              "name": "exit",
-              "text": "Exit Settings",
-              "style": "primary",
-              "type": "button",
-              "value": "exit"
-            },              
-            {
-              "name": "help",
-              "text": "Help",
-              "style": "default",
-              "type": "button",
-
-
-              "value": "help"
-            },              
-            {
-              "name": "team",
-              "text": "Team Members",
-              "style": "default",
-              "type": "button",
-              "value": "team"
-            },
-            {
-              "name": "",
-              "text": "View Cart",
-              "style": "default",
-              "type": "button",
-              "value": "team"
-            },
-            {
-              "name": "home",
-              "text": "🐧",
-              "style": "default",
-              "type": "button",
-              "value": "home"
-            }
-        ],
-        callback_id: 'none'
-      })
+      text: 'Don’t have any changes? Type `exit` to quit settings',
+      color: '#49d63a',
+      mrkdwn_in: ['text'],
+      fallback:'Settings',
+      actions: [
+          {
+            "name": "exit",
+            "text": "Exit Settings",
+            "style": "primary",
+            "type": "button",
+            "value": "exit"
+          },                          
+          {
+            "name": "team",
+            "text": "Team Members",
+            "style": "default",
+            "type": "button",
+            "value": "team"
+          },
+          {
+            "name": "",
+            "text": "View Cart",
+            "style": "default",
+            "type": "button",
+            "value": "team"
+          },
+          // {
+          //   "name": "home",
+          //   "text": "🐧",
+          //   "style": "default",
+          //   "type": "button",
+          //   "value": "home"
+          // }
+      ],
+      callback_id: 'none'
+    })
     // console.log('SETTINGS ATTACHMENTS ',attachments);
     // make all the attachments markdown
     attachments.map(function(a) {
@@ -154,19 +146,19 @@ handlers['start'] = function * (message) {
       a.color = '#45a5f4';
     })
 
-     var msg = message;
-     msg.mode = 'home'
-     msg.text = ''
-     msg.execute = [ {
-      "mode": "home",
-      "action": "home",
-      "_id": message._id
-      }]
-     msg.source.team = team_id;
-     msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
-     msg.client_res.push(attachments)
-     msg.reply = attachments;
-     return [msg];
+   var msg = message;
+   msg.mode = 'home'
+   msg.text = ''
+   msg.execute = [ {
+    "mode": "home",
+    "action": "home",
+    "_id": message._id
+    }]
+   msg.source.team = team_id;
+   msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+   msg.client_res.push(attachments)
+   msg.reply = attachments;
+   return [msg];
 
 }
 
@@ -278,6 +270,7 @@ handlers['add_or_remove'] = function * (message) {
       }
     });
     if (userIds.length === 0) {
+      // return yield handlers['home.sorry'][message]
       var attachments = [];
        attachments.push({
           text: 'Don’t have any changes? Type `exit` to quit settings',
@@ -329,19 +322,19 @@ handlers['add_or_remove'] = function * (message) {
         a.mrkdwn_in =  ['text'];
         a.color = '#45a5f4';
       })
-      message.reply = attachments;
       var msg = message;
       msg.mode = 'home'
       msg.action = 'home'
       msg.text = "We couldn't find that user!";
-      msg.execute = [ { 
-        "mode": "home",
-        "action": "home",
-        "_id": message._id
-      } ]; 
+      // msg.execute = [ { 
+      //   "mode": "home",
+      //   "action": "home",
+      //   "_id": message._id
+      // } ]; 
       msg.reply = attachments;
       msg.source.team = team.team_id;
       msg.source.channel = typeof msg.source.channel == 'string' ? msg.source.channel : message.thread_id;
+      kip.debug(' \n\n\n\n\n settings.js line 336 ', msg, ' \n\n\n\n\n')
       return [msg]
     }
     var shouldReturn = false;
@@ -446,13 +439,13 @@ handlers['send_last_call'] = function * (message) {
         replies.push(msg);
     })
   });
-  kip.debug('\n\n\n\n\n settings.js:448: ', replies,' \n\n\n\n\n')
+  // kip.debug('\n\n\n\n\n settings.js:448: ', replies,' \n\n\n\n\n')
   return replies;
 }
 
 handlers['sorry'] = function * (message) {
-   kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
-   message.text = "We're sorry, we couldn't understand that!"
+   // kip.debug('\n\n\n  settings.js : 453 : could not understand message : ', message ,'\n\n\n')
+   message.text = "Sorry, my brain froze!"
    message.mode = 'home';
    message.action = 'home';
    var attachments = [];
@@ -579,7 +572,7 @@ function isLastCallOff(input) {
 }
 
 function isLastCallOn(input) {
-    var regex = /^(last call)/;
+    var regex = /^(yes last call)/;
     if (input.toLowerCase().trim().match(regex)) {
       return true;
     } else {

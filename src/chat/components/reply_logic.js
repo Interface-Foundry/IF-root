@@ -229,13 +229,10 @@ queue.topic('incoming').subscribe(incoming => {
       break;
      case 'home':
         var replies = yield settings.handle(message);
-        kip.debug('\n\n\n\n\n reply_logic 234 replies: ', replies,' \n\n\n\n\n');
         break;
      case 'team':
-        kip.debug('\n\nreply_logic 237: switch case "team"', replies,'\n\n');
         var replies = yield team.handle(message);
         break;
-      //default Kip Mode shopping
       default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
