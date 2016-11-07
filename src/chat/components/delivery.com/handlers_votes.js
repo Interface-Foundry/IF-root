@@ -409,7 +409,8 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   foodSession.chosen_restaurant = {
     id: merchant.id,
     name: merchant.summary.name,
-    url: url
+    url: url,
+    minimum: merchant.ordering.minimum
   }
 
   var menu = yield request({
@@ -422,7 +423,6 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   foodSession.save()
 
   return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
-
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {
