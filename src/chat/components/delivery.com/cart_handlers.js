@@ -688,34 +688,45 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'card': {'card_id': message.source.actions[0].value}
   })
 
+    // add various shit to the foodSession
+  var postBody = {
+    '_id': foodSession._id,
+    'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
+    'active': foodSession.active,
+    'team_id': foodSession.team_id,
+    'chosen_location': {
+      'addr': {
+        'address_1': foodSession.chosen_location.address_1,
+        'address_2': foodSession.chosen_location.address_2,
+        'city': foodSession.chosen_location.city,
+        'state': foodSession.chosen_location.state,
+        'zip_code': foodSession.chosen_location.zip_code,
+        'coordinates': []
+      },
+      'special_instructions': foodSession.data.special_instructions || ''
+    },
+    'time_started': foodSession.time_started,
+    'convo_initiater': foodSession.convo_initiater,
+    'chosen_restaurant': foodSession.chosen_restaurant,
+    'guest_token': foodSession.guest_token,
+    'order': {
+      'total': foodSession.order.total * 100,
+      'tip': 0,
+      'order_type': foodSession.fulfillment_method
+    },
+    'saved_card': {
+      'vendor': card.vendor,
+      'customer_id': card.customer_id,
+      'card_id': card.card.card_id
+    }
+  }
+
   try {
     foodSession.payment = yield request({
       uri: `https://pay.kipthis.com/charge`,
       method: `POST`,
       json: true,
-      body: {
-        'kip_token': `mooseLogicalthirteen$*optimumNimble!Cake`,
-        '_id': foodSession._id,
-        'active': foodSession.active,
-        'team_id': foodSession.team_id,
-        'chosen_location': foodSession.chosen_location,
-        'chosen_location.addr': foodSession.chosen_location,
-        'chosen_restaurant': foodSession.chosen_restaurant,
-        'time_started': foodSession.time_started,
-        'convo_initiater': foodSession.convo_initiater,
-        'guest_token': foodSession.guest_token,
-        'order': foodSession.order,
-        // stuff not directly from foodSession to make it easier for alyx
-        'amount': foodSession.order.total,
-        'kipId': foodSession.team_id,
-        'description': `${foodSession.chosen_restaurant.id}`,
-        'email': `${foodSession.convo_initiater.email}`,
-        'saved_card': {
-          'vendor': card.vendor,
-          'customer_id': card.customer_id,
-          'card_id': card.card.card_id
-        }
-      }
+      body: postBody
     })
     foodSession.save()
     var response = {
