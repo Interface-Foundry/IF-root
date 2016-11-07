@@ -1,40 +1,155 @@
 require('kip')
 
 var co = require('co')
-var fs = require('fs')
 var _ = require('lodash')
-var sm = require('slack-message-builder')
-var async = require('async')
+var googl = require('goo.gl')
+var request = require('request-promise')
+var Fuse = require('fuse.js')
 
-var weekly_updates = require('../weekly_updates.js')
-var api = require('./api-wrapper.js')
+var queue = require('../queue-mongo')
+
+
+
+/*
+* use this to match on terms where key_choices are
+* text is what user entered,
+* allChoices is array of all the options to search thru
+* keyChoices is array like ['name'] or ['title', 'children.name']
+*/
+function * matchText (text, allChoices, keyChoices) {
+  // might want to use id, but dont for now
+  var fuse = new Fuse(allChoices, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: keyChoices
+  })
+  var res = yield fuse.search(text)
+  //
+  if (res.length > 0) {
+    return res
+  } else {
+    // no matches
+    return null
+  }
+}
+
+function * matchTextToButton (message) {
+  // find previous buttons displayed to user
+
+  // need to grab last message we sent to user that contained attachments
+  var prevMessage = yield db.Message.findOne({id: message.source.id, incoming: false}).exec()
+  // combine all the previous attachments actions
+  var prevButtons = _.map(_.flatten(prevMessage.reply.data.attachments), 'actions')
+  var fuse = new Fuse(prevButtons, {
+    shouldSort: true,
+    threshold: 0.4,
+    keys: ['text']
+  })
+  var res = yield fuse.search(message.data.text)
+
+  if (res.length > 0) {
+    return res
+  } else {
+    // no matches
+    return null
+  }
+}
+
+function defaultReply (message) {
+  return new db.Message({
+    incoming: false,
+    thread_id: message.thread_id,
+    resolved: true,
+    user_id: 'kip',
+    origin: message.origin,
+    text: "I'm sorry I couldn't quite understand that",
+    source: message.source,
+    mode: message.mode,
+    action: message.action,
+    state: message.state
+  })
+}
+
+function textReply (message, text) {
+  var msg = defaultReply(message)
+  msg.text = text
+  return msg
+}
+
+function sendTextReply (message, text) {
+  var msg = textReply(message, text)
+  msg.save()
+  logging.info('<<<'.yellow, text.yellow)
+  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
+}
+
+/**
+ * helper to determine an affirmative or negative response
+ *
+ * 10-4 good buddy is not supported
+ *
+ * @param {any} text
+ * @returns {Boolean} yes
+ */
+function * yesOrNo (text) {
+  text = (text || '').toLowerCase().trim()
+  if (text === 'yes') {
+    return true
+  } else {
+    return false
+  }
+}
 
 /*
 *
 *
 *
 */
-function * initiateDeliverySession (session, teamMembers) {
+function * initiateDeliverySession (session) {
   var foodSessions = yield db.Delivery.find({team_id: session.source.team, active: true}).exec()
+
   if (foodSessions) {
     yield foodSessions.map((session) => {
+      logging.info('send message to old admin that their order is being canceled')
+      // var oldMessage = yield db.Message.findOne({incoming: true, mode: 'food', })
+      // replyChannel.sendReplace(oldMessage, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
       session.active = false
       session.save()
     })
   }
+
+  var teamMembers = yield db.Chatusers.find({
+    team_id: session.source.team,
+    is_bot: {$ne: true},
+    deleted: {$ne: true},
+    id: {$ne: 'USLACKBOT'}}).exec()
+
   var admin = yield db.Chatuser.findOne({id: session.source.user}).exec()
   var newSession = new db.Delivery({
     active: true,
     team_id: session.source.team,
-    // probably will want team_members to come from weekly_updates getTeam later
     team_members: teamMembers,
-    fulfillment_method: 'delivery', // set by default and change to pickup if it changes (for now)
+    fulfillment_method: 'delivery', // set by default and change to pickup if it changes
     confirmed_orders: [],
     convo_initiater: {
       id: admin.id,
-      name: admin.name
+      name: admin.name,
+      first_name: _.get(admin.profile, 'first_name') ? admin.profile.first_name : admin.profile.real_name,
+      last_name: _.get(admin.profile, 'last_name') ? admin.profile.last_name : '',
+      email: admin.profile.email
+    },
+    data: {
+      instructions: ' '
+    },
+    tracking: {
+    // last_sent_message to replace, and specific id's to
+      confirmed_orders_msg: null
     }
   })
+  // check if user has entered phone number before
+  if (_.get(admin, 'phone_number')) {
+    newSession.convo_initiater.phone_number = admin.phone_number
+  }
   return newSession
 }
 
@@ -180,7 +295,7 @@ function createCuisineOptionForUser (user, cuisines) {
   var randomsToUse = 1
   var users_top = _.countBy(user.history)
 
-  historySorted = Object.keys(users_top).sort(function (a, b) {
+  var historySorted = Object.keys(users_top).sort(function (a, b) {
     return users_top[b] - users_top[a]
   })
 
@@ -204,10 +319,6 @@ function getMerchatsWithCuisine (merchants, cuisineType) {
   return _.filter(merchants, function (m) {
     return _.includes(m.summary.cuisines, cuisineType)
   })
-}
-
-function askUserForPreferences (user) {
-  var buttons = createPreferencesAttachments()
 }
 
 function createPreferencesAttachments () {
@@ -236,8 +347,60 @@ function * removeUserFromSession (team, user) {
   foodSession.save()
 }
 
+function * buildRestaurantAttachment (restaurant) {
+  // will need to use picstitch for placeholder image in future
+  // var placeholderImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+
+  try {
+    var realImage = yield request({
+      uri: kip.config.picstitchDelivery,
+      json: true,
+      body: {
+        origin: 'slack',
+        cuisines: restaurant.summary.cuisines,
+        location: restaurant.location,
+        ordering: restaurant.ordering,
+        summary: restaurant.summary,
+        url: restaurant.summary.merchant_logo
+      }
+    })
+  } catch (e) {
+    kip.err(e)
+    realImage = 'https://storage.googleapis.com/kip-random/laCroix.gif'
+  }
+
+  var shortenedRestaurantUrl = yield googl.shorten(restaurant.summary.url.complete)
+
+  var obj = {
+    'text': `<${shortenedRestaurantUrl}|*${restaurant.summary.name}*>`,
+    'image_url': realImage,
+    'color': '#3AA3E3',
+    'callback_id': restaurant.id,
+    'fallback': 'You are unable to choose a restaurant',
+    'attachment_type': 'default',
+    'mrkdwn_in': ['text'],
+    'actions': [
+      {
+        'name': 'food.admin.restaurant.confirm',
+        'text': '✓ Choose',
+        'type': 'button',
+        'style': 'primary',
+        'value': restaurant.id
+      }
+    ]
+  }
+  return obj
+}
+
 module.exports = {
   initiateFoodMessage: initiateFoodMessage,
   initiateDeliverySession: initiateDeliverySession,
   removeUserFromSession: removeUserFromSession,
+  buildRestaurantAttachment: buildRestaurantAttachment,
+  default_reply: defaultReply,
+  text_reply: textReply,
+  send_text_reply: sendTextReply,
+  yesOrNo: yesOrNo,
+  matchText: matchText,
+  matchTextToButton: matchTextToButton
 }

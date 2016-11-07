@@ -36,6 +36,7 @@ module.exports.createCartForSession = function * (session) {
 
   try {
     var response = yield request(opts)
+    logging.info('got cart from delivery.com')
     return response
   } catch (e) {
     logging.error('error lol', e)

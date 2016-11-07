@@ -4,3 +4,9 @@ mongodb:
 picstitch: http://localhost:5000
 nlp: http://localhost:8083
 nlp_rnn: http://localhost:8085
+slack:
+  client_id: "40262605191.99843739429"
+  client_secret: 00a0a312ef83e675243ca4102080aae1
+  # verification_token: rF1BCPsHSBpLyw80aQ7FCGhN
+  redirect_uri: https://8147874e.ngrok.io/newslack
+

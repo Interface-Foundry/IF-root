@@ -22,7 +22,6 @@ var topics = {
 //
 function publish (topic, data, key) {
   logging.info('topic: ', topic, 'data: ', data, 'key: ', key)
-  kip.debug('publishing to topic', topic)
   if (typeof topic !== 'string') {
     throw new Error('pub/sub topic must be a string, ex queue.publish("messages", {})')
   }

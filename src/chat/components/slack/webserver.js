@@ -3,6 +3,7 @@ var kip = require('kip');
 //
 // "Actions" are what slack calls buttons
 //
+<<<<<<< HEAD
 var queue = require('../queue-mongo');
 var db = require('db');
 require('kip');
@@ -20,6 +21,21 @@ var slackConnections = require('./slack').slackConnections
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
+=======
+var queue = require('../queue-mongo')
+require('kip')
+var refresh_team = require('../refresh_team')
+var express = require('express')
+var co = require('co')
+var app = express()
+var bodyParser = require('body-parser')
+var cart = require('./cart')
+var kipcart = require('../cart')
+var _ = require('lodash')
+app.use(express.static(__dirname + '/public'))
+app.use(bodyParser.urlencoded())
+app.use(bodyParser.json())
+>>>>>>> a4f42ca5ba14c29032e3b43f44792ecac3625ce4
 // app.listen(3000, function(e) {
 //   if (e) { console.error(e) }
 //   console.log('chat app listening on port 8000 🌏 💬')

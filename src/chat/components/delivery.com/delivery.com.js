@@ -1,49 +1,20 @@
 require('kip')
 
 var co = require('co')
-var fs = require('fs')
 var _ = require('lodash')
-var path = require('path')
+var sleep = require('co-sleep')
 var api = require('./api-wrapper')
 var queue = require('../queue-mongo')
-var search = require('./search')
 var utils = require('./utils')
 var address_utils = require('./address_utils')
-var request = require('request-promise')
 var team_utils = require('./team_utils.js')
+var mailer_transport = require('../../../mail/IF_mail.js')
 var UserChannel = require('./UserChannel')
-var ui = require('../ui_controls')
-var all_cuisines = require('./cuisines2').cuisines
-
 var replyChannel = new UserChannel(queue)
 
-function default_reply (message) {
-  return new db.Message({
-    incoming: false,
-    thread_id: message.thread_id,
-    resolved: true,
-    user_id: 'kip',
-    origin: message.origin,
-    text: "I'm sorry I couldn't quite understand that",
-    source: message.source,
-    mode: message.mode,
-    action: message.action,
-    state: message.state
-  })
-}
-
-function text_reply (message, text) {
-  var msg = default_reply(message)
-  msg.text = text
-  return msg
-}
-
-function send_text_reply (message, text) {
-  var msg = text_reply(message, text)
-  msg.save()
-  console.log('<<<'.yellow, text.yellow)
-  queue.publish('outgoing.' + message.origin, msg, message._id + '.reply.' + (+(Math.random() * 100).toString().slice(3)).toString(36))
-}
+//turn feedback buttons on/off
+var feedbackOn = true
+var feedbackTracker = {}
 
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
@@ -55,6 +26,7 @@ queue.topic('incoming').subscribe(incoming => {
     } else {
       console.log('>>>'.yellow, '[button clicked]'.blue, incoming.data.data.value.yellow)
     }
+
     // find the last 20 messages in this conversation, including this one
     var history = yield db.Messages.find({
       thread_id: incoming.data.thread_id,
@@ -67,6 +39,12 @@ queue.topic('incoming').subscribe(incoming => {
     if (_.get(session, 'state') && _.get(history[1], 'state')) {
       session.state = history[1].state
     }
+
+    // parse the action value objects if they exist
+    try {
+      session.data.value = JSON.parse(session.data.value)
+    } catch (e) {}
+
     if (!session) {
       logging.error('No Session!!!')
       session.state = {}
@@ -93,6 +71,13 @@ queue.topic('incoming').subscribe(incoming => {
       session.action = session.prevAction
     }
     var route = yield getRoute(session)
+
+    if (session.text && session.mode === 'food') {
+      // if user types something allow the text_matching flag which we can use
+      // in some handlers: cuisine picking, restaurant picking, item picking
+      session.allow_text_matching = true
+    }
+
     kip.debug('mode', session.mode, 'action', session.action)
     kip.debug('route'.cyan, route.cyan)
     // session.mode = 'food'
@@ -121,6 +106,7 @@ function getRoute (session) {
       kip.debug('### User typed in :' + session.text)
       return 'food.begin'
     } else if (handlers[session.text]) {
+      // allows jumping to a section, will want to remove this when not testing to not create issues
       return session.text
     } else {
       return (session.mode + '.' + session.action)
@@ -137,6 +123,7 @@ var handlers = {}
 require('./menu_handlers')(replyChannel, handlers)
 require('./cart_handlers')(replyChannel, handlers)
 require('./handlers_votes')(replyChannel, handlers)
+require('./team_handlers')(replyChannel, handlers)
 
 handlers['food.sys_error'] = function * (session) {
   kip.debug('chat session halted.')
@@ -180,6 +167,11 @@ handlers['food.exit'] = function * (message) {
 
 handlers['food.exit.confirm'] = function * (message) {
   replyChannel.sendReplace(message, 'shopping.initial', {type: message.origin, data: {text: 'ok byeee'}})
+  // make sure to remove this user from the food session if they are in it
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.team_members = foodSession.team_members.filter(user => user.id !== message.user_id)
+  foodSession.markModified('team_members')
+  foodSession.save()
 }
 
 //
@@ -187,12 +179,25 @@ handlers['food.exit.confirm'] = function * (message) {
 //
 handlers['food.begin'] = function * (session) {
   kip.debug('🍕 food order 🌮')
-  // loading chat users here for now lel, can remove once init_team is fully implemented tocreate chat user objects:
+
+  // send the banner first
+  var msg_json = {
+    attachments: [
+      {
+        'fallback': 'Kip Cafe',
+        'title': '',
+        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
+      }
+    ]
+  }
+  replyChannel.send(session, 'food.banner', {type: session.origin, data: msg_json})
+  yield sleep(1000)
+
+  // loading chat users here for now, can remove once init_team is fully implemented tocreate chat user objects
   team_utils.getChatUsers(session)
   session.state = {}
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  var teamMembers = yield db.Chatusers.find({team_id: session.source.team, is_bot: false, id: {$ne: 'USLACKBOT'}}).exec()
-  var foodSession = yield utils.initiateDeliverySession(session, teamMembers)
+  var foodSession = yield utils.initiateDeliverySession(session)
   yield foodSession.save()
   var address_buttons = _.get(team, 'meta.locations', []).map(a => {
     return {
@@ -209,12 +214,9 @@ handlers['food.begin'] = function * (session) {
     type: 'button',
     value: 'address.new'
   })
+
   var msg_json = {
     'attachments': [
-      {
-        'title': '',
-        'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
-      },
       {
         'text': 'Great! Which address is this for?',
         'fallback': 'You are unable to choose an address',
@@ -225,6 +227,8 @@ handlers['food.begin'] = function * (session) {
       }
     ]
   }
+
+
   replyChannel.send(session, 'food.choose_address', {type: session.origin, data: msg_json})
 }
 
@@ -244,18 +248,13 @@ handlers['food.choose_address'] = function * (session) {
 
     var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
     foodSession.chosen_location = location
-    yield foodSession.save()
-    
+
     //
     // START OF S2
     //
     var text = `Cool! You selected \`${location.address_1}\`. Delivery or Pickup?`
     var msg_json = {
       'attachments': [
-        {
-          'title': '',
-          'image_url': 'http://kipthis.com/kip_modes/mode_cafe.png'
-        },
         {
           'mrkdwn_in': [
             'text'
@@ -267,19 +266,19 @@ handlers['food.choose_address'] = function * (session) {
           'attachment_type': 'default',
           'actions': [
             {
-              'name': 'passthrough',
+              'name': 'food.delivery_or_pickup',
               'text': 'Delivery',
               'type': 'button',
-              'value': 'food.delivery_or_pickup'
+              'value': 'delivery'
             },
             {
-              'name': 'passthrough',
+              'name': 'food.delivery_or_pickup',
               'text': 'Pickup',
               'type': 'button',
-              'value': 'food.delivery_or_pickup'
+              'value': 'pickup'
             },
             {
-              'name': 'passthrough',
+              'name': 'address.change',
               'text': '< Change Address',
               'type': 'button',
               'value': 'address.change'
@@ -289,6 +288,16 @@ handlers['food.choose_address'] = function * (session) {
       ]
     }
     replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: msg_json})
+
+
+    // get the merchants now assuming "delivery" for UI responsiveness. that means that if they choose "pickup" we'll have to do more work in the next step
+    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input');
+    var res = yield api.searchNearby({addr: addr})
+    foodSession.merchants = _.get(res, 'merchants')
+    foodSession.cuisines = _.get(res, 'cuisines')
+    foodSession.markModified('merchants')
+    foodSession.markModified('cuisines')
+    yield foodSession.save()
   } else {
     throw new Error('this route does not handle text input')
   }
@@ -301,8 +310,13 @@ handlers['address.new'] = function * (session) {
   kip.debug(' 🌆🏙 enter a new address')
   // session.state = {}
   var msg_json = {
-    'text': "What's the delivery address?",
-    'attachments': [{'text': 'Type your address below'}]
+    'text': "What's the address for the order?",
+    'attachments': [{
+      'text': '✎ Type your address below (Example: _902 Broadway 10010_)',
+      'mrkdwn_in': [
+          'text'
+      ]
+    }]
   }
   replyChannel.send(session, 'address.confirm', {type: session.origin, data: msg_json})
 }
@@ -312,19 +326,19 @@ handlers['address.new'] = function * (session) {
 //
 handlers['address.confirm'] = function * (session) {
   var input = session.text;
-  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+
+  //✐✐✐
+  //this process is slow, we need to send a "Processing..." text message here
+
   var res = yield api.searchNearby({addr: input})
-  if (!res) return send_text_reply(session, 'Sorry! We couldn\'t find that address!');
+  if (!res) return utils.send_text_reply(session, 'Sorry, I can\'t find that address! Try typing something like: "902 Broadway New York, NY 10010"');
   var res_loc = res.search_address;
   res_loc.input = input;
+
+  // format the address nicely
   var location = yield address_utils.parseAddress(res_loc);
-  foodSession.chosen_location = location;
-  var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
-  team.meta.chosen_location = location
-  team.meta.locations.push(location)
-  yield team.save();
-  kip.debug('\n\n\n\n\n final address is : ', location,'\n\n\n\n\n')
-  var prompt = 'Is `' + location.address_1 + '` your address?'
+
+  var prompt = 'Is `' + location.address_1 + ' ' + location.city + ', ' + location.state + ' ' + location.zip_code +'` your address?'
   var msg_json = {
     'text': prompt,
     'attachments': [
@@ -338,14 +352,15 @@ handlers['address.confirm'] = function * (session) {
         'attachment_type': 'default',
         'actions': [
           {
-            name: 'address_confirm_btn',
-            text: 'Confirm',
+            name: 'address.save',
+            text: '✓ Confirm Address',
             type: 'button',
-            value: session.text
+            style: 'primary',
+            value: JSON.stringify(location)
           },
           {
             name: 'passthrough',
-            text: 'Edit',
+            text: 'Edit Address',
             type: 'button',
             value: 'address.new'
           }
@@ -353,75 +368,35 @@ handlers['address.confirm'] = function * (session) {
       }
     ]
   }
-  // storing location in source since there is no other way to persist it thru handler exchanges,
-  // feel free to implement a better way. would not make sense to save it in slackbots before it is even validate nah meen
-  foodSession.data = { input: session.text}
-  yield foodSession.save()
-  yield session.save()
-  replyChannel.send(session, 'address.validate', {type: session.origin, data: msg_json})
-}
 
-handlers['address.validate'] = function * (session) {
-  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec();
-  var text = `Cool! You selected \`${foodSession.chosen_location.address_1}\`. Delivery or pickup?`
-  var msg_json = {
-    'attachments': [
-      {
-        'mrkdwn_in': [
-          'text'
-        ],
-        'text': text,
-        'fallback': 'You did not choose a fulfillment method :/',
-        'callback_id': 'wopr_game',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [
-          {
-            'name': 'passthrough',
-            'text': 'Delivery',
-            'type': 'button',
-            'value': 'food.delivery_or_pickup'
-          },
-          {
-            'name': 'passthrough',
-            'text': 'Pickup',
-            'type': 'button',
-            'value': 'food.delivery_or_pickup'
-          },
-          {
-            'name': 'passthrough',
-            'text': '< Change Address',
-            'type': 'button',
-            'value': 'address.change'
-          }
-        ]
-      }
-    ]
+  //collect feedback on this feature
+  if(feedbackOn && msg_json){
+    msg_json.attachments[0].actions.push({
+      name: 'feedback.new',
+      text: '⇲ Send feedback',
+      type: 'button',
+      value: 'feedback.new'
+    })
   }
-  replyChannel.send(session, 'food.user.poll', {type: session.origin, data: msg_json})
+
+  replyChannel.send(session, 'address.save', {type: session.origin, data: msg_json})
 }
 
+// Save the address to the db after the user confirms it
 handlers['address.save'] = function * (session) {
-  kip.debug('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n🌃🌉getting to address.save\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
-  if (session.text === 'no') {
-    return handlers['food.begin'](session)
-  }
-  var location = JSON.parse(session.text)
-  //
-  //
-  // *Also store the address into mongo*
-  //
-  //
+  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
   var team = yield db.Slackbots.findOne({team_id: session.source.team}).exec()
+  var location = session.data.value
 
   if (location) {
     team.meta.locations.push(location)
-    team.meta.chosen_location = location
+    foodSession.chosen_location = location
   } else {
     // todo error
     throw new Error('womp bad address')
   }
-  yield team.save()
+  yield [team.save(), foodSession.save()]
+
   session.text = JSON.stringify(location)
   return yield handlers['food.choose_address'](session)
 }
@@ -430,60 +405,125 @@ handlers['address.change'] = function * (session) {
   return yield handlers['food.begin'](session)
 }
 
+
+//send feedback to Kip 😀😐🙁
+handlers['feedback.new'] = function * (session) {
+
+   feedbackTracker[session.source.team + session.source.user + session.source.channel] = {
+    source: session.source
+   }
+
+  var msg_json = {
+    'text': 'Can you share a bit of info about this? I\'ll pass it on so that we can do better next time',
+    'attachments': [
+      {
+        'text': '✎ Type your feedback',
+        'mrkdwn_in': [
+          'text'
+        ],
+        'fallback': 'What can we improve?',
+        'callback_id': JSON.stringify(session),
+        'attachment_type': 'default'
+      }
+    ]
+  }
+  replyChannel.send(session, 'feedback.save', {type: session.origin, data: msg_json})
+}
+
+handlers['feedback.save'] = function * (session) {
+
+  //check for entry in feedback tracker
+  if (feedbackTracker[session.source.team + session.source.user + session.source.channel]){
+    var source = feedbackTracker[session.source.team + session.source.user + session.source.channel].source
+  }else {
+    var source = 'undefined'
+  }
+
+  var mailOptions = {
+    to: 'Kip Server <hello@kipthis.com>',
+    from: 'Kip Café <server@kipthis.com>',
+    subject: '['+source.callback_id+'] Kip Café Feedback',
+    text: '- Feedback: '+session.text + ' \r\n - Context:'+JSON.stringify(source)
+  }
+  mailer_transport.sendMail(mailOptions, function (err) {
+    if (err) console.log(err)
+  })
+
+  var msg_json = {
+    'text': 'Thanks for explaining the issue'
+  }
+
+  //switch back to original context
+  if(source.callback_id){
+    replyChannel.send(session, source.callback_id.replace(/_/g, '.'), {type: session.origin, data: msg_json})
+  }
+}
+
+//
+// The user jsut clicked pickup or delivery and is now ready to start ordering
+//
 handlers['food.delivery_or_pickup'] = function * (session) {
-  var fulfillmentMethod = session.text
+  var foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+
+  // Sometimes we have to wait a ilttle bit for the merchants to finish populating from an earlier step
+  // i ended up just sending the reply back in that earlier step w/o waiting for delivery.com, because
+  // delivery.com is so slow
+  var time = +new Date()
+  while (_.get(foodSession, 'merchants.length', 0) <= 0 && (+new Date() - time < 3000)) {
+    if (!alreadyWaiting) {
+      var alreadyWaiting = true
+      replyChannel.sendReplace(session, 'food.delivery_or_pickup', {type: session.origin, data: {text: 'Searching your area for good food...'}})
+    }
+    yield sleep(500)
+    foodSession = yield db.Delivery.findOne({team_id: session.source.team, active: true}).exec()
+  }
+  var fulfillmentMethod = session.data.value
+  foodSession.fulfillment_method = fulfillmentMethod
   kip.debug('set fulfillmentMethod', fulfillmentMethod)
+
+  if (fulfillmentMethod === 'pickup') {
+    var addr = (foodSession.chosen_location && foodSession.chosen_location.address_1) ? foodSession.chosen_location.address_1 : _.get(foodSession,'data.input')
+    var res = yield api.searchNearby({addr: addr, pickup: true})
+    foodSession.merchants = _.get(res, 'merchants')
+    foodSession.cuisines = _.get(res, 'cuisines')
+    foodSession.markModified('merchants')
+    foodSession.markModified('cuisines')
+  }
 
   //
   // START OF S2B
   //
+
+  // find the most recent merchant that is open now (aka is in the foodSession.merchants array)
+  var merchantIds = foodSession.merchants.map(m => m.id)
   var lastOrdered = yield db.Deliveries.find({team_id: session.source.team, chosen_restaurant: {$exists: true}})
     .sort({_id: -1})
     .select('chosen_restaurant')
     .exec()
-  var done = false
-  var i = 0
-  var merchant
-  while (!done) {
-    if (i >= lastOrdered.length) {
-      done = true
-    } else {
-      var merchant = yield api.getMerchant(lastOrdered[i].chosen_restaurant.id)
-      if (_.get(merchant, 'ordering.availability.delivery')) {
-        done = true
-      } else {
-        merchant = null
-      }
-   }
-   i++;
-  }
+
+  lastOrdered = lastOrdered.filter(session => merchantIds.includes(session.chosen_restaurant.id))
+  var mostRecentSession = lastOrdered[0]
+  lastOrdered = _.uniq(lastOrdered.map(session => session.chosen_restaurant.id)) // list of unique restaurants
+
+  // create attachments, only including most recent merchant if one exists
   var attachments = []
 
-  if (merchant) {
-
-   var picstitchUrl = yield request({
-    uri: kip.config.picstitchDelivery,
-    json: true,
-    body: {
-      origin: 'slack',
-      cuisines: merchant.summary.cuisines,
-      location: merchant.location,
-      ordering: {
-        minimum: _.get(merchant, 'ordering.minimum.delivery.lowest', 0),
-        delivery_charge: _.get(merchant, 'ordering.fees.delivery_charge', 0),
-        availability: merchant.ordering.availability
-      },
-      summary: merchant.summary,
-      url: merchant.summary.merchant_logo }})
-
-    attachments.push({
-      title: '',
-      image_url: picstitchUrl,
-      text: `You ordered \`Deivery\` from \`${merchant.summary.name}\` recently, order again?`,
-      color: '#3AA3E3',
-      mrkdwn_in: ['text'],
-      actions: [{name: 'food.admin.restaurant.confirm', text: 'Choose Restaurant', type: 'button', value: merchant.id}]
-    })
+  if (mostRecentSession) {
+    // build the regular listing as if it were a choice presented to the admin in the later steps,
+    // but them modify it with some text to indicate you've ordered here before
+    var mostRecentMerchant = foodSession.merchants.filter(m => m.id === mostRecentSession.chosen_restaurant.id)[0] // get the full merchant
+    var listing = yield utils.buildRestaurantAttachment(mostRecentMerchant)
+    listing.text = `You ordered \`Delivery\` from ${listing.text} recently, order again?`
+    listing.mrkdwn_in = ['text']
+    if (lastOrdered.length > 1) {
+      listing.actions.push({
+        'name': 'food.restaurants.list.recent',
+        'text': 'See More',
+        'type': 'button',
+        'value': 0
+      })
+    }
+    attachments.push(listing)
   }
 
   attachments.push({
@@ -505,15 +545,7 @@ handlers['food.delivery_or_pickup'] = function * (session) {
       },
       {
         'name': 'passthrough',
-        'text': 'See More',
-        'type': 'button',
-        'value': 'food.restaurants.list'
-      },
-
-      {
-        'name': 'passthrough',
         'text': '× Cancel',
-
         'type': 'button',
         'value': 'food.exit.confirm',
         confirm: {
@@ -530,7 +562,8 @@ handlers['food.delivery_or_pickup'] = function * (session) {
     attachments: attachments
   }
 
-  replyChannel.send(session, 'food.ready_to_poll', {type: session.origin, data: res})
+  replyChannel.sendReplace(session, 'food.ready_to_poll', {type: session.origin, data: res})
+  foodSession.save()
 }
 
 handlers['food.restaurants.list'] = function * (message) {
@@ -664,11 +697,94 @@ handlers['food.restaurants.list'] = function * (message) {
   replyChannel.send(message, 'food.ready_to_poll', {type: message.origin, data: msg_json})
 }
 
+
+//
+// Return some restaurants, button value is the index offset
+//
+handlers['food.restaurants.list.recent'] = function * (message) {
+  var index = parseInt(_.get(message, 'data.value')) || 0;
+  var msg_json = { text: 'Looking up your order history for this location...' }
+  replyChannel.sendReplace(message, 'food.waiting', {type: message.origin, data: msg_json})
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  var availableMerchantIds = foodSession.merchants.map(m => m.id);
+  var recentDeliveries = yield db.Delivery.aggregate([
+    {
+      $match: {
+        team_id: message.source.team,
+        'chosen_restaurant.id': {$exists: true}
+      }
+    },
+    {
+      $group: {
+        _id: '$chosen_restaurant.id',
+        count: {$sum: 1}
+      }
+    }
+  ]);
+
+  // show 3 restaurants that are in the foodSession available list
+  var attachments = yield recentDeliveries
+    .filter(g => availableMerchantIds.includes(g._id)) // remember that ._id here is from the $group mongo aggregate operator
+    .sort(g => g.count)
+    .slice(index, index + 3)
+    .map(g => {
+      var merchant = foodSession.merchants.filter(m => m.id === g._id)[0]
+      return utils.buildRestaurantAttachment(merchant)
+    })
+
+  attachments.push({
+    'mrkdwn_in': [
+      'text'
+    ],
+    'text': '*Tip:* `✓ Start New Poll` polls your team on what type of food they want.',
+    'fallback': 'You are unable to choose a game',
+    'callback_id': 'wopr_game',
+    'color': '#3AA3E3',
+    'attachment_type': 'default',
+    'actions': [
+      {
+        'name': 'passthrough',
+        'text': '✓ Start New Poll',
+        'style': 'primary',
+        'type': 'button',
+        'value': 'food.poll.confirm_send'
+      },
+      {
+        'name': 'food.restaurants.list.recent',
+        'text': 'See More',
+        'type': 'button',
+        'value': index + 3
+      },
+
+      {
+        'name': 'passthrough',
+        'text': '× Cancel',
+        'type': 'button',
+        'value': 'food.exit.confirm',
+        confirm: {
+          title: 'Leave Order',
+          text: 'Are you sure you want to stop ordering food?',
+          ok_text: "Don't order food",
+          dismiss_text: 'Keep ordering food'
+        }
+      }
+    ]
+  })
+  var msg = {
+    'text': 'Here are 3 restaurant suggestions based on your recent history. \n Which do you want today?',
+    attachments: attachments
+  }
+
+  replyChannel.sendReplace(message, 'food.ready_to_poll', {type: message.origin, data: msg})
+
+}
+
+
 handlers['food.poll.confirm_send'] = function * (message) {
   var team = yield db.Slackbots.findOne({team_id: message.source.team}).exec();
   var locationIndex = _.get(team,'meta.locations[0]') && _.get(team,'meta.locations[0]').length > 0 ? _.get(team,'meta.locations[0]').length - 1 : 0;
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
-  var addr = _.get(foodSession, 'chosen_location.address_1') ? _.get(foodSession, 'chosen_location.address_1').address_1  : (_.get(team,'meta.locations[',locationIndex,']') ? _.get(team,'meta.locations[',locationIndex,']').address_1 : _.get(foodSession,'data.input',''));
+  var addr = _.get(foodSession, 'chosen_location.address_1', 'the office')
   var msg_json = {
     'attachments': [
       {
@@ -689,7 +805,7 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'value': 'food.user.poll'
           },
           {
-            'name': 'passthrough',
+            'name': 'food.admin.team.members',
             'text': 'View Team Members',
             'type': 'button',
             'value': 'team.members'
@@ -698,7 +814,13 @@ handlers['food.poll.confirm_send'] = function * (message) {
             'name': 'passthrough',
             'text': '× Cancel',
             'type': 'button',
-            'value': 'food.exit'
+            'value': 'food.exit.confirm',
+            'confirm': {
+              'title': 'Are you sure?',
+              'text': "Are you sure you don't want to order food?",
+              'ok_text': 'Yes',
+              'dismiss_text': 'No'
+            }
           }
         ]
       }
@@ -747,25 +869,4 @@ handlers['test.s8'] = function * (message) {
   }
 
   replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
-}
-
-/**
- * helper to determine an affirmative or negative response
- *
- * 10-4 good buddy is not supported
- *
- * @param {any} text
- * @returns {Boolean} yes
- */
-function * yesOrNo (text) {
-  text = (text || '').toLowerCase().trim()
-  if (text === 'yes') {
-    return true
-  } else {
-    return false
-  }
-}
-
-module.exports = {
-  send_text_reply: send_text_reply
 }
