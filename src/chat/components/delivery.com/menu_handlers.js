@@ -144,6 +144,18 @@ handlers['food.menu.quick_picks'] = function * (message) {
     })
   }
 
+  if (index > 0) {
+    msg_json.attachments[msg_json.attachments.length - 1].actions.splice(0, 0, {
+      name: 'food.menu.quick_picks',
+      text: '<',
+      type: 'button',
+      value: {
+        index: Math.max(index - 3, 0),
+        keyword: keyword
+      }
+    })
+  }
+
   $replyChannel.sendReplace(message, 'food.menu.search', {type: 'slack', data: msg_json})
 }
 
