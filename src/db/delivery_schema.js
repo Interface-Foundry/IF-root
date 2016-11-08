@@ -60,6 +60,10 @@ var deliverySchema = mongoose.Schema({
   data: {}, // \shrug
   tracking: {}, // possibly combine w/ data, cant remember what data is in explicitly
   order: {}, // info after adding items to cart
+  tip: {
+    type: String,
+    default: `15%`
+  },
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
   guest_token: String // related to creating a guest token per session

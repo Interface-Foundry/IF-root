@@ -270,8 +270,33 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }]
     }
   }))
-  // attachments with all the food
-  response.attachments.push({'title': ''})
+  // tip stuff
+
+  var tipButtons = [`15%`, `20%`, `25%`, `Cash`].map((t) => {
+    var baseTipButton = (foodSession.tip === t) ? `◉ ${t}` : `￮ ${t}`
+    return {
+      'name': 'food.admin.cart.tip',
+      'text': baseTipButton,
+      'type': `button`,
+      'value': t.toLowerCase()
+    }
+  })
+  var tipAmount
+  if (foodSession.tip.toLowerCase() === 'cash') {
+    tipAmount = `Will tip with cash`
+  } else {
+    tipAmount = String(Number(foodSession.tip.slice(0, 2)) * 0.01 * foodSession.order.subtotal)
+  }
+
+  response.attachments.push({
+    'title': `*Tip:* ${tipAmount}`, // need tip amount,
+    'callback_id': 'food.admin.cart.tip',
+    'color': '#3AA3E3',
+    'attachment_type': 'default',
+    'mrkdwn_in': ['text'],
+    'actions': tipButtons
+  })
+
   // final attachment
   response.attachments.push({
     text: `*Delivery Fee:* ${foodSession.order.delivery_fee.$}\n` +
@@ -300,6 +325,13 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
 handlers['food.member.order.view'] = function * (message) {
   // would be S12 stuff for just member here
+}
+
+handlers['food.admin.cart.tip'] = function * (message) {
+  var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
+  foodSession.tip = message.source.actions[0].value
+  foodSession.save()
+  yield handlers['food.admin.order.confirm'](message, true)
 }
 
 handlers['food.admin.cart.quantity.add'] = function * (message) {
