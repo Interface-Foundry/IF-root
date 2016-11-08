@@ -32,8 +32,6 @@ var upload = require('./upload.js');
 var email = require('./email');
 /////////// LOAD INCOMING ////////////////
 var queue = require('./queue-mongo');
-var UserChannel = require('./UserChannel');
-var replyChannel = new UserChannel(queue)
 var onboarding = require('./modes/onboarding');
 var settings = require('./modes/settings');
 var team = require('./modes/team');
