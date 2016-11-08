@@ -14,7 +14,7 @@ var cart = require('./cart');
 var kipcart = require('../cart');
 var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
-
+var buttonTemplate = require('./button_templates');
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
@@ -54,6 +54,12 @@ function simple_action_handler (action) {
     //
     case 'home_btn':
       return 'home_btn';
+    case 'back_btn':
+      return 'back_btn';
+    case 'help_btn':
+      return 'help_btn';
+    case 'view_cart_btn':
+      return 'view_cart_btn';
     case 'team':
       return 'team';
     case 'settings':
@@ -120,39 +126,14 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.channel = message.source.channel.id;
 
       if (simple_command == 'home_btn') {
-        var json = message.source.original_message;
+        var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
+        var last_message = history[0];
+        var actions = _.get(last_message,'mode') == 'shopping' ? buttonTemplate.slack_home : buttonTemplate.slack_settings;
+        var json = parsedIn.original_message;
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
             callback_id: 'search_results',
-            actions: [{
-              name: "more",
-              text: "See More Result",
-              style: "default",
-              type: "button",
-              value: "more"
-            },
-            {
-              name: "settings",
-              text: "Settings",
-              style: "default",
-              type: "button",
-              value: "home",
-            },
-            {
-              name: "team",
-              text: "Team Members",
-              style: "default",
-              type: "button",
-              value: "home",
-            }, 
-            {
-              name: "viewcart",
-              text: "View Cart",
-              style: "default",
-              type: "button",
-              value: "viewcart"
-              }
-            ]
+            actions: actions
         }
         request({
           method: 'POST',
@@ -160,6 +141,40 @@ app.post('/slackaction', next(function * (req, res) {
           body: JSON.stringify(json)
         })
         return res.sendStatus(200)
+      }
+      else if (simple_command == 'back_btn') {
+        var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
+        var last_message = history[0];
+        var actions = _.get(last_message,'mode') == 'shopping' ? buttonTemplate.slack_home_default : buttonTemplate.slack_settings_default;
+        var json = parsedIn.original_message;
+        json.attachments[json.attachments.length-1] = {
+            fallback: 'Search Results',
+            callback_id: 'search_results',
+            actions: actions
+        };
+        request({
+          method: 'POST',
+          uri: message.source.response_url,
+          body: JSON.stringify(json)
+        })
+        return res.sendStatus(200)
+      }
+      else if (simple_command == 'help_btn') {
+          message.mode = 'banter'
+          message.action = 'reply'
+          // inject source.team and source.user because fuck the fuck out of slack message formats
+          message.text = 'help'
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
+      }
+      else if (simple_command == 'view_cart_btn') {
+          message.mode = 'shopping'
+          message.action = 'cart.view'
+          message.text = 'view cart'
+          message.save().then(() => {
+            queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
+          })
       }
       else if (simple_command == 'address_confirm_btn') {
         message.mode = 'address'
@@ -247,33 +262,12 @@ app.post('/slackaction', next(function * (req, res) {
       message.source.team = message.source.team.id
       message.source.user = message.source.user.id
       message.source.channel = message.source.channel.id
-      kip.debug(' \n\n\n\n webserver:205:buttonData: message: ', message, ' \n\n\n\n ')
       message.save().then(() => {
         queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
       })
     } else {
       //actions that do not require processing in reply_logic, skill all dat
       switch (action.name) {
-        case 'viewcart':
-          var message = new db.Message({
-              incoming: true,
-              thread_id: parsedIn.channel.id,
-              action: 'cart.view',
-              mode: 'shopping',
-              text: 'view cart',
-              user_id: parsedIn.user.id,
-              origin: 'slack',
-              source: parsedIn
-            })
-            // inject source.team and source.user because fuck the fuck out of slack message formats
-            message.source.team = message.source.team.id
-            message.source.user = message.source.user.id
-            message.source.channel = message.source.channel.id
-            kip.debug(' \n\n\n\n webserver:273:viewcartbutton: message: ', message, ' \n\n\n\n ')
-            message.save().then(() => {
-              queue.publish('incoming', message, ['slack', parsedIn.channel.id, parsedIn.action_ts].join('.'))
-            })
-         break
         case 'additem':
           // adds the item to the cart the right way, but for speed we return a hacked message right away
           var updatedMessage = parsedIn.original_message

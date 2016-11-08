@@ -114,8 +114,6 @@ function printMode(message) {
   }
 }
 
-
-
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS <--lel
 //
@@ -371,7 +369,6 @@ function * simple_response (message) {
         action: 'remove',
         params: {
           focus: reply.query
-        // ? reply.query : (message.searchSelect[0] ? message.searchSelect[0] : undefined)
         }
       })
       break
@@ -605,7 +602,7 @@ handlers['shopping.more'] = function * (message, exec) {
     origin: message.origin,
     source: message.source,
     execute: [exec],
-    text: 'Hi, here are some more options. Type `more` to see more options or tap `Add to Cart` to save to your Cart 😊',
+    text: 'Hi,  re are some more options. Type `more` to see more options or tap `Add to Cart` to save to your Cart 😊',
     amazon: JSON.stringify(results),
     mode: 'shopping',
     action: 'results',

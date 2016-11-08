@@ -6,6 +6,7 @@ var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
+var buttonTemplate = require('../slack/button_templates');
 var team;
 var teamMembers;
 var admins;
@@ -107,36 +108,7 @@ handlers['start'] = function * (message) {
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: [
-          {
-            "name": "exit",
-            "text": "Exit Settings",
-            "style": "primary",
-            "type": "button",
-            "value": "exit"
-          },                          
-          {
-            "name": "team",
-            "text": "Team Members",
-            "style": "default",
-            "type": "button",
-            "value": "team"
-          },
-          {
-            "name": "",
-            "text": "View Cart",
-            "style": "default",
-            "type": "button",
-            "value": "team"
-          },
-          // {
-          //   "name": "home",
-          //   "text": "🐧",
-          //   "style": "default",
-          //   "type": "button",
-          //   "value": "home"
-          // }
-      ],
+      actions: buttonTemplate.slack_settings_default,
       callback_id: 'none'
     })
     // console.log('SETTINGS ATTACHMENTS ',attachments);

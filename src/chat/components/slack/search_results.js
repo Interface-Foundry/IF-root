@@ -64,7 +64,7 @@ function* results(message) {
     callback_id: 'search_results',
     actions: [{
       name: "more",
-      text: "See More Result",
+      text: "See More Results",
       style: "default",
       type: "button",
       value: "more"

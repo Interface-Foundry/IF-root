@@ -88,9 +88,6 @@ function * getChannelMembers(team, channelId) {
 }
 
 
-
-
-
 /*
 * returns members of a team given a slackbot object, creates chatuser objects if they do not exist in db
 * @param {Object} slackbot object

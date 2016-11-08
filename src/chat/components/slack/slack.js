@@ -219,9 +219,31 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         msgData.attachments = message.reply
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
+      //{ incoming: false,
+      // thread_id: 'D2HKEQ9RV',
+      // user_id: 'kip',
+      // origin: 'slack',
+      // text: 'I\'m Kip, your penguin shopper.\n Tell me what you\'re looking for, and I\'ll show you three options.\n Try it now! Maybe you need new headphones? Type <b>headphones</b> to start.',
+      // source:
+      //  { type: 'message',
+      //    channel: 'D2HKEQ9RV',
+      //    user: 'U0HLZP0A2',
+      //    text: 'help',
+      //    ts: '1478631638.000096',
+      //    team: 'T0HLZP09L' },
+      // _id: 582220d683b41617ed2f9d92,
+      // urlShorten: [],
+      // client_res: [],
+      // execute:
+      //  [ { mode: 'banter',
+      //      action: 'reply',
+      //      _id: 582220d683b41617ed2f9d93 } ],
+      // tokens: [],
+      // resolved: true,
+      // ts: 2016-11-08T19:00:38.607Z }
 
       try {
-        bot.web.chat.postMessage(message.source.channel, message.reply.label, message.reply.data);
+        bot.web.chat.postMessage(message.source.channel, message.text, null);
       } catch (err) {
         kip.debug('\n\n\n\n slack.js bot.web.chat.postMessage error: ', message,'\n\n\n\n');
       }
