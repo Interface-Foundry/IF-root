@@ -270,8 +270,8 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
       }]
     }
   }))
-  // tip stuff
 
+  // tip stuff
   var tipButtons = [`15%`, `20%`, `25%`, `Cash`].map((t) => {
     var baseTipButton = (foodSession.tip === t) ? `◉ ${t}` : `￮ ${t}`
     return {
@@ -282,14 +282,14 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
   var tipAmount
-  if (foodSession.tip.toLowerCase() === 'cash') {
+  if (foodSession.tip === 'cash') {
     tipAmount = `Will tip with cash`
   } else {
     tipAmount = String(Number(foodSession.tip.slice(0, 2)) * 0.01 * foodSession.order.subtotal)
   }
 
   response.attachments.push({
-    'title': `*Tip:* ${tipAmount}`, // need tip amount,
+    'title': `*Tip:* ${tipAmount}`,
     'callback_id': 'food.admin.cart.tip',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -676,7 +676,7 @@ handlers['food.admin.add_new_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': foodSession.order.total * 100,
-      'tip': 0,
+      'tip': (foodSession.tip === `cash`) ? 0.00 : Number(foodSession.tip.slice(0, 2)) * 0.01,
       'order_type': foodSession.fulfillment_method
     }
   }
@@ -743,7 +743,7 @@ handlers['food.admin.order.select_card'] = function * (message) {
     'guest_token': foodSession.guest_token,
     'order': {
       'total': foodSession.order.total * 100,
-      'tip': 0,
+      'tip': (foodSession.tip === `cash`) ? 0.00 : Number(foodSession.tip.slice(0, 2)) * 0.01,
       'order_type': foodSession.fulfillment_method
     },
     'saved_card': {
