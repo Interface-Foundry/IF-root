@@ -6,7 +6,7 @@ var co = require('co');
 var utils = require('../slack/utils');
 var momenttz = require('moment-timezone');
 var queue = require('../queue-mongo');
-var buttonTemplate = require('../slack/button_templates');
+var cardTemplate = require('../slack/card_templates');
 var team;
 var teamMembers;
 var admins;
@@ -108,7 +108,7 @@ handlers['start'] = function * (message) {
       color: '#49d63a',
       mrkdwn_in: ['text'],
       fallback:'Settings',
-      actions: buttonTemplate.slack_settings_default,
+      actions: cardTemplate.slack_settings_default,
       callback_id: 'none'
     })
     // console.log('SETTINGS ATTACHMENTS ',attachments);

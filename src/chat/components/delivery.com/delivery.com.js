@@ -16,6 +16,10 @@ var replyChannel = new UserChannel(queue)
 var feedbackOn = true
 var feedbackTracker = {}
 
+// injected dependencies
+var $replyChannel
+var $allHandlers // this is how you can access handlers from other methods
+
 //
 // Listen for incoming messages from all platforms because I'm 🌽 ALL 🌽 EARS
 //
@@ -367,7 +371,7 @@ handlers['address.confirm'] = function * (session) {
         ]
       }
     ]
-  }
+  };
 
   //collect feedback on this feature
   if(feedbackOn && msg_json){
@@ -870,3 +874,13 @@ handlers['test.s8'] = function * (message) {
 
   replyChannel.send(message, 'food.menu.quick_picks', {type: 'slack', data: msg_json})
 }
+
+
+module.exports = function (allHandlers) {
+  $allHandlers = allHandlers
+  // merge in our own handlers
+  _.merge($allHandlers, handlers)
+}
+
+
+

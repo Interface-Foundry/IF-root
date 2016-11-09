@@ -50,10 +50,8 @@ var image_search = require('../image_search')
 var search_results = require('./search_results')
 var focus = require('./focus')
 var cart = require('./cart')
-// var actions = require('./actions'); --> this runs an extra service not sure what for
-// var slackConnections  = {};
+var cardTemplate = require('./card_templates');
 module.exports.slackConnections = slackConnections = {}
-
 var webserver = require('./webserver')
 
 //
@@ -195,6 +193,12 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
       }
 
+      if (message.mode === 'shopping' && message.action === 'switch') {
+        msgData.attachments = cardTemplate.slack_shopping_mode;
+        return bot.web.chat.postMessage(message.source.channel, message.text, msgData);
+      }
+
+
       if (message.mode === 'shopping' && message.action === 'focus' && message.focus) {
         msgData.attachments = yield focus(message)
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
@@ -219,28 +223,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
         msgData.attachments = message.reply
         return bot.web.chat.postMessage(message.source.channel, message.text, msgData)
       }
-      //{ incoming: false,
-      // thread_id: 'D2HKEQ9RV',
-      // user_id: 'kip',
-      // origin: 'slack',
-      // text: 'I\'m Kip, your penguin shopper.\n Tell me what you\'re looking for, and I\'ll show you three options.\n Try it now! Maybe you need new headphones? Type <b>headphones</b> to start.',
-      // source:
-      //  { type: 'message',
-      //    channel: 'D2HKEQ9RV',
-      //    user: 'U0HLZP0A2',
-      //    text: 'help',
-      //    ts: '1478631638.000096',
-      //    team: 'T0HLZP09L' },
-      // _id: 582220d683b41617ed2f9d92,
-      // urlShorten: [],
-      // client_res: [],
-      // execute:
-      //  [ { mode: 'banter',
-      //      action: 'reply',
-      //      _id: 582220d683b41617ed2f9d93 } ],
-      // tokens: [],
-      // resolved: true,
-      // ts: 2016-11-08T19:00:38.607Z }
 
       try {
         bot.web.chat.postMessage(message.source.channel, message.text, null);
@@ -261,8 +243,6 @@ queue.topic('outgoing.slack').subscribe(outgoing => {
     kip.err(e)
   }
 })
-
-
 
 module.exports = {
   start: start

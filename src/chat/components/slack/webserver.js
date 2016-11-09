@@ -14,7 +14,7 @@ var cart = require('./cart');
 var kipcart = require('../cart');
 var _ = require('lodash');
 var slackConnections = require('./slack').slackConnections
-var buttonTemplate = require('./button_templates');
+var cardTemplate = require('./card_templates');
 app.use(express.static(__dirname + '/public'))
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
@@ -128,7 +128,7 @@ app.post('/slackaction', next(function * (req, res) {
       if (simple_command == 'home_btn') {
         var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
         var last_message = history[0];
-        var actions = _.get(last_message,'mode') == 'shopping' ? buttonTemplate.slack_home : buttonTemplate.slack_settings;
+        var actions = _.get(last_message,'mode') == 'shopping' ? cardTemplate.slack_home : cardTemplate.slack_settings;
         var json = parsedIn.original_message;
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
@@ -145,7 +145,7 @@ app.post('/slackaction', next(function * (req, res) {
       else if (simple_command == 'back_btn') {
         var history = yield db.Messages.find({thread_id: message.source.channel}).sort('-ts').limit(10);
         var last_message = history[0];
-        var actions = _.get(last_message,'mode') == 'shopping' ? buttonTemplate.slack_home_default : buttonTemplate.slack_settings_default;
+        var actions = _.get(last_message,'mode') == 'shopping' ? cardTemplate.slack_home_default : cardTemplate.slack_settings_default;
         var json = parsedIn.original_message;
         json.attachments[json.attachments.length-1] = {
             fallback: 'Search Results',
@@ -212,26 +212,7 @@ app.post('/slackaction', next(function * (req, res) {
       else if (simple_command == 'exit') {
         message.mode = 'exit';
         message.action = 'exit';
-        var attachments = [
-            {
-              "pretext": "Ok thanks! Going back to Shopping Mode ☺️",
-              "image_url":"http://kipthis.com/kip_modes/mode_shopping.png",
-              "text":"",
-              "mrkdwn_in": [
-                  "text",
-                  "pretext"
-              ],
-              "color":"#45a5f4"
-            },
-            {
-                "text": "Tell me what you're looking for, or use `help` for more options",
-                "mrkdwn_in": [
-                    "text",
-                    "pretext"
-                ],
-                "color":"#49d63a"
-            }
-         ];
+        var attachments = cardTemplate.slack_shopping_mode;
         var reply = {
           username: 'Kip',
           text: "",
