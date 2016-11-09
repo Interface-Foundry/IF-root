@@ -66,7 +66,8 @@ var deliverySchema = mongoose.Schema({
   },
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
-  guest_token: String // related to creating a guest token per session
+  guest_token: String, // related to creating a guest token per session
+  completed_payment: Boolean
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {
