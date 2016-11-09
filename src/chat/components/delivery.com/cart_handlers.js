@@ -278,8 +278,10 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
     }
   })
 
+  var tipTitle = (foodSession.tipPercent === 'cash') ? `Will tip in cash` : `$${foodSession.tipAmount}`
+
   response.attachments.push({
-    'title': `*Tip:* ${foodSession.tipAmount}`,
+    'title': `Tip: ${tipTitle}`,
     'callback_id': 'food.admin.cart.tip',
     'color': '#3AA3E3',
     'attachment_type': 'default',
@@ -320,13 +322,13 @@ handlers['food.member.order.view'] = function * (message) {
 handlers['food.admin.cart.tip'] = function * (message) {
   var foodSession = yield db.Delivery.findOne({team_id: message.source.team, active: true}).exec()
   foodSession.tipPercent = message.source.actions[0].value
-  foodSession.tipAmount = Number(foodSession.tip.slice(0, 2)) * 0.01 * foodSession.order.subtotal
+  yield foodSession.save()
 
   // set up tip stuff
   if (foodSession.tipPercent === 'cash') {
     foodSession.tipAmount = 0.00
   } else {
-    foodSession.tipAmount = Number((Number(foodSession.tip.slice(0, 2)) * 0.01 * foodSession.order.subtotal).toFixed(2))
+    foodSession.tipAmount = Number((Number(foodSession.tipPercent.slice(0, 2)) * 0.01 * foodSession.order.subtotal).toFixed(2))
   }
   yield foodSession.save()
   yield handlers['food.admin.order.confirm'](message, true)
