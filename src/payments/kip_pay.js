@@ -243,7 +243,7 @@ app.post('/process', jsonParser, function (req, res) {
         }).then(function (customer) {
           customer_id = customer.id
           return stripe.charges.create({
-            amount: pay.order.order.total, // Amount in cents
+            amount: pay.order.order.total + pay.order.tipAmount * 100. // Amount in cents + tip
             currency: 'usd',
             customer: customer.id
           })
