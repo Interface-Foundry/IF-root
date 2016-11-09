@@ -33,6 +33,7 @@ if (process.env.NODE_ENV == 'development_alyx') {
 // See keys here: https://dashboard.stripe.com/account/apikeys
 var stripe = require('stripe')(stripe_id) // NOTE: change to production key
 var path = require('path')
+var _ = require('lodash')
 var crypto = require('crypto')
 var co = require('co')
 
@@ -157,7 +158,7 @@ app.post('/charge', jsonParser, function (req, res) {
 
   // NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM
 
-  if (req.body && req.body.kip_token == kip_secret && req.body.order && req.body.order.total) {
+  if (req.body && (req.body.kip_token === kip_secret) && req.body.order && req.body.order.total) {
     var o = req.body
     // new payment
     var p = new Payment({
@@ -196,7 +197,6 @@ app.post('/charge', jsonParser, function (req, res) {
 
     // NEW STRIPE USER
     else {
-
       // return checkout LINK
       var v = {
         newAcct: true,
@@ -206,7 +206,7 @@ app.post('/charge', jsonParser, function (req, res) {
 
       res.status(200).send(JSON.stringify(v))
     }
-  }else {
+  } else {
     res.status(401).send('😅')
   }
 })
@@ -375,9 +375,8 @@ function pay_delivery_com (pay, callback) {
     }
 
     // convert tips to double if exists
-    if (pay.order.tip) {
-      Number(foodSession.tip.slice(0, 2)) * 0.01 * foodSession.order.subtotal
-      guestCheckout.tip = pay.order.order.total * Number(pay.order.tip)
+    if (_.get(pay, 'order.tipAmount')) {
+      guestCheckout.tip = pay.order.order.tipAmount
     }
 
     // limit special delivery instructions to 100 char

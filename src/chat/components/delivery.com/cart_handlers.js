@@ -269,7 +269,7 @@ handlers['food.admin.order.confirm'] = function * (message, replace) {
 
   // tip stuff
   var tipButtons = [`15%`, `20%`, `25%`, `Cash`].map((t) => {
-    var baseTipButton = (foodSession.tipPercent === t) ? `◉ ${t}` : `￮ ${t}`
+    var baseTipButton = (foodSession.tipPercent.toLowerCase() === t.toLowerCase()) ? `◉ ${t}` : `￮ ${t}`
     return {
       'name': 'food.admin.cart.tip',
       'text': baseTipButton,
