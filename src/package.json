@@ -80,6 +80,7 @@
     "parse-reply": "0.0.4",
     "promisify-global": "^1.0.0",
     "promisify-node": "^0.4.0",
+    "prompt-promise": "^1.0.3",
     "request": "^2.72.0",
     "restify": "^4.1.1",
     "rx": "^4.1.0",
