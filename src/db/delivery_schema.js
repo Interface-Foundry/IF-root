@@ -12,7 +12,12 @@ var deliverySchema = mongoose.Schema({
   team_id: String,
   team_members: [], // who is in the order
   chosen_location: {}, // from slackbot.meta.locations
-  chosen_restaurant: {},
+  chosen_restaurant: {
+    id: String,
+    name: String,
+    url: String,
+    minimum: Number
+  },
   menu: {}, // the actual menu for the chosen merchant
   merchants: [], // all possible merchants (based on location)
   cuisines: [], // don't confuse this with votes below
@@ -55,9 +60,15 @@ var deliverySchema = mongoose.Schema({
   data: {}, // \shrug
   tracking: {}, // possibly combine w/ data, cant remember what data is in explicitly
   order: {}, // info after adding items to cart
+  tipPercent: {
+    type: String,
+    default: `15%`
+  },
+  tipAmount: Number,
   payment: {}, // object with payment details
   confirmed_orders: [], // possibly add time counter thing later
-  guest_token: String // related to creating a guest token per session
+  guest_token: String, // related to creating a guest token per session
+  completed_payment: Boolean
 })
 
 deliverySchema.virtual('chosen_restaurant_full').get(function () {

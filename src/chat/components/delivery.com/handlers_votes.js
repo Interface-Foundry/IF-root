@@ -1,12 +1,10 @@
 'use strict'
 require('kip')
 var _ = require('lodash')
-var Fuse = require('fuse.js')
+
 var googl = require('goo.gl')
 var request = require('request-promise')
-var send_text_reply = require('./utils.js').send_text_reply
 var api = require('./api-wrapper.js')
-var team_utils = require('./team_utils.js')
 var utils = require('./utils')
 
 if (_.includes(['development', 'test'], process.env.NODE_ENV)) {
@@ -21,7 +19,6 @@ var $allHandlers
 
 // exports
 var handlers = {}
-var api = require('./api-wrapper')
 
 /*
 * S5
@@ -409,7 +406,8 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   foodSession.chosen_restaurant = {
     id: merchant.id,
     name: merchant.summary.name,
-    url: url
+    url: url,
+    minimum: merchant.ordering.minimum
   }
 
   var menu = yield request({
@@ -422,7 +420,6 @@ handlers['food.admin.restaurant.confirm'] = function * (message) {
   foodSession.save()
 
   return yield handlers['food.admin.restaurant.collect_orders'](message, foodSession)
-
 }
 
 handlers['food.admin.restaurant.collect_orders'] = function * (message, foodSession) {

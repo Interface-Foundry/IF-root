@@ -353,7 +353,7 @@ class PicStitch:
                            fill='#37a936')
             else:         
                 draw.text((x + 89, last_y + 4), 
-                           '$' + delivery_charge,
+                           '$' + str(delivery_charge),
                            font=self.config['font2'],
                            fill='#37a936')
         ## if 'Size' in self.img_req['name']:
