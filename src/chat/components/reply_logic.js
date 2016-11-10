@@ -264,6 +264,9 @@ queue.topic('incoming').subscribe(incoming => {
     case 'food':
         return
         break;
+     case 'address':
+        return
+        break;
     default:
         logging.debug('DEFAULT SHOPPING MODE')
         // try for simple reply
