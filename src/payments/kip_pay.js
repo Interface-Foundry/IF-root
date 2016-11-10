@@ -143,20 +143,7 @@ app.post('/charge', jsonParser, function (req, res) {
     }
   }
 
-  // SAVED CARD
-  // "saved_card": {
-  //     "vendor": "stripe",
-  //     "customer_id": "cus_9RcJXBqg6vR4tx",
-  //     "card_id": "card_198j4tI2kQvuYJlV9jt11NLz"
-  //    }
-
-  // params:
-  // stripe ID
-  // if stripe ID + CC card select, return confirmed payment
-  // else return URL to checkout: click here to add credit card (you only need to do this once)
-
   // NEED TO IP RESTRICT TO ONLY OUR ECOSYSTEM
-
   if (_.get(req, 'body') && (req.body.kip_token === kipSecret) && _.get(req, 'body.order.total')) {
     var body = req.body
 
@@ -173,12 +160,13 @@ app.post('/charge', jsonParser, function (req, res) {
     })
 
     // ALREADY A STRIPE USER
-    if (body.saved_card && body.saved_card.customer_id) {
+    if (_.get(body, 'saved_card.customer_id')) {
       // we have card to charge
       if (body.saved_card.card_id) {
         chargeById(payment, function (r) {
           logging.info('SAVED CHARGE RESULT ', r)
         })
+
         var v = {
           newAcct: false,
           processing: true,
@@ -439,7 +427,7 @@ function * payDeliveryDotCom (pay, callback) {
 
 // precision is 10 for 10ths, 100 for 100ths, etc.
 function roundUp (number, precision) {
-  Math.ceil(number * precision) / precision
+  return Math.ceil(number * precision) / precision
 }
 
 var port = process.env.PORT || 8080
